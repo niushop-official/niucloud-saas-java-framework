@@ -1,7 +1,7 @@
 # niucloud shop Vite 2023精简版
 
 #### 介绍
-niucloud shop Vite 2023精简版，程序员二开神器！ 100%开源商用马上授权仅需99元！！！
+niucloud-admin应用 niucloud shop Vite 2023精简版，程序员二开神器！ 100%开源商用马上授权仅需99元！！！
 
 #### 软件架构
 软件架构说明

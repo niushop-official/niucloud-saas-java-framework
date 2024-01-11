@@ -1,0 +1,22 @@
+{
+  "goodsSelectPopupSelectGoodsButton": "选择商品",
+  "goodsSelectPopupSelect": "已选",
+  "goodsSelectPopupPiece": "个",
+  "goodsSelectPopupSelectGoodsDialog": "商品选择",
+  "goodsSelectPopupAllGoods": "全部商品",
+  "goodsSelectPopupSelectedGoods": "已选商品",
+  "goodsSelectPopupGoodsName": "商品名称",
+  "goodsSelectPopupGoodsNamePlaceholder": "请输入商品名称",
+  "goodsSelectPopupGoodsCategory": "商品分类",
+  "goodsSelectPopupGoodsCategoryPlaceholder": "全部",
+  "goodsSelectPopupGoodsType": "商品类型",
+  "goodsSelectPopupGoodsTypePlaceholder": "请选择商品类型",
+  "goodsSelectPopupGoodsInfo": "商品",
+  "goodsSelectPopupPrice": "价格",
+  "goodsSelectPopupStock": "库存",
+  "goodsSelectPopupBeforeTip": "已选择",
+  "goodsSelectPopupAfterTip": "个商品",
+  "goodsSelectPopupClearGoods": "取消选择",
+  "goodsSelectPopupGoodsMinTip": "所选商品数量不能少于",
+  "goodsSelectPopupGoodsMaxTip": "所选商品数量不能超过"
+}

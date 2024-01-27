@@ -254,7 +254,7 @@ const create = () => {
             if (orderData.value.basic.order_money == 0) {
                 redirect({ url: '/addon/shop/pages/order/detail', param: { order_id: orderId }, mode: 'redirectTo' })
             } else {
-                payRef.value?.open(data.trade_type, data.order_id, `/shop/pages/order/detail?order_id=${data.order_id}`)
+                payRef.value?.open(data.trade_type, data.order_id, `/addon/shop/pages/order/detail?order_id=${data.order_id}`)
             }
         })
         .catch(() => {

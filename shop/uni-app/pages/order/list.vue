@@ -170,7 +170,7 @@ const toLink = (data) => {
 const payRef = ref(null)
 const orderBtnFn = (data, type = '') => {
 	if (type == 'pay')
-		payRef.value?.open(data.order_type, data.order_id, `/shop/pages/order/detail?order_id=${data.order_id}`);
+		payRef.value?.open(data.order_type, data.order_id, `/addon/shop/pages/order/detail?order_id=${data.order_id}`);
 	else if (type == 'close') {
 		close(data);
 	} else if (type == 'finish') {

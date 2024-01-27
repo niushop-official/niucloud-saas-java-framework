@@ -2,31 +2,25 @@
 	<view class="bg-gray-100 min-h-[100vh]">
 		<view class="fixed left-0 right-0 top-0 product-warp bg-[#fff] px-[24rpx]">
 			<view class="flex items-center h-[106rpx] box-border py-[24rpx]">
-				<view
-					class="bg-[#F5F5F5]  flex items-center justify-between h-[66rpx] rounded-[33rpx] flex-1 pl-[20rpx] mr-[40rpx]">
-					<input class="uni-input text-sm flex-1" maxlength="50" v-model="goods_name"
-						@confirm="searchTypeFn('all')" placeholder="请搜索您想要的商品" />
+				<view class="bg-[#F5F5F5]  flex items-center justify-between h-[66rpx] rounded-[33rpx] flex-1 pl-[20rpx] mr-[40rpx]">
+					<input class="uni-input text-sm flex-1" maxlength="50" v-model="goods_name" @confirm="searchTypeFn('all')" placeholder="请搜索您想要的商品" />
 					<text class="iconfont iconxiazai17 text-[30rpx] mr-[18rpx]" @click="searchTypeFn('all')"></text>
 				</view>
-				<text :class="['iconfont text-[44rpx]', listType ? 'iconshangpinliebiao' : 'iconliebiaoxingshi']"
-					@click="listIconBtn"></text>
+				<text :class="['iconfont text-[44rpx]', listType ? 'iconshangpinliebiao' : 'iconliebiaoxingshi']" @click="listIconBtn"></text>
 			</view>
 			<view class="pb-3 pt-1 flex items-center justify-between">
 				<text :class="['text-sm', { 'text-color': searchType == 'all' }]" @click="searchTypeFn('all')">综合</text>
-				<view class="flex items-center" :class="[{ 'text-color': searchType == 'sale_num' }]"
-					@click="searchTypeFn('sale_num')">
+				<view class="flex items-center" :class="[{ 'text-color': searchType == 'sale_num' }]" @click="searchTypeFn('sale_num')">
 					<text class="text-sm mr-[4rpx]">销量</text>
 					<text v-if="sale_num == 'asc'" class="text-xs iconfont iconjiantoushang font-bold"></text>
 					<text v-else class="text-xs iconfont iconxialajiantouxiao"></text>
 				</view>
-				<view class="flex items-center" :class="[{ 'text-color': searchType == 'price' }]"
-					@click="searchTypeFn('price')">
+				<view class="flex items-center" :class="[{ 'text-color': searchType == 'price' }]" @click="searchTypeFn('price')">
 					<text class="text-sm mr-[4rpx]">价格</text>
 					<text v-if="price == 'asc'" class="text-xs iconfont iconjiantoushang font-bold"></text>
 					<text v-else class="text-xs iconfont iconxialajiantouxiao"></text>
 				</view>
-				<view class="flex items-center" :class="[{ 'text-color': searchType == 'label' }]"
-					@click="searchTypeFn('label')">
+				<view class="flex items-center" :class="[{ 'text-color': searchType == 'label' }]" @click="searchTypeFn('label')">
 					<text class="text-sm mr-[2rpx]">筛选</text>
 					<text class="iconfont iconshaixuan"></text>
 				</view>
@@ -42,8 +36,7 @@
 			</view>
 		</u-popup>
 
-		<mescroll-body ref="mescrollRef" top="174rpx" bottom="50px" @init="mescrollInit" @down="downCallback"
-			@up="getAllAppListFn">
+		<mescroll-body ref="mescrollRef" top="174rpx" bottom="50px" @init="mescrollInit" @down="downCallback" @up="getAllAppListFn">
 			<view :class="['p-[24rpx] !pb-0', !listType ? 'flex justify-between flex-wrap' : '']">
 				<template v-for="(item, index) in articleList">
 					<template v-if="listType" :key="item.app_id">
@@ -62,9 +55,7 @@
 								</view>
 								<view class="mt-auto flex justify-between items-end">
 									<view class="flex flex-col">
-										<text class="text-[28rpx] text-[var(--price-text-color)] price-font">￥{{
-											item.goodsSku.price }}</text>
-
+										<text class="text-[28rpx] text-[var(--price-text-color)] price-font">￥{{ item.goodsSku.price }}</text>
 									</view>
 									<text class="text--[24rpx] text-[#666]">已售{{ item.sale_num }}{{ item.unit }}</text>
 								</view>
@@ -73,29 +64,23 @@
 					</template>
 					<template v-else>
 						<view class="w-[342rpx] bg-[#fff] box-border rounded-[10rpx] overflow-hidden mt-[20rpx]" @click="toDetail(item.goods_id)">
-							<u--image width="342rpx" height="342rpx"
-								:src="img(item.goods_cover_thumb_small ? item.goods_cover_thumb_small : '')"
-								model="aspectFill">
+							<u--image width="342rpx" height="342rpx" :src="img(item.goods_cover_thumb_small ? item.goods_cover_thumb_small : '')" model="aspectFill">
 								<template #error>
 									<u-icon name="photo" color="#999" size="50"></u-icon>
 								</template>
 							</u--image>
-							<view
-								class="pl-[22rpx] pr-[30rpx] mt-[18rpx] h-[80rpx] leading-[40rpx] text-[26rpx] font-500 multi-hidden">
+							<view class="pl-[22rpx] pr-[30rpx] mt-[18rpx] h-[80rpx] leading-[40rpx] text-[26rpx] font-500 multi-hidden">
 								{{ item.goods_name }}
 							</view>
 							<view class="pl-[22rpx] pb-[20rpx] pr-[30rpx] flex justify-between items-end mt-[12rpx]">
 								<view class="flex justify-between items-end">
-									<text class="text-[28rpx] text-[var(--price-text-color)] price-font">￥{{
-										item.goodsSku.price
-									}}</text>
+									<text class="text-[28rpx] text-[var(--price-text-color)] price-font">￥{{ item.goodsSku.price }}</text>
 									<!-- <text class="text-[28rpx] font-bold text-[#FF3223]"
 									v-if="!parseFloat(item.price) && parseFloat(item.balance)">{{item.balance}}牛币</text>
 								<text class="text-[24rpx] ml-[6rpx]"
 									v-if="parseFloat(item.price) && parseFloat(item.balance) || !parseFloat(item.price) && !parseFloat(item.balance)">{{item.balance}}牛币</text> -->
 								</view>
-								<text class="text--[24rpx] text-[#666] leading-[31rpx]">已售{{ item.sale_num }}{{ item.unit
-								}}</text>
+								<text class="text--[24rpx] text-[#666] leading-[31rpx]">已售{{ item.sale_num }}{{ item.unit}}</text>
 							</view>
 						</view>
 					</template>
@@ -103,7 +88,8 @@
 			</view>
 			<mescroll-empty v-if="!articleList.length && loading"></mescroll-empty>
 		</mescroll-body>
-		<tabbar />
+
+		<tabbar addon="shop"/>
 	</view>
 </template>
 

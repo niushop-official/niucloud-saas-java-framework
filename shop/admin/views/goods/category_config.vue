@@ -201,7 +201,6 @@ const getCategoryConfigFn = () => {
 getCategoryConfigFn()
 const levelChange = (value: any) => {
     formData.value.template = value
-    console.log(value)
 }
 const carStyleClick = (value: any) => {
     formData.value.cart.style = 'style-' + value

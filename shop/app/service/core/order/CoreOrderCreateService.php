@@ -96,6 +96,7 @@ class CoreOrderCreateService extends BaseCoreService
                 'goods_image' => $v['goods']['goods_cover'],
                 'sku_image' => $v['sku_image'],
                 'price' => $v['price'],
+                'original_price' => $v['original_price'] ?? 0,
                 'num' => $v['num'],
                 'goods_money' => $v['goods_money'],
                 'goods_type' => $v['goods']['goods_type'],
@@ -214,6 +215,9 @@ class CoreOrderCreateService extends BaseCoreService
         $sku_list = (new  GoodsSku())->where($sku_condition)->with(['goods'])->field('sku_id, site_id, sku_name, sku_image, goods_id, price, stock, weight, volume,sku_id, sku_spec_format')->select()->toArray();
         $sku_list = array_column($sku_list, null, 'sku_id');
         //商品数据  查询商品列表
+
+
+
         $order_data = [];
         $goods_list = [];
         $order_money = $goods_money = $delivery_money = 0;
@@ -229,7 +233,8 @@ class CoreOrderCreateService extends BaseCoreService
             $market_type_id = $v['market_type_id'] ?? 0;
             $sku_info = $sku_list[$sku_id] ?? [];
             if (empty($sku_info)) throw new CommonException('SHOP_ORDER_CARTS_EXPIRE');//无效的商品
-
+            //商品原价
+            $sku_info['original_price'] = $sku_info['price'];
             //默认金额填充
             $sku_info['discount_money'] = 0;
             $item_goods_type = $sku_info['goods']['goods_type'];

@@ -63,6 +63,7 @@ class CouponService extends BaseApiService
         ,receive_type,valid_type,length,valid_start_time,valid_end_time,sort';
         $order = 'id desc';
 
+        $where[] = [ 'site_id', '=', $this->site_id ];
         $where[] = [ 'status', '=', CouponDict::ALL ];
 
         if (!empty($category_coupon_id) || !empty($goods_coupon_id)) {
@@ -215,7 +216,8 @@ class CouponService extends BaseApiService
                 'type' => $info[ 'type' ],
                 'title' => $info[ 'title' ],
                 'price' => $info[ 'price' ],
-                'status' => CouponMemberDict::WAIT_USE
+                'status' => CouponMemberDict::WAIT_USE,
+                'min_condition_money' => $info['min_condition_money']
             ];
             $this->model->where([ [ 'id', '=', $coupon_id ] ])->update($coupon_data);
             $coupon_member_model->create($member_coupon_data);

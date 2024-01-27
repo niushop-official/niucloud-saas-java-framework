@@ -65,8 +65,13 @@ class CoreOrderCloseService extends BaseCoreService
             ]
         );
         $data['order_data'] = $order_data;
+//        //订单关闭后操作
+//        event('AfterShopOrderClose', $data);
+
+        //订单关闭操作
+        CoreOrderEventService::orderClose($data);
         //订单关闭后操作
-        event('AfterShopOrderClose', $data);
+        CoreOrderEventService::orderCloseAfter($data);
         return true;
     }
 

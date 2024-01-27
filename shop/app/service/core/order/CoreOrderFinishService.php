@@ -66,8 +66,11 @@ class CoreOrderFinishService extends BaseCoreService
         //订单项收货
         $this->orderGoodsTake($data);
         $data['order_data'] = array_merge($order, $update_data);
+//        event('AfterShopOrderFinish', $data);
+        //订单完成操作
+        CoreOrderEventService::orderFinish($data);
         //订单完成后操作
-        event('AfterShopOrderFinish', $data);
+        CoreOrderEventService::orderFinishAfter($data);
         return true;
     }
 

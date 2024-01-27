@@ -5,11 +5,12 @@ namespace addon\shop\app\listener\notice_template;
 
 use addon\shop\app\dict\order\OrderDict;
 use addon\shop\app\service\core\order\CoreOrderService;
+use app\listener\notice_template\BaseNoticeTemplate;
 
 /**
  * 订单发货通知
  */
-class OrderDelivery
+class OrderDelivery extends BaseNoticeTemplate
 {
     private $key = 'shop_order_delivery';
 

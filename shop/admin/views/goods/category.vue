@@ -17,7 +17,7 @@
                     </template>
                     <el-table-column :label="t('categoryName')" min-width="120">
                         <template #default="{ row }">
-                            <i class="order-0 iconfont icontuodong vues-rank cursor-move mr-[8px]"></i>
+                            <i class="order-0 iconfont icontuodong vues-rank mr-[8px]"></i>
                             <span class="order-2">{{ row.category_name }}</span>
                         </template>
                     </el-table-column>

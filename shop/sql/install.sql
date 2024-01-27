@@ -526,6 +526,7 @@ CREATE TABLE `{{prefix}}shop_order_goods` (
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态',
   `order_refund_no` varchar(50) NOT NULL DEFAULT '' COMMENT '退款单号',
   `order_goods_money` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '订单项实付金额',
+  `original_price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '商品原价',
   PRIMARY KEY (`order_goods_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci COMMENT='订单项表';
 

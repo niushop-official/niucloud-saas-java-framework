@@ -92,13 +92,14 @@ trait CoreOrderCreateTrait
             $this->delOrderCache($this->order_key);
             $order_data['order_id'] = $this->order_id;
             //订单创建后事件
-            event('AfterShopOrderCreate', ['site_id' => $site_id, 'order_id' => $this->order_id, 'order_data' => $order_data, 'order_goods_data' => $order_goods_data, 'cart_ids' => $this->cart_ids, 'basic' => get_object_vars($this), 'main_type' => $main_type, 'main_id' => $main_id, 'time' => time()]);
+            CoreOrderEventService::orderCreate(['site_id' => $site_id, 'order_id' => $this->order_id, 'order_data' => $order_data, 'order_goods_data' => $order_goods_data, 'cart_ids' => $this->cart_ids, 'basic' => get_object_vars($this), 'main_type' => $main_type, 'main_id' => $main_id, 'time' => time()]);
+            //订单创建后事件
+            CoreOrderEventService::orderCreateAfter(['site_id' => $site_id, 'order_id' => $this->order_id, 'order_data' => $order_data, 'order_goods_data' => $order_goods_data, 'cart_ids' => $this->cart_ids, 'basic' => get_object_vars($this), 'main_type' => $main_type, 'main_id' => $main_id, 'time' => time()]);
+//            event('AfterShopOrderCreate', ['site_id' => $site_id, 'order_id' => $this->order_id, 'order_data' => $order_data, 'order_goods_data' => $order_goods_data, 'cart_ids' => $this->cart_ids, 'basic' => get_object_vars($this), 'main_type' => $main_type, 'main_id' => $main_id, 'time' => time()]);
             //订单金额为0的话,要直接支付
             if ($order_data['order_money'] == 0) {
                 (new CoreOrderPayService())->pay(['site_id' => $site_id, 'trade_id' => $this->order_id, 'main_type' => $main_type, 'main_id' => $main_id]);
             }
-
-            CoreStatService::addStat(['site_id' => $site_id, 'order_num' => 1]);
 
             return [
                 'trade_type' => $order_data['order_type'],
@@ -262,7 +263,7 @@ trait CoreOrderCreateTrait
         //如果有优惠券
         if (!empty($coupon_list)) {
             foreach ($coupon_list as &$v) {
-                $type = $v['type'];
+                $type = (int)$v['type'];
                 $goods_data = $v['goods'];
                 $min_condition_money = $v['min_condition_money'];
                 switch ($type) {
@@ -293,12 +294,11 @@ trait CoreOrderCreateTrait
                         $match_goods_list = [];
                         $match_goods_money = 0;
                         foreach ($this->goods_data as $goods_v) {
-                            if (!in_array($goods_v['goods_id'], $goods_ids)) {
+                            if (in_array($goods_v['goods_id'], $goods_ids)) {
                                 $match_goods_list[] = $goods_v;
                                 $match_goods_money += $goods_v['goods_money'];
                             }
                         }
-
                         break;
                 }
 
@@ -355,7 +355,7 @@ trait CoreOrderCreateTrait
         if ($coupon_id > 0) {
             $coupon_data = (new CoreCouponMemberService())->getUseCouponById($coupon_id);
             if (empty($coupon_data)) throw new CommonException('SHOP_ORDER_COUPON_EXPIRE_OR_NOT_FOUND');//优惠券已使用或不存在
-            $type = $coupon_data['type'];
+            $type = (int)$coupon_data['type'];
             $goods_data = $coupon_data['goods'];
             $min_condition_money = $coupon_data['min_condition_money'];
             $match_order_goods_money = 0;
@@ -386,7 +386,7 @@ trait CoreOrderCreateTrait
                     $match_goods_list = [];
                     $match_goods_money = 0;
                     foreach ($this->goods_data as $goods_v) {
-                        if (!in_array($goods_v['goods_id'], $goods_ids)) {
+                        if (in_array($goods_v['goods_id'], $goods_ids)) {
                             $match_goods_list[] = $goods_v;
                             $match_goods_money += $goods_v['goods_money'];
                             $match_order_goods_money += $this->calculateOrderGoodsMoney($goods_v);

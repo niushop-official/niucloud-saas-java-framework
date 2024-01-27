@@ -63,10 +63,8 @@
 						<!-- @click="showAllTabs()" -->
 					</template>
 					<template v-else>
-						<view class="flex-1 h-[48rpx] text-[22rpx] text-[#E2E2E2] px-[24rpx] leading-[48rpx]">全部分类
-						</view>
-						<text class="iconfont iconjiantoushang transform text-[30rpx] rotate-180"
-							@click="labelPopup = false"></text>
+						<view class="flex-1 h-[48rpx] text-[22rpx] text-[#E2E2E2] px-[24rpx] leading-[48rpx]">全部分类</view>
+						<text class="iconfont iconjiantoushang transform text-[30rpx] rotate-180" @click="labelPopup = false"></text>
 					</template>
 
 				</view>
@@ -89,8 +87,7 @@
 							class="w-[536rpx] box-border bg-white w-full flex mx-[16rpx] px-[24rpx] py-[20rpx] rounded-[12rpx]"
 							:class="{ 'mt-[16rpx]': index }" @click.stop="toLink(item.goods_id)">
 							<view class="overflow-hidden mr-[8rpx] rounded-md">
-								<u--image width="168rpx" height="168rpx"
-									:src="img(item.goods_cover_thumb_small ? item.goods_cover_thumb_small : '')"
+								<u--image width="168rpx" height="168rpx" :src="img(item.goods_cover_thumb_small ? item.goods_cover_thumb_small : '')"
 									model="aspectFill">
 									<template #error>
 										<u-icon name="photo" color="#999" size="50"></u-icon>
@@ -99,8 +96,7 @@
 							</view>
 							<view class="flex flex-1 flex-wrap">
 								<view class="w-[316rpx] max-h-[72rpx] text-[26rpx] font-500 leading-[36rpx] multi-hidden">
-									{{
-										item.goods_name }}
+									{{ item.goods_name }}
 								</view>
 								<view class="w-[316rpx] flex self-end items-end justify-between">
 									<text class="text-[var(--price-text-color)] price-font">
@@ -174,8 +170,7 @@
 						</view>
 
 					</template>
-					<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }"
-						v-if="!list.length && !loading && listLoading"></mescroll-empty>
+					<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }" v-if="!list.length && !loading && listLoading"></mescroll-empty>
 
 				</view>
 
@@ -237,7 +232,7 @@
 			<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }"></mescroll-empty>
 		</view>
 		<u-loading-page bg-color="rgb(248,248,248)" :loading="loading" fontSize="16" color="#333"></u-loading-page>
-		<tabbar />
+		<tabbar addon="shop"/>
 	</view>
 </template>
 

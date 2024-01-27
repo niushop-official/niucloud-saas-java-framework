@@ -23,6 +23,8 @@ use core\base\BaseAdminService;
  */
 class DeliveryService extends BaseAdminService
 {
+    protected $core_delivery_config_service;
+
     public function __construct()
     {
         parent::__construct();

@@ -76,13 +76,13 @@
 
 <style lang="scss" scoped>
 	.menu :deep(.u-tabs__wrapper__nav__item__text) {
-		font-size: 30 rpx !important;
-		padding-bottom: 10 rpx;
+		font-size: 30rpx !important;
+		padding-bottom: 10rpx;
 	}
 
 	.parcel :deep(.u-text__value) {
-		font-size: 24 rpx !important;
-		line-height: 42 rpx !important;
+		font-size: 24rpx !important;
+		line-height: 42rpx !important;
 	}
 
 	.parcel :deep(.u-steps-item__wrapper__dot) {
@@ -91,6 +91,6 @@
 	}
 
 	.parcel :deep(.u-steps-item__content) {
-		margin-left: 20 rpx !important;
+		margin-left: 20rpx !important;
 	}
 </style>

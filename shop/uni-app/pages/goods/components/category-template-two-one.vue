@@ -7,8 +7,7 @@
 					<text class="iconfont iconxiazai17 text-[30rpx]" @click="searchNameFn"></text>
 				</view>
 			</view>
-			<view class="tabs-box z-2 fixed left-0 bg-[#fff] bottom-[50px] top-0"
-				:class="{ '!top-[106rpx]': config.search.control }">
+			<view class="tabs-box z-2 fixed left-0 bg-[#fff] bottom-[50px] top-0" :class="{ '!top-[106rpx]': config.search.control }">
 				<scroll-view :scroll-y="true" height="100%">
 					<view>
 						<view class="tab-item truncate" :class="{ 'tab-item-active': index == tabActive }"
@@ -21,13 +20,11 @@
 				</scroll-view>
 			</view>
 			<scroll-view :scroll-y="true">
-				<view class="flex flex-wrap pl-[182rpx] pb-[70rpx] pt-[20rpx]"
-					:class="{ '!pt-[126rpx]': config.search.control }">
+				<view class="flex flex-wrap pl-[182rpx] pb-[70rpx] pt-[20rpx]" :class="{ '!pt-[126rpx]': config.search.control }">
 
 					<template v-for="(item, index) in tabsData[tabActive]?.child_list" :key="item.category_id">
 						<view class="w-[160rpx] ml-[22rpx] mb-[24rpx]" @click="toLink(item.category_id)">
-							<u--image width="160rpx" height="160rpx" :src="img(item.image ? item.image : '')"
-								model="aspectFill">
+							<u--image width="160rpx" height="160rpx" :src="img(item.image ? item.image : '')" model="aspectFill">
 								<template #error>
 									<u-icon name="photo" color="#999" size="50"></u-icon>
 								</template>
@@ -42,7 +39,7 @@
 				</view>
 			</scroll-view>
 		</view>
-		<tabbar />
+		<tabbar addon="shop"/>
 		<view class="flex justify-center w-[100%]" v-if="!tabsData.length && !loading">
 			<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }"></mescroll-empty>
 		</view>

@@ -41,7 +41,7 @@ class ShopAddress extends BaseModel
     public function searchMobileAttr($query, $value, $data)
     {
         if ($value) {
-            $query->where("mobile",  $value);
+            $query->where("mobile", "like", "%$value%");
         }
     }
 
@@ -53,7 +53,7 @@ class ShopAddress extends BaseModel
     public function searchFullAddressAttr($query, $value, $data)
     {
         if ($value) {
-            $query->where("full_address", $value);
+            $query->where("full_address", "like", "%$value%");
         }
     }
 

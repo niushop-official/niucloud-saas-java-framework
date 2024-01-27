@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'BASIC' => [
-        'title' => get_lang('dict_diy.component_type_basic'),
+    'SHOP_COMPONENT' => [
+        'title' => get_lang('dict_diy.shop_component_type_basic'),
         'list' => [
             'GoodsList' => [
                 'title' => '商品列表',
@@ -27,14 +27,14 @@ return [
                 'uses' => 1,
                 'sort' => 10012,
                 'value' => [
-                    "searchStyle"=> "style-1",
+                    "searchStyle" => "style-1",
                     "searchLink" => [
                         "name" => ""
                     ],
-                    "title"=> "搜索",
-                    "iconType"=> "img",
-                    "icon"=> "",
-                    "imageUrl"=> ""
+                    "title" => "搜索",
+                    "iconType" => "img",
+                    "icon" => "",
+                    "imageUrl" => ""
                 ],
             ]
         ]

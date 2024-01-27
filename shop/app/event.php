@@ -6,7 +6,7 @@ return [
     ],
     'listen' => [
         // 站点创建之后
-        'AddSiteAfter' => [ 'addon\shop\app\listener\AddSiteAfter' ],
+        'AddSiteAfter' => [ 'addon\shop\app\listener\AddSiteAfterListener' ],
         //订单创建后
         'AfterShopOrderCreate' => [ 'addon\shop\app\listener\order\AfterShopOrderCreate' ],
         //订单支付后
@@ -30,6 +30,8 @@ return [
 
         'ShopPromotion' => [ 'addon\shop\app\listener\app\ShopPromotionListener' ],
         'WapIndex' => [ 'addon\shop\app\listener\WapIndexListener' ],
+        'BottomNavigation' => [ 'addon\shop\app\listener\BottomNavigationListener' ],
+
         //支付
         'PayCreate' => [ 'addon\shop\app\listener\pay\PayCreateListener' ],
         'PaySuccess' => [ 'addon\shop\app\listener\pay\PaySuccessListener' ],

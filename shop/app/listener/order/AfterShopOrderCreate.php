@@ -11,6 +11,7 @@ use addon\shop\app\job\order\OrderPayRemind;
 use addon\shop\app\model\order\Order;
 use addon\shop\app\model\order\OrderGoods;
 use addon\shop\app\service\core\cart\CoreCartService;
+use addon\shop\app\service\core\CoreStatService;
 use addon\shop\app\service\core\goods\CoreGoodsSaleNumService;
 use addon\shop\app\service\core\goods\CoreGoodsStockService;
 use addon\shop\app\service\core\order\CoreInvoiceService;
@@ -117,7 +118,8 @@ class AfterShopOrderCreate
 //                OrderClose::dispatch(['order_id' => $order_data['order_id'] ], secs: $order_config['close_length'] * 60);
             }
         }
-
+        //增加统计数据
+        CoreStatService::addStat(['site_id' => $site_id, 'order_num' => 1]);
         // 订单催付通知
         OrderPayRemind::dispatch(['site_id' => $site_id, 'order_id' => $order_data['order_id'] ], secs:1800);
     }

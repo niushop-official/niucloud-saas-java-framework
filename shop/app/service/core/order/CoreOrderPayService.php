@@ -65,8 +65,12 @@ class CoreOrderPayService extends BaseCoreService
 
         $data['order_data'] = $order->toArray();
         $data['order_id'] = $order_id;
+
+//        event('AfterShopOrderPay', $data);
+        //订单支付操作
+        CoreOrderEventService::orderPay($data);
         //订单支付后操作
-        event('AfterShopOrderPay', $data);
+        CoreOrderEventService::orderPayAfter($data);
         return true;
     }
 

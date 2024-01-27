@@ -3,7 +3,7 @@
     <div class="main-container">
         <!-- 添加优惠券按钮 -->
         <el-card class="box-card !border-none" shadow="never">
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center mb-[5px]">
                 <span class="text-[20px]">{{pageName}}</span>
                 <el-button type="primary" @click="handleChange">
                     {{ t('addCoupon') }}
@@ -183,7 +183,6 @@ const resetForm = (formEl: FormInstance | undefined) => {
 </script>
 <style lang="scss" scoped>
 .main-container {
-    margin: 20px 0 0 20px;
 
     .shop-marketing-list-particulars {
         margin-top: 20px;

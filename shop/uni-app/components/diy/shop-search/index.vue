@@ -16,7 +16,6 @@
 
 	const props = defineProps(['component', 'index', 'pullDownRefreshCount']);
 	const diyStore = useDiyStore();
-	const noticeShow = ref(false);
 
 	const diyComponent = computed(() => {
 		if (diyStore.mode == 'decorate') {

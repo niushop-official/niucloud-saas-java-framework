@@ -264,7 +264,7 @@ const payRef = ref(null)
 const materialRef = ref(null)
 const orderBtnFn = (type = '') => {
 	if (type == 'pay')
-		payRef.value?.open(detail.value.order_type, detail.value.order_id, `/shop/pages/order/detail?order_id=${detail.value.order_id}`);
+		payRef.value?.open(detail.value.order_type, detail.value.order_id, `/addon/shop/pages/order/detail?order_id=${detail.value.order_id}`);
 	else if (type == 'close') {
 		close(detail.value);
 	} else if (type == 'finish') {

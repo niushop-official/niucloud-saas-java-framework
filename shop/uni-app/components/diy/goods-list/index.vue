@@ -19,8 +19,7 @@
 			</block>
 			<block v-if="diyComponent.style == 'style2'">
 				<view :class="['bg-white w-full flex p-[20rpx] rounded-[16rpx]',{'mt-[20rpx]': index > 0}]"  v-for="(item,index) in goodsList" :key="item.goods_id" @click="toLink(item)">
-					<u--image class="rounded-[10rpx] overflow-hidden" width="200rpx" height="200rpx"
-						:src="img(item.goods_cover_thumb_small || '')" model="aspectFill">
+					<u--image class="rounded-[10rpx] overflow-hidden" width="200rpx" height="200rpx" :src="img(item.goods_cover_thumb_small || '')" model="aspectFill">
 						<template #error>
 							<u-icon name="photo" color="#999" size="50"></u-icon>
 						</template>

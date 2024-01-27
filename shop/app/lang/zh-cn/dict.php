@@ -90,6 +90,7 @@ return [
         'close' => '退款关闭'
     ],
     'dict_diy' => [
+        'shop_component_type_basic' => '商城组件',
         'page_shop_index' => '商城首页',
         'page_shop_member_index' => '商城个人中心',
 

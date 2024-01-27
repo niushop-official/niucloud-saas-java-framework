@@ -18,8 +18,7 @@
 			<h3 class="mb-[10px]">{{ t("selectSource") }}</h3>
 			<el-form label-width="80px" class="px-[10px]">
 				<el-form-item :label="t('goodsSelectPopupSelectGoodsButton')">
-					<el-radio-group v-model="diyStore.editComponent.source" :title="t('goodsSelectPopupSelectGoodsButton')"
-						class="mb-[18px]">
+					<el-radio-group v-model="diyStore.editComponent.source" :title="t('goodsSelectPopupSelectGoodsButton')" class="mb-[18px]">
 						<el-radio label="all">{{ t('goodsSelectPopupAllGoods') }}</el-radio>
 						<el-radio label="category">{{ t('selectCategory') }}</el-radio>
 						<el-radio label="custom">{{ t('manualSelectionSources') }}</el-radio>
@@ -40,13 +39,11 @@
 					</div>
 				</el-form-item>
 				<el-form-item :label="t('customGoods')" v-if="diyStore.editComponent.source == 'custom'">
-					<goods-select-popup ref="goodsSelectPopupRef" v-model="diyStore.editComponent.goods_ids" :min="1"
-						:max="99" />
+					<goods-select-popup ref="goodsSelectPopupRef" v-model="diyStore.editComponent.goods_ids" :min="1" :max="99" />
 				</el-form-item>
 			</el-form>
 
-			<el-dialog v-model="categoryShowDialog" :title="t('goodsCategoryTitle')" width="1000px"
-				:close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+			<el-dialog v-model="categoryShowDialog" :title="t('goodsCategoryTitle')" width="1000px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
 				<el-table :data="categoryTable.data" ref="categoryTableRef" size="large" v-loading="categoryTable.loading"
 					height="490px" @selection-change="handleSelectionChange" row-key="category_id"
 					:tree-props="{ hasChildren: 'hasChildren', children: 'child_list' }">
@@ -70,7 +67,6 @@
 									</template>
 								</el-image>
 							</div>
-
 						</template>
 					</el-table-column>
 				</el-table>
@@ -173,11 +169,4 @@ defineExpose({})
 
 </script>
 
-<style lang="scss">
-.horz-blank-slider {
-	.el-slider__input {
-		width: 100px;
-	}
-}
-</style>
 <style lang="scss" scoped></style>

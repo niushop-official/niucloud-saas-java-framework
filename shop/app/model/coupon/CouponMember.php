@@ -59,7 +59,7 @@ class CouponMember extends BaseModel
      */
     public function goods()
     {
-        return $this->hasMany(CouponGoods::class, 'coupon_id', 'id');
+        return $this->hasMany(CouponGoods::class, 'coupon_id', 'coupon_id');
     }
 
     public function getStatusNameAttr($value, $data)

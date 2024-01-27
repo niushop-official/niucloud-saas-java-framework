@@ -11,7 +11,7 @@
 						<template #header>
 							<div class="flex items-center justify-between">
 								<div class="flex items-center">
-									<i class="iconfont icontuodong vues-rank !cursor-move mr-[5px]"></i>
+									<i class="iconfont icontuodong vues-rank mr-[5px]"></i>
 									<el-input v-focus v-if="index === activeIndex" v-model="inputValue"  class="w-[120px]"  @blur="inputBlur"/>
 									<span v-else class="font-600 text-[14px]">{{ item.name }}</span>
 									<el-icon class="text-color ml-[10px] cursor-pointer" @click="edit(index)">
@@ -77,15 +77,16 @@ const getShopDeliveryListFn = () => {
     loading.value = true
     getShopDeliveryList().then(res => {
         tableData.value = res.data
-        loading.value = false
+        loading.value = false 
+		nextTick(() => {
+        if(rowDrop) rowDrop()
+    })
     }).catch(() => {
         loading.value = false
     })
 }
 onMounted(() => {
-    nextTick(() => {
-        rowDrop()
-    })
+   
     getShopDeliveryListFn()
 })
 const vFocus = {
@@ -99,6 +100,7 @@ const rowDrop = () => {
         handle: '.vues-rank',
         animation: 300,
         onEnd ({ newIndex, oldIndex }) {
+
             const currRow = tableData.value.splice(oldIndex, 1)[0]
             tableData.value.splice(newIndex, 0, currRow)
             toggleIndex.value += 1

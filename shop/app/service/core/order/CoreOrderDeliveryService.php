@@ -345,7 +345,11 @@ class CoreOrderDeliveryService extends BaseCoreService
         $order->save($order_data);
         //订单发货后操作
         $data['order_data'] = $order->toArray();
-        event('AfterShopOrderDelivery', $data);
+//        event('AfterShopOrderDelivery', $data);
+        //订单发货操作
+        CoreOrderEventService::orderDelivery($data);
+        //订单发货后操作
+        CoreOrderEventService::orderDeliveryAfter($data);
         return true;
     }
 }

@@ -5,8 +5,7 @@
 		<view v-show="!loading">
 
 			<!-- 自定义模板渲染 -->
-			<view class="diy-template-wrap bg-index" v-if="data.pageMode != 'fixed'"
-				:style="{ backgroundColor: data.global.pageBgColor,minHeight: 'calc(100vh - 50px)',backgroundImage : data.global.bgUrl ? 'url(' +  img(data.global.bgUrl) + ')' : '' }">
+			<view class="diy-template-wrap bg-index" v-if="data.pageMode != 'fixed'" :style="{ backgroundColor: data.global.pageBgColor,minHeight: 'calc(100vh - 50px)',backgroundImage : data.global.bgUrl ? 'url(' +  img(data.global.bgUrl) + ')' : '' }">
 
 				<diy-group :data="data" :pullDownRefreshCount="pullDownRefreshCount"></diy-group>
 
@@ -103,9 +102,6 @@
 						title: diyData.title
 					});
 					loading.value = false;
-				} else if (data.mode == 'other') {
-					// 跳转到其他页面
-					redirect({ url: data.page })
 				}
 			});
 		}

@@ -11,12 +11,10 @@
 					</view>
 				</view>
 				<!--  #ifdef  H5 -->
-				<view class="tabs-box z-2 fixed left-0 bg-[#fff] bottom-[50px] top-0"
-					:class="{ '!top-[106rpx]': config.search.control, 'pb-[98rpx]': config.cart.control && config.cart.event === 'cart' }">
+				<view class="tabs-box z-2 fixed left-0 bg-[#fff] bottom-[50px] top-0" :class="{ '!top-[106rpx]': config.search.control, 'pb-[98rpx]': config.cart.control && config.cart.event === 'cart' }">
 					<scroll-view :scroll-y="true" height="100%">
 						<view>
-							<view class="tab-item truncate" :class="{ 'tab-item-active': index == tabActive }"
-								v-for="(item, index) in tabsData" :key="item.site_id" @click="firstLevelClick(index, item)">
+							<view class="tab-item truncate" :class="{ 'tab-item-active': index == tabActive }" v-for="(item, index) in tabsData" :key="item.site_id" @click="firstLevelClick(index, item)">
 								<view class="text-box">
 									{{ item.category_name }}
 								</view>
@@ -40,16 +38,13 @@
 					</scroll-view>
 				</view>
 				<!--  #endif -->
-				<view class="flex justify-center flex-wrap pl-[182rpx]"
-					:class="{ ' pt-[126rpx]': config.search.control, ' pt-[20rpx]': !(config.search.control) }">
+				<view class="flex justify-center flex-wrap pl-[182rpx]" :class="{ ' pt-[126rpx]': config.search.control, ' pt-[20rpx]': !(config.search.control) }">
 					<template v-for="(item, index) in list" :key="item.goods_id">
 						<view
 							class="w-[536rpx] box-border bg-white w-full flex mx-[16rpx] px-[24rpx] py-[20rpx] rounded-[12rpx]"
 							:class="{ 'mt-[16rpx]': index }" @click.stop="toLink(item.goods_id)">
 							<view class="overflow-hidden mr-[8rpx] rounded-md">
-								<u--image width="168rpx" height="168rpx"
-									:src="img(item.goods_cover_thumb_small ? item.goods_cover_thumb_small : '')"
-									model="aspectFill">
+								<u--image width="168rpx" height="168rpx" :src="img(item.goods_cover_thumb_small ? item.goods_cover_thumb_small : '')" model="aspectFill">
 									<template #error>
 										<u-icon name="photo" color="#999" size="50"></u-icon>
 									</template>
@@ -57,8 +52,7 @@
 							</view>
 							<view class="flex flex-1 ml-[8rpx] flex-wrap">
 								<view class="w-[316rpx] max-h-[72rpx] text-[26rpx] font-500 leading-[36rpx] multi-hidden">
-									{{
-										item.goods_name }}
+									{{ item.goods_name }}
 								</view>
 								<view class="w-[316rpx] flex self-end items-end justify-between">
 									<text class="text-[var(--price-text-color)] price-font">
@@ -72,8 +66,7 @@
 										<text class="text-[44rpx] text-color iconfont iconjianhao"
 											@click.stop="reduceCart(cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id])"></text>
 										<text class="text-[#333] fext-[23rpx] font-500 mx-[16rpx]">
-											{{ cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id].num
-											}}</text>
+											{{ cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id].num }}</text>
 										<text class="text-[44rpx] text-color iconfont iconjiahao2fill"
 											@click.stop="addCartBtn(cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id])"></text>
 									</view>
@@ -132,8 +125,7 @@
 						</view>
 
 					</template>
-					<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }"
-						v-if="!list.length && !loading && listLoading"></mescroll-empty>
+					<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }" v-if="!list.length && !loading && listLoading"></mescroll-empty>
 
 				</view>
 
@@ -144,9 +136,7 @@
 				class="bg-[#fff] z-2 flex justify-between items-center fixed left-0 right-0 bottom-[50px] box-solid px-[24rpx] pt-[10rpx] pb-[18rpx]">
 				<view class="flex items-center">
 					<view class="w-[70rpx] h-[70rpx] mr-[27rpx] relative">
-						<view id="animation-end"
-							class="w-[70rpx] h-[70rpx] rounded-[35rpx] bg-[var(--primary-color)] text-center leading-[70rpx]"
-							@click.stop="toCart">
+						<view id="animation-end" class="w-[70rpx] h-[70rpx] rounded-[35rpx] bg-[var(--primary-color)] text-center leading-[70rpx]" @click.stop="toCart">
 							<text class="icongouwuche1 iconfont text-[#fff]"></text>
 						</view>
 						<view v-if="totalNum"
@@ -195,7 +185,7 @@
 			<mescroll-empty :option="{ 'icon': img('static/resource/images/empty.png') }"></mescroll-empty>
 		</view>
 		<u-loading-page bg-color="rgb(248,248,248)" :loading="loading" fontSize="16" color="#333"></u-loading-page>
-		<tabbar />
+		<tabbar addon="shop"/>
 	</view>
 </template>
 

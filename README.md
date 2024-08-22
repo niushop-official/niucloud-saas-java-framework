@@ -53,23 +53,17 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 ![输入图片说明](https://media.niucloud.com/1724312677bd2c7d91d1293cc51f932b1de5d5c0f9_aliyun.png)
 
 
-版权说明
-niucloud-Admin-Java 版本采用 Apache License2.0协议
-
-代码可用于个人项目等接私活或企业项目脚手架使用，niucloud-Admin-Java 开源完全免费
-
-二次开发如用于开源竞品请先联系群主沟通，禁止任何变相的二开行为，未经审核视为侵权
-
-请不要删除和修改Snowy源码头部的版权与作者声明及出处
-
 niucloud-Admin-Java 程序员二开神器！
 
 ### 官网地址
 https://www.niucloud.com
 
+### 版权说明
+niucloud-Admin-Java 版本采用 Apache License2.0协议
+
 ### 开源使用须知
 
-1.允许用于个人学习、毕业设计、教学案例、公益事业、商业使用;
+1.允许用于个人学习、毕业设计、教学案例、公益事业、商业使用; 代码可用于个人项目等接私活或企业项目脚手架使用;
 
 2.本框架应用源代码所有权和著作权归niucloud官方所有，基于niucloud-admin框架开发的应用，所有权和著作权归应用开发商所有。但必须明确声明是基于niucloud-admin框架开发，请自觉遵守，否则产生的一切任何后果责任由侵权者自负;
 

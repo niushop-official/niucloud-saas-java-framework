@@ -4,7 +4,7 @@
 <br>
 
 
-:rocket: 使用niucloud-Admin-Java框架，我们开发一个软件系统，一切插件化！！！= niucloud-Admin-Java框架 + 应用1 + 应用2 + 应用N + 插件1 + 插件2 + 插件N + ... 
+:rocket: 使用niucloud-Admin-Java框架，我们开发一个软件系统， **一切皆插件化** ！！！= niucloud-Admin-Java框架 + 应用1 + 应用2 + 应用N + 插件1 + 插件2 + 插件N + ... 
 
 <br>
 

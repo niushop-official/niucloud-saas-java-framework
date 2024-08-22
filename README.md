@@ -11,7 +11,7 @@
 :fa-quote-left:  如果对您有帮助，您可以点右上角 ⭐“Star” 收藏一下 ，获取第一时间更新，谢谢！ :fa-quote-right: 
 
 ### 框架介绍
-niucloud-Admin-Java（niucloud框架）是一款快速开发SaaS通用管理系统后台框架，基于SpringBoot+MyBatisPlus+Shiro 技术架构精心设计，易读易懂，没有任何其它重度依赖，架构设计小巧灵活，没有采用过度设计模式。 前端采用最新的技术栈Vite+TypeScript+Vue3+ElementPlus最流行技术架构。是一款快速可以开发企业级应用的软件系统。【您不需要重复造轮子 – 框架内置已经实现基础组件功能，您只需要开发业务模块即可 】!
+niucloud-Admin-Java（niucloud框架）是一款快速开发SaaS通用管理系统后台框架，基于SpringBoot+MyBatisPlus+Sa-Token 技术架构精心设计，易读易懂，没有任何其它重度依赖，架构设计小巧灵活，没有采用过度设计模式。 前端采用最新的技术栈Vite+TypeScript+Vue3+ElementPlus最流行技术架构。是一款快速可以开发企业级应用的软件系统。【您不需要重复造轮子 – 框架内置已经实现基础组件功能，您只需要开发业务模块即可 】!
 
 
 ### 快速链接
@@ -48,7 +48,7 @@ HBUILDER, VSCODE，微信小程序开发工具，打包，上传，发布！ niu
 
 1. niucloud-admin-java采用多租户的saas系统设计，能够提供企业级软件服务运营 ，同时满足用户多站点，多商户，多门店等系统开发需求。
 
-2. 后台SpringBoot+MyBatisPlus+Shiro+MYSQL8,支持多语言设计开发，同时开发采用严格的restful的api设计开发。
+2. 后台SpringBoot+MyBatisPlus+Sa-Token+MYSQL8,支持多语言设计开发，同时开发采用严格的restful的api设计开发。
 
 3. 前端采用uniapp前后端分离，同时使用element-plus、uview、vue3.0、typescript、vite、pina等前端技术，同时使用i18n支持国际化多语言开发，可以灵活编译成h5,微信小程序，支付宝小程序，抖音小程序等使用场景。介于前端采用标准的element-plus，开发者不需要详细了解前端，只需要用标准的element组件就可以。
 

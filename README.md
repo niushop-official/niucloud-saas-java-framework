@@ -28,7 +28,7 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 
 强大的多应用+插件组合设计理念，低耦合，高内聚
 
-全新生态设计，多应用聚合+多插件组合运营模式全新升级，支持共同会员体系下商城，会员卡，上门服务等等多种商业模式随机组合，DIY装修出最强的软件系统
+全新生态设计，多应用聚合+多插件组合运营模式全新升级，支持共同会员体系下多种应用+插件组合，DIY装修出最强的软件系统
 ![输入图片说明](https://www.niushop.com/app/web/view/public/img/product/b2cv6/low-play.mp4?v=4)
 
 ### 插件化，完全为开发者二次开发而生

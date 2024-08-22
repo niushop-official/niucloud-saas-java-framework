@@ -58,8 +58,6 @@ niucloud-Admin-Java 程序员二开神器！
 ### 官网地址
 https://www.niucloud.com
 
-### 版权说明
-niucloud-Admin-Java 版本采用 Apache License2.0协议
 
 ### 开源使用须知
 
@@ -75,7 +73,11 @@ niucloud-Admin-Java 版本采用 Apache License2.0协议
 
 6.一切事物有个人喜好的标准，本开源代码意在分享，不喜勿喷。
 
-版权信息
+
+### 版权说明
+
+niucloud-Admin-Java 版本采用 Apache License2.0协议
+
 版权所有Copyright © 2015-2025 niucloud-admin 版权所有
 
 All rights reserved。

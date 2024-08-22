@@ -15,7 +15,7 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 文档地址：https://www.niucloud.com
 
 
-###  **niucloud-admin-java** 采用的技术亮点
+### 技术亮点
 
 1. niucloud-admin-java采用多租户的saas系统设计，能够提供企业级软件服务运营 ，同时满足用户多站点，多商户，多门店等系统开发需求。
 

@@ -13,7 +13,7 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 文档地址：https://www.niucloud.com
 
 
--  **niucloud-admin采用的技术亮点** 
+**niucloud-admin采用的技术亮点** 
 后台php采用THINKPHP8+PHP8+MYSQL8,支持composer快速安装扩展，支持redis缓存以及消息队列，支持多语言设计开发，同时开发采用严格的restful的api设计开发。
 
 后台前后端分离采用element-plus、vue3.0、typescript、vite、pina等前端技术,同时使用i18n支持国际化多语言开发。
@@ -38,7 +38,7 @@ niucloud-admin结合系统结构特点专门开发了代码生成器，这样开
 
 手机端使用uniapp ，同时使用uview页面展示，可以开发出丰富的手机样式，同时不需要专门学习小程序，app等开发语言，只需要通过uniapp编译就可以。
 
--  **界面截图说明** 
+**界面截图说明** 
 
 ![输入图片说明](https://media.niucloud.com/172431244911349b7ff1e9608035bb6957850ec96d_aliyun.png)
 ![输入图片说明](https://media.niucloud.com/172431267682a7be77c2c9e61520be08b080cc8ac2_aliyun.png)

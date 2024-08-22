@@ -35,13 +35,11 @@ niucloud-admin-java框架采用插件化模式设计，可以做到多种插件�
 ![输入图片说明](https://www.niushop.com/app/web/view/public/img/product/b2cv6/addon-right.png)
 
 ### 首创强大的一键云安装，云编译，云发布,升级引擎
-给我一个支点，必能撬动地球。V6简单方便的一键云安装，云编译工具，让您小白也能变大师。
-niucloud-admin-java内置在线升级功能，系统会全自动化帮您升级文件。产品的更新只需一键完成 。
 
-HBUILDER, VSCODE，微信小程序开发工具，打包，上传，发布！ V6强大的小程序一键傻瓜式发布系统，任何开发环境都不再需要搭建！鼠标一点完成小程序升级发布。
-![输入图片说明](https://media.niucloud.com/171214000404e2574b6bfa3ff0a05fafbbb93ea23b_aliyun.mp4)
-![输入图片说明](https://media.niucloud.com/17121421916f5969317fac428cb7001711e93d8ae3_aliyun.mp4)
-![输入图片说明](https://media.niucloud.com/17121430761c9bef9042d7275c4227993149ddb2df_aliyun.mp4)
+niucloud-admin-java 框架内置简单方便的一键云安装，云编译工具。
+niucloud-admin-java 内置在线升级功能，系统会全自动化帮您升级文件。产品的更新只需一键完成 。
+
+HBUILDER, VSCODE，微信小程序开发工具，打包，上传，发布！ niucloud-admin-java 框架强大的小程序一键傻瓜式发布系统，任何开发环境都不再需要搭建！鼠标一点完成小程序升级发布。
 
 
 ### 技术亮点

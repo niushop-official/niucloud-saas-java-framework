@@ -1,5 +1,5 @@
-![输入图片说明](https://www.niucloud.com/_nuxt/login_logo.650a27e2.png)   
-> 如果对您有帮助，您可以点右上角 ⭐“Star” 收藏一下 ，获取第一时间更新，谢谢！ 
+![输入图片说明](https://www.niucloud.com/_nuxt/login_logo.650a27e2.png)   一款插件化快速开发SAAS多用户系统后台管理框架
+:fa-quote-left:  如果对您有帮助，您可以点右上角 ⭐“Star” 收藏一下 ，获取第一时间更新，谢谢！ :fa-quote-right: 
 
 ### 框架介绍
 niucloud-Admin-Java（niucloud框架）是一款快速开发SaaS通用管理系统后台框架，基于SpringBoot+MyBatisPlus+Shiro 技术架构精心设计，易读易懂，没有任何其它重度依赖，架构设计小巧灵活，没有采用过度设计模式。 前端采用最新的技术栈Vite+TypeScript+Vue3+ElementPlus最流行技术架构。是一款快速可以开发企业级应用的软件系统。【您不需要重复造轮子 – 框架内置已经实现基础组件功能，您只需要开发业务模块即可 】!

@@ -12,7 +12,6 @@
 ### 框架介绍
 niucloud-Admin-Java（niucloud框架）是一款快速开发SaaS通用管理系统后台框架，基于SpringBoot+MyBatisPlus+Shiro 技术架构精心设计，易读易懂，没有任何其它重度依赖，架构设计小巧灵活，没有采用过度设计模式。 前端采用最新的技术栈Vite+TypeScript+Vue3+ElementPlus最流行技术架构。是一款快速可以开发企业级应用的软件系统。【您不需要重复造轮子 – 框架内置已经实现基础组件功能，您只需要开发业务模块即可 】!
 
-Gitee star Gitee fork bootstrap spring-boot bootstrap spring-boot mybatis-plus license Apache 2.0 
 
 ### 快速链接
 gitee下载地址：https://gitee.com/niucloud-team/niucloud-admin-java
@@ -22,6 +21,27 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 演示地址：https://www.niucloud.com
 
 文档地址：https://www.niucloud.com
+
+
+### 设计理念
+
+强大的多应用+插件组合设计理念，低耦合，高内聚
+
+全新生态设计，多应用聚合+多插件组合运营模式全新升级，支持共同会员体系下商城，会员卡，上门服务等等多种商业模式随机组合，DIY装修出最强的软件系统
+![输入图片说明](https://www.niushop.com/app/web/view/public/img/product/b2cv6/low-play.mp4?v=4)
+
+### 插件化，完全为开发者二次开发而生
+niucloud-admin-java框架采用插件化模式设计，可以做到多种插件共存，组合使用。比如您有一个项目是旅游的项目，这个项目的要求是，既有商城的功能，又有旅游项目的销售，还需要进行会员的管理，甚至于还要客服系统。传统的实现方式是，找多个源码，东拼西凑，二次开发，或者部署多套独立的系统，配合起来。而今天，使用niucloud-admin-java，可以通过组装的方式，在一套体系中实现，随着发展，会有越来越多的各行各业的插件和应用上架。您对于项目的定制，可能只需要简单组装，装修页面，就可以最终实现功能交付。
+![输入图片说明](https://www.niushop.com/app/web/view/public/img/product/b2cv6/addon-right.png)
+
+### 首创强大的一键云安装，云编译，云发布,升级引擎
+给我一个支点，必能撬动地球。V6简单方便的一键云安装，云编译工具，让您小白也能变大师。
+niucloud-admin-java内置在线升级功能，系统会全自动化帮您升级文件。产品的更新只需一键完成 。
+
+HBUILDER, VSCODE，微信小程序开发工具，打包，上传，发布！ V6强大的小程序一键傻瓜式发布系统，任何开发环境都不再需要搭建！鼠标一点完成小程序升级发布。
+![输入图片说明](https://media.niucloud.com/171214000404e2574b6bfa3ff0a05fafbbb93ea23b_aliyun.mp4)
+![输入图片说明](https://media.niucloud.com/17121421916f5969317fac428cb7001711e93d8ae3_aliyun.mp4)
+![输入图片说明](https://media.niucloud.com/17121430761c9bef9042d7275c4227993149ddb2df_aliyun.mp4)
 
 
 ### 技术亮点

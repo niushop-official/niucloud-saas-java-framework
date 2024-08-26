@@ -34,6 +34,7 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 ### 插件化，完全为开发者二次开发而生
 niucloud-admin-java框架采用插件化模式设计，可以做到多种插件共存，组合使用。一切皆为插件（应用）！比如您有一个项目是旅游的项目，这个项目的要求是，既有商城的功能，又有旅游项目的销售，还需要进行会员的管理，甚至于还要客服系统。传统的实现方式是，找多个源码，东拼西凑，二次开发，或者部署多套独立的系统，配合起来。而今天，使用niucloud-admin-java，可以通过组装的方式，在一套体系中实现，随着发展，会有越来越多的各行各业的插件和应用上架。您对于项目的定制，可能只需要简单组装，装修页面，就可以最终实现功能交付。
 <br>
+![输入图片说明](https://media.niucloud.com/17243126765cd61a78df7867dc6dcafe4d5c705be9_aliyun.png)
 ![输入图片说明](https://media.niucloud.com/1724314998d5372ae6ddd97e604ec8ba1bef7acce8_aliyun.png)
 
 ### 首创强大的一键云安装，云编译，云发布,升级引擎

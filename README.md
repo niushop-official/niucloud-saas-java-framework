@@ -66,6 +66,34 @@ HBUILDER, VSCODE，微信小程序开发工具，打包，上传，发布！ niu
 9. niucloud-admin-java 结合系统结构特点专门开发了代码生成器，这样开发者根据数据表就可以一键生成基础的业务代码。
 
 
+### 目录说明
+
+```
+niucloud-admin-java
+  |-niucloud-addon == 插件模块
+  |-niucloud-boot == niucloud框架启动模块
+  |-niucloud-core == niucloud框架核心业务模块，所有的核心业务都在这个模块内实现
+  |-niucloud-web-app == niucloud框架web application模块
+  |-uni-app == 前端手机端源代码
+  |-web == 前端PC端源代码
+  |-admin == admin端前端源代码
+  |-webroot== 生产环境应用发布模块 （在生产环境，只要把这个目录和下面的文件发布到服务器，就可以了）
+  |  |-addon == 插件目录
+  |  |-jar == 插件目录 
+  |  |  |-addon == 插件目录-addon == 插件目录    
+  |  |-public == 插件目录
+  |  |-resource == 插件目录
+  |  |-runtime == 插件目录
+  |  |  |-admin == 插件目录-addon == 插件目录  
+  |  |  |-uniapp == 插件目录-addon == 插件目录  
+  |  |  |-web == 插件目录-addon == 插件目录        
+  |  |-addon == 插件目录-addon == 插件目录    
+  |  |-addon == 插件目录-addon == 插件目录    
+  |  |-niucloud.bat == windows系统启动文件 
+  |  |-niucloud.sh == linux系统启动文件
+```
+
+
 ### 界面截图
 
 ![输入图片说明](https://media.niucloud.com/172431244911349b7ff1e9608035bb6957850ec96d_aliyun.png)

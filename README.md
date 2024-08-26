@@ -70,25 +70,30 @@ HBUILDER, VSCODE，微信小程序开发工具，打包，上传，发布！ niu
 
 ```
 niucloud-admin-java
-  |-niucloud-addon == 插件模块
-  |-niucloud-boot == niucloud框架启动模块
-  |-niucloud-core == niucloud框架核心业务模块，所有的核心业务都在这个模块内实现
-  |-niucloud-web-app == niucloud框架web application模块
-  |-uni-app == 前端手机端源代码
-  |-web == 前端PC端源代码
-  |-admin == admin端前端源代码
+  |-niucloud-addon == 插件模块 (JAVA)
+  |-niucloud-boot == niucloud框架启动模块 (JAVA)
+  |-niucloud-core == niucloud框架核心业务模块，所有的核心业务都在这个模块内实现 (JAVA)
+  |-niucloud-web-app == niucloud框架web application模块 (JAVA)
+  |-uni-app == 前端手机端源代码 （UNI-APP, HBUILDER）
+  |-web == 前端PC端源代码 (NEXT3, VITE)
+  |-admin == admin端前端源代码 (VUE3, VITE)
   |-webroot== 生产环境应用发布模块 （在生产环境，只要把这个目录和下面的文件发布到服务器，就可以了）
   |  |-addon == 插件目录
   |  |-jar == 插件目录 
-  |  |  |-addon == 插件目录-addon == 插件目录    
-  |  |-public == 插件目录
-  |  |-resource == 插件目录
-  |  |-runtime == 插件目录
-  |  |  |-admin == 插件目录-addon == 插件目录  
-  |  |  |-uniapp == 插件目录-addon == 插件目录  
-  |  |  |-web == 插件目录-addon == 插件目录        
-  |  |-addon == 插件目录-addon == 插件目录    
-  |  |-addon == 插件目录-addon == 插件目录    
+  |  |  |-addon == 插件jar包目录
+  |  |  |  |- ~ == 插件的jar文件
+  |  |  |-application.yml == 应用程序配置文件 
+  |  |  |-application-prod.yml == 生产环境应用程序配置文件 
+  |  |  |-web-app.jar == niucloud-web-app打包后的jar文件    
+  |  |-public == 前台各端口编译后的代码目录，这里是nigix执行目录
+  |  |  |-admin   
+  |  |  |-h5  == 要注意！uniapp编译的目录，会变成h5(wap端)
+  |  |  |-web    
+  |  |-resource == 资源文件目录
+  |  |-runtime == 运行时目录（其实就是前端所有的端口源代码目录。注意！这里的目录不包含插件！）
+  |  |  |-admin   
+  |  |  |-uniapp  
+  |  |  |-web         
   |  |-niucloud.bat == windows系统启动文件 
   |  |-niucloud.sh == linux系统启动文件
 ```

@@ -168,6 +168,7 @@ niucloud-admin-java
 ![输入图片说明](https://media.niucloud.com/1724312677ad1f9259074de7443f992b46dc3766d6_aliyun.png)
 ![输入图片说明](https://media.niucloud.com/1724312677bd2c7d91d1293cc51f932b1de5d5c0f9_aliyun.png)
 ![输入图片说明](https://media.niucloud.com/1724653865a956b3d964aec2062b79ac5218b16210_aliyun.png)
+![输入图片说明](https://media.niucloud.com/17248130522492df4a3c0ffdbc8aedd851307b878c_aliyun.png)
 
 niucloud-Admin-Java 程序员二开神器！
 

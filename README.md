@@ -98,6 +98,18 @@ niucloud-admin-java
   |  |-niucloud.sh == linux系统启动文件
 ```
 
+前端支撑
+|---|---|---|---|
+| 插件  |  版本 | 用途  |   |
+| node.js  | ≥18  | JavaScript运行环境  |   |
+		
+后端支撑
+|插件	版本|	用途|
+|jdk|	17|	java环境|
+|maven|	最新版|	包管理工具|
+|redis|	最新版|	缓存库|
+|mysql|	8.0 / 5.7|	数据库 |
+
 
 ### 界面截图
 

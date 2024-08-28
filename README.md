@@ -79,7 +79,7 @@ niucloud-admin-java
   |-admin == admin端前端源代码 (VUE3, VITE)
   |-webroot== 生产环境应用发布模块 （在生产环境，只要把这个目录和下面的文件发布到服务器，就可以了）
   |  |-addon == 插件目录
-  |  |-jar == 插件目录 
+  |  |-jar == jar包目录 
   |  |  |-addon == 插件jar包目录
   |  |  |  |- ~ == 插件的jar文件
   |  |  |-application.yml == 应用程序配置文件 

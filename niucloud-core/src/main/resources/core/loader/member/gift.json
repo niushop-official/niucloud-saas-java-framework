@@ -1,0 +1,48 @@
+{
+  "balance": {
+    "key": "balance",
+    "name": "送红包",
+    "desc": "发放红包",
+    "component": "/src/app/views/member/components/gift-balance.vue",
+    "grant": {
+      "driver": "com.niu.core.service.core.member.driver.GiftBalanceDriver"
+    },
+    "content": {
+      "admin": {
+        "driver": "com.niu.core.service.core.member.driver.GiftBalanceDriver"
+      },
+      "member_level": {
+        "driver": "com.niu.core.service.core.member.driver.GiftBalanceDriver"
+      },
+      "member_sign": {
+        "driver": "com.niu.core.service.core.member.driver.GiftBalanceDriver"
+      },
+      "member_sign_continue": {
+        "driver": "com.niu.core.service.core.member.driver.GiftBalanceDriver"
+      }
+    }
+  },
+  "point": {
+    "key": "point",
+    "name": "送积分",
+    "desc": "发放积分",
+    "component": "/src/app/views/member/components/gift-point.vue",
+    "grant": {
+      "driver": "com.niu.core.service.core.member.driver.GiftPointDriver"
+    },
+    "content": {
+      "admin": {
+        "driver": "com.niu.core.service.core.member.driver.GiftPointDriver"
+      },
+      "member_level": {
+        "driver": "com.niu.core.service.core.member.driver.GiftPointDriver"
+      },
+      "member_sign": {
+        "driver": "com.niu.core.service.core.member.driver.GiftPointDriver"
+      },
+      "member_sign_continue": {
+        "driver": "com.niu.core.service.core.member.driver.GiftPointDriver"
+      }
+    }
+  }
+}

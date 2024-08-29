@@ -1,0 +1,16 @@
+boot:
+  # 应用
+  application:
+    environment: dev
+    ## 是否打印日志
+    print-Log: true
+  # 监视
+  monitor:
+    time-to-idle-seconds: 3
+  # 管理
+  manager:
+    app-name: niu-cloud-app
+    jar-name: web-app-exec.jar
+    failed-restart-count: 1
+    service-starting-hook-flag: Service starting,Hook is ready.
+    service-started-successfully-flag: Service started successfully.

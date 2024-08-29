@@ -1,0 +1,24 @@
+{
+  "aliyun": {
+    "name": "阿里云短信",
+    "driver": "com.niu.core.service.core.sms.driver.Aliyun",
+    "params": {
+      "sign": "短信签名",
+      "app_key": "APP_KEY",
+      "secret_key": "APP_SECRET"
+    },
+    "component": "/src/app/views/setting/components/sms-ali.vue"
+  },
+
+  "tencent": {
+    "name": "腾讯云短信",
+    "driver": "com.niu.core.service.core.sms.driver.Tencent",
+    "params": {
+      "sign": "短信签名",
+      "app_id": "APP_ID",
+      "secret_id": "SECRET_ID",
+      "secret_key": "SECRET_KEY"
+    },
+    "component": "/src/app/views/setting/components/sms-tencent.vue"
+  }
+}

@@ -1,0 +1,522 @@
+{
+  "BASIC": {
+    "title": "基础组件",
+    "list": {
+      "Text": {
+        "title": "标题",
+        "icon": "iconfont iconbiaoti",
+        "path": "edit-text",
+        "uses": 0,
+        "position": "",
+        "template": {
+          "textColor": "#303133",
+          "pageStartBgColor": "",
+          "pageEndBgColor": "",
+          "pageGradientAngle": "to bottom",
+          "componentBgUrl": "",
+          "componentBgAlpha": 2,
+          "componentStartBgColor": "",
+          "componentEndBgColor": "",
+          "componentGradientAngle": "to bottom",
+          "topRounded": 0,
+          "bottomRounded": 0,
+          "elementBgColor": "",
+          "topElementRounded": 0,
+          "bottomElementRounded": 0,
+          "margin": {
+            "top": 0,
+            "bottom": 0,
+            "both": 0
+          }
+        },
+        "value": {
+          "style": "style-1",
+          "styleName": "风格1",
+          "text": "标题栏",
+          "link": {
+            "name": ""
+          },
+          "textColor": "#303133",
+          "fontSize": 16,
+          "fontWeight": "normal",
+          "textAlign": "center",
+          "subTitle": {
+            "text": "副标题",
+            "color": "#999999",
+            "fontSize": 14,
+            "control": false,
+            "fontWeight": "normal"
+          },
+          "more": {
+            "text": "更多",
+            "control": false,
+            "isShow": true,
+            "link": {
+              "name": ""
+            },
+            "color": "#999999"
+          }
+        }
+      },
+      "ImageAds": {
+        "title": "图片广告",
+        "icon": "iconfont icontupianguanggao1",
+        "path": "edit-image-ads",
+        "uses": 0,
+        "value": {
+          "imageHeight": 180,
+          "list": [
+            {
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "",
+              "imgWidth": 0,
+              "imgHeight": 0
+            }
+          ]
+        }
+      },
+      "GraphicNav": {
+        "title": "图文导航",
+        "icon": "iconfont icontuwendaohang2",
+        "path": "edit-graphic-nav",
+        "uses": 0,
+        "value": {
+          "layout": "horizontal",
+          "mode": "graphic",
+          "type": "img",
+          "showStyle": "fixed",
+          "rowCount": 4,
+          "pageCount": 2,
+          "carousel": {
+            "type": "circle",
+            "color": "#FFFFFF"
+          },
+          "imageSize": 40,
+          "aroundRadius": 25,
+          "font": {
+            "size": 14,
+            "weight": "normal",
+            "color": "#303133"
+          },
+          "list": [
+            {
+              "title": "",
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "",
+              "label": {
+                "control": false,
+                "text": "热门",
+                "textColor": "#FFFFFF",
+                "bgColorStart": "#F83287",
+                "bgColorEnd": "#FE3423"
+              }
+            },
+            {
+              "title": "",
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "",
+              "label": {
+                "control": false,
+                "text": "热门",
+                "textColor": "#FFFFFF",
+                "bgColorStart": "#F83287",
+                "bgColorEnd": "#FE3423"
+              }
+            },
+            {
+              "title": "",
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "",
+              "label": {
+                "control": false,
+                "text": "热门",
+                "textColor": "#FFFFFF",
+                "bgColorStart": "#F83287",
+                "bgColorEnd": "#FE3423"
+              }
+            },
+            {
+              "title": "",
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "",
+              "label": {
+                "control": false,
+                "text": "热门",
+                "textColor": "#FFFFFF",
+                "bgColorStart": "#F83287",
+                "bgColorEnd": "#FE3423"
+              }
+            }
+          ]
+        }
+      },
+      "RubikCube": {
+        "title": "魔方",
+        "icon": "iconfont iconmofang1",
+        "path": "edit-rubik-cube",
+        "uses": 0,
+        "value": {
+          "mode": "row1-of2",
+          "imageGap": 0,
+          "list": [
+            {
+              "imageUrl": "",
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "link": {
+                "name": ""
+              }
+            },
+            {
+              "imageUrl": "",
+              "imgWidth": 0,
+              "imgHeight": 0,
+              "link": {
+                "name": ""
+              }
+            }
+          ]
+        }
+      },
+      "HotArea": {
+        "title": "热区",
+        "icon": "iconfont iconrequ",
+        "path": "edit-hot-area",
+        "uses": 0,
+        "value": {
+          "imageUrl": "",
+          "imgWidth": 0,
+          "imgHeight": 0,
+          "heatMapData": []
+        }
+      },
+      "MemberLevel": {
+        "title": "会员等级",
+        "icon": "iconfont iconhuangguan",
+        "path": "edit-member-level",
+        "uses": 1,
+        "value": {
+          "style": "style-1",
+          "styleName": "风格1"
+        }
+      },
+      "Notice": {
+        "title": "公告",
+        "icon": "iconfont icongonggao",
+        "path": "edit-notice",
+        "uses": 0,
+        "value": {
+          "noticeType": "img",
+          "imgType": "system",
+          "systemUrl": "style_1",
+          "imageUrl": "",
+          "showType": "popup",
+          "scrollWay": "upDown",
+          "fontSize": 14,
+          "fontWeight": "normal",
+          "noticeTitle": "公告",
+          "list": [
+            {
+              "text": "公告",
+              "link": {
+                "name": ""
+              }
+            }
+          ]
+        }
+      },
+      "RichText": {
+        "title": "富文本",
+        "icon": "iconfont iconfuwenben1",
+        "path": "edit-rich-text",
+        "uses": 0,
+        "value": {
+          "html": ""
+        }
+      },
+      "ActiveCube": {
+        "title": "活动魔方",
+        "icon": "iconfont iconmofang1",
+        "path": "edit-active-cube",
+        "uses": 0,
+        "value": {
+          "titleStyle": {
+            "title": "风格1",
+            "value": "style-1"
+          },
+          "text": "超值爆款",
+          "textLink": {
+            "name": ""
+          },
+          "titleColor": "#F91700",
+          "subTitle": {
+            "text": "为您精选爆款",
+            "textColor": "#FFFFFF",
+            "startColor": "#FB792F",
+            "endColor": "#F91700",
+            "link": {
+              "name": ""
+            }
+          },
+          "blockStyle": {
+            "title": "风格1",
+            "value": "style-1",
+            "fontWeight": "normal"
+          },
+          "list": [
+            {
+              "title": {
+                "text": "今日推荐",
+                "textColor": "#303133"
+              },
+              "subTitle": {
+                "text": "诚意推荐",
+                "textColor": "#999999",
+                "startColor": "",
+                "endColor": ""
+              },
+              "moreTitle": {
+                "text": "去看看",
+                "startColor": "#FEA715",
+                "endColor": "#FE1E00"
+              },
+              "listFrame": {
+                "startColor": "#FEA715",
+                "endColor": "#FE1E00"
+              },
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods1.png"
+            },
+            {
+              "title": {
+                "text": "优惠好物",
+                "textColor": "#303133"
+              },
+              "subTitle": {
+                "text": "领券更优惠",
+                "textColor": "#999999",
+                "startColor": "",
+                "endColor": ""
+              },
+              "moreTitle": {
+                "text": "去看看",
+                "startColor": "#FFBF50",
+                "endColor": "#FF9E03"
+              },
+              "listFrame": {
+                "startColor": "#FFBF50",
+                "endColor": "#FF9E03"
+              },
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods2.png"
+            },
+            {
+              "title": {
+                "text": "热销推荐",
+                "textColor": "#303133"
+              },
+              "subTitle": {
+                "text": "本周热销商品",
+                "textColor": "#999999",
+                "startColor": "",
+                "endColor": ""
+              },
+              "moreTitle": {
+                "text": "去看看",
+                "startColor": "#A2E792",
+                "endColor": "#49CD2D"
+              },
+              "listFrame": {
+                "startColor": "#A2E792",
+                "endColor": "#49CD2D"
+              },
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods3.png"
+            },
+            {
+              "title": {
+                "text": "书桌好物",
+                "textColor": "#303133"
+              },
+              "subTitle": {
+                "text": "办公好物推荐",
+                "textColor": "#999999",
+                "startColor": "",
+                "endColor": ""
+              },
+              "moreTitle": {
+                "text": "去看看",
+                "startColor": "#4AC1FF",
+                "endColor": "#1D7CFF"
+              },
+              "listFrame": {
+                "startColor": "#4AC1FF",
+                "endColor": "#1D7CFF"
+              },
+              "link": {
+                "name": ""
+              },
+              "imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods4.png"
+            }
+          ],
+          "template": {
+            "textColor": "#303133",
+            "pageStartBgColor": "",
+            "pageEndBgColor": "",
+            "pageGradientAngle": "to bottom",
+            "componentBgUrl": "",
+            "componentBgAlpha": 2,
+            "componentStartBgColor": "",
+            "componentEndBgColor": "",
+            "componentGradientAngle": "to bottom",
+            "topRounded": 12,
+            "bottomRounded": 12,
+            "elementBgColor": "#FFFAF5",
+            "topElementRounded": 0,
+            "bottomElementRounded": 0,
+            "margin": {
+              "top": 10,
+              "bottom": 10,
+              "both": 10
+            }
+          }
+        }
+      },
+      "CarouselSearch": {
+        "title": "轮播搜索",
+        "icon": "iconfont iconsousuokuang",
+        "path": "edit-carousel-search",
+        "uses": 1,
+        "position": "top_fixed",
+        "value": {
+          "positionWay": "static",
+          "fixedBgColor": "",
+          "bgGradient": false,
+          "search": {
+            "logo": "",
+            "text": "请输入搜索关键词",
+            "link": {
+              "name": ""
+            },
+            "hotWord": {
+              "interval": 3,
+              "list": []
+            }
+          },
+          "tab": {
+            "control": true,
+            "noColor": "",
+            "selectColor": "",
+            "fixedNoColor": "",
+            "fixedSelectColor": "",
+            "list": [
+              {
+                "text": "分类名称",
+                "source": "diy_page",
+                "diy_id": "",
+                "diy_title": ""
+              },
+              {
+                "text": "分类名称",
+                "source": "diy_page",
+                "diy_id": "",
+                "diy_title": ""
+              },
+              {
+                "text": "分类名称",
+                "source": "diy_page",
+                "diy_id": "",
+                "diy_title": ""
+              },
+              {
+                "text": "分类名称",
+                "source": "diy_page",
+                "diy_id": "",
+                "diy_title": ""
+              }
+            ]
+          },
+          "swiper": {
+            "control": true,
+            "interval": 5,
+            "indicatorColor": "rgba(0, 0, 0, 0.3)",
+            "indicatorActiveColor": "#FF0E0E",
+            "indicatorStyle": "style-1",
+            "indicatorAlign": "center",
+            "swiperStyle": "style-1",
+            "imageHeight": 168,
+            "topRounded": 0,
+            "bottomRounded": 0,
+            "list": [
+              {
+                "imageUrl": "",
+                "imgWidth": 690,
+                "imgHeight": 330,
+                "link": {
+                  "name": ""
+                }
+              }
+            ]
+          }
+        }
+      },
+      "FloatBtn": {
+        "title": "浮动按钮",
+        "icon": "iconfont iconfudonganniu1",
+        "path": "edit-float-btn",
+        "uses": 1,
+        "position": "fixed",
+        "value": {
+          "imageSize": 40,
+          "aroundRadius": 0,
+          "bottomPosition": "lowerRight",
+          "list": [
+            {
+              "imageUrl": "",
+              "link": {
+                "name": ""
+              }
+            }
+          ],
+          "offset": 0
+        }
+      },
+      "HorzBlank": {
+        "title": "辅助空白",
+        "icon": "iconfont iconfuzhukongbai1",
+        "path": "edit-horz-blank",
+        "uses": 0,
+        "value": {
+          "height": 20
+        }
+      },
+      "HorzLine": {
+        "title": "辅助线",
+        "icon": "iconfont iconfuzhuxian1",
+        "path": "edit-horz-line",
+        "uses": 0,
+        "value": {
+          "borderWidth": 1,
+          "borderColor": "#303133",
+          "borderStyle": "solid"
+        }
+      }
+    }
+  }
+}

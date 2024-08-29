@@ -1,0 +1,10 @@
+[
+  {
+    "name": "积分",
+    "key": "point"
+  },
+  {
+    "name": "余额",
+    "key": "balance"
+  }
+]

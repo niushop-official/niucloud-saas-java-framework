@@ -1,0 +1,119 @@
+package com.niu.core.entity.stat;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
+
+/**
+ * 小时统计实体
+ */
+@Data
+public class StatHour implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @TableId(value="id", type= IdType.AUTO)
+    private Integer id;
+
+    /** 站点id */
+    private Integer siteId;
+
+    /** 插件 */
+    private String addon;
+
+    /** 统计字段 */
+    private String field;
+
+    /** 总计 */
+    private BigDecimal fieldTotal;
+
+    /** 年 */
+    private Integer year;
+
+    /** 月 */
+    private Integer month;
+
+    /** 天 */
+    private Integer day;
+
+    /** 当日开始时间戳 */
+    private Long startTime;
+
+    /** 最后执行时间 */
+    private Integer lastTime;
+
+    private BigDecimal hour0;
+
+    private BigDecimal hour1;
+
+    private BigDecimal hour2;
+
+    private BigDecimal hour3;
+
+    private BigDecimal hour4;
+
+    private BigDecimal hour5;
+
+    private BigDecimal hour6;
+
+    private BigDecimal hour7;
+
+    private BigDecimal hour8;
+
+    private BigDecimal hour9;
+
+    private BigDecimal hour10;
+
+    private BigDecimal hour11;
+
+    private BigDecimal hour12;
+
+    private BigDecimal hour13;
+
+    private BigDecimal hour14;
+
+    private BigDecimal hour15;
+
+    private BigDecimal hour16;
+
+    private BigDecimal hour17;
+
+    private BigDecimal hour18;
+
+    private BigDecimal hour19;
+
+    private BigDecimal hour20;
+
+    private BigDecimal hour21;
+
+    private BigDecimal hour22;
+
+    private BigDecimal hour23;
+
+}

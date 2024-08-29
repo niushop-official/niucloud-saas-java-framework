@@ -1,0 +1,13 @@
+{
+  "name": "recharge",
+  "title": "会员充值",
+  "desc": "在线充值到会员账户",
+  "key": "recharge",
+  "version": "1.0.0",
+  "author": "niucloud",
+  "url": "https://www.niucloud.com",
+  "type": "addon",
+  "support_app": "",
+  "jar": "shop.jar",
+  "mainClass": "com.niu.recharge.WebApplication"
+}

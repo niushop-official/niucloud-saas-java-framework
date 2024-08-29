@@ -1,0 +1,16 @@
+{
+  "discount": {
+    "key": "discount",
+    "name": "下单折扣",
+    "desc": "商品购买享受折扣优惠",
+    "component": "/src/app/views/member/components/benefits-discount.vue",
+    "content": {
+      "admin": {
+        "driver": "com.niu.core.service.core.member.driver.BenefitsDriver"
+      },
+      "member_level": {
+        "driver": "com.niu.core.service.core.member.driver.BenefitsDriver"
+      }
+    }
+  }
+}

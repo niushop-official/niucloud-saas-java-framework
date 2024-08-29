@@ -1,0 +1,23 @@
+{
+  "wechatpay": {
+    "name": "微信支付",
+    "key": "wechatpay",
+    "icon": "static/resource/icon/pay_icon/wechatpay.png",
+    "setting_component": "/src/app/views/setting/components/pay-wechatpay.vue",
+    "driver": "com.niu.core.service.core.pay.driver.Wechatpay"
+  },
+  "alipay": {
+    "name": "支付宝支付",
+    "key": "alipay",
+    "icon": "static/resource/icon/pay_icon/alipay.png",
+    "setting_component": "/src/app/views/setting/components/pay-alipay.vue",
+    "driver": "com.niu.core.service.core.pay.driver.Alipay"
+  },
+  "balancepay": {
+    "name": "余额支付",
+    "key": "balancepay",
+    "icon": "static/resource/icon/pay_icon/balancepay.png",
+    "setting_component": "",
+    "driver": "com.niu.core.service.core.pay.driver.Balancepay"
+  }
+}

@@ -1,0 +1,117 @@
+package com.niu.core.service.core.sys.impl;
+
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.utils.TreeUtils;
+import com.niu.core.common.utils.json.JacksonUtils;
+import com.niu.core.common.utils.json.JsonLoadUtils;
+import com.niu.core.config.dataization.AddonModuleContext;
+import com.niu.core.entity.addon.Addon;
+import com.niu.core.entity.sys.SysMenu;
+import com.niu.core.mapper.addon.AddonMapper;
+import com.niu.core.mapper.sys.SysMenuMapper;
+import com.niu.core.service.core.sys.ICoreMenuService;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.stereotype.Service;
+import javax.annotation.Resource;
+import java.io.File;
+import java.util.List;
+
+@Service
+public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> implements ICoreMenuService {
+
+    @Resource
+    SysMenuMapper sysMenuMapper;
+
+    @Resource
+    AddonMapper addonMapper;
+
+    @Resource
+    SqlSessionFactory sqlSessionFactory;
+
+    @Override
+    public void refreshAddonMenu(String addon) {
+        this.deleteMenu(addon, false);
+
+        String adminMenuString=AddonModuleContext.readResourceAsStreamToText(addon, "menu/admin.json");
+        if(ObjectUtil.isNotNull(adminMenuString) && ObjectUtil.isNotEmpty(adminMenuString)){
+            JSONObject adminMenu = JSONUtil.parseObj(adminMenuString);
+            if (adminMenu.getJSONArray("menu") != null) {
+                List<SysMenu> adminMenuBeanList = this.menuTreeToList(TreeUtils.treeToList(adminMenu.getJSONArray("menu"), "parent_key", "", "menu_key", "children"), addon, "admin");
+                super.saveBatch(adminMenuBeanList);
+            }
+        }
+        String siteMenuString=AddonModuleContext.readResourceAsStreamToText(addon, "menu/site.json");
+        if(ObjectUtil.isNotNull(siteMenuString) && ObjectUtil.isNotEmpty(siteMenuString)){
+            JSONObject siteMenu = JSONUtil.parseObj(siteMenuString);
+            if (siteMenu.getJSONArray("menu") != null) {
+                List<SysMenu> siteMenuBeanList = this.menuTreeToList(TreeUtils.treeToList(siteMenu.getJSONArray("menu"), "parent_key", "", "menu_key", "children"), addon, "site");
+                super.saveBatch(siteMenuBeanList);
+            }
+        }
+
+    }
+
+    /**
+     * 刷新菜单
+     * @param addon
+     */
+    @Override
+    public void installAddonMenu(String addon) {
+        this.deleteMenu(addon, false);
+
+        String menuDir = WebAppEnvs.get().webRootDownAddon + addon + "/menu/";
+        File adminMenu = new File(menuDir + "admin.json");
+        File siteMenu = new File(menuDir + "site.json");
+
+        if (adminMenu.exists()) {
+            String jsonString = JsonLoadUtils.loadJsonString(adminMenu);
+            List<JSONObject> menuList = TreeUtils.treeToList(JSONUtil.parseObj(jsonString).getJSONArray("menu"), "parent_key", "", "menu_key", "children");
+            List<SysMenu> adminMenuBeanList = this.menuTreeToList(menuList, addon, "admin");
+            super.saveBatch(adminMenuBeanList);
+        }
+        if (siteMenu.exists()) {
+            String jsonString = JsonLoadUtils.loadJsonString(siteMenu);
+            List<JSONObject> menuList = TreeUtils.treeToList(JSONUtil.parseObj(jsonString).getJSONArray("menu"), "parent_key", "", "menu_key", "children");
+            List<SysMenu> siteMenuBeanList = this.menuTreeToList(menuList, addon, "site");
+            super.saveBatch(siteMenuBeanList);
+        }
+    }
+
+    private List<SysMenu> menuTreeToList(List<JSONObject> menuList, String addon, String appType) {
+        for (JSONObject item : menuList) {
+            item.put("addon", addon);
+            item.put("app_type", appType);
+        }
+        return JacksonUtils.toSnakeCaseList(menuList, SysMenu.class);
+    }
+
+    /**
+     * 删除菜单
+     * @param addon
+     * @param isAll
+     */
+    public void deleteMenu(String addon, Boolean isAll) {
+        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<SysMenu>()
+                .eq("addon", addon);
+        if (!isAll) queryWrapper.eq("source", "system");
+
+        sysMenuMapper.delete(queryWrapper);
+    }
+
+    /**
+     * 刷新所有插件菜单
+     */
+    @Override
+    public void refreshAllAddonMenu() {
+        //查询所有的插件
+        List<Addon> addonList=addonMapper.selectList(new QueryWrapper<Addon>());
+        for (Addon addon: addonList) {
+            this.refreshAddonMenu(addon.getKey());
+        }
+    }
+}

@@ -1,0 +1,43 @@
+{
+  "local": {
+    "driver": "com.niu.core.service.core.upload.driver.Local",
+    "name": "本地",
+    "params": {},
+    "component": "/src/app/views/setting/components/storage-local.vue"
+  },
+  "qiniu": {
+    "driver": "com.niu.core.service.core.upload.driver.Qiniu",
+    "name": "七牛云",
+    "params": {
+      "bucket": "存储空间",
+      "access_key": "ACCESS_KEY",
+      "secret_key": "SECRET_KEY",
+      "domain": "空间域名"
+    },
+    "component": "/src/app/views/setting/components/storage-qiniu.vue"
+  },
+  "aliyun": {
+    "driver": "com.niu.core.service.core.upload.driver.Aliyun",
+    "name": "阿里云存储",
+    "params": {
+      "bucket": "存储空间",
+      "access_key": "ACCESS_KEY_ID",
+      "secret_key": "ACCESS_KEY_SECRET",
+      "endpoint": "Endpoint",
+      "domain": "空间域名"
+    },
+    "component": "/src/app/views/setting/components/storage-ali.vue"
+  },
+  "tencent": {
+    "driver": "com.niu.core.service.core.upload.driver.Tencent",
+    "name": "腾讯云存储",
+    "params": {
+      "bucket": "存储空间",
+      "region": "REGION",
+      "access_key": "SECRET_ID",
+      "secret_key": "SECRET_KEY",
+      "domain": "空间域名"
+    },
+    "component": "/src/app/views/setting/components/storage-tencent.vue"
+  }
+}

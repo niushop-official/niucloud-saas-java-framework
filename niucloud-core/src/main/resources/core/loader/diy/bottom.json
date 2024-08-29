@@ -1,0 +1,33 @@
+{
+  "key": "app",
+  "value": {
+    "backgroundColor": "#ffffff",
+    "textColor": "#606266",
+    "textHoverColor": "#007aff",
+    "type": "1",
+    "list": [
+      {
+        "text": "首页",
+        "link": {
+          "parent": "SYSTEM_LINK",
+          "name": "INDEX",
+          "title": "首页",
+          "url": "/app/pages/index/index"
+        },
+        "iconPath": "static/resource/images/tabbar/index.png",
+        "iconSelectPath": "static/resource/images/tabbar/index-selected.png"
+      },
+      {
+        "text": "我的",
+        "link": {
+          "parent": "MEMBER_LINK",
+          "name": "MEMBER_CENTER",
+          "title": "个人中心",
+          "url": "/app/pages/member/index"
+        },
+        "iconPath": "static/resource/images/tabbar/my.png",
+        "iconSelectPath": "static/resource/images/tabbar/my-selected.png"
+      }
+    ]
+  }
+}

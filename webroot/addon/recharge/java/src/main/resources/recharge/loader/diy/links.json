@@ -1,0 +1,18 @@
+{
+  "RECHARGE_LINK": {
+    "title": "会员充值",
+    "addon_info": {
+      "title": "会员充值",
+      "key": "recharge"
+    },
+    "child_list": [
+      {
+        "name": "RECHARGE_INDEX",
+        "title": "会员充值",
+        "url": "/addon/recharge/pages/recharge",
+        "is_share": 1,
+        "action": ""
+      }
+    ]
+  }
+}

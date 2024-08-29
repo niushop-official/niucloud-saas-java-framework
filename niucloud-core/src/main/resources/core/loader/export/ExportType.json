@@ -1,0 +1,67 @@
+[
+  {
+    "member": {
+      "name": "会员列表",
+      "column": [
+        {
+          "nickname":{
+            "name": "会员昵称"
+          }
+        },
+        {
+          "mobile":{
+            "name": "手机号"
+          }
+        },{
+          "member_level_name":{
+            "name": "会员等级"
+          }
+        },{
+          "sex_name":{
+            "name": "性别"
+          }
+        },{
+          "birthday":{
+            "name": "生日"
+          }
+        },{
+          "point":{
+            "name": "积分"
+          }
+        },{
+          "balance":{
+            "name": "余额"
+          }
+        },{
+          "money":{
+            "name": "可提现余额"
+          }
+        },{
+          "growth":{
+            "name": "成长值"
+          }
+        },{
+          "commission":{
+            "name": "佣金"
+          }
+        },{
+          "register_channel_name":{
+            "name": "注册来源"
+          }
+        },{
+          "status_name":{
+            "name": "用户状态"
+          }
+        },{
+          "create_time":{
+            "name": "注册时间"
+          }
+        },{
+          "last_visit_time":{
+            "name": "最后访问时间"
+          }
+        }
+      ]
+    }
+  }
+]

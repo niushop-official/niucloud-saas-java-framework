@@ -1,0 +1,11 @@
+{
+	"groupName": "站点套餐",
+	"lastTime": "上次同步时间",
+	"weappVersionUpdate": "小程序同步",
+	"weappVersionUpdateRecord": "小程序同步记录",
+	"createTime": "提交时间",
+	"userVersion": "版本号",
+	"failReason": "失败原因",
+	"updateTips": "版本提交成功之后会自动给已授权的小程序进行同步更新，使用该功能必须要启动消息队列",
+	"seeUpdateRecord": "查看同步记录"
+}

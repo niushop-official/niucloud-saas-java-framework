@@ -1,0 +1,14 @@
+{
+  "balance": {
+    "recharge": {
+      "name": "充值",
+      "inc": 1,
+      "dec": 0
+    },
+    "recharge_refund": {
+      "name": "充值退款",
+      "inc": 0,
+      "dec": 1
+    }
+  }
+}

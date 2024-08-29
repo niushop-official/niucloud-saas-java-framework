@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!--
+                %d{yyyy-MM-dd HH:mm:ss.SSS}: 日志日期及其格式，%d表示日期
+                %t/%thread: 日志执行的线程
+                %-5level: 日志级别输出占5个字符，左对其；
+                %c{36}: 日志执行的类的全限定名, 深度为36
+                %M: 日志执行的方法名
+                %L: 日志执行的具体行号
+                %l: 日志执行的位置信息
+                %m/%msg: 日志的消息
+                %n: 换行符
+            -->
+            <!--
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] %t %-5level %class{36} %L %M - %msg%xEx%n"/>
+            -->
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss SSS}] %t %highlight{%-5level}{ERROR=Bright RED, WARN=Bright Yellow, INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White} %class{36} %L %M - %msg%xEx%n"/>
+        </Console>
+        <Console name="AspectConsole" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="[%d{yyyy-MM-dd HH:mm:ss SSS}] %t %highlight{%-5level}{ERROR=Bright RED, WARN=Bright Yellow, INFO=Bright Green, DEBUG=Bright Cyan, TRACE=Bright White} - %msg%xEx%n"/>
+        </Console>
+
+        <File name="FileLog" fileName="logs/web-app.log" filePattern="logs/web-app.%d{yyyy-MM-dd}-%i.log" immediateFlush="false">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </File>
+        <!--
+        <File name="ErrorLog" fileName="logs/niucloud-web-app.error.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+        </File>
+        -->
+    </appenders>
+    <loggers>
+        <root level="info">
+            <appender-ref ref="Console"/>
+            <!-- -->
+            <appender-ref ref="FileLog"/>
+        </root>
+        <logger name="java.sql" level="info" additivity="false">
+            <AppenderRef ref="AspectConsole"/>
+        </logger>
+        <logger name="org.mybatis" level="info" additivity="false">
+            <AppenderRef ref="AspectConsole"/>
+        </logger>
+        <logger name="org.apache.ibatis" level="info" additivity="false">
+            <AppenderRef ref="AspectConsole"/>
+        </logger>
+        <logger name="com.niu.core.config.aspect" level="info" additivity="false">
+            <AppenderRef ref="AspectConsole"/>
+        </logger>
+    </loggers>
+</configuration>

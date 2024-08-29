@@ -1,0 +1,132 @@
+#Spring
+spring:
+  name: niu-cloud-app
+  main:
+    allow-bean-definition-overriding: true
+  # 自动配置项
+  autoconfigure:
+  # exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+  # Web配置项
+  web:
+    # 可配置：zh_CN、en_US
+    language: zh_CN
+    # 默认访问路径
+    default-access-path: /admin/index.html
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  servlet:
+    # 文件上传大小配置
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  # 数据源配置项
+  datasource:
+    url:
+    username:
+    password:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    druid:
+      test-on-borrow: false
+      test-while-idle: true
+      validation-query: SELECT 1
+      timeBetweenEvictionRunsMillis: 30000
+      stat-view-servlet:
+        # 是否启用StatViewServlet（监控页面）false为不启动
+        enabled: true
+        url-pattern: '/druid/*'
+        # IP白名单(没有配置或者为空，则允许所有访问)
+        # allow: 172.19.23.158
+        # IP黑名单 (存在共同时，deny优先于allow)
+        # deny: 192.168.0.0
+        # 禁用HTML页面上的“Reset All”功能
+        reset-enable: false
+        # 登录名
+        login-username: admin
+        # 登录密码
+        login-password: admin
+  # redis配置
+  redis:
+    # Redis数据库索引（默认为0）
+    database: 1
+    # Redis服务器地址
+    host: 127.0.0.1
+    # Redis服务器连接端口
+    port: 6379
+    # Redis服务器连接密码（默认为空）
+    # password:
+    # 连接超时时间
+    timeout: 10s
+    lettuce:
+      pool:
+        # 连接池最大连接数
+        max-active: 200
+        # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1ms
+        # 连接池中的最大空闲连接
+        max-idle: 10
+        # 连接池中的最小空闲连接
+        min-idle: 0
+  # 缓存策略
+  cache:
+    type: redis
+
+
+# MyBatis分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+
+# Mybatis-plus配置
+mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:com/niu/**/mapper/**/**Mapper.xml
+  typeAliasesPackage: com.ncd.**.mapper
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto #主键策略
+      table-prefix: ns_ #表前缀
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration-properties:
+    prefix: ns_
+
+
+# Sa-Token 配置 (文档: https://sa-token.cc)
+sa-token:
+  # token 名称（同时也是 cookie 名称）
+  token-name: token
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+  timeout: 2592000
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: -1
+  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+  is-share: true
+  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+  token-style: uuid
+  # jwt秘钥
+  jwt-secret-key: niu-cloud..niu-cloud..niu-cloud
+  # 是否输出操作日志
+  is-log: true
+  # 登录是否往前端注入Cookie
+  is-read-cookie: false
+  # 配置 Sa-Token 单独使用的 Redis 连接
+  alone-redis:
+    # Redis数据库索引（默认为0）
+    database: 15
+    # Redis服务器地址
+    host: 127.0.0.1
+    # Redis服务器连接端口
+    port: 6379
+    # Redis服务器连接密码（默认为空）
+    password:
+    # 连接超时时间
+    timeout: 10s

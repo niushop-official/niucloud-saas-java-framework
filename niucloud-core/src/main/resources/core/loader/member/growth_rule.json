@@ -1,0 +1,11 @@
+{
+  "member_register": {
+    "key": "member_register",
+    "name": "会员注册",
+    "desc": "会员注册之后发放成长值",
+    "component": "/src/app/views/member/components/growth-rule-register.vue",
+    "calculate": {
+      "driver": "com.niu.core.service.core.member.driver.GrowthRuleDriver"
+    }
+  }
+}

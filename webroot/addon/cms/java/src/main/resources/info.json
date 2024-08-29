@@ -1,0 +1,11 @@
+{
+  "title": "微官网",
+  "desc": "",
+  "key": "cms",
+  "version": "1.0.0",
+  "author": "niucloud",
+  "type": "app",
+  "support_app": "",
+  "jar": "cms.jar",
+  "mainClass": "com.niu.cms.WebApplication"
+}

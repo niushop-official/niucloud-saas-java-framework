@@ -1,0 +1,20 @@
+{
+  "BASIC": {
+    "title": "基础组件",
+    "list": {
+      "Article": {
+        "title": "文章",
+        "icon": "iconfont iconwenzhangpc",
+        "path": "edit-article",
+        "support_page": [],
+        "uses": 0,
+        "sort": 10007,
+        "value": {
+          "sources": "initial",
+          "count": 8,
+          "articleIds": []
+        }
+      }
+    }
+  }
+}

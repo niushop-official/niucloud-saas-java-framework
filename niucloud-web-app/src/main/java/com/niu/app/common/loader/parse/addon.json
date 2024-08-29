@@ -1,0 +1,7 @@
+[
+  {
+    "jar": "shop-1.0.0.jar",
+    "name": "shop",
+    "mainClass": "com.niu.shop.ShopApplication"
+  }
+]

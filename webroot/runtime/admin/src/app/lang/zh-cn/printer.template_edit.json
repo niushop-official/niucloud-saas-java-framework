@@ -1,0 +1,21 @@
+{
+      "templateId":"",
+      "templateIdPlaceholder":"请输入",
+      "siteId":"站点id",
+      "siteIdPlaceholder":"请输入站点id",
+      "templateType":"模板类型",
+      "templateTypePlaceholder":"请输入模板类型",
+      "templateName":"模板名称",
+      "templateNamePlaceholder":"请输入模板名称",
+      "value":"模板数据，json格式",
+      "valuePlaceholder":"请输入模板数据，json格式",
+      "createTime":"创建时间",
+      "createTimePlaceholder":"请输入创建时间",
+      "updateTime":"修改时间",
+      "updateTimePlaceholder":"请输入修改时间",
+      "addPrinterTemplate":"添加小票打印模板",
+      "updatePrinterTemplate":"编辑小票打印模板",
+      "printerTemplateDeleteTips":"确定要删除该数据吗？",
+      "startDate":"请选择开始时间",
+      "endDate":"请选择结束时间"
+}

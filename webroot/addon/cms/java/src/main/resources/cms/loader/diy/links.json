@@ -1,0 +1,18 @@
+{
+  "CMS_LINK": {
+    "title": "微官网",
+    "addon_info": {
+      "title": "微官网",
+      "key": "cms"
+    },
+    "child_list": [
+      {
+        "name": "ARTICLE_LIST",
+        "title": "文章资讯",
+        "url": "/addon/cms/pages/list",
+        "is_share": 1,
+        "action": ""
+      }
+    ]
+  }
+}

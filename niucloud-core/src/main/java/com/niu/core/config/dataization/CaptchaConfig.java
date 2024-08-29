@@ -1,0 +1,28 @@
+package com.niu.core.config.dataization;
+
+import com.anji.captcha.properties.AjCaptchaProperties;
+import com.anji.captcha.service.CaptchaCacheService;
+import com.anji.captcha.service.impl.CaptchaServiceFactory;
+import com.niu.core.service.admin.captcha.cache.CaptchaCacheServiceRedisImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+@Configuration()
+public class CaptchaConfig {
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
+
+    @Bean(name = "captchaCacheService")
+    public CaptchaCacheService captchaCacheService(AjCaptchaProperties config) {
+        CaptchaCacheService ret = CaptchaServiceFactory.getCache(config.getCacheType().name());
+        if(config.getCacheType().name().equals("redis")){
+            ret = new CaptchaCacheServiceRedisImpl(config.getCacheType().name(), redisTemplate);
+            CaptchaServiceFactory.cacheService.put(config.getCacheType().name(), ret);
+        }
+        return ret;
+    }
+
+}

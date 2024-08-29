@@ -1,0 +1,11 @@
+{
+  "title": "{title}",
+  "desc": "{desc}",
+  "key": "{key}",
+  "version": "{version}",
+  "author": "{author}",
+  "type": "{type}",
+  "support_app": "{supportApp}",
+  "jar": "{key}.jar",
+  "mainClass": "com.niu.{key}.WebApplication"
+}

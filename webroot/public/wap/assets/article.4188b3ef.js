@@ -1,0 +1,1 @@
+import{bO as t}from"./index-8c71ab23.js";function r(r){return t.get("cms/article",r)}function e(r){return t.get(`cms/article/${r}`)}function n(){return t.get("cms/category")}export{r as a,e as b,n as g};

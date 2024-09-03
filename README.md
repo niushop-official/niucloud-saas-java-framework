@@ -21,7 +21,7 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 
 演示地址：https://www.niucloud.com
 
-文档地址：https://www.niucloud.com
+文档地址：http://doc.java.niucloud.com 
 
 云应用市场：https://www.niucloud.com/app
 

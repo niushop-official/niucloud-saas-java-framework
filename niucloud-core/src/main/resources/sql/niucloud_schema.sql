@@ -266,7 +266,7 @@ CREATE TABLE `{table_prefix}member_address` (
    PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会员收货地址' ROW_FORMAT = Dynamic;
 
-ALTER TABLE `member_address`ADD INDEX IDX_member_address (member_id);
+ALTER TABLE `{table_prefix}member_address`ADD INDEX IDX_member_address (member_id);
 
 
 DROP TABLE IF EXISTS `{table_prefix}member_cash_out`;

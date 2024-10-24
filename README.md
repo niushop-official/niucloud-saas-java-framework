@@ -176,8 +176,8 @@ niucloud-Admin-Java 程序员二开神器！
 https://www.niucloud.com
 
 ### 技术交流群
-![输入图片说明](%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20240914084735.jpg)
-![输入图片说明](qrcode_1724725655641.jpg)
+![输入图片说明](qun1.jpg)
+![输入图片说明](qun2.jpg)
 
 ### 开源使用须知
 

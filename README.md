@@ -21,7 +21,7 @@ github下载地址（镜像）：https://gitee.com/niucloud-team/niucloud-admin-
 
 演示地址：http://java.niucloud-admin.com/admin/      账号：admin   密码：123456
 
-文档地址：http://doc.java.niucloud.com 
+文档地址：https://doc.niucloud.com/java 
 
 云应用市场：https://www.niucloud.com/app
 

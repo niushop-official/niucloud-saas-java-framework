@@ -1,0 +1,6 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-select class="" v-model="${lowerClassName}Table.searchParam.${column.columnName}" clearable :placeholder="t('${lowerColumnName}Placeholder')">
+        <el-option label="全部" value=""></el-option>
+
+    </el-select>
+</el-form-item>

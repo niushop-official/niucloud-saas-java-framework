@@ -15,7 +15,7 @@ import com.niu.cms.service.api.article.vo.ArticleListVo;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -63,7 +63,7 @@ public class ArticleImpl implements IArticleService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

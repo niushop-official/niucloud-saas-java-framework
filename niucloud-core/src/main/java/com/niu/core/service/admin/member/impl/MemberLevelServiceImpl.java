@@ -73,7 +73,7 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
             if (ObjectUtil.isNotEmpty(item.getLevelGifts())) vo.setLevelGifts(coreMemberService.getGiftContent(item.getSiteId(), JSONUtil.parseObj(item.getLevelGifts()), "admin"));
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -154,7 +154,7 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
         Long memberNum = memberMapper.selectCount(new QueryWrapper<Member>()
                 .eq("site_id", siteId)
                 .eq("member_level", id));
-        if (!memberNum.equals(0)) throw new CommonException("该等级下存在会员不允许删除");
+        if (memberNum > 0) throw new CommonException("该等级下存在会员不允许删除");
 
         QueryWrapper<MemberLevel> queryWrapper = new QueryWrapper<MemberLevel>()
                 .eq("site_id", siteId)

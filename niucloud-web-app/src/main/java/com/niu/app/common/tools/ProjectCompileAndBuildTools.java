@@ -1,8 +1,12 @@
 package com.niu.app.common.tools;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +18,7 @@ public class ProjectCompileAndBuildTools {
     public static void main(String[] args) {
         String projectHome = ProjectCompileAndBuildTools.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (projectHome.contains("niucloud-web-app")) {
-            projectHome = projectHome.substring(1, projectHome.indexOf("niucloud-web-app"));
+            projectHome = projectHome.substring(0, projectHome.indexOf("niucloud-web-app"));
         } else {
             System.err.println("工程[niucloud-web-app]不存在.");
             return;
@@ -67,6 +71,12 @@ public class ProjectCompileAndBuildTools {
         } else {
             System.out.println("[INFO] Installing ERROR");
         }
+        // 检查目标目录是否存在
+        File distFile = new File(home + "/webroot/public/admin/");
+        if (!distFile.exists()) {
+            System.out.println("[INFO] create wap directory");
+            distFile.mkdirs();
+        }
         System.out.println("[INFO] ------------------------------------------------------------------------");
         System.out.println("[INFO] BUILD admin");
         System.out.println("[INFO] ------------------------------------------------------------------------");
@@ -93,6 +103,12 @@ public class ProjectCompileAndBuildTools {
             System.out.println("[INFO] Installing SUCCESS");
         } else {
             System.out.println("[INFO] Installing ERROR");
+        }
+        // 检查目标目录是否存在
+        File distFile = new File(home + "/webroot/public/wap/");
+        if (!distFile.exists()) {
+            System.out.println("[INFO] create wap directory");
+            distFile.mkdirs();
         }
         System.out.println("[INFO] ------------------------------------------------------------------------");
         System.out.println("[INFO] BUILD uni-app");
@@ -124,11 +140,17 @@ public class ProjectCompileAndBuildTools {
         System.out.println("[INFO] ------------------------------------------------------------------------");
         System.out.println("[INFO] BUILD web");
         System.out.println("[INFO] ------------------------------------------------------------------------");
-        try {
-            System.setOut(new PrintStream(System.out, true, "GBK"));
-        } catch (UnsupportedEncodingException e) {
-            // ignore
+        // 检查目标目录是否存在
+        File distFile = new File(home + "/webroot/public/web/");
+        if (!distFile.exists()) {
+            System.out.println("[INFO] create wap directory");
+            distFile.mkdirs();
         }
+//        try {
+//            System.setOut(new PrintStream(System.out, true, "GBK"));
+//        } catch (UnsupportedEncodingException e) {
+//            // ignore
+//        }
         int buildResult = execute(home + "/web", "npm run generate");
         System.out.println("[INFO] ------------------------------------------------------------------------");
         if (buildResult == 0) {
@@ -144,9 +166,88 @@ public class ProjectCompileAndBuildTools {
      * @param command
      */
     public static int execute(String home, String command) {
+        if (System.getProperty("os.name").contains("Windows")) {
+            return executeWithWin(home, command);
+        } else {
+            return executeWithLinux(home, command);
+        }
+    }
+
+    /**
+     * @param home
+     * @param command
+     * @return
+     */
+    public static int executeWithWin(String home, String command) {
         Process operateProcess = null;
         try {
             Process process = Runtime.getRuntime().exec("cmd /c " + command, null, new File(home));
+            operateProcess = process;
+            new Thread(() -> {
+                BufferedReader standardReader = null;
+                try {
+                    standardReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                    String line;
+                    while ((line = standardReader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // ignore
+                } finally {
+                    try {
+                        standardReader.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+            }).start();
+            new Thread(() -> {
+                BufferedReader errorReader = null;
+                try {
+                    errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    String line;
+                    while ((line = errorReader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // ignore
+                } finally {
+                    try {
+                        errorReader.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+            }).start();
+            int exitValue = process.waitFor();
+            if (exitValue == 0) {
+                return 0;
+            } else {
+                return -1;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                operateProcess.destroyForcibly();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * @param home
+     * @param command
+     * @return
+     */
+    public static int executeWithLinux(String home, String command) {
+        Process operateProcess = null;
+        try {
+            Process process = Runtime.getRuntime().exec(command, null, new File(home));
             operateProcess = process;
             new Thread(() -> {
                 BufferedReader standardReader = null;
@@ -217,23 +318,10 @@ public class ProjectCompileAndBuildTools {
             if (destDir.exists()) {
                 FileUtils.deleteDirectory(destDir);
             }
-            for (File subSrcFile : srcDir.listFiles()) {
-                if ("dist".equals(subSrcFile.getName()) || "node_modules".equals(subSrcFile.getName())) {
-                    continue;
-                } else {
-                    try {
-                        File destSubFile = new File(destDir.getAbsoluteFile() + "/" + subSrcFile.getName());
-                        if (subSrcFile.isDirectory()) {
-                            FileUtils.copyDirectory(subSrcFile, destSubFile);
-                            FileUtils.copyDirectoryToDirectory(subSrcFile, destSubFile);
-                        } else {
-                            FileUtils.copyFile(subSrcFile, destSubFile);
-                        }
-                    } catch (Exception e) {
-                        System.err.println("error:" + e.getMessage());
-                    }
-                }
-            }
+
+            String[] exclusionDir = {"node_modules", ".vscode", "dist", ".idea"};
+            FileUtils.copyDirectory(srcDir, destDir, createExclusionFilter(exclusionDir));
+
             // 移除插件
             File addonDirFile = new File(home + "/webroot/runtime/admin/src/addon");
             if (addonDirFile.exists()) {
@@ -260,23 +348,10 @@ public class ProjectCompileAndBuildTools {
             if (destDir.exists()) {
                 FileUtils.deleteDirectory(destDir);
             }
-            for (File subSrcFile : srcDir.listFiles()) {
-                if ("dist".equals(subSrcFile.getName()) || "node_modules".equals(subSrcFile.getName())) {
-                    continue;
-                } else {
-                    try {
-                        File destSubFile = new File(destDir.getAbsoluteFile() + "/" + subSrcFile.getName());
-                        if (subSrcFile.isDirectory()) {
-                            FileUtils.copyDirectory(subSrcFile, destSubFile);
-                            FileUtils.copyDirectoryToDirectory(subSrcFile, destSubFile);
-                        } else {
-                            FileUtils.copyFile(subSrcFile, destSubFile);
-                        }
-                    } catch (Exception e) {
-                        System.err.println("error:" + e.getMessage());
-                    }
-                }
-            }
+
+            String[] exclusionDir = {"node_modules", "unpackage", "dist"};
+            FileUtils.copyDirectory(srcDir, destDir, createExclusionFilter(exclusionDir));
+
             // 移除插件
             File addonDirFile = new File(home + "/webroot/runtime/uni-app/src/addon");
             if (addonDirFile.exists()) {
@@ -324,23 +399,10 @@ public class ProjectCompileAndBuildTools {
             if (destDir.exists()) {
                 FileUtils.deleteDirectory(destDir);
             }
-            for (File subSrcFile : srcDir.listFiles()) {
-                if ("dist".equals(subSrcFile.getName()) || "node_modules".equals(subSrcFile.getName()) || ".nuxt".equals(subSrcFile.getName()) || ".output".equals(subSrcFile.getName())) {
-                    continue;
-                } else {
-                    try {
-                        File destSubFile = new File(destDir.getAbsoluteFile() + "/" + subSrcFile.getName());
-                        if (subSrcFile.isDirectory()) {
-                            FileUtils.copyDirectory(subSrcFile, destSubFile);
-                            FileUtils.copyDirectoryToDirectory(subSrcFile, destSubFile);
-                        } else {
-                            FileUtils.copyFile(subSrcFile, destSubFile);
-                        }
-                    } catch (Exception e) {
-                        System.err.println("error:" + e.getMessage());
-                    }
-                }
-            }
+
+            String[] exclusionDir = {"node_modules", ".output", "nuxt"};
+            FileUtils.copyDirectory(srcDir, destDir, createExclusionFilter(exclusionDir));
+
             // 移除插件
             File addonDirFile = new File(home + "/webroot/runtime/web/src/addon");
             if (addonDirFile.exists()) {
@@ -354,4 +416,24 @@ public class ProjectCompileAndBuildTools {
         System.out.println("[INFO] ------------------------------------------------------------------------");
     }
 
+    /**
+     * 排除目录
+     * @param dirs
+     * @return
+     */
+    private static IOFileFilter createExclusionFilter(String[] dirs) {
+        // 定义要排除的目录
+        List<String> excludedDirs = Arrays.asList(dirs);
+
+        // 创建一个过滤器来排除特定子目录
+        IOFileFilter excludeSubDirsFilter = FileFilterUtils.trueFileFilter(); // 初始化为 false，表示过滤所有文件或目录
+
+        // 循环创建过滤器
+        for (String dirName : excludedDirs) {
+            IOFileFilter tempFilter = FileFilterUtils.nameFileFilter(dirName);
+            excludeSubDirsFilter = FileFilterUtils.and(excludeSubDirsFilter, FileFilterUtils.notFileFilter(tempFilter));
+        }
+
+        return excludeSubDirsFilter;
+    }
 }

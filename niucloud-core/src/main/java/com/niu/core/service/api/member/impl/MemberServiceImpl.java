@@ -2,16 +2,11 @@ package com.niu.core.service.api.member.impl;
 
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.common.domain.PageParam;
-import com.niu.core.common.exception.BaseException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.config.GlobalConfig;
 import com.niu.core.entity.member.Member;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.login.IRegisterService;
@@ -19,7 +14,6 @@ import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.IMemberService;
 import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.api.member.vo.MemberCenterVo;
-import com.niu.core.service.api.member.vo.MemberExportDataVo;
 import com.niu.core.service.api.member.vo.MemberInfoVo;
 import com.niu.core.service.api.member.vo.MemberQcodeVo;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +21,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-
-import java.util.List;
 
 @Service
 @Slf4j

@@ -1,8 +1,6 @@
 package com.niu.core.service.core.weapp.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.Method;
@@ -12,18 +10,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.common.utils.file.FileTools;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.service.admin.niucloud.INiucloudService;
 import com.niu.core.service.core.addon.AddonInstallTools;
-import com.niu.core.service.core.sys.ICoreConfigService;
-import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import com.niu.core.service.core.weapp.ICoreWeappCloudService;
-import com.niu.core.service.core.weapp.ICoreWeappConfigService;
-import com.niu.core.service.core.weapp.param.WeappConfigParam;
 import com.niu.core.service.core.weapp.param.WeappUploadParam;
-import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -31,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -121,15 +113,15 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
             if (!uniApp.exists()) throw new CommonException("未找到uni-app源码");
 
             String[] exclusionDir = {"node_modules", "unpackage", "dist"};
-            FileUtils.copyDirectory(uniApp, new File(packageDir), createExclusionFilter(exclusionDir));
+            FileUtils.copyDirectory(uniApp, new File(packageDir), FileTools.createExclusionFilter(exclusionDir));
 
             File envFile = new File(packageDir + ".env.production");
             if (!envFile.exists()) throw new CommonException("uni-app .env.production 文件缺失");
 
             String content = FileUtils.readFileToString(envFile, "UTF-8");
             content = content.replace("VITE_APP_BASE_URL = ''", "VITE_APP_BASE_URL = '" + param.getBaseUrl() + "/api/" + "'");
-            content = content.replace("VITE_IMG_DOMAIN = ''", "VITE_IMG_DOMAIN = '" + param.getSiteId().toString() + "'");
-            content = content.replace("VITE_SITE_ID = ''", "VITE_SITE_ID = '" + param.getBaseUrl() + "'");
+            content = content.replace("VITE_IMG_DOMAIN = ''", "VITE_IMG_DOMAIN = '" + param.getBaseUrl() + "'");
+            content = content.replace("VITE_SITE_ID = ''", "VITE_SITE_ID = '" + param.getSiteId().toString() + "'");
             FileUtil.writeUtf8String(content, envFile);
 
             addonInstallTools.handlePagesJson(packageDir, param.getAddon());
@@ -170,28 +162,6 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
             throw new CommonException(e.getMessage());
         }
     }
-
-    /**
-     * 排除目录
-     * @param dirs
-     * @return
-     */
-    private static IOFileFilter createExclusionFilter(String[] dirs) {
-        // 定义要排除的目录
-        List<String> excludedDirs = Arrays.asList(dirs);
-
-        // 创建一个过滤器来排除特定子目录
-        IOFileFilter excludeSubDirsFilter = FileFilterUtils.trueFileFilter(); // 初始化为 false，表示过滤所有文件或目录
-
-        // 循环创建过滤器
-        for (String dirName : excludedDirs) {
-            IOFileFilter tempFilter = FileFilterUtils.nameFileFilter(dirName);
-            excludeSubDirsFilter = FileFilterUtils.and(excludeSubDirsFilter, FileFilterUtils.notFileFilter(tempFilter));
-        }
-
-        return excludeSubDirsFilter;
-    }
-
 
     /**
      * 获取小程序编译日志

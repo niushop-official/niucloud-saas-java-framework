@@ -1,6 +1,6 @@
 package com.niu.core.event.example;
 
-import com.niu.core.component.context.event.Event;
+import com.niu.core.common.component.context.event.Event;
 
 /**
  * 作用: 示例

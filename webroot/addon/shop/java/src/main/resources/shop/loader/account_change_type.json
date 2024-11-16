@@ -1,0 +1,32 @@
+{
+  "point": {
+
+    "account_point_exchange_close": {
+      "name": "兑换订单关闭",
+      "inc": 0,
+      "dec": 1
+    },
+    "account_point_exchange_order": {
+      "name": "兑换订单消费",
+      "inc": 1,
+      "dec": 0
+    },
+    "account_point_exchange_refund": {
+      "name": "兑换订单维权",
+      "inc": 1,
+      "dec": 0
+    },
+    "consume_reward": {
+      "name": "消费奖励",
+      "inc": 1,
+      "dec": 0
+    }
+  },
+  "growth": {
+    "consume_reward": {
+      "name": "消费奖励",
+      "inc": 1,
+      "dec": 0
+    }
+  }
+}

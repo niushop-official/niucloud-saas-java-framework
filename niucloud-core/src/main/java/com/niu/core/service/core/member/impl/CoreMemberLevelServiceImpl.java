@@ -1,5 +1,6 @@
 package com.niu.core.service.core.member.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.entity.member.Member;
@@ -8,7 +9,6 @@ import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.core.member.ICoreMemberLevelService;
 import com.niu.core.service.core.member.ICoreMemberService;
-import org.hibernate.validator.constraints.EAN;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -57,13 +57,13 @@ public class CoreMemberLevelServiceImpl implements ICoreMemberLevelService {
             vars.put("from_type", "level_upgrade");
             vars.put("memo", "会员升级奖励");
 
-            for (MemberLevel level: upgrade) {
-                if (level.getLevelGifts().isEmpty() && JSONUtil.isJson(level.getLevelGifts())) {
+            for (MemberLevel level : upgrade) {
+                if (ObjectUtil.isNotEmpty(level.getLevelGifts()) && JSONUtil.isJson(level.getLevelGifts())) {
                     coreMemberService.memberGiftGrant(siteId, memberId, JSONUtil.parseObj(level.getLevelGifts()), vars);
                 }
             }
 
-            MemberLevel end = upgrade.get(-1);
+            MemberLevel end = upgrade.get(upgrade.size() - 1);
             member.setMemberLevel(end.getLevelId());
             memberMapper.updateById(member);
         }

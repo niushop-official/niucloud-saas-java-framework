@@ -23,4 +23,6 @@ public class AccountRegisterParam implements Serializable {
     private String mobileKey = "";
 
     private String mobileCode = "";
+
+    private Integer pid;
 }

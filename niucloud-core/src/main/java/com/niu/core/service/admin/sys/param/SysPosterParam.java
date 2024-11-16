@@ -1,18 +1,17 @@
 package com.niu.core.service.admin.sys.param;
+
 import lombok.Data;
+
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import javax.validation.constraints.*;
 
 /**
  * 海报参数
-*/
+ */
 @Data
 public class SysPosterParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @NotNull(message = "siteId参数缺失")
-    private Integer siteId;
 
     @NotNull(message = "name参数缺失")
     private String name;
@@ -33,6 +32,8 @@ public class SysPosterParam implements Serializable {
     private String addon;
 
     @NotNull(message = "isDefault参数缺失")
-    private Integer isDefault;
+    private Integer isDefault = 0;
+
+    private Integer siteId;
 
 }

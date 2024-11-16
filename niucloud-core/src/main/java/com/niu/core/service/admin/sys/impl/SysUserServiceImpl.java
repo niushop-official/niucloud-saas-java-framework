@@ -7,14 +7,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.utils.IpUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.entity.user.UserCreateSiteLimit;
 import com.niu.core.enums.member.StatusEnum;
@@ -123,7 +123,7 @@ public class SysUserServiceImpl implements ISysUserService {
             vo.setIsSuperAdmin(superAdminUid==item.getUid());
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

@@ -4,7 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.service.core.sys.ICoreScanService;

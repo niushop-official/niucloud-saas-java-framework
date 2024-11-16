@@ -1,13 +1,16 @@
 package com.niu.core.service.admin.sys;
 
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.entity.sys.SysArea;
 import com.niu.core.service.admin.sys.param.SysAreaSearchParam;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.service.admin.sys.vo.SysAreaByCodeVo;
 import com.niu.core.service.admin.sys.vo.SysAreaListVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 地址服务接口
@@ -18,7 +21,7 @@ public interface ISysAreaService {
 
     JSONArray getAreaTree(Integer level);
 
-    JSONArray getAreaByAreaCode(Integer id);
+    Map<String, SysAreaByCodeVo> getAreaByAreaCode(Integer id);
 
     Integer getAreaId(String name, Integer level);
 
@@ -33,4 +36,16 @@ public interface ISysAreaService {
      */
     PageResult<SysAreaListVo> list(PageParam pageParam, SysAreaSearchParam searchParam);
 
+    /**
+     * 逆地址解析
+     * @param location
+     */
+    JSONObject getAddressInfo(String location);
+
+    /**
+     * 地址解析
+     * @param address
+     * @return
+     */
+    JSONObject getAddress(String address);
 }

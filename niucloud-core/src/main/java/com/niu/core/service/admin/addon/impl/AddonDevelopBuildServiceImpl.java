@@ -5,7 +5,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.file.FileTools;
@@ -15,10 +15,13 @@ import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.mapper.sys.SysMenuMapper;
 import com.niu.core.service.admin.addon.IAddonDevelopBuildService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.*;
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,15 +141,18 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
                 FileTools.createDirs(destPath.getPath());
             }
 
-            FileUtils.copyDirectory(sourcePath, destPath);
+            String[] exclusionDir = {".mvm", "target"};
+            FileUtils.copyDirectory(sourcePath, destPath, FileTools.createExclusionFilter(exclusionDir));
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }
     }
 
     private void jar() {
+        File sourcePath = new File(WebAppEnvs.get().projectNiucloudAddon + this.addon + "/target/" + this.addon + ".jar");
+        if (!sourcePath.exists()) throw new CommonException("请先通过maven打包好jar包");
+
         try {
-            File sourcePath = new File(WebAppEnvs.get().projectNiucloudAddon + this.addon + "/target/" + this.addon + ".jar");
             File destPath = new File(this.addonPath + "jar/");
             if (destPath.exists()) {
                 FileUtils.cleanDirectory(destPath);

@@ -36,4 +36,12 @@ public interface ICoreNoticeService {
      * @param data
      */
     void send(Integer siteId, String key, Map<String, Object> data);
+
+    /**
+     * 发送消息
+     * @param siteId
+     * @param notice
+     * @param data
+     */
+    void asyncSend(Integer siteId, NoticeInfoVo notice, Map<String, Object> data);
 }

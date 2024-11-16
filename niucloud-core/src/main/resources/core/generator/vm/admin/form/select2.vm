@@ -1,0 +1,11 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-select class="input-width"  v-model="formData.${column.columnName}" clearable :placeholder="t('${lowerColumnName}Placeholder')">
+    <el-option label="请选择" value=""></el-option>
+        <el-option
+            v-for="(item, index) in {DICT_TYPE}"
+            :key="index"
+            :label="item.name"
+            :value="item.value"
+        />
+    </el-select>
+</el-form-item>

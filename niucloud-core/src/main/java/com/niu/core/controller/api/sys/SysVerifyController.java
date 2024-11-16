@@ -36,10 +36,7 @@ public class SysVerifyController {
     @GetMapping("/check_verifier")
     public Result<?> checkVerifier(SysVerifyCheckVerifierParam param) {
         boolean result = sysVerifyService.checkVerifier(param);
-        if (result) {
-            return Result.success();
-        }
-        return Result.fail();
+        return Result.success(result);
     }
 
     /**
@@ -60,7 +57,7 @@ public class SysVerifyController {
      * @return
      */
     @GetMapping("/verify_detail/{code}")
-    public Result<?> verifyDetail(@PathVariable("code") Integer code) {
+    public Result<?> verifyDetail(@PathVariable("code") String code) {
         SysVerifyDetailParam param = new SysVerifyDetailParam();
         param.setCode(code);
         return Result.success(sysVerifyService.detail(param));

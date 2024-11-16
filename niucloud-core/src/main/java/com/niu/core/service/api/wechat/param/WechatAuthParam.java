@@ -13,4 +13,6 @@ public class WechatAuthParam implements Serializable {
     @NotNull(message = "code参数缺失")
     @NotBlank(message = "code不能为空")
     private String code;
+
+    private Integer pid;
 }

@@ -5,7 +5,12 @@
     "desc": "会员注册之后发放成长值",
     "component": "/src/app/views/member/components/growth-rule-register.vue",
     "calculate": {
-      "driver": "com.niu.core.service.core.member.driver.GrowthRuleDriver"
+      "driver": "com.niu.core.service.core.member.driver.GrowthRuleRegisterDriver"
+    },
+    "content": {
+      "admin": {
+        "driver": "com.niu.core.service.core.member.driver.GrowthRuleRegisterDriver"
+      }
     }
   }
 }

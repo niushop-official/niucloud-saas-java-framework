@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.utils.date.DateUtils;
 
+import java.math.BigDecimal;
+
 public class QueryMapperUtils {
 
     /**
@@ -48,4 +50,47 @@ public class QueryMapperUtils {
         return queryWrapper;
     }
 
+    /**
+     *
+     * @param queryWrapper
+     * @param fieldName
+     * @param arr
+     * @return
+     */
+    public static <N extends Number> QueryWrapper buildByBetween(QueryWrapper queryWrapper, String fieldName, N[] arr) {
+        BigDecimal zero = new BigDecimal(0);
+        BigDecimal start = (arr[0] == null) ? zero : new BigDecimal(String.valueOf(arr[0]));
+        BigDecimal end = (arr.length == 1) ? zero : new BigDecimal(String.valueOf(arr[1]));
+
+        if (start.compareTo(zero) > 0 && end.compareTo(zero) > 0) {
+            queryWrapper.between(fieldName, start, end);
+        } else if (start.compareTo(zero) > 0 && end.compareTo(zero) == 0) {
+            queryWrapper.ge(fieldName, start);
+        } else if (start.compareTo(zero) == 0 && end.compareTo(zero) > 0) {
+            queryWrapper.le(fieldName, start);
+        }
+        return queryWrapper;
+    }
+
+    /**
+     *
+     * @param queryWrapper
+     * @param fieldName
+     * @param arr
+     * @return
+     */
+    public static <N extends Number> MPJQueryWrapper buildByBetween(MPJQueryWrapper queryWrapper, String fieldName, N[] arr) {
+        BigDecimal zero = new BigDecimal(0);
+        BigDecimal start = (arr[0] == null) ? zero : new BigDecimal(String.valueOf(arr[0]));
+        BigDecimal end = (arr.length == 1) ? zero : new BigDecimal(String.valueOf(arr[1]));
+
+        if (start.compareTo(zero) > 0 && end.compareTo(zero) > 0) {
+            queryWrapper.between(fieldName, start, end);
+        } else if (start.compareTo(zero) > 0 && end.compareTo(zero) == 0) {
+            queryWrapper.ge(fieldName, start);
+        } else if (start.compareTo(zero) == 0 && end.compareTo(zero) > 0) {
+            queryWrapper.le(fieldName, start);
+        }
+        return queryWrapper;
+    }
 }

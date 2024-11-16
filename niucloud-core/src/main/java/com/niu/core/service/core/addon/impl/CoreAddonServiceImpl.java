@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.enums.addon.AddonStatusEnum;
 import com.niu.core.mapper.addon.AddonMapper;
@@ -17,9 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CoreAddonServiceImpl extends CoreAddonBaseService implements ICoreAddonService {
@@ -42,7 +47,21 @@ public class CoreAddonServiceImpl extends CoreAddonBaseService implements ICoreA
      */
     @Override
     public Integer getLocalAddonCount() {
-        Integer localAddonCount=15;
+        Integer localAddonCount = 0;
+        try {
+            // 获取本地所有的插件
+            List<File> localAddons = Files.list(Paths.get(WebAppEnvs.get().webRootDownAddon))
+                    .map(path -> path.toFile())
+                    .filter(file -> file.isDirectory())
+                    .collect(Collectors.toList());
+
+            for (File file : localAddons) {
+                if (new File(file, "info.json").exists()) {
+                    localAddonCount++;
+                }
+            }
+        } catch (Exception e) {
+        }
         return localAddonCount;
     }
 

@@ -9,7 +9,7 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.verify.Verifier;
 import com.niu.core.mapper.member.MemberMapper;
@@ -18,7 +18,6 @@ import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.admin.verify.param.VerifierParam;
 import com.niu.core.service.admin.verify.param.VerifierSearchParam;
 import com.niu.core.service.admin.verify.IVerifierService;
-import com.niu.core.service.admin.verify.vo.VerifierInfoVo;
 import com.niu.core.service.admin.verify.vo.VerifierListVo;
 import com.niu.core.service.admin.verify.vo.VerifierVo;
 import org.springframework.beans.BeanUtils;
@@ -70,7 +69,7 @@ public class VerifierServiceImpl implements IVerifierService {
 
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

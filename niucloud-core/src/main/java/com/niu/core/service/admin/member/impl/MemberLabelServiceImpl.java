@@ -60,7 +60,7 @@ public class MemberLabelServiceImpl implements IMemberLabelService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

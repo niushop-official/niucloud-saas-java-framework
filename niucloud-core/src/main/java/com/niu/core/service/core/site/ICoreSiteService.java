@@ -48,7 +48,28 @@ public interface ICoreSiteService {
      * @param siteId
      * @return
      */
-    public List<Addon> getSiteAddons(Integer siteId);
+    List<Addon> getSiteAddons(Integer siteId);
 
+    /**
+     * 站点插件是否已执行初始化
+     *
+     * @param siteId
+     * @param addon
+     * @return
+     */
+    boolean siteAddonIsInit(Integer siteId, String addon);
 
+    /**
+     * 添加站点插件初始化记录
+     *
+     * @param siteId
+     * @param addon
+     */
+    void addSiteAddonInitRecord(Integer siteId, String addon);
+
+    /**
+     * 站点到期自动关闭
+     *
+     */
+    void siteExpireClose();
 }

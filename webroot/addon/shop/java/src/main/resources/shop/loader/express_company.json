@@ -1,0 +1,367 @@
+[
+	{
+		"company_name": "邮政EMS",
+		"logo": "addon/shop/express/ems.jpg",
+		"url": "https://www.ems.com.cn",
+		"express_no": "EMS",
+		"express_no_electronic_sheet": "EMS",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 76*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "一联130新 76*130",
+				"template_size": "1301"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "180"
+			},
+			{
+				"template_name": "二联180新 100*180",
+				"template_size": "1801"
+			},
+			{
+				"template_name": "二联150 100*150",
+				"template_size": "0"
+			},
+			{
+				"template_name": "二联150新 100*150",
+				"template_size": "1501"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "特快专递",
+				"value": 1
+			},
+			{
+				"text": "代收到付",
+				"value": 8
+			},
+			{
+				"text": "快递包裹",
+				"value": 9
+			},
+			{
+				"text": "电商标快",
+				"value": 10
+			},
+			{
+				"text": "国内标快",
+				"value": 11
+			}
+		]
+	},
+	{
+		"company_name": "邮政快递包裹",
+		"logo": "addon/shop/express/youzhengkd.png",
+		"url": "https://www.ems.com.cn",
+		"express_no": "YZPY",
+		"express_no_electronic_sheet": "YZPY",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 76*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "一联130新 76*130",
+				"template_size": "1301"
+			},
+			{
+				"template_name": "二联1801 100*180",
+				"template_size": "1801"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "0"
+			},
+			{
+				"template_name": "二联180新 100*180",
+				"template_size": "180"
+			},
+			{
+				"template_name": "二联150 100*150",
+				"template_size": "150"
+			},
+			{
+				"template_name": "二联150新 100*150",
+				"template_size": "1501"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "标准快递",
+				"value": 1
+			}
+		]
+	},
+	{
+		"company_name": "顺丰速运",
+		"logo": "addon/shop/express/shunfeng.png",
+		"url": "https://www.sf-express.com/chn/sc",
+		"express_no": "SF",
+		"express_no_electronic_sheet": "SF",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130新 76*130",
+				"template_size": "1301"
+			},
+			{
+				"template_name": "二联150新 100*150",
+				"template_size": "0"
+			},
+			{
+				"template_name": "二联180新 100*180",
+				"template_size": "180"
+			},
+			{
+				"template_name": "三联210新 100*210",
+				"template_size": "210"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "顺丰特快",
+				"value": 1
+			},
+			{
+				"text": "顺丰标快",
+				"value": 2
+			},
+			{
+				"text": "顺丰即日",
+				"value": 6
+			},
+			{
+				"text": "冷运标快",
+				"value": 201
+			},
+			{
+				"text": "顺丰微小件",
+				"value": 202
+			}
+		]
+	},
+	{
+		"company_name": "中通快递",
+		"logo": "addon/shop/express/zhongtong.png",
+		"url": "https://www.zto.com",
+		"express_no": "ZTO",
+		"express_no_electronic_sheet": "ZTO",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 76*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "0"
+			},
+			{
+				"template_name": "二联180新 100*180",
+				"template_size": "180"
+			}
+		],
+		"exp_type": []
+	},
+	{
+		"company_name": "圆通速递",
+		"logo": "addon/shop/express/yuantong.png",
+		"url": "https://www.yto.net.cn",
+		"express_no": "YTO",
+		"express_no_electronic_sheet": "YTO",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 76*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "一联130新 76*130",
+				"template_size": "1301"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "0"
+			},
+			{
+				"template_name": "三联180 100*180",
+				"template_size": "180"
+			},
+			{
+				"template_name": "二联180新 100*180",
+				"template_size": "1801"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "标准快递",
+				"value": 1
+			},
+			{
+				"text": "圆准达",
+				"value": 2
+			}
+		]
+	},
+	{
+		"company_name": "申通快递",
+		"logo": "addon/shop/express/shentong.png",
+		"url": "https://www.sto.cn/pc",
+		"express_no": "STO",
+		"express_no_electronic_sheet": "STO",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 76*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "一联130新 76*130",
+				"template_size": "1301"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "0"
+			},
+			{
+				"template_name": "二联180新 100*180",
+				"template_size": "180"
+			},
+			{
+				"template_name": "三联180新 100*180",
+				"template_size": "1803"
+			},
+			{
+				"template_name": "二联150 100*150",
+				"template_size": "150"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "标准快递",
+				"value": 1
+			}
+		]
+	},
+	{
+		"company_name": "韵达速递",
+		"logo": "addon/shop/express/yunda.png",
+		"url": "http://www.yundaex.com/cn",
+		"express_no": "YD",
+		"express_no_electronic_sheet": "YD",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 100*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "180"
+			},
+			{
+				"template_name": "二联203 100*203",
+				"template_size": "0"
+			}
+		],
+		"exp_type": []
+	},
+	{
+		"company_name": "极兔速递",
+		"logo": "addon/shop/express/jitu.png",
+		"url": "https://www.jtexpress.cn",
+		"express_no": "JTSD",
+		"express_no_electronic_sheet": "JTSD",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 100*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "二联180 100*180",
+				"template_size": "0"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "标准快递",
+				"value": 1
+			},
+			{
+				"text": "兔优达",
+				"value": 2
+			}
+		]
+	},
+	{
+		"company_name": "菜鸟速递",
+		"logo": "addon/shop/express/cainiao.jpg",
+		"url": "https://express.cainiao.com/",
+		"express_no": "CNSD",
+		"express_no_electronic_sheet": "CNSD",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130 100*130",
+				"template_size": "0"
+			}
+		],
+		"exp_type": [
+			{
+				"text": "当日达",
+				"value": 1
+			},
+			{
+				"text": "次日达",
+				"value": 2
+			},
+			{
+				"text": "预约配送",
+				"value": 3
+			},
+			{
+				"text": "当日下午达",
+				"value": 4
+			},
+			{
+				"text": "当日夜间达",
+				"value": 5
+			},
+			{
+				"text": "次日上午达",
+				"value": 6
+			}
+		]
+	},
+	{
+		"company_name": "京东快递",
+		"logo": "addon/shop/express/jingdong.jpg",
+		"url": "https://www.jdl.com",
+		"express_no": "JD",
+		"express_no_electronic_sheet": "JD",
+		"electronic_sheet_switch": 0,
+		"print_style": [
+			{
+				"template_name": "一联130新 76*130",
+				"template_size": "130"
+			},
+			{
+				"template_name": "二联110 100*110",
+				"template_size": "0"
+			},
+			{
+				"template_name": "二联110新 100*110",
+				"template_size": "110"
+			}
+		],
+		"exp_type": []
+	}
+]

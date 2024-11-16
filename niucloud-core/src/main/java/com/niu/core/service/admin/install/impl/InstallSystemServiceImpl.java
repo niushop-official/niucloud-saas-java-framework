@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.sys.SysMenu;

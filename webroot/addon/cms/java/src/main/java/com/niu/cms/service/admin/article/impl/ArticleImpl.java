@@ -15,7 +15,7 @@ import com.niu.cms.service.admin.article.vo.*;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 import org.springframework.beans.BeanUtils;
@@ -73,7 +73,7 @@ public class ArticleImpl implements IArticleService {
             vo.setArticleUrl(articleUrl);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

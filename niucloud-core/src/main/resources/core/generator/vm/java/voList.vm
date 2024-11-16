@@ -1,0 +1,39 @@
+package com.niu.${addonName}.service.admin.${moduleName}.vo;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
+import java.io.Serializable;
+import lombok.Data;
+
+#foreach ($column in $columns)
+    #if ($column.columnType.equals("BigDecimal"))
+    import java.math.BigDecimal;
+    #end
+    #if ($column.columnType.equals("Date"))
+    import java.util.Date;
+    #end
+#end
+
+/**
+* ${tableContent}列表
+*/
+@Data
+public class ${className}ListVo implements Serializable {
+
+private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+    #if($column.isLists == 1 || $column.isPk == 1)
+        #if($column.viewType == 'datetime')
+        /** ${column.columnComment} */
+        @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+        private ${column.columnType} ${column.lowerColumnFiledName};
+        #else
+        /** ${column.columnComment} */
+        private ${column.columnType} ${column.lowerColumnFiledName};
+        #end
+    #end
+
+#end
+
+}

@@ -1,0 +1,30 @@
+{
+  "shop_buy_goods": {
+    "key": "shop_buy_goods",
+    "name": "购买商品",
+    "desc": "订单交易成功后按订单交易金额发放成长值",
+    "component": "/src/addon/shop/views/member/components/growth-rule-buygoods.vue",
+    "calculate": {
+      "driver": "com.niu.shop.service.core.member.driver.GrowthRuleBuyGoodsDriver"
+    },
+    "content": {
+      "admin": {
+        "driver": "com.niu.shop.service.core.member.driver.GrowthRuleBuyGoodsDriver"
+      }
+    }
+  },
+  "shop_buy_order": {
+    "key": "shop_buy_order",
+    "name": "完成下单",
+    "desc": "订单交易成功后发放成长值",
+    "component": "/src/addon/shop/views/member/components/growth-rule-buyorder.vue",
+    "calculate": {
+      "driver": "com.niu.shop.service.core.member.driver.GrowthRuleBuyOrderDriver"
+    },
+    "content": {
+      "admin": {
+        "driver": "com.niu.shop.service.core.member.driver.GrowthRuleBuyOrderDriver"
+      }
+    }
+  }
+}

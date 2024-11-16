@@ -21,4 +21,6 @@ public class MobileRegisterParam implements Serializable {
     private String mobileKey = "";
 
     private String mobileCode = "";
+
+    private Integer pid;
 }

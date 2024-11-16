@@ -2,9 +2,9 @@ package com.niu.core.event.sys;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
-import com.niu.core.component.context.event.Event;
-import com.niu.core.component.context.event.EventResult;
-import com.niu.core.component.context.listener.CallbackListener;
+import com.niu.core.common.component.context.event.Event;
+import com.niu.core.common.component.context.event.EventResult;
+import com.niu.core.common.component.context.listener.CallbackListener;
 import com.niu.core.common.domain.PageParam;
 import lombok.Data;
 import lombok.experimental.Accessors;

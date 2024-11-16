@@ -1,7 +1,7 @@
 package com.niu.recharge.listener;
 
 import com.niu.core.common.annotation.EventListen;
-import com.niu.core.component.context.listener.AbstractListener;
+import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.event.pay.PaySuccessEvent;
 import com.niu.recharge.service.core.ICoreRechargeOrderService;
 import org.springframework.stereotype.Component;

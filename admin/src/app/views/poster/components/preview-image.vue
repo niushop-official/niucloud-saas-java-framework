@@ -1,5 +1,5 @@
 <template>
-	<div class="pointer-events-none max-w-[360px]" :style="componentStyle">
+	<div class="pointer-events-none max-w-[720px]" :style="componentStyle">
 		<img v-if="data.value" :src="img(data.value)" class="w-full h-full" />
 		<img v-else :src="img('static/resource/images/diy/crack_figure.png')" class="w-full h-full" />
 	</div>

@@ -92,7 +92,7 @@ public class TreeUtils {
         }
         for (int i = 0; i < jsonArray.size(); i++) {
             cn.hutool.json.JSONObject jsonObject = jsonArray.getJSONObject(i);
-            jsonObject.put(parentKey, parentValue);
+            if (jsonObject.get(parentKey) == null) jsonObject.put(parentKey, parentValue);
             String currentKeyValue = jsonObject.getStr(currentKey);
             cn.hutool.json.JSONArray childrenKeyArray = jsonObject.getJSONArray(childrenKey);
             jsonObject.remove(childrenKey);

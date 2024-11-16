@@ -1,8 +1,8 @@
 package com.niu.core.listener.example;
 
 import com.niu.core.common.annotation.EventListen;
-import com.niu.core.component.context.event.Event;
-import com.niu.core.component.context.listener.AbstractListener;
+import com.niu.core.common.component.context.event.Event;
+import com.niu.core.common.component.context.listener.AbstractListener;
 import org.springframework.stereotype.Component;
 
 /**

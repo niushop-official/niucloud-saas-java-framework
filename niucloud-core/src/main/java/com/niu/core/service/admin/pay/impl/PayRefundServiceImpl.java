@@ -61,7 +61,7 @@ public class PayRefundServiceImpl implements IPayRefundService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

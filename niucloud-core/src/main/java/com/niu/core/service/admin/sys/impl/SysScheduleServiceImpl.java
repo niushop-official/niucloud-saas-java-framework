@@ -8,9 +8,9 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
-import com.niu.core.component.job.factory.JobProviderFactory;
-import com.niu.core.component.job.model.JobInfo;
-import com.niu.core.component.job.quartz.QuartzJobManager;
+import com.niu.core.common.component.job.factory.JobProviderFactory;
+import com.niu.core.common.component.job.model.JobInfo;
+import com.niu.core.common.component.job.quartz.QuartzJobManager;
 import com.niu.core.entity.sys.SysSchedule;
 import com.niu.core.mapper.sys.SysScheduleMapper;
 import com.niu.core.service.admin.sys.ISysScheduleService;
@@ -76,7 +76,7 @@ public class SysScheduleServiceImpl implements ISysScheduleService {
             sysScheduleListVo.setCrontabContent(QuartzJobManager.convertCronContent(sysSchedule.getTime()));
             sysScheduleListVoList.add(sysScheduleListVo);
         }
-        return PageResult.build(page, limit).setData(sysScheduleListVoList);
+        return PageResult.build(page, limit, sysSchedulePage.getTotal()).setData(sysScheduleListVoList);
     }
 
     /**

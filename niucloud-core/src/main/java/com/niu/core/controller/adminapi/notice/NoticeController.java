@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.notice.INoticeService;
 import com.niu.core.service.admin.notice.ISmsService;
+import com.niu.core.service.admin.notice.param.EditMessageStatusParam;
 import com.niu.core.service.admin.notice.vo.SmsTypeVo;
 import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 import com.niu.core.service.core.notice.vo.NoticeInfoVo;
@@ -83,6 +84,17 @@ public class NoticeController {
     @PutMapping("/notice/sms/{sms_type}")
     public Result<?> editSms(@PathVariable("sms_type") String smsType, @RequestBody JSONObject data){
         smsService.setConfig(smsType, data);
+        return Result.success();
+    }
+
+    /**
+     * 消息启动与关闭
+     *
+     * @return
+     */
+    @PostMapping("/notice/editstatus")
+    public Result editStatus(@Validated @RequestBody EditMessageStatusParam param) {
+        noticeService.editMessageStatus(param);
         return Result.success();
     }
 }

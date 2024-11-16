@@ -5,13 +5,12 @@ import cn.hutool.json.JSONArray;
 import com.niu.core.common.domain.Result;
 import com.niu.core.entity.sys.SysArea;
 import com.niu.core.service.admin.sys.ISysAreaService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.niu.core.service.admin.sys.vo.SysAreaByCodeVo;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 地址控制器
@@ -47,8 +46,34 @@ public class SysAreaController {
         return Result.success(sysAreaService.getAreaTree(level));
     }
 
-    public Result<JSONArray> getAreaByAreaCode(Integer id) {
-        return Result.success(sysAreaService.getAreaByAreaCode(id));
+    /**
+     *
+     * @param code
+     * @return
+     */
+    @GetMapping("/code/{code}")
+    public Result<Map<String, SysAreaByCodeVo>> getAreaByAreaCode(@PathVariable Integer code) {
+        return Result.success(sysAreaService.getAreaByAreaCode(code));
     }
 
+    /**
+     * 逆地址解析
+     *
+     * @param location
+     * @return
+     */
+    @GetMapping("/contrary")
+    public Result contraryAddress(@RequestParam("location") String location) {
+        return Result.success(sysAreaService.getAddressInfo(location));
+    }
+
+    /**
+     * 地址解析
+     * @param address
+     * @return
+     */
+    @GetMapping("/get_info")
+    public Result addressInfo(@RequestParam String address) {
+        return Result.success(sysAreaService.getAddress(address));
+    }
 }

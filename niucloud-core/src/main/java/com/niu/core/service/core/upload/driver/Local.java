@@ -1,8 +1,8 @@
 package com.niu.core.service.core.upload.driver;
 
 import cn.hutool.json.JSONObject;
-import com.niu.core.component.context.WebAppEnvs;
-import com.niu.core.component.upload.exception.UploadException;
+import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.component.upload.exception.UploadException;
 import com.niu.core.common.loader.upload.BaseUpload;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.admin.sys.param.AttachmentUploadParam;

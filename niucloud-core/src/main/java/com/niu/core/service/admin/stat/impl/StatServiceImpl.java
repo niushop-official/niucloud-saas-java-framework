@@ -64,6 +64,7 @@ public class StatServiceImpl implements IStatService {
         //今日站点数
         SiteSearchParam todaySiteParam=new SiteSearchParam();
         todaySiteParam.setCreateTime(createTimes);
+        todaySiteParam.setAppType(AppTypeEnum.SITE.getName());
         statToDayVo.setTodaySiteCount(siteService.getSiteCountByCondition(todaySiteParam));
         //正常站点数
         SiteSearchParam normaSiteParam=new SiteSearchParam();
@@ -73,6 +74,7 @@ public class StatServiceImpl implements IStatService {
         //到期站点数
         SiteSearchParam expireSiteParam=new SiteSearchParam();
         expireSiteParam.setStatus(2);
+        expireSiteParam.setAppType(AppTypeEnum.SITE.getName());
         statToDayVo.setExpireSiteCount(siteService.getSiteCountByCondition(expireSiteParam));
         //即将到期站点数
         SiteSearchParam weekExpireSiteParam=new SiteSearchParam();
@@ -81,6 +83,7 @@ public class StatServiceImpl implements IStatService {
         expireTimes[1]=DateUtils.getDateAddDay(7);
         weekExpireSiteParam.setStatus(1);
         weekExpireSiteParam.setExpireTime(expireTimes);
+        weekExpireSiteParam.setAppType(AppTypeEnum.SITE.getName());
         statToDayVo.setWeekExpireSiteCount(siteService.getSiteCountByCondition(weekExpireSiteParam));
 
         /**
@@ -107,7 +110,7 @@ public class StatServiceImpl implements IStatService {
             String[] startEndDate=DateUtils.getStartEndByDay(itemDay);
 
             MemberStatSearchParam itemMemberParam=new MemberStatSearchParam();
-            todayMemberParam.setCreateTime(startEndDate);
+            itemMemberParam.setCreateTime(startEndDate);
             Integer itemMemberCount=coreMemberService.getMemberCount(itemMemberParam);
             dates.add(startEndDate[0]);
             memberValues.add(itemMemberCount);

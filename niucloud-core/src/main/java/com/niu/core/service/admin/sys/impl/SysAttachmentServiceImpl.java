@@ -60,7 +60,7 @@ public class SysAttachmentServiceImpl implements ISysAttachmentService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.orderByDesc("att_id");
         if (ObjectUtil.isNotEmpty(searchParam.getAttType())) queryWrapper.eq("att_type", searchParam.getAttType());
-        if (ObjectUtil.isNotEmpty(searchParam.getCateId())) queryWrapper.eq("cate_id", searchParam.getCateId());
+        if (ObjectUtil.isNotEmpty(searchParam.getCateId()) && searchParam.getCateId() > 0) queryWrapper.eq("cate_id", searchParam.getCateId());
         if (ObjectUtil.isNotEmpty(searchParam.getRealName())) queryWrapper.like("real_name", searchParam.getRealName());
 
         IPage<SysAttachment> iPage = sysAttachmentMapper.selectPage(new Page<>(page, limit), queryWrapper);
@@ -175,6 +175,9 @@ public class SysAttachmentServiceImpl implements ISysAttachmentService {
      * @param addParam
      */
     public void addCategory(SysAttachmentCategoryParam addParam) {
+        if (addParam.getType() == null) throw new CommonException("type参数缺失");
+        if (ObjectUtil.isNotEmpty(addParam.getType())) throw new CommonException("type参数不能为空");
+
         SysAttachmentCategory model = new SysAttachmentCategory();
         model.setSiteId(RequestUtils.siteId());
         model.setType(addParam.getType());

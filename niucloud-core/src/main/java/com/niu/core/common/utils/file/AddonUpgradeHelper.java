@@ -1,7 +1,7 @@
 package com.niu.core.common.utils.file;
 
 import com.niu.core.common.utils.system.RuntimeTools;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 
 import java.util.ArrayList;
 import java.util.List;

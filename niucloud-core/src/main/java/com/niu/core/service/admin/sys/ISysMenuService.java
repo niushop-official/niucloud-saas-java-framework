@@ -123,4 +123,7 @@ public interface ISysMenuService {
      * @return
      */
     SysMenu find(String menuKey, String appType);
+
+    JSONArray getMenuByTypeDir(String addon);
+
 }

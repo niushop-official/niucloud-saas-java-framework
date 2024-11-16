@@ -1,0 +1,1 @@
+<el-table-column prop="${column.columnName}" :label="t('${lowerColumnName}')" min-width="120" :show-overflow-tooltip="true"/>

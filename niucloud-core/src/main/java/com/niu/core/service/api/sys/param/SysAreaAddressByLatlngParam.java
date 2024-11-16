@@ -9,6 +9,6 @@ public class SysAreaAddressByLatlngParam implements ApiBaseParam {
     private String latlng;
 
     //是否返回周边POI列表：1.返回；0不返回(默认)
-    private Integer getPoi;
+    private Integer getPoi = 0;
 
 }

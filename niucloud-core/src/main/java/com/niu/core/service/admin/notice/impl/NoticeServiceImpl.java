@@ -6,11 +6,16 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.pay.Pay;
+import com.niu.core.enums.notice.NoticeEnum;
+import com.niu.core.enums.notice.NoticeTypeEnum;
 import com.niu.core.enums.notice.vo.NoticeEnumListVo;
 import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.admin.notice.INoticeService;
+import com.niu.core.service.admin.notice.param.EditMessageStatusParam;
 import com.niu.core.service.admin.pay.IPayService;
 import com.niu.core.service.admin.pay.param.PayParam;
 import com.niu.core.service.admin.pay.param.PaySearchParam;
@@ -57,5 +62,23 @@ public class NoticeServiceImpl implements INoticeService {
     @Override
     public void edit(String key, JSONObject data) {
         coreNoticeService.edit(RequestUtils.siteId(), key, data);
+    }
+
+    /**
+     * 修改消息状态
+     *
+     * @param param
+     */
+    @Override
+    public void editMessageStatus(EditMessageStatusParam param) {
+        if (NoticeTypeEnum.getNameByType(param.getType()).isEmpty()) throw new CommonException("消息类型不存在");
+
+        JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+        JSONObject notice = jsonModuleLoader.mergeResultElement("notice/notice.json");
+        if (notice.getJSONObject(param.getKey()) == null) throw new CommonException("消息类型不存在");
+
+        JSONObject data = new JSONObject();
+        data.put("is_" + param.getType(), param.getStatus());
+        coreNoticeService.edit(RequestUtils.siteId(), param.getKey(), data);
     }
 }

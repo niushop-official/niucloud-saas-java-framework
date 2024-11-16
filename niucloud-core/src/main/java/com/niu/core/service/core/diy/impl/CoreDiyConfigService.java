@@ -51,7 +51,7 @@ public class CoreDiyConfigService implements ICoreDiyConfigService {
             {
                 addon.setTitle("系统");
             }else {
-                addon = addonMapper.selectOne(new QueryWrapper<Addon>().eq("key", key));
+                addon = addonMapper.selectOne(new QueryWrapper<Addon>().eq("`key`", key));
             }
 
             vo.setInfo(addon);

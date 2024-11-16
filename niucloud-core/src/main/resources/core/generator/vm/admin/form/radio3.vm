@@ -1,0 +1,11 @@
+
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-radio-group  v-model="formData.${column.columnName}" :placeholder="t('${lowerColumnName}Placeholder')">
+        <el-radio
+            v-for="(item, index) in {DICT_TYPE}"
+            :key="index"
+            :label="item['{ITEM_VALUE}']">
+              {{ item['{ITEM_LABEL}'] }}
+        </el-radio>
+    </el-radio-group>
+</el-form-item>

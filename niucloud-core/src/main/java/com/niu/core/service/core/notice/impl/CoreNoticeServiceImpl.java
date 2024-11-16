@@ -19,6 +19,7 @@ import com.niu.core.service.core.notice.ICoreNoticeService;
 import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 import com.niu.core.service.core.notice.vo.NoticeInfoVo;
 import com.niu.core.service.core.site.ICoreSiteService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,13 @@ public class CoreNoticeServiceImpl implements ICoreNoticeService {
     @Resource
     ICoreSiteService coreSiteService;
 
+    ICoreNoticeService coreNoticeService;
+
+    @Resource
+    public void setCoreSiteService(@Lazy ICoreNoticeService coreNoticeService) {
+        this.coreNoticeService = coreNoticeService;
+    }
+
     @Override
     public SysNotice find(Integer siteId, String key) {
         QueryWrapper queryWrapper = new QueryWrapper();
@@ -54,7 +62,7 @@ public class CoreNoticeServiceImpl implements ICoreNoticeService {
     public Map<String, NoticeInfoVo> getList(Integer siteId, String[] keys) {
         QueryWrapper queryWrapper = new QueryWrapper<SysNotice>();
         queryWrapper.eq("site_id", siteId);
-        if (keys.length > 0) queryWrapper.in("`key`", keys);
+        if (ObjectUtil.isNotEmpty(keys)) queryWrapper.in("`key`", keys);
 
         Map<String, SysNotice> noticeList = (Map<String, SysNotice>) sysNoticeMapper.selectList(queryWrapper).stream().collect(Collectors.toMap(SysNotice::getKey, SysNotice::getClass));
 
@@ -183,7 +191,7 @@ public class CoreNoticeServiceImpl implements ICoreNoticeService {
         if (notice == null) return;
 
         if (notice.getAsync()) {
-            asyncSend(siteId, notice, data);
+            coreNoticeService.asyncSend(siteId, notice, data);
         } else {
             syncSend(siteId, notice, data);
         }

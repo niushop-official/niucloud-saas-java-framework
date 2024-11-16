@@ -2,7 +2,8 @@ package com.niu.core.common.utils;
 
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
 import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl;
-import com.niu.core.component.context.SpringContext;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.enums.channel.WechatEncryptionTypeEnum;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
@@ -30,6 +31,8 @@ public class WechatUtils {
         WxMpService service = new WxMpServiceImpl();
         WxMpDefaultConfigImpl wxMpDefaultConfig = new WxMpDefaultConfigImpl();
         WechatConfigVo wechatConfigVo = coreWechatConfigService.getWechatConfig(siteId);
+        if (wechatConfigVo.getAppId().isEmpty() || wechatConfigVo.getAppSecret().isEmpty()) throw new CommonException("微信公众号未配置完善");
+
         wxMpDefaultConfig.setAppId(wechatConfigVo.getAppId());
         wxMpDefaultConfig.setSecret(wechatConfigVo.getAppSecret());
         wxMpDefaultConfig.setToken(wechatConfigVo.getToken());
@@ -52,6 +55,8 @@ public class WechatUtils {
         WxMaDefaultConfigImpl wxMaDefaultConfig = new WxMaDefaultConfigImpl();
 
         WeappConfigVo weappConfigVo = coreWeappConfigService.getWeappConfig(siteId);
+        if (weappConfigVo.getAppId().isEmpty() || weappConfigVo.getAppSecret().isEmpty()) throw new CommonException("微信小程序未配置完善");
+
         wxMaDefaultConfig.setAppid(weappConfigVo.getAppId());
         wxMaDefaultConfig.setSecret(weappConfigVo.getAppSecret());
         wxMaDefaultConfig.setToken(weappConfigVo.getToken());

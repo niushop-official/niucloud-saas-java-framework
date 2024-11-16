@@ -9,8 +9,8 @@ import com.alipay.easysdk.payment.common.models.AlipayTradeRefundResponse;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
 import com.alipay.easysdk.util.generic.models.AlipayOpenApiGenericResponse;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.loader.pay.BasePay;
 import com.niu.core.common.loader.pay.param.*;
@@ -29,7 +29,6 @@ import com.niu.core.service.core.pay.vo.PayTypeVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;

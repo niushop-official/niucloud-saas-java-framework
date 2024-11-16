@@ -1,0 +1,12 @@
+package com.niu.${addonName}.mapper.${moduleName};
+
+import com.github.yulichang.base.MPJBaseMapper;
+import com.niu.${addonName}.entity.${moduleName}.${humpTableName};
+import org.apache.ibatis.annotations.Mapper;
+
+/**
+ * ${tableContent} Mapper
+ */
+@Mapper
+public interface ${humpTableName}Mapper extends MPJBaseMapper<${humpTableName}> {
+}

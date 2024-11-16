@@ -1,6 +1,6 @@
 package com.niu.core.service.core.app.tools;
 
-import com.niu.core.component.context.SpringContext;
+import com.niu.core.common.component.context.SpringContext;
 import org.apache.ibatis.jdbc.ScriptRunner;
 
 import java.io.*;

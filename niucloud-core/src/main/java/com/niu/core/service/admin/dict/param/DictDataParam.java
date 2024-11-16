@@ -13,22 +13,9 @@ public class DictDataParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "typeId参数缺失")
-    private Integer typeId;
 
-    @NotNull(message = "name参数缺失")
-    private String name;
+    @NotNull(message = "字典数据不能为空")
+    private String dictionary;
 
-    @NotNull(message = "value参数缺失")
-    private String value;
-
-    @NotNull(message = "remark参数缺失")
-    private String remark;
-
-    @NotNull(message = "sort参数缺失")
-    private Integer sort;
-
-    @NotNull(message = "status参数缺失")
-    private Integer status;
 
 }

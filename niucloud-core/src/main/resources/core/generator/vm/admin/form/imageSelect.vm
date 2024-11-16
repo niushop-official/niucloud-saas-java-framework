@@ -1,0 +1,3 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <upload-image v-model="formData.${column.columnName}" />
+</el-form-item>

@@ -48,7 +48,7 @@ public class AuthServiceImpl implements IAuthService {
         }
         String rule=RequestUtils.getReqeustURI();
         if(!rule.equals("site")){
-            if(siteInfoVo.getStatus()== SiteStatusEnum.CLOSE.getCode() || siteInfoVo.getExpireTime()< DateUtils.currTime()){
+            if(siteInfoVo.getStatus()== SiteStatusEnum.CLOSE.getCode()){
                 throw new AuthException("SITE_CLOSE_NOT_ALLOW", 403);
             }
         }

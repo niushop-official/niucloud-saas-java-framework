@@ -176,5 +176,15 @@
     "write": "可写",
     "cloudbuildSuccess": "编译完成",
     "showDialogCloseTips": "编译任务尚未完成，关闭将取消编译，是否要继续关闭？"
-  }
+  },
+  "generateNumber": "请输入数字",
+  "generateEmail": "请输入正确的邮箱",
+  "generateIdCard": "请输入正确的身份证号",
+  "generateMobile": "请输入正确的手机号",
+  "generateNumberOrFloat": "只能输入整数或小数",
+  "generateMax": "最大输入字符不能超出",
+  "generateMin": "输入字符不能小于",
+  "generateUnit": "位",
+  "startDate": "开始时间",
+  "endDate": "结束时间"
 }

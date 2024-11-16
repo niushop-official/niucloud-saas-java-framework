@@ -2,10 +2,10 @@ package com.niu.core.service.core.addon;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.json.JsonLoadUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 
 import java.io.File;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package com.niu.core.common.utils.redis;
 
-import com.niu.core.component.context.SpringContext;
+import com.niu.core.common.component.context.SpringContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 

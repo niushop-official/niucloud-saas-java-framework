@@ -1,5 +1,10 @@
 package com.niu.core.service.admin.sys.vo;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.enums.poster.PosterTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -21,7 +26,15 @@ public class SysPosterListVo implements Serializable {
     private Integer status;  // 是否启用 1启用 2不启用
     private String addon;  // 所属插件
     private Integer isDefault;  // 是否默认海报，1：是，0：否
-    private String createTime; // 创建时间
-    private String updateTime; // 修改时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long createTime; // 创建时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long updateTime; // 修改时间
+    private String typeName;
+
+    public String getTypeName() {
+        JSONObject posterType = PosterTypeEnum.getType(this.type);
+        return posterType != null ? posterType.getStr("name", "") : "";
+    }
 
 }

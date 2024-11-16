@@ -96,7 +96,6 @@
         }
 
         // 判断是否已登录
-        console.log(getToken())
         if (getToken()) {
             const memberStore = useMemberStore()
             await memberStore.setToken(getToken())
@@ -148,7 +147,6 @@
                 // #endif
                 // #ifdef H5
                 if (isWeixinBrowser()) {
-                    console.log("authlogin", data)
                     data.query.code ? login.authLogin(data.query.code) : login.getAuthCode('snsapi_userinfo')
                 }
                 // #endif

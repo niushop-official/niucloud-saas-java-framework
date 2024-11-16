@@ -103,7 +103,7 @@ public class SiteAccountLogServiceImpl implements ISiteAccountLogService {
             list.add(vo);
         }
 
-        return PageResult.build(page, limit).setTotal(iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

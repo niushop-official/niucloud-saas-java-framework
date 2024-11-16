@@ -1,0 +1,4 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-date-picker v-model="${lowerClassName}Table.searchParam.${column.columnName}" type="datetimerange" format="YYYY-MM-DD hh:mm:ss"
+        :start-placeholder="t('startDate')" :end-placeholder="t('endDate')" />
+</el-form-item>

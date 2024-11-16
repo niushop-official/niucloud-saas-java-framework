@@ -5,7 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.exception.CommonException;
@@ -72,7 +72,7 @@ public class WechatMediaServiceImpl implements IWechatMediaService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

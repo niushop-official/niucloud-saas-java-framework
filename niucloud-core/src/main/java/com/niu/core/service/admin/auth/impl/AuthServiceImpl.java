@@ -5,7 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.AuthException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.TreeUtils;

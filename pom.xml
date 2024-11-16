@@ -60,6 +60,8 @@
         <qcloud.version>5.6.219</qcloud.version>
         <alisms.version>3.0.0</alisms.version>
         <alipay.version>2.2.3</alipay.version>
+        <jtscore.version>1.18.1</jtscore.version>
+        <image-combiner.version>2.6.9</image-combiner.version>
     </properties>
 
     <dependencyManagement>
@@ -224,6 +226,11 @@
                 <artifactId>core</artifactId>
                 <version>${zxing.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
             <!-- EasyExcel -->
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -327,6 +334,18 @@
                 <groupId>com.alipay.sdk</groupId>
                 <artifactId>alipay-easysdk</artifactId>
                 <version>${alipay.version}</version>
+            </dependency>
+            <!-- 空间分析 -->
+            <dependency>
+                <groupId>org.locationtech.jts</groupId>
+                <artifactId>jts-core</artifactId>
+                <version>${jtscore.version}</version>
+            </dependency>
+            <!-- 图片合成  -->
+            <dependency>
+                <groupId>com.freewayso</groupId>
+                <artifactId>image-combiner</artifactId>
+                <version>${image-combiner.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

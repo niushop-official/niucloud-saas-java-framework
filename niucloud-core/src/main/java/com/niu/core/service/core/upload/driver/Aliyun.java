@@ -7,7 +7,7 @@ import com.aliyun.oss.common.auth.DefaultCredentialProvider;
 import com.aliyun.oss.common.comm.SignVersion;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
-import com.niu.core.component.upload.exception.UploadException;
+import com.niu.core.common.component.upload.exception.UploadException;
 import com.niu.core.common.loader.upload.BaseUpload;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.admin.sys.param.AttachmentUploadParam;

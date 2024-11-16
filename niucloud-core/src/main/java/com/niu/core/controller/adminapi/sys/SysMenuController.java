@@ -110,4 +110,15 @@ public class SysMenuController {
         return Result.success(sysMenuService.menuTree());
     }
 
+    /**
+     * 获取菜单类型
+     * @param addon
+     * @return
+     */
+    @GetMapping("/menu/dir/{addon}")
+    public Result<JSONArray> getMenuByTypeDir(@PathVariable("addon") String addon) {
+
+        return Result.success(sysMenuService.getMenuByTypeDir(addon));
+    }
+
 }

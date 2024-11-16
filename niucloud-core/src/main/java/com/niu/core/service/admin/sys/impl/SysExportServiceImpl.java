@@ -67,7 +67,7 @@ public class SysExportServiceImpl implements ISysExportService {
         }
 
         IPage<SysExportListVo> iPage = sysExportMapper.selectJoinPage(new Page<>(page, limit), SysExportListVo.class,queryWrapper);
-        return PageResult.build(page, limit).setData(iPage.getRecords());
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     /**

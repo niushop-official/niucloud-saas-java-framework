@@ -5,15 +5,15 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.google.common.io.Files;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.utils.file.AddonUpgradeHelper;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.common.utils.file.PipeNameUtils;
 import com.niu.core.common.utils.json.JsonLoadUtils;
 import com.niu.core.common.utils.system.LocalMavenTools;
 import com.niu.core.common.utils.system.RuntimeTools;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -267,4 +267,34 @@ public class AddonInstallJavaTools {
         return runAddonJsonArray;
     }
 
+    public static void addAddonJson(String addonName) {
+        // 1、读取JAR内容
+        String addonJarPath = RuntimeTools.getWebRootPath() + "/jar/addon/" + addonName + ".jar";
+        File addonJarFile = new File(addonJarPath);
+        if (!addonJarFile.exists()) {
+            throw new RuntimeException("插件" + addonName + ".jar文件不存在.");
+        }
+        // 2、读取JAR中的描述文件
+        JSONObject addonInfoJsonObject = JsonLoadUtils.readJsonObjectFromJarInner(addonJarPath, "info.json");
+        if (addonInfoJsonObject == null) {
+            throw new RuntimeException("插件" + addonName + ".jar文件中描述文件info.json不存在.");
+        }
+        String addonJar = addonInfoJsonObject.getStr("jar");
+        String addonMainClass = addonInfoJsonObject.getStr("mainClass");
+        // 3、插件归档目录下读取==>addon.json文件，文件可以为空
+        String addonRunDescPath = RuntimeTools.getWebRootPath() + "/jar/addon/addon.json";
+        JSONArray runAddonJsonArray = JsonLoadUtils.readFileToJSONArray(addonRunDescPath);
+        boolean containedAddon = checkContainedAddon(runAddonJsonArray, addonName);
+        if (containedAddon) {
+            throw new RuntimeException("插件" + addonName + "已存在,不可以再次安装.");
+        }
+        // 4、添加到插件内容到：addon.json
+        JSONObject newRunJsonObject = new JSONObject();
+        newRunJsonObject.put("name", addonName);
+        newRunJsonObject.put("jar", addonJar);
+        newRunJsonObject.put("mainClass", addonMainClass);
+        runAddonJsonArray.add(newRunJsonObject);
+        String formattedJsonStr = JSONUtil.formatJsonStr(JSONUtil.toJsonStr(runAddonJsonArray));
+        FileTools.write(addonRunDescPath, formattedJsonStr);
+    }
 }

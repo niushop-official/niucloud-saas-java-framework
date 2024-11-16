@@ -76,14 +76,6 @@ public class SysScheduleListVo implements Serializable {
     // 过程
     private String function;
 
-    /**
-     * 获取名称
-     *
-     * @return
-     */
-    public String getName() {
-        return key;
-    }
 
     /**
      * 状态名称

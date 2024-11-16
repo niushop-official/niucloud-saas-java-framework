@@ -103,7 +103,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
                 }
             }
         }
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     /**
@@ -143,7 +143,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<AccountBalanceFlowVo> dataList = CollectUtils.convert(iPage.getRecords(), AccountBalanceFlowVo.class);
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     /**
@@ -178,7 +178,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<AccountBalanceListVo> dataList = CollectUtils.convert(iPage.getRecords(), AccountBalanceListVo.class);
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     /**
@@ -217,7 +217,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<AccountMoneyFlowVo> dataList = CollectUtils.convert(iPage.getRecords(), AccountMoneyFlowVo.class);
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     @Override
@@ -268,7 +268,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<AccountCommissionFlowVo> dataList = CollectUtils.convert(iPage.getRecords(), AccountCommissionFlowVo.class);
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     @Override

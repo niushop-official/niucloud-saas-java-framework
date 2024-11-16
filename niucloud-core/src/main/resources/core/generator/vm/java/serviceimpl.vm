@@ -1,0 +1,177 @@
+package com.niu.${addonName}.service.admin.${moduleName}.impl;
+
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.RequestUtils;
+import com.niu.${addonName}.entity.${moduleName}.${humpTableName};
+import com.niu.${addonName}.mapper.${moduleName}.${humpTableName}Mapper;
+import com.niu.${addonName}.service.admin.${moduleName}.I${className}Service;
+import com.niu.${addonName}.service.admin.${moduleName}.param.${className}Param;
+import com.niu.${addonName}.service.admin.${moduleName}.param.${className}SearchParam;
+import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}InfoVo;
+import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}ListVo;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import javax.annotation.Resource;
+import java.util.LinkedList;
+import java.util.List;
+
+
+/**
+ * ${notes}实现
+ */
+@Service
+public class ${className}ServiceImpl implements I${className}Service {
+        
+    @Resource
+    ${humpTableName}Mapper ${lowerTableName}Mapper;
+
+    @Override
+    public PageResult<${className}ListVo> page(PageParam pageParam, ${className}SearchParam searchParam) {
+        Integer page  = pageParam.getPage();
+        Integer limit =pageParam.getLimit();
+
+        QueryWrapper<${humpTableName}> queryWrapper = new QueryWrapper<>();
+
+        #if($isSiteId == 1)
+            queryWrapper.eq("site_id", RequestUtils.siteId());
+        #end
+
+#foreach($column in $columns)
+    #if($column.isSearch == 1)
+    #if($column.queryType == 'like')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+            queryWrapper.like("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #if($column.queryType == '=')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+        queryWrapper.eq("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #if($column.queryType == '!=')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+        queryWrapper.ne("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #if($column.queryType == '>')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+        queryWrapper.gt("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #if($column.queryType == '>=')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+        queryWrapper.ge("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #if($column.queryType == '<')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+        queryWrapper.lt("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #if($column.queryType == '<=')
+        if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
+        queryWrapper.le("${column.columnName}", searchParam.get${column.columnFiledName}());
+        }
+    #end
+    #end
+#end
+    #if($sortColumn != '')
+        #if($orderType == 1)
+            queryWrapper.orderByAsc("${sortColumn}");
+            #else
+            queryWrapper.orderByDesc("${sortColumn}");
+        #end
+    #end
+        queryWrapper.orderByDesc("${sortColumn}");
+
+        IPage<${humpTableName}> iPage = ${lowerTableName}Mapper.selectPage(new Page<>(page, limit), queryWrapper);
+        List<${className}ListVo> list = new LinkedList<>();
+        for (${humpTableName} item : iPage.getRecords()) {
+            ${className}ListVo vo = new ${className}ListVo();
+            BeanUtils.copyProperties(item, vo);
+            list.add(vo);
+        }
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+    }
+
+    @Override
+    public ${className}InfoVo info(Integer id) {
+        #if($isSiteId == 1)
+        ${humpTableName} model = ${lowerTableName}Mapper.selectOne(
+        new QueryWrapper<${humpTableName}>()
+        .eq("${primaryField}", id)
+        .eq("site_id", RequestUtils.siteId()));
+            #else
+        ${humpTableName} model = ${lowerTableName}Mapper.selectOne(
+        new QueryWrapper<${humpTableName}>()
+        .eq("${primaryField}", id));
+        #end
+
+
+        Assert.notNull(model, "${notes}不存在");
+
+        ${className}InfoVo vo = new ${className}InfoVo();
+        BeanUtils.copyProperties(model, vo);
+        return vo;
+    }
+
+    @Override
+    public void add(${className}Param addParam) {
+
+        ${humpTableName} model = new ${humpTableName}();
+
+        #foreach ($column in $columns)
+            #if($column.isInsert && !$column.columnName.equals($primaryField) && !$column.columnName.equals("site_id"))
+                #if($column.columnName.equals("create_time"))
+        model.set${column.columnFiledName}(System.currentTimeMillis() / 1000);
+                #else
+        model.set${column.columnFiledName}(addParam.get${column.columnFiledName}());
+                #end
+            #end
+        #end
+
+        #if($isSiteId == 1)
+        model.setSiteId(RequestUtils.siteId());
+        #end
+
+        ${lowerTableName}Mapper.insert(model);
+    }
+
+    @Override
+    public void edit(Integer id, ${className}Param editParam) {
+
+        ${humpTableName} model = ${lowerTableName}Mapper.selectOne(
+                new QueryWrapper<${humpTableName}>()
+                        .eq("${primaryField}", id)
+                        .eq("site_id", RequestUtils.siteId()));
+
+        Assert.notNull(model, "${notes}不存在");
+    #foreach ($column in $columns)
+        #if($column.isUpdate && !$column.columnName.equals($primaryField) && !$column.columnName.equals("site_id"))
+            #if($column.columnName.equals("update_time"))
+        model.set${column.columnFiledName}(System.currentTimeMillis() / 1000);
+            #else
+        model.set${column.columnFiledName}(editParam.get${column.columnFiledName}());
+            #end
+        #end
+    #end
+        ${lowerTableName}Mapper.updateById(model);
+    }
+
+    @Override
+    public void del(Integer id) {
+    #if($isSiteId == 1)
+        ${lowerTableName}Mapper.delete(new QueryWrapper<${humpTableName}>().eq("${primaryField}", id).eq("site_id", RequestUtils.siteId()));
+        #else
+        ${lowerTableName}Mapper.delete(new QueryWrapper<${humpTableName}>().eq("${primaryField}", id));
+    #end
+    }
+}

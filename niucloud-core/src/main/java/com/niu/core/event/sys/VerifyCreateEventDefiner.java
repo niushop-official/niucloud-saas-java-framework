@@ -1,8 +1,8 @@
 package com.niu.core.event.sys;
 
-import com.niu.core.component.context.event.Event;
-import com.niu.core.component.context.event.EventResult;
-import com.niu.core.component.context.listener.CallbackListener;
+import com.niu.core.common.component.context.event.Event;
+import com.niu.core.common.component.context.event.EventResult;
+import com.niu.core.common.component.context.listener.CallbackListener;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * 事件定义者
  */
-public abstract class VerifyCreateEventDefiner extends CallbackListener {
+public abstract class VerifyCreateEventDefiner extends CallbackListener<VerifyCreateEventDefiner.VerifyCreateEvent> {
 
     /**
      * 事件主题： 核销创建

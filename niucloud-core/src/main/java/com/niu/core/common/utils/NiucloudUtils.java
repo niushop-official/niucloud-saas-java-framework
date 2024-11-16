@@ -7,9 +7,9 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.cache.Cached;
-import com.niu.core.component.context.cache.CacheFactory;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.CacheFactory;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.service.admin.sys.vo.SysDeveloperTokenVo;
 import com.niu.core.service.core.niucloud.ICoreNiucloudConfigService;
@@ -180,7 +180,7 @@ public class NiucloudUtils {
      * niucloud云服务器
      */
     public static class Cloud {
-        private String baseUrl = "http://oss.niucloud.com/";
+        private String baseUrl = "http://8.152.194.94:8000/";
 
         private String url;
 

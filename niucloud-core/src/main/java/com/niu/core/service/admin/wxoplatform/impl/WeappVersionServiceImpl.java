@@ -1,28 +1,20 @@
 package com.niu.core.service.admin.wxoplatform.impl;
 
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
-import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.oplatform.WxOplatfromWeappVersion;
-import com.niu.core.entity.sys.SysRole;
-import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.mapper.oplatform.WxOplatfromWeappVersionMapper;
-import com.niu.core.service.admin.site.vo.SiteUserVo;
 import com.niu.core.service.admin.wxoplatform.IWeappVersionService;
 import com.niu.core.service.admin.wxoplatform.vo.WxOplatfromWeappVersionVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class WeappVersionServiceImpl implements IWeappVersionService {
@@ -69,7 +61,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
         wxOplatfromMPJQueryWrapper.orderByDesc(" wowv.id ");
 
         IPage<WxOplatfromWeappVersionVo> iPage = wxOplatfromWeappVersionMapper.selectJoinPage(new Page<>(page, limit), WxOplatfromWeappVersionVo.class, wxOplatfromMPJQueryWrapper);
-        return PageResult.build(page, limit).setTotal(iPage.getTotal()).setData(iPage.getRecords());
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
 

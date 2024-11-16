@@ -1,8 +1,8 @@
 package com.niu.core.event.sys;
 
-import com.niu.core.component.context.event.Event;
-import com.niu.core.component.context.event.DefaultEventResult;
-import com.niu.core.component.context.listener.CallbackListener;
+import com.niu.core.common.component.context.event.Event;
+import com.niu.core.common.component.context.event.DefaultEventResult;
+import com.niu.core.common.component.context.listener.CallbackListener;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -22,7 +22,7 @@ public abstract class VerifyEventDefiner extends CallbackListener<VerifyEventDef
 
         private String code;
 
-        private String data;
+        private Map<String, Object> data;
 
         private String value;
 
@@ -32,7 +32,7 @@ public abstract class VerifyEventDefiner extends CallbackListener<VerifyEventDef
 
         private String relateTag;
 
-        private String createTime;
+        private Long createTime;
 
         private Integer verifierMemberId;
 
@@ -42,12 +42,13 @@ public abstract class VerifyEventDefiner extends CallbackListener<VerifyEventDef
         public void build(Map<String, Object> dataMap) {
             if (dataMap != null) {
                 this.code = (String) dataMap.get("code");
-                this.data = (String) dataMap.get("data");
+                this.data = (Map<String, Object>) dataMap.get("data");
                 this.value = (String) dataMap.get("value");
+                this.type = (String) dataMap.get("type");
                 this.body = (String) dataMap.get("body");
-                this.relateTag = (String) dataMap.get("relateTag");
-                this.createTime = (String) dataMap.get("createTime");
-                this.verifierMemberId = (Integer) dataMap.get("verifierMemberId");
+                this.relateTag = (String) dataMap.get("relate_tag");
+                this.createTime = (Long) dataMap.get("create_time");
+                this.verifierMemberId = (Integer) dataMap.get("verifier_member_id");
             }
         }
     }

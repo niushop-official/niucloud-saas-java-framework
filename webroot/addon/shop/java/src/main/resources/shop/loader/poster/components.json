@@ -1,0 +1,68 @@
+{
+	"shop_goods": {
+		"title": "商品组件",
+		"support": ["fenxiao_goods", "shop_point_goods"],
+		"list": {
+			"GoodsImage": {
+				"title": "商品图片",
+				"type": "image",
+				"icon": "iconfont iconshangpintupian",
+				"path": "goods-image",
+				"uses": 1,
+				"sort": 10006,
+				"relate": "goods_img",
+				"value": "",
+				"template": {
+					"width": 400,
+					"height": 400,
+					"minWidth": 60,
+					"minHeight": 60
+				}
+			},
+			"GoodsName": {
+				"title": "商品名称",
+				"type": "text",
+				"icon": "iconfont icona-Group13",
+				"path": "goods-name",
+				"uses": 1,
+				"sort": 10007,
+				"relate": "goods_name",
+				"value": "",
+				"template": {
+					"width": 164,
+					"height": 55
+				}
+			},
+			"GoodsPrice": {
+				"title": "销售价",
+				"type": "text",
+				"icon": "iconfont iconshoujia",
+				"path": "goods-price",
+				"uses": 1,
+				"sort": 10008,
+				"relate": "goods_price",
+				"value": "",
+				"template": {
+					"fontFamily": "static/font/price.ttf",
+					"width": 151,
+					"height": 49
+				}
+			},
+			"GoodsMarketPrice": {
+				"title": "划线价",
+				"type": "text",
+				"icon": "iconfont iconhuajiaqian",
+				"path": "goods-market-price",
+				"uses": 1,
+				"sort": 10009,
+				"relate": "goods_market_price",
+				"value": "",
+				"template": {
+					"fontFamily": "static/font/price.ttf",
+					"width": 170,
+					"height": 48
+				}
+			}
+		}
+	}
+}

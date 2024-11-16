@@ -4,7 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.annotation.EventCallback;
-import com.niu.core.component.context.event.DefaultEventResult;
+import com.niu.core.common.component.context.event.DefaultEventResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.loader.notice.NoticeDataVo;
 import com.niu.core.entity.member.Member;

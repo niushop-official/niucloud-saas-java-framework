@@ -5,7 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.BaseException;
 import com.niu.core.common.utils.RequestUtils;
@@ -13,6 +13,7 @@ import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.entity.sys.SysMenu;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.enums.sys.MenuSourceEnum;
 import com.niu.core.mapper.sys.SysMenuMapper;
 import com.niu.core.service.admin.sys.ISysMenuService;
@@ -34,7 +35,7 @@ import java.util.*;
 public class SysMenuServiceImpl implements ISysMenuService {
 
     /** 菜单tag */
-    public static String cacheTagName = "MenuCache";
+    public static String cacheTagName = CacheTagEnum.MENU_CACHE.getTagName();
 
     /** 是否使用缓存 */
     static final boolean useCache = true;
@@ -149,31 +150,38 @@ public class SysMenuServiceImpl implements ISysMenuService {
 
     @Override
     public JSONArray menuTree() {
-        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("app_type", "site");
-        queryWrapper.orderByDesc(Arrays.asList("sort", "id"));
-        List<SysMenu> sysMenuList = sysMenuMapper.selectList(queryWrapper);
-        JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(sysMenuList));
-        return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
+
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("menuTree"), uniqueKey ->{
+
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("app_type", "site");
+            queryWrapper.orderByDesc(Arrays.asList("sort", "id"));
+            List<SysMenu> sysMenuList = sysMenuMapper.selectList(queryWrapper);
+            JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(sysMenuList));
+            return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
+        });
     }
 
     @Override
     public Map<String, List<String>> getAllApiList(String app_type, Integer status) {
-        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("api_url", "");
-        queryWrapper.eq("app_type", app_type);
-        if (status != 100) {
-            queryWrapper.eq("status", status);
-        }
-        List<SysMenu> list = sysMenuMapper.selectList(queryWrapper);
-        Map<String, List<String>> apiMap = new HashMap<>();
-        for (SysMenu sysMenu : list) {
-            if (!apiMap.containsKey(sysMenu.getMethods())) {
-                apiMap.put(sysMenu.getMethods(), new ArrayList<String>());
+
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getAllApiList", app_type, status), uniqueKey ->{
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.ne("api_url", "");
+            queryWrapper.eq("app_type", app_type);
+            if (status != 100) {
+                queryWrapper.eq("status", status);
             }
-            apiMap.get(sysMenu.getMethods()).add(sysMenu.getApiUrl());
-        }
-        return apiMap;
+            List<SysMenu> list = sysMenuMapper.selectList(queryWrapper);
+            Map<String, List<String>> apiMap = new HashMap<>();
+            for (SysMenu sysMenu : list) {
+                if (!apiMap.containsKey(sysMenu.getMethods())) {
+                    apiMap.put(sysMenu.getMethods(), new ArrayList<String>());
+                }
+                apiMap.get(sysMenu.getMethods()).add(sysMenu.getApiUrl());
+            }
+            return apiMap;
+        });
     }
 
     /**
@@ -185,23 +193,26 @@ public class SysMenuServiceImpl implements ISysMenuService {
      */
     @Override
     public Map<String, List<String>> getApiListBySystem(String appType, List<String> addons) {
-        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
-        if (addons.size() > 0) {
-            queryWrapper.in("addon", addons);
-        }
-        if (ObjectUtil.isNotEmpty(appType)) {
-            queryWrapper.eq("app_type", appType);
-        }
-        queryWrapper.orderByDesc("sort");
-        List<SysMenu> list = sysMenuMapper.selectList(queryWrapper);
-        Map<String, List<String>> apiMap = new HashMap<>();
-        for (SysMenu sysMenu : list) {
-            if (!apiMap.containsKey(sysMenu.getMethods())) {
-                apiMap.put(sysMenu.getMethods(), new ArrayList<String>());
+
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getApiListBySystem", appType, addons), uniqueKey ->{
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            if (addons.size() > 0) {
+                queryWrapper.in("addon", addons);
             }
-            apiMap.get(sysMenu.getMethods()).add(sysMenu.getApiUrl());
-        }
-        return apiMap;
+            if (ObjectUtil.isNotEmpty(appType)) {
+                queryWrapper.eq("app_type", appType);
+            }
+            queryWrapper.orderByDesc("sort");
+            List<SysMenu> list = sysMenuMapper.selectList(queryWrapper);
+            Map<String, List<String>> apiMap = new HashMap<>();
+            for (SysMenu sysMenu : list) {
+                if (!apiMap.containsKey(sysMenu.getMethods())) {
+                    apiMap.put(sysMenu.getMethods(), new ArrayList<String>());
+                }
+                apiMap.get(sysMenu.getMethods()).add(sysMenu.getApiUrl());
+            }
+            return apiMap;
+        });
     }
 
     /**
@@ -213,26 +224,28 @@ public class SysMenuServiceImpl implements ISysMenuService {
      */
     @Override
     public Map<String, List<String>> getApiListByMenuKeys(String appType, List<String> menuKeys) {
-        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
-        if (menuKeys.size() > 0) {
-            queryWrapper.in("menu_key", menuKeys);
-        } else {
-            queryWrapper.in("menu_key", " ");
-        }
-
-        if (ObjectUtil.isNotEmpty(appType)) {
-            queryWrapper.eq("app_type", appType);
-        }
-        queryWrapper.orderByDesc("sort");
-        List<SysMenu> list = sysMenuMapper.selectList(queryWrapper);
-        Map<String, List<String>> apiMap = new HashMap<>();
-        for (SysMenu sysMenu : list) {
-            if (!apiMap.containsKey(sysMenu.getMethods())) {
-                apiMap.put(sysMenu.getMethods(), new ArrayList<String>());
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getApiListByMenuKeys", appType, menuKeys), uniqueKey ->{
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            if (menuKeys.size() > 0) {
+                queryWrapper.in("menu_key", menuKeys);
+            } else {
+                queryWrapper.in("menu_key", " ");
             }
-            apiMap.get(sysMenu.getMethods()).add(sysMenu.getApiUrl());
-        }
-        return apiMap;
+
+            if (ObjectUtil.isNotEmpty(appType)) {
+                queryWrapper.eq("app_type", appType);
+            }
+            queryWrapper.orderByDesc("sort");
+            List<SysMenu> list = sysMenuMapper.selectList(queryWrapper);
+            Map<String, List<String>> apiMap = new HashMap<>();
+            for (SysMenu sysMenu : list) {
+                if (!apiMap.containsKey(sysMenu.getMethods())) {
+                    apiMap.put(sysMenu.getMethods(), new ArrayList<String>());
+                }
+                apiMap.get(sysMenu.getMethods()).add(sysMenu.getApiUrl());
+            }
+            return apiMap;
+        });
     }
 
     /**
@@ -248,35 +261,33 @@ public class SysMenuServiceImpl implements ISysMenuService {
      */
     @Override
     public List<SysMenu> getMenuListByCondition(String appType, Integer siteId, Integer status, Integer isButton, List<String> menuKeys, String addon) {
-        List<String> addonList = coreSiteService.getAddonKeysBySiteId(siteId);
-        QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
-        if (ObjectUtil.isNotEmpty(appType)) {
-            queryWrapper.eq("app_type", appType);
-        }
-        if (addonList.size() > 0) {
-            addonList.add("");
-            queryWrapper.in("addon", addonList);
-        } else {
-            queryWrapper.in("addon", "");
-        }
-        if (status != 100) {
-            queryWrapper.eq("status", status);
-        }
-        if (menuKeys.size() > 0) {
-            queryWrapper.in("menu_key", menuKeys);
-        }
-        if (isButton == 0) {
-            queryWrapper.ne("menu_type", 2);
-        }
+        return cached.remember(useCache, cacheTagName, Arrays.asList("getMenuListByCondition", appType, siteId, status, isButton, menuKeys, addon), uniqueKey -> {
+            List<String> addonList = coreSiteService.getAddonKeysBySiteId(siteId);
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            if (ObjectUtil.isNotEmpty(appType)) {
+                queryWrapper.eq("app_type", appType);
+            }
+            if (addonList.size() > 0) {
+                addonList.add("");
+                queryWrapper.in("addon", addonList);
+            } else {
+                queryWrapper.in("addon", "");
+            }
+            if (status != 100) {
+                queryWrapper.eq("status", status);
+            }
+            if (menuKeys.size() > 0) {
+                queryWrapper.in("menu_key", menuKeys);
+            }
+            if (isButton == 0) {
+                queryWrapper.ne("menu_type", 2);
+            }
 
-        //排除菜单 后期处理
+            //排除菜单 后期处理
 
-        List<SysMenu> menuList = sysMenuMapper.selectList(queryWrapper);
-        /*for (SysMenu sysMenu: menuList) {
-            String langMenuKey="";
-            sysMenu.setMenuName(LanguageUtils.get(""));
-        }*/
-        return menuList;
+            List<SysMenu> menuList = sysMenuMapper.selectList(queryWrapper);
+            return menuList;
+        });
     }
 
     /**
@@ -345,6 +356,22 @@ public class SysMenuServiceImpl implements ISysMenuService {
         }
         SysMenu sysMenu=sysMenuMapper.selectOne(queryWrapper);
         return sysMenu;
+    }
+
+    @Override
+    public JSONArray getMenuByTypeDir(String addon) {
+        List<SysMenu> outterMenuList= cached.remember(useCache, cacheTagName, Arrays.asList("getMenuByTypeDir", addon), uniqueKey -> {
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("app_type", "site");
+            queryWrapper.eq("menu_type", "0");
+            queryWrapper.eq("addon", addon.equals("system")? "": addon);
+            queryWrapper.orderByDesc("sort");
+            return sysMenuMapper.selectList(queryWrapper);
+        });
+
+        //暂无多语言设计
+        JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(outterMenuList));
+        return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
     }
 
 }

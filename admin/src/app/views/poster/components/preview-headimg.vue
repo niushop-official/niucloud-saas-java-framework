@@ -1,6 +1,6 @@
 <template>
-	<div class="pointer-events-none max-w-[360px]" :style="componentStyle">
-		<img src="@/app/assets/images/default_headimg.png" class="w-full h-full" />
+	<div class="pointer-events-none max-w-[720px]" :style="componentStyle">
+		<img src="@/app/assets/images/default_headimg_square.jpg" class="w-full h-full" />
 	</div>
 </template>
 
@@ -22,6 +22,9 @@ const data = computed(()=> {
 const componentStyle = computed(()=> {
     var style = '';
     style += `width: ${prop.value.width}px;`;
+    if(prop.value.shape == 'circle'){
+        style += `border-radius: 50%; overflow: hidden;`;
+    }
     return style;
 })
 

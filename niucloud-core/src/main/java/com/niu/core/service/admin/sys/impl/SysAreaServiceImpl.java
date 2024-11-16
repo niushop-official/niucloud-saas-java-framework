@@ -1,25 +1,29 @@
 package com.niu.core.service.admin.sys.impl;
 
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.entity.sys.SysArea;
 import com.niu.core.mapper.sys.SysAreaMapper;
 import com.niu.core.service.admin.sys.ISysAreaService;
 import com.niu.core.service.admin.sys.param.SysAreaSearchParam;
+import com.niu.core.service.admin.sys.vo.SysAreaByCodeVo;
 import com.niu.core.service.admin.sys.vo.SysAreaListVo;
+import com.niu.core.service.admin.sys.vo.SysMapVo;
+import com.niu.core.service.core.sys.ICoreSysConfigService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 地址实现
@@ -29,6 +33,9 @@ public class SysAreaServiceImpl implements ISysAreaService {
 
     @Resource
     SysAreaMapper sysAreaMapper;
+
+    @Resource
+    ICoreSysConfigService coreSysConfigService;
 
     @Override
     public List<SysArea> getListByPid(Integer pid) {
@@ -48,10 +55,29 @@ public class SysAreaServiceImpl implements ISysAreaService {
     }
 
     @Override
-    public JSONArray getAreaByAreaCode(Integer id) {
-        SysArea areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", id).last("limit 1"));
+    public Map<String, SysAreaByCodeVo> getAreaByAreaCode(Integer id) {
+        Map<String, SysAreaByCodeVo> area = new HashMap<>();
+        String[] keys = { "", "province", "city", "district" };
+        SysArea areaInfo = null;
+        SysAreaByCodeVo vo = null;
 
-        return null;
+        areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", id).select("id,level,pid,name"));
+        if (areaInfo != null) {
+            vo = new SysAreaByCodeVo();
+            BeanUtils.copyProperties(areaInfo, vo);
+            area.put(keys[areaInfo.getLevel()], vo);
+
+            while (areaInfo.getLevel() > 1) {
+                areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", areaInfo.getPid()).select("id,level,pid,name"));
+                if (areaInfo != null) {
+                    vo = new SysAreaByCodeVo();
+                    BeanUtils.copyProperties(areaInfo, vo);
+                    area.put(keys[areaInfo.getLevel()], vo);
+                }
+            }
+        }
+
+        return area;
     }
 
     @Override
@@ -94,7 +120,31 @@ public class SysAreaServiceImpl implements ISysAreaService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
+    /**
+     * 逆地址解析
+     * @param location
+     * @return
+     */
+    public JSONObject getAddressInfo(String location) {
+        SysMapVo map = coreSysConfigService.getMap(RequestUtils.siteId());
+        String result = HttpUtil.get("https://apis.map.qq.com/ws/geocoder/v1/?location="+ location +"&key=" + map.getKey());
+        if (!JSONUtil.isJson(result)) return null;
+        return JSONUtil.parseObj(result);
+    }
+
+    /**
+     * 地址解析
+     * @param address
+     * @return
+     */
+    @Override
+    public JSONObject getAddress(String address) {
+        SysMapVo map = coreSysConfigService.getMap(RequestUtils.siteId());
+        String result = HttpUtil.get("https://apis.map.qq.com/ws/geocoder/v1/?address="+ address +"&key=" + map.getKey());
+        if (!JSONUtil.isJson(result)) return null;
+        return JSONUtil.parseObj(result);
+    }
 }

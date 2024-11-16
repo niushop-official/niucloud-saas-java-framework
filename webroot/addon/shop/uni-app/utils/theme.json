@@ -1,0 +1,10 @@
+{
+  "--primary-color": "#FF4142",
+  "--primary-help-color": "#FB7939",
+  "--primary-color-dark": "#F26F3E",
+  "--primary-color-disabled": "#FFB397",
+  "--primary-color-light": "#FFF4F4",
+  "--primary-color-light2": "rgba(255,65,66,.04)",
+  "--page-bg-color": "#f6f6f6",
+  "--price-text-color": "#FF4142"
+}

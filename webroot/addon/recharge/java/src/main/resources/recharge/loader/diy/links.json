@@ -1,6 +1,7 @@
 {
   "RECHARGE_LINK": {
     "title": "会员充值",
+    "name": "recharge_link",
     "addon_info": {
       "title": "会员充值",
       "key": "recharge"

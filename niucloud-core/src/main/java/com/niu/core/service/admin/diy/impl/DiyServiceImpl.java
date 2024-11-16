@@ -82,7 +82,7 @@ public class DiyServiceImpl implements IDiyService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page,limit).setTotal(iPage.getTotal()).setData(list);
+        return PageResult.build(page,limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -345,9 +345,10 @@ public class DiyServiceImpl implements IDiyService {
         JSONObject pages = PagesEnum.getPagesByAddon(type, addon);
         if (pages == null || pages.keySet().size() == 0) return null;
 
-        JSONObject data = new JSONObject();
+        String template = pages.keySet().iterator().next();
+        JSONObject data = pages.getJSONObject(template);
         data.set("type", type);
-        data.set("template", pages.getJSONObject(pages.keySet().iterator().next()));
+        data.set("template", template);
 
         return data;
     }
@@ -468,7 +469,7 @@ public class DiyServiceImpl implements IDiyService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page,limit).setTotal(iPage.getTotal()).setData(list);
+        return PageResult.build(page,limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -477,37 +478,67 @@ public class DiyServiceImpl implements IDiyService {
      * @param param
      */
     public void setDiyData(SetDiyDataParam param) {
+        String addonFlag = param.getKey();
+
         TemplateParam templateParam = new TemplateParam();
         String[] key = { param.getKey() };
         templateParam.setKey(key);
         JSONObject template = getTemplate(templateParam).getJSONObject(param.getKey());
         if (template == null) return;
+
+        if (!param.getAddon().isEmpty()) {
+            TemplateParam addonTemplateParam = new TemplateParam();
+            addonTemplateParam.setAddon(param.getAddon());
+            addonTemplateParam.setType(param.getType());
+            JSONObject addonTemplate = getTemplate(addonTemplateParam);
+            if (addonTemplate != null) {
+                addonFlag = addonTemplate.keySet().iterator().next();
+                template = addonTemplate.getJSONObject(addonFlag);
+            }
+        }
+
         JSONObject pages = template.getJSONObject("template");
         if (pages.isEmpty()) return;
 
         String pageKey = pages.keySet().iterator().next();
         JSONObject page = pages.getJSONObject(pageKey);
 
-        RequestUtils.setSiteId(param.getSiteId());
+        DiyPage info = diyPageMapper.selectOne(new QueryWrapper<DiyPage>()
+                .eq("name", addonFlag)
+                .eq("site_id", param.getSiteId())
+                .eq("is_default", 1)
+        );
 
-        DiyPageParam addParam = new DiyPageParam();
-        addParam.setTitle(page.getStr("title", ""));
-        addParam.setPageTitle(page.getStr("title", ""));
-        addParam.setName(param.getKey());
-        addParam.setType(param.getKey());
-        addParam.setTemplate(pageKey);
-        addParam.setValue(page.getJSONObject("data").toString());
-        addParam.setMode(page.getStr("mode", ""));
-        addParam.setIsDefault(1);
-        addParam.setIsChange(0);
-        this.add(addParam);
+        if (info == null) {
+            RequestUtils.setSiteId(param.getSiteId());
+            DiyPageParam addParam = new DiyPageParam();
+            addParam.setTitle(page.getStr("title", ""));
+            addParam.setPageTitle(page.getStr("title", ""));
+            addParam.setName(addonFlag);
+            addParam.setType(addonFlag);
+            addParam.setTemplate(pageKey);
+            addParam.setValue(page.getJSONObject("data").toString());
+            addParam.setMode(page.getStr("mode", ""));
+            addParam.setIsDefault(1);
+            addParam.setIsChange(0);
+            this.add(addParam);
+        } else {
+            if (info.getName().equals("DIY_INDEX") && info.getType().equals("DIY_INDEX")) {
+                DiyPage update = new DiyPage();
+                update.setId(info.getId());
+                update.setValue(page.getJSONObject("data").toString());
+                diyPageMapper.updateById(update);
+            }
+        }
 
-        StartUpPageConfigParam startPage = new StartUpPageConfigParam();
-        startPage.setType(param.getKey());
-        startPage.setMode(page.getStr("mode", ""));
-        startPage.setTitle(page.getStr("title", ""));
-        startPage.setAction(template.getStr("action", ""));
-        startPage.setPage(template.getStr("page"));
-        this.changeTemplate(startPage);
+        if (param.getIsStart().equals(1)) {
+            StartUpPageConfigParam startPage = new StartUpPageConfigParam();
+            startPage.setType(param.getKey());
+            startPage.setMode(page.getStr("mode", ""));
+            startPage.setTitle(page.getStr("title", ""));
+            startPage.setAction(template.getStr("action", ""));
+            startPage.setPage(template.getStr("page"));
+            this.changeTemplate(startPage);
+        }
     }
 }

@@ -92,7 +92,7 @@ public interface ICoreMemberService {
      * @param memberId
      * @param key
      */
-    void sendGrowth(Integer siteId, Integer memberId, String key, MemberAccountLogParam param);
+    void sendGrowth(Integer siteId, Integer memberId, String key, Map<String, Object> data);
 
     /**
      * 发放积分
@@ -101,7 +101,7 @@ public interface ICoreMemberService {
      * @param memberId
      * @param key
      */
-    void sendPoint(Integer siteId, Integer memberId, String key, MemberAccountLogParam param);
+    void sendPoint(Integer siteId, Integer memberId, String key, Map<String, Object> data);
 
     /**
      * 发放礼包

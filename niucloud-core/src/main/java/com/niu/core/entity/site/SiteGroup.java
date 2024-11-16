@@ -26,19 +26,15 @@ public class SiteGroup implements Serializable {
     private String groupDesc;
 
     /** 应用 */
-    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String app;
 
     /** 插件 */
-    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String addon;
 
     /** 添加时间 */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;
 
     /** 更新时间 */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long updateTime;
 
 }

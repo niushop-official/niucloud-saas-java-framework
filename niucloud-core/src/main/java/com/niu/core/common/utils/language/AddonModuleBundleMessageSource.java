@@ -1,8 +1,8 @@
 package com.niu.core.common.utils.language;
 
 import cn.hutool.core.util.StrUtil;
-import com.niu.core.config.GlobalConfig;
-import com.niu.core.config.dataization.AddonModuleContext;
+import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.config.dataization.AddonModuleContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;

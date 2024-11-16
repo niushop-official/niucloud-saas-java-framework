@@ -22,9 +22,9 @@ spring:
       max-request-size: 50MB
   # 数据源配置项
   datasource:
-    url:
-    username:
-    password:
+    url: jdbc:mysql://127.0.0.1:3306/***?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     druid:
@@ -91,11 +91,11 @@ mybatis-plus:
     banner: false
     db-config:
       id-type: auto #主键策略
-      table-prefix: ns_ #表前缀
+      table-prefix: nc_ #表前缀
       logic-delete-value: 1
       logic-not-delete-value: 0
   configuration-properties:
-    prefix: ns_
+    prefix: nc_
 
 
 # Sa-Token 配置 (文档: https://sa-token.cc)

@@ -1,6 +1,7 @@
 {
   "CMS_LINK": {
     "title": "微官网",
+    "name": "cms_link",
     "addon_info": {
       "title": "微官网",
       "key": "cms"

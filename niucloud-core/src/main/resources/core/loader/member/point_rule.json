@@ -6,7 +6,12 @@
       "desc": "会员注册之后发放积分",
       "component": "/src/app/views/member/components/point-rule-register.vue",
       "calculate": {
-        "driver": "com.niu.core.service.core.member.driver.PointRuleDriver"
+        "driver": "com.niu.core.service.core.member.driver.PointRuleRegisterDriver"
+      },
+      "content": {
+        "admin": {
+          "driver": "com.niu.core.service.core.member.driver.PointRuleRegisterDriver"
+        }
       }
     }
   },

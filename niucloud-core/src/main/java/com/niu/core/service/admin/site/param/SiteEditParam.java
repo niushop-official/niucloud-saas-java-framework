@@ -20,7 +20,7 @@ public class SiteEditParam implements Serializable {
     private Integer groupId;
 
     @NotNull(message = "expire_time参数缺失")
-    private long expireTime;
+    private String expireTime;
 
     @NotNull(message = "siteDomain参数缺失")
     private String siteDomain;

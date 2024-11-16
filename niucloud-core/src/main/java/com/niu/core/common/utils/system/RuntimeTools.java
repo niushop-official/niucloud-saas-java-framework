@@ -1,6 +1,6 @@
 package com.niu.core.common.utils.system;
 
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 
 import java.io.File;
 import java.net.URLDecoder;

@@ -1,0 +1,5 @@
+ <el-table-column :label="t('${lowerColumnName}')" min-width="180" align="center" :show-overflow-tooltip="true">
+    <template #default="{ row }">
+        {{ row.${column.columnName} || '' }}
+    </template>
+</el-table-column>

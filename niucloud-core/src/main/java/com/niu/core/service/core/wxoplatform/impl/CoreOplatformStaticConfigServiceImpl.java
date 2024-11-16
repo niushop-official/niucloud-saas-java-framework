@@ -2,7 +2,7 @@ package com.niu.core.service.core.wxoplatform.impl;
 
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.enums.sys.ConfigKeyEnum;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
 import com.niu.core.service.core.sys.ICoreConfigService;

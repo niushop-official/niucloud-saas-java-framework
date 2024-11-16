@@ -7,15 +7,15 @@ import lombok.Data;
 @Data
 public class MemberSignConfigVo {
 
-    private Boolean isUse;
+    private Boolean isUse = false;
 
-    private Integer signPeriod;
+    private Integer signPeriod = 0;
 
-    private JSONObject dayAward;
+    private JSONObject dayAward = new JSONObject();
 
-    private JSONArray continueAward;
+    private JSONArray continueAward = new JSONArray();
 
-    private String ruleExplain;
+    private String ruleExplain = "";
 
     private Boolean isSign;
 

@@ -2,7 +2,7 @@ package com.niu.core.service.admin.addon.impl;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.file.FileTools;

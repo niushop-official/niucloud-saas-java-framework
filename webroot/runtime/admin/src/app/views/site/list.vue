@@ -126,7 +126,7 @@
                                 <template #dropdown>
                                     <div class="flex flex-col py-[5px] px-[10px]">
                                         <el-button type="primary" link @click="editEvent(row)">{{ t('edit') }}</el-button>
-                                        <el-button type="primary" class="mt-[5px] !ml-[0]" link @click="deleteEvent(row)">{{ t('delete') }}</el-button>
+                                        <!-- <el-button type="primary" class="mt-[5px] !ml-[0]" link @click="deleteEvent(row)">{{ t('delete') }}</el-button> -->
                                         <el-button type="primary" class="mt-[5px] !ml-[0]" link @click="infoEvent(row)">{{ t('info') }}</el-button>
                                     </div>
                                 </template>

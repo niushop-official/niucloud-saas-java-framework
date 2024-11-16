@@ -1,7 +1,6 @@
 package com.niu.core.service.admin.site.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -11,10 +10,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.common.utils.crypto.PasswordEncipher;
-import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.config.GlobalConfig;
-import com.niu.core.entity.site.Site;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.sys.SysRole;
 import com.niu.core.entity.sys.SysUser;
 import com.niu.core.entity.sys.SysUserRole;
@@ -23,22 +19,18 @@ import com.niu.core.mapper.sys.SysRoleMapper;
 import com.niu.core.mapper.sys.SysUserMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
 import com.niu.core.service.admin.site.ISiteUserService;
-import com.niu.core.service.admin.site.param.SiteGroupSearchParam;
 import com.niu.core.service.admin.site.param.SiteUserParam;
 import com.niu.core.service.admin.site.param.SiteUserSearchParam;
-import com.niu.core.service.admin.site.vo.SiteListVo;
 import com.niu.core.service.admin.site.vo.SiteUserVo;
 import com.niu.core.service.admin.sys.ISysUserRoleService;
 import com.niu.core.service.admin.sys.ISysUserService;
 import com.niu.core.service.admin.sys.param.SysUserParam;
 import com.niu.core.service.admin.sys.param.SysUserRoleParam;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -89,7 +81,7 @@ public class SiteUserServiceImpl implements ISiteUserService {
             }
             siteUserVo.setRoleArray(roleArray);
         }
-        return PageResult.build(page, limit).setTotal(iPage.getTotal()).setData(iPage.getRecords());
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     /**

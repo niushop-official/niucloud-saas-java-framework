@@ -5,11 +5,12 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.common.utils.json.JsonLoadUtils;
-import com.niu.core.config.dataization.AddonModuleContext;
+import com.niu.core.common.config.dataization.AddonModuleContext;
+import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.mapper.addon.AddonMapper;
@@ -37,17 +38,15 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
     public void refreshAddonMenu(String addon) {
         this.deleteMenu(addon, false);
 
-        String adminMenuString=AddonModuleContext.readResourceAsStreamToText(addon, "menu/admin.json");
-        if(ObjectUtil.isNotNull(adminMenuString) && ObjectUtil.isNotEmpty(adminMenuString)){
-            JSONObject adminMenu = JSONUtil.parseObj(adminMenuString);
+        JSONObject adminMenu = JsonModuleLoader.build().getResultElement(addon, "menu/admin.json");
+        if(ObjectUtil.isNotEmpty(adminMenu)){
             if (adminMenu.getJSONArray("menu") != null) {
                 List<SysMenu> adminMenuBeanList = this.menuTreeToList(TreeUtils.treeToList(adminMenu.getJSONArray("menu"), "parent_key", "", "menu_key", "children"), addon, "admin");
                 super.saveBatch(adminMenuBeanList);
             }
         }
-        String siteMenuString=AddonModuleContext.readResourceAsStreamToText(addon, "menu/site.json");
-        if(ObjectUtil.isNotNull(siteMenuString) && ObjectUtil.isNotEmpty(siteMenuString)){
-            JSONObject siteMenu = JSONUtil.parseObj(siteMenuString);
+        JSONObject siteMenu = JsonModuleLoader.build().getResultElement(addon, "menu/site.json");
+        if(ObjectUtil.isNotEmpty(siteMenu)){
             if (siteMenu.getJSONArray("menu") != null) {
                 List<SysMenu> siteMenuBeanList = this.menuTreeToList(TreeUtils.treeToList(siteMenu.getJSONArray("menu"), "parent_key", "", "menu_key", "children"), addon, "site");
                 super.saveBatch(siteMenuBeanList);

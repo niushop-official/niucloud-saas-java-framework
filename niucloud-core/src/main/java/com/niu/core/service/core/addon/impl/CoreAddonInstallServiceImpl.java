@@ -8,13 +8,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.file.AddonUpgradeHelper;
 import com.niu.core.common.utils.file.FileTools;
-import com.niu.core.component.context.WebAppEnvs;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.core.addon.*;
 import com.niu.core.service.core.app.tools.SQLScriptRunnerTools;
+import com.niu.core.service.core.schedule.ICoreScheduleService;
 import com.niu.core.service.core.sys.ICoreMenuService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -43,6 +44,9 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
 
     @Resource
     ICloudBuildService cloudBuildService;
+
+    @Resource
+    ICoreScheduleService coreScheduleService;
 
     private Boolean installCheck = false;
 
@@ -221,6 +225,15 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
     }
 
     /**
+     * 安装计划任务
+     *
+     */
+    private void installSchedule() {
+        coreScheduleService.installAddonSchedule(this.getInstallTask().getStr("addon"));
+        this.installStep.add("installSchedule");
+    }
+
+    /**
      * 安装数据库
      */
     private void installSql(String addon) {
@@ -277,6 +290,9 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
         if (this.installStep.indexOf("installSql") != -1) {
             this.uninstallSql(addon);
         }
+        if (this.installStep.indexOf("installSchedule") != -1) {
+            coreScheduleService.uninstallAddonSchedule(addon);
+        }
         this.installStep.clear();
         if (this.getInstallTask().getStr("mode").equals("cloud")) cloudBuildService.clearBuildTask();
     }
@@ -289,6 +305,9 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
         this.installMenu();
         // 执行安装sql
         this.installSql(this.getInstallTask().getStr("addon"));
+        // 安装计划任务
+        this.installSchedule();
+
         JSONObject addonConfig = this.getAddonConfig(this.getInstallTask().getStr("addon"));
         coreAddonService.set(JSONUtil.toBean(addonConfig, Addon.class));
 

@@ -2,8 +2,8 @@ package com.niu.core.service.api.login.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.component.context.cache.Cached;
-import com.niu.core.component.context.event.EventPublisher;
+import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.component.context.event.EventPublisher;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
@@ -82,6 +82,7 @@ public class RegisterServiceImpl implements IRegisterService {
         member.setMobile(param.getMobile());
         member.setRegisterType(MemberRegisterTypeEnum.USERNAME.getType());
         member.setLoginType(MemberLoginTypeEnum.USERNAME.getType());
+        member.setPid(param.getPid());
 
         return this.register(member);
     }
@@ -101,6 +102,7 @@ public class RegisterServiceImpl implements IRegisterService {
         member.setNickname(param.getMobile().substring(0, 3) + "****" + param.getMobile().substring(7));
         member.setRegisterType(MemberRegisterTypeEnum.MOBILE.getType());
         member.setLoginType(MemberLoginTypeEnum.MOBILE.getType());
+        member.setPid(param.getPid());
 
         return this.register(member);
     }
@@ -112,7 +114,7 @@ public class RegisterServiceImpl implements IRegisterService {
      */
     public LoginVo register(Member member) {
         HttpServletRequest request = RequestUtils.handler();
-        Integer pid = (Integer) ObjectUtil.defaultIfNull(request.getParameter("pid"), 0);
+        Integer pid = (Integer) ObjectUtil.defaultIfNull(member.getPid(), 0);
         if (pid > 0) {
             Member inviteMember = memberMapper.selectOne(new QueryWrapper<Member>().select("member_id").eq("member_id", member.getPid()).eq("site_id", RequestUtils.siteId()));
             if (inviteMember == null) member.setPid(0);
@@ -125,6 +127,7 @@ public class RegisterServiceImpl implements IRegisterService {
         member.setSiteId(RequestUtils.siteId());
         member.setCreateTime(System.currentTimeMillis() / 1000);
         member.setMemberNo(coreMemberService.createMemberNo(RequestUtils.siteId()));
+        member.setRegisterChannel(RequestUtils.channel());
         this.memberMapper.insert(member);
 
         // 会员注册事件

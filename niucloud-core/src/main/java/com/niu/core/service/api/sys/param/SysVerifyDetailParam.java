@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class SysVerifyDetailParam implements ApiBaseParam {
 
-    private Integer code;
+    private String code;
 
 }

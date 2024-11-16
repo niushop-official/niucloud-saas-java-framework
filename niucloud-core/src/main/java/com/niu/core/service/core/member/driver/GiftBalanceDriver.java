@@ -2,12 +2,11 @@ package com.niu.core.service.core.member.driver;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
-import com.niu.core.component.context.SpringContext;
+import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 @Component

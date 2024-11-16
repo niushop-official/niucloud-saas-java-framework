@@ -89,6 +89,15 @@ public interface IDiyService {
     DiyPageInfoVo getPageInit(DiyPageInitParam param);
 
     /**
+     * 获取默认页面数据
+     *
+     * @param type
+     * @param addon
+     * @return
+     */
+    JSONObject getFirstPageData(String type, String addon);
+
+    /**
      * 获取页面模板
      *
      * @return

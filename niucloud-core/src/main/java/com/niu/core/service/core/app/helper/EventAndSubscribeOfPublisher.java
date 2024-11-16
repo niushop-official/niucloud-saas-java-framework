@@ -1,9 +1,9 @@
 package com.niu.core.service.core.app.helper;
 
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.event.CallbackPublisher;
-import com.niu.core.component.context.event.Event;
-import com.niu.core.component.context.event.EventResult;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.event.CallbackPublisher;
+import com.niu.core.common.component.context.event.Event;
+import com.niu.core.common.component.context.event.EventResult;
 import com.niu.core.service.core.site.factory.CoreSiteServiceFactory;
 import org.springframework.context.ApplicationEventPublisher;
 

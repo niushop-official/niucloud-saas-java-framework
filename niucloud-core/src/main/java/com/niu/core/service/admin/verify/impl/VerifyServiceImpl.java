@@ -1,7 +1,6 @@
 package com.niu.core.service.admin.verify.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
@@ -9,12 +8,10 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.config.GlobalConfig;
-import com.niu.core.entity.verify.Verifier;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.verify.Verify;
 import com.niu.core.mapper.verify.VerifyMapper;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
-import com.niu.core.service.admin.verify.param.VerifyParam;
 import com.niu.core.service.admin.verify.param.VerifySearchParam;
 import com.niu.core.service.admin.verify.IVerifyService;
 import com.niu.core.service.admin.verify.vo.VerifyInfoVo;
@@ -71,7 +68,7 @@ public class VerifyServiceImpl implements IVerifyService {
 
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

@@ -1,0 +1,10 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-checkbox-group v-model="formData.${column.columnName}" :placeholder="t('${lowerColumnName}Placeholder')">
+        <el-checkbox
+            v-for="(item, index) in {DICT_TYPE}"
+                :key="index"
+                :label="item.value">
+           {{ item.name }}
+        </el-checkbox>
+    </el-checkbox-group>
+</el-form-item>

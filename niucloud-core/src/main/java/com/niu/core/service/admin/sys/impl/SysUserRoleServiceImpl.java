@@ -1,6 +1,5 @@
 package com.niu.core.service.admin.sys.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -13,7 +12,7 @@ import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.enums.member.StatusEnum;
 import com.niu.core.service.admin.sys.param.SysUserRoleParam;
 import com.niu.core.service.admin.sys.param.SysUserRoleSearchParam;

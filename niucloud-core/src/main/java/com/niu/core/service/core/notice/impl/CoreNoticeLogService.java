@@ -45,7 +45,7 @@ public class CoreNoticeLogService implements ICoreNoticeLogService {
         if (ObjectUtil.isNotEmpty(noticeLogSearchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "create_time", noticeLogSearchParam.getCreateTime());
 
         IPage<SysNoticeLog> iPage = sysNoticeLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
-        return PageResult.build(iPage);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     @Override

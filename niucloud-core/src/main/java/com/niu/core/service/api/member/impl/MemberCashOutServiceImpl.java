@@ -61,7 +61,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
 //
 //            }
         }
-        return PageResult.build(page, limit).setData(memberCashOutListVoList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(memberCashOutListVoList);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberCashOutAccount> iPage = this.memberCashOutAccountMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<MemberCashOutAccountVo> dataList = CollectUtils.convert(iPage.getRecords(), MemberCashOutAccountVo.class);
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     @Override

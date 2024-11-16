@@ -1,0 +1,10 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-radio-group v-model="formData.${column.columnName}" :placeholder="t('${lowerColumnName}Placeholder')">
+        <el-radio label="1">
+            选项1
+        </el-radio>
+        <el-radio label="2">
+            选项2
+        </el-radio>
+    </el-radio-group>
+</el-form-item>

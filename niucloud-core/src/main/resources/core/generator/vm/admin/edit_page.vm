@@ -1,0 +1,95 @@
+<template>
+    <div class="main-container">
+        <div class="detail-head">
+            <div class="left" @click="back()">
+                <span class="iconfont iconxiangzuojiantou !text-xs"></span>
+                <span class="ml-[1px]">{{t('returnToPreviousPage')}}</span>
+            </div>
+            <span class="adorn">|</span>
+            <span class="right">{{ pageName }}</span>
+        </div>
+        <el-card class="box-card !border-none" shadow="never">
+            <el-form :model="formData" label-width="90px" ref="formRef" :rules="formRules" class="page-form">
+${formView}
+            </el-form>
+        </el-card>
+         <div class="fixed-footer-wrap">
+            <div class="fixed-footer">
+                <el-button type="primary" @click="onSave(formRef)">{{ t('save') }}</el-button>
+                <el-button @click="back()">{{ t('cancel') }}</el-button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, reactive, computed, watch } from 'vue'
+import { t } from '@/lang'
+import { useDictionary } from '@/app/api/dict'
+import type { FormInstance } from 'element-plus'
+import { get${className}Info, add${className}, edit${className} } from '${adminPath}/api/${moduleName}/${originalClassName}';
+import { useRoute } from 'vue-router'
+import Validate from '@/utils/formValidate'
+
+const route = useRoute()
+const id:number = parseInt(route.query.id);
+const loading = ref(false)
+const pageName = route.meta.title
+
+/**
+ * 表单数据
+ */
+const initialFormData = {
+${formData}
+}
+const formData: Record<string, any> = reactive({ ...initialFormData })
+
+const setFormData = async (id:number = 0) => {
+    Object.assign(formData, initialFormData)
+    const data = await (await get${className}Info(id)).data
+    Object.keys(formData).forEach((key: string) => {
+        if (data[key] != undefined) formData[key] = data[key]
+    })
+}
+if(id) setFormData(id);
+
+const formRef = ref<FormInstance>()
+// 选中数据
+const selectData = ref<any[]>([])
+
+// 字典数据
+{DICT_LIST}
+
+{MODEL_DATA}
+// 表单验证规则
+const formRules = computed(() => {
+    return {
+        ${formValidate}
+    }
+})
+
+const onSave = async (formEl: FormInstance | undefined) => {
+    if (loading.value || !formEl) return
+    await formEl.validate(async (valid) => {
+       if (valid) {
+           loading.value = true
+           let data = formData
+
+           const save = id ? edit${className} : add${className}
+           save(data).then(res => {
+               loading.value = false
+               history.back()
+           }).catch(err => {
+               loading.value = false
+           })
+
+       }
+    })
+}
+
+const back = () => {
+    history.back()
+}
+</script>
+
+<style lang="scss" scoped></style>

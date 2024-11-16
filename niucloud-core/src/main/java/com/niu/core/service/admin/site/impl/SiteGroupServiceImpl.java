@@ -12,7 +12,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
@@ -21,6 +21,7 @@ import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
+import com.niu.core.service.admin.site.ISiteService;
 import com.niu.core.service.admin.site.param.SiteGroupAddParam;
 import com.niu.core.service.admin.site.param.SiteGroupParam;
 import com.niu.core.service.admin.site.param.SiteGroupSearchParam;
@@ -29,6 +30,7 @@ import com.niu.core.service.admin.site.vo.SiteGroupListVo;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import javax.annotation.Resource;
@@ -58,6 +60,13 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
 
     @Resource
     SysUserRoleMapper sysUserRoleMapper;
+
+    ISiteService siteService;
+
+    @Resource
+    private void setSiteService(@Lazy ISiteService siteService) {
+        this.siteService = siteService;
+    }
 
     /**
      * 店铺分组（分组权限）列表
@@ -107,7 +116,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
             vo.setAppName(appStr);
             list.add(vo);
         }
-        return PageResult.build(iPage.getCurrent(), iPage.getSize()).setTotal(iPage.getTotal()).setData(list);
+        return PageResult.build(iPage.getCurrent(), iPage.getSize(), iPage.getTotal()).setData(list);
     }
 
     @Override
@@ -175,14 +184,31 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
         /**判断应用是否全部是有效的已安装应用 */
         checkAddon(groupRoles);
 
-        model.setGroupId(id);
-        model.setGroupId(editParam.getGroupId());
-        model.setGroupName(editParam.getGroupName());
-        model.setGroupDesc(editParam.getGroupDesc());
-        model.setApp(JSONUtil.toJsonStr(editParam.getApp()));
-        model.setAddon(JSONUtil.toJsonStr(editParam.getAddon()));
-        model.setUpdateTime(DateUtils.currTime());
-        siteGroupMapper.updateById(model);
+        SiteGroup group = new SiteGroup();
+        group.setGroupId(id);
+        group.setGroupId(editParam.getGroupId());
+        group.setGroupName(editParam.getGroupName());
+        group.setGroupDesc(editParam.getGroupDesc());
+        group.setApp(JSONUtil.toJsonStr(editParam.getApp()));
+        group.setAddon(JSONUtil.toJsonStr(editParam.getAddon()));
+        group.setUpdateTime(DateUtils.currTime());
+        siteGroupMapper.updateById(group);
+
+        if (!model.getApp().equals(group.getApp())) {
+            // 修改站点应用
+            Site siteModel = new Site();
+            siteModel.setApp(model.getApp());
+            siteMapper.update(siteModel, new QueryWrapper<Site>().eq("group_id", id));
+        }
+
+        if (!model.getApp().equals(group.getApp()) || !model.getAddon().equals(group.getAddon())) {
+            List<Site> siteList = siteMapper.selectList(new QueryWrapper<Site>().eq("group_id", id));
+            if (ObjectUtil.isNotEmpty(siteList)) {
+                for (Site site : siteList) {
+                    siteService.siteAddonChange(site, model);
+                }
+            }
+        }
     }
 
     /**
@@ -199,7 +225,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
         Assert.notNull(model, "数据不存在!");
         long siteCount=siteMapper.selectCount(new QueryWrapper<Site>().eq("group_id", id));
         if(siteCount>0){
-            throw new CommonException("SITE_GROUP_IS_EXIST");
+            throw new CommonException("当前套餐存在站点，不能删除");
         }
         siteGroupMapper.delete(new QueryWrapper<SiteGroup>().eq("group_id", id));
     }

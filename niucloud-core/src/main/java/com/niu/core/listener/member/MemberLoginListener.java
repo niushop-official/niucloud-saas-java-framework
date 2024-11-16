@@ -1,7 +1,7 @@
 package com.niu.core.listener.member;
 
 import com.niu.core.common.annotation.EventListen;
-import com.niu.core.component.context.listener.AbstractListener;
+import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.event.member.MemberLoginEvent;
 
 @EventListen("core")

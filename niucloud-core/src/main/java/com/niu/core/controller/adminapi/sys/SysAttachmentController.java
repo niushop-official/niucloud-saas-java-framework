@@ -58,7 +58,7 @@ public class SysAttachmentController {
      * @return
      */
     @PutMapping("/attachment/batchmove")
-    public Result batchMoveCategory(SysAttachmentMoveParam param) {
+    public Result batchMoveCategory(@Validated @RequestBody SysAttachmentMoveParam param) {
         sysAttachmentService.batchMoveCategory(param);
         return Result.success();
     }

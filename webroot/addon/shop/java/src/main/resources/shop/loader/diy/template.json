@@ -1,0 +1,20 @@
+{
+	"DIY_SHOP_INDEX": {
+		"title": "商城首页",
+		"page": "/addon/shop/pages/index",
+		"action": "decorate",
+		"type": "index"
+	},
+	"DIY_SHOP_MEMBER_INDEX": {
+		"title": "商城个人中心",
+		"page": "/addon/shop/pages/member/index",
+		"action": "decorate",
+		"type": "member_index"
+	},
+	"DIY_SHOP_POINT_INDEX": {
+		"title": "积分商城",
+		"page": "/addon/shop/pages/point/index",
+		"action": "decorate",
+		"type": ""
+	}
+}

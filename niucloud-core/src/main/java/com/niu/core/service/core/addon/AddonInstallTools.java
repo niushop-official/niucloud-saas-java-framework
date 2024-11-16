@@ -37,6 +37,10 @@ public class AddonInstallTools extends CoreAddonBaseService {
 
     private String addon;
 
+    public void setAddon(String addon) {
+        this.addon = addon;
+    }
+
     /**
      * 安装插件代码
      */
@@ -51,6 +55,21 @@ public class AddonInstallTools extends CoreAddonBaseService {
         if (new File(this.devAddonPath).exists()) this.mergeJava();
         this.mergeJar();
         this.mergeResource();
+    }
+
+    /**
+     * 安装插件vue源码
+     *
+     * @param addon
+     */
+    public void installVue(String addon) {
+        this.addon = addon;
+        if (new File(this.devRootPath + "/admin").exists()) this.mergeAdmin(this.devRootPath + "/admin/src/addon/");
+        if (new File(this.webRuntimePath + "/admin").exists()) this.mergeAdmin(this.webRuntimePath + "/admin/src/addon/");
+        if (new File(this.devRootPath + "/uni-app").exists()) this.mergeUniapp(this.devRootPath + "/uni-app/src/addon/");
+        if (new File(this.webRuntimePath + "/uni-app").exists()) this.mergeUniapp(this.webRuntimePath + "/uni-app/src/addon/");
+        if (new File(this.devRootPath + "/web").exists()) this.mergeWeb(this.devRootPath + "/web/addon/");
+        if (new File(this.webRuntimePath + "/web").exists()) this.mergeWeb(this.webRuntimePath + "/web/addon/");
     }
 
     /**
@@ -277,7 +296,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
 
             FileUtils.copyDirectory(source, new File(dest));
 
-            if (!new File(this.addonDownloadPath + "/" + this.addon + "/java/" + this.addon + ".iml").exists() && new File(this.devAddonPath).exists()) {
+            if (!new File(this.addonDownloadPath + "/" + this.addon + "/java/pom.xml").exists() && new File(this.devAddonPath).exists()) {
                 FileUtils.copyDirectory(source, new File(this.devAddonPath));
             }
         } catch (IOException e) {
@@ -474,7 +493,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      * @param dir
      * @param mode
      */
-    private void mergeUniappLocale(String dir, String mode) {
+    public void mergeUniappLocale(String dir, String mode) {
         try {
             File zh = new File(dir + "src/locale/zh-Hans.json");
             File en = new File(dir + "src/locale/en.json");

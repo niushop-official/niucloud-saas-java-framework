@@ -31,10 +31,8 @@ public class ConfigServiceImpl implements IConfigService {
     @Override
     public LoginConfigVo getLoginConfig() {
         Integer defaultSiteId= RequestUtils.defaultSiteId();
-        CoreSysConfigVo sysConfig=coreConfigService.getConfig(defaultSiteId, ConfigKeyEnum.ADMIN_LOGIN.getName());
-        LoginConfigVo vo = new LoginConfigVo();
-        vo=JSONUtil.toBean(sysConfig.getValueJson(), LoginConfigVo.class);
-        return vo;
+        JSONObject sysConfig=coreConfigService.getConfigValue(defaultSiteId, ConfigKeyEnum.ADMIN_LOGIN.getName());
+        return JSONUtil.toBean(sysConfig, LoginConfigVo.class);
     }
 
     /**

@@ -9,8 +9,8 @@ import cn.hutool.http.Method;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.niu.core.component.context.WebAppEnvs;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.common.utils.file.FileTools;
@@ -238,19 +238,19 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
             if (uniApp.exists()) {
                 String[] exclusionDir = {"node_modules", "unpackage", "dist"};
                 FileTools.createDirs(packageDir + "uni-app");
-                FileUtils.copyDirectory(uniApp, new File(packageDir + "uni-app/"), createExclusionFilter(exclusionDir));
+                FileUtils.copyDirectory(uniApp, new File(packageDir + "uni-app/"), FileTools.createExclusionFilter(exclusionDir));
             }
             File admin = new File(rootDir + "admin/");
             if (admin.exists()) {
                 String[] exclusionDir = {"node_modules", ".vscode", "dist", ".idea"};
                 FileTools.createDirs(packageDir + "admin");
-                FileUtils.copyDirectory(admin, new File(packageDir + "admin/"), createExclusionFilter(exclusionDir));
+                FileUtils.copyDirectory(admin, new File(packageDir + "admin/"), FileTools.createExclusionFilter(exclusionDir));
             }
             File web = new File(rootDir + "web/");
             if (web.exists()) {
-                String[] exclusionDir = {"node_modules", ".output", "nuxt"};
+                String[] exclusionDir = {"node_modules", ".output", "nuxt", "dist", ".nuxt"};
                 FileTools.createDirs(packageDir + "web");
-                FileUtils.copyDirectory(web, new File(packageDir + "web/"), createExclusionFilter(exclusionDir));
+                FileUtils.copyDirectory(web, new File(packageDir + "web/"), FileTools.createExclusionFilter(exclusionDir));
             }
 
             // 打包自定义端口
@@ -272,27 +272,6 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
             clearBuildTask();
             throw new CommonException(e.getMessage());
         }
-    }
-
-    /**
-     * 排除目录
-     * @param dirs
-     * @return
-     */
-    private static IOFileFilter createExclusionFilter(String[] dirs) {
-        // 定义要排除的目录
-        List<String> excludedDirs = Arrays.asList(dirs);
-
-        // 创建一个过滤器来排除特定子目录
-        IOFileFilter excludeSubDirsFilter = FileFilterUtils.trueFileFilter(); // 初始化为 false，表示过滤所有文件或目录
-
-        // 循环创建过滤器
-        for (String dirName : excludedDirs) {
-            IOFileFilter tempFilter = FileFilterUtils.nameFileFilter(dirName);
-            excludeSubDirsFilter = FileFilterUtils.and(excludeSubDirsFilter, FileFilterUtils.notFileFilter(tempFilter));
-        }
-
-        return excludeSubDirsFilter;
     }
 
     /**

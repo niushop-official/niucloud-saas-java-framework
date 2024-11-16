@@ -10,20 +10,11 @@ public class SysPosterSearchParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer siteId;
-
     private String name;
 
     private String type;
 
-    private String channel;
 
-    private String value;
-
-    private Integer status;
-
-    private String addon;
-
-    private Integer isDefault;
+    private Integer id;
 
 }

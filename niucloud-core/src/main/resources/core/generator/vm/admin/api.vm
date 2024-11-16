@@ -1,0 +1,49 @@
+import request from '@/utils/request'
+
+//begin--${tableName}--begin
+/**
+ * 获取${tableContent}列表
+ * @param params
+ * @returns
+ */
+export function get${className}List(params: Record<string, any>) {
+    return request.get(`${addonName}/${moduleName}/${tableName}`, {params})
+}
+
+/**
+ * 获取${tableContent}详情
+ * @param ${primaryField} ${notes}${primaryField}
+ * @returns
+ */
+export function get${className}Info(id: number) {
+    return request.get(`${addonName}/${moduleName}/${tableName}/${id}`);
+}
+
+/**
+ * 添加${tableContent}
+ * @param params
+ * @returns
+ */
+export function add${className}(params: Record<string, any>) {
+    return request.post('${addonName}/${moduleName}/${tableName}', params, { showErrorMessage: true, showSuccessMessage: true })
+}
+
+/**
+ * 编辑${tableContent}
+ * @param ${primaryField}
+ * @param params
+ * @returns
+ */
+export function edit${className}(params: Record<string, any>) {
+    return request.put('${addonName}/${moduleName}/${tableName}/' + params.${primaryField}, params, { showErrorMessage: true, showSuccessMessage: true })
+}
+
+/**
+ * 删除${tableContent}
+ * @param ${primaryField}
+ * @returns
+ */
+export function delete${className}(id: number) {
+    return request.delete(`${addonName}/${moduleName}/${tableName}/${id}`, { showErrorMessage: true, showSuccessMessage: true })
+}
+//end--${tableName}--end

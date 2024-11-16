@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.site.impl;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
@@ -14,7 +15,7 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
@@ -22,8 +23,9 @@ import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.addon.AddonTypeEnum;
 import com.niu.core.enums.site.SiteStatusEnum;
 import com.niu.core.enums.sys.AppTypeEnum;
-import com.niu.core.event.pay.PaySuccessEvent;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.event.site.SiteAddAfterEvent;
+import com.niu.core.event.site.SiteEditAfterEvent;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
@@ -41,8 +43,7 @@ import com.niu.core.service.admin.sys.param.SysUserRoleParam;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.site.ICoreSiteService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -55,7 +56,13 @@ import java.util.*;
  */
 @Service
 public class SiteServiceImpl implements ISiteService {
-        
+
+    /** 站点tag */
+    public static String cacheTagName = CacheTagEnum.SITE_CASH.getTagName();
+
+    /** 是否使用缓存 */
+    public static final boolean useCache = true;
+
     @Resource
     SiteMapper siteMapper;
 
@@ -174,7 +181,7 @@ public class SiteServiceImpl implements ISiteService {
             vo.setGroupName(siteGroup.getGroupName());
             list.add(vo);
         }
-        return PageResult.build(page, limit).setTotal(iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -277,10 +284,17 @@ public class SiteServiceImpl implements ISiteService {
 
         model.setInitalledAddon(JSONUtil.toJsonStr(initallJsonArray));
         model.setSiteDomain(editParam.getSiteDomain());
-        model.setExpireTime(editParam.getExpireTime());
-        model.setStatus(editParam.getExpireTime()>DateUtils.currTime()?SiteStatusEnum.ON.getCode():SiteStatusEnum.EXPIRE.getCode());
+        model.setExpireTime(new DateTime(editParam.getExpireTime()).getTime() / 1000);
+        model.setStatus(model.getExpireTime()>DateUtils.currTime()?SiteStatusEnum.ON.getCode():SiteStatusEnum.EXPIRE.getCode());
         siteMapper.updateById(model);
 
+        SiteEditAfterEvent event = new SiteEditAfterEvent();
+        event.setSiteId(model.getSiteId());
+        event.addAppSign("core");
+        event.setName("SiteEditAfterEvent");
+        event.setSite(model);
+        event.setSiteGroup(siteGroup);
+        EventAndSubscribeOfPublisher.publishAll(event);
     }
 
     /**
@@ -298,7 +312,6 @@ public class SiteServiceImpl implements ISiteService {
         Assert.notNull(model, "数据不存在!");
         model.setStatus(SiteStatusEnum.DELETE.getCode());
         siteMapper.updateById(model);
-        //siteMapper.delete(new QueryWrapper<Site>().eq("site_id", id));
     }
 
     @Override
@@ -374,6 +387,10 @@ public class SiteServiceImpl implements ISiteService {
             queryWrapper.eq("group_id", siteSearchParam.getGroupId());
         }
 
+        if (ObjectUtil.isNotEmpty(siteSearchParam.getAppType())) {
+            queryWrapper.eq("app_type", siteSearchParam.getAppType());
+        }
+
         if (ObjectUtil.isNotEmpty(siteSearchParam.getExpireTime())) {
 
             String[] expireTime = siteSearchParam.getExpireTime();
@@ -404,4 +421,23 @@ public class SiteServiceImpl implements ISiteService {
                 .eq("status", 1)
                 .in("`key`", coreSiteService.getAddonKeysBySiteId(RequestUtils.siteId())));
     }
+
+    /**
+     * 站点变更
+     *
+     * @param site
+     * @param siteGroup
+     */
+    @Override
+    @Async
+    public void siteAddonChange(Site site, SiteGroup siteGroup) {
+        SiteEditAfterEvent event = new SiteEditAfterEvent();
+        event.setSiteId(site.getSiteId());
+        event.addAppSign("core");
+        event.setName("SiteEditAfterEvent");
+        event.setSite(site);
+        event.setSiteGroup(siteGroup);
+        EventAndSubscribeOfPublisher.publishAll(event);
+    }
+
 }

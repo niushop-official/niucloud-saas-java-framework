@@ -1,6 +1,10 @@
 package com.niu.app.common.loader;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 import org.springframework.core.metrics.StartupStep;
 import org.yaml.snakeyaml.Yaml;
@@ -44,6 +48,10 @@ public final class PluginBufferingApplicationStartup extends BufferingApplicatio
                 ExternalJarsLoaderPlugin.load(argList, loadGuard);
             }
         } else if ("spring.context.refresh".equals(name)) {
+            Configuration configuration = LoggerContext.getContext().getConfiguration();
+            RollingFileAppender appender = (RollingFileAppender) configuration.getAppender("RollingFile");
+//            System.out.println("appender > " + appender.getName());
+//            System.out.println("getFilePattern > " + appender.getFilePattern());
             // 启动时钩子日志
             System.out.println("Service starting,Hook is ready.");
         }

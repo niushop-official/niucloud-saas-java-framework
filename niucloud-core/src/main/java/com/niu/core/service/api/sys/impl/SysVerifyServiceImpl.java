@@ -1,7 +1,7 @@
 package com.niu.core.service.api.sys.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
@@ -9,22 +9,24 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.CollectUtils;
+import com.niu.core.common.utils.QrcodeUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.object.CollectBuildUtils;
 import com.niu.core.common.utils.object.ObjectGroupUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.verify.Verifier;
 import com.niu.core.entity.verify.Verify;
+import com.niu.core.enums.sys.VerifyTypeEnum;
 import com.niu.core.event.sys.VerifyCreateEventDefiner;
 import com.niu.core.event.sys.VerifyEventDefiner;
-import com.niu.core.event.sys.VerifyTypeEventDefiner;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.mapper.verify.VerifierMapper;
 import com.niu.core.mapper.verify.VerifyMapper;
+import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.api.sys.ISysVerifyService;
 import com.niu.core.service.api.sys.param.*;
 import com.niu.core.service.api.sys.vo.SysVerifyDetailVo;
@@ -64,7 +66,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         for (String verifyCode : verifyCodeList) {
             SysVerifyGetCodeVo sysVerifyGetCodeVo = new SysVerifyGetCodeVo();
             sysVerifyGetCodeVo.setCode(verifyCode);
-            sysVerifyGetCodeVo.setQrcode(generateQrcode(param.siteId(), verifyCode));
+            sysVerifyGetCodeVo.setQrcode(QrcodeUtils.qrcode(param.siteId(), "h5", verifyCode, "", null));
             sysVerifyGetCodeVoList.add(sysVerifyGetCodeVo);
         }
         return sysVerifyGetCodeVoList;
@@ -92,11 +94,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
      * @return
      */
     private List<String> createVerifyCode(Integer siteId, Integer memberId, String type, Map<String, Object> data) {
-        // 1、通过事件获取核销类型，不存在则返回
-        VerifyTypeEventDefiner.VerifyTypeEvent verifyTypeEvent = new VerifyTypeEventDefiner.VerifyTypeEvent();
-        verifyTypeEvent.setSiteId(siteId);
-        List<VerifyCreateEventDefiner.VerifyCreateEventResult> verifyTypObjectList = EventAndSubscribeOfPublisher.publishAndCallbackBySite(verifyTypeEvent);
-        if (CollectionUtil.isEmpty(verifyTypObjectList)) {
+        if (ObjectUtil.isEmpty(VerifyTypeEnum.getTypeByName(type))) {
             // 核销类型错误
             throw new RuntimeException("VERIFY_TYPE_ERROR");
         }
@@ -106,7 +104,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         verifyCreateEvent.setType(type);
         verifyCreateEvent.setMemberId(memberId);
         verifyCreateEvent.setData(data);
-        List<VerifyCreateEventDefiner.VerifyCreateEventResult> verifyCreateJsonObjectList = EventAndSubscribeOfPublisher.publishAndCallbackBySite(verifyCreateEvent);
+        List<VerifyCreateEventDefiner.VerifyCreateEventResult> verifyCreateJsonObjectList = EventAndSubscribeOfPublisher.publishAndCallback(verifyCreateEvent);
         VerifyCreateEventDefiner.VerifyCreateEventResult verifyCreateEventResult = null;
         if (verifyCreateJsonObjectList != null && verifyCreateJsonObjectList.size() > 0) {
             verifyCreateEventResult = verifyCreateJsonObjectList.get(0);
@@ -120,7 +118,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
             expireTime = verifyCreateEventResult.getExpireTime();
             verifyCodeDataMap.put("site_id", siteId);
             verifyCodeDataMap.put("type", type);
-            verifyCodeDataMap.put("type_name", "");
+            verifyCodeDataMap.put("type_name", VerifyTypeEnum.getTypeByName(type));
             verifyCodeDataMap.put("data", data);
             verifyCodeDataMap.put("value", verifyCreateEventResult.getData());
             verifyCodeDataMap.put("body", verifyCreateEventResult.getBody());
@@ -128,7 +126,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         } else {
             verifyCodeDataMap.put("site_id", siteId);
             verifyCodeDataMap.put("type", type);
-            verifyCodeDataMap.put("type_name", type);
+            verifyCodeDataMap.put("type_name", VerifyTypeEnum.getTypeByName(type));
             verifyCodeDataMap.put("data", data);
         }
         // 4、生成核销码，并且放入缓存
@@ -177,7 +175,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         Map<String, Object> codeMap = (Map<String, Object>) cached.tag(CACHE_VERIFY).get(verifyCode);
         if (codeMap == null) {
             // 核销码已过期
-            throw new RuntimeException("VERIFY_CODE_EXPIRED");
+            throw new RuntimeException("当前核销码已核销或已失效");
         }
         return codeMap;
     }
@@ -248,12 +246,12 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         dataList.stream().forEach(bean -> {
             Member member = memberMap.get(bean.getVerifierMemberId());
             if (member != null) {
-                bean.setNickname(member.getNickname());
-                bean.setMobile(member.getMobile());
-                bean.setHeadimg(member.getHeadimg());
+                MemberBriefInfoVo membervo = new MemberBriefInfoVo();
+                BeanUtils.copyProperties(member, membervo);
+                bean.setMember(membervo);
             }
         });
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     @Override
@@ -267,13 +265,12 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         mpjQueryWrapper.eq("site_id", param.siteId());
         mpjQueryWrapper.eq("verifier_member_id", param.memberId());
         IPage<SysVerifyRecordsVo> iPage = memberMapper.selectJoinPage(new Page<>(page, limit), SysVerifyRecordsVo.class, mpjQueryWrapper);
-        return PageResult.build(iPage);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     @Override
     public SysVerifyDetailVo detail(SysVerifyDetailParam param) {
         QueryWrapper<Verify> verifyQueryWrapper = new QueryWrapper();
-        verifyQueryWrapper.select("member_id, nickname, mobile, headimg");
         verifyQueryWrapper.eq("site_id", param.siteId());
         verifyQueryWrapper.eq("verifier_member_id", param.memberId());
         verifyQueryWrapper.eq("code", param.getCode());
@@ -284,12 +281,11 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
             QueryWrapper<Member> memberQueryWrapper = new QueryWrapper();
             memberQueryWrapper.select("member_id, nickname, mobile, headimg");
             memberQueryWrapper.eq("member_id", param.memberId());
-            memberQueryWrapper.eq("", "");
             Member member = this.memberMapper.selectOne(memberQueryWrapper);
             if (member != null) {
-                sysVerifyDetailVo.setNickname(member.getNickname());
-                sysVerifyDetailVo.setMobile(member.getMobile());
-                sysVerifyDetailVo.setHeadimg(member.getHeadimg());
+                MemberBriefInfoVo membervo = new MemberBriefInfoVo();
+                BeanUtils.copyProperties(member, membervo);
+                sysVerifyDetailVo.setMember(membervo);
             }
         }
         return sysVerifyDetailVo;
@@ -305,10 +301,11 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
     public Map<String, Object> getInfoByCode(SysVerifyByCodeParam param) {
         // param.getSiteId();
         Map<String, Object> codeMap = this.getCodeData(param.getCode());
-        if (codeMap.get("site_id") == null || codeMap.get("site_id") != param.siteId()) {
+        if (codeMap.get("site_id") == null || !codeMap.get("site_id").equals(param.siteId())) {
             // 核销码已过期
-            throw new RuntimeException("VERIFY_CODE_EXPIRED");
+            throw new RuntimeException("当前核销码已核销或已失效");
         }
+        codeMap.put("value", JSONUtil.parseObj(codeMap.get("value")));
         return codeMap;
     }
 
@@ -323,9 +320,9 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         // 1、获取核销码数据
         Map<String, Object> verifyMap = this.getCodeData(param.getCode());
         // 检测站点数据
-        if (verifyMap.get("site_id") == null || verifyMap.get("site_id") != param.siteId()) {
+        if (verifyMap.get("site_id") == null || !verifyMap.get("site_id").equals(param.siteId())) {
             // 核销码已过期
-            throw new RuntimeException("VERIFY_CODE_EXPIRED");
+            throw new RuntimeException("当前核销码已核销或已失效");
         }
         // 检测核销员身份
         QueryWrapper queryWrapper = new QueryWrapper();
@@ -334,12 +331,13 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         queryWrapper.eq("site_id", param.siteId());
         Verifier verifier = verifierMapper.selectOne(queryWrapper);
         if (verifier == null) {
-            throw new RuntimeException("VERIFIER_NOT_EXIST");
+            throw new RuntimeException("核销员不存在");
         }
         // 核销操作
         Map<String, Object> verifyDataMap = new HashMap<>();
         verifyDataMap.put("site_id", verifyMap.get("site_id"));
-        verifyDataMap.put("code", verifyMap.get(param.getCode()));
+        verifyDataMap.put("code", param.getCode());
+        verifyDataMap.put("body", verifyMap.get("body"));
         verifyDataMap.put("data", verifyMap.get("data"));
         verifyDataMap.put("value", verifyMap.get("value"));
         verifyDataMap.put("type", verifyMap.get("type"));
@@ -350,7 +348,14 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         VerifyEventDefiner.VerifyEvent verifyEvent = new VerifyEventDefiner.VerifyEvent();
         verifyEvent.setSiteId(param.siteId());
         verifyEvent.build(verifyDataMap);
-        EventAndSubscribeOfPublisher.publishAndCallbackBySite(verifyEvent);
+        EventAndSubscribeOfPublisher.publishAndCallback(verifyEvent);
+
+        // 添加核销记录
+        Verify model = new Verify();
+        BeanUtils.copyProperties(verifyEvent, model);
+        model.setData(JSONUtil.parseObj(verifyEvent.getData()).toString());
+        verifyMapper.insert(model);
+
         // 核销码失效
         this.clearCode(param.getCode());
         return true;

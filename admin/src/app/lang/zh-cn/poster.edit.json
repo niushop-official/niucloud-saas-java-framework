@@ -47,5 +47,15 @@
   "polygon": "多边形",
   "angle": "旋转角度",
   "nickName": "昵称",
-  "needLoginTips": "前台需要登录才会展示"
+  "needLoginTips": "前台需要登录才会展示",
+  "horizontalAlignment": "水平对齐方式",
+  "verticalAlignment": "垂直对齐方式",
+  "AlignTips": "当设置文本水平对齐方式时，其内容也会随之改变",
+  "lineHeight": "行高",
+  "textAlign": "文字居中方式",
+  "space": "字间距",
+  "weight": "文字加粗",
+  "imgShape": "图片形状"
+  
+  
 }

@@ -1,0 +1,88 @@
+package com.niu.${addonName}.controller.adminapi.${moduleName};
+
+import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.domain.Result;
+import com.niu.${addonName}.service.admin.${moduleName}.I${className}Service;
+import com.niu.${addonName}.service.admin.${moduleName}.param.${className}Param;
+import com.niu.${addonName}.service.admin.${moduleName}.param.${className}SearchParam;
+import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}InfoVo;
+import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}ListVo;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+/**
+ * ${tableContent}控制器
+ */
+
+@RestController
+@RequestMapping("adminapi/${addonName}/${moduleName}/${tableName}")
+public class ${className}Controller {
+
+    @Resource
+    I${className}Service ${className}Service;
+
+    /**
+     * ${tableContent}分页列表
+     *
+     * @param pageParam 分页
+     * @param searchParam 搜索条件
+     * @return Result<PageResult<${className}ListVo>>
+     */
+    @GetMapping("")
+    public Result<PageResult<${className}ListVo>> page(@Validated PageParam pageParam, @Validated ${className}SearchParam searchParam) {
+        PageResult<${className}ListVo> list = ${className}Service.page(pageParam, searchParam);
+        return Result.success(list);
+    }
+
+    /**
+     * ${tableContent}详情
+     *
+     * @param id 主键ID
+     * @return Result<${className}InfoVo>
+     */
+    @GetMapping("/{id}")
+    public Result<${className}InfoVo> info(@PathVariable Integer id) {
+        ${className}InfoVo info = ${className}Service.info(id);
+        return Result.success(info);
+    }
+
+    /**
+     * ${className}添加
+     *
+     * @param addParam 添加参数
+     * @return AjaxResult<Object>
+     */
+    @PostMapping("")
+    public Result<Object> add(@Validated @RequestBody ${className}Param addParam) {
+        ${className}Service.add(addParam);
+        return Result.success();
+    }
+
+    /**
+     * ${className}编辑
+     *
+     * @param editParam 编辑参数
+     * @return Result<Object>
+     */
+    @PutMapping("/{id}")
+    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ${className}Param editParam) {
+        ${className}Service.edit(id, editParam);
+        return Result.success();
+    }
+
+    /**
+     * ${className}删除
+     *
+     * @param id 参数
+     * @return Result<Object>
+     */
+    @DeleteMapping("/{id}")
+    public Result<Object> del(@PathVariable Integer id) {
+        ${className}Service.del(id);
+        return Result.success();
+    }
+}

@@ -1,9 +1,9 @@
 package com.niu.core.service.core.app.impl;
 
-import com.niu.core.component.context.queue.AsyncTaskQueueManager;
-import com.niu.core.component.context.queue.TaskArgument;
-import com.niu.core.component.context.queue.AsyncTask;
-import com.niu.core.component.context.queue.AsyncTaskManager;
+import com.niu.core.common.component.context.queue.AsyncTaskQueueManager;
+import com.niu.core.common.component.context.queue.TaskArgument;
+import com.niu.core.common.component.context.queue.AsyncTask;
+import com.niu.core.common.component.context.queue.AsyncTaskManager;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.core.app.ICoreQueueService;
 import com.niu.core.service.core.app.param.CoreQueueExecParam;

@@ -6,20 +6,30 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.entity.sys.SysConfig;
-import com.niu.core.entity.sys.SysUserLog;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.mapper.sys.SysConfigMapper;
-import com.niu.core.service.admin.sys.vo.SysUserLogInfoVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 
 @Service
 public class CoreConfigServiceImpl implements ICoreConfigService {
+
+
+    /** 站点tag */
+    public static String cacheTagName = CacheTagEnum.SYS_CONFIG_CACHE.getTagName();
+
+    /** 是否使用缓存 */
+    public static final boolean useCache = true;
+
+    @Resource
+    private Cached cached;
 
     @Resource
     SysConfigMapper sysConfigMapper;
@@ -33,6 +43,7 @@ public class CoreConfigServiceImpl implements ICoreConfigService {
      */
     @Override
     public CoreSysConfigVo getConfig(Integer siteId, String key) {
+
         SysConfig model = sysConfigMapper.selectOne(new QueryWrapper<SysConfig>().eq("config_key", key).eq("site_id", siteId).last(" limit 1"));
         CoreSysConfigVo vo = new CoreSysConfigVo();
         if (ObjectUtil.isNotNull(model)) {
@@ -55,13 +66,24 @@ public class CoreConfigServiceImpl implements ICoreConfigService {
      */
     @Override
     public JSONObject getConfigValue(Integer siteId, String key) {
-        SysConfig model = sysConfigMapper.selectOne(new QueryWrapper<SysConfig>().eq("config_key", key).eq("site_id", siteId).last(" limit 1"));
-        if (ObjectUtil.isNotNull(model)) {
-            if (!model.getValue().equals("")) {
-                return model.getObjectValue();
+
+        Object jsonObject =  cached.rememberObject(useCache, cacheTagName, Arrays.asList("getConfigValue", siteId, key), uniqueKey -> {
+
+            SysConfig model = sysConfigMapper.selectOne(new QueryWrapper<SysConfig>().eq("config_key", key).eq("site_id", siteId).last(" limit 1"));
+            if (ObjectUtil.isNotNull(model)) {
+                if (!model.getValue().equals("")) {
+                    return model.getValue();
+                }else{
+                    return "";
+                }
             }
+            return "";
+        });
+        if(ObjectUtil.isNotEmpty(jsonObject)){
+            return JSONUtil.parseObj(jsonObject);
+        }else{
+            return new JSONObject();
         }
-        return new JSONObject();
     }
 
     /**
@@ -72,13 +94,25 @@ public class CoreConfigServiceImpl implements ICoreConfigService {
      * @return
      */
     public JSONArray getConfigArrayValue(Integer siteId, String key) {
-        SysConfig model = sysConfigMapper.selectOne(new QueryWrapper<SysConfig>().eq("config_key", key).eq("site_id", siteId).last(" limit 1"));
-        if (ObjectUtil.isNotNull(model)) {
-            if (!model.getValue().equals("")) {
-                return model.getArrayValue();
+
+        Object jsonObject =  cached.rememberObject(useCache, cacheTagName, Arrays.asList("getConfigArrayValue", siteId, key), uniqueKey -> {
+            SysConfig model = sysConfigMapper.selectOne(new QueryWrapper<SysConfig>().eq("config_key", key).eq("site_id", siteId).last(" limit 1"));
+            if (ObjectUtil.isNotNull(model)) {
+                if (!model.getValue().equals("")) {
+                    return model.getValue();
+                }else{
+                    return "";
+                }
             }
+            return "";
+        });
+
+        if(ObjectUtil.isNotEmpty(jsonObject)){
+            return JSONUtil.parseArray(jsonObject.toString());
+        }else{
+            return new JSONArray();
         }
-        return new JSONArray();
+
     }
 
     /**
@@ -108,6 +142,7 @@ public class CoreConfigServiceImpl implements ICoreConfigService {
             sysConfigMapper.insert(addModel);
 
         } else {
+            cached.tag(cacheTagName).clear();
             model.setUpdateTime(System.currentTimeMillis() / 1000);
             model.setValue(valueJson.toString());
             sysConfigMapper.update(model, new QueryWrapper<SysConfig>().eq("config_key", key).eq("site_id", siteId));

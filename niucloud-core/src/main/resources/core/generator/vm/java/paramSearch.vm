@@ -1,0 +1,23 @@
+package com.niu.${addonName}.service.admin.${moduleName}.param;
+
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * ${tableContent}参数
+ */
+@Data
+public class ${className}SearchParam implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+    #if($column.isQuery==1)
+    /** ${column.columnComment} */
+    private ${column.columnType} ${column.lowerColumnFiledName};
+    #end
+
+#end
+
+}

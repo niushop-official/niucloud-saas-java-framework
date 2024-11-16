@@ -70,11 +70,9 @@ public class Site implements Serializable {
     private String businessHours;
 
     /** 创建时间 */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;
 
     /** 到期时间（如果是0 无限期） */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long expireTime; //
 
     /** 前台名称 */
@@ -103,5 +101,7 @@ public class Site implements Serializable {
 
     /** 站点域名 */
     private String siteDomain;
+
+    private Integer isinit;
 
 }

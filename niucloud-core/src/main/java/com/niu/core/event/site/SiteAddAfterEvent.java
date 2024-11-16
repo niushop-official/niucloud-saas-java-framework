@@ -1,6 +1,6 @@
 package com.niu.core.event.site;
 
-import com.niu.core.component.context.event.Event;
+import com.niu.core.common.component.context.event.Event;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
 import lombok.Data;

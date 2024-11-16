@@ -5,7 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.loader.pay.BasePay;
 import com.niu.core.common.loader.pay.param.*;
-import com.niu.core.component.context.SpringContext;
+import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.entity.pay.Pay;
 import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.enums.member.MemberAccountChangeTypeEnum;
@@ -15,11 +15,9 @@ import com.niu.core.enums.pay.RefundTransferStatusEnum;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
 import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.core.service.core.pay.ICoreRefundService;
-import com.niu.core.service.core.pay.ICoreTransferService;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -95,14 +93,18 @@ public class Balancepay extends BasePay {
      * 退款
      */
     public void refund(RefundParam param) {
-        String memo = MemberAccountChangeTypeEnum.getType(AccountTypeEnum.BALANCE.getType()).getByPath("order_refund.name", String.class);
-        coreMemberAccountService().addLog(param.getSiteId(), param.getMemberId(), AccountTypeEnum.BALANCE.getType(), param.getMoney().negate().doubleValue(), "order_refund", memo, param.getRefundNo());
+        Pay pay = corePayService().findPayInfoByOutTradeNo(param.getSiteId(), param.getOutTradeNo());
 
-        RefundNotifyParam notifyParam = new RefundNotifyParam();
-        BeanUtil.copyProperties(param, notifyParam);
-        notifyParam.setType("balance");
-        notifyParam.setRefundStatus(RefundTransferStatusEnum.SUCCESS);
-        coreRefundService().refundNotify(notifyParam);
+        String memo = MemberAccountChangeTypeEnum.getType(AccountTypeEnum.BALANCE.getType()).getByPath("order_refund.name", String.class);
+
+        if (pay.getMainType().equals("member")) {
+            coreMemberAccountService().addLog(param.getSiteId(), pay.getMainId(), AccountTypeEnum.BALANCE.getType(), param.getMoney().doubleValue(), "order_refund", memo, param.getRefundNo());
+            RefundNotifyParam notifyParam = new RefundNotifyParam();
+            BeanUtil.copyProperties(param, notifyParam);
+            notifyParam.setType("balance");
+            notifyParam.setRefundStatus(RefundTransferStatusEnum.SUCCESS);
+            coreRefundService().refundNotify(notifyParam);
+        }
     }
 
     /**

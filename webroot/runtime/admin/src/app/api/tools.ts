@@ -137,7 +137,7 @@ export function deleteGenerateTable(id: number) {
  * @returns
  */
 export function generateCreate(params: Record<string, any>) {
-    return request.post(`generator/download`, params)
+    return request.post('/generator/download', params)
 }
 
 /**

@@ -1,7 +1,7 @@
 package com.niu.core.service.core.site.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.niu.core.component.context.cache.Cached;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.utils.cache.CacheTag;
 import com.niu.core.common.utils.json.JsonConverterUtils;
 import com.niu.core.entity.site.Site;

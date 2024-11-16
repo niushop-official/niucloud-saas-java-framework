@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.enums.notice.vo.NoticeEnumListVo;
+import com.niu.core.service.admin.notice.param.EditMessageStatusParam;
 import com.niu.core.service.admin.pay.param.PayParam;
 import com.niu.core.service.admin.pay.param.PaySearchParam;
 import com.niu.core.service.admin.pay.vo.PayInfoVo;
@@ -28,4 +29,5 @@ public interface INoticeService {
 
     void edit(String key, JSONObject data);
 
+    void editMessageStatus(EditMessageStatusParam param);
 }

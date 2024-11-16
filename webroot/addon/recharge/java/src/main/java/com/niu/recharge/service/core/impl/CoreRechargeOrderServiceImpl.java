@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.NoticeUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.pay.Pay;
 import com.niu.core.enums.member.AccountTypeEnum;
@@ -41,9 +42,6 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
 
     @Resource
     ICoreMemberAccountService coreMemberAccountService;
-
-    @Resource
-    ICoreNoticeService coreNoticeService;
 
     /**
      *
@@ -168,7 +166,7 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
     private void sendRechargeSuccessNotice(RechargeOrder order) {
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("order", order);
-        coreNoticeService.send(order.getSiteId(), "recharge_success", param);
+        NoticeUtils.send(order.getSiteId(), "recharge_success", param);
     }
 
 }

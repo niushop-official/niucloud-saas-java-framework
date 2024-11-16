@@ -1,8 +1,7 @@
 package com.niu.core.common.utils.file;
 
 import com.niu.core.common.utils.system.RuntimeTools;
-import com.niu.core.component.context.WebAppEnvs;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;

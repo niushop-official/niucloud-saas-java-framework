@@ -3,20 +3,16 @@ package com.niu.core.service.admin.member.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.config.GlobalConfig;
-import com.niu.core.entity.member.MemberAccountLog;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.member.MemberSign;
 import com.niu.core.mapper.member.MemberSignMapper;
-import com.niu.core.service.admin.member.param.MemberSignParam;
 import com.niu.core.service.admin.member.param.MemberSignSearchParam;
 import com.niu.core.service.admin.member.IMemberSignService;
 import com.niu.core.service.admin.member.param.SignConfigParam;
@@ -25,7 +21,7 @@ import com.niu.core.service.core.member.ICoreMemberService;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+
 import javax.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,7 +78,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
             vo.setMember(memberInfoVo);
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

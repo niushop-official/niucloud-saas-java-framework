@@ -71,7 +71,8 @@ public class WeappServiceImpl implements IWeappService {
 
             return this.login(
                     ObjectUtil.defaultIfNull(wxUser.getOpenid(), ""),
-                    ObjectUtil.defaultIfNull(wxUser.getUnionid(), "")
+                    ObjectUtil.defaultIfNull(wxUser.getUnionid(), ""),
+                    param.getPid()
             );
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
@@ -84,7 +85,7 @@ public class WeappServiceImpl implements IWeappService {
      * @param unionid
      * @return
      */
-    private LoginVo login(String openid, String unionid) {
+    private LoginVo login(String openid, String unionid, Integer pid) {
         if (openid.isEmpty()) throw new CommonException("openid不能为空");
 
         Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("weapp_openid", openid).eq("site_id", RequestUtils.siteId()));
@@ -102,6 +103,7 @@ public class WeappServiceImpl implements IWeappService {
             Member registerMember = new Member();
             registerMember.setWxOpenid(openid);
             registerMember.setWxUnionid(unionid);
+            registerMember.setPid(pid);
             return registerService.register(registerMember);
         }
         return null;
@@ -139,6 +141,7 @@ public class WeappServiceImpl implements IWeappService {
             registerMember.setWxOpenid(param.getOpenid());
             registerMember.setMobile(param.getMobile());
             registerMember.setWxUnionid(param.getUnionid());
+            registerMember.setPid(param.getPid());
             return registerService.register(registerMember);
         } catch (Exception e) {
             throw new CommonException(e.getMessage());

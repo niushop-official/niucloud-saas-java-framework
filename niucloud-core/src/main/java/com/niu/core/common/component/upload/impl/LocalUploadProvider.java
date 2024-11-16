@@ -1,0 +1,101 @@
+package com.niu.core.common.component.upload.impl;
+
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.component.upload.IUploadProvider;
+import com.niu.core.common.component.upload.annotation.UploadProvider;
+import com.niu.core.common.component.upload.exception.UploadException;
+import com.niu.core.common.component.upload.model.*;
+import com.niu.core.common.utils.file.FileTools;
+import com.niu.core.common.component.upload.AbstractUploadProvider;
+import com.niu.core.common.component.upload.model.*;
+import com.niu.core.enums.upload.UploadThumbTypeEnum;
+import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+
+@UploadProvider(name = "local", source = "core", describe = "本地存储")
+@Slf4j
+public class LocalUploadProvider extends AbstractUploadProvider implements IUploadProvider {
+
+    private String rootUploadDir;
+
+    @Override
+    public void init(JSONObject configObject) {
+        if (configObject != null) {
+            this.rootUploadDir = configObject.getStr("rootUploadDir");
+        }
+        if (StrUtil.isEmpty(rootUploadDir)) {
+            this.rootUploadDir = WebAppEnvs.get().webRootDownResource;
+        }
+    }
+
+    @Override
+    public UploadModelResult upload(UploadModel uploadModel) {
+        UploadModelResult uploadModelResult = new UploadModelResult();
+        try {
+            // 上传的文件
+            MultipartFile multipartFile = uploadModel.getUploadFile();
+            // 不存在时创建目录
+            FileTools.createDirs(this.rootUploadDir + uploadModel.getUploadFilePath());
+            // 存储的相对目录
+            String key = uploadModel.getUploadFilePath() + uploadModel.getUploadFileName();
+            // 存储的完整路径
+            String saveFilePath = this.rootUploadDir + key;
+            multipartFile.transferTo(new File(saveFilePath));
+            // 设置返回参数
+            uploadModelResult.setOriginalFilename(multipartFile.getOriginalFilename());
+            uploadModelResult.setSize(multipartFile.getSize());
+            uploadModelResult.setAccessUrl(key);
+            uploadModelResult.setUploadMethod(super.getUploadMethod());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        }
+        return uploadModelResult;
+    }
+
+    @Override
+    public DeleteModelResult delete(DeleteModel deleteModel) {
+        DeleteModelResult deleteModelResult = new DeleteModelResult();
+        try {
+            // 要删除的key
+            String key = deleteModel.getFilePath();
+            // 删除操作
+            FileTools.deleteFile(this.rootUploadDir + key);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        }
+        return deleteModelResult;
+    }
+
+    @Override
+    public ThumbModelResult thumb(ThumbModel thumbModel) {
+        ThumbModelResult thumbModelResult = new ThumbModelResult();
+        try {
+            File file = new File(this.rootUploadDir + thumbModel.getFilePath());
+            if (file.exists()) {
+                String filename = file.getName();
+                for (UploadThumbTypeEnum item : UploadThumbTypeEnum.values()) {
+                    if (thumbModel.getType().equals("all") || thumbModel.getType().equals(item.getType())) {
+                        String thumbName = thumbModel.getFilePath().replace(filename, item.getWidth() + "x" + item.getHeight() + "_" + filename);
+                        File thumbFile = new File(this.rootUploadDir + thumbName);
+                        if (!thumbFile.exists()) {
+                            Thumbnails.of(file).size(item.getWidth(), item.getHeight()).toFile(thumbFile);
+                        }
+                        thumbModelResult.addDataMap(item.getType(), thumbName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        }
+        return thumbModelResult;
+    }
+
+}

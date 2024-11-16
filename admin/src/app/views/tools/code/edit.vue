@@ -124,14 +124,6 @@
 
                             </template>
                         </el-table-column>
-                        <!-- <el-table-column :label="t('formValidation')" prop="" min-width="170px">
-                            <template #default="{ row }">
-                                <el-select :placeholder="t('selectPlaceholder')" v-model="row.view_type">
-                                    <el-option :label="item.label" :value="item.value" v-for="(item, index) in viewType"
-                                        :key="index" />
-                                </el-select>
-                            </template>
-                        </el-table-column> -->
                     </el-table>
                 </el-tab-pane>
                 <el-tab-pane :label="t('generationSettings')" name="generationSettings">
@@ -221,25 +213,6 @@
                         </el-form-item> -->
                     </el-form>
                 </el-tab-pane>
-                <el-tab-pane :label="t('associatedConfiguration')" name="associatedConfiguration">
-                    <div class="mb-[20px]">
-                        <el-button type="primary" class="w-[100px]" @click="addEvent(null, -1)">{{ t('insertAssociated') }}</el-button>
-                    </div>
-                    <el-table :data="formData.relations" size="large">
-                        <el-table-column :label="t('associatedType')" prop="type" min-width="130px" />
-                        <el-table-column :label="t('associatedName')" prop="name" min-width="130px" />
-                        <el-table-column :label="t('addons')" prop="addon" min-width="130px" />
-                        <el-table-column :label="t('associatedModel')" prop="model" min-width="130px" />
-                        <el-table-column :label="t('localKey')" prop="local_key" min-width="130px" />
-                        <el-table-column :label="t('foreignKey')" prop="foreign_key" min-width="130px" />
-                        <el-table-column :label="t('operation')" align="right" min-width="130px">
-                            <template #default="{ row, $index }">
-                                <el-button type="primary" link @click="addEvent(row, $index)">{{ t('edit') }}</el-button>
-                                <el-button type="primary" link @click="deleteEvent($index)">{{ t('delete') }}</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-tab-pane>
             </el-tabs>
         </el-card>
     </div>
@@ -264,7 +237,6 @@ import { t } from '@/lang'
 import { img } from '@/utils/common'
 import { FormInstance, ElMessageBox, ElMessage } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
-import editAssociated from '@/app/views/tools/code/components/edit-associated.vue'
 import editViewType from '@/app/views/tools/code/components/edit-view-type.vue'
 import editVerify from '@/app/views/tools/code/components/edit-verify.vue'
 import { getGenerateTableInfo, editGenerateTable, getAddonDevelop, generatorCheckFile, generateCreate } from '@/app/api/tools'
@@ -466,25 +438,7 @@ const addonChange = async (val: any) => {
         if (addonMenuList.value[0]) formData.parent_menu = addonMenuList.value[0].menu_key
     }
 }
-const associatedIndex = ref(0)
 const editDialog = ref()
-// 添加编辑关联设置
-
-const addEvent = (val: any, index: number) => {
-    associatedIndex.value = index
-    editDialog.value.setFormData(val)
-}
-const complete = (row: any) => {
-    if (associatedIndex.value != -1) {
-        formData.relations.splice(associatedIndex.value, 1, row)
-    } else {
-        formData.relations.unshift(row)
-    }
-}
-// 删除关联配置
-const deleteEvent = (index: number) => {
-    formData.relations.splice(index, 1)
-}
 const onSave = async (code: number) => {
     const data = cloneDeep(formData)
     // if (data.table_column.some(el => { return ['select', 'radio', 'checkbox'].includes(el.view_type) && el.dict_type == '' })) {

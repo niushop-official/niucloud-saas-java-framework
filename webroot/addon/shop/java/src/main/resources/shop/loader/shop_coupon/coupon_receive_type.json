@@ -1,0 +1,10 @@
+[
+  {
+    "name": "send",
+    "title": "后台发放"
+  },
+  {
+    "name": "receive",
+    "title": "用户手动领取"
+  }
+]

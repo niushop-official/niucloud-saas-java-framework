@@ -29,7 +29,7 @@ public class CoreNoticeSmsLogServiceImpl implements ICoreNoticeSmsLogService {
         queryWrapper.orderByDesc("id");
 
         IPage<SysNoticeSmsLog> iPage = sysNoticeSmsLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
-        return PageResult.build(iPage);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     @Override

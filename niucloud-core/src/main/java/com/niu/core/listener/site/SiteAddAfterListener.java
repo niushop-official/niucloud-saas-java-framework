@@ -3,8 +3,8 @@ package com.niu.core.listener.site;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.annotation.EventListen;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.listener.AbstractListener;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.event.site.SiteAddAfterEvent;
 import com.niu.core.service.admin.diy.IDiyService;
@@ -32,7 +32,7 @@ public class SiteAddAfterListener extends AbstractListener {
         setParam.setSiteId(event.getSiteId());
         setParam.setType("index");
         setParam.setKey("DIY_INDEX");
-        setParam.setIsStart(1);
+        setParam.setIsStart(app.size() > 1 ? 1 : 0);
         setParam.setMainApp(app);
         diyService().setDiyData(setParam);
 

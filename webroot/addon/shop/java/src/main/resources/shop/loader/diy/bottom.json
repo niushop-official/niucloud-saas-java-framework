@@ -1,0 +1,55 @@
+{
+	"key": "shop",
+	"value": {
+		"backgroundColor": "#ffffff",
+		"textColor": "#333333",
+		"textHoverColor": "#FF4500",
+		"type": "1",
+		"list": [
+			{
+				"text": "首页",
+				"link": {
+					"parent": "SHOP_LINK",
+					"name": "SHOP_INDEX",
+					"title": "首页",
+					"url": "/addon/shop/pages/index"
+				},
+				"iconPath": "addon/shop/diy/tabbar/system-home.png",
+				"iconSelectPath": "addon/shop/diy/tabbar/system-home-selected.png"
+			},
+			{
+				"text": "商品分类",
+				"link": {
+					"parent": "SHOP_LINK",
+					"name": "SHOP_GOODS_CATEGORY",
+					"title": "商品分类",
+					"url": "/addon/shop/pages/goods/category"
+				},
+				"iconPath": "addon/shop/diy/tabbar/system-category.png",
+				"iconSelectPath": "addon/shop/diy/tabbar/system-category-selected.png"
+			},
+			{
+				"text": "购物车",
+				"link": {
+					"parent": "SHOP_LINK",
+					"name": "SHOP_GOODS_CART",
+					"title": "购物车",
+					"url": "/addon/shop/pages/goods/cart"
+				},
+				"iconPath": "addon/shop/diy/tabbar/system-cart.png",
+				"iconSelectPath": "addon/shop/diy/tabbar/system-cart-selected.png"
+			},
+			{
+				"text": "我的",
+				"link": {
+					"parent": "SHOP_LINK",
+					"name": "SHOP_MEMBER_INDEX",
+					"title": "我的",
+					"url": "/addon/shop/pages/member/index"
+				},
+				"iconPath": "addon/shop/diy/tabbar/system-my.png",
+				"iconSelectPath": "addon/shop/diy/tabbar/system-my-selected.png"
+			}
+		]
+	}
+}

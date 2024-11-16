@@ -23,6 +23,7 @@ public class VerifyInfoVo implements Serializable {
     private Integer verifierMemberId;  // 核销会员id
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime; // 核销时间
+    @JsonSerialize(using = BeanJsonSerializer.StringToJSONObjectSerializer.class)
     private String value;  // 核销内容
     private String body;  // 描述
     private String relateTag;  // 业务标识

@@ -1,12 +1,17 @@
 package com.niu.core.service.api.member.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.utils.CollectUtils;
+import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLevel;
 import com.niu.core.enums.member.MemberLevelStyleEnum;
 import com.niu.core.mapper.member.MemberLevelMapper;
+import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.param.MemberLevelParam;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
@@ -17,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +36,9 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
 
     @Autowired
     private ICoreMemberService coreMemberService;
+
+    @Resource
+    private MemberMapper memberMapper;
 
     @Override
     public MemberLevel findById(Integer id) {
@@ -86,4 +95,28 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
         return list;
     }
 
+    /**
+     * 获取会员的会员等级
+     *
+     * @param memberId
+     * @return
+     */
+    public MemberLevelInfoVo findMemberLevel(Integer memberId) {
+        MPJQueryWrapper<Member> queryWrapper = new MPJQueryWrapper<>();
+        queryWrapper.setAlias("m")
+                .leftJoin("?_member_level ml ON ml.level_id = m.member_level".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("ml.*");
+        queryWrapper.eq("m.member_id", memberId);
+        queryWrapper.ne("m.member_level", 0);
+        MemberLevel level = memberMapper.selectJoinOne(MemberLevel.class, queryWrapper);
+        if (level == null) return null;
+
+        MemberLevelInfoVo vo = new MemberLevelInfoVo();
+        BeanUtils.copyProperties(level, vo);
+
+        if (ObjectUtil.isNotEmpty(level.getLevelBenefits()) && JSONUtil.isJson(level.getLevelBenefits())) vo.setLevelBenefits(JSONUtil.parseObj(level.getLevelBenefits()));
+        if (ObjectUtil.isNotEmpty(level.getLevelGifts()) && JSONUtil.isJson(level.getLevelGifts())) vo.setLevelGifts(JSONUtil.parseObj(level.getLevelGifts()));
+
+        return vo;
+    }
 }

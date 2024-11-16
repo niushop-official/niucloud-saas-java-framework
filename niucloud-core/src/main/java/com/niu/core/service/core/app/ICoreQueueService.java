@@ -1,6 +1,6 @@
 package com.niu.core.service.core.app;
 
-import com.niu.core.component.context.queue.TaskArgument;
+import com.niu.core.common.component.context.queue.TaskArgument;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.core.app.param.CoreQueueExecParam;
 

@@ -22,4 +22,6 @@ public class AuthRegisterParam implements Serializable {
 
     private String mobileCode = "";
 
+    private Integer pid;
+
 }

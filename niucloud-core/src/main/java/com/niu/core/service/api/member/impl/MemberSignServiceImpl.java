@@ -60,7 +60,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
 
         IPage<MemberSign> iPage = this.memberSignMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<MemberSignRecordVo> dataList = CollectUtils.convert(iPage.getRecords(), MemberSignRecordVo.class);
-        return PageResult.build(page, limit).setData(dataList);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 
     /**
@@ -223,7 +223,6 @@ public class MemberSignServiceImpl implements IMemberSignService {
      * @return
      */
     @Override
-    @Transactional
     public MemberSignConfigVo signConfig(MemberSignConfigParam param) {
         JSONObject config = coreConfigService.getConfigValue(RequestUtils.siteId(), "SIGN_CONFIG");
         MemberSignConfigVo signConfig = JSONUtil.toBean(config, MemberSignConfigVo.class);

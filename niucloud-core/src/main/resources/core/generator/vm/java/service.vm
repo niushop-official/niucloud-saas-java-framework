@@ -1,0 +1,49 @@
+package com.niu.${addonName}.service.admin.${moduleName};
+
+import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
+import com.niu.${addonName}.service.admin.${moduleName}.param.${className}Param;
+import com.niu.${addonName}.service.admin.${moduleName}.param.${className}SearchParam;
+import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}InfoVo;
+import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}ListVo;
+
+/**
+ * ${notes}服务接口
+ */
+public interface I${className}Service {
+
+    /**
+     * ${notes}列表
+     * @param pageParam 分页参数
+     * @param searchParam 搜索参数
+     * @return PageResult<${className}ListVo>
+     */
+    PageResult<${className}ListVo> page(PageParam pageParam, ${className}SearchParam searchParam);
+
+    /**
+     * ${notes}详情
+     * @param id 主键ID
+     * @return ShopGoodsLabelInfoVo
+     */
+    ${className}InfoVo info(Integer id);
+
+    /**
+     * ${notes}添加
+     * @param addParam 添加参数
+     */
+    void add(${className}Param addParam);
+
+    /**
+     * ${notes}编辑
+     * @param id   主键
+     * @param editParam 编辑参数
+     */
+    void edit(Integer id, ${className}Param editParam);
+
+    /**
+     * ${notes}删除
+     * @param id 主键ID
+     */
+    void del(Integer id);
+
+}

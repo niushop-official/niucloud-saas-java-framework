@@ -8,8 +8,8 @@ const usePosterStore = defineStore('poster', {
     state: () => {
         return {
 
-            contentBoxWidth: 360, // 360*2=720
-            contentBoxHeight: 640, //  640*2=1280
+            contentBoxWidth: 720, // 360*2=720
+            contentBoxHeight: 1280, //  640*2=1280
 
             id: 0,
             name: '', // 页面名称
@@ -52,11 +52,11 @@ const usePosterStore = defineStore('poster', {
             },
             // 组件类型，文本：text，image：图片，qrcode：二维码
             template: {
-                width: 100, // 宽度
-                height: 100, // 高度
-                minWidth: 30, // 最小宽度
-                minHeight: 30, // 最小高度
-                x: 0, // 横向坐标 →
+                width: 200, // 宽度
+                height: 200, // 高度
+                minWidth: 60, // 最小宽度
+                minHeight: 60, // 最小高度
+                x: 0, // 横向坐标 → 
                 y: 0, // 纵向坐标 ↑
                 angle: 0, // 旋转角度 0~360
                 zIndex: 0 // 层级
@@ -64,14 +64,18 @@ const usePosterStore = defineStore('poster', {
             // 各组件类型的默认值
             templateType: {
                 text: {
-                    height: 30,
-                    minWidth: 60,
-                    minHeight: 22,
-                    fontFamily: '',
-                    fontSize: 20,
+                    height: 60,
+                    minWidth: 120,
+                    minHeight: 44,
+                    fontFamily: 'static/font/SourceHanSansCN-Regular.ttf',
+                    fontSize: 40,
+                    weight: false,
+                    lineHeight: 10,
                     fontColor: '#303133'
                 },
-                image: {},
+                image: {
+                    shape: 'normal' // 圆形 circle 方形  normal
+                },
                 qrcode: {},
                 // 绘画
                 draw: {
@@ -328,38 +332,40 @@ const usePosterStore = defineStore('poster', {
         // 移动事件
         mouseDown(e: any, id: any, index: any) {
             const box: any = document.getElementById(id);
-            const disX = e.clientX - box.offsetLeft;
-            const disY = e.clientY - box.offsetTop;
+            const disX = (e.clientX * 2 ) - box.offsetLeft;
+            const disY = (e.clientY * 2 ) - box.offsetTop;
 
             // 鼠标移动时
             document.onmousemove = (e) => {
+                let clientX = e.clientX * 2;
+                let clientY = e.clientY * 2;
+                
                 if (this.contentBoxWidth == box.offsetWidth) {
                     box.style.left = 0
                 } else {
-                    box.style.left = e.clientX - disX + 'px'
+                    box.style.left = (clientX - disX)  + 'px'
                 }
-                box.style.top = e.clientY - disY + 'px';
+                box.style.top = (clientY - disY)  + 'px';
 
                 // 边界判断
-                if (e.clientX - disX < 0) {
+                if (clientX - disX < 0) {
                     box.style.left = 0
                 }
 
-                if (e.clientX - disX > this.contentBoxWidth - box.offsetWidth) {
+                if (clientX - disX > this.contentBoxWidth - box.offsetWidth) {
                     box.style.left = this.contentBoxWidth - box.offsetWidth + 'px'
                 }
 
-
-                if (e.clientY - disY < 0) {
+                if (clientY - disY < 0) {
                     box.style.top = 0
                 }
 
-                if (e.clientY - disY > this.contentBoxHeight - box.offsetHeight) {
+                if (clientY - disY > this.contentBoxHeight - box.offsetHeight) {
                     box.style.top = this.contentBoxHeight - box.offsetHeight + 'px'
                 }
-
+                
                 this.value[index].x = box.offsetLeft;
-                this.value[index].y = box.offsetTop
+                this.value[index].y = box.offsetTop;
 
             };
 

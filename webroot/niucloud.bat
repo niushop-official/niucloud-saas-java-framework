@@ -30,7 +30,7 @@ PAUSE
 :: 启动
 :start
 java %JVM_OPTS% -jar %BootAppName%
-timeout /T 5
+timeout /T 2
 goto:eof
 
 :: 停止
@@ -52,7 +52,7 @@ goto:eof
 goto:eof
 
 :: 状态
-:state
+:stataie
 echo ----------------------------------------------------------------
 for /f "usebackq tokens=1-2" %%a in (`jps -l ^| findstr %BootAppName%`) do (
     echo %%a  %%b

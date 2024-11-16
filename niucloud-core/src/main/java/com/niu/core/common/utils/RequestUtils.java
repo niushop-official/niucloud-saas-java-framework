@@ -1,7 +1,7 @@
 package com.niu.core.common.utils;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.niu.core.component.base.ThreadLocalHolder;
+import com.niu.core.common.component.base.ThreadLocalHolder;
 import com.niu.core.enums.common.ChannelEnum;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

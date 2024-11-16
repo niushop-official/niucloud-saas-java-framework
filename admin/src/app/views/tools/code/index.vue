@@ -141,23 +141,25 @@
             <el-dialog v-model="dialogVisible" class="dialog-visible" width="70%" title="代码预览">
                 <div class="flex h-[50vh]" v-loading="codeLoading">
                     <el-scrollbar class="h-[100%] w-[270px]">
-                        <el-tree v-if="treeData.length && treeKey != ''" :data="treeData" :props="{ label: 'name', value: 'key' }"
-                            node-key="key" :current-node-key="treeKey" :expand-on-click-node="false" highlight-current
-                            default-expand-all ref="treeRef" @node-click="nodeClick">
-                            <template #default="{ node, data }">
-                                <div class="flex items-center">
-                                    <el-icon v-if="data.children">
-                                        <Folder v-if="!node.expanded" />
-                                        <FolderOpened v-else />
-                                    </el-icon>
-                                    <el-icon v-else>
-                                        <Document />
-                                    </el-icon>
-                                    <span class="pl-[5px]">{{ data.name }}</span>
-                                </div>
-
-                            </template>
-                        </el-tree>
+                        <div class="w-[600px]">
+                            <el-tree v-if="treeData.length && treeKey != ''" :data="treeData" :props="{ label: 'name', value: 'key' }"
+                                node-key="key" :current-node-key="treeKey" :expand-on-click-node="false" highlight-current
+                                default-expand-all ref="treeRef" @node-click="nodeClick">
+                                <template #default="{ node, data }">
+                                    <div class="flex items-center">
+                                        <el-icon v-if="data.children">
+                                            <Folder v-if="!node.expanded" />
+                                            <FolderOpened v-else />
+                                        </el-icon>
+                                        <el-icon v-else>
+                                            <Document />
+                                        </el-icon>
+                                        <span class="pl-[5px]">{{ data.name }}</span>
+                                    </div>
+                            
+                                </template>
+                            </el-tree>
+                        </div>
                     </el-scrollbar>
                     <div class="ml-[20px]" style="width: calc(100% - 285px);">
                         <el-scrollbar class="h-[100%] w-[100%]">
@@ -178,6 +180,7 @@ import { img } from '@/utils/common'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import AddTable from '@/app/views/tools/code/components/add-table.vue'
 import type { FormInstance } from 'element-plus'
+import { downloadFile } from '@/utils/file'
 import { useRouter, useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -304,7 +307,6 @@ const generatorCheckFileFn = ((id: any) => {
  * 同步or下载
  */
 const generateCreateFn = (id: any, generate_type: any) => {
-    codeTableData.loading = true
     generateCreate({ id, generate_type }).then(res => {
         ElMessage({
             type: 'success',

@@ -4,11 +4,9 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.niu.core.common.domain.Result;
 import com.niu.core.enums.addon.AddonTypeEnum;
 import com.niu.core.service.admin.addon.IAddonService;
+import com.niu.core.service.admin.upgrade.IUpgradeService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -22,13 +20,47 @@ import java.util.Map;
 @SaCheckLogin
 public class UpgradeController {
 
+    @Resource
+    IUpgradeService upgradeService;
+
+    /**
+     * 获取升级内容
+     */
+    @GetMapping("")
+    public Result<?> getUpgradeContent() {
+        return Result.success(upgradeService.getUpgradeContent(""));
+    }
+
+    /**
+     * 获取升级内容
+     */
+    @GetMapping("/{addon}")
+    public Result<?> getUpgradeContent(@PathVariable(value = "addon") String addon) {
+        return Result.success(upgradeService.getUpgradeContent(addon));
+    }
+
+    /**
+     * 升级
+     */
+    @PostMapping("")
+    public Result<?> upgrade() {
+        return Result.success(upgradeService.upgrade(""));
+    }
+
+    /**
+     * 升级
+     */
+    @PostMapping("/{addon}")
+    public Result<?> upgrade(@PathVariable(value = "addon") String addon) {
+        return Result.success(upgradeService.upgrade(addon));
+    }
+
     /**
      * 获取正在进行的升级任务
      */
     @GetMapping("/task")
     public Result<?> getUpgradeTask() {
-        Object result = null;
-        return Result.success(result);
+        return Result.success(upgradeService.getUpgradeTask());
     }
 
     /**
@@ -36,6 +68,7 @@ public class UpgradeController {
      */
     @PostMapping("/execute")
     public Result execute() {
+        upgradeService.execute();
         return Result.success();
     }
 
@@ -44,6 +77,7 @@ public class UpgradeController {
      */
     @PostMapping("/clear")
     public Result clearUpgradeTask() {
+        upgradeService.clearUpgradeTask(0);
         return Result.success();
     }
 }

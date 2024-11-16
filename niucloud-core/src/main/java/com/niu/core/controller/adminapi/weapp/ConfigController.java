@@ -14,6 +14,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 微信小程序配置
@@ -43,5 +45,17 @@ public class ConfigController {
     public Result<Object> set(@Validated @RequestBody WeappConfigParam weappConfigParam) {
         weappConfigService.setWeappConfig(weappConfigParam);
         return Result.success();
+    }
+
+    /**
+     * 查询小程序是否已开通发货信息管理服务
+     *
+     * @return
+     */
+    @GetMapping("/delivery/getIsTradeManaged")
+    public Result getIsTradeManaged() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("is_trade_managed", false);
+        return Result.success(data);
     }
 }

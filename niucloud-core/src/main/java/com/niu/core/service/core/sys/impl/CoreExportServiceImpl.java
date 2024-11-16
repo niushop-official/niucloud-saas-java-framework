@@ -3,7 +3,7 @@ package com.niu.core.service.core.sys.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.Export.BusinessExcelUtil;
 import com.niu.core.common.utils.Export.ExportDynamic;

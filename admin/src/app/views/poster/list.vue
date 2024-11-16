@@ -10,7 +10,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="posterTableData.searchParam" ref="searchFormDiyPosterRef">
                     <el-form-item :label="t('posterName')" prop="name">
-                        <el-input v-model="posterTableData.searchParam.name" :placeholder="t('posterNamePlaceholder')" />
+                        <el-input v-model.trim="posterTableData.searchParam.name" :placeholder="t('posterNamePlaceholder')" />
                     </el-form-item>
                     <el-form-item :label="t('posterType')" prop="type">
                         <el-select v-model="posterTableData.searchParam.type" :placeholder="t('posterTypePlaceholder')">
@@ -66,14 +66,14 @@
         </el-card>
 
         <!--添加海报-->
-        <el-dialog v-model="dialogVisible" :title="t('addPosterTitle')" width="25%">
+        <el-dialog v-model="dialogVisible" :title="t('addPosterTitle')" width="350px">
 
             <el-form :model="formData" label-width="90px" ref="formRef" :rules="formRules">
                 <el-form-item :label="t('posterName')" prop="name">
-                    <el-input v-model="formData.name" :placeholder="t('posterNamePlaceholder')" clearable maxlength="12" show-word-limit class="w-full" />
+                    <el-input v-model.trim="formData.name" :placeholder="t('posterNamePlaceholder')" clearable maxlength="12" show-word-limit class="w-full" />
                 </el-form-item>
                 <el-form-item :label="t('posterType')" prop="type">
-                    <el-select v-model="formData.type" :placeholder="t('posterTypePlaceholder')" class="w-full">
+                    <el-select v-model="formData.type" :placeholder="t('posterTypePlaceholder')" class="!w-full">
                         <el-option v-for="item in posterType" :label="item.name" :value="item.type" :key="item.type"/>
                     </el-select>
                 </el-form-item>
@@ -151,7 +151,7 @@ const addEvent = async (formEl: FormInstance | undefined) => {
 }
 
 // 获取自定义海报类型
-const loadPosterType = (addon = '')=> {
+const loadPosterType = ()=> {
     getPosterType({}).then((res:any)=>{
         for (let key in posterType) {
             delete posterType[key];

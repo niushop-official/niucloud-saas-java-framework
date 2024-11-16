@@ -78,7 +78,8 @@ public class WechatServiceImpl implements IWechatService {
                     ObjectUtil.defaultIfNull(wxUser.getOpenid(), ""),
                     ObjectUtil.defaultIfNull(wxUser.getUnionId(), ""),
                     ObjectUtil.defaultIfNull(wxUser.getNickname(), ""),
-                    ObjectUtil.defaultIfNull(wxUser.getHeadImgUrl(), "")
+                    ObjectUtil.defaultIfNull(wxUser.getHeadImgUrl(), ""),
+                    param.getPid()
             );
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
@@ -95,7 +96,8 @@ public class WechatServiceImpl implements IWechatService {
                 param.getOpenid(),
                 param.getUnionId(),
                 param.getNickname(),
-                param.getHeadImgUrl()
+                param.getHeadImgUrl(),
+                param.getPid()
         );
     }
 
@@ -107,7 +109,7 @@ public class WechatServiceImpl implements IWechatService {
      * @param avatar
      * @return
      */
-    private LoginVo login(String openid, String unionid, String nickname, String avatar) {
+    private LoginVo login(String openid, String unionid, String nickname, String avatar, Integer pid) {
         if (openid.isEmpty()) throw new CommonException("openid不能为空");
 
         Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_openid", openid).eq("site_id", RequestUtils.siteId()));
@@ -127,6 +129,7 @@ public class WechatServiceImpl implements IWechatService {
             registerMember.setNickname(nickname);
             registerMember.setHeadimg(avatar);
             registerMember.setWxUnionid(unionid);
+            registerMember.setPid(pid);
             return registerService.register(registerMember);
         }
         return null;
@@ -158,6 +161,7 @@ public class WechatServiceImpl implements IWechatService {
             registerMember.setWxOpenid(param.getOpenid());
             registerMember.setMobile(param.getMobile());
             registerMember.setWxUnionid(param.getUnionid());
+            registerMember.setPid(param.getPid());
             return registerService.register(registerMember);
         } catch (Exception e) {
             throw new CommonException(e.getMessage());

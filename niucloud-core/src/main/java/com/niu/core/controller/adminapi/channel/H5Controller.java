@@ -3,7 +3,6 @@ package com.niu.core.controller.adminapi.channel;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.service.admin.dict.param.DictDataParam;
 import com.niu.core.service.core.channel.ICoreH5Service;
 import com.niu.core.service.core.channel.param.SetH5Param;
 import com.niu.core.service.core.channel.vo.H5ConfigVo;

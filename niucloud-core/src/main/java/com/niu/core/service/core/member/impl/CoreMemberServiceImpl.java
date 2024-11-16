@@ -279,7 +279,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
      * @param memberId
      * @param key
      */
-    public void sendGrowth(Integer siteId, Integer memberId, String key, MemberAccountLogParam param) {
+    public void sendGrowth(Integer siteId, Integer memberId, String key, Map<String, Object> data) {
         JSONObject ruleConfig = coreMemberConfigService.getGrowthRuleConfig(siteId);
         if (ruleConfig == null) return;
 
@@ -295,13 +295,13 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
         try {
             Class<?> clazz = Class.forName(driver);
             Object obj = clazz.getDeclaredConstructor().newInstance();
-            Method method = clazz.getMethod("calculate", Integer.class, String.class, JSONObject.class);
-            Object[] params = {siteId, key, config};
+            Method method = clazz.getMethod("calculate", Integer.class, String.class, JSONObject.class, Map.class);
+            Object[] params = {siteId, key, config, data};
             Object growth = method.invoke(obj, params);
 
             if (growth instanceof Integer && (Integer) growth > 0) {
                 Double accountData = new Double(growth.toString());
-                coreMemberAccountService.addLog(siteId, memberId, AccountTypeEnum.GROWTH.getType(), accountData, param.getFromType(), param.getMemo(), param.getRelatedId());
+                coreMemberAccountService.addLog(siteId, memberId, AccountTypeEnum.GROWTH.getType(), accountData, String.valueOf(ObjectUtil.defaultIfNull(data.get("from_type"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("memo"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("related_id"), "")));
             }
         } catch (Exception e) {
             System.out.println("成长值发放异常");
@@ -316,7 +316,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
      * @param memberId
      * @param key
      */
-    public void sendPoint(Integer siteId, Integer memberId, String key, MemberAccountLogParam param) {
+    public void sendPoint(Integer siteId, Integer memberId, String key, Map<String, Object> data) {
         JSONObject ruleConfig = coreMemberConfigService.getPointRuleConfig(siteId).getJSONObject("grant");
         if (ruleConfig == null) return;
 
@@ -332,13 +332,13 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
         try {
             Class<?> clazz = Class.forName(driver);
             Object obj = clazz.getDeclaredConstructor().newInstance();
-            Method method = clazz.getMethod("calculate", Integer.class, String.class, JSONObject.class);
-            Object[] params = {siteId, key, config};
+            Method method = clazz.getMethod("calculate", Integer.class, String.class, JSONObject.class, Map.class);
+            Object[] params = {siteId, key, config, data};
             Object growth = method.invoke(obj, params);
 
             if (growth instanceof Integer && (Integer) growth > 0) {
                 Double accountData = new Double(growth.toString());
-                coreMemberAccountService.addLog(siteId, memberId, AccountTypeEnum.POINT.getType(), accountData, param.getFromType(), param.getMemo(), param.getRelatedId());
+                coreMemberAccountService.addLog(siteId, memberId, AccountTypeEnum.POINT.getType(), accountData, String.valueOf(ObjectUtil.defaultIfNull(data.get("from_type"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("memo"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("related_id"), "")));
             }
         } catch (Exception e) {
             System.out.println("积分发放异常");

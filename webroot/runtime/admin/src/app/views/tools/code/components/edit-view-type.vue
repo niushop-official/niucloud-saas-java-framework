@@ -4,7 +4,7 @@
             <el-form-item :label="t('selectType')" prop="type">
 					<el-radio-group v-model="formData.select_type">
 						<el-radio :label="1">{{ t('dictType' )}}</el-radio>
-						<el-radio :label="2">{{ t('remotePullDown') }}</el-radio>
+			
 					</el-radio-group>
 			</el-form-item>
 
@@ -25,18 +25,6 @@
                     <el-option v-for="item in modelList" :label="item" :value="item" :key="item" />
                 </el-select>
             </el-form-item>
-
-             <el-form-item prop="value_key" :label="t('remotePullDownValue')" v-if="formData.select_type == 2">
-                <el-select class="input-width" :placeholder="t('remotePullDownValuePlaceholder')" v-model="formData.value_key">
-                    <el-option :label="`${item.name}:${item.comment}`" :value="item.name" v-for="(item, index) in keyList" :key="index" />
-                </el-select>
-            </el-form-item>
-
-            <el-form-item prop="label_key" :label="t('remotePullDownLabel')" v-if="formData.select_type == 2">
-                <el-select class="input-width" :placeholder="t('remotePullDownLabelPlaceholder')" v-model="formData.label_key">
-                    <el-option :label="`${item.name}:${item.comment}`" :value="item.name" v-for="(item, index) in keyList" :key="index" />
-                </el-select>
-            </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -53,8 +41,6 @@ import { t } from '@/lang'
 import { getDictAll } from '@/app/api/dict'
 import type { FormInstance } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
-import { getGeneratorAllModel, getGeneratorTableColumn,getAddonDevelop,getGeneratorModelTableColumn } from '@/app/api/tools'
-
 const showDialog = ref(false)
 const title = ref('')
 /**
@@ -73,44 +59,8 @@ const formData: Record<string, any> = ref({ ...initialFormData })
 const formRef = ref<FormInstance>()
 const dicList = ref<Array<any>>([])
 
-/**
- * 获取关联模型
- */
-const modelList = ref([])
-const getGeneratorAllModelFn = (params:any) => {
-    getGeneratorAllModel(params).then(res => {
-        modelList.value = res.data
-    })
-}
 
-//获取插件列表
-const addonList = ref<Array<any>>([])
-const getAddonDevelopFn = async () => {
-    let { data } = await getAddonDevelop({})
-    addonList.value = [{ title: "系统", key: "system" }]
-    addonList.value.push(...data)
-    getGeneratorAllModelFn({addon:'system'})
-}
-getAddonDevelopFn()
 
-//选择应用
-const addonChange =(val:any)=>{
-    formData.value.model = ''
-   getGeneratorAllModelFn({addon:val})
-}
-
-const keyList = ref([])
-const getGeneratorModelTableColumnFn = (params:any) => {
-    getGeneratorModelTableColumn(params).then(res => {
-        keyList.value = res.data
-    })
-}
-
-//根据模型获取字段
-const modelChange = (val:any) => {
-    // formData.value.model = ''
-    getGeneratorModelTableColumnFn({model:val})
-}
 
 // 表单验证规则
 const formRules = computed(() => {
@@ -126,54 +76,6 @@ const formRules = computed(() => {
             },
             trigger: 'blur'
         }
-        ],
-        addon: [
-            {
-                validator: (rule: any, value: any, callback: any) => {
-                    if (formData.value.select_type == 2 && formData.value.addon == '') {
-                        callback(new Error(t('addonsPlaceholder')))
-                    }else{
-                        callback()
-                    } 
-                },
-                trigger: 'blur'
-            }
-        ],
-        model: [
-            {
-                validator: (rule: any, value: any, callback: any) => {
-                    if (formData.value.select_type == 2 && formData.value.model == '') {
-                        callback(new Error(t('associatedModelPlaceholder')))
-                    }else{
-                        callback()
-                    }
-                },
-                trigger: 'blur'
-            }
-        ],
-        value_key: [
-            {
-                validator: (rule: any, value: any, callback: any) => {
-                    if (formData.value.select_type == 2 && formData.value.value_key == '') {
-                        callback(new Error(t('remotePullDownValuePlaceholder')))
-                    }else{
-                        callback()
-                    } 
-                },
-                trigger: 'blur'
-            }
-        ],
-        label_key: [
-            {
-                validator: (rule: any, value: any, callback: any) => {
-                    if (formData.value.select_type == 2 && formData.value.label_key == '') {
-                        callback(new Error(t('remotePullDownLabelPlaceholder')))
-                    }else{
-                        callback()
-                    } 
-                },
-                trigger: 'blur'
-            }
         ]
 
     }
@@ -203,11 +105,6 @@ const confirm = async (formEl: FormInstance | undefined) => {
 const setFormData = async (row: any = null) => {
     formData.value = cloneDeep(Object.assign(initialFormData, row))
     getDictAllFn()
-    if(formData.value.model != '')
-    {
-        getGeneratorAllModelFn({addon:formData.value.addon})
-        getGeneratorModelTableColumnFn({model:formData.value.model})
-    }
     showDialog.value = true
 }
 const beforeClose = (next: any) => {

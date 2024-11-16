@@ -1,0 +1,28 @@
+package com.niu.${addonName}.service.admin.${moduleName}.param;
+
+import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+
+/**
+ * ${tableContent}参数
+*/
+@Data
+public class ${className}Param implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+#if(($column.isInsert==1 || $column.isUpdate==1))
+    /** ${column.columnComment} */
+    #if($column.isRequired==1)
+    @NotNull(message = "${column.columnComment}参数缺失")
+    #end
+    private ${column.columnType} ${column.lowerColumnFiledName};
+
+    #end
+#end
+
+}

@@ -68,12 +68,13 @@ public class CoreMemberAccountServiceImpl implements ICoreMemberAccountService {
 
         // 账户变更事件
         MemberAccountEvent accountEvent = new MemberAccountEvent();
-        accountEvent.setSiteId(RequestUtils.siteId());
+        accountEvent.setSiteId(siteId);
         accountEvent.addAppSign("core");
         accountEvent.setName("MemberAccountEvent");
         accountEvent.setAccountType(accountType);
         accountEvent.setAccountData(accountData);
         accountEvent.setAccountNewData(accountNewData);
+        accountEvent.setMemberId(memberId);
         EventAndSubscribeOfPublisher.publishAll(accountEvent);
 
         memberMapper.updateById(memberModel);

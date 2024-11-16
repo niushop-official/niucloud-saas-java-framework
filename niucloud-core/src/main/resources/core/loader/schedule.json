@@ -1,0 +1,8 @@
+[
+	{
+		"key": "SiteExpireCloseJob",
+		"name": "站点到期自动关闭",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	}
+]

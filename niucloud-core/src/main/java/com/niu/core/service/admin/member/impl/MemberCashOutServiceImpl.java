@@ -8,17 +8,14 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberCashOut;
-import com.niu.core.entity.member.MemberSign;
 import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.mapper.member.MemberCashOutMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
-import com.niu.core.service.admin.member.param.MemberCashOutParam;
 import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
 import com.niu.core.service.admin.member.IMemberCashOutService;
 import com.niu.core.service.admin.member.vo.*;
@@ -85,7 +82,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
 
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**

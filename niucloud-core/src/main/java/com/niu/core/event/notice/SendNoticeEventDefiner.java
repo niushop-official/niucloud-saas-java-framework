@@ -1,8 +1,8 @@
 package com.niu.core.event.notice;
 
-import com.niu.core.component.context.event.Event;
-import com.niu.core.component.context.event.DefaultEventResult;
-import com.niu.core.component.context.listener.CallbackListener;
+import com.niu.core.common.component.context.event.Event;
+import com.niu.core.common.component.context.event.DefaultEventResult;
+import com.niu.core.common.component.context.listener.CallbackListener;
 import com.niu.core.common.loader.notice.NoticeDataVo;
 import com.niu.core.service.core.notice.vo.NoticeInfoVo;
 

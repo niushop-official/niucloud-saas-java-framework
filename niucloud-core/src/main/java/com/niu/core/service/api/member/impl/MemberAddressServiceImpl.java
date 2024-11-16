@@ -111,16 +111,12 @@ public class MemberAddressServiceImpl implements IMemberAddressService {
 
     @Override
     public int delete(MemberAddressDeleteParam param) {
-        MemberAddress memberAddress = this.getMemberAddress(param.siteId(), param.memberId(), param.getId());
-        if (memberAddress == null) {
-            throw new BaseException("[" + param.getId() + "]会员收货地址不存在.");
-        }
         QueryWrapper<MemberAddress> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("site_id", memberAddress.getSiteId());
-        queryWrapper.eq("member_id", memberAddress.getMemberId());
-        queryWrapper.eq("id", memberAddress.getId());
+        queryWrapper.eq("site_id", param.siteId());
+        queryWrapper.eq("member_id", param.memberId());
+        queryWrapper.eq("id", param.getId());
         int result = this.memberAddressMapper.delete(queryWrapper);
-        if (result > 0) {
+        if (result == 0) {
             throw new BaseException("删除会员收货地址失败.");
         }
         return result;

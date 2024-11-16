@@ -1,6 +1,6 @@
 package com.niu.core.event.pay;
 
-import com.niu.core.component.context.event.Event;
+import com.niu.core.common.component.context.event.Event;
 import com.niu.core.entity.pay.Pay;
 import lombok.Data;
 

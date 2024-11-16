@@ -1,0 +1,94 @@
+{
+	"basic": {
+		"title": "基础组件",
+		"support": [],
+		"list": {
+			"Text": {
+				"title": "文本",
+				"type": "text",
+				"icon": "iconfont iconbiaoti",
+				"path": "text",
+				"uses": 0,
+				"sort": 10000,
+				"relate": "",
+				"value": "文本内容",
+				"template": {
+					"width": 165,
+					"height": 53
+				}
+			},
+			"Image": {
+				"title": "图片",
+				"type": "image",
+				"icon": "iconfont icontupian1",
+				"path": "image",
+				"uses": 0,
+				"sort": 10001,
+				"relate": "",
+				"value": ""
+			},
+			"Qrcode": {
+				"title": "二维码",
+				"type": "qrcode",
+				"icon": "iconfont iconerweima",
+				"path": "qrcode",
+				"uses": 1,
+				"sort": 10002,
+				"relate": "url",
+				"value": ""
+			},
+			"HeadImg": {
+				"title": "头像",
+				"type": "image",
+				"icon": "iconfont icongeren",
+				"path": "headimg",
+				"uses": 1,
+				"sort": 10003,
+				"relate": "headimg",
+				"value": "",
+				"template": {
+					"width": 100,
+					"height": 100,
+					"minWidth": 60,
+					"minHeight": 60,
+					"shape": "circle"
+				}
+			},
+			"NickName": {
+				"title": "昵称",
+				"type": "text",
+				"icon": "iconfont iconnicheng1",
+				"path": "nickname",
+				"uses": 1,
+				"sort": 10004,
+				"relate": "nickname",
+				"value": "",
+				"template": {
+					"width": 164,
+					"height": 55,
+					"minWidth": 120,
+					"minHeight": 50
+				}
+			},
+			"Draw": {
+				"title": "绘画",
+				"type": "draw",
+				"icon": "iconfont iconhuihua1",
+				"path": "draw",
+				"uses": 0,
+				"sort": 10005,
+				"relate": "",
+				"value": "",
+				"template": {
+					"width": 200,
+					"height": 200,
+					"minWidth": 60,
+					"minHeight": 60,
+					"drawType": "Polygon",
+					"bgColor": "#eeeeee",
+					"points": []
+				}
+			}
+		}
+	}
+}

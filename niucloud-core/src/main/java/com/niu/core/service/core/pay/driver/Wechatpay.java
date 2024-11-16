@@ -14,8 +14,8 @@ import com.github.binarywang.wxpay.bean.transfer.TransferBatchesResult;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.loader.pay.BasePay;
 import com.niu.core.common.loader.pay.param.*;
@@ -34,7 +34,6 @@ import com.niu.core.service.core.pay.vo.PayTypeVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;

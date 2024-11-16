@@ -57,7 +57,7 @@
                                 <div class="title-wrap text-center text-[14px]">{{ posterStore.name }}</div>
                             </div>
                         </div>
-                        <div class="preview-block relative">
+                        <div class="preview-block relative max-h-[640px]">
                             <ul class="quick-action absolute text-center -right-[70px] top-[20px] w-[42px] rounded shadow-md">
                                 <el-tooltip effect="light" :content="t('moveUpComponentZIndex')" placement="right">
                                     <icon name="iconfont iconjiantoushang" size="20px" class="block cursor-pointer leading-[40px]" @click="posterStore.moveUpComponent" />
@@ -78,8 +78,8 @@
 
                             <!-- 组件预览渲染区域 -->
                             <div class="preview-iframe" :style="posterStore.getGlobalStyle()" @click="posterStore.changeCurrentIndex(-99)">
-                                <div class="item-wrap area-box select-none max-w-[360px] cursor-move" v-for="(item,index) in posterStore.value" :id="item.id" :key="item.id"
-                                     :style="{ top: item.y + 'px', left: item.x + 'px', zIndex: item.zIndex, transform : 'rotate(' + item.angle +  'deg)' }"
+                                <div class="item-wrap area-box select-none max-w-[720px] cursor-move" v-for="(item,index) in posterStore.value" :id="item.id" :key="item.id"
+                                     :style="previewIframeStyle(item)"
                                      :class="{ 'selected' : posterStore.currentIndex == index }"
                                      @mousedown="posterStore.mouseDown($event,item.id,index)"
                                      @click.stop="posterStore.changeCurrentIndex(index,item)"
@@ -106,7 +106,7 @@
                     <el-card class="box-card" shadow="never">
                         <template #header>
                             <div class="card-header flex justify-between items-center">
-                                <span class="title flex-1">{{ posterStore.currentIndex == -99 ? t('posterSet') : posterStore.editComponent.componentTitle }}</span>
+                                <span class="title flex-1">{{ posterStore.currentIndex == -99 ? t('posterSet') : posterStore.editComponent?.componentTitle }}</span>
                             </div>
                         </template>
 
@@ -116,7 +116,7 @@
                                 <template #common>
                                     <div class="edit-attr-item-wrap">
                                         <h3 class="mb-[10px]">{{ t('componentStyleTitle') }}</h3>
-                                        <el-form label-width="80px" class="px-[10px]">
+                                        <el-form label-width="100px" class="px-[10px]">
 
                                             <!-- 角度旋转、这里根据类型展示 文本、图片、绘画的编辑属性 -->
 
@@ -124,21 +124,29 @@
                                                 <span>{{ posterStore.editComponent.zIndex }}</span>
                                             </el-form-item>
 
-                                            <el-form-item :label="t('coordinate')">
+                                            <!-- <el-form-item :label="t('coordinate')">
                                                 <el-slider v-model="posterStore.editComponent.x" show-input size="small" class="ml-[10px]" :min="0" :max="posterStore.getMaxX()" />
                                                 <div class="my-[10px]"></div>
                                                 <el-slider v-model="posterStore.editComponent.y" show-input size="small" class="ml-[10px]" :min="0" :max="posterStore.getMaxY()" />
                                             </el-form-item>
-
-                                            <div class="ml-[92px] mb-[18px] text-sm text-gray-400">{{ t('coordinateTips') }}</div>
+                                            <div class="ml-[92px] mb-[18px] text-sm text-gray-400">{{ t('coordinateTips') }}</div> -->
 
                                             <!-- 文本 -->
                                             <template v-if="posterStore.editComponent.type == 'text'">
                                                 <el-form-item :label="t('textFontSize')">
-                                                    <el-slider v-model="posterStore.editComponent.fontSize" show-input size="small" class="ml-[10px]" :min="14" :max="36" />
+                                                    <el-slider v-model="posterStore.editComponent.fontSize" show-input size="small" class="ml-[10px]" :min="14" :max="50" />
                                                 </el-form-item>
                                                 <el-form-item :label="t('textColor')">
                                                     <el-color-picker v-model="posterStore.editComponent.fontColor" />
+                                                </el-form-item>
+                                                <el-form-item :label="t('weight')">
+                                                    <el-switch v-model="posterStore.editComponent.weight" />
+                                                </el-form-item>
+                                                <!-- <el-form-item :label="t('space')">
+                                                    <el-slider v-model="posterStore.editComponent.space" show-input size="small" class="ml-[10px]" :min="0" :max="20" />
+                                                </el-form-item> -->
+                                                <el-form-item :label="t('lineHeight')">
+                                                    <el-slider v-model="posterStore.editComponent.lineHeight" show-input size="small" class="ml-[10px]" :min="0" :max="50" />
                                                 </el-form-item>
                                             </template>
 
@@ -159,6 +167,30 @@
                                                 </el-form-item>
                                                 <el-form-item :label="t('bgColor')">
                                                     <el-color-picker v-model="posterStore.editComponent.bgColor" />
+                                                </el-form-item>
+                                            </template>
+
+                                            <!-- 对齐方式 -->
+                                            <template v-if="posterStore.editComponent.type != 'draw' && posterStore.editComponent.type != 'image' && posterStore.editComponent.type != 'qrcode'">
+                                                <el-form-item :label="t('horizontalAlignment')">
+                                                    <ul class="flex items-center">
+                                                        <template v-for="(item,i) in xAlignList">
+                                                            <li :class="['w-[50px] h-[32px] flex items-center justify-center border-solid  border-[1px] border-[#eee] cursor-pointer', {'border-r-transparent': xAlignList.length != (i+1)}, (item.className == posterStore.editComponent.x) ?  '!border-[var(--el-color-primary)]' : '' ]" @click="alignChangeFn('x',item)">
+                                                                <span :class="['iconfont !text-[20px]', item.src]" :title="item.name"></span>
+                                                            </li>
+                                                        </template>
+                                                    </ul>
+                                                    <div class="text-sm mt-[10px] leading-[1.4] text-gray-400">{{ t('AlignTips') }}</div>
+                                                </el-form-item>
+
+                                                <el-form-item :label="t('verticalAlignment')">
+                                                    <ul class="flex items-center">
+                                                        <template v-for="(item,i) in yAlignList">
+                                                            <li :class="['w-[50px] h-[32px] flex items-center justify-center border-solid  border-[1px] border-[#eee] cursor-pointer', {'border-r-transparent': yAlignList.length != (i+1)}, (item.className == posterStore.editComponent.y) ?  '!border-[var(--el-color-primary)]' : '' ]" @click="alignChangeFn('y',item)">
+                                                                <span :class="['iconfont !text-[20px]', item.src]" :title="item.name"></span>
+                                                            </li>
+                                                        </template>
+                                                    </ul>
                                                 </el-form-item>
                                             </template>
 
@@ -209,10 +241,12 @@ const posterStore = usePosterStore()
 const route = useRoute()
 const router = useRouter()
 
-route.query.id = route.query.id || 0
-route.query.type = route.query.type || '' // 海报类型
-route.query.name = route.query.name || ''
-route.query.back = route.query.back || '/site/poster/list'
+if(route && route.query){
+    route.query.id = route.query.id || 0
+    route.query.type = route.query.type || '' // 海报类型
+    route.query.name = route.query.name || ''
+    route.query.back = route.query.back || '/site/poster/list'
+}
 
 const backPath:any = route.query.back
 const template = ref('');
@@ -224,6 +258,90 @@ const page = ref('')
 
 const activeNames = ref(componentType)
 const handleChange = (val: string[]) => {
+}
+
+const previewIframeStyle = (data: any)=>{
+    let style: any = {
+        transform: '',
+        zIndex: '',
+        top: '',
+        left: '',
+        right: '',
+        bottom: ''
+    };
+    style.transform =  `rotate(${data.angle}deg)`;
+    style.zIndex =  `${data.zIndex}`;
+    switch(data.y) {
+        case 'top':
+            style.top = 0;
+            break;
+        case 'center':
+            style.top = '50%';
+            style.transform = style.transform + ' translateY(-50%)';
+            break;
+        case 'bottom':
+            style.bottom = 0;
+            break;
+        default:
+            style.top = data.y + 'px';
+    } 
+    switch(data.x) {
+        case 'left':
+            style.left = 0;
+            break;
+        case 'center':
+            style.left = '50%';
+            style.transform = style.transform + ' translateX(-50%)';
+            break;
+        case 'right':
+            style.right = 0;
+            break;
+        default:
+            style.left = data.x + 'px';
+    }
+    // console.log(data.x,data.y)
+    return style;
+}
+
+// 水平方向对齐
+const xAlignList = ref([
+    {
+        name: '左',
+        src: 'iconzuoduiqi1',
+        className: 'left'
+    },
+    {
+        name: '中',
+        src: 'iconshuipingjuzhong1',
+        className: 'center'
+    },
+    {
+        name: '右',
+        src: 'iconyouduiqi1',
+        className: 'right'
+    }
+])
+
+// 水平方向对齐
+const yAlignList = ref([
+    {
+        name: '上',
+        src: 'icondingduiqi1',
+        className: 'top'
+    },
+    {
+        name: '中',
+        src: 'iconchuizhijuzhong1',
+        className: 'center'
+    },
+    {
+        name: '下',
+        src: 'icondiduiqi1',
+        className: 'bottom'
+    },
+])
+const alignChangeFn = (type: any,data: any)=>{
+    posterStore.editComponent[type] = data.className;
 }
 
 // 返回上一页
@@ -376,17 +494,17 @@ const save = (callback: any) => {
     if (isRepeat.value) return
     isRepeat.value = true
 
-    posterStore.value.forEach((item:any,index:any)=> {
+    posterStore.value.forEach((item:any,index:any, originalArr:any)=> {
         const box: any = document.getElementById(item.id)
         if (box) {
             item.width = box.offsetWidth;
             item.height = box.offsetHeight;
             if (item.type == 'draw') {
                 // [x,y]：左上，右上，右下，左下
-                let leftTop = [item.x * 2, item.y * 2]; // 左上
-                let rightTop = [(item.x + item.width) * 2, item.y * 2]; // 右上
-                let rightBottom = [(item.x + item.width) * 2, (item.y + item.height) * 2]; // 右下
-                let leftBottom = [item.x * 2, (item.y + item.height) * 2]; // 左下
+                let leftTop = [item.x * 1, item.y * 1]; // 左上
+                let rightTop = [(item.x + item.width) * 1, item.y * 1]; // 右上
+                let rightBottom = [(item.x + item.width) * 1, (item.y + item.height) * 1]; // 右下
+                let leftBottom = [item.x * 1, (item.y + item.height) * 1]; // 左下
                 item.points = [leftTop, rightTop, rightBottom, leftBottom];
             }
         }
@@ -481,12 +599,14 @@ const preview = () => {
 }
 
 .preview-iframe {
+    transform: scale(0.5);
 	margin: 0 auto;
-	width: 360px;
-	height: 640px;
-	background-size: 100% 640px;
+	width: 720px;
+	height: 1280px;
+	background-size: 100% 1280px;
 	background-repeat: no-repeat;
 	position: relative;
+    transform-origin: left top;
 
 	.item-wrap {
 		position: absolute;
@@ -524,8 +644,8 @@ const preview = () => {
 			.box2,
 			.box3,
 			.box4 {
-				width: 10px;
-				height: 10px;
+				width: 20px;
+				height: 20px;
 				background-color: #fff;
 				position: absolute;
 				border-radius: 50%;
@@ -534,26 +654,26 @@ const preview = () => {
 			}
 
 			.box1 {
-				top: -4px;
-				left: -4px;
+				top: -8px;
+				left: -8px;
 				cursor: nw-resize;
 			}
 
 			.box2 {
-				top: -4px;
-				right: -4px;
+				top: -8px;
+				right: -8px;
 				cursor: ne-resize;
 			}
 
 			.box3 {
-				left: -4px;
-				bottom: -4px;
+				left: -8px;
+				bottom: -8px;
 				cursor: sw-resize;
 			}
 
 			.box4 {
-				bottom: -4px;
-				right: -4px;
+				bottom: -8px;
+				right: -8px;
 				cursor: se-resize;
 			}
 		}

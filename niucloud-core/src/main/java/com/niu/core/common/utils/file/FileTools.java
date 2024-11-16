@@ -3,9 +3,12 @@ package com.niu.core.common.utils.file;
 import cn.hutool.core.io.FileUtil;
 import com.niu.core.common.Constants;
 import com.niu.core.common.utils.system.RuntimeTools;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FileTools {
@@ -210,4 +213,25 @@ public class FileTools {
         }
     }
 
+    /**
+     * 创建 FileUtils.copyDirectory 需要排除的目录
+     *
+     * @param dirs
+     * @return
+     */
+    public static IOFileFilter createExclusionFilter(String[] dirs) {
+        // 定义要排除的目录
+        List<String> excludedDirs = Arrays.asList(dirs);
+
+        // 创建一个过滤器来排除特定子目录
+        IOFileFilter excludeSubDirsFilter = FileFilterUtils.trueFileFilter(); // 初始化为 false，表示过滤所有文件或目录
+
+        // 循环创建过滤器
+        for (String dirName : excludedDirs) {
+            IOFileFilter tempFilter = FileFilterUtils.nameFileFilter(dirName);
+            excludeSubDirsFilter = FileFilterUtils.and(excludeSubDirsFilter, FileFilterUtils.notFileFilter(tempFilter));
+        }
+
+        return excludeSubDirsFilter;
+    }
 }

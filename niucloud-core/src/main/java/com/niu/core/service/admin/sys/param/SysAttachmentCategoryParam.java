@@ -15,8 +15,6 @@ public class SysAttachmentCategoryParam implements Serializable {
 
     private Integer pid;
 
-    @NotNull(message = "type参数缺失")
-    @NotBlank(message = "type参数不能为空")
     private String type;
 
     @NotNull(message = "name参数缺失")

@@ -109,7 +109,7 @@
 					// #endif
 					break;
 				default:
-                    if (res.data.url) {
+                    if (res.data && res.data.url) {
                         redirect({
                             url: res.data.url,
                             param: res.data.param || {},

@@ -1,0 +1,16 @@
+{
+  "shop_free_shipping": {
+    "key": "shop_free_shipping",
+    "name": "包邮",
+    "desc": "商品购买时可享受免邮服务",
+    "component": "/src/addon/shop/views/member/components/benefits-free-shipping.vue",
+    "content": {
+      "admin": {
+        "driver": "com.niu.core.service.core.member.driver.BenefitsDriver"
+      },
+      "member_level": {
+        "driver": "com.niu.core.service.core.member.driver.BenefitsDriver"
+      }
+    }
+  }
+}

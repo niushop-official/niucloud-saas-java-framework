@@ -19,4 +19,6 @@ public class WechatAuthDataLoginParam implements Serializable {
     private String unionId = "";
 
     private String headImgUrl = "";
+
+    private Integer pid;
 }

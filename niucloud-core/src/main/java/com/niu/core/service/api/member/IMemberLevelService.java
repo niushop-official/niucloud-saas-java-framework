@@ -31,4 +31,11 @@ public interface IMemberLevelService {
      */
     List<MemberLevelInfoVo> list(MemberLevelParam param);
 
+    /**
+     * 获取会员等级
+     * @param memberId
+     * @return
+     */
+    MemberLevelInfoVo findMemberLevel(Integer memberId);
+
 }

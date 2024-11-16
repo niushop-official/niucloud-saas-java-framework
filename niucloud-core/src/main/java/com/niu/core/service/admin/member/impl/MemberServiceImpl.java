@@ -14,7 +14,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.config.GlobalConfig;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
 import com.niu.core.enums.member.MemberRegisterChannelEnum;
@@ -28,7 +28,6 @@ import com.niu.core.service.core.member.ICoreMemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -117,7 +116,7 @@ public class MemberServiceImpl implements IMemberService {
             }
             list.add(vo);
         }
-        return PageResult.build(page, limit).setData(list);
+        return PageResult.build(page, limit,list.size()).setData(list);
     }
 
     /**
@@ -173,10 +172,9 @@ public class MemberServiceImpl implements IMemberService {
         addParam.setUsername(addParam.getMobile());
 
         Member mobileIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
-                .eq("mobile", addParam.getMobile())
-                .or()
-                .eq("username", addParam.getMobile())
+                .select("member_id")
                 .eq("site_id", siteId)
+                .and(i -> i.eq("mobile", addParam.getMobile()).or().eq("username", addParam.getMobile()))
                 .last("limit 1"));
         Assert.isNull(mobileIsExist, "手机号已存在");
 
@@ -184,14 +182,25 @@ public class MemberServiceImpl implements IMemberService {
             addParam.setNickname(addParam.getMobile().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
         }
 
+        if (addParam.getMemberNo().isEmpty()) {
+            addParam.setMemberNo(iCoreMemberService.createMemberNo(siteId));
+        } else {
+            Member memberNoIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
+                .select("member_id")
+                .eq("site_id", siteId)
+                .eq("member_no", addParam.getMemberNo())
+                .last("limit 1"));
+            Assert.isNull(memberNoIsExist, "会员编码已存在");
+        }
+
         Member model = new Member();
         model.setSiteId(siteId);
+        model.setMobile(addParam.getMobile());
+        model.setMemberNo(addParam.getMemberNo());
         model.setUsername(addParam.getUsername());
         model.setNickname(addParam.getNickname());
         model.setHeadimg(addParam.getHeadimg());
         model.setPassword(addParam.getPassword());
-        model.setSex(addParam.getSex());
-        model.setBirthday(addParam.getBirthday());
         model.setRegisterType(MemberRegisterTypeEnum.MANUAL.getType());
         model.setRegisterChannel(MemberRegisterChannelEnum.MANUAL.getType());
         model.setCreateTime(System.currentTimeMillis() / 1000);

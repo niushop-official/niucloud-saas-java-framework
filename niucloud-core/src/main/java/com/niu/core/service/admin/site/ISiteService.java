@@ -2,6 +2,8 @@ package com.niu.core.service.admin.site;
 
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.entity.addon.Addon;
+import com.niu.core.entity.site.Site;
+import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.service.admin.site.param.SiteAddParam;
 import com.niu.core.service.admin.site.param.SiteEditParam;
 import com.niu.core.service.admin.site.param.SiteParam;
@@ -85,4 +87,12 @@ public interface ISiteService {
      * @return
      */
     List<Addon> getSiteAddons();
+
+    /**
+     *
+     *
+     * @param site
+     * @param siteGroup
+     */
+    void siteAddonChange(Site site, SiteGroup siteGroup);
 }

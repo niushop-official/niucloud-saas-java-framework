@@ -18,7 +18,7 @@
 					<div class="text-sm text-gray-400 mt-[10px]">{{ t('bgUrlTips') }}</div>
 				</el-form-item>
 				<el-form-item :label="t('bgColor')" v-show="posterStore.global.bgType == 'color'">
-					<el-color-picker v-model="posterStore.editComponent.bgColor" show-alpha :predefine="posterStore.predefineColors" />
+					<el-color-picker v-model="posterStore.editComponent.bgColor" :predefine="posterStore.predefineColors" />
 				</el-form-item>
 				<el-form-item :label="t('statusLabel')" class="display-block">
 					<el-switch v-model="posterStore.status" :active-value="1" :inactive-value="0"/>

@@ -1,0 +1,12 @@
+<el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
+    <el-select v-model="formData.${column.columnName}" clearable :placeholder="t('${lowerColumnName}Placeholder')" class="input-width">
+        <el-option
+            label="选项1"
+            value="1"
+        />
+        <el-option
+            label="选项2"
+            value="2"
+        />
+    </el-select>
+</el-form-item>

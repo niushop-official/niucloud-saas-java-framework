@@ -1,14 +1,11 @@
 package com.niu.core.service.core.sys.impl;
 
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.component.upload.model.*;
 import com.niu.core.common.exception.CommonException;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.component.upload.IUploadProvider;
-import com.niu.core.component.upload.factory.UploadProviderFactory;
-import com.niu.core.component.upload.model.DeleteModel;
-import com.niu.core.component.upload.model.DeleteModelResult;
-import com.niu.core.component.upload.model.UploadModel;
-import com.niu.core.component.upload.model.UploadModelResult;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.upload.IUploadProvider;
+import com.niu.core.common.component.upload.factory.UploadProviderFactory;
 import com.niu.core.entity.sys.SysAttachment;
 import com.niu.core.enums.sys.StorageEnum;
 import com.niu.core.enums.upload.UploadRolesEnum;
@@ -153,4 +150,26 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
         }
     }
 
+    /**
+     * 生成缩略图
+     * @param siteId
+     * @param path
+     * @param type
+     * @return
+     */
+    @Override
+    public ThumbModelResult thumb(Integer siteId, String path, String type) {
+        // 获取站点的上传配置
+        ICoreConfigService coreConfigService = SpringContext.bean(ICoreConfigService.class);
+        JSONObject rootJSONObject = coreConfigService.getConfigValue(siteId, "STORAGE");
+        String defaultValue = rootJSONObject.getStr("default", StorageEnum.LOCAL.getCode());
+        JSONObject configObject = rootJSONObject.getJSONObject(defaultValue);
+        // 根据配置初始化
+        IUploadProvider uploadProvider = UploadProviderFactory.createAndInit(defaultValue, configObject);
+
+        ThumbModel model = new ThumbModel();
+        model.setType(type);
+        model.setFilePath(path);
+        return uploadProvider.thumb(model);
+    }
 }

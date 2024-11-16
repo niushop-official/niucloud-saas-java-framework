@@ -17,33 +17,24 @@
                     </div>
                     <img src="@/app/assets/images/tools/addon_develop.png" class="w-[256px] h-[128px]" />
                 </div>
-<!--                <div class="w-[256px] tools-item-shadow m-[20px] !mr-[0px] !mt-[0px] rounded-[8px] flex flex-col cursor-pointer leading-[1]" @click="toLink('/admin/tools/code')">-->
-<!--                    <div class="flex-1 pt-[18px] pb-[14px] px-[24px] flex flex-col bg-[var(&#45;&#45;el-bg-color)]">-->
-<!--                        <span class="text-[16px] font-bold">代码生成</span>-->
-<!--                        <div class="text-[13px] text-[#6D7278] leading-[18px] mt-[8px] truncate">-->
-<!--                            代码生成-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <img src="@/app/assets/images/tools/code.png" class="w-[256px] h-[128px]" />-->
-<!--                </div>-->
-<!--                <div class="w-[256px] tools-item-shadow m-[20px] !mr-[0px] !mt-[0px] rounded-[8px] flex flex-col cursor-pointer leading-[1]" @click="toLink('/admin/tools/list')">-->
-<!--                    <div class="flex-1 pt-[18px] pb-[14px] px-[24px] flex flex-col bg-[var(&#45;&#45;el-bg-color)]">-->
-<!--                        <span class="text-[16px] font-bold">数据字典</span>-->
-<!--                        <div class="text-[13px] text-[#6D7278] leading-[18px] mt-[8px] truncate">-->
-<!--                            数据字典-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <img src="@/app/assets/images/tools/sys_dict_list.png" class="w-[256px] h-[128px]" />-->
-<!--                </div>-->
-<!--                <div class="w-[256px] tools-item-shadow m-[20px] !mr-[0px] !mt-[0px] rounded-[8px] flex flex-col cursor-pointer leading-[1]" @click="toLink('/admin/tools/detection')">-->
-<!--                    <div class="flex-1 pt-[18px] pb-[14px] px-[24px] flex flex-col bg-[var(&#45;&#45;el-bg-color)]">-->
-<!--                        <span class="text-[16px] font-bold">环境监测</span>-->
-<!--                        <div class="text-[13px] text-[#6D7278] leading-[18px] mt-[8px] truncate">-->
-<!--                            环境监测-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <img src="@/app/assets/images/tools/tools_check_environment.png" class="w-[256px] h-[128px] cursor-pointer" />-->
-<!--                </div>-->
+                <div class="w-[256px] tools-item-shadow m-[20px] !mr-[0px] !mt-[0px] rounded-[8px] flex flex-col cursor-pointer leading-[1]" @click="toLink('/admin/tools/code')">
+                    <div class="flex-1 pt-[18px] pb-[14px] px-[24px] flex flex-col bg-[var(--el-bg-color)]">
+                        <span class="text-[16px] font-bold">代码生成</span>
+                        <div class="text-[13px] text-[#6D7278] leading-[18px] mt-[8px] truncate">
+                            代码生成
+                        </div>
+                    </div>
+                    <img src="@/app/assets/images/tools/code.png" class="w-[256px] h-[128px]" />
+                </div>
+                <div class="w-[256px] tools-item-shadow m-[20px] !mr-[0px] !mt-[0px] rounded-[8px] flex flex-col cursor-pointer leading-[1]" @click="toLink('/admin/tools/list')">
+                    <div class="flex-1 pt-[18px] pb-[14px] px-[24px] flex flex-col bg-[var(--el-bg-color)]">
+                        <span class="text-[16px] font-bold">数据字典</span>
+                        <div class="text-[13px] text-[#6D7278] leading-[18px] mt-[8px] truncate">
+                            数据字典
+                        </div>
+                    </div>
+                    <img src="@/app/assets/images/tools/sys_dict_list.png" class="w-[256px] h-[128px]" />
+                </div>
                 <div class="w-[256px] tools-item-shadow m-[20px] !mr-[0px] !mt-[0px] rounded-[8px] flex flex-col cursor-pointer leading-[1]" @click="toLink('/admin/tools/schedule')">
                     <div class="flex-1 pt-[18px] pb-[14px] px-[24px] flex flex-col bg-[var(--el-bg-color)]">
                         <span class="text-[16px] font-bold">计划任务</span>

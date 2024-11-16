@@ -1,8 +1,7 @@
 package com.niu.core.service.core.weapp.helper;
 
 import cn.hutool.json.JSONObject;
-import com.niu.core.component.context.SpringContext;
-import com.niu.core.service.core.notice.ICoreNoticeSmsLogService;
+import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.service.core.sys.ICoreConfigService;
 
 import java.util.Map;

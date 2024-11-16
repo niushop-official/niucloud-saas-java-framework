@@ -1,5 +1,5 @@
 <template>
-	<div class="pointer-events-none max-w-[360px]" :style="componentStyle">
+	<div class="pointer-events-none max-w-[720px]" :style="componentStyle">
 		<img :src="img('static/resource/images/diy/qrcode.png')" class="w-full h-full" />
 	</div>
 </template>

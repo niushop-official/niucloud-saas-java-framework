@@ -2,7 +2,6 @@ package com.niu.recharge.service.api.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.niu.core.common.domain.BeanJsonDeserializer;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.recharge.entity.RechargeOrder;
 import com.niu.recharge.entity.RechargeOrderItem;

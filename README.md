@@ -175,7 +175,7 @@ niucloud-Admin-Java 程序员二开神器！
 ### 官网地址
 https://www.niucloud.com
 
-### 技术交流群
+### 技术交流群(加客服拉您入群)
 ![输入图片说明](qun1.jpg)
 
 ### 开源使用须知

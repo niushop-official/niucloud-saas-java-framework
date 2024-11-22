@@ -177,7 +177,6 @@ https://www.niucloud.com
 
 ### 技术交流群
 ![输入图片说明](qun1.jpg)
-![输入图片说明](qun2.jpg)
 
 ### 开源使用须知
 

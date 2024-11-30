@@ -10,6 +10,8 @@ public class AccountBalanceFlowParam implements ApiBaseParam {
 
     private String accountType = "balance";
 
+    private String tradeType;
+
     private String[] createTime;
 
     private String accountDataGt;

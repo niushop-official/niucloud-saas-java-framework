@@ -35,14 +35,16 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         BeanUtils.copyProperties(member, vo);
 
         MemberLevel memberLevel = memberLevelMapper.selectById(member.getMemberLevel());
-        ShopGoodsMemberInfoVo.MemberLevel level = new ShopGoodsMemberInfoVo.MemberLevel();
-        BeanUtils.copyProperties(memberLevel, level);
-        vo.setLevel(level);
+        if (ObjectUtil.isNotEmpty(memberLevel)) {
+            ShopGoodsMemberInfoVo.MemberLevel level = new ShopGoodsMemberInfoVo.MemberLevel();
+            BeanUtils.copyProperties(memberLevel, level);
+            vo.setLevel(level);
+        }
         return vo;
     }
 
     @Override
-    public BigDecimal getMemberPrice(ShopGoodsMemberInfoVo memberInfo, String memberDiscount, String memberPrice, String price) {
+    public BigDecimal getMemberPrice(ShopGoodsMemberInfoVo memberInfo, String memberDiscount, String memberPrice, BigDecimal price) {
         if (ObjectUtil.hasEmpty(memberDiscount, memberInfo)) {
             return NumberUtil.toBigDecimal(price);
         }

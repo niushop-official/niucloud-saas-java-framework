@@ -294,7 +294,7 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         if (timeout > 0) {
             ShopOrder orderUpdate = new ShopOrder();
             orderUpdate.setOrderId(order.getOrderId());
-            order.setTimeout(timeout);
+            orderUpdate.setTimeout(timeout);
             shopOrderMapper.updateById(orderUpdate);
         }
 
@@ -333,7 +333,7 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
             if (orderConfig.getRefund().getRefundLength() > 0) {
                 ShopOrder orderUpdate = new ShopOrder();
                 orderUpdate.setOrderId(order.getOrderId());
-                order.setTimeout(System.currentTimeMillis() / 1000 + orderConfig.getRefund().getRefundLength() * 60);
+                orderUpdate.setTimeout(System.currentTimeMillis() / 1000 + orderConfig.getRefund().getRefundLength() * 60);
                 shopOrderMapper.updateById(orderUpdate);
             }
         }
@@ -355,5 +355,6 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         coreMemberService.sendGrowth(order.getSiteId(), order.getMemberId(), "shop_buy_goods", data);
         coreMemberService.sendGrowth(order.getSiteId(), order.getMemberId(), "shop_buy_order", data);
         coreMemberService.sendPoint(order.getSiteId(), order.getMemberId(), "shop_buy_goods", data);
+
     }
 }

@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.utils.image.ImageUtils;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.enums.addon.AddonStatusEnum;
 import com.niu.core.mapper.addon.AddonMapper;
@@ -87,6 +88,8 @@ public class CoreAddonServiceImpl extends CoreAddonBaseService implements ICoreA
             {
                 InstallAddonListVo installAddonListVo = new InstallAddonListVo();
                 BeanUtils.copyProperties(item, installAddonListVo);
+                installAddonListVo.setIcon(ImageUtils.imageToBase64(new File(WebAppEnvs.get().webRootDownResource, item.getIcon()).getPath()));
+                installAddonListVo.setCover(ImageUtils.imageToBase64(new File(WebAppEnvs.get().webRootDownResource, item.getCover()).getPath()));
                 map.put(item.getKey(), installAddonListVo);
             }
         }

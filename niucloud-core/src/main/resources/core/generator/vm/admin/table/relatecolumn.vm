@@ -1,0 +1,7 @@
+<el-table-column :label="t('${lowerColumnName}')" min-width="180" align="center" :show-overflow-tooltip="true">
+    <template #default="{ row }">
+        <div v-for="(item, index) in $strUtil.lowerFirst($mapper.entityName)List">
+            <div v-if="item.$column.valueKey == row.${column.columnName}">{{ item.$column.labelKey }}</div>
+        </div>
+    </template>
+</el-table-column>

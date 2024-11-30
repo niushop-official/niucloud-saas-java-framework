@@ -22,7 +22,7 @@
                     </div>
                 </el-scrollbar>
             </div>
-            <div class="flex justify-end" v-if="upgradeContent.version_list.length">
+            <div class="flex justify-end" v-if="upgradeContent && upgradeContent.version_list.length">
                 <el-button type="primary" @click="handleUpgrade" :loading="uploading">{{ t('upgrade.upgradeButton') }}</el-button>
             </div>
         </div>
@@ -132,8 +132,10 @@ const uploading = ref(false)
 const terminalRef = ref(null)
 const emits = defineEmits(['complete', 'cloudbuild'])
 const upgradeTipsShowDialog = ref<boolean>(false)
+const isShowRestartTips = ref(false) 
 
 let upgradeLog = []
+let errorLog = []
 /**
  * 查询升级任务
  */
@@ -158,10 +160,12 @@ const getUpgradeTaskFn = () => {
         })
         // 安装失败
         if (data.error) {
-            upgradeTask.value = data
-            ElMessage({ message: '升级失败', type: 'error' })
-            terminalRef.value.pushMessage({ content: data.error, class: 'error' })
-            return
+            data.error.forEach(item => {
+                if (!errorLog.includes(item)) {
+                    terminalRef.value.pushMessage({ content: item, class: 'error' })
+                    errorLog.push(item)
+                }
+            })
         }
         // 安装完成
         if (data.step == 'upgradeComplete') {
@@ -171,16 +175,40 @@ const getUpgradeTaskFn = () => {
             clearUpgradeTask()
             return
         }
+        // 回滚完成
+        if (data.step == 'rollbackComplete') {
+            return
+        }
         upgradeTask.value = data
+        if (data.status && data.status == 'restarting') {
+            if (!isShowRestartTips.value && data.env_type == 'dev') {
+                showRestartTips()
+                isShowRestartTips.value = true
+            }
+            setTimeout(() => {
+                getUpgradeTaskFn()
+            }, 5000)
+            return;
+        }
         executeUpgradeFn()
-    }).catch()
+    }).catch(() => {
+        setTimeout(() => {
+            getUpgradeTaskFn()
+        }, 5000)
+    })
 }
 getUpgradeTaskFn()
 
 const executeUpgradeFn = () => {
     executeUpgrade().then(() => {
         getUpgradeTaskFn()
-    }).catch()
+    }).catch(() => {
+        if (upgradeTask.value) {
+            setTimeout(() => {
+                getUpgradeTaskFn()
+            }, 5000)
+        }
+    })
 }
 
 let notificationEl : any = null
@@ -197,6 +225,12 @@ const showElNotification = () => {
         ]),
         duration: 0,
         showClose: false
+    })
+}
+
+const showRestartTips = () => {
+    ElMessageBox.alert('更新内容已经覆盖请先手动重启服务，在这期间请不要进行其他操作，在服务重启后耐心等待后续操作执行完毕。', {
+        confirmButtonText: '我已知晓',
     })
 }
 
@@ -316,7 +350,9 @@ const clearUpgradeTaskFn = () => {
     uploading.value = false
     upgradeTask.value = null
     upgradeLog = []
+    errorLog = []
     flashInterval && clearInterval(flashInterval)
+    isShowRestartTips.value = false
     clearUpgradeTask().then(() => {}).catch()
 }
 

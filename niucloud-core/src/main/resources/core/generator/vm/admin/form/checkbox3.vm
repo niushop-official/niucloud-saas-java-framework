@@ -1,10 +1,10 @@
+#set($mapper = $generateService.getMapperInfo($column.model))
 <el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
     <el-checkbox-group v-model="formData.${column.columnName}" :placeholder="t('${lowerColumnName}Placeholder')">
-        <el-checkbox
-            v-for="(item, index) in {DICT_TYPE}"
-                 :key="index"
-                :label="item['{ITEM_VALUE}']">
-                {{ item['{ITEM_LABEL}'] }}
-        </el-checkbox>
+        #if ($column.columnType != "String")
+        <el-checkbox v-for="(item, index) in $strUtil.lowerFirst($mapper.entityName)List" :key="index" :label="isNaN(parseInt(item.$column.valueKey)) ? item.$column.valueKey : parseInt(item.$column.valueKey)">{{ item.$column.labelKey }}</el-checkbox>
+        #else
+        <el-checkbox v-for="(item, index) in $strUtil.lowerFirst($mapper.entityName)List" :key="index" :label="item.$column.valueKey">{{ item.$column.labelKey }}</el-checkbox>
+        #end
     </el-checkbox-group>
 </el-form-item>

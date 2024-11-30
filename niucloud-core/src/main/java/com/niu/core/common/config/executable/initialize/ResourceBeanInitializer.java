@@ -2,6 +2,9 @@ package com.niu.core.common.config.executable.initialize;
 
 import com.niu.core.common.annotation.EventCallback;
 import com.niu.core.common.annotation.SpringModuleApplication;
+import com.niu.core.common.component.context.MapperMap;
+import com.niu.core.common.component.upgrade.annotation.UpgradeProvider;
+import com.niu.core.common.component.upgrade.factory.UpgradeProviderFactory;
 import com.niu.core.common.utils.system.ClassPathScanAnnotationManager;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.component.context.event.EventMediatorContext;
@@ -19,6 +22,7 @@ import com.niu.core.common.component.sms.factory.SmsProviderFactory;
 import com.niu.core.common.component.upload.annotation.UploadProvider;
 import com.niu.core.common.component.upload.factory.UploadProviderFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -52,6 +56,10 @@ public final class ResourceBeanInitializer {
         scanAnnotationClassList.add(JobProvider.class);
         // 事件回调
         scanAnnotationClassList.add(EventCallback.class);
+        // 升级事件
+        scanAnnotationClassList.add(UpgradeProvider.class);
+        // mapper
+        scanAnnotationClassList.add(Mapper.class);
         // 统一获取系统中的注解，返回注解以及扫描到实现类列表
         Map<Class<? extends Annotation>, List<Class>> annotationClassListMap = ClassPathScanAnnotationManager.scanClassAnnotation(basePackage, scanAnnotationClassList);
         return annotationClassListMap;
@@ -79,6 +87,10 @@ public final class ResourceBeanInitializer {
         // EventMediatorContext.test();
         // 任务调度统一实现
         JobProviderFactory.init(JobProvider.class, annotationClassListMap.get(JobProvider.class));
+        // 升级事件初始化
+        UpgradeProviderFactory.init(UpgradeProvider.class, annotationClassListMap.get(UpgradeProvider.class));
+
+        MapperMap.init(Mapper.class, annotationClassListMap.get(Mapper.class));
     }
 
 }

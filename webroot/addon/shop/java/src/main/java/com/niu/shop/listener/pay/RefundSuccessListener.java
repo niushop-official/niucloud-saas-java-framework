@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * 支付成功
+ * 退款成功
  */
 @EventListen("shop")
 @Component

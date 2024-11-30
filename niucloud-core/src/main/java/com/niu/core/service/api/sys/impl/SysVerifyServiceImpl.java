@@ -149,7 +149,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
      * @param timeoutSeconds
      */
     private void createCode(String verifyCode, Map<String, Object> valueMap, Long timeoutSeconds) {
-        if (timeoutSeconds != null) {
+        if (timeoutSeconds != null && timeoutSeconds > 0) {
             cached.tag(CACHE_VERIFY).put(verifyCode, valueMap, timeoutSeconds);
         } else {
             cached.tag(CACHE_VERIFY).put(verifyCode, valueMap);

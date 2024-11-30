@@ -7,6 +7,11 @@ import com.niu.${addonName}.service.admin.${moduleName}.param.${className}Search
 import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}InfoVo;
 import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}ListVo;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * ${notes}服务接口
  */
@@ -23,7 +28,7 @@ public interface I${className}Service {
     /**
      * ${notes}详情
      * @param id 主键ID
-     * @return ShopGoodsLabelInfoVo
+     * @return  ${className}InfoVo
      */
     ${className}InfoVo info(Integer id);
 
@@ -46,4 +51,13 @@ public interface I${className}Service {
      */
     void del(Integer id);
 
+    #if($relateList.size() > 0)
+        #foreach($key in $relateList.keySet())
+            #set($mapper = $relateList.get($key).get("mapper_info"))
+    /**
+     *  获取${mapper.tableName}列表
+     */
+    List<Map<String, Object>> get${mapper.entityName}List();
+        #end
+    #end
 }

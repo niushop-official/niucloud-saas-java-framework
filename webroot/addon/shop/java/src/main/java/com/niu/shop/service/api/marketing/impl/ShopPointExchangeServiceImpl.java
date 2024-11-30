@@ -161,7 +161,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         shopPointExchangeInfoVo.setTypeName(ShopPointExchangeTypeEnum.getNameByType(shopPointExchange.getType()));
         shopPointExchangeInfoVo.setEvaluateIsShow(shopGoodsDetailVo.getEvaluateIsShow());
         shopPointExchangeInfoVo.setPoint(shopPointExchange.getPoint().toString());
-        shopPointExchangeInfoVo.setExchangeId(shopGoodsDetailVo.getExchangeId());
+        shopPointExchangeInfoVo.setExchangeId(id);
         shopPointExchangeInfoVo.setGoodsSpec(shopGoodsDetailVo.getGoodsSpec());
 
         // goods

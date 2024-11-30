@@ -32,9 +32,8 @@ public class QrcodeUtils {
                 throw new UploadException("创建二维码存放目录失败");
             }
         }
-
-        String filePath = dir + "/" + DigestUtil.md5Hex(url + String.valueOf(System.currentTimeMillis())) + ".png";
-        return createQrcode(url, page, data, siteId, channel, true, filePath);
+        
+        return createQrcode(url, page, data, siteId, channel, true, dir);
     }
 
     /**

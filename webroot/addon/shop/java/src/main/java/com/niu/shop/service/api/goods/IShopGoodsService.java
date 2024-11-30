@@ -7,5 +7,5 @@ import java.math.BigDecimal;
 public interface IShopGoodsService {
     ShopGoodsMemberInfoVo getMemberInfo();
 
-    BigDecimal getMemberPrice(ShopGoodsMemberInfoVo memberInfo, String memberDiscount, String memberPrice, String price);
+    BigDecimal getMemberPrice(ShopGoodsMemberInfoVo memberInfo, String memberDiscount, String memberPrice, BigDecimal price);
 }

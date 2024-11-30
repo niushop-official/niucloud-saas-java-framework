@@ -153,11 +153,15 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
                     .collect(Collectors.toMap(ElectronicSheetInfo::getId, e -> e));
 
             List<ElectronicSheetPrintVo> results = new ArrayList<>(param.getList().size());
+
+            // 单订单打印，按照包裹拆分打印
             for (int i = 0; i < param.getList().size(); i++) {
                 ShopDeliveryPrintElectronicSheetParam.Parcel parcel = param.getList().get(i);
 
+                // 查询电子面单模板
                 ElectronicSheetInfo electronicSheetInfo = electronicSheetInfoMap.get(parcel.getElectronicSheetId());
                 if (ObjectUtil.isEmpty(electronicSheetInfo)) {
+                    // 电子面单模板不存在
                     continue;
                 }
 
@@ -326,7 +330,7 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
                     continue;
                 }
 
-                String goodsName = renderIllegalChar(CharSequenceUtil.sub(orderGood.getGoodsName() + orderGood.getSkuName(), 0, 100));
+                String goodsName = renderIllegalChar(CharSequenceUtil.sub(orderGood.getGoodsName() + orderGood.getSkuName(), 0, 50));
                 ApplyParam.Commodity commodity = new ApplyParam.Commodity()
                         .setGoodsName(goodsName)
                         .setGoodsquantity(orderGood.getNum());

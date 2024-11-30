@@ -1,7 +1,9 @@
 package com.niu.core.service.core.app.tools;
 
+import cn.hutool.core.io.IoUtil;
 import com.niu.core.common.component.context.SpringContext;
 import org.apache.ibatis.jdbc.ScriptRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.*;
 import java.sql.Connection;
@@ -34,20 +36,9 @@ public final class SQLScriptRunnerTools {
      * @param fileReader
      */
     public static void execScript(Reader fileReader) {
-        try {
-            Connection connection = (Connection) SpringContext.getBean("dataSourceConnection");
-            ScriptRunner scriptRunner = new ScriptRunner(connection);
-            // 设置自动提交为：false
-            scriptRunner.setAutoCommit(false);
-            // 每条命令间的分隔符
-            // scriptRunner.setDelimiter(";");
-            // scriptRunner.setLogWriter(null); //设置普通日志
-            // scriptRunner.setErrorLogWriter(null); //设置异常日志
-            scriptRunner.runScript(fileReader);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("执行脚本异常.");
-        }
+        JdbcTemplate jdbcTemplate = SpringContext.bean(JdbcTemplate.class);
+        String sql = IoUtil.read(fileReader);
+        jdbcTemplate.execute(sql);
     }
 
     /**

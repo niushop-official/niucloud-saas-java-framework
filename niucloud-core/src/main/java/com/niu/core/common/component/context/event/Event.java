@@ -21,7 +21,7 @@ public class Event extends ApplicationEvent {
     private Set<String> appSignSet = new HashSet();
 
     // 是否授权发送
-    private boolean authority = true;
+    private boolean authority = false;
 
     // 事件名称
     private String name;

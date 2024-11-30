@@ -1,7 +1,11 @@
 package com.niu.core.common.utils.file;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.utils.system.RuntimeTools;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.service.admin.upgrade.IUpgradeService;
+import com.niu.core.service.admin.upgrade.vo.UpgradeTaskVo;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -16,7 +20,7 @@ public class PipeNameUtils {
      * @param addonName
      */
     public static void noticeBootRestart(String applicationName, String addonName) {
-        noticeBoot(applicationName, "upgrade", addonName);
+        noticeBoot(applicationName, "install", addonName);
     }
 
     /**
@@ -25,6 +29,20 @@ public class PipeNameUtils {
      */
     public static void noticeBootRestartByUninstall(String applicationName, String addonName) {
         noticeBoot(applicationName, "uninstall", addonName);
+    }
+
+    /**
+     *
+     * @param applicationName
+     * @param addonName
+     */
+    public static void noticeBootRestartByUpgrade(String applicationName, String addonName, String dir, String version) {
+        noticeBootCommand(applicationName, "upgrade," + addonName + "," + dir + "," + version);
+    }
+
+
+    public static void noticeBootRestartByUpgradeRollback(String applicationName, String addonName, String dir) {
+        noticeBootCommand(applicationName, "upgraderollback," + addonName + "," + dir);
     }
 
     /**
@@ -91,15 +109,15 @@ public class PipeNameUtils {
             addonResult.setOperate(AddonResult.OPERATE_UNINSTALL);
             addonResult.setAddon(addon);
             // 卸载完成
-        } else if (command.startsWith("upgrading,")) {
+        } else if (command.startsWith("installing,")) {
             PipeNameUtils.noticeBootCommand(applicationName, "");
-            String addon = command.replaceAll("upgrading,", "");
+            String addon = command.replaceAll("installing,", "");
             addonResult.setResult(1);
             addonResult.setOperate(AddonResult.OPERATE_ROLLBACK);
             addonResult.setAddon(addon);
-        } else if (command.startsWith("upgraded,")) {
+        } else if (command.startsWith("installed,")) {
             PipeNameUtils.noticeBootCommand(applicationName, "");
-            String addon = command.replaceAll("upgraded,", "");
+            String addon = command.replaceAll("installed,", "");
             addonResult.setResult(1);
             addonResult.setOperate(AddonResult.OPERATE_ROLLBACK);
             addonResult.setAddon(addon);
@@ -109,6 +127,45 @@ public class PipeNameUtils {
             addonResult.setResult(-1);
             addonResult.setOperate(AddonResult.OPERATE_ROLLBACK);
             addonResult.setAddon(addon);
+        } else if (command.startsWith("upgrade,") || command.startsWith("upgraderollback,")) {
+            PipeNameUtils.noticeBootCommand(applicationName, "");
+        } else if (command.startsWith("upgradefail,")) {
+            PipeNameUtils.noticeBootCommand(applicationName, "");
+            IUpgradeService upgradeService = SpringContext.bean(IUpgradeService.class);
+            UpgradeTaskVo task = upgradeService.getUpgradeTask();
+            if (ObjectUtil.isNotEmpty(task) && ObjectUtil.isNotEmpty(task.getStatus()) && task.getStatus().equals("restarting")) {
+                String msg = command.replaceAll("upgradefail,", "");
+                task.setStatus("restarted");
+                task.getError().add(msg);
+                upgradeService.setUpgradeTaskCache(task);
+                upgradeService.upgradeErrorHandle(task);
+            }
+        } else if (command.startsWith("upgradesuccess,")) {
+            PipeNameUtils.noticeBootCommand(applicationName, "");
+            IUpgradeService upgradeService = SpringContext.bean(IUpgradeService.class);
+            UpgradeTaskVo task = upgradeService.getUpgradeTask();
+            if (ObjectUtil.isNotEmpty(task) && ObjectUtil.isNotEmpty(task.getStatus()) && task.getStatus().equals("restarting")) {
+                task.setStatus("restarted");
+                upgradeService.setUpgradeTaskCache(task);
+            }
+        } else if (command.startsWith("upgraderollbackfail,")) {
+            PipeNameUtils.noticeBootCommand(applicationName, "");
+            IUpgradeService upgradeService = SpringContext.bean(IUpgradeService.class);
+            UpgradeTaskVo task = upgradeService.getUpgradeTask();
+            if (ObjectUtil.isNotEmpty(task) && ObjectUtil.isNotEmpty(task.getStatus()) && task.getStatus().equals("restarting")) {
+                String msg = command.replaceAll("upgraderollbackfail,", "");
+                task.setStatus("restarted");
+                task.getError().add(msg);
+                upgradeService.setUpgradeTaskCache(task);
+            }
+        } else if (command.startsWith("upgraderollbacksuccess,")) {
+            PipeNameUtils.noticeBootCommand(applicationName, "");
+            IUpgradeService upgradeService = SpringContext.bean(IUpgradeService.class);
+            UpgradeTaskVo task = upgradeService.getUpgradeTask();
+            if (ObjectUtil.isNotEmpty(task) && ObjectUtil.isNotEmpty(task.getStatus()) && task.getStatus().equals("restarting")) {
+                task.setStatus("restarted");
+                upgradeService.setUpgradeTaskCache(task);
+            }
         } else {
             addonResult.setResult(0);
         }

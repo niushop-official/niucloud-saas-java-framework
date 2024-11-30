@@ -18,10 +18,19 @@ import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}ListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+#if($relateList.size() > 0)
+    #foreach($key in $relateList.keySet())
+        #set($mapper = $relateList.get($key).get("mapper_info"))
+import $mapper.mapper;
+import $mapper.entity;
+    #end
+#end
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -32,6 +41,14 @@ public class ${className}ServiceImpl implements I${className}Service {
         
     @Resource
     ${humpTableName}Mapper ${lowerTableName}Mapper;
+
+    #if($relateList.size() > 0)
+        #foreach($key in $relateList.keySet())
+            #set($mapper = $relateList.get($key).get("mapper_info"))
+    @Resource
+    $mapper.MapperName $strUtil.lowerFirst($mapper.MapperName);
+        #end
+    #end
 
     @Override
     public PageResult<${className}ListVo> page(PageParam pageParam, ${className}SearchParam searchParam) {
@@ -45,7 +62,7 @@ public class ${className}ServiceImpl implements I${className}Service {
         #end
 
 #foreach($column in $columns)
-    #if($column.isSearch == 1)
+    #if($column.isSearch == 1 && $column.column != "site_id")
     #if($column.queryType == 'like')
         if (ObjectUtil.isNotEmpty(searchParam.get${column.columnFiledName}())) {
             queryWrapper.like("${column.columnName}", searchParam.get${column.columnFiledName}());
@@ -89,8 +106,9 @@ public class ${className}ServiceImpl implements I${className}Service {
             #else
             queryWrapper.orderByDesc("${sortColumn}");
         #end
+    #else
+        queryWrapper.orderByDesc("${primaryField}");
     #end
-        queryWrapper.orderByDesc("${sortColumn}");
 
         IPage<${humpTableName}> iPage = ${lowerTableName}Mapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<${className}ListVo> list = new LinkedList<>();
@@ -174,4 +192,32 @@ public class ${className}ServiceImpl implements I${className}Service {
         ${lowerTableName}Mapper.delete(new QueryWrapper<${humpTableName}>().eq("${primaryField}", id));
     #end
     }
+
+    #if($relateList.size() > 0)
+        #foreach($key in $relateList.keySet())
+            #set($mapper = $relateList.get($key).get("mapper_info"))
+            #set($field = $relateList.get($key).get("field"))
+    @Override
+    public List<Map<String, Object>> get${mapper.entityName}List() {
+        List<Map<String, Object>> list = new LinkedList<>();
+
+        QueryWrapper<$mapper.entityName> queryWrapper = new QueryWrapper<$mapper.entityName>();
+        #if($isSiteId == 1)
+        queryWrapper.eq("site_id", RequestUtils.siteId());
+        #end
+        queryWrapper.select("$strUtil.join(",", $field)");
+
+        List<$mapper.entityName> records = ${strUtil.lowerFirst($mapper.MapperName)}.selectList(queryWrapper); // 调用 selectList 方法
+        for ($mapper.entityName item : records) {
+            Map<String, Object> data = new HashMap<>();
+            #foreach($name in $field)
+            data.put("${name}", item.get${strUtil.upperFirst($strUtil.toCamelCase($name))}());
+            #end
+            list.add(data);
+        }
+
+        return list;
+    }
+        #end
+    #end
 }

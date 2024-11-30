@@ -19,6 +19,7 @@ import com.niu.core.service.core.schedule.ICoreScheduleService;
 import com.niu.core.service.core.sys.ICoreMenuService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.analysis.function.Add;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -309,7 +310,9 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
         this.installSchedule();
 
         JSONObject addonConfig = this.getAddonConfig(this.getInstallTask().getStr("addon"));
-        coreAddonService.set(JSONUtil.toBean(addonConfig, Addon.class));
+        Addon model = JSONUtil.toBean(addonConfig, Addon.class);
+        model.setIcon("addon/" + model.getKey() + "/icon.png");
+        coreAddonService.set(model);
 
         ArrayList<String> tips = new ArrayList<String>();
         String addon = this.installTask.getStr("addon");

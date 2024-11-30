@@ -69,7 +69,7 @@ public class DatabaseBackup {
             statement = connection.prepareStatement("SHOW TABLES");
             resultSet = statement.executeQuery();
 
-            file = new File(this.backupFilePath + fileName + ".sql");
+            file = new File(this.backupFilePath + fileName + "-" + fileCounter + ".sql");
             writer = new FileWriter(file);
 
             while (resultSet.next()) {

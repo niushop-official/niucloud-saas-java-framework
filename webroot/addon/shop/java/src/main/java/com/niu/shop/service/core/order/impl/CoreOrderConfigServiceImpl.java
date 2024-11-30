@@ -6,11 +6,11 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
-import com.niu.core.service.core.wechat.vo.WechatConfigVo;
 import com.niu.shop.entity.order.config.*;
 import com.niu.shop.service.core.order.ICoreOrderConfigService;
 import com.niu.shop.service.core.order.param.OrderConfigParam;
 import com.niu.shop.service.core.order.vo.OrderConfigVo;
+import com.niu.shop.service.core.order.vo.ShopOrderCloseVo;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -31,8 +31,7 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
     public OrderConfigVo getConfig(Integer siteId) {
         CoreSysConfigVo coreSysConfigVo = coreConfigService.getConfig(siteId, "SHOP_ORDER_CONFIG");
         OrderConfigParam orderConfigParam = new OrderConfigParam();
-        if(ObjectUtil.isNotNull(coreSysConfigVo.getValueJson()))
-        {
+        if (ObjectUtil.isNotNull(coreSysConfigVo.getValueJson())) {
             orderConfigParam = JSONUtil.toBean(coreSysConfigVo.getValueJson(), OrderConfigParam.class);
         }
 
@@ -75,8 +74,7 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
     public ShopOrderFinish orderConfirm(Integer siteId) {
         CoreSysConfigVo coreSysConfigVo = coreConfigService.getConfig(siteId, "SHOP_ORDER_CONFIG");
         ShopOrderFinish shopOrderFinish = new ShopOrderFinish();
-        if(ObjectUtil.isNotNull(coreSysConfigVo.getValueJson()))
-        {
+        if (ObjectUtil.isNotNull(coreSysConfigVo.getValueJson())) {
             shopOrderFinish = JSONUtil.toBean(coreSysConfigVo.getValueJson(), ShopOrderFinish.class);
         }
 
@@ -87,8 +85,7 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
     public ShopOrderRefund orderRefund(Integer siteId) {
         CoreSysConfigVo coreSysConfigVo = coreConfigService.getConfig(siteId, "SHOP_ORDER_CONFIG");
         ShopOrderRefund shopOrderRefund = new ShopOrderRefund();
-        if(ObjectUtil.isNotNull(coreSysConfigVo.getValueJson()))
-        {
+        if (ObjectUtil.isNotNull(coreSysConfigVo.getValueJson())) {
             shopOrderRefund = JSONUtil.toBean(coreSysConfigVo.getValueJson(), ShopOrderRefund.class);
         }
 
@@ -99,8 +96,7 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
     public ShopOrderInvoice invoice(Integer siteId) {
         CoreSysConfigVo coreSysConfigVo = coreConfigService.getConfig(siteId, "SHOP_ORDER_CONFIG");
         ShopOrderInvoice shopOrderInvoice = new ShopOrderInvoice();
-        if(ObjectUtil.isNotNull(coreSysConfigVo.getValueJson()))
-        {
+        if (ObjectUtil.isNotNull(coreSysConfigVo.getValueJson())) {
             shopOrderInvoice = JSONUtil.toBean(coreSysConfigVo.getValueJson(), ShopOrderInvoice.class);
         }
 
@@ -111,11 +107,21 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
     public ShopOrderEvaluate getEvaluateConfig(Integer siteId) {
         CoreSysConfigVo coreSysConfigVo = coreConfigService.getConfig(siteId, "SHOP_ORDER_CONFIG");
         ShopOrderEvaluate shopOrderEvaluate = new ShopOrderEvaluate();
-        if(ObjectUtil.isNotNull(coreSysConfigVo.getValueJson()))
-        {
+        if (ObjectUtil.isNotNull(coreSysConfigVo.getValueJson())) {
             shopOrderEvaluate = JSONUtil.toBean(coreSysConfigVo.getValueJson(), ShopOrderEvaluate.class);
         }
 
         return shopOrderEvaluate;
+    }
+
+    @Override
+    public ShopOrderCloseVo orderClose(Integer siteId) {
+        JSONObject data = coreConfigService.getConfigValue(siteId, "SHOP_ORDER_CONFIG");
+        if (ObjectUtil.isEmpty(data)) {
+            return new ShopOrderCloseVo(true, 20);
+        }
+
+        JSONObject orderClose = JSONUtil.parseObj(data.get("order_close"));
+        return new ShopOrderCloseVo(orderClose.getBool("is_close"), orderClose.getInt("close_length"));
     }
 }

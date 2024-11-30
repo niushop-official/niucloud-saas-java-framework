@@ -1,13 +1,17 @@
 package com.niu.boot.process;
 
+import cn.hutool.core.io.FileUtil;
 import com.niu.boot.config.BootConfig;
 import com.niu.boot.utils.BIOUtils;
 import com.niu.boot.utils.BootLogUtils;
 import com.niu.boot.utils.PipeNameUtils;
 import com.niu.boot.utils.ThreadUtils;
-
+import org.apache.commons.io.FileUtils;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProcessManager {
@@ -89,12 +93,12 @@ public class ProcessManager {
             AddonRollback.execute(uninstalledCommand, this.bootConfig.getJarDir());
             this.start();
             ThreadUtils.sleepSeconds(5);
-        } else if (pipeContent.startsWith("upgrade,")) {
+        } else if (pipeContent.startsWith("install,")) {
             // ============================================================================//
-            // 正常升级情况，进程也在运行中
+            // 正常安装情况，进程也在运行中
             // ============================================================================//
             if (getAtomicStatus().get() == 3) {
-                String upgradingCommand = pipeContent.replaceAll("upgrade,", "upgrading,");
+                String upgradingCommand = pipeContent.replaceAll("install,", "installing,");
                 this.writePipe(upgradingCommand);
                 this.upgradeCount = 1;
                 this.upgradeTime = System.currentTimeMillis();
@@ -108,10 +112,10 @@ public class ProcessManager {
                 ThreadUtils.sleepSeconds(10);
             }
             // ============================================================================//
-            // 正常升级情况，进程已经处于停止状态，这时候也需要启动起来继续升级任务
+            // 正常安装情况，进程已经处于停止状态，这时候也需要启动起来继续安装任务
             // ============================================================================//
             if (getAtomicStatus().get() == 5 || getAtomicStatus().get() == 6) {
-                String upgradingCommand = pipeContent.replaceAll("upgrade,", "upgrading,");
+                String upgradingCommand = pipeContent.replaceAll("install,", "installing,");
                 this.writePipe(upgradingCommand);
                 this.upgradeCount = 1;
                 this.upgradeTime = System.currentTimeMillis();
@@ -124,20 +128,20 @@ public class ProcessManager {
                 this.start();
                 ThreadUtils.sleepSeconds(10);
             }
-        } else if (pipeContent.startsWith("upgrading,")) {
+        } else if (pipeContent.startsWith("installing,")) {
             // ============================================================================//
-            // 执行升级情况，可以正常启动，进入升级完成，同时做出通知
+            // 执行安装情况，可以正常启动，进入安装完成，同时做出通知
             // ============================================================================//
             if (getAtomicStatus().get() == 3) {
                 long currentTime = System.currentTimeMillis();
-                BootLogUtils.log("插件升级成功, 耗时：" + ((currentTime - upgradeTime) / 60) + " s.");
-                String upgradedCommand = pipeContent.replaceAll("upgrading,", "upgraded,");
+                BootLogUtils.log("插件安装成功, 耗时：" + ((currentTime - upgradeTime) / 60) + " s.");
+                String upgradedCommand = pipeContent.replaceAll("installing,", "installed,");
                 this.writePipe(upgradedCommand);
                 this.upgradeCommand = "";
                 this.upgradeTime = 0;
             }
             // ============================================================================//
-            // 执行升级情况，不能正常启动，进入重启或者回滚后重启，同时做出通知
+            // 执行安装情况，不能正常启动，进入重启或者回滚后重启，同时做出通知
             // ============================================================================//
             if (getAtomicStatus().get() == 5) {
                 if (this.upgradeCount < this.bootConfig.failedRestartCount()) {
@@ -147,24 +151,121 @@ public class ProcessManager {
                     long currentTime = System.currentTimeMillis();
                     BootLogUtils.log("第" + this.upgradeCount + "次启动, 耗时：" + ((currentTime - upgradeTime) / 60) + " s.");
                 } else {
-                    String rollbackCommand = this.upgradeCommand.replaceAll("upgrading,", "rollback,");
+                    String rollbackCommand = this.upgradeCommand.replaceAll("installing,", "rollback,");
                     this.writePipe(rollbackCommand);
                     AddonRollback.execute(rollbackCommand, this.bootConfig.getJarDir());
                     long currentTime = System.currentTimeMillis();
-                    BootLogUtils.log("插件升级失败, 耗时：" + ((currentTime - upgradeTime) / 60) + " s, 进入回滚操作.");
+                    BootLogUtils.log("插件安装失败, 耗时：" + ((currentTime - upgradeTime) / 60) + " s, 进入回滚操作.");
                     this.upgradeCommand = "";
                     this.restartWait();
                 }
             }
-        } else if (pipeContent.startsWith("upgraded,")) {
-            BootLogUtils.log("升级成功后, 已正常启动服务.");
+        } else if (pipeContent.startsWith("installed,")) {
+            BootLogUtils.log("安装成功后, 已正常启动服务.");
         } else if (pipeContent.startsWith("rollback,")) {
             if (getAtomicStatus().get() == 3) {
-                BootLogUtils.log("升级回滚后, 已正常启动服务.");
+                BootLogUtils.log("安装回滚后, 已正常启动服务.");
             }
             if (getAtomicStatus().get() == 5) {
                 BootLogUtils.log(".......................................................");
-                BootLogUtils.log("升级回滚后, 启动失败，急需要人工干预处理.");
+                BootLogUtils.log("安装回滚后, 启动失败，急需要人工干预处理.");
+            }
+        } else if (pipeContent.startsWith("upgrade,")) {
+            this.resetPipe();
+            this.stop();
+
+            String[] data = pipeContent.split(",");
+            String addon = data[1];
+            String dir = data[2];
+            String version = data[3];
+
+            // 判断升級文件是否存在
+            File upgradeDir = new File(bootConfig.getRootPath(), "webroot/runtime/upgrade/" + addon + "/" + dir);
+            BootLogUtils.log("升级覆盖文件路径：" + upgradeDir.getPath());
+            String command = "upgradesuccess,";
+
+            if (upgradeDir.exists()) {
+                try {
+                    this.coverUpgradeFile(upgradeDir, addon, version);
+                } catch (Exception e) {
+                    command = "upgradefail,升级覆盖文件失败错误原因：" + e.getMessage();
+                    BootLogUtils.log("升级覆盖文件失败,错误原因：" + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                BootLogUtils.log("升级覆盖文件路径不存在" + upgradeDir.getPath());
+            }
+            this.writePipe(command);
+            this.start();
+        } else if (pipeContent.startsWith("upgraderollback,")) {
+            this.resetPipe();
+            this.stop();
+
+            String[] data = pipeContent.split(",");
+            String addon = data[1];
+            String dir = data[2];
+
+            // 判断升級文件是否存在
+            File upgradeDir = new File(bootConfig.getRootPath(), "webroot/runtime/upgrade/" + addon + "/" + dir);
+            BootLogUtils.log("升级文件路径：" + upgradeDir.getPath());
+            String command = "upgraderollbacksuccess,";
+
+            if (upgradeDir.exists()) {
+                try {
+                    FileUtils.copyDirectory(new File(upgradeDir, "backup/code"), new File(bootConfig.getRootPath()));
+                } catch (Exception e) {
+                    command = "upgraderollbackfail,升级变更文件回滚失败错误原因：" + e.getMessage();
+                    BootLogUtils.log("升级变更文件回滚失败错误原因：" + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                BootLogUtils.log("升级文件路径不存在" + upgradeDir.getPath());
+            }
+            this.writePipe(command);
+            this.start();
+        }
+    }
+
+    private void coverUpgradeFile(File upgradeDir, String addon, String versionList) throws Exception {
+        for (String version: versionList.split("-")) {
+            File changeRecord = new File(upgradeDir, "download/" + version + ".txt");
+
+            File sourceFile = null;
+
+            if (addon.equals("niucloud-admin")) {
+                sourceFile = new File(bootConfig.getRootPath());
+            } else {
+                sourceFile = new File(bootConfig.getRootPath(), "webroot/addon/" + addon);
+            }
+
+            // 移除已删除文件
+            if (changeRecord.exists()) {
+                List<String> change =  Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
+                for (String line : change) {
+                    String[] content = line.split(" ");
+                    if (content[0].equals("-")) {
+                        (new File(sourceFile, content[2])).deleteOnExit();
+                    }
+                }
+            }
+
+            // 覆盖变更文件
+            File codeDir = new File(upgradeDir, "download/" + version);
+            if (addon.equals("niucloud-admin")) {
+                File[] childFile = codeDir.listFiles();
+                for (File file : childFile) {
+                    if (file.isDirectory()) {
+                        if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()));
+                    } else {
+                        FileUtils.copyFile(file, new File(sourceFile, file.getName()));
+                    }
+                }
+            } else {
+                // 覆盖jar包
+                FileUtils.copyDirectory(codeDir, sourceFile);
+
+                File jarFile = new File(codeDir, "jar/" + addon + ".jar");
+                if (jarFile.exists()) FileUtils.copyFile(jarFile, new File(bootConfig.getRootPath(), "webroot/jar/addon/" + addon + ".jar"));
             }
         }
     }

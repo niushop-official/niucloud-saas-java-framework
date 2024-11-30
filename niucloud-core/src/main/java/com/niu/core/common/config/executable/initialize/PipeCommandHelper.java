@@ -78,7 +78,7 @@ public final class PipeCommandHelper {
                         ICoreAddonInstallService iCoreAddonInstallService = (ICoreAddonInstallService) SpringContext.getBean(ICoreAddonInstallService.class);
                         iCoreAddonInstallService.installResult(false, addonResult.getAddon(), addonResult.getMessage());
                     }
-                } else if (addonResult.getOperate().endsWith("upgraded,")) {
+                } else if (addonResult.getOperate().endsWith("installed,")) {
                     // 升级成功，需要回调
                     if (addonResult.getResult() == 1) {
                         ICoreAddonInstallService iCoreAddonInstallService = (ICoreAddonInstallService) SpringContext.getBean(ICoreAddonInstallService.class);

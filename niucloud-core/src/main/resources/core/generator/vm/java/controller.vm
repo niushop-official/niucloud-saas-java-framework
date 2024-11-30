@@ -23,7 +23,7 @@ import java.util.List;
 public class ${className}Controller {
 
     @Resource
-    I${className}Service ${className}Service;
+    I${className}Service ${lowerClassName}Service;
 
     /**
      * ${tableContent}分页列表
@@ -34,7 +34,7 @@ public class ${className}Controller {
      */
     @GetMapping("")
     public Result<PageResult<${className}ListVo>> page(@Validated PageParam pageParam, @Validated ${className}SearchParam searchParam) {
-        PageResult<${className}ListVo> list = ${className}Service.page(pageParam, searchParam);
+        PageResult<${className}ListVo> list = ${lowerClassName}Service.page(pageParam, searchParam);
         return Result.success(list);
     }
 
@@ -46,43 +46,57 @@ public class ${className}Controller {
      */
     @GetMapping("/{id}")
     public Result<${className}InfoVo> info(@PathVariable Integer id) {
-        ${className}InfoVo info = ${className}Service.info(id);
+        ${className}InfoVo info = ${lowerClassName}Service.info(id);
         return Result.success(info);
     }
 
     /**
-     * ${className}添加
+     * ${tableContent}添加
      *
      * @param addParam 添加参数
-     * @return AjaxResult<Object>
+     * @return Result<Object>
      */
     @PostMapping("")
     public Result<Object> add(@Validated @RequestBody ${className}Param addParam) {
-        ${className}Service.add(addParam);
+        ${lowerClassName}Service.add(addParam);
         return Result.success();
     }
 
     /**
-     * ${className}编辑
+     * ${tableContent}编辑
      *
      * @param editParam 编辑参数
      * @return Result<Object>
      */
     @PutMapping("/{id}")
     public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ${className}Param editParam) {
-        ${className}Service.edit(id, editParam);
+        ${lowerClassName}Service.edit(id, editParam);
         return Result.success();
     }
 
     /**
-     * ${className}删除
+     * ${tableContent}删除
      *
      * @param id 参数
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
     public Result<Object> del(@PathVariable Integer id) {
-        ${className}Service.del(id);
+        ${lowerClassName}Service.del(id);
         return Result.success();
     }
+
+    #if($relateList.size() > 0)
+        #foreach($key in $relateList.keySet())
+            #set($mapper = $relateList.get($key).get("mapper_info"))
+    /**
+     * 获取${mapper.tableName}列表
+     * @return Result<Object>
+     */
+    @GetMapping("/${mapper.tableName}")
+    public Result<Object> get${mapper.entityName}List() {
+        return Result.success(${lowerClassName}Service.get${mapper.entityName}List());
+    }
+        #end
+    #end
 }

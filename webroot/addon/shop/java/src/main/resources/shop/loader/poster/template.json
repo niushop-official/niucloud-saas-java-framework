@@ -81,7 +81,7 @@
 					"id": "2vef9ovhene9",
 					"componentName": "GoodsMarketPrice",
 					"componentTitle": "划线价",
-					"type": "text",
+					"type": "strikethrough",
 					"path": "goods-market-price",
 					"uses": 1,
 					"relate": "goods_market_price",

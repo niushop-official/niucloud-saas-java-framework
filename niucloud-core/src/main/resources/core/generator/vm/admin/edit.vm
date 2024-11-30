@@ -21,7 +21,15 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useDictionary } from '@/app/api/dict'
 import { t } from '@/lang'
 import type { FormInstance } from 'element-plus'
-import { add${className}, edit${className}, get${className}Info } from '${adminPath}/api/${moduleName}/${originalClassName}'
+import {
+    #foreach($key in $relateList.keySet())
+        #set($mapper = $relateList.get($key).get("mapper_info"))
+    get${mapper.entityName}List,
+    #end
+    add${className},
+    edit${className},
+    get${className}Info
+} from '${adminPath}/api/${moduleName}/${originalClassName}'
 import Test from '@/utils/test'
 
 let showDialog = ref(false)
@@ -71,8 +79,37 @@ const confirm = async (formEl: FormInstance | undefined) => {
     })
 }
 
-// 获取字典数据
+#if ($relateList.size() > 0)
+// 远程下拉
+    #foreach($key in $relateList.keySet())
+    #set($mapper = $relateList.get($key).get("mapper_info"))
+const $strUtil.lowerFirst($mapper.entityName)List = ref([])
+get${mapper.entityName}List().then(({ data }) => {
+    $strUtil.lowerFirst($mapper.entityName)List.value = data
+})
 
+    #end
+#end
+
+#if ($dictList.size() > 0)
+// 获取字典数据
+    #foreach($dict in $dictList)
+const $strUtil.toCamelCase($dict)Dict = ref([]);
+useDictionary('$dict').then(({ data }) => {
+    $strUtil.toCamelCase($dict)Dict.value = data.dictionary
+    #foreach ($column in $columns)
+        #if ($column.dictType == $dict)
+            #if ($column.columnType != "String")
+   formData.${column.columnName} = isNaN(parseInt(data.dictionary[0].value)) ? data.dictionary[0].value : parseInt(data.dictionary[0].value)
+            #else
+   formData.${column.columnName} = data.dictionary[0].value
+            #end
+       #end
+   #end
+})
+
+    #end
+#end
 const setFormData = async (row: any = null) => {
     Object.assign(formData, initialFormData)
     loading.value = true

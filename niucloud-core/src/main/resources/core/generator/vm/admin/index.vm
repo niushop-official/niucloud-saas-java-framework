@@ -51,16 +51,24 @@ ${listView}
 import { reactive, ref, watch } from 'vue'
 import { t } from '@/lang'
 import { useDictionary } from '@/app/api/dict'
-import { get${className}List, delete${className} } from '${adminPath}/api/${moduleName}/${originalClassName}'
+import {
+    #foreach($key in $relateList.keySet())
+        #set($mapper = $relateList.get($key).get("mapper_info"))
+    get${mapper.entityName}List,
+    #end
+    get${className}List,
+    delete${className}
+} from '${adminPath}/api/${moduleName}/${originalClassName}'
 import { img } from '@/utils/common'
 import { ElMessageBox,FormInstance } from 'element-plus'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 #if ($editType == 1)
 #set($componentName = $originalClassName.toLowerCase().replace("_", "-"))
 import Edit from "${adminPath}/views/${moduleName}/components/${componentName}-edit.vue"
 #end
 
 const route = useRoute()
+const router = useRouter()
 const pageName = route.meta.title
 #if ($editType == 1)
 const edit${className}Dialog = ref(null)
@@ -82,8 +90,28 @@ const searchFormRef = ref<FormInstance>()
 // 选中数据
 const selectData = ref<any[]>([])
 
-// 字典数据
+#if ($relateList.size() > 0)
+// 远程下拉
+    #foreach($key in $relateList.keySet())
+    #set($mapper = $relateList.get($key).get("mapper_info"))
+const $strUtil.lowerFirst($mapper.entityName)List = ref([])
+get${mapper.entityName}List().then(({ data }) => {
+    $strUtil.lowerFirst($mapper.entityName)List.value = data
+})
 
+    #end
+#end
+
+#if ($dictList.size() > 0)
+// 获取字典数据
+    #foreach($dict in $dictList)
+const $strUtil.toCamelCase($dict)Dict = ref([]);
+useDictionary('$dict').then(({ data }) => {
+    $strUtil.toCamelCase($dict)Dict.value = data.dictionary
+})
+
+    #end
+#end
 /**
  * 获取${notes}列表
  */
@@ -110,6 +138,7 @@ load${className}List()
  */
 const addEvent = () => {
 #if ($editType == 1)
+    edit${className}Dialog.value.setFormData()
     edit${className}Dialog.value.showDialog = true
 #else
     #if ($addonName.equals("core"))

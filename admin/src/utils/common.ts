@@ -126,7 +126,14 @@ export function isUrl(str: string): boolean {
  * @returns
  */
 export function img(path: string): string {
-    return isUrl(path) ? path : `${import.meta.env.VITE_IMG_DOMAIN || location.origin}/${path}`
+    if (isUrl(path)) {
+        return path
+    } else {
+        let baseURL = import.meta.env.VITE_IMG_DOMAIN || location.origin
+        baseURL = baseURL.substr(-1) == '/' ? baseURL : `${baseURL}/`
+        if (path.substr(0, 1) == '/') path = path.substr(1)
+        return baseURL + path
+    }
 }
 
 /**

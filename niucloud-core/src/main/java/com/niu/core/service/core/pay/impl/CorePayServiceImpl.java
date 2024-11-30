@@ -24,6 +24,8 @@ import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.pay.ICorePayChannelService;
 import com.niu.core.service.core.pay.ICorePayService;
+import com.niu.core.service.core.sys.ICorePrinterService;
+import com.niu.core.service.core.sys.param.SysPrinterPrintTicketParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,9 @@ public class CorePayServiceImpl implements ICorePayService {
 
     @Resource
     ICorePayChannelService corePayChannelService;
+
+    @Resource
+    ICorePrinterService corePrinterService;
 
     /**
      * 支付
@@ -223,6 +228,15 @@ public class CorePayServiceImpl implements ICorePayService {
         pay.setPayTime(System.currentTimeMillis() / 1000);
 
         payMapper.updateById(pay);
+
+        SysPrinterPrintTicketParam printParam = new SysPrinterPrintTicketParam();
+        printParam.setSiteId(pay.getSiteId());
+        printParam.setType("shopGoodsOrder");
+        printParam.setTrigger("pay_after");
+        SysPrinterPrintTicketParam.Business business = new SysPrinterPrintTicketParam.Business();
+        business.setOrderId(pay.getTradeId());
+        printParam.setBusiness(business);
+        corePrinterService.printTicket(printParam);
     }
 
     /**

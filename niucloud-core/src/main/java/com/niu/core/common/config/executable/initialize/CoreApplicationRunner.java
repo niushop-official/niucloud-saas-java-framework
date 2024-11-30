@@ -54,21 +54,26 @@ public class CoreApplicationRunner implements CommandLineRunner, ApplicationRunn
         } else {
             executorService.schedule(() -> {
                 log.info("生产环境下装载模块开始.");
-                // 初始化已安装的插件
-                Map<String, String> addonEnvsMap = AddonResourceHelper.loadDynamicAddon();
-                log.info("addonEnvsMap = " + addonEnvsMap);
-                AddonModuleContext.init(addonEnvsMap);
-                // 统一扫描注解
-                Map<Class<? extends Annotation>, List<Class>> annotationClassListMap = ResourceBeanInitializer.scanning(basePackage);
-                // 初始化国际化
-                AddonModuleBundleMessageSource.init();
-                // 业务资源初始化
-                ResourceBeanInitializer.initialize(annotationClassListMap);
-                // 从管道中获取命令
-                PipeCommandHelper.doPipeCommand();
-                log.info("生产环境下装载模块完成.");
-                // 钩子输出
-                System.out.println("Service started successfully.");
+                try {
+                    // 初始化已安装的插件
+                    Map<String, String> addonEnvsMap = AddonResourceHelper.loadDynamicAddon();
+                    log.info("addonEnvsMap = " + addonEnvsMap);
+                    AddonModuleContext.init(addonEnvsMap);
+                    // 统一扫描注解
+                    Map<Class<? extends Annotation>, List<Class>> annotationClassListMap = ResourceBeanInitializer.scanning(basePackage);
+                    // 初始化国际化
+                    AddonModuleBundleMessageSource.init();
+                    // 业务资源初始化
+                    ResourceBeanInitializer.initialize(annotationClassListMap);
+                    // 从管道中获取命令
+                    PipeCommandHelper.doPipeCommand();
+                    log.info("生产环境下装载模块完成.");
+                    // 钩子输出
+                    System.out.println("Service started successfully.");
+                }catch (Exception e) {
+                    log.info("生产环境下装载模块异常");
+                    e.printStackTrace();
+                }
             }, delaySeconds, TimeUnit.SECONDS);
         }
         executorService.shutdown();

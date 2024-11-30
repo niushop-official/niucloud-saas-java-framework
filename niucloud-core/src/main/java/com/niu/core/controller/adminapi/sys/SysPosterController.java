@@ -75,7 +75,7 @@ public class SysPosterController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(Integer id, @Validated @RequestBody SysPosterParam editParam) {
+    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody SysPosterParam editParam) {
         sysPosterService.edit(id, editParam);
         return Result.success();
     }
@@ -86,7 +86,7 @@ public class SysPosterController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@Validated @RequestBody Integer id) {
+    public Result<Object> del(@PathVariable Integer id) {
         sysPosterService.del(id);
         return Result.success();
     }

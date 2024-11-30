@@ -214,6 +214,7 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
                 sku.setGoodsId(model.getGoodsId());
                 sku.setSkuImage(model.getGoodsCover());
                 sku.setSalePrice(editParam.getPrice());
+                sku.setSkuSpecFormat("");
                 sku.setIsDefault(1);
                 skuData.add(sku);
             } else {

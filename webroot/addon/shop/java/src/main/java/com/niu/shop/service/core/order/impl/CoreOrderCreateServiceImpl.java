@@ -1,71 +1,45 @@
 package com.niu.shop.service.core.order.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.lang.Snowflake;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.common.component.context.cache.CacheFactory;
-import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberAddress;
-import com.niu.core.mapper.member.MemberAddressMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.cart.ShopCart;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.coupon.ShopCouponMember;
-import com.niu.shop.entity.exchange.ShopPointExchange;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.entity.order.ShopOrder;
-import com.niu.shop.entity.order.ShopOrderDiscount;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.enums.coupon.CouponMemberStatusEnum;
 import com.niu.shop.enums.coupon.CouponTypeEnum;
-import com.niu.shop.enums.goods.GoodsTypeEnum;
-import com.niu.shop.enums.marketing.ShopPointExchangeStatusEnum;
-import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderStatusEnum;
 import com.niu.shop.event.marketing.GoodsMarketCalculateEventDefiner;
-import com.niu.shop.event.order.OrderCreateAfterEvent;
-import com.niu.shop.event.order.ShopOrderDiscountCreateEventDefiner;
 import com.niu.shop.mapper.cart.ShopCartMapper;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.coupon.ShopCouponMemberMapper;
-import com.niu.shop.mapper.delivery.ShopStoreMapper;
 import com.niu.shop.mapper.exchange.ShopPointExchangeMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
-import com.niu.shop.mapper.order.ShopInvoiceMapper;
-import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
-import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.service.api.goods.IGoodsService;
-import com.niu.shop.service.core.delivery.ICoreDeliveryConfigService;
-import com.niu.shop.service.core.delivery.ICoreExpressService;
-import com.niu.shop.service.core.delivery.ICoreLocalDeliveryService;
-import com.niu.shop.service.core.delivery.ICoreStoreService;
-import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
-import com.niu.shop.service.core.goods.ICoreGoodsService;
-import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
-import com.niu.shop.service.core.order.*;
+import com.niu.shop.service.core.order.ICoreOrderCreateService;
 import com.niu.shop.service.core.order.helper.OrderCreateHelper;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
 import com.niu.shop.service.core.order.param.OrderCreateParam;
 import com.niu.shop.service.core.order.vo.OrderCouponListVo;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import com.niu.shop.service.core.order.vo.OrderCreateResultVo;
-import com.niu.shop.service.core.shop.ICoreStatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
@@ -255,6 +229,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
     /**
      * 查询商品信息
+     *
      * @param vo
      * @param param
      */
@@ -272,7 +247,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         }
 
         if (ObjectUtil.isNotEmpty(param.getSkuData())) {
-            for (OrderCalculateParam.SkuItem item: param.getSkuData()) {
+            for (OrderCalculateParam.SkuItem item : param.getSkuData()) {
                 // 查询规格数据
                 OrderCreateDataVo.Sku skuVo = new OrderCreateDataVo.Sku();
                 ShopGoodsSku sku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().eq("site_id", param.getSiteId()).eq("sku_id", item.getSkuId()));
@@ -303,6 +278,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 event.setSiteId(vo.getSiteId());
                 event.setVo(vo);
                 event.setSkuInfo(skuVo);
+                event.setSkuData(param.getSkuData());
                 List<GoodsMarketCalculateEventDefiner.GoodsMarketCalculateResult> marketData = EventAndSubscribeOfPublisher.publishAndCallback(event);
 
                 // 累加商品总价
@@ -361,12 +337,12 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                             .select("category_id")).stream().map(i -> i.getCategoryId()).collect(Collectors.toList());
 
                     for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
-                         List<Integer> goodsCategory = JSONUtil.parseArray(sku.getGoods().getGoodsCategory()).toList(Integer.class);
+                        List<Integer> goodsCategory = JSONUtil.parseArray(sku.getGoods().getGoodsCategory()).toList(Integer.class);
                         boolean hasIntersection = !goodsCategory.retainAll(categoryIds);
-                         if (!hasIntersection) {
-                             matchGoods = true;
-                             matchGoodsMoney = matchGoodsMoney.add(sku.getGoodsMoney());
-                         }
+                        if (!hasIntersection) {
+                            matchGoods = true;
+                            matchGoodsMoney = matchGoodsMoney.add(sku.getGoodsMoney());
+                        }
                     }
                 }
                 // 商品券

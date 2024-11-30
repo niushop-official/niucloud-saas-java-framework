@@ -33,7 +33,7 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
         JSONArray schedule = jsonModuleLoader.getResultSet("core", "schedule.json");
 
         if (ObjectUtil.isNotEmpty(schedule)) {
-            List<SysSchedule> scheduleList = sysScheduleMapper.selectList(new QueryWrapper<SysSchedule>().eq("addon", "core").select("id,`key`"));
+            List<SysSchedule> scheduleList = sysScheduleMapper.selectList(new QueryWrapper<SysSchedule>().eq("addon", "").select("id,`key`"));
             Map<String, SysSchedule> scheduleMap = scheduleList.stream().collect(Collectors.toMap(SysSchedule::getKey, i -> i));
 
             List<SysSchedule> list = new LinkedList<>();
@@ -56,7 +56,7 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
      */
     @Override
     public void uninstallSystemSchedule() {
-        sysScheduleMapper.delete(new QueryWrapper<SysSchedule>().eq("addon", "core"));
+        sysScheduleMapper.delete(new QueryWrapper<SysSchedule>().eq("addon", ""));
     }
 
     /**
@@ -68,7 +68,7 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
         JSONArray schedule = jsonModuleLoader.getResultSet(addon, "schedule.json");
 
         if (ObjectUtil.isNotEmpty(schedule)) {
-            List<SysSchedule> scheduleList = sysScheduleMapper.selectList(new QueryWrapper<SysSchedule>().eq("addon", "core").select("id,`key`"));
+            List<SysSchedule> scheduleList = sysScheduleMapper.selectList(new QueryWrapper<SysSchedule>().eq("addon", addon).select("id,`key`"));
             Map<String, SysSchedule> scheduleMap = scheduleList.stream().collect(Collectors.toMap(SysSchedule::getKey, i -> i));
 
             List<SysSchedule> list = new LinkedList<>();
@@ -78,6 +78,7 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
                 String key = item.getStr("key");
                 if (scheduleMap.get(key) == null) {
                     SysSchedule sysScheduleVo = JSONUtil.toBean(item, SysSchedule.class);
+                    sysScheduleVo.setAddon(addon);
                     list.add(sysScheduleVo);
                 }
             }

@@ -10,7 +10,6 @@ import com.niu.core.entity.site.Site;
 import com.niu.core.enums.member.*;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.mapper.site.SiteMapper;
-import com.niu.core.service.admin.member.param.MemberAccountLogParam;
 import com.niu.core.service.admin.member.vo.MemberConfigVo;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
@@ -39,12 +38,10 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
 
     @Override
     public Member getMember(Integer siteId, Integer memberId) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
-        queryWrapper.select("memberId,weapp_openid,wx_openid");
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", siteId);
         queryWrapper.eq("member_id", memberId);
-        Member member = memberMapper.selectOne(queryWrapper);
-        return member;
+        return memberMapper.selectOne(queryWrapper);
     }
 
     /**

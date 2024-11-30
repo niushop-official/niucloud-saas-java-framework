@@ -45,7 +45,7 @@ public class DictServiceImpl implements IDictService {
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getKey())) {
-            queryWrapper.eq("key", searchParam.getKey());
+            queryWrapper.eq("`key`", searchParam.getKey());
         }
 
        queryWrapper.orderByDesc("id");
@@ -84,7 +84,7 @@ public class DictServiceImpl implements IDictService {
     public DictInfoVo info(String key) {
         SysDict model = dictMapper.selectOne(
                 new QueryWrapper<SysDict>()
-                        .eq("key", key)
+                        .eq("`key`", key)
                         .last("limit 1"));
 
         Assert.notNull(model, "数据不存在");

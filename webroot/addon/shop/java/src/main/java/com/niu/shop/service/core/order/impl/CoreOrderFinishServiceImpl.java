@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
+import com.niu.core.service.core.sys.ICorePrinterService;
+import com.niu.core.service.core.sys.param.SysPrinterPrintTicketParam;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.enums.order.OrderDeliveryStatusEnum;
@@ -31,16 +33,21 @@ public class CoreOrderFinishServiceImpl implements ICoreOrderFinishService {
     @Resource
     ICoreOrderEventService coreOrderEventService;
 
+    @Resource
+    ICorePrinterService corePrinterService;
+
     @Override
     public boolean finish(OrderFinishParam param) {
 
         ShopOrder shopOrder = shopOrderMapper.selectOne(new QueryWrapper<ShopOrder>().eq("site_id", param.getSiteId()).eq("order_id", param.getOrderId()));
-        if(ObjectUtil.isEmpty(shopOrder)) throw new CommonException("订单信息不存在");
+        if (ObjectUtil.isEmpty(shopOrder)) throw new CommonException("订单信息不存在");
 
-        if(!shopOrder.getStatus().equals(OrderStatusEnum.WAIT_TAKE.getStatus().toString())) throw new CommonException("只有待收货订单才能完成");
-        if(shopOrder.getStatus().equals(OrderStatusEnum.FINISH.getStatus().toString())) throw new CommonException("订单已完成");
+        if (!shopOrder.getStatus().equals(OrderStatusEnum.WAIT_TAKE.getStatus().toString()))
+            throw new CommonException("只有待收货订单才能完成");
+        if (shopOrder.getStatus().equals(OrderStatusEnum.FINISH.getStatus().toString()))
+            throw new CommonException("订单已完成");
         Long refundCount = shopOrderGoodsMapper.selectCount(new QueryWrapper<ShopOrderGoods>().eq("order_id", param.getOrderId()).eq("status", OrderGoodsRefundEnum.REFUNDING.getStatus()));
-        if(refundCount > 0) throw new CommonException("订单中存在退款项，无法完成");
+        if (refundCount > 0) throw new CommonException("订单中存在退款项，无法完成");
 
         //执行订单完成
         shopOrder.setStatus(OrderStatusEnum.FINISH.getStatus().toString());
@@ -62,6 +69,15 @@ public class CoreOrderFinishServiceImpl implements ICoreOrderFinishService {
         event.setName("OrderFinishAfterEvent");
         EventAndSubscribeOfPublisher.publishAll(event);
 
+        SysPrinterPrintTicketParam printParam = new SysPrinterPrintTicketParam();
+        printParam.setSiteId(shopOrder.getSiteId());
+        printParam.setType("shopGoodsOrder");
+        printParam.setTrigger("take_delivery");
+        SysPrinterPrintTicketParam.Business business = new SysPrinterPrintTicketParam.Business();
+        business.setOrderId(shopOrder.getOrderId());
+        printParam.setBusiness(business);
+        corePrinterService.printTicket(printParam);
+
         return true;
     }
 
@@ -71,7 +87,7 @@ public class CoreOrderFinishServiceImpl implements ICoreOrderFinishService {
         QueryWrapper<ShopOrderGoods> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("order_id", orderId);
         queryWrapper.eq("status", OrderGoodsRefundEnum.NORMAL.getStatus());
-        if(ObjectUtil.isNotEmpty(orderGoodsId)) queryWrapper.in("order_goods_id", orderGoodsId);
+        if (ObjectUtil.isNotEmpty(orderGoodsId)) queryWrapper.in("order_goods_id", orderGoodsId);
 
         ShopOrderGoods shopOrderGoods = new ShopOrderGoods();
         shopOrderGoods.setDeliveryStatus(OrderDeliveryStatusEnum.TAKED.getStatus());

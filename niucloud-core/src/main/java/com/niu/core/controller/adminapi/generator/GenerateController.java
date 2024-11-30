@@ -1,5 +1,6 @@
 package com.niu.core.controller.adminapi.generator;
 
+import com.niu.core.common.component.context.MapperMap;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
@@ -101,7 +102,7 @@ public class GenerateController {
     public Result<Map<String, String>> create(@Validated @RequestBody GenerateCodeParam generateCodeParam) {
         generateService.generate(generateCodeParam);
         Map<String, String> data = new HashMap<>();
-        data.put("file", "upload/generate/package.zip");
+        if (generateCodeParam.getGenerateType().equals("2")) data.put("file", "upload/generate/package.zip");
         return Result.success(data);
     }
 
@@ -149,12 +150,24 @@ public class GenerateController {
         return Result.success(list);
     }
 
+    /**
+     * 获取mapper
+     * @param addon
+     * @return
+     */
+    @GetMapping("/all_model")
+    public Result<?> getAllMapper(@RequestParam String addon) {
+        if (addon.equals("system")) addon = "core";
+        return Result.success(MapperMap.getMappersByModule(addon));
+    }
 
-
-
-
-
-
-
-
+    /**
+     * 根据mapper获取表字段
+     * @param model
+     * @return
+     */
+    @GetMapping("/model_table_column")
+    public Result<?> gettableColumn(@RequestParam String model) {
+        return Result.success(generateService.getTableColumnByMapper(model));
+    }
 }

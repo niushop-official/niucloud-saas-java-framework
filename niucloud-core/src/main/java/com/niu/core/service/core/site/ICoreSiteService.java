@@ -72,4 +72,9 @@ public interface ICoreSiteService {
      *
      */
     void siteExpireClose();
+
+    /**
+     * 清除站点缓存
+     */
+    void clearSiteCache();
 }

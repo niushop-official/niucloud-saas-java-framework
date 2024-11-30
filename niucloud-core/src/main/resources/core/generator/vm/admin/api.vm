@@ -46,4 +46,17 @@ export function edit${className}(params: Record<string, any>) {
 export function delete${className}(id: number) {
     return request.delete(`${addonName}/${moduleName}/${tableName}/${id}`, { showErrorMessage: true, showSuccessMessage: true })
 }
+
+#if($relateList.size() > 0)
+    #foreach($key in $relateList.keySet())
+        #set($mapper = $relateList.get($key).get("mapper_info"))
+/**
+ * 获取${mapper.tableName}列表
+ * @returns
+ */
+export function get${mapper.entityName}List() {
+    return request.get(`${addonName}/${moduleName}/${tableName}/${mapper.tableName}`);
+}
+    #end
+#end
 //end--${tableName}--end

@@ -31,7 +31,10 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/account/point")
-    public Result<?> point(@Validated PageParam pageParam, @Validated AccountPointFlowParam param) {
+    public Result<?> point(@Validated PageParam pageParam, @Validated AccountPointFlowParam param, @RequestParam(name = "create_time[0]", defaultValue = "") String startTime, @RequestParam(name = "create_time[1]", defaultValue = "") String endTime) {
+        if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            param.setCreateTime(new String[]{ startTime, endTime });
+        }
         return Result.success(memberAccountService.pointFlow(pageParam, param));
     }
 
@@ -42,7 +45,10 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/account/balance")
-    public Result<?> balance(@Validated PageParam pageParam, @Validated AccountBalanceFlowParam param) {
+    public Result<?> balance(@Validated PageParam pageParam, @Validated AccountBalanceFlowParam param, @RequestParam(name = "create_time[0]", defaultValue = "") String startTime, @RequestParam(name = "create_time[1]", defaultValue = "") String endTime) {
+        if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            param.setCreateTime(new String[]{ startTime, endTime });
+        }
         return Result.success(memberAccountService.balanceFlow(pageParam, param));
     }
 
@@ -53,7 +59,10 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/account/balance_list")
-    public Result<?> balanceList(@Validated PageParam pageParam, @Validated AccountBalanceListParam param) {
+    public Result<?> balanceList(@Validated PageParam pageParam, @Validated AccountBalanceListParam param, @RequestParam(name = "create_time[0]", defaultValue = "") String startTime, @RequestParam(name = "create_time[1]", defaultValue = "") String endTime) {
+        if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            param.setCreateTime(new String[]{ startTime, endTime });
+        }
         return Result.success(memberAccountService.balanceList(pageParam, param));
     }
 

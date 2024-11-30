@@ -1,6 +1,7 @@
 package com.niu.core.controller.adminapi.addon;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.Result;
 import com.niu.core.enums.addon.AddonTypeEnum;
 import com.niu.core.service.admin.addon.IAddonService;
@@ -37,6 +38,22 @@ public class UpgradeController {
     @GetMapping("/{addon}")
     public Result<?> getUpgradeContent(@PathVariable(value = "addon") String addon) {
         return Result.success(upgradeService.getUpgradeContent(addon));
+    }
+
+    /**
+     * 升级检测
+     */
+    @GetMapping("/check")
+    public Result<?> upgradeCheck() {
+        return Result.success(upgradeService.upgradeCheck(""));
+    }
+
+    /**
+     * 升级检测
+     */
+    @GetMapping("/check/{addon}")
+    public Result<?> upgradeCheck(@PathVariable(value = "addon") String addon) {
+        return Result.success(upgradeService.upgradeCheck(addon));
     }
 
     /**

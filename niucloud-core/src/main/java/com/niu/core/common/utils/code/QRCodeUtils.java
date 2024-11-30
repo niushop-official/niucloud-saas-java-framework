@@ -10,6 +10,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import cn.hutool.crypto.digest.DigestUtil;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -120,8 +121,8 @@ public class QRCodeUtils {
     public static String encode(String content, String imgPath, String destPath, boolean needCompress) throws Exception {
         BufferedImage image = QRCodeUtils.createImage(content, imgPath, needCompress);
         mkdirs(destPath);
-        String file = new Random().nextInt(99999999) + ".jpg";
-        ImageIO.write(image, FORMAT_NAME, new File(destPath + "/" + file));
+        String file = DigestUtil.md5Hex(content) + ".png";
+        ImageIO.write(image, FORMAT_NAME, new File(destPath, file));
         return file;
     }
 
@@ -169,8 +170,8 @@ public class QRCodeUtils {
      * @param destPath 存储地址
      * @throws Exception
      */
-    public static void encode(String content, String destPath) throws Exception {
-        QRCodeUtils.encode(content, null, destPath, false);
+    public static String encode(String content, String destPath) throws Exception {
+        return QRCodeUtils.encode(content, null, destPath, false);
     }
 
     /**

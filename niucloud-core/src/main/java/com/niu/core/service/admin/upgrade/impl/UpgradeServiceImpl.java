@@ -15,6 +15,7 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.CacheFactory;
 import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.component.upgrade.factory.UpgradeProviderFactory;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.config.dataization.AddonModuleContext;
 import com.niu.core.common.exception.CommonException;
@@ -42,6 +43,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -77,6 +79,67 @@ public class UpgradeServiceImpl implements IUpgradeService {
     }
 
     /**
+     * 升级检测
+     *
+     * @param addon
+     * @return
+     */
+    @Override
+    public JSONObject upgradeCheck(String addon) {
+        boolean upgradeCheck = true;
+
+        JSONObject checkResult = new JSONObject();
+        String rootPath = "";
+        String runtimePath = "";
+        JSONArray readableDir = new JSONArray();
+        JSONArray writeDir = new JSONArray();
+
+        if (WebAppEnvs.get().envType.equals("dev")) {
+            rootPath = WebAppEnvs.get().projectRoot + "/";
+            runtimePath = rootPath;
+
+            readableDir.put(new JSONObject().set("dir", rootPath + "niucloud-addon").set("status", true));
+            writeDir.put(new JSONObject().set("dir", rootPath + "niucloud-addon").set("status", true));
+            readableDir.put(new JSONObject().set("dir", rootPath + "webroot").set("status", true));
+            writeDir.put(new JSONObject().set("dir", rootPath + "webroot").set("status", true));
+        } else {
+            rootPath = WebAppEnvs.get().webRoot + "/";
+            runtimePath = rootPath + "runtime/";
+
+            readableDir.put(new JSONObject().set("dir", runtimePath).set("status", true));
+            writeDir.put(new JSONObject().set("dir", runtimePath).set("status", true));
+        }
+
+        readableDir.put(new JSONObject().set("dir", runtimePath + "admin").set("status", true));
+        readableDir.put(new JSONObject().set("dir", runtimePath + "uni-app").set("status", true));
+        readableDir.put(new JSONObject().set("dir", runtimePath + "web").set("status", true));
+
+        writeDir.put(new JSONObject().set("dir", runtimePath + "admin").set("status", true));
+        writeDir.put(new JSONObject().set("dir", runtimePath + "uni-app").set("status", true));
+        writeDir.put(new JSONObject().set("dir", runtimePath + "web").set("status", true));
+
+        for (int i = 0; i < readableDir.size(); i++) {
+            JSONObject dir = readableDir.getJSONObject(i);
+            dir.set("status", new File(dir.getStr("dir")).canRead());
+            dir.set("dir", dir.getStr("dir").replace(rootPath, ""));
+            readableDir.set(i, dir);
+            if (!dir.getBool("status")) upgradeCheck = false;
+        }
+
+        for (int i = 0; i < writeDir.size(); i++) {
+            JSONObject dir = writeDir.getJSONObject(i);
+            dir.set("status", new File(dir.getStr("dir")).canWrite());
+            dir.set("dir", dir.getStr("dir").replace(rootPath, ""));
+            writeDir.set(i, dir);
+            if (!dir.getBool("status")) upgradeCheck = false;
+        }
+
+        checkResult.put("is_pass", upgradeCheck);
+        checkResult.put("dir", new JSONObject().set("is_readable", readableDir).set("is_write", writeDir));
+        return checkResult;
+    }
+
+    /**
      * 获取升级内容
      *
      * @param addon
@@ -98,7 +161,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
             query.put("version", addonModel.getVersion());
         }
 
-        return NiucloudUtils.Niucloud.get("member_app_upgrade/content", query);
+        return NiucloudUtils.Niucloud.get("member_app_upgrade/content", query).getJSONObject("data");
     }
 
     /**
@@ -138,6 +201,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
         if (body.getInt("code").equals(0)) throw new RuntimeException(body.getStr("msg"));
 
         UpgradeTaskVo vo = new UpgradeTaskVo();
+        vo.setEnvType(WebAppEnvs.get().envType);
         vo.setUpgradeTime(DateUtil.now());
         vo.setAddon((String) actionQuery.get("data[app_key]"));
         vo.setKey(RandomUtil.randomString(10));
@@ -146,8 +210,9 @@ public class UpgradeServiceImpl implements IUpgradeService {
         vo.getExecuted().add("requestUpgrade");
         vo.getLog().add(vo.getSteps().get("requestUpgrade").getTitle());
         vo.setParams(query);
-        vo.setUpgradeContent(this.getUpgradeContent(addon).getJSONObject("data"));
-
+        vo.setUpgradeContent(this.getUpgradeContent(addon));
+        vo.setVersion((String) actionQuery.get("data[version]"));
+        vo.setUpgradeVersion(vo.getUpgradeContent().getStr("upgrade_version"));
         setUpgradeTaskCache(vo);
 
         return vo;
@@ -165,7 +230,8 @@ public class UpgradeServiceImpl implements IUpgradeService {
         return JSONUtil.toBean(JSONUtil.parseObj(data), UpgradeTaskVo.class);
     }
 
-    private void setUpgradeTaskCache(UpgradeTaskVo vo) {
+    @Override
+    public void setUpgradeTaskCache(UpgradeTaskVo vo) {
         Cached cache = CacheFactory.getCacheOperator();
         cache.put("upgrade", JSONUtil.parseObj(vo).toString());
     }
@@ -194,43 +260,19 @@ public class UpgradeServiceImpl implements IUpgradeService {
         UpgradeTaskVo vo = this.getUpgradeTask();
         if (vo == null) return;
 
+        if (ObjectUtil.isNotEmpty(vo.getStatus()) && vo.getStatus().equals("restarting")) return;
+
         List<String> steps = vo.getSteps().keySet().stream().collect(Collectors.toList());
         String step = steps.indexOf(vo.getStep()) < steps.size() - 1 ? steps.get(steps.indexOf(vo.getStep()) + 1) : "";
-        step ="downloadFile";
+
         if (!step.isEmpty()) {
-            vo.getExecuted().add(step);
-            vo.getLog().add(vo.getSteps().get(step).getTitle());
+            if (!vo.getExecuted().contains(step)) {
+                vo.getExecuted().add(step);
+                vo.getLog().add(vo.getSteps().get(step).getTitle());
+            }
             try {
                 Map<String, Object> param = null;
-                switch (step) {
-                    case "downloadFile":
-                        param = this.downloadFile(vo);
-                        break;
-                    case "backupCode":
-                        this.backupCode(vo);
-                        break;
-                    case "backupSql":
-                        this.backupSql(vo);
-                        break;
-                    case "coverCode":
-                        this.coverCode(vo);
-                        break;
-                    case "handleUpgrade":
-                        this.handleUpgrade(vo);
-                        break;
-                    case "handleVue":
-                        this.handleVue(vo);
-                        break;
-                    case "refreshMenu":
-                        this.refreshMenu(vo);
-                        break;
-                    case "installSchedule":
-                        this.installSchedule(vo);
-                        break;
-                    case "upgradeComplete":
-                        this.upgradeComplete(vo);
-                        break;
-                }
+                param = (Map<String, Object>) dynamicMethodCall(step, vo);
                 if (param != null) {
                     vo.setParams(param);
                 } else {
@@ -239,6 +281,11 @@ public class UpgradeServiceImpl implements IUpgradeService {
                 }
                 setUpgradeTaskCache(vo);
             } catch (Exception e) {
+                vo.setStep(step);
+                vo.getError().add(e.getMessage());
+                setUpgradeTaskCache(vo);
+                this.upgradeErrorHandle(vo);
+                System.out.println("升级异常.");
                 e.printStackTrace();
             }
         }
@@ -251,7 +298,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * @return
      */
     private String upgradeDir(UpgradeTaskVo vo) {
-        return WebAppEnvs.get().webRootDownRuntime + "upgrade/" + vo.getAddon() + "/" + vo.getUpgrade().get("data[version]") + "-" + vo.getUpgradeContent().getStr("upgrade_version");
+        return WebAppEnvs.get().webRootDownRuntime + "upgrade/" + vo.getAddon() + "/" + vo.getVersion() + "-" + vo.getUpgradeVersion();
     }
 
     /**
@@ -260,7 +307,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * @param vo
      * @return
      */
-    private Map<String, Object> downloadFile(UpgradeTaskVo vo) throws Exception
+    public Map<String, Object> downloadFile(UpgradeTaskVo vo) throws Exception
     {
         Map<String, Object> param = vo.getParams();
 
@@ -275,9 +322,11 @@ public class UpgradeServiceImpl implements IUpgradeService {
 
         if (param.get("index") == null) {
             FileTools.createDirs(downloadDir.getPath());
+            FileUtils.cleanDirectory(downloadDir);
 
             HttpResponse response = new NiucloudUtils.Cloud().build("cloud/upgrade/download").query(query).header("Range", "bytes=0-").method(Method.HEAD).execute();
-            String length = response.header("Content-Length");
+            String totalLength = response.header("Content-range");
+            String length = ObjectUtil.defaultIfNull(totalLength.split("/")[1], "");
             Double step = Math.ceil(Double.valueOf(length) / chunkSize);
 
             param.put("index", 0);
@@ -304,8 +353,10 @@ public class UpgradeServiceImpl implements IUpgradeService {
                 param.put("index", index + 1);
                 return param;
             } else {
+                fos.close();
                 ZipUtil.unzip(file.getPath(), downloadDir.getPath());
-                file.deleteOnExit();
+                Thread.sleep(1000);
+                file.delete();
                 return null;
             }
         }
@@ -316,55 +367,71 @@ public class UpgradeServiceImpl implements IUpgradeService {
      *
      * @param vo
      */
-    private void backupCode(UpgradeTaskVo vo) throws Exception {
+    public void backupCode(UpgradeTaskVo vo) throws Exception {
         File backupDir = new File(upgradeDir(vo) + "/backup/code/");
         FileTools.createDirs(backupDir.getPath());
+        FileUtils.cleanDirectory(backupDir);
 
         WebAppEnvs envs = WebAppEnvs.get();
 
         // 备份前端
-        FileUtils.copyDirectory(new File(WebAppEnvs.get().webRootDownPublic), new File(backupDir, "webroot/public"));
-        // 备份前端源码
-        String[] adminExclusionDir = {"node_modules", ".vscode", "dist", ".idea"};
-        if (new File(envs.projectRoot + "/admin").exists()) {
-            FileUtils.copyDirectory(new File(envs.projectRoot + "/admin"), new File(backupDir, "admin"), FileTools.createExclusionFilter(adminExclusionDir));
+        FileUtils.copyDirectory(new File(envs.webRootDownPublic), new File(backupDir, "webroot/public"));
+
+        String[] uniAppExclusionDir = {"node_modules", "unpackage", "dist"};
+        if (new File(envs.projectRoot, "uni-app").exists()) {
+            FileUtils.copyDirectory(new File(envs.projectRoot, "uni-app"), new File(backupDir, "webroot/runtime/uni-app"), FileTools.createExclusionFilter(uniAppExclusionDir));
         }
-        if (new File(envs.webRootDownRuntime + "/admin").exists()) {
-            FileUtils.copyDirectory(new File(envs.webRootDownRuntime + "/admin"), new File(backupDir, "webroot/runtime/admin"), FileTools.createExclusionFilter(adminExclusionDir));
-        }
-        String[] uniappExclusionDir = {"node_modules", "unpackage", "dist"};
-        if (new File(envs.projectRoot + "/uni-app").exists()) {
-            FileUtils.copyDirectory(new File(envs.projectRoot + "/uni-app"), new File(backupDir, "uni-app"), FileTools.createExclusionFilter(uniappExclusionDir));
-        }
-        if (new File(envs.webRootDownRuntime + "/uni-app").exists()) {
-            FileUtils.copyDirectory(new File(envs.webRootDownRuntime + "/uni-app"), new File(backupDir, "webroot/runtime/uni-app"), FileTools.createExclusionFilter(uniappExclusionDir));
-        }
-        String[] webExclusionDir = {"node_modules", ".output", "nuxt", "dist", ".nuxt"};
-        if (new File(envs.projectRoot + "/web").exists()) {
-            FileUtils.copyDirectory(new File(envs.projectRoot + "/web"), new File(backupDir, "web"), FileTools.createExclusionFilter(webExclusionDir));
-        }
-        if (new File(envs.webRootDownRuntime + "/web").exists()) {
-            FileUtils.copyDirectory(new File(envs.webRootDownRuntime + "/web"), new File(backupDir, "webroot/runtime/web"), FileTools.createExclusionFilter(webExclusionDir));
+        if (new File(envs.webRootDownRuntime + "uni-app").exists()) {
+            FileUtils.copyDirectory(new File(envs.webRootDownRuntime + "uni-app"), new File(backupDir, "webroot/runtime/uni-app"), FileTools.createExclusionFilter(uniAppExclusionDir));
         }
 
+        String[] adminExclusionDir = {"node_modules", ".vscode", "dist", ".idea"};
+        if (new File(envs.projectRoot, "admin").exists()) {
+            FileUtils.copyDirectory(new File(envs.projectRoot, "admin"), new File(backupDir, "webroot/runtime/admin"), FileTools.createExclusionFilter(adminExclusionDir));
+        }
+        if (new File(envs.webRootDownRuntime + "admin").exists()) {
+            FileUtils.copyDirectory(new File(envs.webRootDownRuntime + "admin"), new File(backupDir, "webroot/runtime/admin"), FileTools.createExclusionFilter(adminExclusionDir));
+        }
+
+        String[] webExclusionDir = {"node_modules", ".output", "nuxt", "dist", ".nuxt"};
+        if (new File(envs.projectRoot, "web").exists()) {
+            FileUtils.copyDirectory(new File(envs.projectRoot, "web"), new File(backupDir, "webroot/runtime/web"), FileTools.createExclusionFilter(webExclusionDir));
+        }
+        if (new File(envs.webRootDownRuntime + "web").exists()) {
+            FileUtils.copyDirectory(new File(envs.webRootDownRuntime + "web"), new File(backupDir, "webroot/runtime/web"), FileTools.createExclusionFilter(webExclusionDir));
+        }
+
+        File srcDir = null;
+        File destDir = null;
         if (vo.getAddon().equals(GlobalConfig.appKey)) {
-            // 备份java源码
-            String[] addonExclusionDir = {".mvm", ".mvn", "target"};
-            File javaFile = new File(envs.projectRoot + "/niucloud-core");
-            if (javaFile.exists()) FileUtils.copyDirectory(javaFile, new File(backupDir, "niucloud-core"), FileTools.createExclusionFilter(addonExclusionDir));
-            // 备份jar文件
-            FileUtils.copyFile(new File(envs.webRootDownJar + "/web-app-exec.jar"), new File(backupDir, "webroot/jar/web-app-exec.jar"));
+            srcDir = new File(envs.projectRoot);
+            destDir = backupDir;
         } else {
-            // 备份java源码
-            String[] addonExclusionDir = {".mvm", ".mvn", "target"};
-            File javaFile = new File(envs.projectNiucloudAddon + vo.getAddon());
-            if (javaFile.exists()) FileUtils.copyDirectory(javaFile, new File(backupDir, "niucloud-addon/" + vo.getAddon()), FileTools.createExclusionFilter(addonExclusionDir));
+            srcDir = new File(envs.webRootDownAddon + vo.getAddon());
+            destDir = new File(backupDir, "webroot/addon/" + vo.getAddon());
+
             // 备份jar文件
-            File jarFile = new File(envs.webRootDownJar + "/addon/"+ vo.getAddon() +".jar");
-            if (jarFile.exists()) FileUtils.copyFile(jarFile, new File(backupDir, "webroot/jar/addon/"+ vo.getAddon() +".jar"));
-            // 备份webroot下的源码
-            File sourceFile = new File(envs.webRootDownAddon + vo.getAddon());
-            if (sourceFile.exists()) FileUtils.copyDirectory(sourceFile, new File(backupDir, "webroot/addon/" + vo.getAddon()));
+            File jarFile = new File(envs.webRootDownJar, "addon/" + vo.getAddon() + ".jar");
+            if (jarFile.exists()) FileUtils.copyFile(jarFile, new File(backupDir, "webroot/jar/addon/" + vo.getAddon() + ".jar"));
+        }
+
+        JSONArray versionList = vo.getUpgradeContent().getJSONArray("version_list");
+        for (int i = 0; i < versionList.size(); i++) {
+            String versionNo = versionList.getJSONObject(i).getStr("version_no");
+
+            File changeRecord = new File(upgradeDir(vo) + "/download/" + versionNo + ".txt");
+
+            if (changeRecord.exists()) {
+                List<String> change = Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
+                for (String line : change) {
+                    String[] content = line.split(" ");
+                    if (!content[0].equals("+")) {
+                        String path = content[2];
+                        File changeFile = new File(srcDir, path);
+                        if (changeFile.exists()) FileUtils.copyFile(changeFile, new File(destDir, path));
+                    }
+                }
+            }
         }
     }
 
@@ -372,9 +439,10 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * 备份数据库
      * @param vo
      */
-    private void backupSql(UpgradeTaskVo vo) throws Exception {
+    public void backupSql(UpgradeTaskVo vo) throws Exception {
         File backupDir = new File(upgradeDir(vo) + "/backup/sql/");
         FileTools.createDirs(backupDir.getPath());
+        FileUtils.cleanDirectory(backupDir);
 
         String url = env.getProperty("spring.datasource.url");
         String user = env.getProperty("spring.datasource.username");
@@ -394,10 +462,8 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * 合并更新文件
      * @param vo
      */
-    private void coverCode(UpgradeTaskVo vo) throws Exception {
+    public void coverCode(UpgradeTaskVo vo) throws Exception {
         if (WebAppEnvs.get().envType.equals("dev")) {
-            String upgradeVersion = vo.getUpgradeContent().getStr("upgrade_version");
-            File changeRecord = new File(upgradeDir(vo) + "/download/code/" + upgradeVersion + ".txt");
 
             File sourceFile = null;
             File projectFile = null;
@@ -409,29 +475,58 @@ public class UpgradeServiceImpl implements IUpgradeService {
                 projectFile = new File(WebAppEnvs.get().projectNiucloudAddon + vo.getAddon());
             }
 
-            // 移除已删除文件
-            if (changeRecord.exists()) {
-                List<String> change =  Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
-                for (String line : change) {
-                    String[] content = line.split(" ");
-                    if (content[0].equals("-")) {
-                        (new File(sourceFile, content[2])).deleteOnExit();
-                        if (projectFile != null && content[2].startsWith("/java/") && projectFile.exists()) (new File(projectFile, content[2].replaceFirst("^/java/", ""))).deleteOnExit();
+            JSONArray versionList = vo.getUpgradeContent().getJSONArray("version_list");
+            for (int i = 0; i < versionList.size(); i++) {
+                String versionNo = versionList.getJSONObject(i).getStr("version_no");
+
+                File changeRecord = new File(upgradeDir(vo) + "/download/" + versionNo + ".txt");
+                // 移除已删除文件
+                if (changeRecord.exists()) {
+                    List<String> change =  Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
+                    for (String line : change) {
+                        String[] content = line.split(" ");
+                        if (content[0].equals("-")) {
+                            (new File(sourceFile, content[2])).deleteOnExit();
+                            if (projectFile != null && content[2].startsWith("/java/") && projectFile.exists()) (new File(projectFile, content[2].replaceFirst("^/java/", ""))).deleteOnExit();
+                        }
+                    }
+                }
+
+                // 覆盖变更文件
+                File codeDir = new File(upgradeDir(vo) + "/download/" + versionNo);
+                if (vo.getAddon().equals(GlobalConfig.appKey)) {
+                    File[] childFile = codeDir.listFiles();
+                    for (File file : childFile) {
+                        if (file.isDirectory()) {
+                            if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()));
+                        } else {
+                            FileUtils.copyFile(file, new File(sourceFile, file.getName()));
+                        }
+                    }
+                } else {
+                    FileUtils.copyDirectory(codeDir, sourceFile);
+                    if (projectFile != null && projectFile.exists() && new File(codeDir, "java").exists()) {
+                        FileUtils.copyDirectory(new File(codeDir, "java"), projectFile);
                     }
                 }
             }
 
-            // 覆盖变更文件
-            if (vo.getAddon().equals(GlobalConfig.appKey)) {
-                FileUtils.copyDirectory(new File(upgradeDir(vo) + "/download/code/"), sourceFile);
-            } else {
-                FileUtils.copyDirectory(new File(upgradeDir(vo) + "/download/code/"), sourceFile);
-                if (projectFile != null && projectFile.exists() && new File(upgradeDir(vo) + "/download/code/java/").exists()) {
-                    FileUtils.copyDirectory(new File(upgradeDir(vo) + "/download/code/java/"), projectFile);
-                }
-            }
+            vo.setStatus("restarting");
+            setUpgradeTaskCache(vo);
         } else {
-            PipeNameUtils.noticeBootRestart(GlobalConfig.applicationName, vo.getAddon().equals(GlobalConfig.appKey) ? "core" : vo.getAddon());
+            vo.setStep("coverCode");
+            vo.setStatus("restarting");
+            setUpgradeTaskCache(vo);
+
+            String dir = vo.getUpgrade().get("data[version]") + "-" + vo.getUpgradeContent().getStr("upgrade_version");
+
+            List<String> versions = new LinkedList<>();
+            JSONArray versionList = vo.getUpgradeContent().getJSONArray("version_list");
+            for (int i = 0; i < versionList.size(); i++) {
+                versions.add(versionList.getJSONObject(i).getStr("version_no"));
+            }
+
+            PipeNameUtils.noticeBootRestartByUpgrade(GlobalConfig.applicationName, vo.getAddon(), dir, String.join("-", versions));
             Thread.sleep(3000);
         }
     }
@@ -440,7 +535,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * 处理升级方法
      * @param vo
      */
-    private void handleUpgrade(UpgradeTaskVo vo) {
+    public void handleUpgrade(UpgradeTaskVo vo) {
         JSONArray versionList = vo.getUpgradeContent().getJSONArray("version_list");
         String addon = vo.getAddon().equals(GlobalConfig.appKey) ? "core" : vo.getAddon();
         for (int i = 0; i < versionList.size(); i++) {
@@ -457,17 +552,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
             }
 
             try {
-                try {
-                    String className = "com.niu."+ addon +".upgrade.V" + versionNo.replaceAll(".", "") + ".Upgrade";
-                    Class<?> clazz = Class.forName(className);
-                    try {
-                        Object instance = clazz.getDeclaredConstructor().newInstance();
-                        java.lang.reflect.Method method = clazz.getMethod("handle");
-                        method.invoke(instance);
-                    } catch (NoSuchMethodException e) {
-                    }
-                } catch (ClassNotFoundException e) {
-                }
+                UpgradeProviderFactory.handle(addon, versionNo);
             } catch (Exception e) {
                 throw new CommonException(versionNo + "版本升级方法执行出错，错误原因：" + e.getMessage());
             }
@@ -478,7 +563,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * 处理vue
      * @param vo
      */
-    private void handleVue(UpgradeTaskVo vo) throws Exception {
+    public void handleVue(UpgradeTaskVo vo) throws Exception {
         WebAppEnvs envs = WebAppEnvs.get();
 
         if (!vo.getAddon().equals(GlobalConfig.appKey)) {
@@ -516,7 +601,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * 刷新菜单
      * @param vo
      */
-    private void refreshMenu(UpgradeTaskVo vo) {
+    public void refreshMenu(UpgradeTaskVo vo) {
         if (vo.getAddon().equals(GlobalConfig.appKey)) {
             coreMenuService.refreshAddonMenu("core");
         } else {
@@ -528,7 +613,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      * 安装计划任务
      * @param vo
      */
-    private void installSchedule(UpgradeTaskVo vo) {
+    public void installSchedule(UpgradeTaskVo vo) {
         if (vo.getAddon().equals(GlobalConfig.appKey)) {
             coreScheduleService.installSystemSchedule();
         } else {
@@ -536,15 +621,162 @@ public class UpgradeServiceImpl implements IUpgradeService {
         }
     }
 
-    private void upgradeComplete(UpgradeTaskVo vo) {
+    public void upgradeComplete(UpgradeTaskVo vo) {
         vo.setStatus("success");
         if (!vo.getAddon().equals(GlobalConfig.appKey)) {
             Addon addon = JSONUtil.toBean(coreAddonService.getAddonConfig(vo.getAddon()), Addon.class);
             coreAddonService.set(addon);
         }
         File backupDir = new File(upgradeDir(vo));
-        FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, "log.json"));
+        FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, DateUtil.now() + ".log"));
 
         upgradeService.clearUpgradeTask(5);
+    }
+
+    /**
+     * 升级异常处理
+     * @param vo
+     */
+    public void upgradeErrorHandle(UpgradeTaskVo vo) {
+        File backupDir = new File(upgradeDir(vo));
+        FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, DateUtil.now() + ".log"));
+
+        Map<String, UpgradeTaskVo.Step> steps = new LinkedHashMap<>();
+        steps.put("rollback", new UpgradeTaskVo.Step("rollback", "升级失败开始回滚"));
+
+        if (vo.getExecuted().contains("coverCode")) {
+            steps.put("restoreCover", new UpgradeTaskVo.Step("restoreCover", "恢复变更文件"));
+        }
+        if (vo.getExecuted().contains("handleUpgrade")) {
+            steps.put("restoreDatabase", new UpgradeTaskVo.Step("restoreDatabase", "恢复数据库"));
+        }
+        steps.put("rollbackComplete", new UpgradeTaskVo.Step("rollbackComplete", "回滚完成"));
+
+        vo.setSteps(steps);
+        vo.setStep("rollback");
+        vo.getLog().add(steps.get("rollback").getTitle());
+        vo.getExecuted().add("rollback");
+
+        setUpgradeTaskCache(vo);
+    }
+
+    /**
+     * 恢复文件备份
+     */
+    public void restoreCover(UpgradeTaskVo vo) {
+        if (WebAppEnvs.get().envType.equals("dev")) {
+            try {
+                File backupDir = new File(upgradeDir(vo) + "/backup/code/");
+                WebAppEnvs envs = WebAppEnvs.get();
+
+                File rootDir = null;
+                if (vo.getAddon().equals(GlobalConfig.appKey)) {
+                    rootDir = new File(envs.projectRoot);
+                } else {
+                    rootDir = new File(envs.webRootDownAddon + vo.getAddon());
+                }
+                FileUtils.copyDirectory(backupDir, new File(envs.projectRoot));
+
+                JSONArray versionList = vo.getUpgradeContent().getJSONArray("version_list");
+                for (int i = 0; i < versionList.size(); i++) {
+                    String versionNo = versionList.getJSONObject(i).getStr("version_no");
+                    File changeRecord = new File(upgradeDir(vo) + "/download/" + versionNo + ".txt");
+
+                    // 移除更新新增的文件
+                    if (changeRecord.exists()) {
+                        List<String> change = Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
+                        for (String line : change) {
+                            String[] content = line.split(" ");
+                            if (content[0].equals("+")) {
+                                String path = content[2];
+                                File changeFile = new File(rootDir, path);
+                                if (changeFile.exists()) changeFile.delete();
+                            }
+                        }
+                    }
+                }
+
+                if (!vo.getAddon().equals(GlobalConfig.appKey)) {
+                    File sourceDir = new File(envs.webRootDownAddon + vo.getAddon() + "/java");
+                    File projectDir = new File(envs.projectNiucloudAddon + vo.getAddon());
+                    if (sourceDir.exists() && projectDir.exists()) FileUtils.copyDirectory(sourceDir, projectDir);
+                }
+            } catch (Exception e) {
+                vo.getError().add("变更文件恢复失败，错误信息：" + e.getMessage());
+            }
+        } else {
+            try {
+                vo.setStep("restoreCover");
+                vo.setStatus("restarting");
+                setUpgradeTaskCache(vo);
+
+                String dir = vo.getUpgrade().get("data[version]") + "-" + vo.getUpgradeContent().getStr("upgrade_version");
+                PipeNameUtils.noticeBootRestartByUpgradeRollback(GlobalConfig.applicationName, vo.getAddon(), dir);
+                Thread.sleep(3000);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    /**
+     * 恢复数据库
+     */
+    public void restoreDatabase(UpgradeTaskVo vo) {
+        try {
+            File backupDir = new File(upgradeDir(vo), "/backup/sql/");
+            File[] files = backupDir.listFiles();
+            Arrays.sort(files);
+
+            for (File file : files) {
+                if (file.isFile()) {
+                    SQLScriptRunnerTools.execScript(file);
+                }
+            }
+        } catch (Exception e) {
+            vo.getError().add("数据库回滚失败，错误信息：" + e.getMessage());
+            String dir = "webboot/upgrade/" + vo.getAddon() + "/" + vo.getVersion() + "-" + vo.getUpgradeVersion() + "/backup/sql";
+            vo.getError().add("数据库回滚失败请找到" + dir + "目录下的数据库备份文件手动进行恢复");
+        }
+    }
+
+    /**
+     * 回滚完成
+     * @param vo
+     */
+    public void rollbackComplete(UpgradeTaskVo vo) {
+        vo.setStatus("rollback");
+        File backupDir = new File(upgradeDir(vo));
+        FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, DateUtil.now() + ".log"));
+        upgradeService.clearUpgradeTask(5);
+    }
+
+    public Object dynamicMethodCall(String methodName, Object... args) {
+        try {
+            // 获取当前类的 Class 对象
+            Class<?> clazz = this.getClass();
+            // 获取方法对象
+            java.lang.reflect.Method method = clazz.getMethod(methodName, extractParameterTypes(args));
+            // 调用方法
+            Object result = method.invoke(this, args);
+            if (method.getReturnType() == void.class) {
+                return null;
+            } else {
+                return result;
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private Class<?>[] extractParameterTypes(Object[] args) {
+        if (args == null || args.length == 0) {
+            return new Class<?>[0];
+        }
+        Class<?>[] parameterTypes = new Class<?>[args.length];
+        for (int i = 0; i < args.length; i++) {
+            parameterTypes[i] = args[i].getClass();
+        }
+        return parameterTypes;
     }
 }

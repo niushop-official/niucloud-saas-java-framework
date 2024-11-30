@@ -16,6 +16,7 @@ import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberAccountLog;
+import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.mapper.member.MemberAccountLogMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberAccountService;
@@ -46,9 +47,9 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.select("id, member_id, site_id, account_type, account_data, from_type, related_id, create_time, memo");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
-        if ("income".equals(param.getAccountType())) {
+        if ("income".equals(param.getAmountType())) {
             queryWrapper.gt("account_data", 0);
-        } else if ("disburse".equals(param.getAccountType())) {
+        } else if ("disburse".equals(param.getAmountType())) {
             queryWrapper.lt("account_data", 0);
         }
         if (StrUtil.isNotEmpty(param.getAccountType())) {
@@ -122,9 +123,8 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.select("id, member_id, site_id, account_type, account_data, from_type, related_id, create_time, memo");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
-        if (StrUtil.isNotEmpty(param.getAccountType())) {
-            queryWrapper.eq("account_type", param.getAccountType());
-        }
+        queryWrapper.in("account_type", new String[]{ AccountTypeEnum.BALANCE.getType(), AccountTypeEnum.MONEY.getType() });
+
         if (StrUtil.isNotEmpty(param.getFromType())) {
             queryWrapper.eq("from_type", param.getFromType());
         }
@@ -139,6 +139,13 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         }
         if (StrUtil.isNotEmpty(param.getKeyword())) {
             queryWrapper.eq("keyword", param.getKeyword());
+        }
+        if ("income".equals(param.getTradeType())) {
+            queryWrapper.gt("account_data", 0);
+        } else if ("disburse".equals(param.getTradeType())) {
+            queryWrapper.lt("account_data", 0);
+        } else if ("cash_out".equals(param.getTradeType())) {
+            queryWrapper.eq("from_type", "cash_out");
         }
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
@@ -174,6 +181,9 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
             queryWrapper.eq("from_type", "cash_out");
         } else {
             queryWrapper.in("account_type", "balance", "money");
+        }
+        if (ObjectUtil.isNotEmpty(param.getCreateTime())) {
+            QueryMapperUtils.buildByTime(queryWrapper, "create_time", param.getCreateTime());
         }
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
@@ -298,14 +308,17 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         if (member.getPointGet() != null) {
             accountPointCountVo.setPointGet(member.getPointGet());
         }
-        Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("site_id", param.siteId());
-        paramsMap.put("member_id", param.memberId());
-        paramsMap.put("account_type", "point");
-        paramsMap.put("account_data", 0);
-        Double use = memberAccountLogMapper.sumAccountData(paramsMap);
-        if (use != null) {
-            accountPointCountVo.setUse(Math.abs(use));
+
+        MemberAccountLog accountLog = memberAccountLogMapper.selectOne(new QueryWrapper<MemberAccountLog>()
+                .eq("site_id", param.siteId())
+                .eq("member_id", param.memberId())
+                .eq("account_type", AccountTypeEnum.POINT.getType())
+                .lt("account_data", 0)
+                        .select("SUM(account_data) AS account_data")
+                .groupBy("member_id")
+        );
+        if (accountLog != null) {
+            accountPointCountVo.setUse(Math.abs(accountLog.getAccountData().doubleValue()));
         }
         return accountPointCountVo;
     }

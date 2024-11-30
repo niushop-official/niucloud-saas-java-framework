@@ -29,8 +29,7 @@ public class WechatQrcodeListener extends GetQrcodeOfChannelDefiner {
 
                 if (event.getOutfile()) {
                     String filePath = event.getFilePath();
-                    QRCodeUtils.encode(url, WebAppEnvs.get().webRootDownResource + "upload/" + filePath);
-                    result.setPath(filePath);
+                    result.setPath(event.getFilePath() + "/" + QRCodeUtils.encode(url, WebAppEnvs.get().webRootDownResource + filePath));
                 } else {
                     ByteArrayOutputStream output = new ByteArrayOutputStream();
                     QRCodeUtils.encode(url, output);

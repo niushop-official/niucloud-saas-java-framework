@@ -180,7 +180,7 @@ public class NiucloudUtils {
      * niucloud云服务器
      */
     public static class Cloud {
-        private String baseUrl = "http://8.152.194.94:8000/";
+        private String baseUrl = "http://java.oss.niucloud.com/";
 
         private String url;
 

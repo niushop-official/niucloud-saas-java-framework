@@ -5,10 +5,8 @@ import com.niu.core.common.component.context.listener.CallbackListener;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 媒介类（事件服务者）
@@ -48,31 +46,32 @@ public final class CallbackMediator {
     /**
      * @param callbackClass
      */
-    private void initCallback(Class callbackClass) {
+    private void initCallback(Class<?> callbackClass) {
         try {
             Object subscriberObject = callbackClass.newInstance();
             if (subscriberObject instanceof CallbackListener) {
-                Method method = getCallbackMethod(callbackClass);
-                Class businessThemeClass = getCallbackType(method);
-                if (businessThemeClass == null) {
-                    return;
-                }
-                Object themeObject = themeObjectMap.get(businessThemeClass);
-                if (themeObject == null) {
-                    themeObject = businessThemeClass.newInstance();
-                    if (themeObject instanceof Event) {
-                        themeObjectMap.put(businessThemeClass, (Event) themeObject);
+                for (Method method : getCallbackMethod(callbackClass)) {
+                    Class<?> businessThemeClass = getCallbackType(method);
+                    if (businessThemeClass == null) {
+                        return;
                     }
+                    Object themeObject = themeObjectMap.get(businessThemeClass);
+                    if (themeObject == null) {
+                        themeObject = businessThemeClass.newInstance();
+                        if (themeObject instanceof Event) {
+                            themeObjectMap.put(businessThemeClass, (Event) themeObject);
+                        }
+                    }
+                    List<CallbackListener> callbackListenerList = callbackListenerMap.get(businessThemeClass);
+                    if (callbackListenerList == null) {
+                        callbackListenerList = new ArrayList<>();
+                    }
+                    callbackListenerList.add((CallbackListener<?>) subscriberObject);
+                    callbackListenerMap.put(businessThemeClass, callbackListenerList);
                 }
-                List<CallbackListener> callbackListenerList = callbackListenerMap.get(businessThemeClass);
-                if (callbackListenerList == null) {
-                    callbackListenerList = new ArrayList<>();
-                }
-                callbackListenerList.add((CallbackListener) subscriberObject);
-                callbackListenerMap.put(businessThemeClass, callbackListenerList);
             }
         } catch (Exception e) {
-            // ignore
+            throw new RuntimeException(e);
         }
     }
 
@@ -80,9 +79,9 @@ public final class CallbackMediator {
      * @param method
      * @return
      */
-    public Class getCallbackType(Method method) {
+    public Class<?> getCallbackType(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes != null && parameterTypes.length > 0) {
+        if (parameterTypes.length > 0) {
             return parameterTypes[0];
         }
         return null;
@@ -92,16 +91,11 @@ public final class CallbackMediator {
      * @param clazz
      * @return
      */
-    public Method getCallbackMethod(Class clazz) {
-        Method[] methods = clazz.getMethods();
-        Method targetMethod = null;
-        for (Method method : methods) {
-            if (method.getName().equals("handleCallback")) {
-                targetMethod = method;
-                break;
-            }
-        }
-        return targetMethod;
+    public List<Method> getCallbackMethod(Class<?> clazz) {
+        return Arrays.stream(clazz.getMethods())
+                .filter(method -> method.getName().equals("handleCallback"))
+                .filter(method -> method.getParameters().length == 1)
+                .collect(Collectors.toList());
     }
 
     /**

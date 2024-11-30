@@ -153,6 +153,7 @@ public class BootConfig {
         BootLogUtils.log("manager.app-name -> " + applicationName());
         BootLogUtils.log("manager.jar-path -> " + this.getJarDir());
         BootLogUtils.log("manager.jar-name -> " + jarName());
+        BootLogUtils.log("manager.root-path -> " + this.getRootPath());
 //        BootLogUtils.log("monitor.time-to-idle-seconds -> " + timeToIdleSeconds());
 //        BootLogUtils.log("manager.failed-restart-count -> " + failedRestartCount());
 //        BootLogUtils.log("manager.service-starting-hook-flag -> " + serviceStartingHookFlag());
@@ -246,6 +247,21 @@ public class BootConfig {
         } else {
             return this.getWorkDir() + "/";
         }
+    }
+
+    public String getRootPath() {
+        String runPath = getRunPath(BootConfig.class);
+        if (runPath.startsWith("file:\\")) {
+            runPath = runPath.substring(6, runPath.length());
+        }
+        if (runPath.startsWith("file:")) {
+            runPath = runPath.substring(5, runPath.length());
+        }
+        String webroot = runPath;
+        if (webroot.contains("webroot")) {
+            webroot = webroot.substring(0, webroot.indexOf("webroot"));
+        }
+        return webroot;
     }
 
     /**

@@ -13,7 +13,7 @@ export function getUpgradeContent(addon: string = '') {
  * 获取升级任务
  */
 export function getUpgradeTask() {
-    return request.get('upgrade/task')
+    return request.get('upgrade/task', { showErrorMessage: false })
 }
 
 /**
@@ -28,7 +28,7 @@ export function upgradeAddon(addon: string = '') {
  * 执行升级
  */
 export function executeUpgrade() {
-    return request.post('upgrade/execute', {})
+    return request.post('upgrade/execute', {}, { showErrorMessage: false })
 }
 
 /**

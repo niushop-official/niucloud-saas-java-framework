@@ -1,1 +1,0 @@
-import{bh as t}from"./index-b7ff5db3.js";function r(r){return t.get("shop_giftcard/giftcard",r)}function i(r){return t.get(`shop_giftcard/giftcard/${r}`)}function n(){return t.get("shop_giftcard/config")}export{i as a,n as b,r as g};

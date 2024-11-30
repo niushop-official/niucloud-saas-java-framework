@@ -354,6 +354,13 @@
             <artifactId>velocity-engine-core</artifactId>
             <version>2.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.yly.print_sdk_library</groupId>
+            <artifactId>yly</artifactId>
+            <scope>system</scope>
+            <version>2.2.2</version>
+            <systemPath>${pom.basedir}/src/main/resources/core/lib/yly_sdk_2.2.2.jar</systemPath>
+        </dependency>
     </dependencies>
 
 

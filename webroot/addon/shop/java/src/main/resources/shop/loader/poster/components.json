@@ -50,7 +50,7 @@
 			},
 			"GoodsMarketPrice": {
 				"title": "划线价",
-				"type": "text",
+				"type": "strikethrough",
 				"icon": "iconfont iconhuajiaqian",
 				"path": "goods-market-price",
 				"uses": 1,

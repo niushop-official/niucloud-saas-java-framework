@@ -99,19 +99,10 @@ public interface IGenerateService {
     List<TableFiledVo> getTableColumn(String tableName);
 
     /**
-     * 获取模型
-     * @return
-     */
-    List<String> getModels();
-
-    /**
      * 获取表字段
-     * @param model
+     * @param mapper
      * @return
      */
-    TableFiledVo getModelColumn(String model);
-
-
-
+    Map<String, Map<String, Object>> getTableColumnByMapper(String mapper);
 
 }

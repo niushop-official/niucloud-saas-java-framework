@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.addon.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -270,35 +271,11 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
         try {
             FileUtils.copyDirectory(new File(this.addonPath), new File(tempDir));
 
-            Path sourceDir = Paths.get(WebAppEnvs.get().webRootDownResource + "temp/" + this.addon + "/");
-            Path zipFile = Paths.get( WebAppEnvs.get().webRootDownResource + "temp/" + this.addon + ".zip");
+            String sourceDir = WebAppEnvs.get().webRootDownResource + "temp/" + this.addon;
+            String zipFile =  WebAppEnvs.get().webRootDownResource + "temp/" + this.addon + ".zip";
 
-            ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(zipFile));
-            Files.walk(sourceDir)
-                .forEach(path -> {
-                    try {
-                        if (!Files.isDirectory(path)) {
-                            Path source = path;
-                            Path target = sourceDir.relativize(source);
-                            ZipEntry zipEntry = new ZipEntry(target.toString());
-                            zs.putNextEntry(zipEntry);
-
-                            try (InputStream is = Files.newInputStream(source)) {
-                                byte[] buffer = new byte[1024];
-                                int length;
-                                while ((length = is.read(buffer)) > 0) {
-                                    zs.write(buffer, 0, length);
-                                }
-                            }
-
-                            zs.closeEntry();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-            FileUtils.deleteDirectory(new File(tempDir));
+            ZipUtil.zip(sourceDir, zipFile);
+            FileUtils.deleteDirectory(new File(sourceDir));
         } catch (IOException e) {
             e.printStackTrace();
         }

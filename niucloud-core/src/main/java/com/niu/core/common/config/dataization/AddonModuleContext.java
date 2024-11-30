@@ -458,4 +458,9 @@ public final class AddonModuleContext {
         return addonModuleMap.keySet();
     }
 
+    /**
+     *
+     * @return
+     */
+    public static Map<String, Class<?>> getAddonModuleMap() { return addonModuleMap; }
 }

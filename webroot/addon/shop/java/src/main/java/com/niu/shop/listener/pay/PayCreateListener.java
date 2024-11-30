@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * 一对多的事件监听，且有返回值
+ * 获取支付数据
  */
 @EventCallback("shop")
 @Component

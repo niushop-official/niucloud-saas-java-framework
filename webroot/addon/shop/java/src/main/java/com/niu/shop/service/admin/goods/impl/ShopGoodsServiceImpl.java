@@ -320,6 +320,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
                 sku.setSkuImage(model.getGoodsCover());
                 sku.setSalePrice(editParam.getPrice());
                 sku.setIsDefault(1);
+                sku.setSkuSpecFormat("");
                 skuData.add(sku);
             } else {
                 ShopGoodsSku sku = skuList.get(0);

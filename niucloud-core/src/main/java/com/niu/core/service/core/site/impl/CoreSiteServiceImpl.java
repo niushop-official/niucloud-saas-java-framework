@@ -232,4 +232,11 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
         );
     }
 
+    /**
+     * 清除站点缓存
+     */
+    @Override
+    public void clearSiteCache() {
+        cached.tag(cacheTagName).clear();
+    }
 }

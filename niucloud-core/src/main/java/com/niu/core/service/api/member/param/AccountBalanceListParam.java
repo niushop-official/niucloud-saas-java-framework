@@ -10,6 +10,6 @@ public class AccountBalanceListParam implements ApiBaseParam {
 
     private String tradeType;
 
-    private String createTime;
+    private String[] createTime;
 
 }

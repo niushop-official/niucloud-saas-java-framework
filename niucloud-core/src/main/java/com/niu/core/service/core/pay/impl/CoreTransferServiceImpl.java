@@ -139,6 +139,7 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
         payTransferMapper.updateById(transfer);
 
         TransferSuccessEvent event = new TransferSuccessEvent();
+        event.setTransfer(transfer);
         event.setSiteId(transfer.getSiteId());
         event.addAppSign("core");
         event.setName("TransferSuccessEvent");

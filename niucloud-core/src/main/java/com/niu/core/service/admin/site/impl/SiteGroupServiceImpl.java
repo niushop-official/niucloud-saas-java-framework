@@ -29,6 +29,7 @@ import com.niu.core.service.admin.site.ISiteGroupService;
 import com.niu.core.service.admin.site.vo.SiteGroupListVo;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
+import com.niu.core.service.core.site.ICoreSiteService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,9 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
     SysUserRoleMapper sysUserRoleMapper;
 
     ISiteService siteService;
+
+    @Resource
+    ICoreSiteService coreSiteService;
 
     @Resource
     private void setSiteService(@Lazy ISiteService siteService) {
@@ -207,6 +211,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
                 for (Site site : siteList) {
                     siteService.siteAddonChange(site, model);
                 }
+                coreSiteService.clearSiteCache();
             }
         }
     }

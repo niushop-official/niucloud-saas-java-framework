@@ -1,10 +1,9 @@
 <el-form-item :label="t('${lowerColumnName}')" prop="${column.columnName}">
     <el-checkbox-group v-model="formData.${column.columnName}" :placeholder="t('${lowerColumnName}Placeholder')">
-        <el-checkbox
-            v-for="(item, index) in {DICT_TYPE}"
-                :key="index"
-                :label="item.value">
-           {{ item.name }}
-        </el-checkbox>
+        #if ($column.columnType != "String")
+        <el-checkbox v-for="(item, index) in $strUtil.toCamelCase($column.dictType)Dict" :key="index" :label="isNaN(parseInt(item.value)) ? item.value : parseInt(item.value)">{{ item.name }}</el-checkbox>
+        #else
+        <el-checkbox v-for="(item, index) in $strUtil.toCamelCase($column.dictType)Dict" :key="index" :label="item.value">{{ item.name }}</el-checkbox>
+        #end
     </el-checkbox-group>
 </el-form-item>

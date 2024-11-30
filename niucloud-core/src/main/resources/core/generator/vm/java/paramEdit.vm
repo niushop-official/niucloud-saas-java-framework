@@ -5,6 +5,12 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+#if($isBigDecimal == 1)
+import java.math.BigDecimal;
+#end
+#if($isDate == 1)
+import java.util.Date;
+#end
 
 /**
  * ${tableContent}参数

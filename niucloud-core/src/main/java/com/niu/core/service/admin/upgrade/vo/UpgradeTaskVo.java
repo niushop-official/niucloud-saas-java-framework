@@ -5,15 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 public class UpgradeTaskVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private String envType;
 
     private String upgradeTime;
 
@@ -35,11 +34,16 @@ public class UpgradeTaskVo implements Serializable {
 
     private String status;
 
-    private Map<String, Step> steps = new HashMap<>();
+    private List<String> error = new LinkedList<>();
 
+    private String version;
+
+    private String upgradeVersion;
+
+    private Map<String, Step> steps = new LinkedHashMap<>();
 
     public UpgradeTaskVo() {
-        this.steps = new HashMap<>();
+        this.steps = new LinkedHashMap<>();
         steps.put("requestUpgrade", new Step("requestUpgrade", "请求升级"));
         steps.put("downloadFile", new Step("downloadFile", "下载更新文件"));
         steps.put("backupCode", new Step("backupCode", "备份源码"));

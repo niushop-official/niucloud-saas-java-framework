@@ -11,7 +11,7 @@ import com.niu.core.service.admin.diy.IDiyService;
 import com.niu.core.service.admin.diy.param.SetDiyDataParam;
 import org.springframework.stereotype.Component;
 
-@EventListen("code")
+@EventListen("core")
 @Component
 public class SiteAddAfterListener extends AbstractListener {
 

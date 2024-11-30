@@ -4,8 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.site.Site;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
@@ -38,6 +38,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取网站信息
+     *
      * @param siteId
      * @return
      */
@@ -53,6 +54,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置网站信息
+     *
      * @param siteId
      * @param configParam
      */
@@ -71,6 +73,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取服务信息
+     *
      * @param siteId
      * @return
      */
@@ -82,6 +85,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取版权信息
+     *
      * @param siteId
      * @return
      */
@@ -93,6 +97,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置版权
+     *
      * @param siteId
      * @param configParam
      */
@@ -104,6 +109,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取地图配置
+     *
      * @param siteId
      * @return
      */
@@ -115,6 +121,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置地图配置
+     *
      * @param siteId
      * @param configParam
      */
@@ -126,6 +133,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取开发者key
+     *
      * @param siteId
      * @return
      */
@@ -137,6 +145,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置开发者key
+     *
      * @param configParam
      */
     @Override
@@ -147,6 +156,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取布局风格
+     *
      * @return
      */
     @Override
@@ -157,6 +167,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置布局风格
+     *
      * @param configParam
      */
     @Override
@@ -168,6 +179,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取色调设置
+     *
      * @return
      */
     @Override
@@ -178,6 +190,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置色调
+     *
      * @param configParam
      */
     @Override
@@ -189,6 +202,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 获取注册与登录设置
+     *
      * @param siteId
      * @return
      */
@@ -200,6 +214,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
     /**
      * 设置注册与登录设置
+     *
      * @param siteId
      * @param configParam
      */
@@ -219,14 +234,13 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
     public SceneDomainVo getSceneDomain(Integer siteId) {
         HttpServletRequest request = RequestUtils.handler();
 
-        String wapDomain= ObjectUtil.isNotEmpty(GlobalConfig.wapDomain) ? GlobalConfig.wapDomain.replace("#/$#", "") : request.getScheme() + "://" + RequestUtils.getRequestDomain();
-        String webDomain= ObjectUtil.isNotEmpty(GlobalConfig.webDomain) ? GlobalConfig.webDomain.replace("#/$#", "") : request.getScheme() + "://" + RequestUtils.getRequestDomain();
+        String wapDomain = ObjectUtil.isNotEmpty(GlobalConfig.wapDomain) ? GlobalConfig.wapDomain.replace("#/$#", "") : request.getScheme() + "://" + RequestUtils.getRequestDomain();
 
-        SiteInfoVo siteInfoVo=coreSiteService.getSiteCache(siteId);
+        SiteInfoVo siteInfoVo = coreSiteService.getSiteCache(siteId);
         String siteDomain = siteInfoVo.getSiteDomain();
         if (!siteDomain.isEmpty()) siteDomain = request.getScheme() + "://" + siteDomain;
 
-        SceneDomainVo sceneDomainVo=new SceneDomainVo();
+        SceneDomainVo sceneDomainVo = new SceneDomainVo();
         sceneDomainVo.setWapDomain(wapDomain);
         sceneDomainVo.setWapUrl(ObjectUtil.isNotEmpty(siteDomain) ? siteDomain + "/wap" : wapDomain + "/wap/" + siteId);
         sceneDomainVo.setWebUrl(ObjectUtil.isNotEmpty(siteDomain) ? siteDomain + "/web" : wapDomain + "/web/" + siteId);

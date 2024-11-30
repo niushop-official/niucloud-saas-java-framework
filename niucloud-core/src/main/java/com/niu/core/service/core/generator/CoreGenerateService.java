@@ -5,20 +5,24 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.entity.generator.GenerateColumn;
 import com.niu.core.entity.generator.GenerateTable;
-import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.service.core.generator.vo.CoreGenerateColumnVo;
 import com.niu.core.service.core.generator.vo.CoreGenerateTemplateVo;
+import com.niu.core.service.core.generator.vo.MapperInfoVo;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.springframework.validation.annotation.Validated;
 
 import java.io.StringWriter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -44,9 +48,10 @@ public class CoreGenerateService {
 
     /**
      * 加载velocity容器
+     *
      * @return VelocityContext
      */
-    public static VelocityContext velocityContext (GenerateTable table, List<GenerateColumn> columns) {
+    public static VelocityContext velocityContext(GenerateTable table, List<GenerateColumn> columns) {
         String lowerClassName = StrUtil.toCamelCase(table.getClassName());
         String className = StrUtil.upperFirst(lowerClassName);
         String addonName = table.getAddonName().equals("") ? "core" : table.getAddonName();
@@ -63,14 +68,20 @@ public class CoreGenerateService {
         velocityContext.put("className", className);
         velocityContext.put("lowerClassName", lowerClassName);
         velocityContext.put("addonName", addonName);
-        velocityContext.put("orderType",  table.getOrderType());
+        velocityContext.put("orderType", table.getOrderType());
         velocityContext.put("editType", table.getEditType());
         velocityContext.put("adminPath", table.getAddonName().equals("") ? "@/app" : "@/addon/" + table.getAddonName());
         velocityContext.put("primaryField", "id");
         velocityContext.put("sortColumn", "");
+        velocityContext.put("strUtil", StrUtil.class);
+        velocityContext.put("generateService", CoreGenerateService.class);
+        List<String> dictList = new LinkedList<>();
+        Map<String, Map> relateList = new HashMap<>();
         List<CoreGenerateColumnVo> list = new ArrayList<>();
         Integer isSiteId = 0;
-        for(GenerateColumn column : columns) {
+        Integer isBigDecimal = 0;
+        Integer isDate = 0;
+        for (GenerateColumn column : columns) {
             CoreGenerateColumnVo vo = new CoreGenerateColumnVo();
             if (column.getIsPk() == 1) {
                 velocityContext.put("primaryField", column.getColumnName());
@@ -79,19 +90,55 @@ public class CoreGenerateService {
                 velocityContext.put("sortColumn", column.getColumnName());
             }
             //检测是否存在siteId
-            if(column.getColumnName().equals("site_id")){
+            if (column.getColumnName().equals("site_id")) {
                 isSiteId = 1;
+            }
+            if (column.getColumnType().equals("BigDecimal")) {
+                isBigDecimal = 1;
+            }
+            if (column.getColumnType().equals("Date")) {
+                isDate = 1;
             }
             BeanUtil.copyProperties(column, vo);
             vo.setLowerColumnFiledName(StrUtil.toCamelCase(column.getColumnName()));
             vo.setColumnFiledName(StrUtil.upperFirst(StrUtil.toCamelCase(column.getColumnName())));
             list.add(vo);
+            // 数据字典
+            if (!column.getDictType().isEmpty() && !dictList.contains(column.getDictType())) {
+                dictList.add(column.getDictType());
+            }
+            // 远程下拉
+            if (!column.getModel().isEmpty()) {
+                Map<String, Object> relateItem = null;
+                MapperInfoVo mapperInfo = getMapperInfo(column.getModel());
+                if (relateList.get(mapperInfo.getTableName()) == null) {
+                    relateItem = new HashMap<>();
+                    relateItem.put("mapper_info", mapperInfo);
+                    List<String> field = new LinkedList<>();
+                    field.add(column.getLabelKey());
+                    field.add(column.getValueKey());
+                    relateItem.put("field", field);
+                } else {
+                    relateItem = relateList.get(mapperInfo.getTableName());
+                    List<String> field = (List<String>) relateItem.get("field");
+                    if (!field.contains(column.getLabelKey())) field.add(column.getLabelKey());
+                    if (!field.contains(column.getValueKey())) field.add(column.getValueKey());
+                    relateItem.put("field", field);
+                }
+                relateList.put(mapperInfo.getTableName(), relateItem);
+            }
         }
-        if(isSiteId == 1){
+        if (isSiteId == 1) {
             velocityContext.put("isSiteId", 1);
-        }else{
+        } else {
             velocityContext.put("isSiteId", 0);
         }
+
+        velocityContext.put("isBigDecimal", isBigDecimal);
+        velocityContext.put("isDate", isDate);
+
+        velocityContext.put("dictList", dictList);
+        velocityContext.put("relateList", relateList);
 
         velocityContext.put("columns", list);
 
@@ -112,6 +159,7 @@ public class CoreGenerateService {
 
     /**
      * 生成搜索表单
+     *
      * @param velocityContext
      * @param columns
      * @return
@@ -131,6 +179,12 @@ public class CoreGenerateService {
             String template = column.getViewType();
             if (column.getViewType().equals("radio") || column.getViewType().equals("select") || column.getViewType().equals("checkbox")) {
                 template = "select";
+                if (!column.getDictType().isEmpty()) {
+                    template = "select2";
+                }
+                if (!column.getModel().isEmpty()) {
+                    template = "select3";
+                }
             }
             if (column.getQueryType().equals("BETWEEN")) {
                 template = column.getViewType().equals("datetime") ? "datetime" : "rangeInput";
@@ -176,6 +230,12 @@ public class CoreGenerateService {
             if (column.getViewType().equals("datetime")) {
                 template = "datetime";
             }
+            if (!column.getDictType().isEmpty()) {
+                template = "dictcolumn";
+            }
+            if (!column.getModel().isEmpty()) {
+                template = "relatecolumn";
+            }
 
             StringWriter sw = new StringWriter();
             Template tpl = Velocity.getTemplate("core/generator/vm/admin/table/" + template + ".vm", "UTF-8");
@@ -188,6 +248,7 @@ public class CoreGenerateService {
 
     /**
      * 生成编辑表单
+     *
      * @param velocityContext
      * @param columns
      * @return
@@ -200,7 +261,7 @@ public class CoreGenerateService {
             if (column.getIsPk().equals(1)) {
                 param.add(column.getColumnName() + ": 0");
             }
-            if (column.getIsInsert().equals(0) || column.getIsUpdate().equals(0) || column.getColumnName().equals("site_id")) {
+            if (column.getIsPk().equals(1) || column.getIsInsert().equals(0) || column.getIsUpdate().equals(0) || column.getColumnName().equals("site_id")) {
                 continue;
             }
 
@@ -209,6 +270,12 @@ public class CoreGenerateService {
 
             String template = column.getViewType();
             if (column.getViewType().equals("radio") || column.getViewType().equals("select") || column.getViewType().equals("checkbox")) {
+                if (!column.getDictType().isEmpty()) {
+                    template = column.getViewType() + "2";
+                }
+                if (!column.getModel().isEmpty()) {
+                    template = column.getViewType() + "3";
+                }
             }
 
             StringWriter sw = new StringWriter();
@@ -225,6 +292,7 @@ public class CoreGenerateService {
 
     /**
      * 表单验证规则
+     *
      * @param velocityContext
      * @param columns
      */
@@ -240,7 +308,8 @@ public class CoreGenerateService {
 
             // 验证规则
             List<String> validateRule = new LinkedList<>();
-            if (column.getIsRequired().equals(1)) validateRule.add("{ required: true, message: t('"+ lowerColumnName +"Placeholder'), trigger: 'blur' }");
+            if (column.getIsRequired().equals(1))
+                validateRule.add("{ required: true, message: t('" + lowerColumnName + "Placeholder'), trigger: 'blur' }");
 
             if (!column.getValidateType().isEmpty()) {
                 if (JSONUtil.isJson(column.getValidateType())) {
@@ -250,8 +319,8 @@ public class CoreGenerateService {
                         case "min":
                             validateRule.add("{ validator: (rule: any, value: string, callback: any) => {" +
                                     "value += ''\n" +
-                                    "        if (value.length < "+ limit.getInt(0) +") {\n" +
-                                    "            callback(new Error(t('generateMin') + "+ limit.getInt(0) +" + t('generateUnit')))\n" +
+                                    "        if (value.length < " + limit.getInt(0) + ") {\n" +
+                                    "            callback(new Error(t('generateMin') + " + limit.getInt(0) + " + t('generateUnit')))\n" +
                                     "        } else {\n" +
                                     "            callback()\n" +
                                     "        }" +
@@ -260,8 +329,8 @@ public class CoreGenerateService {
                         case "max":
                             validateRule.add("{ validator: (rule: any, value: string, callback: any) => {" +
                                     "value += ''\n" +
-                                    "        if (value.length > "+ limit.getInt(0) +") {\n" +
-                                    "            callback(new Error(t('generateMax') + "+ limit.getInt(0) +" + t('generateUnit')))\n" +
+                                    "        if (value.length > " + limit.getInt(0) + ") {\n" +
+                                    "            callback(new Error(t('generateMax') + " + limit.getInt(0) + " + t('generateUnit')))\n" +
                                     "        } else {\n" +
                                     "            callback()\n" +
                                     "        }" +
@@ -270,10 +339,10 @@ public class CoreGenerateService {
                         case "between":
                             validateRule.add("{ validator: (rule: any, value: string, callback: any) => {" +
                                     "value += ''\n" +
-                                    "        if (value.length < "+ limit.getInt(0) +") {\n" +
-                                    "           callback(new Error(t('generateMin') + "+ limit.getInt(0) +" + t('generateUnit')))\n" +
-                                    "        } else if (value.length > "+ limit.getInt(1) +") {\n" +
-                                    "           callback(new Error(t('generateMax') + "+ limit.getInt(0) +" + t('generateUnit')))\n" +
+                                    "        if (value.length < " + limit.getInt(0) + ") {\n" +
+                                    "           callback(new Error(t('generateMin') + " + limit.getInt(0) + " + t('generateUnit')))\n" +
+                                    "        } else if (value.length > " + limit.getInt(1) + ") {\n" +
+                                    "           callback(new Error(t('generateMax') + " + limit.getInt(0) + " + t('generateUnit')))\n" +
                                     "        } else {\n" +
                                     "            callback()\n" +
                                     "        }" +
@@ -281,11 +350,12 @@ public class CoreGenerateService {
                             break;
                     }
                 } else {
-                    validateRule.add("{ validator: Validate."+ column.getValidateType() +"Verify, trigger: 'blur' }");
+                    validateRule.add("{ validator: Validate." + column.getValidateType() + "Verify, trigger: 'blur' }");
                 }
             }
 
-            if (validateRule.size() > 0) validate.add(column.getColumnName() + ": [\n" + String.join(", \n", validateRule) + "\n]");
+            if (validateRule.size() > 0)
+                validate.add(column.getColumnName() + ": [\n" + String.join(", \n", validateRule) + "\n]");
         }
 
         velocityContext.put("formValidate", String.join(", \n", validate));
@@ -306,12 +376,12 @@ public class CoreGenerateService {
 
         lang.set("add" + className, "添加" + notes);
         lang.set("update" + className, "编辑" + notes);
-        lang.set(lowerClassName + "DeleteTips", "確定要刪除" + notes + "吗？");
+        lang.set(lowerClassName + "DeleteTips", "确定要刪除" + notes + "吗？");
 
         for (GenerateColumn column : columns) {
             if (column.getIsPk().equals(1) || column.getColumnName().equals("site_id")) continue;
             lang.set(StrUtil.toCamelCase(column.getColumnName()), column.getColumnComment());
-            if (column.getIsInsert().equals(1) || column.getIsUpdate().equals(1)) {
+            if (column.getIsInsert().equals(1) || column.getIsUpdate().equals(1) || column.getIsSearch().equals(1)) {
                 String prefix = "请输入";
                 if (column.getViewType().equals("radio") || column.getViewType().equals("select") || column.getViewType().equals("checkbox")) {
                     prefix = "请选择";
@@ -327,6 +397,7 @@ public class CoreGenerateService {
 
     /**
      * 菜单sql
+     *
      * @param velocityContext
      */
     public static void menuSql(GenerateTable table, VelocityContext velocityContext) {
@@ -346,30 +417,30 @@ public class CoreGenerateService {
 
         String apiUrl = velocityContext.get("addonName").toString() + "/" + velocityContext.get("moduleName").toString() + "/" + velocityContext.get("tableName").toString();
 
-        sql.add("DELETE FROM "+ menuTable + " WHERE menu_key in (" + String.join(", ", menuKey.values()) + ");");
+        sql.add("DELETE FROM " + menuTable + " WHERE menu_key in (" + String.join(", ", menuKey.values()) + ");");
 
-        sql.add("INSERT INTO "+ menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
-                "('site', '"+ notes +"', '"+ notes +"', "+ menuKey.get("root") + ", '"+ table.getParentMenu() +"', 0, '', '', '', '', '', 100, 1, 1, '"+ table.getAddonName() +"', 'generator');");
+        sql.add("INSERT INTO " + menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
+                "('site', '" + notes + "', '" + notes + "', " + menuKey.get("root") + ", '" + table.getParentMenu() + "', 0, '', '', '', '', '', 100, 1, 1, '" + table.getAddonName() + "', 'generator');");
 
         String routerPath = (table.getAddonName().equals("") ? "" : table.getAddonName() + "/") + table.getModuleName() + (className.equals("") ? "" : "/" + className);
-        String viewPath = table.getModuleName() +"/"+ table.getClassName();
-        sql.add("INSERT INTO "+ menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
-                "('site', '"+ notes +"列表', '', "+ menuKey.get("list") + ", "+ menuKey.get("root") +", 1, '', '"+ apiUrl + "', '"+ routerPath +"', '"+ viewPath +"', 'get', 100, 1, 1, '"+ table.getAddonName() +"', 'generator');");
+        String viewPath = table.getModuleName() + "/" + table.getClassName();
+        sql.add("INSERT INTO " + menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
+                "('site', '" + notes + "列表', '', " + menuKey.get("list") + ", " + menuKey.get("root") + ", 1, '', '" + apiUrl + "', '" + routerPath + "', '" + viewPath + "', 'get', 100, 1, 1, '" + table.getAddonName() + "', 'generator');");
 
-        sql.add("INSERT INTO "+ menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
-                "('site', '"+ notes +"添加', '', "+ menuKey.get("add") + ", "+ menuKey.get("root") +", 2, '', '"+ apiUrl + "', '', '', 'post', 90, 1, 1, '"+ table.getAddonName() +"', 'generator');");
+        sql.add("INSERT INTO " + menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
+                "('site', '" + notes + "添加', '', " + menuKey.get("add") + ", " + menuKey.get("root") + ", 2, '', '" + apiUrl + "', '', '', 'post', 90, 1, 1, '" + table.getAddonName() + "', 'generator');");
 
-        sql.add("INSERT INTO "+ menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
-                "('site', '"+ notes +"编辑', '', "+ menuKey.get("edit") + ", "+ menuKey.get("root") +", 2, '', '"+ apiUrl + "/<id>', '', '', 'put', 80, 1, 1, '"+ table.getAddonName() +"', 'generator');");
+        sql.add("INSERT INTO " + menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
+                "('site', '" + notes + "编辑', '', " + menuKey.get("edit") + ", " + menuKey.get("root") + ", 2, '', '" + apiUrl + "/<id>', '', '', 'put', 80, 1, 1, '" + table.getAddonName() + "', 'generator');");
 
-        sql.add("INSERT INTO "+ menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
-                "('site', '"+ notes +"删除', '', "+ menuKey.get("delete") + ", "+ menuKey.get("root") +", 2, '', '"+ apiUrl +"/<id>', '', '', 'delete', 70, 1, 1, '"+ table.getAddonName() +"', 'generator');");
+        sql.add("INSERT INTO " + menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
+                "('site', '" + notes + "删除', '', " + menuKey.get("delete") + ", " + menuKey.get("root") + ", 2, '', '" + apiUrl + "/<id>', '', '', 'delete', 70, 1, 1, '" + table.getAddonName() + "', 'generator');");
 
         if (table.getEditType().equals(2)) {
             String editRouterPath = routerPath + "_edit";
-            String editViewPath = table.getModuleName() +"/"+ table.getClassName() + "_edit";
-            sql.add("INSERT INTO "+ menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
-                    "('site', '"+ notes +"添加/编辑', '"+ notes +"', "+ menuKey.get("edit_page") + ", "+ menuKey.get("root") +", 1, '', '"+ apiUrl + "/<id>', '"+ editRouterPath +"', '"+ editViewPath +"', 'get', 100, 1, 0, '"+ table.getAddonName() +"', 'generator');");
+            String editViewPath = table.getModuleName() + "/" + table.getClassName() + "_edit";
+            sql.add("INSERT INTO " + menuTable + "(app_type, menu_name, menu_short_name, menu_key, parent_key, menu_type, icon, api_url, router_path, view_path, methods, sort, status, is_show, addon, source) VALUES\n" +
+                    "('site', '" + notes + "添加/编辑', '" + notes + "', " + menuKey.get("edit_page") + ", " + menuKey.get("root") + ", 1, '', '" + apiUrl + "/<id>', '" + editRouterPath + "', '" + editViewPath + "', 'get', 100, 1, 0, '" + table.getAddonName() + "', 'generator');");
         }
 
         velocityContext.put("sql", String.join("\n", sql));
@@ -377,6 +448,7 @@ public class CoreGenerateService {
 
     /**
      * 加载所有模板以及文件
+     *
      * @param table
      * @return
      */
@@ -387,16 +459,15 @@ public class CoreGenerateService {
         String className = StrUtil.upperFirst(lowerClassName);
         String javaPath = "niucloud-core/src/main/java/com/niu/core";
         if (!addonName.equals("core")) {
-            javaPath = "niucloud-addon/"+ addonName +"/src/main/java/com/niu/" + addonName;
+            javaPath = "niucloud-addon/" + addonName + "/src/main/java/com/niu/" + addonName;
         }
 
         String adminVueAddonName = table.getAddonName().equals("") ? "app" : table.getAddonName();
 
         String adminVuePath = "";
-        if(adminVueAddonName.equals("app"))
-        {
+        if (adminVueAddonName.equals("app")) {
             adminVuePath = "admin/src/" + adminVueAddonName;
-        }else{
+        } else {
             adminVuePath = "admin/src/addon/" + adminVueAddonName;
         }
 
@@ -541,6 +612,7 @@ public class CoreGenerateService {
 
     /**
      * 生成对应的code代码
+     *
      * @param table
      * @param columns
      * @return
@@ -566,5 +638,45 @@ public class CoreGenerateService {
         return list;
     }
 
+    public static MapperInfoVo getMapperInfo(String mapper) {
+        MapperInfoVo vo = new MapperInfoVo();
+        try {
+            Class<?> mapperClass = Class.forName(mapper);
 
+            if (!mapperClass.isInterface() || !mapperClass.isAnnotationPresent(Mapper.class)) {
+                throw new CommonException("提供的类不是有效的MyBatis Mapper接口");
+            }
+
+            String tableName = "";
+
+            Type[] types = mapperClass.getGenericInterfaces();
+            for (Type type : types) {
+                if (type instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) type;
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    if (actualTypeArguments.length == 1) {
+                        Class<?> entityClass = (Class<?>) actualTypeArguments[0];
+                        TableName tableNameAnnotation = entityClass.getAnnotation(TableName.class);
+                        // 通过@TableName 注解获取表名
+                        if (tableNameAnnotation != null) {
+                            tableName = tableNameAnnotation.value();
+                        } else {
+                            // 如果没有 @TableName 注解，使用实体类的简单名称作为表名
+                            tableName = StrUtil.toUnderlineCase(entityClass.getSimpleName());
+                        }
+                        vo.setMapperName(mapperClass.getSimpleName());
+                        vo.setEntity(entityClass.getName());
+                        vo.setEntityName(entityClass.getSimpleName());
+                    }
+                }
+            }
+            if (tableName.isEmpty()) throw new CommonException("未能通过mapper获取到表信息");
+
+            vo.setTableName(tableName);
+            vo.setMapper(mapper);
+            return vo;
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
 }

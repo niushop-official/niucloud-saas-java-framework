@@ -161,10 +161,15 @@
                             </el-tree>
                         </div>
                     </el-scrollbar>
-                    <div class="ml-[20px]" style="width: calc(100% - 285px);">
+                    <div class="ml-[20px] relative" style="width: calc(100% - 285px);">
                         <el-scrollbar class="h-[100%] w-[100%]">
                             <highlightjs autodetect class="h-[100%]" :code="code" />
                         </el-scrollbar>
+                        <div class="absolute top-0 right-[15px] z-5 cursor-pointer hover:text-primary" @click="copyCode">
+                            <el-tooltip content="点击复制" placement="top" >
+                                <icon name="iconfont icondingdanzhongxinPC-3"/>
+                            </el-tooltip>
+                        </div>
                     </div>
                 </div>
             </el-dialog>
@@ -173,7 +178,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { t } from '@/lang'
 import { getGenerateTableList, deleteGenerateTable, generateCreate, generatePreview, generatorCheckFile, getAddonDevelop } from '@/app/api/tools'
 import { img } from '@/utils/common'
@@ -182,6 +187,7 @@ import AddTable from '@/app/views/tools/code/components/add-table.vue'
 import type { FormInstance } from 'element-plus'
 import { downloadFile } from '@/utils/file'
 import { useRouter, useRoute } from 'vue-router'
+import { useClipboard } from '@vueuse/core'
 
 const route = useRoute()
 const pageName = route.meta.title
@@ -381,6 +387,27 @@ const listToTree = (arr:any) => {
     }
     return ret
 }
+
+const { copy, isSupported, copied } = useClipboard()
+const copyCode = () => {
+    if (!isSupported.value) {
+        ElMessage({
+            message: t('notSupportCopy'),
+            type: 'warning'
+        })
+        return
+    }
+    copy(code.value)
+}
+
+watch(copied, () => {
+    if (copied.value) {
+        ElMessage({
+            message: t('copySuccess'),
+            type: 'success'
+        })
+    }
+})
 </script>
 
 <style lang="scss" scoped></style>

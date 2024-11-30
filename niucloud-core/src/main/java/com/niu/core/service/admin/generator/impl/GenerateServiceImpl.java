@@ -8,6 +8,7 @@ import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -19,6 +20,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.loader.pay.BasePay;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.entity.generator.GenerateColumn;
@@ -42,8 +44,10 @@ import com.niu.core.service.core.app.tools.SQLScriptRunnerTools;
 import com.niu.core.service.core.generator.CoreGenerateService;
 import com.niu.core.service.core.generator.vo.CoreGenerateColumnVo;
 import com.niu.core.service.core.generator.vo.CoreGenerateTemplateVo;
+import com.niu.core.service.core.generator.vo.MapperInfoVo;
 import com.qiniu.storage.ApiUploadV2AbortUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +59,8 @@ import javax.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -76,8 +82,8 @@ public class GenerateServiceImpl implements IGenerateService {
     @Override
     public PageResult<GenerateListVo> getPage(PageParam pageParam, GenerateSearchParam searchParam) {
 
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         MPJQueryWrapper<GenerateTable> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("ngt");
@@ -92,17 +98,16 @@ public class GenerateServiceImpl implements IGenerateService {
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getAddonName())) {
-            if(searchParam.getAddonName().equals("2"))
-            {
+            if (searchParam.getAddonName().equals("2")) {
                 queryWrapper.eq("ngt.addon_name", "");
-            }else{
+            } else {
                 queryWrapper.like("ngt.addon_name", searchParam.getAddonName());
             }
         }
 
         queryWrapper.orderByDesc("ngt.create_time");
 
-        IPage<GenerateListVo> iPage = generateTableMapper.selectJoinPage(new Page<>(page, limit),GenerateListVo.class, queryWrapper);
+        IPage<GenerateListVo> iPage = generateTableMapper.selectJoinPage(new Page<>(page, limit), GenerateListVo.class, queryWrapper);
         return PageResult.build(iPage);
     }
 
@@ -110,100 +115,86 @@ public class GenerateServiceImpl implements IGenerateService {
     public GenerateDetailVo getInfo(Integer id) {
 
         GenerateTable generateTable = generateTableMapper.selectById(id);
-        if(ObjectUtil.isEmpty(generateTable)) throw new AdminException("生成表不存在");
+        if (ObjectUtil.isEmpty(generateTable)) throw new AdminException("生成表不存在");
         GenerateDetailVo vo = new GenerateDetailVo();
         BeanUtils.copyProperties(generateTable, vo);
 
-        if(vo.getOrderType() != 0)
-        {
+        if (vo.getOrderType() != 0) {
             GenerateColumn orderColumn = generateColumnMapper.selectOne(new QueryWrapper<GenerateColumn>().eq("table_id", id).eq("is_order", 1));
-            if(ObjectUtil.isNotEmpty(orderColumn))
-            {
+            if (ObjectUtil.isNotEmpty(orderColumn)) {
                 vo.setOrderColumnName(orderColumn.getColumnName());
-            }else{
+            } else {
                 vo.setOrderColumnName("");
             }
         }
         GenerateColumn deleteColumn = generateColumnMapper.selectOne(new QueryWrapper<GenerateColumn>().eq("table_id", id).eq("is_delete", 1));
-        if(ObjectUtil.isNotEmpty(deleteColumn))
-        {
+        if (ObjectUtil.isNotEmpty(deleteColumn)) {
             vo.setDeleteColumnName(deleteColumn.getColumnName());
             vo.setIsDelete(1);
-        }else{
+        } else {
             vo.setDeleteColumnName("");
             vo.setIsDelete(0);
         }
         List<GenerateColumn> columnList = generateColumnMapper.selectList(new QueryWrapper<GenerateColumn>().eq("table_id", id));
-        if( ObjectUtil.isNotEmpty(columnList))
-        {
+        if (ObjectUtil.isNotEmpty(columnList)) {
             List<GenerateColumnVo> columnVoList = new ArrayList<>();
             for (GenerateColumn column : columnList) {
                 GenerateColumnVo generateColumnVo = new GenerateColumnVo();
                 BeanUtils.copyProperties(column, generateColumnVo);
-                if(column.getViewType().equals("number"))
-                {
-                    if(!column.getValidateType().isEmpty())
-                    {
+                if (column.getViewType().equals("number")) {
+                    if (!column.getValidateType().isEmpty()) {
                         if (column.getValidateType().startsWith("[")) {
                             JSONArray numValidate = JSONUtil.parseArray(column.getValidateType());
-                            if(numValidate.get(0).toString().equals("between"))
-                            {
+                            if (numValidate.get(0).toString().equals("between")) {
                                 generateColumnVo.setViewMax(JSONUtil.parseArray(numValidate.get(1)).get(1).toString());
                                 generateColumnVo.setViewMin(JSONUtil.parseArray(numValidate.get(1)).get(0).toString());
-                            }else if(numValidate.get(0).toString().equals("max"))
-                            {
+                            } else if (numValidate.get(0).toString().equals("max")) {
                                 generateColumnVo.setViewMax(JSONUtil.parseArray(numValidate.get(1)).get(0).toString());
-                            }else if(numValidate.get(0).toString().equals("min"))
-                            {
+                            } else if (numValidate.get(0).toString().equals("min")) {
                                 generateColumnVo.setViewMin(JSONUtil.parseArray(numValidate.get(1)).get(0).toString());
-                            }else{
+                            } else {
                                 generateColumnVo.setViewMax("100");
                                 generateColumnVo.setViewMin("0");
                             }
-                        }else{
+                        } else {
                             generateColumnVo.setViewMax("100");
                             generateColumnVo.setViewMin("0");
                         }
 
-                    }else{
+                    } else {
                         generateColumnVo.setViewMax("100");
                         generateColumnVo.setViewMin("0");
                     }
-                }else{
+                } else {
                     generateColumnVo.setViewMax("");
                     generateColumnVo.setViewMin("");
                 }
-                if(!column.getValidateType().isEmpty())
-                {
+                if (!column.getValidateType().isEmpty()) {
                     if (column.getValidateType().startsWith("[")) {
                         JSONArray num1Validate = JSONUtil.parseArray(column.getValidateType());
-                        if(num1Validate.get(0).toString().equals("between"))
-                        {
+                        if (num1Validate.get(0).toString().equals("between")) {
                             generateColumnVo.setMaxNumber(JSONUtil.parseArray(num1Validate.get(1)).get(1).toString());
                             generateColumnVo.setMinNumber(JSONUtil.parseArray(num1Validate.get(1)).get(0).toString());
-                        }else if(num1Validate.get(0).toString().equals("max"))
-                        {
+                        } else if (num1Validate.get(0).toString().equals("max")) {
                             generateColumnVo.setMaxNumber(JSONUtil.parseArray(num1Validate.get(1)).get(0).toString());
-                        }else if(num1Validate.get(0).toString().equals("min"))
-                        {
+                        } else if (num1Validate.get(0).toString().equals("min")) {
                             generateColumnVo.setMinNumber(JSONUtil.parseArray(num1Validate.get(1)).get(0).toString());
-                        }else{
+                        } else {
                             generateColumnVo.setMaxNumber("120");
                             generateColumnVo.setMinNumber("1");
                         }
-                    }else{
+                    } else {
                         generateColumnVo.setMaxNumber("120");
                         generateColumnVo.setMinNumber("1");
                     }
 
-                }else{
+                } else {
                     generateColumnVo.setMaxNumber("120");
                     generateColumnVo.setMinNumber("1");
                 }
-                if(!column.getModel().isEmpty())
-                {
+                if (!column.getModel().isEmpty()) {
                     generateColumnVo.setSelectType(2);
-                }else{
+                } else {
                     generateColumnVo.setSelectType(1);
                 }
                 columnVoList.add(generateColumnVo);
@@ -219,13 +210,13 @@ public class GenerateServiceImpl implements IGenerateService {
 
         String sql = "SHOW TABLE STATUS WHERE 1=1 ";
         String tablePrefix = GlobalConfig.tablePrefix;
-        if(!generateParam.getTableName().isEmpty()){
+        if (!generateParam.getTableName().isEmpty()) {
             sql += " AND Name = '" + generateParam.getTableName() + "'";
         }
         List<Map<String, Object>> listData = jdbcTemplate.queryForList(sql);
-        if(ObjectUtil.isEmpty(listData)) throw new AdminException("数据表不存在");
+        if (ObjectUtil.isEmpty(listData)) throw new AdminException("数据表不存在");
         Map<String, Object> table = listData.get(0);
-        if(ObjectUtil.isEmpty(table)) throw new AdminException("数据表不存在");
+        if (ObjectUtil.isEmpty(table)) throw new AdminException("数据表不存在");
         String tableName = table.get("Name").toString().substring(tablePrefix.length());
 
         //添加生成表数据
@@ -238,7 +229,7 @@ public class GenerateServiceImpl implements IGenerateService {
         generateTableMapper.insert(generateTable);
 
         //添加生成字段数据
-        List<Map<String, Object>> columns = jdbcTemplate.queryForList("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = (SELECT DATABASE()) and TABLE_NAME='" + tablePrefix + tableName+"'");
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = (SELECT DATABASE()) and TABLE_NAME='" + tablePrefix + tableName + "'");
         Integer id = generateTable.getId();
         List<GenerateColumn> list = new ArrayList<>();
         for (Map<String, Object> column : columns) {
@@ -246,21 +237,21 @@ public class GenerateServiceImpl implements IGenerateService {
 
             generateColumn.setIsRequired(0);
             String[] defaultColumn = {"id", "create_time", "update_time"};
-            if(column.get("IS_NULLABLE").toString().equals("NO")&& !column.get("COLUMN_KEY").equals("PRI") && Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString())){
+            if (column.get("IS_NULLABLE").toString().equals("NO") && !column.get("COLUMN_KEY").equals("PRI") && Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString())) {
                 generateColumn.setIsRequired(1);
             }
 
             generateColumn.setTableId(id);
             generateColumn.setColumnName(column.get("COLUMN_NAME").toString());
             generateColumn.setColumnType(getDbFieldType(column.get("DATA_TYPE").toString()));
-            if(generateColumn.getColumnType().equals("Integer") && generateColumn.getColumnName().contains("time")){
+            if (generateColumn.getColumnType().equals("Integer") && generateColumn.getColumnName().contains("time")) {
                 generateColumn.setColumnType("Long");
             }
             generateColumn.setColumnComment(column.get("COLUMN_COMMENT").toString());
-            generateColumn.setIsPk(column.get("COLUMN_KEY").equals("PRI")?1:0);
-            generateColumn.setIsInsert(Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString())?0:1);
-            generateColumn.setIsUpdate(Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString())?0:1);
-            generateColumn.setIsLists(Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString())?0:1);
+            generateColumn.setIsPk(column.get("COLUMN_KEY").equals("PRI") ? 1 : 0);
+            generateColumn.setIsInsert(Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString()) ? 0 : 1);
+            generateColumn.setIsUpdate(Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString()) ? 0 : 1);
+            generateColumn.setIsLists(Arrays.asList(defaultColumn).contains(column.get("COLUMN_NAME").toString()) ? 0 : 1);
             generateColumn.setIsDelete(0);
             generateColumn.setQueryType("=");
             generateColumn.setViewType("input");
@@ -299,7 +290,7 @@ public class GenerateServiceImpl implements IGenerateService {
         JSONArray columns = JSONUtil.parseArray(generateParam.getTableColumn());
         List<GenerateColumn> list = new ArrayList<>();
 
-        for(int i = 0; i < columns.size(); i++){
+        for (int i = 0; i < columns.size(); i++) {
             GenerateColumn generateColumn = new GenerateColumn();
             JSONObject column = columns.getJSONObject(i);
             generateColumn.setTableId(id);
@@ -326,22 +317,18 @@ public class GenerateServiceImpl implements IGenerateService {
             generateColumn.setValidateType(ObjectUtil.isEmpty(column.getStr("validate_type")) ? "" : column.getStr("validate_type"));
             //传入字段rule暂时不知含义，待定
 
-            if(generateParam.getIsDelete() == 1)
-            {
-                if(column.getStr("column_name").equals(generateParam.getDeleteColumnName()))
-                {
+            if (generateParam.getIsDelete() == 1) {
+                if (column.getStr("column_name").equals(generateParam.getDeleteColumnName())) {
                     generateColumn.setIsDelete(1);
                 }
             }
-            if(generateParam.getOrderType() != 0)
-            {
-                if(column.getStr("column_name").equals(generateParam.getOrderColumnName()))
-                {
+            if (generateParam.getOrderType() != 0) {
+                if (column.getStr("column_name").equals(generateParam.getOrderColumnName())) {
                     generateColumn.setIsOrder(1);
                 }
             }
 
-            if(ObjectUtil.isNotEmpty(column.getStr("validate_type")) && !column.getStr("view_type").equals("number")) {
+            if (ObjectUtil.isNotEmpty(column.getStr("validate_type")) && !column.getStr("view_type").equals("number")) {
                 if (column.getStr("validate_type").equals("between")) {
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add("between");
@@ -360,14 +347,13 @@ public class GenerateServiceImpl implements IGenerateService {
                 }
             }
 
-            if(column.getStr("view_type").equals("number")){
+            if (column.getStr("view_type").equals("number")) {
                 JSONArray numJsonArray = new JSONArray();
                 numJsonArray.add("between");
                 numJsonArray.add(new String[]{column.getStr("view_min"), column.getStr("view_max")});
                 generateColumn.setValidateType(numJsonArray.toString());
             }
-            if(ObjectUtil.isNotEmpty(column.getStr("model")))
-            {
+            if (ObjectUtil.isNotEmpty(column.getStr("model"))) {
                 generateColumn.setDictType("");
             }
             list.add(generateColumn);
@@ -391,7 +377,7 @@ public class GenerateServiceImpl implements IGenerateService {
         GenerateTable generateTable = generateTableMapper.selectById(generateCodeParam.getId());
         List<GenerateColumn> columnList = generateColumnMapper.selectList(new QueryWrapper<GenerateColumn>().eq("table_id", generateCodeParam.getId()));
         CoreGenerateService coreGenerateService = new CoreGenerateService();
-        List<CoreGenerateTemplateVo> list =coreGenerateService.generateCode(generateTable, columnList);
+        List<CoreGenerateTemplateVo> list = coreGenerateService.generateCode(generateTable, columnList);
 
         // 下载
         if (generateCodeParam.getGenerateType().equals("2")) {
@@ -424,7 +410,7 @@ public class GenerateServiceImpl implements IGenerateService {
         GenerateTable generateTable = generateTableMapper.selectById(id);
         List<GenerateColumn> list = generateColumnMapper.selectList(new QueryWrapper<GenerateColumn>().eq("table_id", id));
         CoreGenerateService coreGenerateService = new CoreGenerateService();
-        List<CoreGenerateTemplateVo> columnList =coreGenerateService.generateCode(generateTable, list);
+        List<CoreGenerateTemplateVo> columnList = coreGenerateService.generateCode(generateTable, list);
         List<GeneratePreviewVo> voList = new ArrayList<>();
         for (CoreGenerateTemplateVo coreGenerateTemplateVo : columnList) {
             GeneratePreviewVo vo = new GeneratePreviewVo();
@@ -448,17 +434,17 @@ public class GenerateServiceImpl implements IGenerateService {
                 field = entry.getKey();
             }
         }
-        if(field.equals("")){
+        if (field.equals("")) {
             field = "String";
         }
         return field;
     }
+
     @Override
     public String getDbType(String columnType) {
         if (StrUtil.contains(columnType, "(")) {
             return StrUtil.subAfter(columnType, "(", true);
-        }
-        else {
+        } else {
             return columnType;
         }
     }
@@ -467,11 +453,11 @@ public class GenerateServiceImpl implements IGenerateService {
     public List<Map<String, Object>> tableList(String name, String comment) {
 
         String sql = "SHOW TABLE STATUS WHERE 1=1 ";
-        if(!(name == null)){
-            sql += " AND Name like '%"  + name + "%'";
+        if (!(name == null)) {
+            sql += " AND Name like '%" + name + "%'";
         }
-        if(!(comment == null)){
-            sql += " AND comment like '%"  + comment + "%'";
+        if (!(comment == null)) {
+            sql += " AND comment like '%" + comment + "%'";
         }
         List<Map<String, Object>> listData = jdbcTemplate.queryForList(sql);
         return listData;
@@ -487,13 +473,27 @@ public class GenerateServiceImpl implements IGenerateService {
         return null;
     }
 
+    /**
+     * 获取表字段
+     *
+     * @param mapper
+     * @return
+     */
     @Override
-    public List<String> getModels() {
-        return null;
-    }
+    public Map<String, Map<String, Object>> getTableColumnByMapper(String mapper) {
+        MapperInfoVo mapperInfo = CoreGenerateService.getMapperInfo(mapper);
 
-    @Override
-    public TableFiledVo getModelColumn(String model) {
-        return null;
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = (SELECT DATABASE()) and TABLE_NAME='" + GlobalConfig.tablePrefix + mapperInfo.getTableName() + "'");
+
+        Map<String, Map<String, Object>> tableColumn = new HashMap<>();
+        for (Map<String, Object> column : columns) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("name", column.get("COLUMN_NAME"));
+            item.put("comment", column.get("COLUMN_COMMENT"));
+            item.put("default", column.get("COLUMN_DEFAULT"));
+            item.put("primary", column.get("COLUMN_KEY").equals("PRI"));
+            tableColumn.put((String) column.get("COLUMN_NAME"), item);
+        }
+        return tableColumn;
     }
 }

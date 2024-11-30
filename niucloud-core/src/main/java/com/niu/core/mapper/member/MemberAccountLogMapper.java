@@ -12,6 +12,4 @@ import java.util.Map;
 @Mapper
 public interface MemberAccountLogMapper extends MPJBaseMapper<MemberAccountLog> {
 
-    Double sumAccountData(Map<String, Object> paramsMap);
-
 }

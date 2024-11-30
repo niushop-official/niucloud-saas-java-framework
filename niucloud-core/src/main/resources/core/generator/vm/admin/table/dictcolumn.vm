@@ -1,6 +1,6 @@
 <el-table-column :label="t('${lowerColumnName}')" min-width="180" align="center" :show-overflow-tooltip="true">
     <template #default="{ row }">
-        <div v-for="(item, index) in {DICT_TYPE}">
+        <div v-for="(item, index) in $strUtil.toCamelCase($column.dictType)Dict">
             <div v-if="item.value == row.${column.columnName}">{{ item.name }}</div>
         </div>
     </template>

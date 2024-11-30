@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class ShopOrderRefund implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Boolean noAllowRefund; // 退款允许
-    private Integer refundLength; // 退款时长
+    private Boolean noAllowRefund = false; // 退款允许
+    private Integer refundLength = 0; // 退款时长
 
 }

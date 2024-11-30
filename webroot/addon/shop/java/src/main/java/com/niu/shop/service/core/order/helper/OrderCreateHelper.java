@@ -24,7 +24,7 @@ import com.niu.shop.enums.coupon.CouponMemberStatusEnum;
 import com.niu.shop.enums.coupon.CouponTypeEnum;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
-import com.niu.shop.enums.order.OrderStatusEnum;
+import com.niu.shop.enums.order.OrderLogMainTypeEnum;
 import com.niu.shop.event.order.OrderCreateAfterEvent;
 import com.niu.shop.event.order.ShopOrderDiscountCreateEventDefiner;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
@@ -40,7 +40,9 @@ import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import com.niu.shop.service.core.order.ICoreOrderDiscountService;
 import com.niu.shop.service.core.order.ICoreOrderEventService;
+import com.niu.shop.service.core.order.ICoreOrderService;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
+import com.niu.shop.service.core.order.param.OrderPayParam;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import com.niu.shop.service.core.order.vo.OrderCreateResultVo;
 import org.springframework.stereotype.Component;
@@ -94,8 +96,10 @@ public abstract class OrderCreateHelper {
     @Resource
     ICoreOrderEventService coreOrderEventService;
 
+    @Resource
+    ICoreOrderService coreOrderService;
+
     /**
-     *
      * @param orderKey
      * @return
      */
@@ -123,6 +127,7 @@ public abstract class OrderCreateHelper {
 
     /**
      * 缓存订单数据
+     *
      * @param vo
      */
     protected <T extends OrderCreateDataVo> void cacheOrderVo(T vo) {
@@ -134,6 +139,7 @@ public abstract class OrderCreateHelper {
 
     /**
      * 移除订单数据缓存
+     *
      * @param orderKey
      */
     protected void removeOrderVo(String orderKey) {
@@ -154,6 +160,7 @@ public abstract class OrderCreateHelper {
 
     /**
      * 获取配送方式
+     *
      * @param vo
      * @param param
      */
@@ -167,6 +174,7 @@ public abstract class OrderCreateHelper {
 
     /**
      * 计算运费
+     *
      * @param vo
      * @param param
      */
@@ -181,7 +189,8 @@ public abstract class OrderCreateHelper {
                     deliveryType = vo.getDelivery().getDeliveryTypeList().get(0).getKey();
                 }
             } else {
-                if (vo.getDelivery().getDeliveryTypeList().size() == 0) throw new CommonException("请选择正确的配送方式");
+                if (vo.getDelivery().getDeliveryTypeList().size() == 0)
+                    throw new CommonException("请选择正确的配送方式");
                 List<String> typeList = vo.getDelivery().getDeliveryTypeList().stream().map(i -> i.getKey()).collect(Collectors.toList());
                 if (!typeList.contains(deliveryType)) throw new CommonException("请选择正确的配送方式");
             }
@@ -263,6 +272,7 @@ public abstract class OrderCreateHelper {
 
     /**
      * 计算优惠券优惠
+     *
      * @param vo
      * @param param
      */
@@ -273,7 +283,8 @@ public abstract class OrderCreateHelper {
                     .eq("status", CouponMemberStatusEnum.WAIT_USE.getStatus())
                     .eq("id", param.getDiscount().getCouponId()));
             if (memberCoupon == null) throw new CommonException("优惠券已使用或已过期");
-            if (memberCoupon.getExpireTime().compareTo(System.currentTimeMillis() / 1000) == -1) throw new CommonException("当前优惠券已过期");
+            if (memberCoupon.getExpireTime().compareTo(System.currentTimeMillis() / 1000) == -1)
+                throw new CommonException("当前优惠券已过期");
 
             List<OrderCreateDataVo.Sku> matchGoods = new LinkedList<>();
             BigDecimal matchGoodsMoney = new BigDecimal(0);
@@ -423,6 +434,14 @@ public abstract class OrderCreateHelper {
 
         // 清除订单缓存
         removeOrderVo(vo.getOrderKey());
+
+        if (order.getOrderMoney().equals(BigDecimal.ZERO)) {
+            OrderPayParam orderPayParam = new OrderPayParam();
+            orderPayParam.setTradeId(order.getOrderId());
+            orderPayParam.setMainType(OrderLogMainTypeEnum.MEMBER.getType());
+            orderPayParam.setMainId(order.getMemberId());
+            coreOrderService.pay(orderPayParam);
+        }
 
         OrderCreateResultVo result = new OrderCreateResultVo();
         result.setTradeType(vo.getOrderType());

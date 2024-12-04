@@ -29,47 +29,11 @@
             <artifactId>niucloud-core</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>shop</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>sms-email</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>recharge</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>cms</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <!-- TODO 编译错误临时注释 -->
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>shop_fenxiao</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>shop_giftcard</artifactId>
-            <version>1.0.0</version>
-        </dependency>
         <!-- 开发时热启动 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>shop_giftcard</artifactId>
-            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

@@ -65,7 +65,7 @@ public class EnvironmentValidator {
      * @return
      */
     public boolean checkJreUsable() {
-        if (this.bootConfig.getJavaVersion().startsWith("1.8")) {
+        if (this.bootConfig.getJavaVersion().startsWith("17")) {
             System.out.println("当前Java版本: " + bootConfig.getJavaVersion());
             return true;
         }

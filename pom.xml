@@ -19,12 +19,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <java.version>1.8</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
         <!-- 集成框架 -->
         <spring-boot.version>2.7.18</spring-boot.version>
-        <spring-boot-satoken.version>1.38.0</spring-boot-satoken.version>
+        <spring-boot-satoken.version>1.39.0</spring-boot-satoken.version>
         <swagger.version>3.0.0</swagger.version>
         <quartz.version>2.7.2</quartz.version>
         <log4j2.version>3.1.5</log4j2.version>

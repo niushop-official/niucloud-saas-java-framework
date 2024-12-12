@@ -65,6 +65,7 @@ public class CoreMemberAccountServiceImpl implements ICoreMemberAccountService {
             BigDecimal originalGetData = new BigDecimal(new Double(memberWrapper.getPropertyValue(StringUtils.toCamelCase(accountType + "_get")).toString()));
             updateMemberWrapper.setPropertyValue(StringUtils.toCamelCase(accountType + "_get"), originalGetData.add(accountData));
         }
+        memberMapper.updateById(memberModel);
 
         // 账户变更事件
         MemberAccountEvent accountEvent = new MemberAccountEvent();
@@ -76,7 +77,5 @@ public class CoreMemberAccountServiceImpl implements ICoreMemberAccountService {
         accountEvent.setAccountNewData(accountNewData);
         accountEvent.setMemberId(memberId);
         EventAndSubscribeOfPublisher.publishAll(accountEvent);
-
-        memberMapper.updateById(memberModel);
     }
 }

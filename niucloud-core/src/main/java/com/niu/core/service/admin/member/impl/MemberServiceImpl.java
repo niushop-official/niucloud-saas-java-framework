@@ -10,27 +10,36 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
 import com.niu.core.enums.member.MemberRegisterChannelEnum;
 import com.niu.core.enums.member.MemberRegisterTypeEnum;
 import com.niu.core.mapper.member.MemberLabelMapper;
 import com.niu.core.mapper.member.MemberMapper;
-import com.niu.core.service.admin.member.param.*;
 import com.niu.core.service.admin.member.IMemberService;
-import com.niu.core.service.admin.member.vo.*;
+import com.niu.core.service.admin.member.param.MemberAddParam;
+import com.niu.core.service.admin.member.param.MemberModifyParam;
+import com.niu.core.service.admin.member.param.MemberParam;
+import com.niu.core.service.admin.member.param.MemberSearchParam;
+import com.niu.core.service.admin.member.vo.MemberAllListVo;
+import com.niu.core.service.admin.member.vo.MemberInfoVo;
+import com.niu.core.service.admin.member.vo.MemberLabelAllListVo;
+import com.niu.core.service.admin.member.vo.MemberListVo;
 import com.niu.core.service.core.member.ICoreMemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 会员实现
@@ -68,13 +77,13 @@ public class MemberServiceImpl implements IMemberService {
 
         // 查询条件
         if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
-            queryWrapper.like("member_no", searchParam.getKeyword()).or()
+            queryWrapper.and(i -> i.like("member_no", searchParam.getKeyword()).or()
                     .like("username", searchParam.getKeyword()).or()
                     .like("nickname", searchParam.getKeyword()).or()
-                    .like("mobile", searchParam.getKeyword());
+                    .like("mobile", searchParam.getKeyword()));
         }
 
-        if(ObjectUtil.isNotNull(searchParam.getIsDel()) && ObjectUtil.isNotEmpty(searchParam.getKeyword())){
+        if (ObjectUtil.isNotNull(searchParam.getIsDel()) && ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
             queryWrapper.eq("is_del", searchParam.getIsDel());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getMemberLevel())) {
@@ -83,6 +92,9 @@ public class MemberServiceImpl implements IMemberService {
         if (ObjectUtil.isNotEmpty(searchParam.getRegisterChannel())) {
             queryWrapper.eq("register_channel", searchParam.getRegisterChannel());
         }
+        if (ObjectUtil.isNotEmpty(searchParam.getMemberLabel())) {
+            queryWrapper.like("member_label", searchParam.getMemberLabel());
+        }
         if (ObjectUtil.isNotEmpty(searchParam.getRegisterType())) {
             queryWrapper.eq("register_type", searchParam.getRegisterType());
         }
@@ -90,12 +102,13 @@ public class MemberServiceImpl implements IMemberService {
             QueryMapperUtils.buildByTime(queryWrapper, "m.create_time", searchParam.getCreateTime());
         }
 
-        List<Member> memberList=new ArrayList<>();
-        if(page>0 && limit>0){
-            IPage<Member> iPage = memberMapper.selectPage(new Page<>(page, limit), queryWrapper);
-            memberList=iPage.getRecords();
-        }else {
-            memberList=memberMapper.selectList(queryWrapper);
+        IPage<Member> iPage = null;
+        List<Member> memberList = new ArrayList<>();
+        if (page > 0 && limit > 0) {
+            iPage = memberMapper.selectPage(new Page<>(page, limit), queryWrapper);
+            memberList = iPage.getRecords();
+        } else {
+            memberList = memberMapper.selectList(queryWrapper);
         }
         List<MemberListVo> list = new LinkedList<>();
         for (Member item : memberList) {
@@ -116,7 +129,7 @@ public class MemberServiceImpl implements IMemberService {
             }
             list.add(vo);
         }
-        return PageResult.build(page, limit,list.size()).setData(list);
+        return PageResult.build(page, limit, iPage == null ? list.size() : iPage.getTotal()).setData(list);
     }
 
     /**
@@ -186,10 +199,10 @@ public class MemberServiceImpl implements IMemberService {
             addParam.setMemberNo(iCoreMemberService.createMemberNo(siteId));
         } else {
             Member memberNoIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
-                .select("member_id")
-                .eq("site_id", siteId)
-                .eq("member_no", addParam.getMemberNo())
-                .last("limit 1"));
+                    .select("member_id")
+                    .eq("site_id", siteId)
+                    .eq("member_no", addParam.getMemberNo())
+                    .last("limit 1"));
             Assert.isNull(memberNoIsExist, "会员编码已存在");
         }
 

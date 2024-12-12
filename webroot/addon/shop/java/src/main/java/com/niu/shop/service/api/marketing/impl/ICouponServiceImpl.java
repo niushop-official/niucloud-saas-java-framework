@@ -10,7 +10,6 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.ApiException;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.shop.entity.coupon.ShopCoupon;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.coupon.ShopCouponMember;
@@ -47,8 +46,8 @@ public class ICouponServiceImpl implements ICouponService {
 
     @Override
     public PageResult<ShopCouponListVo> getPage(PageParam pageParam, ShopCouponSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
@@ -56,7 +55,7 @@ public class ICouponServiceImpl implements ICouponService {
         queryWrapper.eq("receive_type", CouponReceiveTypeEnum.USER.getType());
 
         //根据时间查询
-        Long nowTime = System.currentTimeMillis()/1000;
+        Long nowTime = System.currentTimeMillis() / 1000;
         queryWrapper.and(i -> i.and(j -> j.le("start_time", nowTime).ge("end_time", nowTime))
                 .or(j -> j.eq("start_time", 0).eq("end_time", 0)));
 
@@ -64,14 +63,13 @@ public class ICouponServiceImpl implements ICouponService {
         List<ShopCouponGoods> couponGoodsList = new ArrayList<>();
         List<ShopCouponGoods> couponGoodsCategoryList = new ArrayList<>();
 
-        if (ObjectUtil.isNotEmpty(searchParam.getGoodsId())){
+        if (ObjectUtil.isNotEmpty(searchParam.getGoodsId())) {
             couponGoodsList = shopCouponGoodsMapper.selectList(new QueryWrapper<ShopCouponGoods>()
                     .eq("site_id", RequestUtils.siteId())
                     .eq("goods_id", searchParam.getGoodsId()));
         }
 
-        if(ObjectUtil.isNotEmpty(searchParam.getCategoryId()))
-        {
+        if (ObjectUtil.isNotEmpty(searchParam.getCategoryId())) {
             couponGoodsCategoryList = shopCouponGoodsMapper.selectList(new QueryWrapper<ShopCouponGoods>()
                     .eq("site_id", RequestUtils.siteId())
                     .in("category_id", searchParam.getCategoryId()));
@@ -79,41 +77,38 @@ public class ICouponServiceImpl implements ICouponService {
         }
 
         //商品券
-        if (couponGoodsList.size() > 0 && couponGoodsCategoryList.size() == 0){
-            List<Integer> goodsIds= couponGoodsList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
+        if (couponGoodsList.size() > 0 && couponGoodsCategoryList.size() == 0) {
+            List<Integer> goodsIds = couponGoodsList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
             queryWrapper.and(i -> i.and(j -> j.in("id", goodsIds).eq("type", CouponTypeEnum.GOODS.getType()))
                     .or(j -> j.eq("type", CouponTypeEnum.ALL.getType())));
         }
 
         //分类券
-        if (couponGoodsCategoryList.size() > 0 && couponGoodsList.size() == 0){
-            List<Integer> categoryIds= couponGoodsCategoryList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
+        if (couponGoodsCategoryList.size() > 0 && couponGoodsList.size() == 0) {
+            List<Integer> categoryIds = couponGoodsCategoryList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
             queryWrapper.and(i -> i.and(j -> j.in("id", categoryIds).eq("type", CouponTypeEnum.CATEGORY.getType()))
                     .or(j -> j.eq("type", CouponTypeEnum.ALL.getType())));
         }
 
         //全部券
-        if (couponGoodsList.size() > 0 && couponGoodsCategoryList.size() > 0){
-            List<Integer> goodsIds= couponGoodsList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
-            List<Integer> categoryIds= couponGoodsCategoryList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
+        if (couponGoodsList.size() > 0 && couponGoodsCategoryList.size() > 0) {
+            List<Integer> goodsIds = couponGoodsList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
+            List<Integer> categoryIds = couponGoodsCategoryList.stream().map(ShopCouponGoods::getCouponId).collect(Collectors.toList());
             queryWrapper.and(i -> i.and(j -> j.in("id", goodsIds).eq("type", CouponTypeEnum.GOODS.getType()))
                     .or(j -> j.eq("type", CouponTypeEnum.ALL.getType()))
-                    .or(j-> j.in("id", categoryIds).eq("type", CouponTypeEnum.CATEGORY.getType())));
+                    .or(j -> j.in("id", categoryIds).eq("type", CouponTypeEnum.CATEGORY.getType())));
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getType())) queryWrapper.eq("type", searchParam.getType());
 
         //排序
-        if(searchParam.getOrder().equals("create_time") || searchParam.getOrder().equals("price"))
-        {
-            if(searchParam.getSort().equals("desc"))
-            {
+        if (searchParam.getOrder().equals("create_time") || searchParam.getOrder().equals("price")) {
+            if (searchParam.getSort().equals("desc")) {
                 queryWrapper.orderByDesc(searchParam.getOrder());
-            }else if(searchParam.getSort().equals("asc"))
-            {
+            } else if (searchParam.getSort().equals("asc")) {
                 queryWrapper.orderByAsc(searchParam.getOrder());
             }
-        }else{
+        } else {
             queryWrapper.orderByDesc("id");
         }
 
@@ -123,20 +118,19 @@ public class ICouponServiceImpl implements ICouponService {
         for (ShopCoupon item : iPage.getRecords()) {
             ShopCouponListVo vo = new ShopCouponListVo();
             BeanUtils.copyProperties(item, vo);
-            if(ObjectUtil.isNotEmpty(RequestUtils.memberId())){
+            if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) {
                 Long couponMemberCount = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
                         .eq("site_id", RequestUtils.siteId())
                         .eq("member_id", RequestUtils.memberId())
                         .eq("coupon_id", item.getId()));
-                if(couponMemberCount > 0)
-                {
+                if (couponMemberCount > 0) {
                     vo.setIsReceive(1);
                     vo.setMemberReceiveCount(couponMemberCount);
-                }else{
+                } else {
                     vo.setIsReceive(0);
                     vo.setMemberReceiveCount(0L);
                 }
-            }else{
+            } else {
                 vo.setIsReceive(0);
                 vo.setMemberReceiveCount(0L);
             }
@@ -161,7 +155,7 @@ public class ICouponServiceImpl implements ICouponService {
             BeanUtils.copyProperties(item, vo);
             voList.add(vo);
         }
-        return  voList;
+        return voList;
 
     }
 
@@ -173,23 +167,20 @@ public class ICouponServiceImpl implements ICouponService {
                         .eq("site_id", RequestUtils.siteId())
                         .last("limit 1"));
         ShopCouponInfoVo vo = new ShopCouponInfoVo();
-        if(ObjectUtil.isEmpty(model)) return null;
+        if (ObjectUtil.isEmpty(model)) return null;
         BeanUtils.copyProperties(model, vo);
 
-        if(vo.getRemainCount() == -1)
-        {
+        if (vo.getRemainCount() == -1) {
             vo.setSumCount("-1");
-        }else{
+        } else {
             vo.setSumCount(Integer.toString(vo.getRemainCount() + vo.getReceiveCount()));
         }
 
-        if(ObjectUtil.isNotEmpty(RequestUtils.memberId()))
-        {
+        if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) {
             Long couponMemberCount = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
                     .eq("member_id", RequestUtils.memberId()).eq("coupon_id", couponId));
 
-            if(couponMemberCount > 0)
-            {
+            if (couponMemberCount > 0) {
                 vo.setIsReceive(1);
                 vo.setMemberReceiveCount(couponMemberCount.intValue());
             }
@@ -211,38 +202,40 @@ public class ICouponServiceImpl implements ICouponService {
         //判断是否领取过
         Long count = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
                 .eq("site_id", RequestUtils.siteId())
-                .eq("id", shopCouponReceiveParam.getCouponId())
+                .eq("coupon_id", shopCouponReceiveParam.getCouponId())
                 .eq("member_id", memberId)
                 .eq("receive_type", shopCouponReceiveParam.getType()));
 
         //判断优惠券是否充足
         ShopCoupon shopCoupon = shopCouponMapper.selectOne(new QueryWrapper<ShopCoupon>().eq("site_id", RequestUtils.siteId()).eq("id", shopCouponReceiveParam.getCouponId()));
 
-        if(ObjectUtil.isEmpty(shopCoupon)) throw new ApiException("优惠券已领完");
-        if(shopCoupon.getStatus() == -1) throw new ApiException("优惠券已失效");
-        if(count >= shopCoupon.getLimitCount()) throw new ApiException("领用次数已达到上限");
-        if(shopCoupon.getRemainCount() == 0) throw new ApiException("优惠券已领完");
+        if (ObjectUtil.isEmpty(shopCoupon)) throw new ApiException("优惠券已领完");
+        if (shopCoupon.getStatus() == -1) throw new ApiException("优惠券已失效");
+        if (count.intValue() >= shopCoupon.getLimitCount()) throw new ApiException("领用次数已达到上限");
+        if (shopCoupon.getRemainCount() == 0) throw new ApiException("优惠券已领完");
         Long time = System.currentTimeMillis() / 1000;
-        if(shopCoupon.getStartTime() > 0){
-
-            if(shopCoupon.getStartTime() > time) throw new ApiException("优惠券未开始");
-            if(shopCoupon.getEndTime() < time) throw new ApiException("优惠券已过期");
+        if (shopCoupon.getStartTime() > 0) {
+            if (shopCoupon.getStartTime() > time) throw new ApiException("优惠券未开始");
+            if (shopCoupon.getEndTime() < time) throw new ApiException("优惠券已过期");
+        }
+        if (shopCoupon.getValidEndTime() > 0) {
+            if (shopCoupon.getValidStartTime() > time) throw new ApiException("优惠券未开始");
+            if (shopCoupon.getValidEndTime() < time) throw new ApiException("优惠券已过期");
         }
         ShopCoupon updateCoupon = new ShopCoupon();
 
-        if( shopCoupon.getRemainCount() != -1) {
+        if (shopCoupon.getRemainCount() != -1) {
             updateCoupon.setRemainCount(shopCoupon.getRemainCount() - shopCouponReceiveParam.getNumber());
             updateCoupon.setReceiveCount(shopCoupon.getReceiveCount() + shopCouponReceiveParam.getNumber());
-        }else{
+        } else {
             updateCoupon.setReceiveCount(shopCoupon.getReceiveCount() + shopCouponReceiveParam.getNumber());
         }
         shopCouponMapper.update(updateCoupon, new QueryWrapper<ShopCoupon>().eq("id", shopCoupon.getId()));
 
         Long expireTime;
-        if(shopCoupon.getValidType() == 1)
-        {
-            expireTime = time + Long.valueOf( 86400 * shopCoupon.getLength() );
-        }else{
+        if (shopCoupon.getValidType() == 1) {
+            expireTime = time + Long.valueOf(86400 * shopCoupon.getLength());
+        } else {
             expireTime = shopCoupon.getValidEndTime();
         }
         ShopCouponMember shopCouponMember = new ShopCouponMember();
@@ -258,23 +251,21 @@ public class ICouponServiceImpl implements ICouponService {
         shopCouponMember.setStatus(CouponMemberStatusEnum.WAIT_USE.getStatus());
         shopCouponMember.setMinConditionMoney(shopCoupon.getMinConditionMoney());
         shopCouponMemberMapper.insert(shopCouponMember);
-
     }
 
     @Override
     public PageResult<ShopCouponMemberListVo> getMemberPage(PageParam pageParam, Integer status, String type) {
 
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopCouponMember> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
-        if(status != null)
-        {
+        queryWrapper.eq("member_id", RequestUtils.memberId());
+        if (status != null) {
             queryWrapper.eq("status", status);
         }
-        if(type != null && !type.equals("all"))
-        {
+        if (type != null && !type.equals("all")) {
             queryWrapper.eq("type", type);
         }
         queryWrapper.orderByDesc("id");
@@ -296,12 +287,12 @@ public class ICouponServiceImpl implements ICouponService {
 
         Map<Integer, String> statusMap = CouponMemberStatusEnum.getMap();
 
-        for(Map.Entry<Integer, String> entry : statusMap.entrySet()){
+        for (Map.Entry<Integer, String> entry : statusMap.entrySet()) {
             JSONObject jsonObject = new JSONObject();
             Long count = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
                     .eq("member_id", RequestUtils.memberId())
                     .eq("status", entry.getKey()));
-            if(count == null){
+            if (count == null) {
                 count = 0L;
             }
             jsonObject.put("status", entry.getKey());
@@ -360,13 +351,12 @@ public class ICouponServiceImpl implements ICouponService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.eq("status", CouponStatusEnum.NORMAL.getStatus());
         queryWrapper.eq("receive_type", CouponReceiveTypeEnum.USER.getType());
-        if(!couponIds.equals(""))
-        {
+        if (!couponIds.equals("")) {
             queryWrapper.in("coupon_id", Arrays.asList(couponIds.split(",")));
         }
 
         //根据时间查询
-        Long nowTime = System.currentTimeMillis()/1000;
+        Long nowTime = System.currentTimeMillis() / 1000;
         queryWrapper.and(i -> i.and(j -> j.le("start_time", nowTime).ge("end_time", nowTime))
                 .or(j -> j.eq("start_time", 0).eq("end_time", 0)));
         queryWrapper.orderByDesc("id");

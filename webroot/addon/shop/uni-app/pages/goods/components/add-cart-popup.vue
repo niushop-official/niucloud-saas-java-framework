@@ -2,7 +2,7 @@
 	<view @touchmove.prevent.stop>
 		<u-popup :show="goodsSkuPop" @close="closeFn" mode="bottom">
 			<view v-if="Object.keys(goodsDetail).length"  @touchmove.prevent.stop class="rounded-t-[20rpx] overflow-hidden bg-[#fff] py-[32rpx] relative">
-				<view class="flex mb-[58rpx] px-[32rpx]">
+				<view class="flex px-[32rpx] mb-[58rpx]">
 					<u--image width="180rpx" height="180rpx" :radius="'var(--goods-rounded-big)'" :src="img(detail.sku_image)" model="aspectFill">
 						<template #error>
 							<image class="w-[180rpx] h-[180rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
@@ -15,16 +15,15 @@
 								<text class="text-[32rpx] font-bold price-font mr-[4rpx]">￥</text>
 								<text class="text-[48rpx] price-font">{{ parseFloat(goodsPrice(detail)).toFixed(2).split('.')[0] }}</text>
 								<text class="text-[32rpx] price-font">.{{ parseFloat(goodsPrice(detail)).toFixed(2).split('.')[1] }}</text>
-								<image class="h-[24rpx] ml-[6rpx]" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-								<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(detail) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
+								<image class="h-[24rpx] ml-[6rpx] max-w-[44rpx]" v-if="priceType(detail) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 							</view>
 							<view class="text-[26rpx] leading-[32rpx] text-[#303133] mt-[12rpx]">库存{{ detail.stock }}{{ goodsDetail.goods.unit }}</view>
 						</view>
-						<view class="w-[100%] text-[26rpx] leading-[30rpx] text-[var(--text-color-light6)] multi-hidden max-h-[60rpx]" v-if="goodsDetail.goods_spec && goodsDetail.goods_spec.length">已选规格：{{ detail.sku_spec_format }}</view>
+						<view class="w-[100%] text-[26rpx] leading-[30rpx] text-[var(--text-color-light6)] multi-hidden max-h-[60rpx]" v-if="goodsDetail.goodsSpec && goodsDetail.goodsSpec.length">已选规格：{{ detail.sku_spec_format }}</view>
 					</view>
 				</view>
 				<scroll-view class="h-[500rpx] box-border px-[32rpx] mb-[30rpx]" scroll-y="true">
-					<view :class="{'mt-[36rpx]': 0 != index }" v-for="(item, index) in goodsDetail.goods_spec" :key="index">
+					<view :class="{'mt-[36rpx]': 0 != index }" v-for="(item, index) in goodsDetail.goodsSpec" :key="index">
 						<view class="text-[26rpx] leading-[36rpx] mb-[24rpx]">{{ item.spec_name }}</view>
 						<view class="flex flex-wrap">
 							<view
@@ -106,8 +105,8 @@ const getGoodsSkuFn = (sku_id: any) => {
 		info.value = res.data
 		// 当前详情内容
 		currSpec.value.sku_id = sku_id
-		if (info.value.sku_list && Object.keys(info.value.sku_list).length) {
-			info.value.sku_list.forEach((item: any) => {
+		if (info.value.skuList && Object.keys(info.value.skuList).length) {
+			info.value.skuList.forEach((item: any) => {
 				if (item.sku_id == sku_id) {
 					detail.value = item;
 					currSpec.value.name = item.sku_spec_format.split(",");
@@ -153,7 +152,7 @@ const goodsDetail = computed(() => {
 
 		if (!Object.keys(currSpec.value.name).length) currSpec.value.name = data.sku_spec_format.split(",");
 
-		data.goods_spec.forEach((item: any, index: any) => {
+		data.goodsSpec.forEach((item: any, index: any) => {
 			let specName = item.spec_values.split(",");
 			item.values = [];
 			specName.forEach((specItem: any, specIndex: any) => {
@@ -173,8 +172,8 @@ const goodsDetail = computed(() => {
 		getSkuId();
 
 		// 当前详情内容
-		if (data.sku_list && Object.keys(data.sku_list).length) {
-			data.sku_list.forEach((item: any) => {
+		if (data.skuList && Object.keys(data.skuList).length) {
+			data.skuList.forEach((item: any) => {
 				if (item.sku_id == currSpec.value.skuId) {
 					detail.value = item;
 				}
@@ -204,7 +203,7 @@ const change = (data: any, index: any) => {
 }
 
 const getSkuId = () => {
-	info.value.sku_list.forEach((skuItem: any, skuIndex: any) => {
+	info.value.skuList.forEach((skuItem: any, skuIndex: any) => {
 		let sku_spec_format = skuItem.sku_spec_format.split(',')
 		if (currSpec.value.name.every((v: any) => sku_spec_format.includes(v))) {
 			currSpec.value.skuId = skuItem.sku_id
@@ -226,9 +225,7 @@ const save = () => {
 
         let price = 0
 
-        if (goodsDetail.value.goods.is_discount && detail.value.sale_price != detail.value.price) {
-            price = detail.value.sale_price ? detail.value.sale_price : detail.value.price // 折扣价
-        } else if (goodsDetail.value.goods.member_discount && getToken() && detail.value.member_price != detail.value.price) {
+         if (goodsDetail.value.goods.member_discount && getToken() && detail.value.member_price != detail.value.price) {
             price = detail.value.member_price ? detail.value.member_price : detail.value.price // 会员价
         } else {
             price = detail.value.price
@@ -241,7 +238,8 @@ const save = () => {
             sku_id: detail.value.sku_id,
             stock: detail.value.stock,
             sale_price: price,
-            num: buyNum.value,
+            num: buyNum.value
+			
         }, 0, () => {
             uni.showToast({
                 title: '加入购物车成功',
@@ -256,9 +254,7 @@ const save = () => {
 // 商品价格
 const goodsPrice = (data:any) => {
     let price = "0.00";
-    if (goodsDetail.value.goods.is_discount && data.sale_price != data.price) {
-        price = data.sale_price ? data.sale_price : data.price // 折扣价
-    } else if (goodsDetail.value.goods.member_discount && getToken() && data.member_price != data.price) {
+    if (goodsDetail.value.goods.member_discount && getToken() && data.member_price != data.price) {
         price = data.member_price ? data.member_price : data.price // 会员价
     } else {
         price = data.price
@@ -269,9 +265,7 @@ const goodsPrice = (data:any) => {
 // 价格类型 
 const priceType = (data:any) => {
     let type = "";
-    if (goodsDetail.value.goods.is_discount && data.sale_price != data.price) {
-        type = 'discount_price'// 折扣
-    } else if (goodsDetail.value.goods.member_discount && getToken() && data.member_price != data.price) {
+    if (goodsDetail.value.goods.member_discount && getToken() && data.member_price != data.price) {
         type = 'member_price' // 会员价
     } else {
         type = ""

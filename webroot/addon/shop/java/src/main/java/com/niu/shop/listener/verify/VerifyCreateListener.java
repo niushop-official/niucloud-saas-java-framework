@@ -84,7 +84,7 @@ public class VerifyCreateListener extends VerifyCreateEventDefiner {
             JSONObject diyItem = new JSONObject();
             JSONArray diyList = new JSONArray();
             diyList.add(new JSONObject().set("title", "订单编号").set("value", order.getOrderNo()));
-            diyList.add(new JSONObject().set("title", "支付时间").set("value", DateUtil.date(order.getPayTime() * 1000)));
+            diyList.add(new JSONObject().set("title", "支付时间").set("value", DateUtil.formatDateTime(new Date(order.getPayTime() * 1000))));
             diyItem.set("title", "订单信息");
             diyItem.set("list", diyList);
             diy.add(diyItem);

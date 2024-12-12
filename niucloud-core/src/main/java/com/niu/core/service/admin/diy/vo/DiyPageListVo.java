@@ -35,6 +35,7 @@ public class DiyPageListVo implements Serializable {
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long updateTime; // 更新时间
     private String typeName;
+    private String addonName;
 
     public String getTypeName() {
         JSONObject template = TemplateEnum.getTemplate();

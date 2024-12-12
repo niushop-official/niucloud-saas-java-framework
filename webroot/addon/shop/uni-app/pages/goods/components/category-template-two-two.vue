@@ -63,7 +63,7 @@
 					<u-popup :show="labelPopup" mode="top" @close="labelPopup = false">
 						<view class="flex flex-wrap pt-[20rpx] pb-[24rpx]" @touchmove.prevent.stop>
 							<text
-								class="px-[14rpx] flex-shrink-0 w-[160rpx] box-border ml-[20rpx] mb-[26rpx] h-[60rpx] text-center leading-[56rpx] text-[26rpx] border-[2rpx] border-solid !rounded-[100rpx] text-[#333] truncate"
+								class="px-[14rpx] flex-shrink-0 w-[160rpx] box-border ml-[20rpx] mb-[26rpx] h-[60rpx] text-center leading-[56rpx] text-[24rpx] border-[2rpx] border-solid !rounded-[100rpx] text-[#333] truncate"
 								:class="{ 'bg-[var(--primary-color-light)] font-500 text-[var(--primary-color)] border-[var(--primary-color)]': index === subActive, 'border-[var(--temp-bg)]  bg-[var(--temp-bg)]': index != subActive }"
 								v-for="(item, index) in tabsData[tabActive]?.child_list"
 								:key="tabsData[tabActive].category_id" @click="subMenuClick(index, item)">{{ item.category_name }}</text>
@@ -76,8 +76,8 @@
 						<view
 							class="w-[536rpx] box-border bg-white w-full flex mx-[20rpx] py-[24rpx] px-[20rpx] rounded-[var(--rounded-small)]"
 							:class="{ 'mt-[20rpx]': index }" @click.stop="toLink(item.goods_id)">
-							<view class="mr-[20rpx] rounded-[var(--goods-rounded-small)] overflow-hidden">
-								<u--image width="168rpx" height="168rpx" :radius="'var(--goods-rounded-small)'" :src="img(item.goods_cover_thumb_mid ? item.goods_cover_thumb_mid : '')" model="aspectFill">
+							<view class="w-[168rpx] h-[168rpx] flex items-center justify-center mr-[20rpx] rounded-[var(--goods-rounded-small)] overflow-hidden">
+								<u--image width="168rpx" height="168rpx" :radius="'var(--goods-rounded-small)'" :src="img( item.goods_cover_thumb_mid || '')" model="aspectFill">
 									<template #error>
 										<image class="w-[168rpx] h-[168rpx]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 									</template>
@@ -85,26 +85,24 @@
 							</view>
 							<view class="flex flex-1 flex-wrap flex-col">
 								<view class="max-h-[80rpx] text-[26rpx] leading-[40rpx] multi-hidden">
-									{{ item.goods_name }}
-								</view>
+									{{ item.goods_name }}</view>
 								<view class="flex  items-end justify-between flex-1">
 									<view class="text-[var(--price-text-color)] price-font -mb-[8rpx]">
 										<text class="text-[24rpx] font-500">￥</text>
 										<text class="text-[40rpx] font-500">{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[0] }}</text>
 										<text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
-										<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-										<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
+										<image class="h-[24rpx] max-w-[46rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 									</view>
 									<view
 										v-if="(item.goods_type == 'real' || (item.goods_type == 'virtual' && item.virtual_receive_type != 'verify')) &&
-										item.goods_sku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id] && config.cart.control && config.cart.event === 'cart'"
+										item.goodsSku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id] && config.cart.control && config.cart.event === 'cart'"
 										class="flex items-center">
 										<view class="relative w-[32rpx] h-[32rpx]">
-											<text class="text-[32rpx] text-color nc-iconfont nc-icon-jianshaoV6xx absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" @click.stop="reduceCart(cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id])"></text>
+											<text class="text-[32rpx] text-color nc-iconfont nc-icon-jianshaoV6xx absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" @click.stop="reduceCart(cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id])"></text>
 										</view>
-										<text class="text-[#333] text-[24rpx] mx-[16rpx]">{{ cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id].num }}</text>
+										<text class="text-[#333] text-[24rpx] mx-[16rpx]">{{ cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id].num }}</text>
 										<view class="relative w-[32rpx] h-[32rpx]">
-											<text class="text-[32rpx] text-color iconfont iconjiahao2fill absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" :id="'itemCart' + index" @click.stop="addCartBtn(item,cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id], 'itemCart' + index)"></text>
+											<text class="text-[32rpx] text-color iconfont iconjiahao2fill absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" :id="'itemCart' + index" @click.stop="addCartBtn(item,cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id], 'itemCart' + index)"></text>
 										</view>
 									</view>
 									<template v-else-if="(item.goods_type == 'virtual' && config.cart.event !== 'cart') || item.goods_type == 'real'">
@@ -327,10 +325,10 @@ const animationAddCart = (row: any, id: any) => {
 	cartRepeatFlag.value = true
 
 	let obj: any = {
-		goods_id: row.goods_sku.goods_id,
-		sku_id: row.goods_sku.sku_id,
+		goods_id: row.goodsSku.goods_id,
+		sku_id: row.goodsSku.sku_id,
 		sale_price: goodsPrice(row),
-		stock: row.goods_sku.stock
+		stock: row.goodsSku.stock
 	};
 	if (row.id) {
 		obj.num = row.num;
@@ -469,7 +467,7 @@ const cartRef = ref()
 const itemCart = (row: any, id: any) => {
     // 虚拟商品，并且需要核销，禁止加入购物车
     if (row.goods_type == 'virtual' && row.virtual_receive_type == 'verify') {
-        return toLink(row.goods_sku.goods_id)
+        return toLink(row.goodsSku.goods_id)
     }
 
     if (config.cart.event !== 'cart') {
@@ -480,11 +478,11 @@ const itemCart = (row: any, id: any) => {
         useLogin().setLoginBack({url: '/addon/shop/pages/goods/category'})
         return false
     }
-    if (row.goods_sku.sku_spec_format) {
-        cartRef.value.open(row.goods_sku.sku_id)
+    if (row.goodsSku.sku_spec_format) {
+        cartRef.value.open(row.goodsSku.sku_id)
     } else {
         //单规格添加购物车
-		if (parseInt(row.goods_sku.num||0) >= parseInt(row.goods_sku.stock)) {
+		if (parseInt(row.goodsSku.num||0) >= parseInt(row.goodsSku.stock)) {
 		    uni.showToast({ title: '商品库存不足', icon: 'none' })
 		    return;
 		}
@@ -569,12 +567,8 @@ const settlement = () => {
 // 价格类型 
 const priceType = (data:any) =>{
 	let type = "";
-    if(data.is_discount && data.goods_sku.sale_price != data.goods_sku.price){
-        type = 'discount_price'// 折扣
-    }else if(data.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
+    if(data.member_discount && getToken() && data.goodsSku.member_price != data.goodsSku.price) {
         type = 'member_price' // 会员价
-    }else{
-        type = ""
     }
     return type;
 }
@@ -582,12 +576,10 @@ const priceType = (data:any) =>{
 // 商品价格
 const goodsPrice = (data:any) => {
     let price = "0.00";
-    if (data.is_discount && data.goods_sku.sale_price != data.goods_sku.price) {
-        price = data.goods_sku.sale_price ? data.goods_sku.sale_price : data.goods_sku.price // 折扣价
-    } else if (data.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
-        price = data.goods_sku.member_price ? data.goods_sku.member_price : data.goods_sku.price // 会员价
+    if (data.member_discount && getToken() && data.goodsSku.member_price != data.goodsSku.price) {
+        price = data.goodsSku.member_price ? data.goodsSku.member_price : data.goodsSku.price // 会员价
     } else {
-        price = data.goods_sku.price
+        price = data.goodsSku.price
     }
     return price;
 }
@@ -676,7 +668,7 @@ const goodsPrice = (data:any) => {
 
 .tabs-box {
 	width: 168rpx;
-	font-size: 28rpx;
+	font-size: 26rpx;
 }
 
 .tabs-box .tab-item {

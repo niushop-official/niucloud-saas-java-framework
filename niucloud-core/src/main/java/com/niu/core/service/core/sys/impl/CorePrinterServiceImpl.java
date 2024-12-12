@@ -76,7 +76,7 @@ public class CorePrinterServiceImpl implements ICorePrinterService {
         List<SysPrinterPrintTicketResult> results = CallbackPublisher.publishReturnList(event)
                 .stream()
                 .map(result -> (SysPrinterPrintTicketResult) result)
-                .collect(Collectors.toList());
+                .toList();
 
         SysPrinterPrintTicketVo vo = new SysPrinterPrintTicketVo();
         Optional<SysPrinterPrintTicketResult> error = results.stream().filter(result -> result.getCode() != 0).findFirst();

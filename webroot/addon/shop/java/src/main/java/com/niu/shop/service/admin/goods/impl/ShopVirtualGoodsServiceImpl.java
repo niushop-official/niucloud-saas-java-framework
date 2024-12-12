@@ -83,6 +83,7 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
             sku.setSkuImage(model.getGoodsCover());
             sku.setSalePrice(addParam.getPrice());
             sku.setIsDefault(1);
+            sku.setSkuSpecFormat("");
             skuData.add(sku);
         } else {
             if (addParam.getGoodsSkuData().keySet().size() == 0) throw new CommonException("请添加商品规格");

@@ -113,6 +113,13 @@
         "is_share": 1,
         "action": "",
         "parent": "SHOP_LINK"
+      },
+      {
+        "name": "SHOP_NEWCOMER_LIST",
+        "title": "新人专享",
+        "url": "/addon/shop/pages/newcomer/list",
+        "is_share": "",
+        "action": ""
       }
     ],
     "addon_info": {

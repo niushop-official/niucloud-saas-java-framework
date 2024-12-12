@@ -3,9 +3,10 @@ package com.niu.shop.service.api.goods.vo;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.goods.ShopGoodsSpec;
@@ -49,17 +50,26 @@ public class ShopGoodsDetailVo implements Serializable {
     private Integer exchangeId;
     private ShopDiscountGoodsInfoVo discountInfo;
 
+    @JsonProperty("skuList")
     private List<Sku> skuList;
 
     private Goods goods;
 
+    @JsonProperty("goodsSpec")
     private List<Spec> goodsSpec;
 
-    private List<Service> service;
+    private List<Service> service = new LinkedList<>();
 
-    private List<Label> labelInfo;
+    private List<Label> labelInfo = new LinkedList<>();
 
     private Brand brandInfo;
+    private int isNewcomer;
+    private String type;
+    private String typeName;
+
+    private String newcomerPrice;
+
+    private String newcomerDesc;
 
     @Data
     public static class Goods {
@@ -107,6 +117,7 @@ public class ShopGoodsDetailVo implements Serializable {
         private String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
         private Integer posterId; // 海报id
         private Integer isCollect = 0;
+        private int hasBuy;
         private Map<String, DeliveryConfigVo> deliveryTypeList;
 
         private ICoreUploadService coreUploadService() {
@@ -128,7 +139,7 @@ public class ShopGoodsDetailVo implements Serializable {
         public List<String> getGoodsImageThumbSmall() {
             List<String> list = new LinkedList<>();
             List<String> images = Arrays.asList(this.goodsImage.split(","));
-            for (String path: images) {
+            for (String path : images) {
                 list.add(coreUploadService().thumb(this.siteId, path, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
             }
             return list;
@@ -137,7 +148,7 @@ public class ShopGoodsDetailVo implements Serializable {
         public List<String> getGoodsImageThumbMid() {
             List<String> list = new LinkedList<>();
             List<String> images = Arrays.asList(this.goodsImage.split(","));
-            for (String path: images) {
+            for (String path : images) {
                 list.add(coreUploadService().thumb(this.siteId, path, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
             }
             return list;
@@ -146,7 +157,7 @@ public class ShopGoodsDetailVo implements Serializable {
         public List<String> getGoodsImageThumbBig() {
             List<String> list = new LinkedList<>();
             List<String> images = Arrays.asList(this.goodsImage.split(","));
-            for (String path: images) {
+            for (String path : images) {
                 list.add(coreUploadService().thumb(this.siteId, path, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType()));
             }
             return list;
@@ -184,6 +195,8 @@ public class ShopGoodsDetailVo implements Serializable {
         private Integer saleNum; // 销量
         private Integer isDefault; // 是否默认
         private BigDecimal memberPrice;
+        private BigDecimal newcomerPrice;
+        private int isNewcomer;
     }
 
     @Data

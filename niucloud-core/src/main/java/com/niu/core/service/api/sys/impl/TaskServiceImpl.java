@@ -2,7 +2,6 @@ package com.niu.core.service.api.sys.impl;
 
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.enums.member.GrowthRuleEnum;
 import com.niu.core.service.api.sys.ITaskService;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.member.ICoreMemberService;
@@ -53,6 +52,6 @@ public class TaskServiceImpl implements ITaskService {
             }
             return filteredObject;
         }
-        return null;
+        return new JSONObject();
     }
 }

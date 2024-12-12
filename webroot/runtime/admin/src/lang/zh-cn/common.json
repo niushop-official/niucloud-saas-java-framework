@@ -186,5 +186,8 @@
   "generateMin": "输入字符不能小于",
   "generateUnit": "位",
   "startDate": "开始时间",
-  "endDate": "结束时间"
+  "endDate": "结束时间",
+  "newcomerNumberColor": "数字颜色",
+  "newcomerNumberBg": "数字背景色",
+  "newcomerOtherColor": "文字颜色"
 }

@@ -3,18 +3,20 @@ package com.niu.shop.service.admin.marketing.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.niu.core.common.domain.PageResult;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
 import com.niu.shop.entity.active.ShopActive;
 import com.niu.shop.mapper.active.ShopActiveMapper;
+import com.niu.shop.service.admin.marketing.IShopActiveService;
 import com.niu.shop.service.admin.marketing.param.ShopActiveParam;
 import com.niu.shop.service.admin.marketing.param.ShopDiscountSearchParam;
-import com.niu.shop.service.admin.marketing.IShopActiveService;
 import com.niu.shop.service.admin.marketing.vo.ShopDiscountInfoVo;
 import com.niu.shop.service.admin.marketing.vo.ShopDiscountListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
 import javax.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,21 +26,22 @@ import java.util.List;
  * 店铺营销活动（整体活动）实现
  */
 @Service
-public class ShopActiveServiceImpl implements IShopActiveService {
-        
+public class ShopActiveServiceImpl extends ServiceImpl<ShopActiveMapper, ShopActive> implements IShopActiveService {
+
     @Resource
     ShopActiveMapper shopActiveMapper;
 
     /**
      * 店铺营销活动（整体活动）列表
-     * @param pageParam 分页参数
+     *
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<ShopActiveListVo>
      */
     @Override
     public PageResult<ShopDiscountListVo> list(PageParam pageParam, ShopDiscountSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopActive> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("active_id");
@@ -55,6 +58,7 @@ public class ShopActiveServiceImpl implements IShopActiveService {
 
     /**
      * 店铺营销活动（整体活动）详情
+     *
      * @param id 主键
      * @return ShopActiveInfoVo
      */
@@ -62,8 +66,8 @@ public class ShopActiveServiceImpl implements IShopActiveService {
     public ShopDiscountInfoVo info(Integer id) {
         ShopActive model = shopActiveMapper.selectOne(
                 new QueryWrapper<ShopActive>()
-                    .eq("active_id", id)
-                    .last("limit 1"));
+                        .eq("active_id", id)
+                        .last("limit 1"));
 
         Assert.notNull(model, "数据不存在");
 
@@ -74,6 +78,7 @@ public class ShopActiveServiceImpl implements IShopActiveService {
 
     /**
      * 店铺营销活动（整体活动）添加
+     *
      * @param addParam 参数
      */
     @Override
@@ -110,8 +115,8 @@ public class ShopActiveServiceImpl implements IShopActiveService {
     public void edit(Integer id, ShopActiveParam editParam) {
         ShopActive model = shopActiveMapper.selectOne(
                 new QueryWrapper<ShopActive>()
-                    .eq("active_id",  id)
-                    .last("limit 1"));
+                        .eq("active_id", id)
+                        .last("limit 1"));
 
         Assert.notNull(model, "数据不存在!");
         model.setActiveId(id);
@@ -137,14 +142,15 @@ public class ShopActiveServiceImpl implements IShopActiveService {
 
     /**
      * 店铺营销活动（整体活动）删除
+     *
      * @param id 主键ID
      */
     @Override
     public void del(Integer id) {
         ShopActive model = shopActiveMapper.selectOne(
                 new QueryWrapper<ShopActive>()
-                    .eq("active_id", id)
-                    .last("limit 1"));
+                        .eq("active_id", id)
+                        .last("limit 1"));
 
         Assert.notNull(model, "数据不存在!");
 

@@ -301,8 +301,8 @@ public abstract class OrderCreateHelper {
 
                 for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
                     List<Integer> goodsCategory = JSONUtil.parseArray(sku.getGoods().getGoodsCategory()).toList(Integer.class);
-                    boolean hasIntersection = !goodsCategory.retainAll(categoryIds);
-                    if (!hasIntersection) {
+                    boolean hasIntersection = goodsCategory.stream().anyMatch(categoryIds::contains);
+                    if (hasIntersection) {
                         matchGoods.add(sku);
                         matchGoodsMoney = matchGoodsMoney.add(sku.getGoodsMoney().subtract(sku.getDiscountMoney()));
                     }
@@ -324,7 +324,7 @@ public abstract class OrderCreateHelper {
 
             if (matchGoods.size() == 0) {
                 vo.getError().add("当前优惠券在本单不可用");
-            } else if (matchGoodsMoney.compareTo(memberCoupon.getMinConditionMoney()) == -1) {
+            } else if (matchGoodsMoney.compareTo(new BigDecimal(0)) == 0 || matchGoodsMoney.compareTo(memberCoupon.getMinConditionMoney()) == -1) {
                 vo.getError().add("未达到当前优惠券的最低使用条件");
             } else {
                 BigDecimal couponMoney = matchGoodsMoney.compareTo(memberCoupon.getPrice()) == -1 ? matchGoodsMoney : memberCoupon.getPrice();

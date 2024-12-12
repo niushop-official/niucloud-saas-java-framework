@@ -11,22 +11,16 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.common.utils.json.JsonLoadUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.member.MemberSign;
 import com.niu.core.mapper.member.MemberSignMapper;
-import com.niu.core.service.admin.member.vo.SignConfigVo;
+import com.niu.core.service.api.member.IMemberSignService;
 import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.api.member.vo.*;
-import com.niu.core.service.api.member.IMemberSignService;
 import com.niu.core.service.core.member.ICoreMemberService;
 import com.niu.core.service.core.sys.ICoreConfigService;
-import com.niu.core.service.core.sys.ICoreSysConfigService;
-import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,6 +118,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
         model.setCreateTime(System.currentTimeMillis() / 1000);
         model.setDays(days);
         model.setDayAward(config.getDayAward().toString());
+        model.setContinueAward("");
         if (days.equals(1)) model.setStartTime(System.currentTimeMillis() / 1000);
         memberSignMapper.insert(model);
 
@@ -162,7 +157,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
                 coreMemberService.memberGiftGrant(param.siteId(), param.memberId(), continueAward, continueAwardVar);
                 model.setContinueAward(continueAward.toString());
 
-                vo.setInfo("连签"+ days.toString() + "天恭喜您获得以下奖励");
+                vo.setInfo("连签" + days.toString() + "天恭喜您获得以下奖励");
                 vo.setAwards(continueAward);
 
                 memberSignMapper.updateById(model);
@@ -232,7 +227,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
         }
         if (!signConfig.getContinueAward().isEmpty()) {
             JSONArray continueAward = new JSONArray();
-            for(int i = 0; i < signConfig.getContinueAward().size(); i++) {
+            for (int i = 0; i < signConfig.getContinueAward().size(); i++) {
                 JSONObject awardItem = new JSONObject();
                 JSONObject item = signConfig.getContinueAward().getJSONObject(i);
                 awardItem.set("continue_sign", item.get("continue_sign"));
@@ -247,7 +242,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
                 List<String> content = new ArrayList<>();
                 String icon = "";
 
-                for (String key: award.keySet()) {
+                for (String key : award.keySet()) {
                     if (award.getJSONObject(key).get("content") != null) {
                         content.add(award.getByPath(key + ".content.text", String.class));
                         icon = award.getByPath(key + ".content.icon", String.class);
@@ -256,7 +251,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
                 JSONObject gift = new JSONObject();
                 if (content.size() > 0) {
                     gift.set("text", String.join("+", content));
-                    gift.set("icon", content.size() > 1 ?  "static/resource/images/member/sign/pack01.png" : icon);
+                    gift.set("icon", content.size() > 1 ? "static/resource/images/member/sign/pack01.png" : icon);
                 }
 
                 awardItem.set("gift", new JSONObject().set("total", gift));
@@ -292,7 +287,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
         }
         if (!signConfig.getContinueAward().isEmpty()) {
             JSONArray continueAward = new JSONArray();
-            for(int i = 0; i < signConfig.getContinueAward().size(); i++) {
+            for (int i = 0; i < signConfig.getContinueAward().size(); i++) {
                 JSONObject item = signConfig.getContinueAward().getJSONObject(i);
                 JSONObject gift = JSONUtil.parseObj(signConfig.getContinueAward().getJSONObject(i).toString());
                 gift.remove("continue_sign");

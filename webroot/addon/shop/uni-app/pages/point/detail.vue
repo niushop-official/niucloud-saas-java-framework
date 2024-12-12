@@ -240,7 +240,7 @@ import goodsSku from '@/addon/shop/pages/point/components/goods-sku.vue';
 import useMemberStore from '@/stores/member'
 import { useShare }from '@/hooks/useShare'
 import sharePoster from '@/components/share-poster/share-poster.vue'
-import {useGoods} from '@/addon/shop/hooks/useGoods'
+import {useGoods} from '@/hooks/useGoods'
 
 const diyGoods = useGoods();
 // 分享

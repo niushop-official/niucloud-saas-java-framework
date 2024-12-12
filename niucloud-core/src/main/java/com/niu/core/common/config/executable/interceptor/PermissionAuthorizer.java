@@ -70,7 +70,8 @@ public class PermissionAuthorizer {
             init = true;
         }
         String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
-        Authorizer authorizer = authorizerMap.get(bestMatchingPattern);
+        Authorizer authorizer = authorizerMap.get("["+ request.getMethod() +"]" + bestMatchingPattern);
+
         if (authorizer != null) {
             try{
                 Class controller=Class.forName(authorizer.getHandlerMethod().getBean().toString());
@@ -114,7 +115,7 @@ public class PermissionAuthorizer {
             authorizer.setSourcePath(supportUrl);
             authorizer.setMethod(supportMethods.toString());
             authorizer.setHandlerMethod(handlerMethod);
-            authorizerMap.put(supportUrl, authorizer);
+            authorizerMap.put(supportMethods.toString() + supportUrl, authorizer);
         }
     }
 

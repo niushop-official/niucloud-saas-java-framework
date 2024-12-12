@@ -54,7 +54,9 @@ public interface IGoodsService {
 
     /**
      * 获取商品列表供组件调用
+     *
      * @param param
      */
     List<ShopGoodsListVo> getGoodsComponents(ShopGoodsComponentsSearchParam param);
+
 }

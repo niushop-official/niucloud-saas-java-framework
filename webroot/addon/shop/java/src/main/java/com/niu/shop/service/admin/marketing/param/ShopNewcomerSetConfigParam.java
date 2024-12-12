@@ -1,5 +1,6 @@
 package com.niu.shop.service.admin.marketing.param;
 
+import com.niu.shop.service.core.marketing.model.ShopNewcomerBannerList;
 import lombok.Data;
 
 import java.util.List;
@@ -15,16 +16,5 @@ public class ShopNewcomerSetConfigParam {
     private String participationWay;
     private String appointTime;
     private Integer limitNum;
-    private List<BannerList> bannerList;
-
-    @Data
-    public static class BannerList {
-        private String imageUrl;
-        private ToLink toLink;
-
-        @Data
-        public static class ToLink {
-            private String name;
-        }
-    }
+    private List<ShopNewcomerBannerList> bannerList;
 }

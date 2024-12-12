@@ -27,7 +27,7 @@
                                 </view>
                                 <u-swipe-action ref="swipeActive">
                                     <block v-for="(item, index) in cartList">
-                                            <view v-if="item.goods_sku"  class="py-[20rpx] overflow-hidden w-full">
+                                            <view v-if="item.goodsSku"  class="py-[20rpx] overflow-hidden w-full">
                                                 <u-swipe-action-item :options="cartOptions" @click="swipeClick(index,item)">
                                                     <view class="flex px-[var(--pad-sidebar-m)]" @click.stop="item.checked = !item.checked">
 														<view class="self-center w-[58rpx] h-[60rpx] flex items-center">
@@ -36,59 +36,65 @@
 																:class="{ 'iconxuanze1':item.checked,'bg-[#F5F5F5]':!item.checked}">
 															</text>
 														</view>
-                                                        <u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" @click="toDetail(item)" :src="img(item.goods_sku.sku_image_thumb_mid||'')" model="aspectFill">
-                                                            <template #error>
-                                                                <image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-                                                            </template>
-                                                        </u--image>
+                                                        <view class="w-[200rpx] h-[200rpx] flex items-center justify-center rounded-[var(--goods-rounded-big)] overflow-hidden">
+															<u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" @click="toDetail(item)" :src="img(item.goodsSku.sku_image_thumb_mid||'')" model="aspectFill">
+															    <template #error>
+															        <image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+															    </template>
+															</u--image>
+														</view>
                                                         <view class="flex flex-1 flex-wrap ml-[20rpx]">
                                                             <view class="w-[100%] flex flex-col items-baseline">
                                                                 <view class="text-[#333] text-[28rpx] max-h-[80rpx] leading-[40rpx] multi-hidden font-400">
-                                                                    {{ item.goods.goods_name }}
-                                                                </view>
-                                                                <view class="box-border max-w-[376rpx] mt-[10rpx] px-[14rpx] h-[36rpx] leading-[36rpx] truncate text-[var(--text-color-light6)] bg-[#F5F5F5] text-[22rpx] rounded-[20rpx]" v-if="item.goods_sku && item.goods_sku.sku_spec_format">
-                                                                    {{ item.goods_sku.sku_spec_format }}
+																	{{ item.goods.goods_name }}
+																</view>
+                                                                <view class="box-border max-w-[376rpx] mt-[10rpx] px-[14rpx] h-[36rpx] leading-[36rpx] truncate text-[var(--text-color-light6)] bg-[#F5F5F5] text-[22rpx] rounded-[20rpx]" v-if="item.goodsSku && item.goodsSku.sku_spec_format">
+                                                                    {{ item.goodsSku.sku_spec_format }}
                                                                 </view>
                                                             </view>
-                                                            <view class="flex justify-between items-end self-end w-[100%]">
-                                                                <view class="flex items-end text-[var(--price-text-color)] leading-[40rpx] price-font">
-                                                                    <view class="text-[var(--price-text-color)] price-font">
-                                                                        <text class="text-[24rpx] font-500">￥</text>
-																		<text class="text-[40rpx] font-500">{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[0] }}</text>
-																		<text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
-																		<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-																		<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
-                                                                    </view>
-                                                                </view>
-                                                                <u-number-box v-model="item.num" :min="numLimit(item).min"
-                                                                    :max="numLimit(item).max" integer :step="1" input-width="68rpx"
-                                                                    input-height="52rpx" button-size="52rpx" disabledInput
-                                                                    @change="numChange($event, index)">
-                                                                    <template #minus>
-                                                                        <view class="relative w-[26rpx] h-[26rpx]">
+															<view v-if="item.goods && item.goods.goods_label_name && item.goods.goods_label_name.length" class="flex flex-wrap mb-[auto]">
+																<template v-for="(tagItem, tagIndex) in item.goods.goods_label_name">
+																	<image class="img-tag" v-if="tagItem.style_type == 'icon' && tagItem.icon" :src="img(tagItem.icon)" mode="heightFix" @error="diyGoods.error(tagItem,'icon')"></image>
+																	<view class="base-tag" v-else-if="tagItem.style_type == 'diy' || !tagItem.icon" :style="diyGoods.baseTagStyle(tagItem)">
+																		{{tagItem.label_name}}
+																	</view>
+																</template>
+															</view>
+															<view class="flex justify-between items-end self-end mt-[10rpx] w-[100%]">
+																<view class="text-[var(--price-text-color)] price-font truncate max-w-[200rpx]">
+																	<text class="text-[24rpx] font-500">￥</text>
+																	<text class="text-[40rpx] font-500">{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[0] }}</text>
+																	<text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
+																</view>
+																<u-number-box v-model="item.num" :min="numLimit(item).min"
+																	:max="numLimit(item).max" integer :step="1" input-width="68rpx"
+																	input-height="52rpx" button-size="52rpx" disabledInput
+																	@change="numChange($event, index)">
+																	<template #minus>
+																		<view class="relative w-[26rpx] h-[26rpx]">
 																			<text
-																			    :class="{ 'text-[var(--text-color-light9)]': item.num === numLimit(item).min, 'text-[#303133]': item.num !== numLimit(item).min }"
-																			    class="text-[24rpx] absolute flex items-center justify-center -left-[10rpx] -bottom-[10rpx] -right-[10rpx] -top-[10rpx] font-500 nc-iconfont nc-icon-jianV6xx"></text>
+																				:class="{ 'text-[var(--text-color-light9)]': item.num === numLimit(item).min, 'text-[#303133]': item.num !== numLimit(item).min }"
+																				class="text-[24rpx] absolute flex items-center justify-center -left-[10rpx] -bottom-[10rpx] -right-[10rpx] -top-[10rpx] font-500 nc-iconfont nc-icon-jianV6xx"></text>
 																		</view>
-                                                                    </template>
-                                                                    <template #input>
+																	</template>
+																	<template #input>
 																		<input  class="text-[#303133] text-[28rpx] mx-[14rpx] w-[80rpx] h-[44rpx] bg-[var(--temp-bg)] leading-[44rpx] text-center rounded-[6rpx]" type="number" @input="goodsSkuInputFn(item)" @blur="goodsSkuBlurFn($event, index)" @click.stop v-model="item.num"  />
-                                                                    </template>
-                                                                    <template #plus>
+																	</template>
+																	<template #plus>
 																		<view class="relative w-[26rpx] h-[26rpx]">
 																			<text
 																				:class="{ 'text-[var(--text-color-light9)]': item.num === numLimit(item).max, ' text-[#303133]': item.num !== numLimit(item).max }"
 																				class="text-[24rpx] absolute flex items-center justify-center -left-[10rpx] -bottom-[10rpx] -right-[10rpx] -top-[10rpx] font-500 nc-iconfont nc-icon-jiahaoV6xx"></text>
 																		</view>
-                                                                    </template>
-                                                                </u-number-box>
-                                                            </view>
+																	</template>
+																</u-number-box>
+															</view>
                                                         </view>
                                                     </view>
                                                 </u-swipe-action-item>
                                             </view>
                                     </block>
-
+                                
                                 </u-swipe-action>
                             </view>
                             <view class="bg-[#fff] pb-[10rpx] box-border rounded-[var(--rounded-big)] mt-[var(--top-m)]" v-if="invalidList.length">
@@ -104,48 +110,44 @@
                                     <view class="flex px-[var(--pad-sidebar-m)]">
                                         <text class="self-center iconfont iconxuanze1 text-[34rpx] mr-[32rpx] text-[#F5F5F5] rounded-[50%] overflow-hidden shrink-0"></text>
                                         <view class="relative w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden">
-                                            <u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goods_sku.sku_image_thumb_mid)" model="aspectFill">
+                                            <u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goodsSku.sku_image_thumb_mid)" model="aspectFill">
                                                 <template #error>
                                                     <image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
                                                 </template>
                                             </u--image>
-                                            <view v-if="item.goods_sku.stock == 0 " class="absolute left-0 top-0  w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
+                                            <view v-if="item.goodsSku.stock == 0 " class="absolute left-0 top-0  w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
                                                 <text class="text-[#fff] text-[28rpx]">已售罄</text>
                                             </view>
-                                            <view v-if="item.goods_sku.stock != 0 " class="absolute left-0 top-0  w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
+                                            <view v-if="item.goodsSku.stock != 0 " class="absolute left-0 top-0  w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
                                                 <text class="text-[#fff] text-[28rpx]">已失效</text>
                                             </view>
                                         </view>
                                         <view class="flex flex-1 flex-wrap ml-[20rpx]">
                                             <view class="w-[100%] flex flex-col items-baseline">
                                                 <view class="text-[#333] text-[28rpx] max-h-[80rpx] leading-[40rpx] font-400 multi-hidden">
-                                                    {{ item.goods.goods_name }}
-                                                </view>
-                                                <view class="box-border max-w-[376rpx] mt-[10rpx] px-[14rpx] h-[36rpx] leading-[36rpx] truncate text-[var(--text-color-light6)] bg-[#F5F5F5] text-[22rpx] rounded-[20rpx]" v-if="item.goods_sku && item.goods_sku.sku_spec_format">
-                                                    {{ item.goods_sku.sku_spec_format }}
+													{{ item.goods.goods_name }}
+												</view>
+                                                <view class="box-border max-w-[376rpx] mt-[10rpx] px-[14rpx] h-[36rpx] leading-[36rpx] truncate text-[var(--text-color-light6)] bg-[#F5F5F5] text-[22rpx] rounded-[20rpx]" v-if="item.goodsSku && item.goodsSku.sku_spec_format">
+                                                    {{ item.goodsSku.sku_spec_format }}
                                                 </view>
                                             </view>
                                             <view class="flex justify-between items-end self-end w-[100%]">
-                                                <view class="flex items-end text-[var(--price-text-color)] leading-[40rpx] price-font">
-                                                    <view class="text-[var(--price-text-color)] price-font">
-                                                        <text class="text-[24rpx] font-500">￥</text>
-                                                        <text class="text-[36rpx] font-500">{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[0] }}</text>
-                                                        <text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
-                                                        <image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-                                                        <image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
-                                                    </view>
-                                                </view>
+												<view class="text-[var(--price-text-color)] price-font">
+													<text class="text-[24rpx] font-500">￥</text>
+													<text class="text-[36rpx] font-500">{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[0] }}</text>
+													<text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
+												</view>
                                             </view>
                                         </view>
                                     </view>
-                                </view>
+								</view>
                             </view>
                         </view>
                     </scroll-view>
                 </view>
             </block>
         </view>
-
+        
         <!--  #ifdef  H5 -->
         <view v-if="cartList.length" class="flex h-[96rpx] items-center bg-[#fff] fixed left-0 right-0 bottom-[50px] pl-[30rpx] pr-[20rpx] box-solid mb-ios justify-between">
             <view class="flex items-center" @click="selectAll">
@@ -202,7 +204,7 @@
 		<loading-page :loading="loading"></loading-page>
         <tabbar />
         <!-- 强制绑定手机号 -->
-		<bind-mobile ref="bindMobileRef" />
+		<bind-mobile ref="bindMobileRef" /> 
     </view>
 </template>
 
@@ -216,7 +218,9 @@ import useCartStore from '@/addon/shop/stores/cart'
 import { getCartGoodsList } from '@/addon/shop/api/cart'
 import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
 import {t} from "@/locale";
+import {useGoods} from '@/hooks/useGoods'
 
+const diyGoods = useGoods();
 const memberStore = useMemberStore()
 const info = computed(() => memberStore.info)
 const loading = ref(true)
@@ -235,10 +239,10 @@ const getCartGoodsListFn = () => {
         loading.value = false
         data.forEach(item => {
             item.checked = false
-            if (item.goods_sku) {
+            if (item.goodsSku) {
                 if (item.goods.status && item.goods.delete_time == 0) {
-                    if (item.goods_sku.stock) {
-                        if (item.num > item.goods_sku.stock) item.num = item.goods_sku.stock;
+                    if (item.goodsSku.stock) {
+                        if (item.num > item.goodsSku.stock) item.num = item.goodsSku.stock;
                         cartList.value.push(item)
                     } else {
                         // 库存为0 时，移动到售罄商品
@@ -265,7 +269,6 @@ onShow(() => {
     cartStore.getList();
 })
 
-
 const goodsSkuInputFn = (data)=>{
 	setTimeout(() => {
 		if(data.num >= numLimit(data).max){
@@ -282,14 +285,14 @@ const goodsSkuBlurFn = (event, index)=>{
 		if(data.num >= numLimit(data).max){
 			data.num = numLimit(data).max;
 		}
-
+		
 		uni.$u.debounce((event: any) => {
 			cartStore.increase({
 				id: data.id,
 				goods_id: data.goods_id,
 				sku_id: data.sku_id,
-				stock: data.goods_sku.stock,
-				sale_price: data.goods_sku.sale_price,
+				stock: data.goodsSku.stock,
+				sale_price: data.goodsSku.sale_price,
 				num: Number(data.num)
 			}, 0);
 		}, 500)
@@ -307,16 +310,13 @@ const checkedNum = computed(() => {
 watch(() => cartList.value, () => {
     let value = 0
     cartList.value.forEach((item:any) => {
-        if (item.checked && item.goods_sku) {
+        if (item.checked && item.goodsSku) {
             let price: any = 0;
-            if (item.goods.is_discount && item.goods_sku.sale_price != item.goods_sku.price) {
-                price = item.goods_sku.sale_price // 折扣价
-            } else if (item.goods.member_discount && getToken() && item.goods_sku.member_price != item.goods_sku.price) {
-                price = item.goods_sku.member_price // 会员价
+            if (item.goods.member_discount && getToken() && item.goodsSku.member_price != item.goodsSku.price) {
+                price = item.goodsSku.member_price // 会员价
             } else {
-                price = item.goods_sku.price
+                price = item.goodsSku.price
             }
-
             value += parseFloat(price) * item.num
         }
     })
@@ -338,8 +338,8 @@ const numChange = (event: any, index: any) => {
 			id: data.id,
 			goods_id: data.goods_id,
 			sku_id: data.sku_id,
-			stock: data.goods_sku.stock,
-			sale_price: data.goods_sku.sale_price,
+			stock: data.goodsSku.stock,
+			sale_price: data.goodsSku.sale_price,
 			num: data.num
 		}, 0);
 	}, 500)
@@ -348,7 +348,7 @@ const numChange = (event: any, index: any) => {
 const numLimit = (data: any) => {
 	return {
 		min: 1,
-		max: data.goods_sku.stock || 1
+		max: data.goodsSku.stock || 1
 	}
 }
 
@@ -366,7 +366,7 @@ const swipeClick = (index:any,item:any) => {
 	if (optionLoading.value) return
 	optionLoading.value = true
 	cartStore.delete(item.id, () => {
-		cartList.value.splice(index, 1)
+		cartList.value.splice(index, 1) 
 		nextTick(()=>{if(swipeActive.value)swipeActive.value.closeOther() })
 		optionLoading.value = false
 	})
@@ -453,15 +453,11 @@ const deleteInvalidList = ()=>{
 	invalidList.value = []
 }
 
-// 价格类型
+// 价格类型 
 const priceType = (data:any) => {
     let type = "";
-    if (data.goods.is_discount && data.goods_sku.sale_price != data.goods_sku.price) {
-        type = 'discount_price'// 折扣
-    } else if (data.goods.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
+    if (data.goods.member_discount && getToken() && data.goodsSku.member_price != data.goodsSku.price) {
         type = 'member_price' // 会员价
-    } else {
-        type = ""
     }
     return type;
 }
@@ -469,12 +465,10 @@ const priceType = (data:any) => {
 // 商品价格
 const goodsPrice = (data:any) => {
     let price = "0.00";
-    if (data.goods.is_discount && data.goods_sku.sale_price != data.goods_sku.price) {
-        price = data.goods_sku.sale_price ? data.goods_sku.sale_price : data.goods_sku.price // 折扣价
-    } else if (data.goods.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
-        price = data.goods_sku.member_price ? data.goods_sku.member_price : data.goods_sku.price // 会员价
+    if (data.goods.member_discount && getToken() && data.goodsSku.member_price != data.goodsSku.price) {
+        price = data.goodsSku.member_price ? data.goodsSku.member_price : data.goodsSku.price // 会员价
     } else {
-        price = data.goods_sku.price
+        price = data.goodsSku.price
     }
     return price;
 }

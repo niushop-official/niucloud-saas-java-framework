@@ -6,12 +6,14 @@ import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.event.member.MemberAccountEvent;
 import com.niu.core.service.core.member.ICoreMemberLevelService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 @EventListen("core")
 @Component
+@Slf4j
 public class MemberAccountListener extends AbstractListener {
 
     public void handleEvent(MemberAccountEvent event) {

@@ -6,7 +6,7 @@
 				<input class="text-[28rpx] flex-1" maxlength="50" type="text" v-model="inputValue"  placeholder="请搜索您想要的商品" confirm-type="search" placeholderClass="text-[var(--text-color-light9)] text-[28rpx]" @confirm="search">
 				<text v-if="inputValue" class="nc-iconfont nc-icon-cuohaoV6xx1 text-[24rpx] text-[var(--text-color-light9)]" @click="inputValue=''"></text>
 			</view>
-			<text @click.stop="search()" class="text-[28rpx] ml-[32rpx] -mb-[2rpx]">搜索</text>
+			<text @click.stop="search()" class="text-[26rpx] ml-[32rpx] -mb-[2rpx]">搜索</text>
 		</view>
 
 		<view class="search-content">
@@ -17,12 +17,14 @@
 						<view class="title font-500">历史搜索</view>
 						<view class="icon nc-iconfont nc-icon-shanchu-yuangaizhiV6xx !text-[24rpx] text-[var(--text-color-light6)]" @click="deleteHistoryList"></view>
 					</view>
-					<view class="history-bottom " id="history-list" :style="{ maxHeight: !isAllHistory ? '100%' : '168rpx' }">
-						<view class="history-li" v-for="(item, index) in historyList" :key="index" @click="otherSearch(item)">
-							<view>{{ item }}</view>
-						</view>
+					<view class="history-bottom " id="history-list" :style="{ maxHeight: !isAllHistory ? '100%' : '148rpx' }">
+						<block v-for="(item, index) in historyList" :key="index">
+							<view class="history-li" @click="otherSearch(item)" v-if="item">
+								<view>{{ item }}</view>
+							</view>
+						</block>
 						<view class="history-li history_more" v-if="isAllHistory" @click="isAllHistory = false">
-							<view>
+							<view class="content-box">
 								<text class="text-[30rpx] nc-iconfont nc-icon-xiaV6xx"></text>
 							</view>
 						</view>
@@ -76,7 +78,7 @@ const deleteHistoryList =()=> {
 
 //搜索
 const search = ()=> {
-    if (inputValue.value.trim() != '') {
+    // if (inputValue.value.trim() != '') {
 
         // 对历史搜索处理,判断有无,最近搜索显示在最前
         let historyList = uni.getStorageSync('goodsSearchHistory');
@@ -92,7 +94,7 @@ const search = ()=> {
         uni.setStorageSync('goodsSearchHistory', array);
 
         redirect({ url: '/addon/shop/pages/goods/list', param: { goods_name: encodeURIComponent(inputValue.value) }, mode: 'navigateTo' })
-    }
+    // }
 }
 
 // 点击历史搜索
@@ -193,6 +195,9 @@ const getHistoryHeight =()=> {
 						position: absolute;
 						bottom: 0;
 						right: 0;
+						.content-box{
+							box-shadow: 2rpx 2rpx 8rpx rgba(0,0,0,.1);
+						}
 					}
 				}
 			}

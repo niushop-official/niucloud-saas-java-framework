@@ -42,4 +42,12 @@ public class SiteAccountLogListVo implements Serializable {
         }
         return "";
     }
+
+    public String getMoney() {
+        if (this.money.compareTo(BigDecimal.ZERO) == 1) {
+            return "+" + this.money.toString();
+        } else {
+            return this.money.toString();
+        }
+    }
 }

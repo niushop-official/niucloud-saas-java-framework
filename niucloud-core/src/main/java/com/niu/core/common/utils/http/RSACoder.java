@@ -5,10 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 支付方提供
@@ -65,7 +62,6 @@ public abstract class RSACoder {
      *            签名验签算法
      * @return
      * @throws Exception
-     * @throws SecureUtilException
      */
     public static String sign(byte[] rawData, String privateKey, String algorithm) throws Exception {
         byte[] keyBytes = decryptBASE64(privateKey);
@@ -187,9 +183,8 @@ public abstract class RSACoder {
      * @return
      */
     public static byte[] decryptBASE64(String src) {
-        sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
         try {
-            return decoder.decodeBuffer(src);
+            return Base64.getDecoder().decode(src);
         } catch (Exception ex) {
             return null;
         }
@@ -201,8 +196,7 @@ public abstract class RSACoder {
      * @return
      */
     public static String encryptBASE64(byte[] src) {
-        sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
-        return encoder.encode(src);
+        return Base64.getEncoder().encodeToString(src);
     }
 
     /**

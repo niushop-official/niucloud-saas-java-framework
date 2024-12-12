@@ -62,6 +62,8 @@ public class PageResult<E> {
     public PageResult(long page, long limit, long total, List<E> list) {
         this.currentPage = page;
         this.perPage = limit;
+        this.total = total;
+        this.data = list;
     }
 
     /**
@@ -69,8 +71,8 @@ public class PageResult<E> {
      * @param limit
      * @return
      */
-    public static PageResult build(long page, long limit) {
-        return new PageResult(page, limit);
+    public static <E> PageResult<E> build(long page, long limit) {
+        return new PageResult<>(page, limit);
     }
 
     /**
@@ -159,6 +161,16 @@ public class PageResult<E> {
             pageList = PageResult.build(page.getCurrent(), page.getSize());
             pageList.setTotal(page.getTotal());
             pageList.setData(page.getRecords());
+        }
+        return pageList;
+    }
+
+    public static <E> PageResult<E> build(IPage<?> page, List<E> data) {
+        PageResult<E> pageList = null;
+        if (page != null) {
+            pageList = PageResult.build(page.getCurrent(), page.getSize());
+            pageList.setTotal(page.getTotal());
+            pageList.setData(data);
         }
         return pageList;
     }

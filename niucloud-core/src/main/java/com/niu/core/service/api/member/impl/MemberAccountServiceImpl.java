@@ -67,7 +67,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         if (StrUtil.isNotEmpty(param.getAccountDataLt())) {
             queryWrapper.lt("account_data", param.getAccountDataLt());
         }
-        queryWrapper.orderByDesc(Arrays.asList("create_time"));
+        queryWrapper.orderByDesc("create_time");
         IPage<MemberAccountLog> iPage = this.memberAccountLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
 
         List<AccountPointFlowVo> dataList = new LinkedList<>();

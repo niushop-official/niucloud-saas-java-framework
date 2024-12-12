@@ -15,7 +15,7 @@ public class Boot {
         EnvironmentValidator environmentValidator = EnvironmentValidator.getInstance(bootConfig);
         if (environmentValidator.checkEnvironment()) {
             if (!environmentValidator.checkJreUsable()) {
-                System.out.println("当前Java环境是:" + bootConfig.getJavaVersion() + ",请安装Java8的运行环境.");
+                System.out.println("当前Java环境是:" + bootConfig.getJavaVersion() + ",请安装Java17的运行环境.");
                 System.exit(0);
             }
             if (!environmentValidator.readAppEnv()) {

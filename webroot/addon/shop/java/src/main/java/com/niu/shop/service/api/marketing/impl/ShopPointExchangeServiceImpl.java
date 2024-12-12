@@ -1,8 +1,6 @@
 package com.niu.shop.service.api.marketing.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSON;
@@ -32,9 +30,7 @@ import com.niu.shop.service.api.goods.param.ShopGoodsDetailParam;
 import com.niu.shop.service.api.goods.vo.ShopGoodsDetailVo;
 import com.niu.shop.service.api.marketing.IShopPointExchangeService;
 import com.niu.shop.service.api.marketing.param.ShopGoodsComponentSearchParam;
-import com.niu.shop.service.api.marketing.param.ShopPointCalculateSearchParam;
 import com.niu.shop.service.api.marketing.param.ShopPointExchangeSearchParam;
-import com.niu.shop.service.api.marketing.vo.ShopPointExchangeCalculateVo;
 import com.niu.shop.service.api.marketing.vo.ShopPointExchangeInfoVo;
 import com.niu.shop.service.api.marketing.vo.ShopPointExchangeListVo;
 import com.niu.shop.service.core.marketing.vo.ProductDetail;
@@ -48,8 +44,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,7 +53,7 @@ import java.util.stream.Collectors;
 @Service
 public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
-    private static final List<String> PRESETS_ORDER_COLUMN = ListUtil.of("total_order_num", "total_exchange_num", "price");
+    private static final List<String> PRESETS_ORDER_COLUMN = List.of("total_order_num", "total_exchange_num", "price");
 
     @Resource
     private ShopPointExchangeMapper shopPointExchangeMapper;
@@ -79,21 +75,22 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     @Override
     public PageResult<ShopPointExchangeListVo> list(PageParam pageParam, ShopPointExchangeSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
+        Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopPointExchange> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getStatus())) queryWrapper.eq("status", searchParam.getStatus());
-        if (ObjectUtil.isNotEmpty(searchParam.getNames())) queryWrapper.like("names", "%"+searchParam.getNames()+"%");
+        if (ObjectUtil.isNotEmpty(searchParam.getNames()))
+            queryWrapper.like("names", "%" + searchParam.getNames() + "%");
 
         if (CollectionUtil.isNotEmpty(searchParam.getCreateTime())) {
             QueryMapperUtils.buildByTime(queryWrapper, "create_time", searchParam.getCreateTime().toArray(new String[0]));
         }
 
-        boolean isAsc =  "asc".equals(searchParam.getSort());
+        boolean isAsc = "asc".equals(searchParam.getSort());
         boolean isAcceptColumn = PRESETS_ORDER_COLUMN.contains(searchParam.getOrder());
-        queryWrapper.orderBy(true, isAcceptColumn && isAsc, ListUtil.of(isAcceptColumn ? searchParam.getOrder() : "total_order_num", "sort"));
+        queryWrapper.orderBy(true, isAcceptColumn && isAsc, List.of(isAcceptColumn ? searchParam.getOrder() : "total_order_num", "sort"));
 
         IPage<ShopPointExchange> iPage = shopPointExchangeMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<ShopPointExchangeListVo> list = new ArrayList<>(limit);
@@ -102,10 +99,17 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             BeanUtils.copyProperties(item, vo);
             vo.setType(ShopPointExchangeTypeEnum.getNameByType(item.getType()));
             vo.setStatusName(ShopPointExchangeStatusEnum.getNameByStatus(item.getStatus()));
-            String coverMid = coreUploadService.thumb(RequestUtils.siteId(), vo.getImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
-            vo.setGoodsCoverThumbMid(coverMid);
-            String coverSmall = coreUploadService.thumb(RequestUtils.siteId(), vo.getImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
-            vo.setGoodsCoverThumbSmall(coverSmall);
+            if (ObjectUtil.isNotEmpty(item.getImage())) {
+                String image = item.getImage().split(",")[0];
+                String coverBig = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+                vo.setGoodsCoverThumbBig(coverBig);
+
+                String coverMid = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+                vo.setGoodsCoverThumbMid(coverMid);
+
+                String coverSmall = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+                vo.setGoodsCoverThumbSmall(coverSmall);
+            }
             list.add(vo);
         }
 
@@ -148,7 +152,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         shopPointExchangeInfoVo.setGoodsId(shopGoodsDetailVo.getGoodsId());
         shopPointExchangeInfoVo.setSiteId(shopGoodsDetailVo.getSiteId());
         shopPointExchangeInfoVo.setSkuSpecFormat(shopGoodsDetailVo.getSkuSpecFormat());
-        shopPointExchangeInfoVo.setPrice(productDetail.getPrice().toString());
+        shopPointExchangeInfoVo.setPrice(productDetail.getPrice());
         shopPointExchangeInfoVo.setMarketPrice(shopGoodsDetailVo.getMarketPrice().toString());
         shopPointExchangeInfoVo.setSalePrice(productDetail.getPrice());
         shopPointExchangeInfoVo.setStock(shopGoodsDetailVo.getStock().toString());
@@ -198,16 +202,20 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         goodsDTO.setSubTitle(shopGoodsDetailVo.getGoods().getSubTitle());
         goodsDTO.setGoodsCover(shopGoodsDetailVo.getGoods().getGoodsCover());
 
-        List<String> labelIds = JSON.parseObject(shopGoodsDetailVo.getGoods().getLabelIds(), new TypeReference<List<String>>() {});
+        List<String> labelIds = JSON.parseObject(shopGoodsDetailVo.getGoods().getLabelIds(), new TypeReference<List<String>>() {
+        });
         goodsDTO.setLabelIds(labelIds);
 
-        List<String> serviceIds = JSON.parseObject(shopGoodsDetailVo.getGoods().getServiceIds(), new TypeReference<List<String>>() {});
+        List<String> serviceIds = JSON.parseObject(shopGoodsDetailVo.getGoods().getServiceIds(), new TypeReference<List<String>>() {
+        });
         goodsDTO.setServiceIds(serviceIds);
 
-        List<String> deliveryTypes = JSON.parseObject(shopGoodsDetailVo.getGoods().getDeliveryType(), new TypeReference<List<String>>() {});
+        List<String> deliveryTypes = JSON.parseObject(shopGoodsDetailVo.getGoods().getDeliveryType(), new TypeReference<List<String>>() {
+        });
         goodsDTO.setDeliveryType(deliveryTypes);
 
-        List<Integer> goodsCategories = JSON.parseObject(shopGoodsDetailVo.getGoods().getGoodsCategory(), new TypeReference<List<Integer>>() {});
+        List<Integer> goodsCategories = JSON.parseObject(shopGoodsDetailVo.getGoods().getGoodsCategory(), new TypeReference<List<Integer>>() {
+        });
         goodsDTO.setGoodsCategory(goodsCategories);
 
         // goods brand
@@ -239,7 +247,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             skuListDTO.setIsDefault(sku.getIsDefault());
             skuListDTO.setMemberPrice(sku.getMemberPrice().toString());
             skuListDTO.setLimitNum(ObjectUtil.isEmpty(sku.getLimitNum()) ? "0" : sku.getLimitNum().toString());
-            skuListDTO.setPoint(ObjectUtil.isEmpty(sku.getPoint()) ? "0" : sku.getPoint().toString());
+            skuListDTO.setPoint(sku.getPoint() == null ? "0" : sku.getPoint().toString());
 
             Optional<ProductDetail> productDetailOptional = productDetails.stream()
                     .filter(detail -> detail.getSkuId().equals(sku.getSkuId()))
@@ -282,9 +290,9 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         QueryWrapper<ShopPointExchange> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
 
-        boolean isAsc =  "asc".equals(searchParam.getSort());
+        boolean isAsc = "asc".equals(searchParam.getSort());
         boolean isAcceptColumn = PRESETS_ORDER_COLUMN.contains(searchParam.getOrder());
-        queryWrapper.orderBy(true, isAcceptColumn && isAsc, ListUtil.of(isAcceptColumn ? searchParam.getOrder() : "total_order_num", "sort"));
+        queryWrapper.orderBy(true, isAcceptColumn && isAsc, List.of(isAcceptColumn ? searchParam.getOrder() : "total_order_num", "sort"));
 
         if (ObjectUtil.isNotEmpty(searchParam.getNames())) {
             queryWrapper.like("names", searchParam.getNames());
@@ -311,14 +319,17 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
                     shopPointExchangeListVo.setTypeName(ShopPointExchangeTypeEnum.getNameByType(shopPointExchange.getType()));
                     shopPointExchangeListVo.setStatusName(ShopPointExchangeStatusEnum.getNameByStatus(shopPointExchange.getStatus()));
 
-                    String coverBig = coreUploadService.thumb(RequestUtils.siteId(), shopPointExchange.getImage(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
-                    shopPointExchangeListVo.setGoodsCoverThumbBig(coverBig);
+                    if (ObjectUtil.isNotEmpty(shopPointExchange.getImage())) {
+                        String image = shopPointExchange.getImage().split(",")[0];
+                        String coverBig = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+                        shopPointExchangeListVo.setGoodsCoverThumbBig(coverBig);
 
-                    String coverMid = coreUploadService.thumb(RequestUtils.siteId(), shopPointExchange.getImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
-                    shopPointExchangeListVo.setGoodsCoverThumbMid(coverMid);
+                        String coverMid = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+                        shopPointExchangeListVo.setGoodsCoverThumbMid(coverMid);
 
-                    String coverSmall = coreUploadService.thumb(RequestUtils.siteId(), shopPointExchange.getImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
-                    shopPointExchangeListVo.setGoodsCoverThumbSmall(coverSmall);
+                        String coverSmall = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+                        shopPointExchangeListVo.setGoodsCoverThumbSmall(coverSmall);
+                    }
 
                     return shopPointExchangeListVo;
                 }).collect(Collectors.toList());
@@ -342,7 +353,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
         LocalDateTime begin = LocalDateTimeUtil.beginOfDay(LocalDateTime.now());
         LocalDateTime end = LocalDateTimeUtil.endOfDay(LocalDateTime.now());
-        memberAccountLogQueryWrapper.between("create_time", begin, end);
+        memberAccountLogQueryWrapper.between("create_time", begin.toEpochSecond(ZoneOffset.UTC), end.toEpochSecond(ZoneOffset.UTC));
 
         List<MemberAccountLog> memberAccountLogs = memberAccountLogMapper.selectList(memberAccountLogQueryWrapper);
         map.put("today_point", ObjectUtil.isEmpty(memberAccountLogs) ? 0 : memberAccountLogs.stream().mapToInt(log -> log.getAccountData().intValue()).sum());

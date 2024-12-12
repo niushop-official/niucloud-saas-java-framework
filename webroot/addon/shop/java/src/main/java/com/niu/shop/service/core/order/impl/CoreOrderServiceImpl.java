@@ -34,6 +34,8 @@ import com.niu.shop.service.core.shop.param.AddStatParam;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -100,8 +102,6 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
 
         order = shopOrderMapper.selectById(order.getOrderId());
 
-        coreOrderEventService.orderCloseAfter(order, param);
-
         // 订单关闭之后事件
         OrderCloseAfterEvent event = new OrderCloseAfterEvent();
         event.setSiteId(order.getSiteId());
@@ -109,6 +109,8 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
         event.setName("OrderCloseAfterEvent");
         event.setOrder(order);
         EventAndSubscribeOfPublisher.publishAll(event);
+
+        coreOrderEventService.orderCloseAfter(order, param);
     }
 
     /**
@@ -138,8 +140,14 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
 
         order = shopOrderMapper.selectById(order.getOrderId());
 
-        coreOrderEventService.orderPayAfter(order, param);
 
+        ShopOrder finalOrder = order;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                coreOrderEventService.orderPayAfter(finalOrder, param);
+            }
+        });
         // 订单支付之后事件
         OrderPayAfterEvent event = new OrderPayAfterEvent();
         event.setSiteId(order.getSiteId());
@@ -147,6 +155,7 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
         event.setName("OrderPayAfterEvent");
         event.setOrder(order);
         EventAndSubscribeOfPublisher.publishAll(event);
+
     }
 
     /**

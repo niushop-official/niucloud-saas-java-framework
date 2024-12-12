@@ -84,14 +84,15 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     /**
      * 积分兑换列表
-     * @param pageParam 分页参数
+     *
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<ShopPointExchangeListVo>
      */
     @Override
     public PageResult<ShopPointExchangeListVo> list(PageParam pageParam, ShopPointExchangeSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopPointExchange> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
@@ -119,8 +120,11 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             vo.setType(ShopPointExchangeTypeEnum.getNameByType(item.getType()));
             vo.setStatusName(ShopPointExchangeStatusEnum.getNameByStatus(item.getStatus()));
 
-            vo.setGoodsCoverThumbBig(coreUploadService.thumb(RequestUtils.siteId(), vo.getImage(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
-            vo.setGoodsCoverThumbSmall(coreUploadService.thumb(RequestUtils.siteId(), vo.getImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
+            if (ObjectUtil.isNotEmpty(vo.getImage())) {
+                String image = vo.getImage().split(",")[0];
+                vo.setGoodsCoverThumbBig(coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
+                vo.setGoodsCoverThumbSmall(coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
+            }
 
             vo.setCreateTime(DateUtils.timestampToString(item.getCreateTime()));
             vo.setUpdateTime(DateUtils.timestampToString(item.getUpdateTime()));
@@ -131,6 +135,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     /**
      * 积分兑换详情
+     *
      * @param id 主键
      * @return ShopPointExchangeInfoVo
      */
@@ -155,9 +160,8 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
             // --- goods list ---
             QueryWrapper<ShopGoodsSku> shopGoodsSkuQueryWrapper = new QueryWrapper<>();
-            shopGoodsSkuQueryWrapper.eq("site_id", RequestUtils.siteId());
-            shopGoodsSkuQueryWrapper.eq("goods_id", productDetail.getGoodsId());
-            shopGoodsSkuQueryWrapper.select("sku_spec_format,sku_id,site_id,sku_name,sku_image,sku_no,price as goods_price,stock as goods_stock");
+            shopGoodsSkuQueryWrapper.eq("site_id", RequestUtils.siteId())
+                    .eq("goods_id", productDetail.getGoodsId());
 
             List<ShopGoodsSku> shopGoodsSkus = shopGoodsSkuMapper.selectList(shopGoodsSkuQueryWrapper);
             List<ShopPointExchangeInfoVo.GoodsSku> goodsList = shopGoodsSkus.stream()
@@ -210,6 +214,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     /**
      * 积分兑换添加
+     *
      * @param addParam 参数
      */
     @Override
@@ -293,6 +298,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     /**
      * 积分兑换删除
+     *
      * @param id 主键ID
      */
     @Override

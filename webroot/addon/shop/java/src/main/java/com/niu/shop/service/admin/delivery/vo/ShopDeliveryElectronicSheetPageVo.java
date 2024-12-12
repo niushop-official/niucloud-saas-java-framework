@@ -33,6 +33,7 @@ public class ShopDeliveryElectronicSheetPageVo implements Serializable {
     private String createTime; // 创建时间
     private String updateTime; // 修改时间
     private Company company;
+    private String payTypeName;
 
     @NoArgsConstructor
     @AllArgsConstructor

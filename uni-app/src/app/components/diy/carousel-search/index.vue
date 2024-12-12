@@ -185,7 +185,7 @@
 			
 			fixedStyleBg.value = false;
             if (props.scrollBool == 1) {
-				let str = diyComponent.value.fixedBgColor;
+				let str = diyComponent.value.fixedBgColor || "";
 				let arr = str.split(',');
 				let num = diyComponent.value.fixedBgColor ? parseInt(arr[arr.length-1]) : 0;
 				if(!diyComponent.value.fixedBgColor || num == 0 ){

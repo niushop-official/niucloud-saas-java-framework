@@ -64,7 +64,9 @@ public class PosterDrawListener extends AbstractListener {
                     e.printStackTrace();
                 }
 
-                TextElement text = new TextElement(testStr, fontStyle, poster.getInt("fontSize"), poster.getInt("x"), poster.getInt("y"));
+                TextElement text = new TextElement(testStr, fontStyle, poster.getInt("fontSize"), poster.getInt("x", 0), poster.getInt("y"));
+                // 设置居中
+                if (poster.getStr("x", "").equals("center")) text.setCenter(true);
                 // 设置字体颜色
                 text.setColor(Color.decode(poster.getStr("fontColor")));
                 // 设置换行

@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.goods;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.goods.param.*;
@@ -10,6 +11,7 @@ import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -52,9 +54,9 @@ public class AttrController {
      * @return Result<ShopGoodsAttrInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ShopGoodsAttrInfoVo> info(@Validated @PathVariable Integer id) {
+    public Result info(@Validated @PathVariable Integer id) {
         ShopGoodsAttrInfoVo info = goodsAttrService.info(id);
-        return Result.success(info);
+        return Result.success(ObjectUtil.defaultIfNull(info, new LinkedList<>()));
     }
 
     /**

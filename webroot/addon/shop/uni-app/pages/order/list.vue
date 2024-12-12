@@ -21,42 +21,48 @@
 								</view>
 								<view class="text-[#303133] text-[26rpx] leading-[34rpx]" :class="{'text-primary': item.status  == 1,'!text-[var(--text-color-light9)]' :item.status  == 5 || item.status  == -1}">{{ item.status_name.name }}</view>
 							</view>
-							<view class="flex box-border mt-[20rpx]" v-for="(subitem, index) in item.order_goods" :key="index">
-								<u--image width="150rpx" height="150rpx" :radius="'var(--goods-rounded-big)'" :src="img(subitem.goods_image_thumb_small ? subitem.goods_image_thumb_small : '')" mode="aspectFill">
-									<template #error>
-										<image class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-									</template>
-								</u--image>
-								<view class="ml-[20rpx] flex flex-1 flex-col box-border">
-									<view class="flex justify-between items-baseline">
-										<view class="max-w-[322rpx] text-[28rpx] leading-[40rpx] font-400 truncate text-[#303133]">{{ subitem.goods_name }}</view>
-										<block v-if="item.activity_type == 'exchange'">
-											<view class="text-right ml-[10rpx] leading-[42rpx]" v-if="parseFloat(subitem.price)">
-												<text class="text-[22rpx] font-400 price-font">￥</text>
-												<text class="text-[36rpx] font-500 price-font">{{parseFloat(subitem.price).toFixed(2).split('.')[0] }}</text>
-												<text class="text-[22rpx] font-500 price-font">.{{parseFloat(subitem.price).toFixed(2).split('.')[1] }}</text>
-											</view>
-										</block>
-										<block v-else>
-											<view class="text-right leading-[42rpx] ml-[10rpx]">
-												<text class="text-[22rpx] price-font">￥</text>
-												<text class="text-[36rpx] font-500 price-font">{{parseFloat(subitem.price).toFixed(2).split('.')[0] }}</text>
-												<text class="text-[22rpx] font-500 price-font">.{{parseFloat(subitem.price).toFixed(2).split('.')[1] }}</text>
-											</view>
-										</block>
-									</view>
-									<view class="flex justify-between items-baseline text-[#303133] mt-[14rpx]">
-										<view>
-											<view class="text-[24rpx] text-[var(--text-color-light6)] font-400 truncate leading-[34rpx] max-w-[369rpx] mb-[10rpx]" v-if="subitem.sku_name">{{ subitem.sku_name }}</view>
-											<view class="text-[24rpx] font-400 leading-[34rpx] text-[var(--text-color-light6)]" v-if="item.delivery_type != 'virtual'">
-												{{t('deliveryType') }} ： {{item.delivery_type_name}}
-											</view>
-											<view class="text-[24rpx] font-400 leading-[34rpx] text-[var(--text-color-light6)]" v-else>{{t('createTime') }} ：{{item.create_time}}</view>
+							<block v-for="(subItem, index) in item.order_goods" :key="index">
+								<view class="flex box-border mt-[20rpx]">
+									<u--image width="150rpx" height="150rpx" :radius="'var(--goods-rounded-big)'" :src="img(subItem.goods_image_thumb_small ? subItem.goods_image_thumb_small : '')" mode="aspectFill">
+										<template #error>
+											<image class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+										</template>
+									</u--image>
+									<view class="ml-[20rpx] flex flex-1 flex-col box-border">
+										<view class="flex justify-between items-baseline">
+											<view class="max-w-[322rpx] text-[28rpx] leading-[40rpx] font-400 truncate text-[#303133]">{{ subItem.goods_name }}</view>
+											<block v-if="item.activity_type == 'exchange'">
+												<view class="text-right ml-[10rpx] leading-[42rpx]" v-if="parseFloat(subItem.price)">
+													<text class="text-[22rpx] font-400 price-font">￥</text>
+													<text class="text-[36rpx] font-500 price-font">{{parseFloat(subItem.price).toFixed(2).split('.')[0] }}</text>
+													<text class="text-[22rpx] font-500 price-font">.{{parseFloat(subItem.price).toFixed(2).split('.')[1] }}</text>
+												</view>
+											</block>
+											<block v-else>
+												<view class="text-right leading-[42rpx] ml-[10rpx]">
+													<text class="text-[22rpx] price-font">￥</text>
+													<text class="text-[36rpx] font-500 price-font">{{parseFloat(subItem.price).toFixed(2).split('.')[0] }}</text>
+													<text class="text-[22rpx] font-500 price-font">.{{parseFloat(subItem.price).toFixed(2).split('.')[1] }}</text>
+												</view>
+											</block>
 										</view>
-										<text class="text-right text-[26rpx] font-400 w-[90rpx] leading-[36rpx]">x{{ subitem.num }}</text>
+										<view class="flex justify-between items-baseline text-[#303133] mt-[14rpx]">
+											<view>
+												<view class="text-[24rpx] text-[var(--text-color-light6)] font-400 truncate leading-[34rpx] max-w-[369rpx] mb-[10rpx]" v-if="subItem.sku_name">{{ subItem.sku_name }}</view>
+												<view class="text-[24rpx] font-400 leading-[34rpx] text-[var(--text-color-light6)]" v-if="item.delivery_type != 'virtual'">
+													{{t('deliveryType') }} ： {{item.delivery_type_name}}
+												</view>
+												<view class="text-[24rpx] font-400 leading-[34rpx] text-[var(--text-color-light6)]" v-else>{{t('createTime') }} ：{{item.create_time}}</view>
+											</view>
+											<text class="text-right text-[26rpx] font-400 w-[90rpx] leading-[36rpx]">x{{ subItem.num }}</text>
+										</view>
 									</view>
 								</view>
-							</view>
+								<view class="flex items-center box-border mt-[8rpx]" v-if="subItem.extend && subItem.extend.is_newcomer && subItem.num > 1">
+									<image class="h-[24rpx] w-[56rpx]" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
+									<view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]">第1{{subItem.unit}}，￥{{parseFloat(subItem.extend.newcomer_price).toFixed(2)}}/{{subItem.unit}}；第{{subItem.num>2?'2~'+subItem.num:'2'}}{{subItem.unit}}，￥{{parseFloat(subItem.price).toFixed(2)}}/{{subItem.unit}}</view>
+								</view>
+							</block>
 						</view>
 						<view class="flex justify-end items-center mt-[20rpx]">
 							<view class="flex items-baseline">

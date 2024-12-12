@@ -81,19 +81,12 @@ public class ShopDeliveryElectronicSheetServiceImpl implements IShopDeliveryElec
         }
 
         queryWrapper.orderByDesc(ShopDeliveryElectronicSheet::getId);
-        IPage<ShopDeliveryElectronicSheet> iPage = shopDeliveryElectronicSheetMapper.selectPage(new Page<>(page, limit), queryWrapper);
 
-        Set<Integer> expressCompanyIds = iPage.getRecords().stream().map(ShopDeliveryElectronicSheet::getExpressCompanyId).collect(Collectors.toSet());
-        final Map<Integer, ShopDeliveryCompany> companyMap = new HashMap<>();
-        if (ObjectUtil.isNotEmpty(expressCompanyIds)) {
-            LambdaQueryWrapper<ShopDeliveryCompany> companyQueryWrapper = new LambdaQueryWrapper<>();
-            companyQueryWrapper.eq(ShopDeliveryCompany::getSiteId, RequestUtils.siteId());
-            companyQueryWrapper.in(ShopDeliveryCompany::getCompanyId, expressCompanyIds);
-            companyMap.putAll(shopDeliveryCompanyMapper.selectList(companyQueryWrapper)
-                    .stream().collect(Collectors.toMap(ShopDeliveryCompany::getCompanyId, e -> e)));
-        }
-
-        return iPage.getRecords().stream().map(item -> BeanUtil.toBean(item, ShopDeliveryElectronicSheetListVo.class)).collect(Collectors.toList());
+        return shopDeliveryElectronicSheetMapper.selectPage(new Page<>(page, limit), queryWrapper)
+                .getRecords()
+                .stream()
+                .map(item -> BeanUtil.toBean(item, ShopDeliveryElectronicSheetListVo.class))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -109,7 +102,9 @@ public class ShopDeliveryElectronicSheetServiceImpl implements IShopDeliveryElec
         Integer limit = pageParam.getLimit();
 
         LambdaQueryWrapper<ShopDeliveryElectronicSheet> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(ShopDeliveryElectronicSheet::getId);
+        queryWrapper.eq(ShopDeliveryElectronicSheet::getSiteId, RequestUtils.siteId())
+                .orderByDesc(ShopDeliveryElectronicSheet::getIsDefault)
+                .orderByDesc(ShopDeliveryElectronicSheet::getId);
 
         if (pagesParam.getExpressCompanyId() != null && pagesParam.getExpressCompanyId() > 0) {
             queryWrapper.eq(ShopDeliveryElectronicSheet::getExpressCompanyId, pagesParam.getExpressCompanyId());
@@ -135,6 +130,7 @@ public class ShopDeliveryElectronicSheetServiceImpl implements IShopDeliveryElec
             ShopDeliveryElectronicSheetPageVo vo = BeanUtil.toBean(item, ShopDeliveryElectronicSheetPageVo.class);
             ShopDeliveryCompany company = companyMap.getOrDefault(item.getExpressCompanyId(), new ShopDeliveryCompany());
             vo.setCompany(new ShopDeliveryElectronicSheetPageVo.Company(company.getCompanyName(), company.getExpressNoElectronicSheet()));
+            vo.setPayTypeName(ElectronicSheetPayTypeEnum.getPayTypeByType(item.getPayType()));
             return vo;
         }).collect(Collectors.toList());
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -185,6 +181,10 @@ public class ShopDeliveryElectronicSheetServiceImpl implements IShopDeliveryElec
         model.setCreateTime(System.currentTimeMillis() / 1000);
         model.setUpdateTime(System.currentTimeMillis() / 1000);
         shopDeliveryElectronicSheetMapper.insert(model);
+
+        if (addParam.getIsDefault() == 1) {
+            setDefault(model.getId());
+        }
     }
 
     /**

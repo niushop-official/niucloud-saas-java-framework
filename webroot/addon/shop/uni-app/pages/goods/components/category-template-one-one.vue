@@ -40,37 +40,37 @@
 						<view
 							class="box-border bg-white w-full flex mr-[20rpx] py-[24rpx] px-[20rpx] rounded-[var(--rounded-small)]"
 							:class="{ 'mt-[16rpx]': index }" @click.stop="toLink(item.goods_id)">
-							<u--image width="168rpx" height="168rpx" radius="var(--goods-rounded-small)" :src="img(item.goods_cover_thumb_mid ? item.goods_cover_thumb_mid : '')" model="aspectFill">
-								<template #error>
-									<image class="w-[168rpx] h-[168rpx]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-								</template>
-							</u--image>
+							<view class="w-[168rpx] h-[168rpx] flex items-center justify-center rounded-[var(--goods-rounded-small)] overflow-hidden">
+								<u--image width="168rpx" height="168rpx" radius="var(--goods-rounded-small)" :src="img( item.goods_cover_thumb_mid || '')" model="aspectFill">
+									<template #error>
+										<image class="w-[168rpx] h-[168rpx]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									</template>
+								</u--image>
+							</view>
 							<view class="flex flex-1 ml-[20rpx] flex-wrap flex-col">
 								<view class="max-h-[80rpx] text-[26rpx] leading-[40rpx] multi-hidden">
-									{{ item.goods_name }}
-								</view>
+									{{ item.goods_name }}</view>
 								<view class="flex-1 flex items-end justify-between">
 									<view class="text-[var(--price-text-color)] price-font -mb-[8rpx]">
 										<text class="text-[24rpx] font-500">￥</text>
 										<text class="text-[40rpx] font-500">{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[0] }}</text>
 										<text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
-										<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-										<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
+										<image class="h-[24rpx] max-w-[46rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 									</view>
 									<view
 										v-if="
 										(item.goods_type == 'real' || (item.goods_type == 'virtual' && item.virtual_receive_type != 'verify')) &&
-										item.goods_sku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id] && config.cart.control && config.cart.event === 'cart'"
+										item.goodsSku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id] && config.cart.control && config.cart.event === 'cart'"
 										class="flex items-center">
 										<view class="relative w-[32rpx] h-[32rpx]">
 											<text class="text-[32rpx] text-color nc-iconfont nc-icon-jianshaoV6xx absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]"
-												@click.stop="reduceCart(cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id])"></text>
+												@click.stop="reduceCart(cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id])"></text>
 										</view>
-										<text class="text-[#333] text-[24rpx] mx-[16rpx]">{{ cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id].num }}</text>
+										<text class="text-[#333] text-[24rpx] mx-[16rpx]">{{ cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id].num }}</text>
 										<view class="relative w-[32rpx] h-[32rpx]">
 											<text class="text-[32rpx] text-color iconfont iconjiahao2fill absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]"
 												:id="'itemCart' + index"
-												@click.stop="addCartBtn(item,cartList['goods_' + item.goods_id]['sku_' + item.goods_sku.sku_id],'itemCart' + index)"></text>
+												@click.stop="addCartBtn(item,cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id],'itemCart' + index)"></text>
 										</view>
 									</view>
 									<template v-else-if="(item.goods_type == 'virtual' && config.cart.event !== 'cart') || item.goods_type == 'real'">
@@ -292,10 +292,10 @@ const animationAddCart = (row: any, id: any) => {
 	cartRepeatFlag.value = true
 
 	let obj: any = {
-		goods_id: row.goods_sku.goods_id,
-		sku_id: row.goods_sku.sku_id,
+		goods_id: row.goodsSku.goods_id,
+		sku_id: row.goodsSku.sku_id,
 		sale_price: goodsPrice(row),
-		stock: row.goods_sku.stock
+		stock: row.goodsSku.stock
 	};
 	if (row.id) {
 		obj.num = row.num;
@@ -346,7 +346,6 @@ const animationAddCart = (row: any, id: any) => {
 	// #endif
 }
 
-//获取购物车数据
 /**
  * @description 获取分类数据
  * */
@@ -401,11 +400,11 @@ const cartRef = ref()
 const itemCart = (row: any, id: any) => {
     // 虚拟商品，并且需要核销，禁止加入购物车
     if(row.goods_type == 'virtual' && row.virtual_receive_type == 'verify'){
-        return toLink(row.goods_sku.goods_id)
+        return toLink(row.goodsSku.goods_id)
     }
 
 	if (config.cart.event !== 'cart') {
-		return toLink(row.goods_sku.goods_id)
+		return toLink(row.goodsSku.goods_id)
 	}
 
 	if (!userInfo.value) {
@@ -413,11 +412,11 @@ const itemCart = (row: any, id: any) => {
 		return false
 	}
 
-	if (row.goods_sku.sku_spec_format) {
-		cartRef.value.open(row.goods_sku.sku_id)
+	if (row.goodsSku.sku_spec_format) {
+		cartRef.value.open(row.goodsSku.sku_id)
 	} else {
 		//单规格添加购物车
-		if (parseInt(row.goods_sku.num||0) >= parseInt(row.goods_sku.stock)) {
+		if (parseInt(row.goodsSku.num||0) >= parseInt(row.goodsSku.stock)) {
 		    uni.showToast({ title: '商品库存不足', icon: 'none' })
 		    return;
 		}
@@ -502,12 +501,8 @@ const settlement = () => {
 // 价格类型 
 const priceType = (data:any) =>{
 	let type = "";
-    if(data.is_discount && data.goods_sku.sale_price != data.goods_sku.price){
-        type = 'discount_price'// 折扣
-    }else if(data.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
+    if(data.member_discount && getToken() && data.goodsSku.member_price != data.goodsSku.price) {
         type = 'member_price' // 会员价
-    }else{
-        type = ""
     }
     return type;
 }
@@ -515,12 +510,10 @@ const priceType = (data:any) =>{
 // 商品价格
 const goodsPrice = (data:any) =>{
 	let price = "0.00";
-    if (data.is_discount && data.goods_sku.sale_price != data.goods_sku.price) {
-        price = data.goods_sku.sale_price ? data.goods_sku.sale_price : data.goods_sku.price // 折扣价
-    } else if (data.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
-        price = data.goods_sku.member_price ? data.goods_sku.member_price : data.goods_sku.price // 会员价
+    if (data.member_discount && getToken() && data.goodsSku.member_price != data.goodsSku.price) {
+        price = data.goodsSku.member_price ? data.goodsSku.member_price : data.goodsSku.price // 会员价
     } else {
-        price = data.goods_sku.price
+        price = data.goodsSku.price
     }
     return price;
 }
@@ -607,7 +600,7 @@ const goodsPrice = (data:any) =>{
 
 .tabs-box {
 	width: 168rpx;
-	font-size: 28rpx;
+	font-size: 26rpx;
 }
 
 .tabs-box .tab-item {

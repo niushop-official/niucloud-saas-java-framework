@@ -18,9 +18,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <java.version>1.8</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
@@ -28,6 +28,36 @@
             <groupId>com.niu</groupId>
             <artifactId>niucloud-core</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>shop</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>sms-email</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>recharge</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>cms</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>shop_fenxiao</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>shop_giftcard</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <!-- 开发时热启动 -->
         <dependency>
@@ -71,27 +101,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>com.jsecode.springboot</groupId>
-                <artifactId>ecode-springboot-maven-plugin</artifactId>
-                <version>1.0</version>
-                <configuration>
-                    <executable>true</executable>
-                    <allInOne>false</allInOne>
-                    <classifier>exec</classifier>
-                    <mainClass>com.niu.app.WebAppApplication</mainClass>
-                    <distDir>../../../webroot/jar/lib</distDir>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -105,12 +114,6 @@
                             <tasks>
                                 <copy overwrite="true" file="target/web-app-exec.jar"
                                       tofile="../webroot/jar/web-app-exec.jar"/>
-                                <!--
-                                <copy overwrite="true" file="target/classes/application.yml"
-                                      tofile="../webroot/jar/application.yml"/>
-                                <copy overwrite="true" file="target/classes/application-prod.yml"
-                                      tofile="../webroot/jar/application-prod.yml"/>
-                                -->
                             </tasks>
                         </configuration>
                     </execution>

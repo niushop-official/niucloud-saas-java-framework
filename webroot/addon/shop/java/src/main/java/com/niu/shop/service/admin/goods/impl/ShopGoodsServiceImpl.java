@@ -866,7 +866,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
                 list.add(vo);
             }
         }
-        
+
         if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds()) && ObjectUtil.isNotEmpty(searchParam.getSkuIds())) {
             QueryWrapper<ShopGoodsSku> skuWrapper = new QueryWrapper<>();
             skuWrapper.in("sku_id", searchParam.getSkuIds()).groupBy("goods_id").select("sku_id");

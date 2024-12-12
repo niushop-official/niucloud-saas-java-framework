@@ -23,7 +23,7 @@
 							<view class="flex box-border mt-[20rpx]" v-for="(subitem, index) in item.order_goods" :key="index">
 								
 								<image v-if="subitem.goods_image_thumb_small" class="w-[150rpx] h-[150rpx] rounded-[var(--rounded-mid)]" :src="img(subitem.goods_image_thumb_small)" :mode="'aspectFill'" @error="subitem.goods_image_thumb_small='static/resource/images/diy/shop_default.jpg'"></image>
-								<image v-else class="w-[150rpx] h-[150rpx] rounded-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
+								<image v-else class="w-[150rpx h-[150rpx] rounded-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
 								<view class="ml-[20rpx] flex flex-1 flex-col box-border">
 									<view class="max-w-[490rpx] text-[28rpx] leading-[40rpx] font-400 truncate text-[#303133]">{{ subitem.goods_name }}</view>
 									<view class="flex justify-between items-baseline text-[#303133] mt-[14rpx]">

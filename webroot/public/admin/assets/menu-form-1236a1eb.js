@@ -1,0 +1,1 @@
+import{_ as o}from"./menu-form.vue_vue_type_script_setup_true_lang-8b6e373e.js";import"./index-073ad35d.js";/* empty css                     *//* empty css                  *//* empty css                       *//* empty css                 *//* empty css                 */export{o as default};

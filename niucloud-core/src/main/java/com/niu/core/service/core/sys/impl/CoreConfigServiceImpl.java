@@ -140,7 +140,7 @@ public class CoreConfigServiceImpl implements ICoreConfigService {
             addModel.setValue(valueJson.toString());
             addModel.setCreateTime(System.currentTimeMillis() / 1000);
             sysConfigMapper.insert(addModel);
-
+            cached.tag(cacheTagName).clear();
         } else {
             cached.tag(cacheTagName).clear();
             model.setUpdateTime(System.currentTimeMillis() / 1000);

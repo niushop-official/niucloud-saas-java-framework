@@ -354,7 +354,7 @@ CREATE TABLE `nc_member_sign` (
   `member_id` int(11) NOT NULL DEFAULT '0' COMMENT '会员id',
   `days` int(11) NOT NULL DEFAULT '0' COMMENT '连续签到天数',
   `day_award` varchar(255) NOT NULL DEFAULT '' COMMENT '日签奖励',
-  `continue_award` varchar(255) NOT NULL DEFAULT '' COMMENT '连签奖励',
+  `continue_award` text NOT NULL COMMENT '连签奖励',
   `continue_tag` varchar(30) NOT NULL DEFAULT '' COMMENT '连签奖励标识',
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '签到时间',
   `start_time` int(11) NOT NULL DEFAULT '0' COMMENT '签到周期开始时间',

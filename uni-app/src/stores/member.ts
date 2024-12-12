@@ -23,12 +23,13 @@ const useMemberStore = defineStore('member', {
             setToken(token)
             await this.getMemberInfo()
         },
-        async getMemberInfo() {
+        async getMemberInfo(callback: any = null) {
             if (!this.token) return
             await getMemberInfo().then((res: any) => {
                 this.info = res.data
                 uni.setStorageSync('wap_member_info', this.info)
                 uni.setStorageSync('wap_member_id', res.data.member_id)
+                if (callback) callback();
             }).catch(async() => {
                 await this.logout()
             })

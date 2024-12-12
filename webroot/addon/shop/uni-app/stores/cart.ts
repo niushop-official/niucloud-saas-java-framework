@@ -40,20 +40,18 @@ const useCartStore = defineStore('cart', {
                 }
                 if (data) {
                     data.forEach((item: any) => {
-                        if (item.goods.status == 1 && item.goods.delete_time == 0 && item.goods_sku) {
+                        if (item.goods.status == 1 && item.goods.delete_time == 0 && item.goodsSku) {
                             let cart: any = {
                                 id: item.id,
                                 goods_id: item.goods_id,
                                 sku_id: item.sku_id,
-                                stock: item.goods_sku.stock,
+                                stock: item.goodsSku.stock,
                                 num: item.num,
-                                sale_price: item.goods_sku.price
+                                sale_price: item.goodsSku.price
                             };
 
-                            if (item.goods.is_discount && item.goods_sku.sale_price != item.goods_sku.price) {
-                                cart.sale_price = item.goods_sku.sale_price ? item.goods_sku.sale_price : item.goods_sku.price // 折扣价
-                            } else if (item.goods.member_discount && getToken() && item.goods_sku.member_price != item.goods_sku.price) {
-                                cart.sale_price = item.goods_sku.member_price ? item.goods_sku.member_price : item.goods_sku.price // 会员价
+                            if (item.goods.member_discount && getToken() && item.goodsSku.member_price != item.goodsSku.price) {
+                                cart.sale_price = item.goodsSku.member_price ? item.goodsSku.member_price : item.goodsSku.price // 会员价
                             }
 
                             // todo sale_price 改成 price

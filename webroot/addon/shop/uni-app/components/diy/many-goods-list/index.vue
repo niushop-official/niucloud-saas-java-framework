@@ -31,6 +31,9 @@
 						<view class="name">{{ item.title }}</view>
 						<text class="nc-iconfont nc-icon-xiaolian-2 !text-[40rpx] text-[var(--primary-color)] transform" v-if="index == cateIndex"></text>
 					</view>
+					<view v-if="diyComponent.headStyle == 'style-4'" class="cate">
+						<view class="name">{{ item.title }}</view>
+					</view>
 				</view>
 			</template>
 		</scroll-view>
@@ -165,7 +168,9 @@
 
             elementBgColor: diyComponent.value.elementBgColor,
             topElementRounded: diyComponent.value.topElementRounded,
-            bottomElementRounded: diyComponent.value.bottomElementRounded
+            bottomElementRounded: diyComponent.value.bottomElementRounded,
+			
+			isShowCart: true // 展示加入购物车按钮
         };
 
         if (obj.goods_category) {
@@ -206,6 +211,10 @@
 			width: 100%;
 			white-space: nowrap;
 			box-sizing: border-box;
+		}
+		
+		&.style-4{
+			padding-bottom: 0;
 		}
 
 		.scroll-item {
@@ -274,6 +283,55 @@
 				&.active {
 					.name{
 						color:var(--primary-color);
+						font-weight: 500;
+					}
+					.nc-iconfont{
+						position: absolute;
+						bottom: -35rpx;
+					}
+				}
+			}
+			&.style-4{
+				padding: 0 10rpx 14rpx;
+				.cate{
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					position: relative;
+					padding: 10rpx 12rpx;
+					background-color: #F6F6F6;
+					border-radius: 12rpx;
+					min-width: 136rpx;
+					box-sizing: border-box;
+					border: 2rpx solid #F6F6F6;
+				}
+				.name{
+					font-size: 28rpx;
+					color: #333;
+					line-height: 32rpx;
+				}
+				&.active {
+					.cate{
+						background-color: var(--primary-color-light);
+						border-color: var(--primary-color);
+						position: relative;
+						&::after{
+							content: "";
+							width: 18rpx;
+							height: 18rpx;
+							position: absolute;
+							background-color: var(--primary-color-light);
+							border: 2rpx solid transparent;
+							border-bottom-color: var(--primary-color);
+							border-right-color: var(--primary-color);
+							bottom: -12rpx;
+							left: 50%;
+							transform: translateX(-50%) rotate(45deg);
+							border-bottom-right-radius: 10rpx;
+						}
+					}
+					.name{
+						color: var(--primary-color);
 						font-weight: 500;
 					}
 					.nc-iconfont{

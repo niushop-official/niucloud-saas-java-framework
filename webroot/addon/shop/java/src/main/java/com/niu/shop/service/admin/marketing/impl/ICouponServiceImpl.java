@@ -69,7 +69,7 @@ ICouponServiceImpl implements ICouponService {
             JSONObject vo = new JSONObject();
             JSONObject jsonObj = (JSONObject) json;
 
-            vo.put("value", jsonObj.getStr("category_id"));
+            vo.put("value", jsonObj.getInt("category_id"));
             vo.put("label", jsonObj.getStr("category_name"));
             if (jsonObj.getJSONArray("children") != null) {
                 JSONArray children = new JSONArray();
@@ -77,7 +77,7 @@ ICouponServiceImpl implements ICouponService {
 
                     JSONObject childJsonObj = (JSONObject) child;
                     JSONObject childVo = new JSONObject();
-                    childVo.put("value", childJsonObj.getStr("category_id"));
+                    childVo.put("value", childJsonObj.getInt("category_id"));
                     childVo.put("label", childJsonObj.getStr("category_name"));
                     children.add(childVo);
                 });

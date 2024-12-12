@@ -36,7 +36,7 @@
 								<u-form-item label="发票内容" prop="header_name">
 									<view class="flex flex-wrap">
 										<block v-for="(item,index) in config.invoice_content">
-											<view class="h-[60rpx] box-border rounded px-[30rpx] leading-[56rpx] border-[2rpx] border-[var(--temp-bg)] border-solid text-[24rpx] bg-[var(--temp-bg)]"
+											<view class="h-[60rpx] box-border rounded px-[30rpx] leading-[56rpx] border-[2rpx] border-[var(--temp-bg)] border-solid text-[24rpx] bg-[var(--temp-bg)] my-[10rpx]"
 												:class="{'!bg-[var(--primary-color-light)] !text-[var(--primary-color)] !border-primary': formData.name == item, 'mr-[20rpx]': (config.invoice_content.length-1) != index}"
 												@click="formData.name = item">{{ item  }}</view>
 										</block>

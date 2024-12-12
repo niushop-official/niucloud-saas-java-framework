@@ -33,8 +33,10 @@ public class ActiveEndJob extends AbstractJobProvider implements IJobProvider {
                 .select("active_id")
         );
         if (ObjectUtil.isNotEmpty(activeList)) {
-            for (ShopActive item: activeList) {
-                coreActiveService().end(item.getActiveId());
+            for (ShopActive item : activeList) {
+                if (item.getEndTime() != null && item.getEndTime() != 0) {
+                    coreActiveService().end(item.getActiveId());
+                }
             }
         }
     }

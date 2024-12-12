@@ -1,21 +1,2 @@
 {
-    "shop_fenxiao.pages.index": "分销中心",
-    "shop_fenxiao.pages.zone": "分销专区",
-    "shop_fenxiao.pages.level": "分销商等级",
-    "shop_fenxiao.pages.child_fenxiao": "分销商",
-    "shop_fenxiao.pages.goods": "分销商品",
-    "shop_fenxiao.pages.team": "团队",
-    "shop_fenxiao.pages.ranking_list": "排行榜",
-    "shop_fenxiao.pages.agent_list": "渠道代理",
-    "shop_fenxiao.pages.bill": "账单",
-    "shop_fenxiao.pages.order": "分销订单",
-    "shop_fenxiao.pages.order_detail": "订单详情",
-    "shop_fenxiao.pages.apply": "分销商申请",
-    "shop_fenxiao.pages.task_rewards": "任务奖励",
-    "shop_fenxiao.pages.task_detail": "任务奖励详情",
-    "shop_fenxiao.pages.task_rewards_detail": "任务奖励明细",
-    "shop_fenxiao.pages.sale": "销售奖励",
-    "shop_fenxiao.pages.sale_detail": "销售奖励详情",
-    "shop_fenxiao.pages.sale_ranking": "销售排行榜",
-    "shop_fenxiao.pages.promote_code": "分销推广"
 }

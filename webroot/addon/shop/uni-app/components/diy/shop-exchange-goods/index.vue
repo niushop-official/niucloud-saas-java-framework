@@ -129,6 +129,11 @@
         getExchangeComponentsList(data).then((res) => {
             goodsList.value = res.data;
             skeleton.loading = false;
+
+	        // 数据为空时隐藏整个组件
+	        // if(goodsList.value.length == 0) {
+		    //     diyComponent.value.pageStyle = '';
+	        // }
             if(diyComponent.value.componentBgUrl) {
                 setTimeout(() => {
                     const query = uni.createSelectorQuery().in(instance);

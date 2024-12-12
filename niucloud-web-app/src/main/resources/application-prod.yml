@@ -24,7 +24,7 @@ spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/***?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai
     username: root
-    password:
+    password: 
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     druid:

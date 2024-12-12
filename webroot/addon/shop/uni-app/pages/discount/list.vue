@@ -43,32 +43,36 @@
 						</view>
 
 						<view class="ml-[20rpx] flex-1 flex flex-col justify-between">
-							<view>
-								<view class="text-[28rpx] leading-[1.4] multi-hidden">
-									{{ item.goods_name }}
-								</view>
-								<view v-if="item.goods_label_name&&item.goods_label_name.length" class="mt-[16rpx] text-[var(--text-color-light9)] text-[24rpx] multi-hidden">
-									{{item.goods_label_name.map(el=>el.label_name).join(' | ')}}
-								</view>
+							<view class="text-[28rpx] leading-[1.4] multi-hidden">
+								{{ item.goods_name }}
+							</view>
+							
+							<view v-if="item.goods_label_name && item.goods_label_name.length" class="flex flex-wrap mb-[auto]">
+								<template v-for="(tagItem, tagIndex) in item.goods_label_name">
+									<image class="img-tag" v-if="tagItem.style_type == 'icon' && tagItem.icon" :src="img(tagItem.icon)" mode="heightFix" @error="diyGoods.error(tagItem,'icon')"></image>
+									<view class="base-tag" v-else-if="tagItem.style_type == 'diy' || !tagItem.icon" :style="diyGoods.baseTagStyle(tagItem)">
+										{{tagItem.label_name}}
+									</view>
+								</template>
 							</view>
 
-							<view class="relative overflow-hidden w-full h-[88rpx] flex justify-between rounded-[100rpx]" :class="{'bg-[var(--primary-color-light)]': item.active_goods.active_goods_status=='active','bg-[#FFF6F1]': item.active_goods.active_goods_status!='active' }">
+							<view class="relative overflow-hidden w-full h-[88rpx] flex justify-between mt-[20rpx] rounded-[100rpx]" :class="{'bg-[var(--primary-color-light)]': item.activeGoods.active_goods_status=='active','bg-[#FFF6F1]': item.activeGoods.active_goods_status!='active' }">
 								<view class="mr-[20rpx] pl-[30rpx] flex-1 flex flex-col justify-center">
-									<view class="text-[var(--price-text-color)] flex items-baseline" :class="{'!text-[#FF8540]':item.active_goods.active_goods_status!='active'}">
+									<view class="text-[var(--price-text-color)] flex items-baseline" :class="{'!text-[#FF8540]':item.activeGoods.active_goods_status!='active'}">
 										<text class="text-[26rpx] leading-[26rpx] font-500 mr-[4rpx] price-font">￥</text>
-										<text class="text-[44rpx] leading-[40rpx] font-500 price-font">{{parseFloat(item.goods_sku.active_discount_price).toFixed(2).split('.')[0]}}.</text>
-										<text class="text-[26rpx] leading-[28rpx] font-500 price-font">{{parseFloat(item.goods_sku.active_discount_price).toFixed(2).split('.')[1]}}</text>
-										<view v-if="item.goods_sku.active_discount_rate<10" class="px-[4rpx] border-[1rpx] border-[var(--primary-color)] border-solid  text-[18rpx] ml-[6rpx] rounded-[4rpx] leading-[24rpx] transform translate-y-[-4rpx]" :class="{'!border-[#FF8540]':item.active_goods.active_goods_status!='active'}">{{item.goods_sku.active_discount_rate}}折</view>
+										<text class="text-[44rpx] leading-[40rpx] font-500 price-font">{{parseFloat(item.goodsSku.active_discount_price).toFixed(2).split('.')[0]}}.</text>
+										<text class="text-[26rpx] leading-[28rpx] font-500 price-font">{{parseFloat(item.goodsSku.active_discount_price).toFixed(2).split('.')[1]}}</text>
+										<view v-if="item.goodsSku.active_discount_rate<10" class="px-[4rpx] border-[1rpx] border-[var(--primary-color)] border-solid  text-[18rpx] ml-[6rpx] rounded-[4rpx] leading-[24rpx] transform translate-y-[-4rpx]" :class="{'!border-[#FF8540]':item.activeGoods.active_goods_status!='active'}">{{item.goodsSku.active_discount_rate}}折</view>
 									</view>
 									<view class="flex items-center mt-[4rpx]">
-										<view class="w-[20rpx] h-[20rpx] mr-[4rpx] rounded-[20rpx] text-[#fff] bg-[var(--primary-color)] flex items-center justify-center" :class="{'!bg-[#FF8540]':item.active_goods.active_goods_status!='active'}">
+										<view class="w-[20rpx] h-[20rpx] mr-[4rpx] rounded-[20rpx] text-[#fff] bg-[var(--primary-color)] flex items-center justify-center" :class="{'!bg-[#FF8540]':item.activeGoods.active_goods_status!='active'}">
 											<text class="text-[10rpx] nc-icon-biaoqianV6mm1 nc-iconfont"></text>
 										</view>
-										<view class="text-[18rpx] font-400 text-[var(--price-text-color)] leading-[24rpx]" :class="{'!text-[#FF8540]':item.active_goods.active_goods_status!='active'}">已省{{item.goods_sku.active_reduce_money}}元</view>
+										<view class="text-[18rpx] font-400 text-[var(--price-text-color)] leading-[24rpx]" :class="{'!text-[#FF8540]':item.activeGoods.active_goods_status!='active'}">已省{{item.goodsSku.active_reduce_money}}元</view>
 									</view>
 								</view>
-								<view class="discount-btn text-[#ff763b] iconfont iconUnion" v-if="item.active_goods.active_goods_status!='active'">
-									<text class="desc">{{item.active_goods.active_goods_status_name}}</text>
+								<view class="discount-btn text-[#ff763b] iconfont iconUnion" v-if="item.activeGoods.active_goods_status!='active'">
+									<text class="desc">{{item.activeGoods.active_goods_status_name}}</text>
 								</view>
 								<view class="discount-btn text-[#fb3f15] iconfont iconUnion" v-else>
 									<text class="icon iconfont iconqiang"></text>
@@ -78,7 +82,7 @@
 						</view>
 					</view>
                 </block>
-				<mescroll-empty v-if="!list.length && !loading" :option="{tip : '暂无商品，请看看其他商品吧！'}" @emptyclick="redirect({ url: '/addon/shop/pages/goods/list' })"></mescroll-empty>
+				<mescroll-empty v-if="!list.length && !loading" :option="{tip : '暂无商品，请看看其他商品吧！'}"></mescroll-empty>
             </view>
         </mescroll-body>
 		
@@ -101,13 +105,14 @@ import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.v
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js'
 import { onPageScroll, onReachBottom } from '@dcloudio/uni-app'
 import { topTabar } from '@/utils/topTabbar'
+import {useGoods} from '@/hooks/useGoods'
 
 let menuButtonInfo: any = {};
 // 如果是小程序，获取右上角胶囊的尺寸信息，避免导航栏右侧内容与胶囊重叠(支付宝小程序非本API，尚未兼容)
 // #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
 menuButtonInfo = uni.getMenuButtonBoundingClientRect();
 // #endif
-
+const diyGoods = useGoods();
 const headStyle = computed(() => {
 	let style = Object.keys(menuButtonInfo).length ? (pxToRpx(Number(menuButtonInfo.height)) + pxToRpx(menuButtonInfo.top) + pxToRpx(8) + 368) + 'rpx' : '490rpx'
 	return style
@@ -150,7 +155,6 @@ const getActiveDiscountListFn = ()=>{
 		}else{
 			loading.value = false
 		}
-        
     })
 }
 getActiveDiscountListFn()
@@ -200,11 +204,11 @@ const toRedirect =(index:any)=>{
 }
 
 const toLink = (item : any) => {
-	if(item.active_goods.active_goods_status!='active'){
-		uni.showToast({ title: `活动${item.active_goods.active_goods_status_name}`, icon: 'none' })
+	if (item.activeGoods.active_goods_status != 'active') {
+		uni.showToast({ title: `活动${ item.activeGoods.active_goods_status_name }`, icon: 'none' })
 		return;
 	}
-	redirect({ url: '/addon/shop/pages/goods/detail', param: { sku_id :item.goods_sku.sku_id } })
+	redirect({ url: '/addon/shop/pages/goods/detail', param: { sku_id: item.goodsSku.sku_id, type: 'discount' } })
 }
 
 const mescrollTop = ref('')

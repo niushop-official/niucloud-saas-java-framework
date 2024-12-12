@@ -1,6 +1,5 @@
 package com.niu.shop.enums.active;
 
-import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,8 +9,8 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 public enum ActiveStatusEnum {
-    NOT_ACTIVE("not_active","未开始"),
-    ACTIVE("active","进行中"),
+    NOT_ACTIVE("not_active", "未开始"),
+    ACTIVE("active", "进行中"),
     END("end", "已结束"),
     CLOSE("close", "已关闭");
 
@@ -23,8 +22,7 @@ public enum ActiveStatusEnum {
 
     public static Map<String, String> getMap() {
         Map<String, String> map = new HashMap<>();
-        for(ActiveStatusEnum item : ActiveStatusEnum.values())
-        {
+        for (ActiveStatusEnum item : ActiveStatusEnum.values()) {
             map.put(item.getStatus(), item.getName());
         }
         return map;
@@ -32,17 +30,25 @@ public enum ActiveStatusEnum {
 
     /**
      * 通过status获取当前名称
+     *
      * @param status
      * @return
      */
-    public static String getNameByStatus(String status){
-        for(ActiveStatusEnum item : ActiveStatusEnum.values())
-        {
-            if(item.getStatus().equals(status))
-            {
+    public static String getNameByStatus(String status) {
+        for (ActiveStatusEnum item : ActiveStatusEnum.values()) {
+            if (item.getStatus().equals(status)) {
                 return item.getName();
             }
         }
         return "";
+    }
+
+    public static ActiveStatusEnum getEnumByStatus(String status) {
+        for (ActiveStatusEnum item : ActiveStatusEnum.values()) {
+            if (item.getStatus().equals(status)) {
+                return item;
+            }
+        }
+        return null;
     }
 }

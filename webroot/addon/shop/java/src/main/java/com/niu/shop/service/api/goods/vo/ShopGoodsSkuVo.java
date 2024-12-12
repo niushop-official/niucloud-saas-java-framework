@@ -1,5 +1,6 @@
 package com.niu.shop.service.api.goods.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
@@ -40,10 +41,12 @@ public class ShopGoodsSkuVo implements Serializable {
     private Integer isDefault; // 是否默认
     private BigDecimal memberPrice;
 
+    @JsonProperty("skuList")
     private List<Sku> skuList;
 
     private Goods goods;
 
+    @JsonProperty("goodsSpec")
     private List<Spec> goodsSpec;
 
     @Data

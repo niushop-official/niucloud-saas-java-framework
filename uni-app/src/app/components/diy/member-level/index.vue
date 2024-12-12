@@ -146,7 +146,7 @@
                         }
                     }
 
-                    if (item.growth > info.value.growth && !isSet) {
+                    if (item.growth > info.value.growth && item.level_id != info.value.member_level && !isSet) {
                         afterCurrIndex.value = index;
                         isSet = true;
                     }
@@ -164,7 +164,7 @@
             }else{
                 // 当前会员没有会员等级，则展示会员等级中的最后一个等级
                 info.value.member_level_name = list[0].level_name;
-                upgradeGrowth.value = list[0].growth;
+                upgradeGrowth.value =  list[0].growth - info.value.growth;
                 afterCurrIndex.value = 0;
                 currIndex.value = 1;
             }

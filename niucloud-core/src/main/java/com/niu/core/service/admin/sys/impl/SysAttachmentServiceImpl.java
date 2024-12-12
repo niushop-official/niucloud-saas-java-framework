@@ -175,8 +175,7 @@ public class SysAttachmentServiceImpl implements ISysAttachmentService {
      * @param addParam
      */
     public void addCategory(SysAttachmentCategoryParam addParam) {
-        if (addParam.getType() == null) throw new CommonException("type参数缺失");
-        if (ObjectUtil.isNotEmpty(addParam.getType())) throw new CommonException("type参数不能为空");
+        if (ObjectUtil.isEmpty(addParam.getType())) throw new CommonException("type参数不能为空");
 
         SysAttachmentCategory model = new SysAttachmentCategory();
         model.setSiteId(RequestUtils.siteId());

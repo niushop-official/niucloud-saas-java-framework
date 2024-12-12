@@ -1,15 +1,16 @@
 package com.niu.shop.controller.adminapi.order;
 
-import com.niu.core.common.domain.Result;
+import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.order.IShopInvoiceService;
 import com.niu.shop.service.admin.order.param.ShopInvoiceParam;
 import com.niu.shop.service.admin.order.param.ShopInvoiceSearchParam;
 import com.niu.shop.service.admin.order.vo.ShopInvoiceInfoVo;
 import com.niu.shop.service.admin.order.vo.ShopInvoiceListVo;
-import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 
 /**
@@ -25,9 +26,10 @@ public class ShopInvoiceController {
 
     /**
      * 发票列表
-     * @param pageParam 分页
+     *
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopInvoiceListVo>>
+     * @return Result<PageResult < ShopInvoiceListVo>>
      */
     @GetMapping("/invoice")
     public Result<PageResult<ShopInvoiceListVo>> lists(@Validated PageParam pageParam, ShopInvoiceSearchParam searchParam) {
@@ -37,6 +39,7 @@ public class ShopInvoiceController {
 
     /**
      * 发票详情
+     *
      * @return
      */
     @GetMapping("/invoice/{id}")
@@ -47,11 +50,12 @@ public class ShopInvoiceController {
 
     /**
      * 发票编辑
+     *
      * @param shopInvoiceParam 开票参数
      * @return Result<Object>
      */
-    @PostMapping("/invoice/{id}")
-    public Result<Object> invoicing(Integer id, @Validated @RequestBody ShopInvoiceParam shopInvoiceParam) {
+    @PutMapping("/invoice/{id}")
+    public Result<Object> invoicing(@PathVariable Integer id, @Validated @RequestBody ShopInvoiceParam shopInvoiceParam) {
         shopInvoiceService.invoicing(id, shopInvoiceParam);
         return Result.success();
     }

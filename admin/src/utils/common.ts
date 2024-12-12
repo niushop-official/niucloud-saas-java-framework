@@ -1,6 +1,6 @@
-import type { App } from 'vue'
+import type {App} from 'vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import { useCssVar, useTitle } from '@vueuse/core'
+import {useCssVar, useTitle} from '@vueuse/core'
 import colorFunction from 'css-color-function'
 import storage from './storage'
 
@@ -16,7 +16,6 @@ export function useElementIcon(app: App): void {
 
 /**
  * 设置主题色
- * @param color
  */
 export function setThemeColor(color: string, mode: string = 'light'): void {
     useCssVar('--el-color-primary', null).value = color
@@ -41,7 +40,7 @@ export function setThemeColor(color: string, mode: string = 'light'): void {
     }
 
     Object.keys(colors[mode]).forEach((key) => {
-        useCssVar('--el-color-primary' + '-' + key, null).value = colorFunction.convert(`color(${color} ${colors[mode][key]})`)
+        useCssVar('--el-color-primary' + '-' + key, null).value = colorFunction.convert(`color(${ color } ${ colors[mode][key] })`)
     })
 }
 
@@ -49,7 +48,9 @@ export function setThemeColor(color: string, mode: string = 'light'): void {
  * 获取当前访问应用类型
  */
 export function getAppType() {
-    const path = location.pathname.split('/').filter((val) => { return val })
+    const path = location.pathname.split('/').filter((val) => {
+        return val
+    })
 
     if (!path.length) {
         return 'admin'
@@ -141,7 +142,7 @@ export function img(path: string): string {
  * @param path
  * @returns
  */
-export function assetImg (path: string) {
+export function assetImg(path: string) {
     return new URL('@/', import.meta.url) + path
 }
 
@@ -167,7 +168,7 @@ export function strByteLength(str: string = ''): number {
  * @param url
  */
 export function urlToRouteRaw(url: string) {
-    const query = {}
+    const query: any = {}
     const [path, param] = url.split('?')
 
     param && param.split('&').forEach((str: string) => {
@@ -212,7 +213,7 @@ export function deepClone(obj: object) {
  * @param {Boolean} firstU
  * @param {Number} radix
  */
-export function guid(len = 10, firstU = true, radix = null) {
+export function guid(len = 10, firstU = true, radix: any = null) {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('')
     const uuid = []
     radix = radix || chars.length
@@ -236,80 +237,168 @@ export function guid(len = 10, firstU = true, radix = null) {
     // 移除第一个字符,并用u替代,因为第一个字符为数值时,该guuid不能用作id或者class
     if (firstU) {
         uuid.shift()
-        return `u${uuid.join('')}`
+        return `u${ uuid.join('') }`
     }
     return uuid.join('')
 }
 
 /**
-* 金额格式化
-*/
-export function moneyFormat(money : string) : string {
-	return isNaN(parseFloat(money)) ? money : parseFloat(money).toFixed(2)
+ * 金额格式化
+ */
+export function moneyFormat(money: string): string {
+    return isNaN(parseFloat(money)) ? money : parseFloat(money).toFixed(2)
 }
 
 
 /**
  * 时间戳转日期格式
- * @param {Object} timeStamp
  */
-export function timeStampTurnTime(timeStamp, type = "") {
-	if (timeStamp != undefined && timeStamp != "" && timeStamp > 0) {
-		var date = new Date();
-		date.setTime(timeStamp * 1000);
-		var y = date.getFullYear();
-		var m = date.getMonth() + 1;
-		m = m < 10 ? ('0' + m) : m;
-		var d = date.getDate();
-		d = d < 10 ? ('0' + d) : d;
-		var h = date.getHours();
-		h = h < 10 ? ('0' + h) : h;
-		var minute = date.getMinutes();
-		var second = date.getSeconds();
-		minute = minute < 10 ? ('0' + minute) : minute;
-		second = second < 10 ? ('0' + second) : second;
-		if (type) {
-			if (type == 'yearMonthDay') {
-				return y + '年' + m + '月' + d + '日';
-			}
-			return y + '-' + m + '-' + d;
-		} else {
-			return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
-		}
+export function timeStampTurnTime(timeStamp: any, type = "") {
+    if (timeStamp != undefined && timeStamp != "" && timeStamp > 0) {
+        var date = new Date();
+        date.setTime(timeStamp * 1000);
+        var y: any = date.getFullYear();
+        var m: any = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d: any = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h: any = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute: any = date.getMinutes();
+        var second: any = date.getSeconds();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        second = second < 10 ? ('0' + second) : second;
+        if (type) {
+            if (type == 'yearMonthDay') {
+                return y + '年' + m + '月' + d + '日';
+            }
+            return y + '-' + m + '-' + d;
+        } else {
+            return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second;
+        }
 
-	} else {
-		return "";
-	}
+    } else {
+        return "";
+    }
 }
 
 /**
  * 过滤小数点(保留两位)
  * @param event
  */
-export function filterDigit(event:any){
-    event.target.value = event.target.value.replace(/[^\d\.]/g,'');
-    event.target.value = event.target.value.replace(/^\./g,'');
-    event.target.value = event.target.value.replace(/\.{2,}/g,'.');
+export function filterDigit(event: any) {
+    event.target.value = event.target.value.replace(/[^\d\.]/g, '');
+    event.target.value = event.target.value.replace(/^\./g, '');
+    event.target.value = event.target.value.replace(/\.{2,}/g, '.');
     // 限制最多两位小数
     const decimalParts = event.target.value.split('.');
     if (decimalParts.length > 1 && decimalParts[1].length > 2) {
         // 如果有小数部分且超过两位，则截取前两位
-        event.target.value = `${decimalParts[0]}.${decimalParts[1].slice(0, 2)}`;
+        event.target.value = `${ decimalParts[0] }.${ decimalParts[1].slice(0, 2) }`;
     }
 }
 
 /**
  * 过滤整数
-  * @param event
+ * @param event
  */
-export function filterNumber(event:any){
-    event.target.value = event.target.value.replace(/[^\d]/g,'');
+export function filterNumber(event: any) {
+    event.target.value = event.target.value.replace(/[^\d]/g, '');
 }
+
 /**
  * 过滤特殊字符
-  * @param event
+ * @param event
  */
-export function filterSpecial(event:any){
+export function filterSpecial(event: any) {
     event.target.value = event.target.value.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '')
-    event.target.value = event.target.value.replace(/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、]/g,'')
+    event.target.value = event.target.value.replace(/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、]/g, '')
+}
+
+export function importIconFontCss() {
+    // const modulesFiles = {}; // import.meta.glob('@/styles/icon/official-iconfont.css', { eager: true })
+    // const modulesFiles = import.meta.glob('@/addon/**/assets/icon/*.css', { eager: true })
+    // // console.log('modulesFiles',modulesFiles)
+    //
+    // const modules:any = {}
+    // for (const [key, value] of Object.entries(modulesFiles)) {
+    //     const moduleName:any = key.split('/').pop()
+    //     const name = moduleName.split('.')[0]
+    //     modules[name] = value.default
+    // }
+    //
+    // // console.log('modules',modules)
+    //
+    // for(let key in modules) {
+    //     // console.log('modules[key]',modules[key])
+    //     import(modules[key]).then((module) => {
+    //         // console.log('module', module.default);
+    //     }).catch((e) => {
+    //         // console.log('caca', e)
+    //     });
+    // }
+}
+
+export function getIcon() {
+    // const modulesFiles = import.meta.glob('@/styles/icon/*.json', { eager: true })
+    // const addonModulesFiles = import.meta.glob('@/addon/**/assets/icon/*.json', { eager: true })
+    // addonModulesFiles && Object.assign(modulesFiles, addonModulesFiles)
+    //
+    // // const modulesFiles = {}; // import.meta.glob('@/styles/icon/official-iconfont.css', { eager: true })
+    // // const modulesFiles = import.meta.glob('@/styles/icon/*.json', { eager: true })
+    // console.log('modulesFiles', modulesFiles)
+    //
+    // const modules = {}
+    // for (const [key, value] of Object.entries(modulesFiles)) {
+    //     const moduleName = key.split('/').pop()
+    //     console.log('moduleName',moduleName)
+    //     const name = moduleName.split('.')[0]
+    //     modules[name] = value.default
+    // }
+    // console.log('modules', modules)
+    // // const addonModulesFiles = import.meta.glob('@/addon/**/assets/icon/*.json', { eager: true })
+}
+
+/**
+ * 设置表格分页数据的本地存储
+ * @param page
+ * @param limit
+ * @param where
+ */
+export function setTablePageStorage(page: any = 1, limit: any = 10, where: any = {}) {
+    var data = storage.get('tablePageStorage');
+    if (!data) {
+        data = {};
+    }
+
+    var key = location.pathname + JSON.stringify(where);
+    data[key] = {
+        page,
+        limit
+    };
+
+    var MAX_COUNT = 5; // 最多存储 5 个页面的分页缓存，超出则删除最开始的第一个页面
+    if (Object.keys(data).length > MAX_COUNT) {
+        delete data[Object.keys(data)[0]];
+    }
+
+    storage.set({ key: 'tablePageStorage', data });
+}
+
+/**
+ * 获取表格分页数据的本地存储
+ * @param where
+ */
+export function getTablePageStorage(where: any = {}) {
+    var data = storage.get('tablePageStorage');
+    var key = location.pathname + JSON.stringify(where);
+    if (!data || !data[key]) {
+        data = {
+            page: 1,
+            limit: 10
+        };
+    } else {
+        data = data[key];
+    }
+    return data;
 }

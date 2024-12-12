@@ -1,5 +1,6 @@
 package com.niu.shop.service.api.goods.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
@@ -39,6 +40,7 @@ public class ShopGoodsListVo implements Serializable {
     private String memberDiscount;
     private Integer virtualVerifyType;
     private Integer isDiscount;
+    @JsonProperty("goodsSku")
     private GoodsSku goodsSku;
 
     @Data

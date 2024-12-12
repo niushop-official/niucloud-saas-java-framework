@@ -40,6 +40,8 @@ public class ApplyParam {
     private BigDecimal weight;
     @JsonProperty("Volume")
     private BigDecimal volume;
+    @JsonProperty("Cost")
+    private BigDecimal cost;
     @JsonProperty("Remark")
     private String remark;
     @JsonProperty("IsReturnPrintTemplate")

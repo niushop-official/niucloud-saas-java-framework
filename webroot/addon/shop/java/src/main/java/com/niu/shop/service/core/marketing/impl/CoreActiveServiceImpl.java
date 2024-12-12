@@ -7,7 +7,6 @@ import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.active.ShopActive;
 import com.niu.shop.entity.active.ShopActiveGoods;
 import com.niu.shop.enums.active.ActiveStatusEnum;
-import com.niu.shop.event.goods.AfterGoodsEditEvent;
 import com.niu.shop.event.marketing.ActiveEndAfterEvent;
 import com.niu.shop.event.marketing.ActiveStartAfterEvent;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
@@ -36,19 +35,19 @@ public class CoreActiveServiceImpl implements ICoreActiveService {
 
         shopActiveMapper.insert(shopActive);
 
-        if(ObjectUtil.isNotEmpty(shopActiveGoodsList)) {
-            for (ShopActiveGoods shopActiveGoods : shopActiveGoodsList){
+        if (ObjectUtil.isNotEmpty(shopActiveGoodsList)) {
+            for (ShopActiveGoods shopActiveGoods : shopActiveGoodsList) {
                 shopActiveGoods.setActiveId(shopActive.getActiveId());
             }
             coreActiveGoodsService.insertAll(shopActiveGoodsList);
         }
 
         //活动开始时间小于当前时间
-        if(shopActive.getStartTime() < System.currentTimeMillis() / 1000) {
+        if (ObjectUtil.isNotEmpty(shopActive.getStartTime()) && shopActive.getStartTime() != 0 && shopActive.getStartTime() < System.currentTimeMillis() / 1000) {
             this.start(shopActive.getActiveId());
         }
         //活动结束时间大于当前时间
-        if(shopActive.getEndTime() <= System.currentTimeMillis() / 1000) {
+        if (ObjectUtil.isNotEmpty(shopActive.getEndTime()) && shopActive.getEndTime() != 0 && shopActive.getEndTime() <= System.currentTimeMillis() / 1000) {
             this.end(shopActive.getActiveId());
         }
 
@@ -58,20 +57,21 @@ public class CoreActiveServiceImpl implements ICoreActiveService {
     @Override
     public void edit(ShopActive shopActive, List<ShopActiveGoods> shopActiveGoodsList) {
 
-        if(shopActive.getEndTime() < System.currentTimeMillis() / 1000) throw new CommonException("活动已结束，无法编辑");
+        if (ObjectUtil.isNotEmpty(shopActive.getEndTime()) && shopActive.getEndTime() != 0 && shopActive.getEndTime() < System.currentTimeMillis() / 1000)
+            throw new CommonException("活动已结束，无法编辑");
 
         shopActiveMapper.updateById(shopActive);
 
-        if(ObjectUtil.isNotEmpty(shopActiveGoodsList)) {
+        if (ObjectUtil.isNotEmpty(shopActiveGoodsList)) {
 
             List<ShopActiveGoods> activeGoodsList = shopActiveGoodsMapper.selectList(new QueryWrapper<ShopActiveGoods>().eq("active_id", shopActive.getActiveId()));
 
-            if(ObjectUtil.isNotEmpty(activeGoodsList)) {
+            if (ObjectUtil.isNotEmpty(activeGoodsList)) {
 
                 for (ShopActiveGoods activeGoods : activeGoodsList) {
                     for (ShopActiveGoods goods : shopActiveGoodsList) {
 
-                        if(activeGoods.getGoodsId().equals(goods.getGoodsId())) {
+                        if (activeGoods.getGoodsId().equals(goods.getGoodsId())) {
                             activeGoods.setActiveGoodsOrderMoney(goods.getActiveGoodsOrderMoney());
                             activeGoods.setActiveGoodsOrderNum(goods.getActiveGoodsOrderNum());
                             activeGoods.setActiveGoodsMemberNum(goods.getActiveGoodsMemberNum());
@@ -86,11 +86,11 @@ public class CoreActiveServiceImpl implements ICoreActiveService {
             coreActiveGoodsService.insertAll(shopActiveGoodsList);
 
             //活动开始时间小于当前时间
-            if(shopActive.getStartTime() < System.currentTimeMillis() / 1000) {
+            if (ObjectUtil.isNotEmpty(shopActive.getStartTime()) && shopActive.getStartTime() != 0 && shopActive.getStartTime() < System.currentTimeMillis() / 1000) {
                 this.start(shopActive.getActiveId());
             }
             //活动结束时间大于当前时间
-            if(shopActive.getEndTime() <= System.currentTimeMillis() / 1000) {
+            if (ObjectUtil.isNotEmpty(shopActive.getEndTime()) && shopActive.getEndTime() != 0 && shopActive.getEndTime() <= System.currentTimeMillis() / 1000) {
                 this.end(shopActive.getActiveId());
             }
         }
@@ -100,9 +100,10 @@ public class CoreActiveServiceImpl implements ICoreActiveService {
     public void del(Integer activeId, Integer siteId, Integer isForce) {
 
         ShopActive shopActive = shopActiveMapper.selectOne(new QueryWrapper<ShopActive>().eq("active_id", activeId).eq("site_id", siteId));
-        if(ObjectUtil.isEmpty(shopActive)) throw new CommonException("活动不存在");
+        if (ObjectUtil.isEmpty(shopActive)) throw new CommonException("活动不存在");
 
-        if(isForce == 0 && shopActive.getActiveStatus().equals(ActiveStatusEnum.ACTIVE.getStatus())) throw new CommonException("活动正在进行中，无法删除");
+        if (isForce == 0 && shopActive.getActiveStatus().equals(ActiveStatusEnum.ACTIVE.getStatus()))
+            throw new CommonException("活动正在进行中，无法删除");
         shopActiveMapper.deleteById(shopActive.getActiveId());
         shopActiveGoodsMapper.delete(new QueryWrapper<ShopActiveGoods>().eq("active_id", shopActive.getActiveId()));
     }

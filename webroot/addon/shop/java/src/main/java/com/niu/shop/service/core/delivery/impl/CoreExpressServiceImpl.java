@@ -77,10 +77,9 @@ public class CoreExpressServiceImpl implements ICoreExpressService {
         if (template == null) {
             template = nationwide;
         } else {
-            BigDecimal zero = new BigDecimal(0);
             if (template.getSnum().compareTo(0) == 0) template.setSnum(nationwide.getSnum());
-            if (template.getSprice().compareTo(zero) == 0) template.setSprice(nationwide.getSprice());
-            if (template.getXprice().compareTo(zero) == 0) template.setXprice(nationwide.getXprice());
+            if (template.getSprice().compareTo(BigDecimal.ZERO) == 0) template.setSprice(nationwide.getSprice());
+            if (template.getXprice().compareTo(BigDecimal.ZERO) == 0) template.setXprice(nationwide.getXprice());
             if (template.getXnum().compareTo(0) == 0) template.setXnum(nationwide.getXnum());
         }
 

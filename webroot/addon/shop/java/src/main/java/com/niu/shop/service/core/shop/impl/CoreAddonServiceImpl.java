@@ -13,7 +13,6 @@ import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.shop.entity.delivery.ShopDeliveryCompany;
 import com.niu.shop.service.admin.delivery.IShopDeliveryCompanyService;
 import com.niu.shop.service.core.shop.ICoreAddonService;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

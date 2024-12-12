@@ -102,8 +102,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         // 计算订单金额
         OrderCreateDataVo.Basic basic = vo.getBasic();
         basic.setOrderMoney(basic.getGoodsMoney().add(basic.getDeliveryMoney()).subtract(basic.getDiscountMoney()));
-        BigDecimal zero = new BigDecimal(0);
-        if (basic.getOrderMoney().compareTo(zero) == -1) basic.setOrderMoney(zero);
+        if (basic.getOrderMoney().compareTo(BigDecimal.ZERO) == -1) basic.setOrderMoney(BigDecimal.ZERO);
 
         cacheOrderVo(vo);
 

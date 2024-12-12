@@ -1,5 +1,6 @@
 package com.niu.shop.service.api.cart.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
@@ -28,6 +29,7 @@ public class ShopCartListVo implements Serializable {
     private Integer status;  // 购物车商品状态
     private String invalidRemark;  // 失效原因
     private Goods goods;
+    @JsonProperty("goodsSku")
     private GoodsSku goodsSku;
     private List<GoodsSpec> goodsSpec;
 

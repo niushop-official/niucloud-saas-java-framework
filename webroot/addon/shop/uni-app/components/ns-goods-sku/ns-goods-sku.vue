@@ -3,7 +3,7 @@
 		<u-overlay :show="goodsSkuPop" @click="closeFn" zIndex="490">
 			<u-popup class="popup-type" :show="goodsSkuPop" @close="closeFn" mode="bottom" :overlay="false" zIndex="500">
 				<view class="py-[32rpx] relative" v-if="goodsDetail.detail" @touchmove.prevent.stop>
-					<view class="flex px-[32rpx] mb-[40rpx]">
+					<view class="flex px-[32rpx]" :class="{'mb-[58rpx]':!(goodsDetail.is_newcomer && goodsDetail.newcomer_price != goodsDetail.price && (Object.keys(cartSkuList).length?parseInt(cartSkuList.num)+buyNum:buyNum)>1)}">
 
 						<view class="rounded-[var(--goods-rounded-big)] overflow-hidden w-[180rpx] h-[180rpx]">
 							<u--image width="180rpx" height="180rpx" :src="img(goodsDetail.detail.sku_image)" @click="imgListPreview(goodsDetail.detail.sku_image)" model="aspectFill">
@@ -18,17 +18,24 @@
 									<text class="text-[32rpx] font-bold price-font">￥</text>
 									<text class="text-[48rpx] price-font">{{ parseFloat(goodsPrice).toFixed(2).split('.')[0] }}</text>
 									<text class="text-[32rpx] mr-[6rpx] price-font">.{{ parseFloat(goodsPrice).toFixed(2).split('.')[1] }}</text>
+									<image class="h-[24rpx] ml-[6rpx] max-w-[60rpx]" v-if="priceType() == 'newcomer_price'" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
+									<image class="h-[24rpx] ml-[6rpx] max-w-[44rpx]" v-if="priceType() == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
+									<image class="h-[24rpx] ml-[6rpx] max-w-[72rpx]" v-if="priceType() == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
 								</view>
-								<view class="text-[26rpx] leading-[32rpx] text-[var(--text-color-light6)] mt-[12rpx]">库存{{goodsDetail.detail.stock}}{{ goodsDetail.goods.unit }}</view>
+								 <view class="text-[26rpx] leading-[32rpx] text-[var(--text-color-light6)] mt-[12rpx]">库存{{goodsDetail.detail.stock}}{{ goodsDetail.goods.unit }}</view>
 							</view>
-							<view class="text-[26rpx] leading-[30rpx] text-[var(--text-color-light6)] w-[100%] max-h-[60rpx] multi-hidden" v-if="goodsDetail.goods_spec && goodsDetail.goods_spec.length">已选规格：{{goodsDetail.detail.sku_spec_format}}</view>
-	<!-- 						<view v-if="goodsDetail.goods_spec && goodsDetail.goods_spec.length">
+							<view class="text-[26rpx] leading-[30rpx] text-[var(--text-color-light6)] w-[100%] max-h-[60rpx] multi-hidden" v-if="goodsDetail.goodsSpec && goodsDetail.goodsSpec.length">已选规格：{{goodsDetail.detail.sku_spec_format}}</view>
+	<!-- 						<view v-if="goodsDetail.goodsSpec && goodsDetail.goodsSpec.length">
 								<text>已选规格：{{goodsDetail.detail.sku_spec_format}}</text>
 							</view> -->
 						</view>
 					</view>
+					<view class="flex items-center px-[32rpx] pt-[8rpx] pb-[16rpx] h-[58rpx] box-border" v-if="goodsDetail.is_newcomer && goodsDetail.newcomer_price != goodsDetail.price && (Object.keys(cartSkuList).length?parseInt(cartSkuList.num)+buyNum:buyNum)>1">
+						<image class="h-[24rpx] w-[56rpx]" :src="img('addon/shop/newcomer.png')" mode="aspectFit" />
+						<view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]">第1{{goodsDetail.goods.unit}}，￥{{parseFloat(goodsDetail.newcomer_price).toFixed(2)}}/{{goodsDetail.goods.unit}}；第{{(parseInt(cartSkuList.num||0)+buyNum)>2?'2~'+(parseInt(cartSkuList.num||0)+buyNum):'2'}}{{goodsDetail.goods.unit}}，￥{{parseFloat(parseFloat(goodsPrice)).toFixed(2)}}/{{goodsDetail.goods.unit}}</view>
+					</view>
 					<scroll-view class="h-[500rpx] px-[32rpx] box-border mb-[60rpx]" scroll-y="true">
-						<view :class="{'mt-[20rpx]': 0 != index }" v-for="(item,index) in goodsDetail.goods_spec" :key="index">
+						<view :class="{'mt-[20rpx]': 0 != index }" v-for="(item,index) in goodsDetail.goodsSpec" :key="index">
 							<view class="text-[28rpx] leading-[36rpx] mb-[24rpx]">{{item.spec_name}}</view>
 							<view class="flex flex-wrap">
 								<view class="box-border bg-[var(--temp-bg)] text-[24rpx] px-[44rpx] text-center h-[56rpx] flex-center mr-[20rpx] mb-[20rpx] border-1 border-solid rounded-[50rpx] border-[var(--temp-bg)]"
@@ -76,21 +83,20 @@
 			</u-popup>
 		</u-overlay>
 		 <!-- 强制绑定手机号 -->
-		<bind-mobile ref="bindMobileRef" /> 
+		<bind-mobile ref="bindMobileRef" />
 	</view>
 </template>
 
 <script setup lang="ts">
-	import { ref, computed, toRaw } from 'vue';
-	import { img, redirect, getToken } from '@/utils/common'
-	import useCartStore from '@/addon/shop/stores/cart'
-	import { useLogin } from '@/hooks/useLogin'
-	import useMemberStore from '@/stores/member'
-	import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
-	import { cloneDeep } from 'lodash-es'
-	import { t } from '@/locale'
+import {computed, ref, toRaw} from 'vue';
+import {getToken, img, redirect} from '@/utils/common'
+import useCartStore from '@/addon/shop/stores/cart'
+import {useLogin} from '@/hooks/useLogin'
+import useMemberStore from '@/stores/member'
+import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
+import {cloneDeep} from 'lodash-es'
 
-	const props = defineProps(['goodsDetail']);
+const props = defineProps(['goodsDetail']);
 	const goodsSkuPop = ref(false);
 	const callback:any = ref(null);
 	const currSpec = ref({
@@ -99,11 +105,14 @@
 	})
 	const openType = ref("");
 	const buyNum = ref(1)
-	
+
 	// 商品价格
 	const goodsPrice = computed(() => {
         let price = "0.00";
-        if (Object.keys(goodsDetail.value).length && Object.keys(goodsDetail.value.goods).length && goodsDetail.value.goods.is_discount && goodsDetail.value.sale_price != goodsDetail.value.price) {
+        if (Object.keys(goodsDetail.value).length && goodsDetail.value.type == 'newcomer_discount' && goodsDetail.value.is_newcomer && goodsDetail.value.newcomer_price != goodsDetail.value.price && (Object.keys(cartSkuList.value).length ? parseInt(cartSkuList.value.num) + buyNum.value : buyNum.value) < 2) {
+            // 新人价
+            price = goodsDetail.value.newcomer_price;
+        } else if (Object.keys(goodsDetail.value).length && goodsDetail.value.type == 'discount' && Object.keys(goodsDetail.value.goods).length && goodsDetail.value.goods.is_discount && goodsDetail.value.sale_price != goodsDetail.value.price) {
             price = goodsDetail.value.sale_price // 折扣价
         } else if (Object.keys(goodsDetail.value).length && Object.keys(goodsDetail.value.goods).length && goodsDetail.value.goods.member_discount && getToken() && goodsDetail.value.member_price != goodsDetail.value.price) {
             price = goodsDetail.value.member_price // 会员价
@@ -113,6 +122,19 @@
         return price;
     })
 
+	// 价格类型
+	const priceType = () => {
+	    let type = "";
+	    if (goodsDetail.value.type == 'newcomer_discount' && Object.keys(goodsDetail.value).length && goodsDetail.value.is_newcomer && goodsDetail.value.newcomer_price != goodsDetail.value.price && getToken()) {
+	        type = 'newcomer_price'// 新人
+	    } else if (goodsDetail.value.type == 'discount' && Object.keys(goodsDetail.value).length && Object.keys(goodsDetail.value.goods).length && goodsDetail.value.goods.is_discount && goodsDetail.value.sale_price != goodsDetail.value.price) {
+	        type = 'discount_price'// 折扣
+	    } else if (Object.keys(goodsDetail.value).length && Object.keys(goodsDetail.value.goods).length && goodsDetail.value.goods.member_discount && getToken() && goodsDetail.value.member_price != goodsDetail.value.price) {
+	        type = 'member_price' // 会员价
+	    }
+	    return type;
+	}
+
 	// 会员信息
 	const memberStore = useMemberStore()
 	const userInfo = computed(() => memberStore.info)
@@ -120,14 +142,20 @@
 	// 购物车数量
 	const cartStore = useCartStore();
 	cartStore.getList();
+	const cartSkuList = computed(()=>{
+		if(goodsDetail.value && cartStore.cartList['goods_' + goodsDetail.value.goods_id] && cartStore.cartList['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id]) {
+			return cartStore.cartList['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id];
+		}else{
+			return {}
+		}
+	})
 	const cartList = computed(() => cartStore.cartList)
-
 	const open = (type="",fn = "")=>{
 		openType.value = type;
 		goodsSkuPop.value = true;
 		callback.value = fn;
 	}
-	
+
 	const goodsSkuInputFn = ()=>{
 		setTimeout(() => {
 			if(buyNum.value >= goodsDetail.value.stock){
@@ -158,7 +186,7 @@
 
 			if(!Object.keys(currSpec.value.name).length) currSpec.value.name = data.sku_spec_format.split(",");
 
-			data.goods_spec.forEach((item: any,index: any)=>{
+			data.goodsSpec.forEach((item: any,index: any)=>{
 				let specName = item.spec_values.split(",");
 				item.values = [];
 				specName.forEach((specItem: any, specIndex: any)=>{
@@ -178,8 +206,8 @@
 			getSkuId();
 
 			// 当前详情内容
-			if(data.sku_list && Object.keys(data.sku_list).length){
-				data.sku_list.forEach((idItem: any, idIndex: any)=>{
+			if(data.skuList && Object.keys(data.skuList).length){
+				data.skuList.forEach((idItem: any, idIndex: any)=>{
 					if(idItem.sku_id == currSpec.value.skuId){
 						data.detail = idItem;
 					}
@@ -197,7 +225,7 @@
 
 	const emits = defineEmits(['change'])
 	const getSkuId = ()=>{
-		props.goodsDetail.sku_list.forEach((skuItem: any, skuIndex: any)=>{
+		props.goodsDetail.skuList.forEach((skuItem: any, skuIndex: any)=>{
 			if(skuItem.sku_spec_format == currSpec.value.name.toString()){
 				currSpec.value.skuId = skuItem.sku_id
 				emits('change',skuItem.sku_id)
@@ -211,13 +239,18 @@
 
 	//提交
 	const confirm = ()=> {
+		if(buyNum.value < 1) return;
+
         // 检测是否登录
         if (!userInfo.value) {
-            useLogin().setLoginBack({
-                url: '/addon/shop/pages/goods/detail',
-                param: { sku_id: goodsDetail.value.sku_id }
-            })
-            return false
+	        useLogin().setLoginBack({
+		        url: '/addon/shop/pages/goods/detail',
+		        param: {
+			        sku_id: goodsDetail.value.sku_id,
+			        type: goodsDetail.value.type
+		        }
+	        })
+	        return false
         }
 
         // #ifdef H5
@@ -263,9 +296,13 @@
             uni.setStorage({
                 key: 'orderCreateData',
                 data: {
-                    sku_data: [
-                        data
-                    ]
+	                sku_data: [
+		                data
+	                ],
+	                extend_data: {
+		                relate_id: '',
+		                activity_type: goodsDetail.value.type // 目前营销活动有，新人价、限时折扣
+	                }
                 },
                 success: () => {
                     redirect({ url: '/addon/shop/pages/order/payment' })

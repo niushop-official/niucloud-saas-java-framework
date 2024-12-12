@@ -258,6 +258,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public SysUserInfoVo getUserInfoByUserName(String userName) {
         SysUser model=sysUserMapper.selectOne(new QueryWrapper<SysUser>().eq("username", userName).last("limit 1"));
+        Assert.notNull(model, "账号或密码错误");
         SysUserInfoVo vo = new SysUserInfoVo();
         BeanUtils.copyProperties(model, vo);
         return vo;

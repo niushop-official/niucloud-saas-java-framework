@@ -1,15 +1,8 @@
 package com.niu.shop.service.admin.goods;
 
-import com.niu.core.common.domain.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.niu.shop.entity.goods.ShopGoodsSku;
-import com.niu.shop.entity.goods.ShopGoodsSpec;
-import com.niu.shop.service.admin.goods.param.ShopGoodsServiceSearchParam;
-import com.niu.shop.service.admin.goods.param.ShopGoodsSkuParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsSkuSearchParam;
-import com.niu.core.common.domain.PageParam;
-import com.niu.shop.service.admin.goods.vo.ShopGoodsServiceListVo;
-import com.niu.shop.service.admin.goods.vo.ShopGoodsSkuInfoVo;
-import com.niu.shop.service.admin.goods.vo.ShopGoodsSkuListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsSkuVo;
 
 import java.util.List;
@@ -17,7 +10,7 @@ import java.util.List;
 /**
  * 商品规格服务接口
  */
-public interface IShopGoodsSkuService {
+public interface IShopGoodsSkuService extends IService<ShopGoodsSku> {
 
     void insertAll(List<ShopGoodsSku> list);
 

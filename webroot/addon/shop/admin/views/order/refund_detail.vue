@@ -24,7 +24,7 @@
 						<el-form-item :label="t('deliveryType')">
 							<div class="input-width">{{ formData.order_main.delivery_type_name }}</div>
 						</el-form-item>
-						<div>
+						<div  v-if="formData.order_main.delivery_type == 'express' || formData.order_main.delivery_type == 'local_delivery'">
 							<el-form-item :label="t('takerName')">
 								<div class="input-width">{{ formData.order_main.taker_name }}</div>
 							</el-form-item>

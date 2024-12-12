@@ -1,23 +1,30 @@
 package com.niu.shop.service.api.goods.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.mapper.member.MemberLevelMapper;
+import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.goods.*;
 import com.niu.shop.entity.order.config.ShopOrderEvaluate;
+import com.niu.shop.enums.active.ActiveClassEnum;
+import com.niu.shop.enums.active.ActiveTypeEnum;
+import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.goods.*;
 import com.niu.shop.service.api.goods.IGoodsService;
 import com.niu.shop.service.api.goods.param.ShopGoodsComponentsSearchParam;
@@ -27,7 +34,10 @@ import com.niu.shop.service.api.goods.vo.ShopGoodsDetailVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsSkuVo;
 import com.niu.shop.service.api.marketing.IShopDiscountService;
+import com.niu.shop.service.api.marketing.IShopNewcomerService;
+import com.niu.shop.service.api.marketing.vo.ShopNewcomerInfoVo;
 import com.niu.shop.service.core.order.ICoreOrderConfigService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +45,9 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class GoodsServiceImpl implements IGoodsService {
 
@@ -72,6 +84,18 @@ public class GoodsServiceImpl implements IGoodsService {
     @Resource
     IShopDiscountService discountService;
 
+    @Resource
+    MemberMapper memberMapper;
+
+    @Resource
+    MemberLevelMapper memberLevelMapper;
+
+    @Resource
+    IShopNewcomerService shopNewcomerService;
+
+    @Resource
+    ShopCouponGoodsMapper shopCouponGoodsMapper;
+
     /**
      * 查询商品列表
      *
@@ -81,7 +105,7 @@ public class GoodsServiceImpl implements IGoodsService {
      */
     @Override
     public PageResult<ShopGoodsListVo> page(PageParam pageParam, ShopGoodsSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
+        Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
@@ -93,9 +117,11 @@ public class GoodsServiceImpl implements IGoodsService {
         queryWrapper.eq("delete_time", 0);
         if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) queryWrapper.like("goods_name", searchParam.getKeyword());
         if (ObjectUtil.isNotEmpty(searchParam.getBrandId())) queryWrapper.eq("brand_id", searchParam.getBrandId());
-        if (ObjectUtil.isNotEmpty(searchParam.getGoodsCategory())) queryWrapper.like("goods_category", "\"" + searchParam.getGoodsCategory() + "\"");
-        if (ObjectUtil.isNotEmpty(searchParam.getLabelIds())) queryWrapper.like("label_ids", "\"" + searchParam.getLabelIds() + "\"");
-        QueryMapperUtils.buildByBetween(queryWrapper,"gs.price", new Double[]{ searchParam.getStartPrice(), searchParam.getEndPrice() });
+        if (ObjectUtil.isNotEmpty(searchParam.getGoodsCategory()))
+            queryWrapper.like("goods_category", "\"" + searchParam.getGoodsCategory() + "\"");
+        if (ObjectUtil.isNotEmpty(searchParam.getLabelIds()))
+            queryWrapper.like("label_ids", "\"" + searchParam.getLabelIds() + "\"");
+        QueryMapperUtils.buildByBetween(queryWrapper, "gs.price", new Double[]{searchParam.getStartPrice(), searchParam.getEndPrice()});
 
         if (ObjectUtil.isNotEmpty(searchParam.getOrder())) {
             queryWrapper.orderBy(true, searchParam.getSort().equals("asc"), searchParam.getOrder());
@@ -104,8 +130,31 @@ public class GoodsServiceImpl implements IGoodsService {
             queryWrapper.orderBy(true, false, "create_time");
         }
 
+        if (searchParam.getCouponId() != null && searchParam.getCouponId() > 0) {
+            List<ShopCouponGoods> couponGoodsList = shopCouponGoodsMapper.selectList(new QueryWrapper<ShopCouponGoods>()
+                    .eq("coupon_id", searchParam.getCouponId())
+                    .select("category_id,goods_id"));
+            List<Integer> goodsIds = couponGoodsList.stream().filter(i -> i.getGoodsId() > 0).map(i -> i.getGoodsId()).collect(Collectors.toList());
+            List<Integer> categoryIds = couponGoodsList.stream().filter(i -> i.getCategoryId() > 0).map(i -> i.getCategoryId()).collect(Collectors.toList());
+            if (goodsIds.size() > 0) {
+                queryWrapper.in("g.goods_id", goodsIds);
+            } else if (categoryIds.size() > 0) {
+                queryWrapper.and(i -> {
+                    for (int index = 0; index < categoryIds.size(); index++) {
+                        Integer categoryId = categoryIds.get(index);
+                        if (index == 0) {
+                            i.like("goods_category", "\"" + categoryId + "\"");
+                        } else {
+                            i.or().like("goods_category", "\"" + categoryId + "\"");
+                        }
+                    }
+                });
+            }
+        }
+
         MemberLevelInfoVo memberLevel = null;
-        if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
+        if (ObjectUtil.isNotEmpty(RequestUtils.memberId()))
+            memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
 
         IPage<ShopGoodsListVo> iPage = shopGoodsMapper.selectJoinPage(new Page<>(page, limit), ShopGoodsListVo.class, queryWrapper);
         List<ShopGoodsListVo> list = new LinkedList<>();
@@ -115,7 +164,7 @@ public class GoodsServiceImpl implements IGoodsService {
             ShopGoodsListVo.GoodsSku goodsSkuVo = new ShopGoodsListVo.GoodsSku();
             BeanUtils.copyProperties(goodsSku, goodsSkuVo);
             if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(goodsSku.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(goodsSku.getMemberPrice());
+                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(goodsSku.getMemberPrice()) ? JSONUtil.parseObj(goodsSku.getMemberPrice()) : new JSONObject();
                 goodsSkuVo.setMemberPrice(calculateMemberPrice(memberLevel, vo.getMemberDiscount(), memberPriceConfig, goodsSku.getPrice()));
             } else {
                 goodsSkuVo.setMemberPrice(goodsSku.getPrice());
@@ -128,13 +177,18 @@ public class GoodsServiceImpl implements IGoodsService {
 
     /**
      * 计算会员价
-     * @param memberLevel 会员等级
+     *
+     * @param memberLevel   会员等级
      * @param calculateType 计算方式
-     * @param config 会员价配置
-     * @param price 商品价格
+     * @param config        会员价配置
+     * @param price         商品价格
      * @return
      */
     public BigDecimal calculateMemberPrice(MemberLevelInfoVo memberLevel, String calculateType, JSONObject config, BigDecimal price) {
+        if (ObjectUtil.hasEmpty(memberLevel, calculateType, config)) {
+            return price;
+        }
+
         // 按会员等级折扣
         if (calculateType.equals("discount")) {
             JSONObject benefits = memberLevel.getLevelBenefits();
@@ -169,18 +223,20 @@ public class GoodsServiceImpl implements IGoodsService {
         queryWrapper.eq("g.status", 1);
         queryWrapper.eq("delete_time", 0);
         queryWrapper.last("limit " + param.getNum());
-
-        if (param.getOrder().equals("sale_num")) {
-            queryWrapper.orderByDesc("g.sale_num");
-        } else if (param.getOrder().equals("price")) {
-            queryWrapper.orderByDesc("gs.price");
+        if (ObjectUtil.isNotEmpty(param.getOrder())) {
+            if (param.getOrder().equals("sale_num")) {
+                queryWrapper.orderByDesc("g.sale_num");
+            } else if (param.getOrder().equals("price")) {
+                queryWrapper.orderByDesc("gs.price");
+            }
         } else {
-            queryWrapper.orderBy(true, false, "sort");
-            queryWrapper.orderBy(true, false, "create_time");
+            queryWrapper.orderBy(true, false, "g.sort");
+            queryWrapper.orderBy(true, false, "g.create_time");
         }
 
         MemberLevelInfoVo memberLevel = null;
-        if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
+        if (ObjectUtil.isNotEmpty(RequestUtils.memberId()))
+            memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
 
         List<ShopGoodsListVo> list = shopGoodsMapper.selectJoinList(ShopGoodsListVo.class, queryWrapper);
         for (ShopGoodsListVo vo : list) {
@@ -189,7 +245,7 @@ public class GoodsServiceImpl implements IGoodsService {
             ShopGoodsListVo.GoodsSku goodsSkuVo = new ShopGoodsListVo.GoodsSku();
             BeanUtils.copyProperties(goodsSku, goodsSkuVo);
             if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(goodsSku.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(goodsSku.getMemberPrice());
+                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(goodsSku.getMemberPrice()) ? JSONUtil.parseObj(goodsSku.getMemberPrice()) : new JSONObject();
                 goodsSkuVo.setMemberPrice(calculateMemberPrice(memberLevel, vo.getMemberDiscount(), memberPriceConfig, goodsSku.getPrice()));
             } else {
                 goodsSkuVo.setMemberPrice(goodsSku.getPrice());
@@ -232,6 +288,9 @@ public class GoodsServiceImpl implements IGoodsService {
         BeanUtils.copyProperties(goods, goodsVo);
         goodsVo.setSaleNum(goods.getSaleNum() + goods.getVirtualSaleNum());
 
+        vo.setType(param.getType());
+        vo.setTypeName(ActiveTypeEnum.getNameByType(param.getType()));
+
         // 是否已收藏
         if (RequestUtils.memberId() != null) {
             Long goodsCollect = shopGoodsCollectMapper.selectCount(new QueryWrapper<ShopGoodsCollect>().eq("goods_id", goodsVo.getGoodsId()).eq("member_id", RequestUtils.memberId()));
@@ -242,10 +301,11 @@ public class GoodsServiceImpl implements IGoodsService {
 
         // 查询会员的会员等级
         MemberLevelInfoVo memberLevel = null;
-        if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
+        if (ObjectUtil.isNotEmpty(RequestUtils.memberId()))
+            memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
 
         if (memberLevel != null) {
-            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(sku.getMemberPrice());
+            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
             vo.setMemberPrice(calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
         } else {
             vo.setMemberPrice(sku.getPrice());
@@ -258,7 +318,7 @@ public class GoodsServiceImpl implements IGoodsService {
             ShopGoodsDetailVo.Sku skuVo = new ShopGoodsDetailVo.Sku();
             BeanUtils.copyProperties(item, skuVo);
             if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(item.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(item.getMemberPrice());
+                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(item.getMemberPrice()) ? JSONUtil.parseObj(item.getMemberPrice()) : new JSONObject();
                 skuVo.setMemberPrice(calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, item.getPrice()));
             } else {
                 skuVo.setMemberPrice(sku.getPrice());
@@ -273,14 +333,20 @@ public class GoodsServiceImpl implements IGoodsService {
 
         // 商品服务
         if (!goodsVo.getServiceIds().isEmpty()) {
-            List<ShopGoodsDetailVo.Service> service = CollectUtils.convert(shopGoodsServiceMapper.selectList(new QueryWrapper<ShopGoodsService>().in("service_id", goodsVo.getServiceIds())), ShopGoodsDetailVo.Service.class);
-            vo.setService(service);
+            JSONArray serviceIds = JSONUtil.parseArray(goodsVo.getServiceIds());
+            if (!serviceIds.isEmpty()) {
+                List<ShopGoodsDetailVo.Service> service = CollectUtils.convert(shopGoodsServiceMapper.selectList(new QueryWrapper<ShopGoodsService>().in("service_id", serviceIds)), ShopGoodsDetailVo.Service.class);
+                vo.setService(service);
+            }
         }
 
         // 商品标签
         if (!goodsVo.getLabelIds().isEmpty()) {
-            List<ShopGoodsDetailVo.Label> labels = CollectUtils.convert(shopGoodsLabelMapper.selectList(new QueryWrapper<ShopGoodsLabel>().in("label_id", goodsVo.getLabelIds())), ShopGoodsDetailVo.Label.class);
-            vo.setLabelInfo(labels);
+            JSONArray labelIds = JSONUtil.parseArray(goodsVo.getLabelIds());
+            if (!labelIds.isEmpty()) {
+                List<ShopGoodsDetailVo.Label> labels = CollectUtils.convert(shopGoodsLabelMapper.selectList(new QueryWrapper<ShopGoodsLabel>().in("label_id", labelIds)), ShopGoodsDetailVo.Label.class);
+                vo.setLabelInfo(labels);
+            }
         }
 
         // 商品品牌
@@ -299,11 +365,27 @@ public class GoodsServiceImpl implements IGoodsService {
             vo.setDiscountInfo(discountService.getInfoByGoods(goodsVo.getGoodsId()));
         }
 
+        if (ActiveClassEnum.NEWCOMER_DISCOUNT.getType().equals(param.getType())) {
+            if (shopNewcomerService.checkIfNewcomer()) {
+                ShopNewcomerInfoVo newcomerInfo = shopNewcomerService.getNewcomerInfo(vo.getGoodsId(), vo.getSkuId());
+                if (ObjectUtil.isNotEmpty(newcomerInfo)) {
+                    vo.setNewcomerPrice(newcomerInfo.getNewcomerPrice().toString());
+                    vo.setNewcomerDesc(newcomerInfo.getNewcomerDesc());
+                    vo.setIsNewcomer(1);
+                }
+
+                vo.setSkuList(shopNewcomerService.getNewcomerPriceByList(vo.getSkuList()));
+            } else {
+                vo.setIsNewcomer(0);
+                vo.setType("");
+                vo.setTypeName("");
+            }
+        }
+
         return vo;
     }
 
     /**
-     *
      * @param skuId
      * @return
      */
@@ -328,10 +410,11 @@ public class GoodsServiceImpl implements IGoodsService {
 
         // 查询会员的会员等级
         MemberLevelInfoVo memberLevel = null;
-        if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
+        if (ObjectUtil.isNotEmpty(RequestUtils.memberId()))
+            memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
 
         if (memberLevel != null) {
-            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(sku.getMemberPrice());
+            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
             vo.setMemberPrice(calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
         } else {
             vo.setMemberPrice(sku.getPrice());
@@ -344,7 +427,7 @@ public class GoodsServiceImpl implements IGoodsService {
             ShopGoodsSkuVo.Sku skuVo = new ShopGoodsSkuVo.Sku();
             BeanUtils.copyProperties(item, skuVo);
             if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(item.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(item.getMemberPrice());
+                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(item.getMemberPrice()) ? JSONUtil.parseObj(item.getMemberPrice()) : new JSONObject();
                 skuVo.setMemberPrice(calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, item.getPrice()));
             } else {
                 skuVo.setMemberPrice(sku.getPrice());

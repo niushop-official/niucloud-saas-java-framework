@@ -3,9 +3,8 @@ package com.niu.shop.entity.active;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
+
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigDecimal;
 import java.math.BigDecimal;
 
 /**
@@ -16,11 +15,12 @@ public class ShopActiveGoods implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value="active_goods_id", type= IdType.AUTO)
+    @TableId(value = "active_goods_id", type = IdType.AUTO)
     private Integer activeGoodsId; // 活动商品id
     private Integer activeId; // 活动id
     private Integer siteId; // 站点id
     private Integer goodsId; // 商品id
+    private Integer skuId; // 商品规格id
     private String activeGoodsType; // 商品活动类型（单品，独立商品，店铺整体商品）
     private String activeClass; // 商品活动类别
     private String activeGoodsLabel; // 活动商品标签（针对活动有标签）

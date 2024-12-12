@@ -265,17 +265,16 @@ public class ShopOrderServiceImpl implements IShopOrderService {
         corePayService.closeByTrade(order.getSiteId(), order.getOrderType(), order.getOrderId());
 
         BigDecimal goodsMoney = new BigDecimal(0);
-        BigDecimal zero = new BigDecimal(0);
         List<ShopOrderGoods> orderGoods = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", order.getOrderId()).select("order_goods_id,order_goods_money,goods_money,price,discount_money,num"));
 
         for (ShopOrderGoods item: orderGoods) {
             if (ObjectUtil.isNotEmpty(param.getOrderGoodsData().get(item.getOrderGoodsId()))) {
                 BigDecimal money = param.getOrderGoodsData().get(item.getOrderGoodsId()).getMoney();
-                if (money.compareTo(zero) != 0) {
+                if (money.compareTo(BigDecimal.ZERO) != 0) {
                     ShopOrderGoods orderGoodsUpdate = new ShopOrderGoods();
                     orderGoodsUpdate.setOrderGoodsId(item.getOrderGoodsId());
                     orderGoodsUpdate.setOrderGoodsMoney(item.getOrderGoodsMoney().add(money));
-                    if (orderGoodsUpdate.getOrderGoodsMoney().compareTo(zero) == -1) {
+                    if (orderGoodsUpdate.getOrderGoodsMoney().compareTo(BigDecimal.ZERO) == -1) {
                         throw new CommonException("订单项小计总额不能小于0");
                     }
                     orderGoodsUpdate.setGoodsMoney(orderGoodsUpdate.getOrderGoodsMoney().add(item.getDiscountMoney()));
@@ -292,7 +291,7 @@ public class ShopOrderServiceImpl implements IShopOrderService {
         ShopOrder orderUpdate = new ShopOrder();
         orderUpdate.setOrderId(order.getOrderId());
         orderUpdate.setOrderMoney(goodsMoney.add(param.getDeliveryMoney()).subtract(order.getDiscountMoney()));
-        if (orderUpdate.getOrderMoney().compareTo(zero) == -1) orderUpdate.setOrderMoney(zero);
+        if (orderUpdate.getOrderMoney().compareTo(BigDecimal.ZERO) == -1) orderUpdate.setOrderMoney(BigDecimal.ZERO);
         orderUpdate.setDeliveryMoney(param.getDeliveryMoney());
         orderUpdate.setGoodsMoney(goodsMoney);
         this.shopOrderMapper.updateById(orderUpdate);
@@ -307,7 +306,7 @@ public class ShopOrderServiceImpl implements IShopOrderService {
         coreOrderLogService.add(logParam);
 
         // 如果调价后的订单金额为0
-        if (orderUpdate.getOrderMoney().compareTo(zero) == 0) {
+        if (orderUpdate.getOrderMoney().compareTo(BigDecimal.ZERO) == 0) {
             OrderPayParam payParam = new OrderPayParam();
             payParam.setTradeId(order.getOrderId());
             payParam.setMainType(OrderLogMainTypeEnum.SYSTEM.getType());

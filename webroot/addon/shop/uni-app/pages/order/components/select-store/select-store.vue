@@ -112,7 +112,7 @@
     const distanceFormat = (distance: any) => {
         distance = parseFloat(distance)
         if (distance < 1000) {
-            return (distance * 1).toFixed(2) + 'm';
+            return `${distance}m`;
         } else {
             const km = (distance / 1000).toFixed(2)
             return `${km}km`;

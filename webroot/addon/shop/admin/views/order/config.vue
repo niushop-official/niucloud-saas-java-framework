@@ -12,7 +12,7 @@
                         <div>
                             <p class="!text-sm">
                                 <span>{{ t('closeOrderInfoLeft') }}</span>
-                                <el-input v-model="formData.close_length" class="!w-[120px] mx-[10px]" @keyup="filterNumber($event)" clearable />
+                                <el-input v-model.trim="formData.close_length" class="!w-[120px] mx-[10px]" @keyup="filterNumber($event)" clearable />
                                 <span>{{ t('closeOrderInfoRight') }}</span>
                             </p>
                             <p class="text-[12px] text-[#a9a9a9] leading-normal  mt-[5px]">{{ t('closeOrderInfoBottom') }}</p>
@@ -28,7 +28,7 @@
                         <div>
                             <p class="!text-sm">
                                 <span>{{ t('confirmLeft') }}</span>
-                                <el-input v-model="formData.finish_length" class="!w-[120px] mx-[10px]" @keyup="filterNumber($event)" clearable />
+                                <el-input v-model.trim="formData.finish_length" class="!w-[120px] mx-[10px]" @keyup="filterNumber($event)" clearable />
                                 <span>{{ t('confirmRight') }}</span>
                             </p>
                             <p class="text-[12px] text-[#a9a9a9] leading-normal  mt-[5px]">{{ t('confirmBottom') }}</p>
@@ -44,7 +44,7 @@
                         <div>
                             <p class="!text-sm">
                                 <span>{{ t('refundLeft') }}</span>
-                                <el-input v-model="formData.refund_length" class="!w-[120px] mx-[10px]" @keyup="filterNumber($event)" clearable />
+                                <el-input v-model.trim="formData.refund_length" class="!w-[120px] mx-[10px]" @keyup="filterNumber($event)" clearable />
                                 <span>{{ t('refundRight') }}</span>
                             </p>
                             <p class="text-[12px] text-[#a9a9a9] leading-normal  mt-[5px]">{{ t('refundBottom') }}</p>

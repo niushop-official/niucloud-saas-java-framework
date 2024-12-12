@@ -15,7 +15,6 @@ import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.entity.sys.SysArea;
 import com.niu.core.mapper.sys.SysAreaMapper;
 import com.niu.core.service.core.sys.ICoreConfigService;
-import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import com.niu.shop.consts.ShopDeliveryElectronicSheetConst;
 import com.niu.shop.entity.delivery.ShopDeliveryCompany;
 import com.niu.shop.entity.delivery.ShopDeliveryElectronicSheet;
@@ -35,7 +34,6 @@ import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.mapper.shop_address.ShopAddressMapper;
 import com.niu.shop.service.core.delivery.ICoreElectronicSheetService;
 import com.niu.shop.service.core.delivery.electronic.sheet.engine.ApplyParam;
-import com.niu.shop.service.core.delivery.electronic.sheet.engine.ApplyResult;
 import com.niu.shop.service.core.delivery.electronic.sheet.engine.ElectronicSheetFactory;
 import com.niu.shop.service.core.delivery.param.ElectronicSheetInfoSearchParam;
 import com.niu.shop.service.core.delivery.param.ShopDeliveryPrintElectronicSheetParam;
@@ -71,8 +69,8 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
     }
 
     private List<ElectronicSheetInfo> getInfo(ElectronicSheetInfoSearchParam param) {
-        LambdaQueryWrapper<ShopDeliveryElectronicSheet> sheetQueryWrapper = new LambdaQueryWrapper<>();
-        sheetQueryWrapper.eq(ShopDeliveryElectronicSheet::getSiteId, param.getSiteId());
+        var sheetQueryWrapper = new LambdaQueryWrapper<ShopDeliveryElectronicSheet>()
+                .eq(ShopDeliveryElectronicSheet::getSiteId, param.getSiteId());
 
         if (param.getIsDefault() != null && param.getIsDefault() != 0) {
             sheetQueryWrapper.eq(ShopDeliveryElectronicSheet::getIsDefault, 1);
@@ -90,18 +88,18 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
             sheetQueryWrapper.eq(ShopDeliveryElectronicSheet::getStatus, 1);
         }
 
-        List<ShopDeliveryElectronicSheet> shopDeliveryElectronicSheets = shopDeliveryElectronicSheetMapper.selectList(sheetQueryWrapper);
-        Set<Integer> companyIds = CollStreamUtil.toSet(shopDeliveryElectronicSheets, ShopDeliveryElectronicSheet::getExpressCompanyId);
-        Map<Integer, ShopDeliveryCompany> companyMap = shopDeliveryCompanyMapper.selectBatchIds(companyIds)
+        var shopDeliveryElectronicSheets = shopDeliveryElectronicSheetMapper.selectList(sheetQueryWrapper);
+        var companyIds = CollStreamUtil.toSet(shopDeliveryElectronicSheets, ShopDeliveryElectronicSheet::getExpressCompanyId);
+        var companyMap = shopDeliveryCompanyMapper.selectBatchIds(companyIds)
                 .stream().collect(Collectors.toMap(ShopDeliveryCompany::getCompanyId, e -> e));
 
         return shopDeliveryElectronicSheets.stream()
                 .map(sheet -> {
-                    ElectronicSheetInfo vo = BeanUtil.toBean(sheet, ElectronicSheetInfo.class);
-                    ShopDeliveryCompany company = companyMap.getOrDefault(sheet.getExpressCompanyId(), new ShopDeliveryCompany());
+                    var vo = BeanUtil.toBean(sheet, ElectronicSheetInfo.class);
+                    var company = companyMap.getOrDefault(sheet.getExpressCompanyId(), new ShopDeliveryCompany());
                     return vo.setCompany(BeanUtil.toBean(company, ElectronicSheetInfo.Company.class));
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private class ElectronicSheetPrinter {
@@ -131,14 +129,11 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
         }
 
         public List<ElectronicSheetPrintVo> print() {
-            switch (param.getPrintType()) {
-                case SINGLE_PRINT_TYPE:
-                    return printSingle();
-                case MULTIPLE_PRINT_TYPE:
-                    return printMultiple();
-                default:
-                    return null;
-            }
+            return switch (param.getPrintType()) {
+                case SINGLE_PRINT_TYPE -> printSingle();
+                case MULTIPLE_PRINT_TYPE -> printMultiple();
+                default -> null;
+            };
         }
 
         private List<ElectronicSheetPrintVo> printSingle() {
@@ -146,55 +141,54 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
                 return Collections.emptyList();
             }
 
-            Integer[] electronicSheetIds = CollStreamUtil.toList(param.getList(), ShopDeliveryPrintElectronicSheetParam.Parcel::getElectronicSheetId)
+            var electronicSheetIds = CollStreamUtil.toList(param.getList(), ShopDeliveryPrintElectronicSheetParam.Parcel::getElectronicSheetId)
                     .toArray(new Integer[]{});
-            Map<Integer, ElectronicSheetInfo> electronicSheetInfoMap = getInfo(0, electronicSheetIds)
+            var electronicSheetInfoMap = getInfo(0, electronicSheetIds)
                     .stream()
                     .collect(Collectors.toMap(ElectronicSheetInfo::getId, e -> e));
-
-            List<ElectronicSheetPrintVo> results = new ArrayList<>(param.getList().size());
+            var results = new ArrayList<ElectronicSheetPrintVo>(param.getList().size());
 
             // 单订单打印，按照包裹拆分打印
             for (int i = 0; i < param.getList().size(); i++) {
-                ShopDeliveryPrintElectronicSheetParam.Parcel parcel = param.getList().get(i);
+                var parcel = param.getList().get(i);
 
                 // 查询电子面单模板
-                ElectronicSheetInfo electronicSheetInfo = electronicSheetInfoMap.get(parcel.getElectronicSheetId());
+                var electronicSheetInfo = electronicSheetInfoMap.get(parcel.getElectronicSheetId());
                 if (ObjectUtil.isEmpty(electronicSheetInfo)) {
                     // 电子面单模板不存在
                     continue;
                 }
 
-                for (ShopOrderInfo order : orderList) {
-                    String printStyle = "0".equals(electronicSheetInfo.getPrintStyle()) ? "" : electronicSheetInfo.getPrintStyle();
-                    String key = renderSingleCacheKey(electronicSheetInfo.getCompany().getExpressNoElectronicSheet(), order, printStyle, parcel.getDeliveryId(), i);
-                    Object o = cacheOperator.get(key);
+                for (var order : orderList) {
+                    var printStyle = "0".equals(electronicSheetInfo.getPrintStyle()) ? "" : electronicSheetInfo.getPrintStyle();
+                    var key = renderSingleCacheKey(electronicSheetInfo.getCompany().getExpressNoElectronicSheet(), order, printStyle, parcel.getDeliveryId(), i);
+                    var o = cacheOperator.get(key);
                     if (ObjectUtil.isNotEmpty(o)) {
-                        ElectronicSheetPrintVo printResult = (ElectronicSheetPrintVo) o;
+                        var printResult = (ElectronicSheetPrintVo) o;
                         printResult.setDeliveryId(parcel.getDeliveryId());
                         results.add(printResult);
                         continue;
                     }
 
-                    List<ShopOrderInfo.OrderGoodsInfo> legalProducts = order.getOrderGoods()
+                    var legalProducts = order.getOrderGoods()
                             .stream()
                             .filter(goods -> goods.getStatus() == 1)
                             .filter(goods -> ObjectUtil.isNotEmpty(goods.getDeliveryId()))
                             .filter(goods -> ObjectUtil.equals(goods.getDeliveryId(), parcel.getDeliveryId()))
-                            .collect(Collectors.toList());
+                            .toList();
                     if (ObjectUtil.isEmpty(legalProducts)) {
                         continue;
                     }
 
-                    ExtraShopGoodsDetail extraShopGoodsDetail = extraShopGoodsDetail(order.getOrderId(), legalProducts);
+                    var extraShopGoodsDetail = extraShopGoodsDetail(order.getOrderId(), legalProducts);
                     if (ObjectUtil.isEmpty(extraShopGoodsDetail.getCommodities())) {
-                        ElectronicSheetPrintVo printResult = ElectronicSheetPrintVo.getFailedResult();
+                        var printResult = ElectronicSheetPrintVo.getFailedResult();
                         printResult.setOrderNo(order.getOrderNo());
                         results.add(printResult);
                         continue;
                     }
 
-                    ElectronicSheetPrintVo printResult = apply(key, electronicSheetInfo, order.getOrderNo() + i, order, extraShopGoodsDetail);
+                    var printResult = apply(key, electronicSheetInfo, order.getOrderNo() + i, order, extraShopGoodsDetail);
                     printResult.setDeliveryId(parcel.getDeliveryId());
                     results.add(printResult);
                 }
@@ -204,57 +198,57 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
         }
 
         private List<ElectronicSheetPrintVo> printMultiple() {
-            boolean isDefault = ObjectUtil.isEmpty(param.getElectronicSheetId());
-            List<ElectronicSheetInfo> electronicSheetInfos = getInfo(isDefault ? 1 : 0, isDefault ? null : param.getElectronicSheetId());
+            var isDefault = ObjectUtil.isEmpty(param.getElectronicSheetId());
+            var electronicSheetInfos = getInfo(isDefault ? 1 : 0, isDefault ? null : param.getElectronicSheetId());
 
             if (ObjectUtil.isEmpty(electronicSheetInfos)) {
                 throw new RuntimeException("电子面单模板不存在");
             }
 
-            ElectronicSheetInfo electronicSheetInfo = electronicSheetInfos.get(0);
+            var electronicSheetInfo = electronicSheetInfos.get(0);
             if ("0".equals(electronicSheetInfo.getPrintStyle())) {
                 electronicSheetInfo.setPrintStyle("");
             }
 
-            Map<Integer, Long> orderCountMap = selectShopOrderDeliveryCount();
-            List<ElectronicSheetPrintVo> results = new ArrayList<>(orderList.size());
-            boolean hasOrderGoodsIds = ObjectUtil.isNotEmpty(param.getOrderGoodsIds());
-            for (ShopOrderInfo order : orderList) {
+            var orderCountMap = selectShopOrderDeliveryCount();
+            var results = new ArrayList<ElectronicSheetPrintVo>(orderList.size());
+            var hasOrderGoodsIds = ObjectUtil.isNotEmpty(param.getOrderGoodsIds());
+            for (var order : orderList) {
                 if (hasOrderGoodsIds && order.getOrderId().equals(param.getOrderId())) {
-                    List<ShopOrderInfo.OrderGoodsInfo> replaceOrderGoods = order.getOrderGoods()
+                    var replaceOrderGoods = order.getOrderGoods()
                             .stream()
                             .filter(goods -> param.getOrderGoodsIds().contains(goods.getOrderGoodsId()))
-                            .collect(Collectors.toList());
+                            .toList();
                     order.setOrderGoods(replaceOrderGoods);
                 }
 
-                Long shopOrderLambdaCount = orderCountMap.getOrDefault(order.getOrderId(), 0L);
+                var shopOrderLambdaCount = orderCountMap.getOrDefault(order.getOrderId(), 0L);
                 shopOrderLambdaCount -= shopOrderLambdaCount > 0 ? 1 : 0;
 
-                String key = renderMultipleCacheKey(electronicSheetInfo, order.getOrderNo(), shopOrderLambdaCount);
-                Object o = cacheOperator.get(key);
+                var key = renderMultipleCacheKey(electronicSheetInfo, order.getOrderNo(), shopOrderLambdaCount);
+                var o = cacheOperator.get(key);
                 if (ObjectUtil.isNotEmpty(o)) {
                     results.add((ElectronicSheetPrintVo) o);
                     continue;
                 }
 
-                List<ShopOrderInfo.OrderGoodsInfo> legalProducts = order.getOrderGoods()
+                var legalProducts = order.getOrderGoods()
                         .stream()
                         .filter(goods -> ObjectUtil.equals(1, goods.getStatus()) && ObjectUtil.isNotEmpty(goods.getDeliveryId()))
-                        .collect(Collectors.toList());
+                        .toList();
                 if (ObjectUtil.isEmpty(legalProducts)) {
                     continue;
                 }
 
-                ExtraShopGoodsDetail shopGoodsDetail = extraShopGoodsDetail(order.getOrderId(), legalProducts);
+                var shopGoodsDetail = extraShopGoodsDetail(order.getOrderId(), legalProducts);
                 if (ObjectUtil.isEmpty(shopGoodsDetail.getCommodities())) {
-                    ElectronicSheetPrintVo printResult = ElectronicSheetPrintVo.getFailedResult();
+                    var printResult = ElectronicSheetPrintVo.getFailedResult();
                     printResult.setOrderNo(order.getOrderNo());
                     results.add(printResult);
                     continue;
                 }
 
-                ElectronicSheetPrintVo printResult = apply(key, electronicSheetInfo, order.getOrderNo() + shopOrderLambdaCount, order, shopGoodsDetail);
+                var printResult = apply(key, electronicSheetInfo, order.getOrderNo() + shopOrderLambdaCount, order, shopGoodsDetail);
                 printResult.setOrderNo(order.getOrderNo());
                 results.add(printResult);
             }
@@ -264,31 +258,30 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
 
         private ElectronicSheetPrintVo apply(String cacheKey, ElectronicSheetInfo electronicSheetInfo, String orderCode,
                                              ShopOrderInfo order, ExtraShopGoodsDetail extraShopGoodsDetail) {
-            ApplyResult apply = ElectronicSheetFactory.getEngine(config.getInterfaceType(), config.getKdniaoId(), config.getKdniaoApiKey())
+            var apply = ElectronicSheetFactory.getEngine(config.getInterfaceType(), config.getKdniaoId(), config.getKdniaoApiKey())
                     .apply(cacheKey, getApplyParam(electronicSheetInfo, orderCode, order, extraShopGoodsDetail));
             return BeanUtil.toBean(apply, ElectronicSheetPrintVo.class);
         }
 
         private ApplyParam getApplyParam(ElectronicSheetInfo electronicSheetInfo, String orderCode,
                                          ShopOrderInfo order, ExtraShopGoodsDetail extraShopGoodsDetail) {
-
-            ApplyParam.Sender sender = BeanUtil.toBean(shopAddress, ApplyParam.Sender.class)
+            var sender = BeanUtil.toBean(shopAddress, ApplyParam.Sender.class)
                     .setName(shopAddress.getContactName())
                     .setProvinceName(senderProvinceSysArea.getName())
                     .setCityName(senderCitySysArea.getName())
                     .setExpAreaName(senderExpSysArea.getName())
                     .setPostCode("000000");
 
-            Integer takerProvince = order.getTakerProvince();
-            Integer takerCity = order.getTakerCity();
-            Integer takerDistrict = order.getTakerDistrict();
+            var takerProvince = order.getTakerProvince();
+            var takerCity = order.getTakerCity();
+            var takerDistrict = order.getTakerDistrict();
 
-            Map<Integer, SysArea> sysAreaMap = groupSysAreaById(takerProvince, takerCity, takerDistrict);
-            SysArea receiverProvince = sysAreaMap.getOrDefault(takerProvince, new SysArea());
-            SysArea receiverCity = sysAreaMap.getOrDefault(takerCity, new SysArea());
-            SysArea receiverExpArea = sysAreaMap.getOrDefault(takerDistrict, new SysArea());
+            var sysAreaMap = groupSysAreaById(takerProvince, takerCity, takerDistrict);
+            var receiverProvince = sysAreaMap.getOrDefault(takerProvince, new SysArea());
+            var receiverCity = sysAreaMap.getOrDefault(takerCity, new SysArea());
+            var receiverExpArea = sysAreaMap.getOrDefault(takerDistrict, new SysArea());
 
-            ApplyParam.Receiver receiver = BeanUtil.toBean(order, ApplyParam.Receiver.class)
+            var receiver = BeanUtil.toBean(order, ApplyParam.Receiver.class)
                     .setName(order.getTakerName())
                     .setMobile(order.getTakerMobile())
                     .setProvinceName(receiverProvince.getName())
@@ -307,41 +300,41 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
                     .setCommodity(extraShopGoodsDetail.getCommodities())
                     .setWeight(extraShopGoodsDetail.getWeightTotal())
                     .setVolume(extraShopGoodsDetail.getVolumeTotal())
-                    .setRemark("<br>" + CharSequenceUtil.sub(String.join("<br>", extraShopGoodsDetail.getRemarks()), 0, 80))
+                    .setRemark("")
                     .setIsReturnPrintTemplate("1")
+                    .setCost(order.getDeliveryMoney())
                     .setTemplateSize(electronicSheetInfo.getPrintStyle())
                     .setIsNotice(electronicSheetInfo.getIsNotice());
         }
 
         private ExtraShopGoodsDetail extraShopGoodsDetail(Integer orderId, List<ShopOrderInfo.OrderGoodsInfo> shopGoodsInfoList) {
-            BigDecimal weightTotal = BigDecimal.ZERO; // 包裹总重量kg
-            BigDecimal volumeTotal = BigDecimal.ZERO; // 包裹总体积 m³
-            List<String> remarks = new ArrayList<>();
-            List<ApplyParam.Commodity> commodities = new ArrayList<>(shopGoodsInfoList.size());
-            for (ShopOrderInfo.OrderGoodsInfo orderGood : shopGoodsInfoList) {
-                LambdaQueryWrapper<ShopOrderDelivery> orderDeliveryQueryWrapper = new LambdaQueryWrapper<>();
-                orderDeliveryQueryWrapper.eq(ShopOrderDelivery::getOrderId, orderId)
+            var weightTotal = BigDecimal.ZERO; // 包裹总重量kg
+            var volumeTotal = BigDecimal.ZERO; // 包裹总体积 m³
+            var remarks = new ArrayList<String>();
+            var commodities = new ArrayList<ApplyParam.Commodity>(shopGoodsInfoList.size());
+            for (var orderGood : shopGoodsInfoList) {
+                var orderDeliveryQueryWrapper = new LambdaQueryWrapper<ShopOrderDelivery>()
+                        .eq(ShopOrderDelivery::getOrderId, orderId)
                         .eq(ShopOrderDelivery::getId, orderGood.getDeliveryId())
                         .eq(ShopOrderDelivery::getDeliveryType, "express")
                         .eq(ShopOrderDelivery::getSubDeliveryType, "express");
 
-                ShopOrderDelivery shopOrderDelivery = shopOrderDeliveryMapper.selectOne(orderDeliveryQueryWrapper);
+                var shopOrderDelivery = shopOrderDeliveryMapper.selectOne(orderDeliveryQueryWrapper);
                 if (ObjectUtil.isEmpty(shopOrderDelivery)) {
                     continue;
                 }
 
-                String goodsName = renderIllegalChar(CharSequenceUtil.sub(orderGood.getGoodsName() + orderGood.getSkuName(), 0, 50));
-                ApplyParam.Commodity commodity = new ApplyParam.Commodity()
+                var goodsName = renderIllegalChar(CharSequenceUtil.sub(orderGood.getGoodsName() + orderGood.getSkuName(), 0, 50));
+                var commodity = new ApplyParam.Commodity()
                         .setGoodsName(goodsName)
                         .setGoodsquantity(orderGood.getNum());
                 commodities.add(commodity);
-                remarks.add(goodsName);
 
-                LambdaQueryWrapper<ShopGoodsSku> shopGoodsSkuQueryWrapper = new LambdaQueryWrapper<>();
-                shopGoodsSkuQueryWrapper.eq(ShopGoodsSku::getSkuId, orderGood.getSkuId())
+                var shopGoodsSkuQueryWrapper = new LambdaQueryWrapper<ShopGoodsSku>()
+                        .eq(ShopGoodsSku::getSkuId, orderGood.getSkuId())
                         .eq(ShopGoodsSku::getSiteId, param.getSiteId());
 
-                ShopGoodsSku goodsSku = shopGoodsSkuMapper.selectOne(shopGoodsSkuQueryWrapper);
+                var goodsSku = shopGoodsSkuMapper.selectOne(shopGoodsSkuQueryWrapper);
                 if (ObjectUtil.isEmpty(goodsSku)) {
                     continue;
                 }
@@ -358,23 +351,23 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
         }
 
         private Map<Integer, Long> selectShopOrderDeliveryCount() {
-            QueryWrapper<ShopOrderDelivery> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("site_id", param.getSiteId())
+            var queryWrapper = new QueryWrapper<ShopOrderDelivery>()
+                    .eq("site_id", param.getSiteId())
                     .in("order_id", CollStreamUtil.toSet(orderList, ShopOrderInfo::getOrderId))
                     .eq("delivery_type", "express")
                     .eq("sub_delivery_type", "express")
                     .groupBy("order_id")
                     .select("order_id as orderId", "count(1) as count");
 
-            Map<Integer, Long> result = new HashMap<>();
+            var result = new HashMap<Integer, Long>();
             shopOrderDeliveryMapper.selectMaps(queryWrapper)
                     .forEach(map -> result.put((Integer) map.get("orderId"), (Long) map.get("count")));
             return result;
         }
 
         private String renderIllegalChar(String name) {
-            String goodsName = name;
-            for (String s : new String[]{"'", "\"", "&", "+", "<", ">", "%", "\\", "#", "and"}) {
+            var goodsName = name;
+            for (var s : new String[]{"'", "\"", "&", "+", "<", ">", "%", "\\", "#", "and"}) {
                 goodsName = goodsName.replace(s, "");
             }
             return goodsName;
@@ -390,7 +383,7 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
         }
 
         private List<ElectronicSheetInfo> getInfo(Integer isDefault, Integer... ids) {
-            ElectronicSheetInfoSearchParam electronicSheetInfoSearchParam = new ElectronicSheetInfoSearchParam()
+            var electronicSheetInfoSearchParam = new ElectronicSheetInfoSearchParam()
                     .setSiteId(param.getSiteId())
                     .setIds(ListUtil.toList(ids))
                     .setStatus(1)
@@ -403,7 +396,7 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
                 return ElectronicSheetConfigValueVo.newInstance();
             }
 
-            CoreSysConfigVo config = coreConfigService.getConfig(siteId, ShopDeliveryElectronicSheetConst.ELECTRONIC_SHEET_CONFIG_KEY);
+            var config = coreConfigService.getConfig(siteId, ShopDeliveryElectronicSheetConst.ELECTRONIC_SHEET_CONFIG_KEY);
             if (ObjectUtil.hasEmpty(config, config.getValue())) {
                 return ElectronicSheetConfigValueVo.newInstance();
             }
@@ -420,49 +413,49 @@ public class CoreElectronicSheetServiceImpl implements ICoreElectronicSheetServi
         private void init() {
             initOrderList();
 
-            LambdaQueryWrapper<ShopAddress> addressQueryWrapper = new LambdaQueryWrapper<>();
-            addressQueryWrapper.eq(ShopAddress::getIsDeliveryAddress, 1)
+            var addressQueryWrapper = new LambdaQueryWrapper<ShopAddress>()
+                    .eq(ShopAddress::getIsDeliveryAddress, 1)
                     .eq(ShopAddress::getIsDefaultDelivery, 1)
                     .eq(ShopAddress::getSiteId, param.getSiteId());
             if (ObjectUtil.isEmpty((shopAddress = shopAddressMapper.selectOne(addressQueryWrapper)))) {
                 throw new RuntimeException("商家未设置默认地址");
             }
 
-            Integer provinceId = shopAddress.getProvinceId();
-            Integer cityId = shopAddress.getCityId();
-            Integer expId = shopAddress.getDistrictId();
+            var provinceId = shopAddress.getProvinceId();
+            var cityId = shopAddress.getCityId();
+            var expId = shopAddress.getDistrictId();
 
-            Map<Integer, SysArea> areaIdMap = groupSysAreaById(provinceId, cityId, expId);
+            var areaIdMap = groupSysAreaById(provinceId, cityId, expId);
             senderProvinceSysArea = areaIdMap.getOrDefault(provinceId, new SysArea());
             senderCitySysArea = areaIdMap.getOrDefault(cityId, new SysArea());
             senderExpSysArea = areaIdMap.getOrDefault(expId, new SysArea());
         }
 
         private void initOrderList() {
-            LambdaQueryWrapper<ShopOrder> orderQueryWrapper = new LambdaQueryWrapper<>();
-            orderQueryWrapper.eq(ShopOrder::getSiteId, param.getSiteId())
+            var orderQueryWrapper = new LambdaQueryWrapper<ShopOrder>()
+                    .eq(ShopOrder::getSiteId, param.getSiteId())
                     .eq(ShopOrder::getOrderId, param.getOrderId())
                     .eq(ShopOrder::getDeliveryType, OrderDeliveryTypeEnum.EXPRESS.getType())
                     .in(ShopOrder::getStatus, ListUtil.of(OrderStatusEnum.WAIT_DELIVERY.getStatus(), OrderStatusEnum.WAIT_TAKE.getStatus()));
 
-            List<ShopOrder> orders = shopOrderMapper.selectList(orderQueryWrapper);
+            var orders = shopOrderMapper.selectList(orderQueryWrapper);
             if (ObjectUtil.isEmpty(orders)) {
                 throw new RuntimeException("订单不存在");
             }
 
-            LambdaQueryWrapper<ShopOrderGoods> orderGoodsQueryWrapper = new LambdaQueryWrapper<>();
-            orderGoodsQueryWrapper.in(ShopOrderGoods::getOrderId, CollStreamUtil.toSet(orders, ShopOrder::getOrderId));
-            Map<Integer, List<ShopOrderGoods>> orderGoodsMap = orderGoodsMapper.selectList(orderGoodsQueryWrapper)
+            var orderGoodsQueryWrapper = new LambdaQueryWrapper<ShopOrderGoods>()
+                    .in(ShopOrderGoods::getOrderId, CollStreamUtil.toSet(orders, ShopOrder::getOrderId));
+            var orderGoodsMap = orderGoodsMapper.selectList(orderGoodsQueryWrapper)
                     .stream().collect(Collectors.groupingBy(ShopOrderGoods::getOrderId));
 
             orderList = orders.stream().map(order -> {
                 // 处理订单商品
-                List<ShopOrderGoods> shopOrderGoods = orderGoodsMap.get(order.getOrderId());
-                List<ShopOrderInfo.OrderGoodsInfo> orderGoodsInfos = ObjectUtil.isEmpty(shopOrderGoods) ? Collections.emptyList() :
-                        CollStreamUtil.toList(shopOrderGoods, goods -> BeanUtil.toBean(goods, ShopOrderInfo.OrderGoodsInfo.class));
+                var shopOrderGoods = orderGoodsMap.get(order.getOrderId());
+                var orderGoodsInfos = ObjectUtil.isEmpty(shopOrderGoods) ? new ArrayList<ShopOrderInfo.OrderGoodsInfo>() :
+                        shopOrderGoods.stream().map(goods -> BeanUtil.toBean(goods, ShopOrderInfo.OrderGoodsInfo.class)).toList();
 
                 return BeanUtil.toBean(order, ShopOrderInfo.class).setOrderGoods(orderGoodsInfos);
-            }).collect(Collectors.toList());
+            }).toList();
         }
     }
 

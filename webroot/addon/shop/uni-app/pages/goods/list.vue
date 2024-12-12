@@ -42,54 +42,114 @@
 		</u-popup>
 
 		<mescroll-body ref="mescrollRef" top="176rpx" bottom="60px" @init="mescrollInit" :down="{ use: false }" @up="getAllAppListFn">
-			<view v-if="articleList.length" :class="['sidebar-margin', !listType ? 'flex justify-between flex-wrap' : '']">
-				<template v-for="(item, index) in articleList">
-					<template v-if="listType" :key="item.app_id">	
-						<view class="bg-white flex px-[20rpx] py-[24rpx] rounded-[var(--rounded-small)] overflow-hidden top-mar" :class="{ 'mb-[20rpx]': (index+1) == articleList.length}" @click="toDetail(item.goods_id)">
-							<image v-if="item.goods_cover_thumb_mid" class="w-[190rpx] h-[190rpx] rounded-[var(--rounded-mid)]" :src="img(item.goods_cover_thumb_mid)" :mode="'aspectFill'" @error="item.goods_cover_thumb_mid='static/resource/images/diy/shop_default.jpg'"></image>
-							<image v-else class="w-[190rpx] h-[190rpx] rounded-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
-							<view class="flex-1 flex flex-col ml-[20rpx] py-[6rpx]">
-								<view class="text-[28rpx] text-[#333] leading-[40rpx] multi-hidden mb-[10rpx]">{{ item.goods_name }}</view>
-								<view class="mt-auto flex justify-between items-baseline">
+			<view v-if="goodsList.length" :class="['sidebar-margin', !listType ? 'biserial-goods-list' : '']">
+				<template v-if="listType">
+					<view v-for="(item, index) in goodsList" :key="index" class="bg-white flex px-[20rpx] py-[24rpx] rounded-[var(--rounded-small)] overflow-hidden top-mar" :class="{ 'mb-[20rpx]': (index+1) == goodsList.length}" @click="toDetail(item.goods_id)">
+						<image v-if="item.goods_cover_thumb_mid" class="w-[190rpx] h-[190rpx] rounded-[var(--rounded-mid)]" :src="img(item.goods_cover_thumb_mid)" :mode="'aspectFill'" @error="item.goods_cover_thumb_mid='static/resource/images/diy/shop_default.jpg'"></image>
+						<image v-else class="w-[190rpx] h-[190rpx] rounded-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
+						<view class="flex-1 flex flex-col ml-[20rpx] py-[6rpx]">
+							<view class="text-[28rpx] text-[#333] leading-[40rpx] multi-hidden mb-[10rpx]">
+								<view class="brand-tag" v-if="item.goods_brand">
+									{{item.goods_brand.brand_name}}
+								</view>
+								{{ item.goods_name }}
+							</view>
+							<view v-if="item.goods_label_name && item.goods_label_name.length" class="flex flex-wrap">
+								<template v-for="(tagItem, tagIndex) in item.goods_label_name">
+									<image class="img-tag" v-if="tagItem.style_type == 'icon' && tagItem.icon" :src="img(tagItem.icon)" mode="heightFix" @error="diyGoods.error(tagItem,'icon')"></image>
+									<view class="base-tag" v-else-if="tagItem.style_type == 'diy' || !tagItem.icon" :style="diyGoods.baseTagStyle(tagItem)">
+										{{tagItem.label_name}}
+									</view>
+								</template>
+							</view>
+							<view class="mt-auto flex justify-between items-baseline">
+								<view class="flex items-baseline mt-[20rpx]">
 									<view class="text-[var(--price-text-color)] price-font flex items-baseline">
 										<text class="text-[24rpx] font-500 mr-[4rpx]">￥</text>
-										<text class="text-[40rpx] font-500">{{ goodsPrice(item).toFixed(2).split('.')[0] }}</text>
-										<text class="text-[24rpx] font-500">.{{ goodsPrice(item).toFixed(2).split('.')[1] }}</text>
-										<image class="h-[24rpx] w-[72rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-										<image class="h-[24rpx] w-[72rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
+										<text class="text-[40rpx] font-500">{{ diyGoods.goodsPrice(item).toFixed(2).split('.')[0] }}</text>
+										<text class="text-[24rpx] font-500">.{{ diyGoods.goodsPrice(item).toFixed(2).split('.')[1] }}</text>
 									</view>
-									<text class="text-[22rpx] text-[var(--text-color-light9)]">已售{{ item.sale_num }}{{ item.unit }}</text>
+									<image v-if="diyGoods.priceType(item) == 'member_price'" class="max-w-[50rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 								</view>
+								<text class="text-[22rpx] mt-[20rpx] text-[var(--text-color-light9)]">已售{{ item.sale_num }}{{ item.unit }}</text>
 							</view>
 						</view>
-					</template>
-					<template v-else>
-						<view class="goods-item-style-two flex flex-col bg-[#fff] box-border rounded-[var(--rounded-mid)] overflow-hidden mt-[var(--top-m)]" @click="toDetail(item.goods_id)">
-							 <image v-if="item.goods_cover_thumb_mid" class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img(item.goods_cover_thumb_mid)" :mode="'aspectFill'" @error="item.goods_cover_thumb_mid='static/resource/images/diy/shop_default.jpg'"></image>
-							 <image v-else class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
-							<view class="px-[20rpx] flex-1 pt-[16rpx] pb-[24rpx] flex flex-col justify-between">
-								<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden">
-									{{ item.goods_name }}
-								</view>
-								<view class="flex justify-between flex-wrap items-baseline mt-[28rpx]">
-									<view class="text-[var(--price-text-color)] price-font flex items-baseline">
-<!--										<text class="text-[20rpx]  mr-[4rpx]">￥</text>-->
-<!--										<text class="text-[36rpx] font-500">{{ item.goods_sku.price }}</text>-->
-
-										<text class="text-[24rpx] font-500">￥</text>
-										<text class="text-[40rpx] font-500">{{ goodsPrice(item).toFixed(2).split('.')[0] }}</text>
-										<text class="text-[24rpx] font-500">.{{ goodsPrice(item).toFixed(2).split('.')[1] }}</text>
-										<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
-										<image class="h-[24rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
+					</view>
+				</template>
+				<template v-else>
+					<view>
+						<template v-for="(item, index) in goodsList">
+							<view v-if="(index%2) == 0" class="flex flex-col bg-[#fff] box-border rounded-[var(--rounded-mid)] overflow-hidden mt-[var(--top-m)]" @click="toDetail(item.goods_id)">
+								 <image v-if="item.goods_cover_thumb_mid" class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img(item.goods_cover_thumb_mid)" :mode="'aspectFill'" @error="item.goods_cover_thumb_mid='static/resource/images/diy/shop_default.jpg'"></image>
+								 <image v-else class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
+								<view class="px-[20rpx] flex-1 pt-[16rpx] pb-[24rpx] flex flex-col justify-between">
+									<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden">
+										<view class="brand-tag" v-if="item.goods_brand">
+											{{item.goods_brand.brand_name}}
+										</view>
+										{{ item.goods_name }}
 									</view>
-									<text class="text-[22rpx] text-[var(--text-color-light9)]">已售{{ item.sale_num }}{{ item.unit}}</text>
+									<view v-if="item.goods_label_name && item.goods_label_name.length" class="flex flex-wrap">
+										<template v-for="(tagItem, tagIndex) in item.goods_label_name">
+											<image class="img-tag" v-if="tagItem.style_type == 'icon' && tagItem.icon" :src="img(tagItem.icon)" mode="heightFix" @error="diyGoods.error(tagItem,'icon')"></image>
+											<view class="base-tag" v-else-if="tagItem.style_type == 'diy' || !tagItem.icon" :style="diyGoods.baseTagStyle(tagItem)">
+												{{tagItem.label_name}}
+											</view>
+										</template>
+									</view>
+									<view class="flex justify-between flex-wrap items-end">
+										<view class="flex items-baseline mt-[20rpx]">
+											<view class="text-[var(--price-text-color)] price-font flex items-baseline">
+												<text class="text-[24rpx] font-500">￥</text>
+												<text class="text-[40rpx] font-500">{{ diyGoods.goodsPrice(item).toFixed(2).split('.')[0] }}</text>
+												<text class="text-[24rpx] font-500">.{{ diyGoods.goodsPrice(item).toFixed(2).split('.')[1] }}</text>
+											</view>
+											<image v-if="diyGoods.priceType(item) == 'member_price'" class="max-w-[50rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/VIP.png')" mode="heightFix" />
+										</view>
+										<text class="text-[22rpx] text-[var(--text-color-light9)] mt-[20rpx]">已售{{ item.sale_num }}{{ item.unit}}</text>
+									</view>
 								</view>
 							</view>
-						</view>
-					</template>
+						</template>
+					</view>
+					<view>
+						<template v-for="(item, index) in goodsList">
+							<view v-if="(index%2) == 1" class="flex flex-col bg-[#fff] box-border rounded-[var(--rounded-mid)] overflow-hidden mt-[var(--top-m)]" @click="toDetail(item.goods_id)">
+								 <image v-if="item.goods_cover_thumb_mid" class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img(item.goods_cover_thumb_mid)" :mode="'aspectFill'" @error="item.goods_cover_thumb_mid='static/resource/images/diy/shop_default.jpg'"></image>
+								 <image v-else class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
+								<view class="px-[20rpx] flex-1 pt-[16rpx] pb-[24rpx] flex flex-col justify-between">
+									<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden">
+										<view class="brand-tag" v-if="item.goods_brand">
+											{{item.goods_brand.brand_name}}
+										</view>
+										{{ item.goods_name }}
+									</view>
+									<view v-if="item.goods_label_name && item.goods_label_name.length" class="flex flex-wrap">
+										<template v-for="(tagItem, tagIndex) in item.goods_label_name">
+											<image class="img-tag" v-if="tagItem.style_type == 'icon' && tagItem.icon" :src="img(tagItem.icon)" mode="heightFix" @error="diyGoods.error(tagItem,'icon')"></image>
+											<view class="base-tag" v-else-if="tagItem.style_type == 'diy' || !tagItem.icon" :style="diyGoods.baseTagStyle(tagItem)">
+												{{tagItem.label_name}}
+											</view>
+										</template>
+									</view>
+									<view class="flex justify-between flex-wrap items-baseline">
+										<view class="flex items-baseline mt-[20rpx]">
+											<view class="text-[var(--price-text-color)] price-font flex items-baseline">
+												<text class="text-[24rpx] font-500">￥</text>
+												<text class="text-[40rpx] font-500">{{ diyGoods.goodsPrice(item).toFixed(2).split('.')[0] }}</text>
+												<text class="text-[24rpx] font-500">.{{ diyGoods.goodsPrice(item).toFixed(2).split('.')[1] }}</text>
+											</view>
+											<image v-if="diyGoods.priceType(item) == 'member_price'" class="max-w-[50rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/VIP.png')" mode="heightFix" />
+										</view>
+										<text class="mt-[20rpx] text-[22rpx] text-[var(--text-color-light9)]">已售{{ item.sale_num }}{{ item.unit}}</text>
+									</view>
+								</view>
+							</view>
+						</template>
+					</view>
 				</template>
 			</view>
-			<mescroll-empty v-if="!articleList.length && loading" :option="{tip : '暂无商品', btnText:'去逛逛'}"></mescroll-empty>
+			<mescroll-empty v-if="!goodsList.length && loading" :option="{tip : '暂无商品', btnText:'去逛逛'}"  @emptyclick="redirect({ url: '/addon/shop/pages/index', mode: 'reLaunch' })"></mescroll-empty>
 		</mescroll-body>
 
 		<tabbar />
@@ -105,10 +165,12 @@ import MescrollBody from '@/components/mescroll/mescroll-body/mescroll-body.vue'
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue';
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js';
 import { onLoad, onPageScroll, onReachBottom } from '@dcloudio/uni-app';
+import {useGoods} from '@/hooks/useGoods'
 
 const { mescrollInit, downCallback, getMescroll } = useMescroll(onPageScroll, onReachBottom);
+const diyGoods = useGoods();
 const categoryList = ref<Array<Object>>([]);
-const articleList = ref<Array<any>>([]);
+const goodsList = ref<Array<any>>([]);
 const coupon_id = ref<number | string>('');
 const currGoodsCategory = ref<number | string>('');
 const mescrollRef = ref(null);
@@ -155,9 +217,9 @@ const getAllAppListFn = (mescroll: mescrollStructure) => {
 		let newArr = (res.data.data as Array<Object>);
 		//设置列表数据
 		if (Number(mescroll.num) === 1) {
-			articleList.value = []; //如果是第一页需手动制空列表
+			goodsList.value = []; //如果是第一页需手动制空列表
 		}
-		articleList.value = articleList.value.concat(newArr);
+		goodsList.value = goodsList.value.concat(newArr);
 		mescroll.endSuccess(newArr.length);
 		loading.value = true;
 	}).catch(() => {
@@ -168,7 +230,7 @@ const getAllAppListFn = (mescroll: mescrollStructure) => {
 
 const loadCategory = (id: string) => {
 	currGoodsCategory.value = id;
-	articleList.value = [];
+	goodsList.value = [];
 	getMescroll().resetUpScroll();
 	labelPopup.value = false;
 }
@@ -202,7 +264,7 @@ const searchTypeFn = (type: any) => {
 		labelPopup.value = true;
 	} else {
 		labelPopup.value = false;
-		articleList.value = [];
+		goodsList.value = [];
 
 		getMescroll().resetUpScroll();
 	}
@@ -220,31 +282,6 @@ onMounted(() => {
 		getMescroll().optUp.textNoMore = t("end");
 	}, 500)
 });
-
-// 价格类型
-const priceType = (data:any) =>{
-	let type = "";
-    if(data.is_discount && data.goods_sku.sale_price != data.goods_sku.price){
-        type = 'discount_price'// 折扣
-    }else if(data.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
-        type = 'member_price' // 会员价
-    }else{
-        type = ""
-    }
-	return type;
-}
-// 商品价格
-const goodsPrice = (data:any) => {
-    let price = "0.00";
-    if (data.is_discount && data.goods_sku.sale_price != data.goods_sku.price) {
-        price = data.goods_sku.sale_price ? data.goods_sku.sale_price : data.goods_sku.price // 折扣价
-    } else if (data.member_discount && getToken() && data.goods_sku.member_price != data.goods_sku.price) {
-        price = data.goods_sku.member_price ? data.goods_sku.member_price : data.goods_sku.price // 会员价
-    } else {
-        price = data.goods_sku.price
-    }
-    return parseFloat(price);
-}
 </script>
 
 <style lang="scss" scoped>
@@ -283,7 +320,9 @@ const goodsPrice = (data:any) => {
 	font-size: 28rpx;
 	background-color: var(--text-color-light9);
 }
-.goods-item-style-two{
-	width: calc(50% - 10rpx);
+.biserial-goods-list{
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-gap: 10px;
 }
 </style>

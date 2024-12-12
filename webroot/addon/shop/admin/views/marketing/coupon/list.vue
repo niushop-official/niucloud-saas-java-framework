@@ -48,7 +48,7 @@
 
                     <el-table-column  :label="t('sumCount')" min-width="160">
                         <template #default="{ row }">
-                            <span v-if="row.receive_type == 1 && row.sum_count != '-1'">{{ row.remain_count || '' }} / {{ row.sum_count || '' }}</span>
+                            <span v-if="row.receive_type == 1 && row.sum_count != '-1'">{{ row.remain_count || 0 }} / {{ row.sum_count || 0 }}</span>
                             <span v-else>不限量</span>
                         </template>
                     </el-table-column>

@@ -234,23 +234,25 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         IPage<Verify> iPage = this.verifyMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<SysVerifyRecordsVo> dataList = CollectUtils.convert(iPage.getRecords(), SysVerifyRecordsVo.class);
 
-        // 以下代码块=====>用以填充SysVerifyRecordsVo类对象的：nickname, mobile, headimg属性
-        // 根据集合ID主键索引查询到对象列表
-        QueryWrapper withQueryWrapper = new QueryWrapper();
-        withQueryWrapper.select("member_id, nickname, mobile, headimg");
-        List<Integer> memberIdList = CollectBuildUtils.getKeyValueList(dataList, "verifierMemberId");
-        withQueryWrapper.in("member_id", memberIdList);
-        List<Member> memberList = memberMapper.selectList(withQueryWrapper);
-        // 先将数据分组，然后放入结果集
-        Map<Integer, Member> memberMap = ObjectGroupUtils.group(memberList, "memberId");
-        dataList.stream().forEach(bean -> {
-            Member member = memberMap.get(bean.getVerifierMemberId());
-            if (member != null) {
-                MemberBriefInfoVo membervo = new MemberBriefInfoVo();
-                BeanUtils.copyProperties(member, membervo);
-                bean.setMember(membervo);
-            }
-        });
+        if (dataList.size() > 0) {
+            // 以下代码块=====>用以填充SysVerifyRecordsVo类对象的：nickname, mobile, headimg属性
+            // 根据集合ID主键索引查询到对象列表
+            QueryWrapper withQueryWrapper = new QueryWrapper();
+            withQueryWrapper.select("member_id, nickname, mobile, headimg");
+            List<Integer> memberIdList = CollectBuildUtils.getKeyValueList(dataList, "verifierMemberId");
+            withQueryWrapper.in("member_id", memberIdList);
+            List<Member> memberList = memberMapper.selectList(withQueryWrapper);
+            // 先将数据分组，然后放入结果集
+            Map<Integer, Member> memberMap = ObjectGroupUtils.group(memberList, "memberId");
+            dataList.stream().forEach(bean -> {
+                Member member = memberMap.get(bean.getVerifierMemberId());
+                if (member != null) {
+                    MemberBriefInfoVo membervo = new MemberBriefInfoVo();
+                    BeanUtils.copyProperties(member, membervo);
+                    bean.setMember(membervo);
+                }
+            });
+        }
         return PageResult.build(page, limit, iPage.getTotal()).setData(dataList);
     }
 

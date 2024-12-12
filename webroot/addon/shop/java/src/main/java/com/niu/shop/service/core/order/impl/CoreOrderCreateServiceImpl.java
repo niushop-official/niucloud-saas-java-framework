@@ -106,8 +106,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         // 计算订单金额
         OrderCreateDataVo.Basic basic = vo.getBasic();
         basic.setOrderMoney(basic.getGoodsMoney().add(basic.getDeliveryMoney()).subtract(basic.getDiscountMoney()));
-        BigDecimal zero = new BigDecimal(0);
-        if (basic.getOrderMoney().compareTo(zero) == -1) basic.setOrderMoney(zero);
+        if (basic.getOrderMoney().compareTo(BigDecimal.ZERO) == -1) basic.setOrderMoney(BigDecimal.ZERO);
 
         cacheOrderVo(vo);
 
@@ -252,6 +251,10 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 OrderCreateDataVo.Sku skuVo = new OrderCreateDataVo.Sku();
                 ShopGoodsSku sku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().eq("site_id", param.getSiteId()).eq("sku_id", item.getSkuId()));
                 Assert.notNull(sku, "购物车数据已过期");
+
+                String memberPrice = sku.getMemberPrice();
+                sku.setMemberPrice(null);
+
                 BeanUtil.copyProperties(sku, skuVo);
                 skuVo.setNum(item.getNum());
                 skuVo.setOriginalPrice(skuVo.getPrice());
@@ -264,7 +267,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 skuVo.setGoods(goodsVo);
 
                 if (ObjectUtil.isNotEmpty(vo.getBuyer().getMemberLevel())) {
-                    JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(sku.getMemberPrice());
+                    JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(memberPrice) ? JSONUtil.parseObj(memberPrice) : new JSONObject();
                     skuVo.setMemberPrice(goodsService.calculateMemberPrice(vo.getBuyer().getMemberLevel(), goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
                     skuVo.setPrice(skuVo.getMemberPrice());
                 }
@@ -338,8 +341,8 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
                     for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
                         List<Integer> goodsCategory = JSONUtil.parseArray(sku.getGoods().getGoodsCategory()).toList(Integer.class);
-                        boolean hasIntersection = !goodsCategory.retainAll(categoryIds);
-                        if (!hasIntersection) {
+                        boolean hasIntersection = goodsCategory.stream().anyMatch(categoryIds::contains);
+                        if (hasIntersection) {
                             matchGoods = true;
                             matchGoodsMoney = matchGoodsMoney.add(sku.getGoodsMoney());
                         }
@@ -362,7 +365,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 if (!matchGoods) {
                     couponVo.setIsNormal(false);
                     couponVo.setError("没有适用的商品");
-                } else if (matchGoodsMoney.compareTo(item.getMinConditionMoney()) == -1) {
+                } else if (matchGoodsMoney.compareTo(BigDecimal.ZERO) == 0 || matchGoodsMoney.compareTo(item.getMinConditionMoney()) == -1) {
                     couponVo.setIsNormal(false);
                     couponVo.setError("未达到最低可使用金额");
                 }

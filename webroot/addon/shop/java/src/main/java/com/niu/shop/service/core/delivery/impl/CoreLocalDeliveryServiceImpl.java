@@ -134,10 +134,9 @@ public class CoreLocalDeliveryServiceImpl implements ICoreLocalDeliveryService {
         }
 
         // 计算续重费用
-        BigDecimal zero = new BigDecimal(0);
-        if (local.getWeightStart().compareTo(zero) == 1
-                && local.getWeightUnit().compareTo(zero) == 1
-                && local.getWeightPrice().compareTo(zero) == 1
+        if (local.getWeightStart().compareTo(BigDecimal.ZERO) == 1
+                && local.getWeightUnit().compareTo(BigDecimal.ZERO) == 1
+                && local.getWeightPrice().compareTo(BigDecimal.ZERO) == 1
                 && local.getWeightStart().compareTo(goodsWeight) == -1
         ) {
             BigDecimal weightPrice = new BigDecimal(Math.ceil(goodsWeight.subtract(local.getWeightStart()).divide(local.getWeightUnit(), 2, BigDecimal.ROUND_HALF_UP).doubleValue())).multiply(local.getWeightPrice());

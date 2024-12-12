@@ -10,7 +10,6 @@ import com.niu.shop.service.api.marketing.param.ShopCouponReceiveParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponSearchParam;
 import com.niu.shop.service.api.marketing.vo.ShopCouponInfoVo;
 import com.niu.shop.service.api.marketing.vo.ShopCouponListVo;
-import com.niu.shop.service.api.marketing.vo.ShopCouponMemberListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +29,10 @@ public class CouponController {
 
     /**
      * 优惠券列表
-     * @param pageParam 分页
+     *
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopCouponListVo>>
+     * @return Result<PageResult < ShopCouponListVo>>
      */
     @GetMapping("/coupon")
     public Result<PageResult<ShopCouponListVo>> list(@Validated PageParam pageParam,
@@ -43,6 +43,7 @@ public class CouponController {
 
     /**
      * 优惠券详情
+     *
      * @param id 主键ID
      * @return Result<ShopCouponInfoVo>
      */
@@ -54,30 +55,33 @@ public class CouponController {
 
     /**
      * 优惠券领取
+     *
      * @param receiveParam
      * @return
      */
     @SaCheckLogin
     @PostMapping("/coupon")
-    public Result<Object> receive(@Validated @RequestBody ShopCouponReceiveParam receiveParam) {
+    public Result<?> receive(@Validated @RequestBody ShopCouponReceiveParam receiveParam) {
         couponService.receive(receiveParam);
-        return Result.success();
+        return Result.success("领取成功");
     }
 
     /**
      * 会员优惠券列表
+     *
      * @param pageParam
      * @param status
      * @return
      */
     @SaCheckLogin
     @GetMapping("/member/coupon")
-    public Result<Object> memberCouponList(@Validated PageParam pageParam,String type, Integer status) {
+    public Result<Object> memberCouponList(@Validated PageParam pageParam, String type, Integer status) {
         return Result.success(couponService.getMemberPage(pageParam, status, type));
     }
 
     /**
      * 会员优惠券状态数量
+     *
      * @return
      */
     @SaCheckLogin
@@ -88,6 +92,7 @@ public class CouponController {
 
     /**
      * 会员优惠券数量
+     *
      * @return
      */
     @SaCheckLogin
@@ -98,6 +103,7 @@ public class CouponController {
 
     /**
      * 获取优惠券列表组件调用
+     *
      * @param couponIds
      * @param num
      * @return
@@ -109,21 +115,22 @@ public class CouponController {
 
     /**
      * 优惠券二维码
+     *
      * @param id
      * @return
      */
     @GetMapping("/coupon/qrcode/{id}")
-    public Result<Object> qrcode( @PathVariable("id") Integer id)
-    {
+    public Result<Object> qrcode(@PathVariable("id") Integer id) {
         return null;
     }
 
     /**
      * 获取优惠券类型
+     *
      * @return
      */
     @GetMapping("/coupon_type")
-    public Result<Object> getCouponType(){
+    public Result<Object> getCouponType() {
         return Result.success(couponService.getCouponType());
     }
 

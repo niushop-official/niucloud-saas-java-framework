@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("adminapi/shop/newcomer")
+@RequestMapping("api/shop/newcomer")
 public class ShopNewcomerMemberRecordsController {
 
     private final IShopNewcomerService shopNewcomerService;

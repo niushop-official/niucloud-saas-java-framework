@@ -1,5 +1,7 @@
 package com.niu.shop.service.admin.order.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.shop.enums.order.InvoiceHeaderTypeEnum;
 import com.niu.shop.enums.order.InvoiceTypeEnum;
 import lombok.Data;
@@ -36,8 +38,10 @@ public class ShopInvoiceListVo implements Serializable {
     private String invoiceNumber;  // 发票代码
     private String invoiceVoucher;  // 发票凭证
     private String remark;  // 备注
-    private String createTime; // 申请时间
-    private Integer invoiceTime;  // 开票时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long createTime; // 申请时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long invoiceTime;  // 开票时间
     private Integer status;  // 是否生效
 
     /**

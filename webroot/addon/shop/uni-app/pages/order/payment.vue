@@ -68,40 +68,48 @@
                 </view>
 
                 <view class="mb-[var(--top-m)] card-template">
-                    <view class="mb-[30rpx]">
-                        <view class="flex" v-for="(item, key, index) in orderData.goods_data" :key="index" :class="{'pb-[40rpx]': (index + 1) != Object.keys(orderData.goods_data).length}">
-                            <u--image radius="var(--goods-rounded-big)" width="180rpx" height="180rpx" :src="img(item.sku_image)" model="aspectFill">
-                                <template #error>
-									<image class="w-[180rpx] h-[180rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-                                </template>
-                            </u--image>
-                            <view class="flex flex-1 w-0 flex-col justify-between ml-[20rpx] py-[6rpx]">
-                                <view class="line-normal">
-                                    <view class="truncate text-[#303133] text-[28rpx] leading-[32rpx]">
-                                        {{ item.goods.goods_name }}
-                                    </view>
-                                    <view class="mt-[14rpx] flex" v-if="item.sku_name">
-                                        <text class="truncate text-[24rpx] text-[var(--text-color-light9)] leading-[28rpx]">{{ item.sku_name }}</text>
-                                    </view>
-                                </view>
-                                <view class="mb-auto" :class="{'mt-[6rpx]': !item.sku_name}" v-if="item.not_support_delivery">
-                                    <u-alert type="error" description="该商品不支持当前所选配送方式" class="leading-[30rpx] !inline-block" fontSize="11"></u-alert>
-                                </view>
-                                <view class="flex justify-between items-baseline">
-                                    <view class="text-[var(--price-text-color)] flex items-baseline  price-font">
-                                        <text class="text-[24rpx] font-500 mr-[4rpx]">￥</text>
-                                        <text class="text-[40rpx] font-500">{{ parseFloat(item.price).toFixed(2).split('.')[0] }}</text>
-                                        <text class="text-[24rpx] font-500">.{{ parseFloat(item.price).toFixed(2).split('.')[1] }}</text>
-                                    </view>
-                                    <view class="font-400 text-[28rpx] text-[#303133]">
-                                        <text>x</text>
-                                        <text>{{ item.num }}</text>
-                                    </view>
-                                </view>
-                            </view>
-                        </view>
-                    </view>
-
+					<block v-for="(item, key, index) in orderData.goods_data" :key="index">
+						<view class="mb-[30rpx]">
+							
+							<view class="flex">
+								<u--image radius="var(--goods-rounded-big)" width="180rpx" height="180rpx" :src="img(item.sku_image)" model="aspectFill">
+									<template #error>
+										<image class="w-[180rpx] h-[180rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									</template>
+								</u--image>
+								<view class="flex flex-1 w-0 flex-col justify-between ml-[20rpx] py-[6rpx]">
+									<view class="line-normal">
+										<view class="truncate text-[#303133] text-[28rpx] leading-[32rpx]">
+											{{ item.goods.goods_name }}
+										</view>
+										<view class="mt-[14rpx] flex" v-if="item.sku_name">
+											<text class="truncate text-[24rpx] text-[var(--text-color-light9)] leading-[28rpx]">{{ item.sku_name }}</text>
+										</view>
+									</view>
+									<view class="mb-auto" :class="{'mt-[6rpx]': !item.sku_name}" v-if="item.not_support_delivery">
+										<u-alert type="error" description="该商品不支持当前所选配送方式" class="leading-[30rpx] !inline-block" fontSize="11"></u-alert>
+									</view>
+									<view class="flex justify-between items-baseline">
+										<view class="text-[var(--price-text-color)] flex items-baseline  price-font">
+											<text class="text-[24rpx] font-500 mr-[4rpx]">￥</text>
+											<text class="text-[40rpx] font-500">{{ parseFloat(item.price).toFixed(2).split('.')[0] }}</text>
+											<text class="text-[24rpx] font-500">.{{ parseFloat(item.price).toFixed(2).split('.')[1] }}</text>
+										</view>
+										<view class="font-400 text-[28rpx] text-[#303133]">
+											<text>x</text>
+											<text>{{ item.num }}</text>
+										</view>
+									</view>
+								</view>
+							</view>
+							<view class="flex items-center mt-[8rpx]" :class="{'pb-[40rpx]': (index + 1) != Object.keys(orderData.goods_data).length}" v-if="item.is_newcomer && item.newcomer_price != item.price && item.num>1">
+								<image class="h-[24rpx] w-[56rpx]" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
+								<view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]"
+							>第1{{item.goods.unit}}，￥{{parseFloat(item.newcomer_price).toFixed(2)}}/{{item.goods.unit}}；第{{item.num>2?'2~'+item.num:'2'}}{{item.goods.unit}}，￥{{parseFloat(item.price).toFixed(2)}}/{{item.goods.unit}}</view>
+							</view>
+								
+						</view>
+					</block>
                     <!-- 买家留言 -->
                     <view class="bg-white flex items-center leading-[30rpx]">
                         <view class="text-[28rpx] w-[150rpx] text-[#303133]">买家留言</view>
@@ -139,19 +147,19 @@
                     <view class="card-template-item">
                         <view class="text-[28rpx] w-[150rpx] leading-[30rpx] text-[#303133]">商品金额</view>
                         <view class="flex-1 w-0 text-right  price-font text-[#333] text-[32rpx]">
-							￥{{ parseFloat(orderData.basic.goods_money) }}
+							￥{{ moneyFormat(orderData.basic.goods_money) }}
                         </view>
                     </view>
                     <view class="card-template-item" v-if="orderData.basic.delivery_money">
                         <view class="text-[28rpx] w-[150rpx] leading-[30rpx] text-[#303133]">配送费用</view>
                         <view class="flex-1 w-0 text-right price-font text-[#333] text-[32rpx]">
-                            ￥{{ parseFloat(orderData.basic.delivery_money) }}
+                            ￥{{ moneyFormat(orderData.basic.delivery_money) }}
                         </view>
                     </view>
                     <view class="card-template-item" v-if="orderData.basic.discount_money">
                         <view class="text-[28rpx] w-[150rpx] leading-[30rpx] text-[#303133]">优惠金额</view>
                         <view class="flex-1 w-0 text-right text-[var(--price-text-color)] text-[32rpx] price-font leading-[1]">
-                            -￥{{parseFloat(orderData.basic.discount_money)}}
+                            -￥{{moneyFormat(orderData.basic.discount_money)}}
                         </view>
                     </view>
                 </view>

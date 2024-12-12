@@ -39,7 +39,6 @@
 			<view class="flex mt-[40rpx] items-center" v-if="diyComponent.isShowAccount">
 				<view class="text-center w-[33.333%] flex-shrink-0">
 					<view class="text-[36rpx] mb-[20rpx] font-500 price-font">
-						<!-- diyComponent.textColor -->
 						<view @click="redirect({url: '/app/pages/member/balance'})" :style="{ color : diyComponent.textColor }">{{ money }}</view>
 					</view>
 					<view class="text-[22rpx] font-400">

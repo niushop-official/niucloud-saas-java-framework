@@ -31,6 +31,19 @@
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
+            <SizeBasedTriggeringPolicy size="2MB"/>
+        </RollingFile>
+        <RollingFile name="ErrorRollingFile" fileName="./logs/error.log" filePattern="./logs/error-%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <SizeBasedTriggeringPolicy size="2MB"/>
         </RollingFile>
         <!--
         <File name="ErrorLog" fileName="logs/niucloud-web-app.error.log">
@@ -46,6 +59,7 @@
         <root level="info">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFile"/>
+            <appender-ref ref="ErrorRollingFile"/>
         </root>
         <logger name="java.sql" level="info" additivity="false">
             <AppenderRef ref="AspectConsole"/>

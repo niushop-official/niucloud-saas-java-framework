@@ -182,7 +182,7 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
         );
         int count = shopActiveGoodsMapper.selectJoinCount(wrapper);
         if (count > 0) {
-            throw new AdminException("该商品已参加其他活动，请重新选择");
+            throw new AdminException("同一商品在一个时间段内只能参加一个限时折扣活动");
         }
         //数据添加
         ShopActive activeModel = new ShopActive();
@@ -282,28 +282,24 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
         );
         int count = shopActiveGoodsMapper.selectJoinCount(wrapper);
         if (count > 0) {
-            throw new AdminException("该商品已参加其他活动，请重新选择");
+            throw new AdminException("同一商品在一个时间段内只能参加一个限时折扣活动");
         }
         //数据添加
-        ShopActive activeModel = new ShopActive();
-        activeModel.setSiteId(RequestUtils.siteId());
+        ShopActive activeModel = shopActiveMapper.selectOne(new QueryWrapper<ShopActive>().eq("active_id", id).eq("site_id", RequestUtils.siteId()));
+        Assert.notNull(activeModel, "活动不存在");
         activeModel.setActiveName(shopDiscountParam.getActiveName());
         activeModel.setActiveDesc(shopDiscountParam.getActiveDesc());
-        activeModel.setActiveType(ActiveTypeEnum.GOODS.getType());
-        activeModel.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
         activeModel.setActiveGoodsInfo(shopDiscountParam.getGoodsData());
-        activeModel.setActiveClass("discount");
-        activeModel.setActiveClassCategory("discount");
         activeModel.setActiveStatus(ActiveStatusEnum.NOT_ACTIVE.getStatus());
         activeModel.setStartTime(DateUtils.StringToTimestamp(shopDiscountParam.getStartTime()));
         activeModel.setEndTime(DateUtils.StringToTimestamp(shopDiscountParam.getEndTime()));
-        activeModel.setCreateTime(System.currentTimeMillis() / 1000);
-        //商品添加
+        activeModel.setUpdateTime(System.currentTimeMillis() / 1000);
 
         List<ShopActiveGoods> activeGoodsList = new ArrayList<>();
         for (int i = 0; i < goodsList.size(); i++) {
             JSONObject goods = goodsList.getJSONObject(i);
             ShopActiveGoods activeGoods = new ShopActiveGoods();
+            activeGoods.setActiveId(id);
             activeGoods.setGoodsId(goods.getInt("goods_id"));
             activeGoods.setSiteId(RequestUtils.siteId());
             activeGoods.setActiveClass("discount");
@@ -325,7 +321,7 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
             }
             activeGoodsList.add(activeGoods);
         }
-        coreActiveService.add(activeModel, activeGoodsList);
+        coreActiveService.edit(activeModel, activeGoodsList);
     }
 
     /**

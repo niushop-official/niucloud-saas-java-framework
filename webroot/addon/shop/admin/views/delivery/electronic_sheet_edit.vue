@@ -40,7 +40,7 @@
 
 				<el-form-item :label="t('customerName')">
 					<div>
-                        <el-input v-model.trim="formData.customer_name" clearable class="input-width" maxlength="50" />
+                        <el-input v-model.trim="formData.customer_name" clearable class="input-width" maxlength="20" />
                         <div class="flex items-center mt-[5px] text-[12px] text-[#999] leading-[20px]">
                             <span>{{ t('customerNameTips') }}</span>
                             <a class="ml-[3px] text-[var(--el-color-primary)]" target="_blank" href="https://www.yuque.com/kdnjishuzhichi/rg4owd">{{t('examine')}}</a>
@@ -54,28 +54,28 @@
 
 				<el-form-item :label="t('customerPwd')">
 					<div>
-						<el-input v-model.trim="formData.customer_pwd" clearable class="input-width" maxlength="50" />
+						<el-input v-model.trim="formData.customer_pwd" clearable class="input-width" maxlength="20" />
 						<div class="mt-[5px] text-[12px] text-[#999] leading-[20px]">{{ t('customerPwdTips') }}</div>
 					</div>
 				</el-form-item>
 
 				<el-form-item :label="t('sendSite')">
 					<div>
-						<el-input v-model.trim="formData.send_site" clearable class="input-width" maxlength="50" />
+						<el-input v-model.trim="formData.send_site" clearable class="input-width" maxlength="20" />
 						<div class="mt-[5px] text-[12px] text-[#999] leading-[20px]">{{ t('sendSiteTips') }}</div>
 					</div>
 				</el-form-item>
 
 				<el-form-item :label="t('sendStaff')">
 					<div>
-						<el-input v-model.trim="formData.send_staff" clearable class="input-width" maxlength="50" />
+						<el-input v-model.trim="formData.send_staff" clearable class="input-width" maxlength="20" />
 						<div class="mt-[5px] text-[12px] text-[#999] leading-[20px]">{{ t('sendStaffTips') }}</div>
 					</div>
 				</el-form-item>
 
 				<el-form-item :label="t('monthCode')">
 					<div>
-						<el-input v-model.trim="formData.month_code" clearable class="input-width" maxlength="50" />
+						<el-input v-model.trim="formData.month_code" clearable class="input-width" maxlength="20" />
 						<div class="mt-[5px] text-[12px] text-[#999] leading-[20px]">{{ t('monthCodeTips') }}</div>
 					</div>
 				</el-form-item>

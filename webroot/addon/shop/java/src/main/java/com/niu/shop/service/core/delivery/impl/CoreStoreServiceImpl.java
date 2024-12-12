@@ -55,8 +55,7 @@ public class CoreStoreServiceImpl implements ICoreStoreService {
     public List<StoreListVo> getStoreList(Integer siteId, LatlngParam latlng) {
         List<StoreListVo> storeList = CollectUtils.convert(shopStoreMapper.selectList(new QueryWrapper<ShopStore>()
                 .eq("site_id", siteId)), StoreListVo.class);
-        BigDecimal zero = new BigDecimal(0);
-        if (ObjectUtil.isNotEmpty(latlng.getLat()) && latlng.getLat().compareTo(zero) == 1 && ObjectUtil.isNotEmpty(latlng.getLng()) && latlng.getLng().compareTo(zero) == 1) {
+        if (ObjectUtil.isNotEmpty(latlng.getLat()) && latlng.getLat().compareTo(BigDecimal.ZERO) == 1 && ObjectUtil.isNotEmpty(latlng.getLng()) && latlng.getLng().compareTo(BigDecimal.ZERO) == 1) {
             for (StoreListVo item : storeList) {
                 item.setDistance(calculateDistance(
                         latlng.getLat().doubleValue(),

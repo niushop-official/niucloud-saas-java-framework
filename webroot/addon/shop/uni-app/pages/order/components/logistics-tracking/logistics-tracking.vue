@@ -24,8 +24,8 @@
 				</view>
 				<view class="parcel" style="height: 53vh;" v-if="showList.sub_delivery_type == 'express'">
 					<view class="h-[56vh] flex flex-col items-center justify-center" v-if="showList.traces.success == false">
-							<text class="nc-iconfont nc-icon-daishouhuoV6xx text-[180rpx] text-[#bfbfbf]"></text>
-							<view class="text-[28rpx] text-[#bfbfbf] leading-8">暂无物流信息～～</view>
+						<text class="nc-iconfont nc-icon-daishouhuoV6xx text-[180rpx] text-[#bfbfbf]"></text>
+						<view class="text-[28rpx] text-[#bfbfbf] leading-8">暂无物流信息～～</view>
 					</view>
 					<scroll-view v-else :scroll-y="true" style="height:53vh;padding: 20rpx;box-sizing: border-box;" class="bg-white rounded-md">
 						<u-steps :current="0" dot direction="column" activeColor="var(--primary-color)">
@@ -56,9 +56,6 @@
     const packageList = ref([])
     const showList = ref<any>({})
     const loadList = async (params: any) => {
-		if(showList.value?.traces?.list.length){
-			showList.value.traces.list = []
-		}
         let data: any = await getMaterialflowList(params)
         showList.value = data.data
     }

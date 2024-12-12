@@ -87,7 +87,7 @@ public class ShopCartServiceImpl implements IShopCartService {
             vo.setGoodsSpec(specList);
 
             if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? new JSONObject() : JSONUtil.parseObj(sku.getMemberPrice());
+                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
                 skuVo.setMemberPrice(goodsService.calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
             } else {
                 skuVo.setMemberPrice(sku.getPrice());

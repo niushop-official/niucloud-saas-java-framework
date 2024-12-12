@@ -9,6 +9,7 @@ import com.niu.core.service.core.site.ICoreSiteAccountService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 
 @Service
 public class CoreSiteAccountServiceImpl implements ICoreSiteAccountService {
@@ -41,7 +42,7 @@ public class CoreSiteAccountServiceImpl implements ICoreSiteAccountService {
         SiteAccountLog model = new SiteAccountLog();
         model.setSiteId(refund.getSiteId());
         model.setType("refund");
-        model.setMoney(refund.getMoney());
+        model.setMoney(refund.getMoney().multiply(new BigDecimal("-1")));
         model.setTradeNo(refund.getRefundNo());
         model.setCreateTime(System.currentTimeMillis() / 1000);
         siteAccountLogMapper.insert(model);
@@ -57,7 +58,7 @@ public class CoreSiteAccountServiceImpl implements ICoreSiteAccountService {
         SiteAccountLog model = new SiteAccountLog();
         model.setSiteId(transfer.getSiteId());
         model.setType("transfer");
-        model.setMoney(transfer.getMoney());
+        model.setMoney(transfer.getMoney().multiply(new BigDecimal("-1")));
         model.setTradeNo(transfer.getTransferNo());
         model.setCreateTime(System.currentTimeMillis() / 1000);
         siteAccountLogMapper.insert(model);

@@ -5,22 +5,21 @@ import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.entity.diy.DiyPage;
 import com.niu.core.enums.diy.ComponentEnum;
 import com.niu.core.enums.diy.LinkEnum;
 import com.niu.core.enums.diy.PagesEnum;
 import com.niu.core.enums.diy.TemplateEnum;
-import com.niu.core.service.admin.diy.IDiyConfigService;
+import com.niu.core.mapper.diy.DiyPageMapper;
 import com.niu.core.service.admin.diy.IDiyRouteService;
-import com.niu.core.service.admin.diy.param.*;
 import com.niu.core.service.admin.diy.IDiyService;
+import com.niu.core.service.admin.diy.param.*;
 import com.niu.core.service.admin.diy.vo.DiyPageInfoVo;
 import com.niu.core.service.admin.diy.vo.DiyPageListVo;
-import com.niu.core.common.domain.PageParam;
-import com.niu.core.entity.diy.DiyPage;
-import com.niu.core.mapper.diy.DiyPageMapper;
 import com.niu.core.service.admin.diy.vo.DiyRouteListVo;
 import com.niu.core.service.core.diy.ICoreDiyConfigService;
 import com.niu.core.service.core.diy.param.StartUpPageConfigParam;
@@ -42,7 +41,7 @@ import java.util.List;
  */
 @Service
 public class DiyServiceImpl implements IDiyService {
-        
+
     @Resource
     DiyPageMapper diyPageMapper;
 
@@ -58,13 +57,13 @@ public class DiyServiceImpl implements IDiyService {
     /**
      * 自定义页面分页列表
      *
-     * @param pageParam 分页参数
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<DiyPageListVo>
      */
     @Override
     public PageResult<DiyPageListVo> list(PageParam pageParam, DiyPageSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
+        Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<DiyPage> queryWrapper = new QueryWrapper<>();
@@ -77,12 +76,12 @@ public class DiyServiceImpl implements IDiyService {
 
         IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
-        for(DiyPage item : iPage.getRecords()) {
+        for (DiyPage item : iPage.getRecords()) {
             DiyPageListVo vo = new DiyPageListVo();
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page,limit, iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -103,7 +102,7 @@ public class DiyServiceImpl implements IDiyService {
         List<DiyPage> pages = diyPageMapper.selectList(queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
 
-        for(DiyPage item : pages) {
+        for (DiyPage item : pages) {
             DiyPageListVo vo = new DiyPageListVo();
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
@@ -121,8 +120,8 @@ public class DiyServiceImpl implements IDiyService {
     public DiyPageInfoVo info(Integer id) {
         DiyPage model = diyPageMapper.selectOne(
                 new QueryWrapper<DiyPage>()
-                    .eq("id", id)
-                    .eq("site_id", RequestUtils.siteId()));
+                        .eq("id", id)
+                        .eq("site_id", RequestUtils.siteId()));
 
         if (model == null) return null;
 
@@ -171,8 +170,8 @@ public class DiyServiceImpl implements IDiyService {
     public void edit(Integer id, DiyPageParam editParam) {
         DiyPage model = diyPageMapper.selectOne(
                 new QueryWrapper<DiyPage>()
-                    .eq("id",  id)
-                    .eq("site_id", RequestUtils.siteId()));
+                        .eq("id", id)
+                        .eq("site_id", RequestUtils.siteId()));
 
         Assert.notNull(model, "数据不存在!");
 
@@ -193,10 +192,11 @@ public class DiyServiceImpl implements IDiyService {
 
     /**
      * 设为使用
+     *
      * @param id
      */
     public void setUse(Integer id) {
-        DiyPage model = diyPageMapper.selectOne(new QueryWrapper<DiyPage>().eq("id",  id).eq("site_id", RequestUtils.siteId()));
+        DiyPage model = diyPageMapper.selectOne(new QueryWrapper<DiyPage>().eq("id", id).eq("site_id", RequestUtils.siteId()));
         Assert.notNull(model, "页面不存在!");
 
         DiyPage update = new DiyPage();
@@ -213,7 +213,7 @@ public class DiyServiceImpl implements IDiyService {
 
     public JSONObject getLink() {
         JSONObject linkEnum = LinkEnum.getLink();
-        for (String key: linkEnum.keySet()) {
+        for (String key : linkEnum.keySet()) {
             if (key.equals("DIY_PAGE")) {
                 List<DiyPage> pageList = this.diyPageMapper.selectList(new QueryWrapper<DiyPage>()
                         .eq("site_id", RequestUtils.siteId())
@@ -266,7 +266,7 @@ public class DiyServiceImpl implements IDiyService {
                         param.setName(info.getName());
                     }
                 } else {
-                    for (String key: template.keySet()) {
+                    for (String key : template.keySet()) {
                         if (ObjectUtil.defaultIfNull(template.getByPath(key + ".page", String.class), "").equals(startConfig.getPage())) {
                             info = this.infoByName(key);
                             if (info != null) {
@@ -337,6 +337,7 @@ public class DiyServiceImpl implements IDiyService {
 
     /**
      * 获取默认页面数据
+     *
      * @param type
      * @param addon
      * @return
@@ -355,12 +356,13 @@ public class DiyServiceImpl implements IDiyService {
 
     /**
      * 获取页面模板
+     *
      * @return
      */
     public JSONObject getTemplate(TemplateParam param) {
         JSONObject template = TemplateEnum.getTemplate(param);
 
-        for (String key: template.keySet()) {
+        for (String key : template.keySet()) {
             JSONObject pages = ObjectUtil.defaultIfNull(PagesEnum.getPages(key, param.getMode()), new JSONObject());
             template.putByPath(key + ".template", pages);
         }
@@ -370,6 +372,7 @@ public class DiyServiceImpl implements IDiyService {
 
     /**
      * 设置启动页
+     *
      * @param value
      */
     public void changeTemplate(StartUpPageConfigParam value) {
@@ -383,7 +386,7 @@ public class DiyServiceImpl implements IDiyService {
      */
     public JSONObject getDecoratePage(DiyPageSearchParam searchParam) {
         TemplateParam templateParam = new TemplateParam();
-        String[] key = { searchParam.getType() };
+        String[] key = {searchParam.getType()};
         templateParam.setKey(key);
         JSONObject template = this.getTemplate(templateParam).getJSONObject(searchParam.getType());
         if (template == null) throw new CommonException("模板不存在");
@@ -448,28 +451,28 @@ public class DiyServiceImpl implements IDiyService {
      * 获取自定义页面分页列表，轮播搜索组件用
      */
     public PageResult<DiyPageListVo> getPageByCarouselSearch(PageParam pageParam) {
-        Integer page  = pageParam.getPage();
+        Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<DiyPage> queryWrapper = new QueryWrapper<DiyPage>()
-            .eq("site_id", RequestUtils.siteId())
-            .eq("type", "DIY_PAGE")
-            .notIn("value", Arrays.asList("top_fixed", "right_fixed", "bottom_fixed", "left_fixed", "fixed"))
-            .or()
-            .eq("site_id", RequestUtils.siteId())
-            .ne("type", "DIY_PAGE")
-            .eq("is_default", 0)
-            .notIn("value", Arrays.asList("top_fixed", "right_fixed", "bottom_fixed", "left_fixed", "fixed"))
-            .orderByDesc("id");
+                .eq("site_id", RequestUtils.siteId())
+                .eq("type", "DIY_PAGE")
+                .notIn("value", Arrays.asList("top_fixed", "right_fixed", "bottom_fixed", "left_fixed", "fixed"))
+                .or()
+                .eq("site_id", RequestUtils.siteId())
+                .ne("type", "DIY_PAGE")
+                .eq("is_default", 0)
+                .notIn("value", Arrays.asList("top_fixed", "right_fixed", "bottom_fixed", "left_fixed", "fixed"))
+                .orderByDesc("id");
 
         IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
-        for(DiyPage item : iPage.getRecords()) {
+        for (DiyPage item : iPage.getRecords()) {
             DiyPageListVo vo = new DiyPageListVo();
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page,limit, iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -481,7 +484,7 @@ public class DiyServiceImpl implements IDiyService {
         String addonFlag = param.getKey();
 
         TemplateParam templateParam = new TemplateParam();
-        String[] key = { param.getKey() };
+        String[] key = {param.getKey()};
         templateParam.setKey(key);
         JSONObject template = getTemplate(templateParam).getJSONObject(param.getKey());
         if (template == null) return;

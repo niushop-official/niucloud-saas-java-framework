@@ -220,7 +220,9 @@ public class CoreSpringContextListener implements ApplicationListener<ContextRef
                         }
                         coreScheduleService.installAddonSchedule(addon);
 
-                        coreAddonService.set(JSONUtil.toBean(info, Addon.class));
+                        Addon model = JSONUtil.toBean(info, Addon.class);
+                        model.setIcon("addon/" + model.getKey() + "/icon.png");
+                        coreAddonService.set(model);
 
                         AddonInstallJavaTools.addAddonJson(addon);
                     }

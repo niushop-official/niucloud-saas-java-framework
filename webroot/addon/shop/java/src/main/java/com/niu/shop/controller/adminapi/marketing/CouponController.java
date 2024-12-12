@@ -5,7 +5,6 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.marketing.ICouponService;
-import com.niu.shop.service.admin.marketing.param.ShopActiveParam;
 import com.niu.shop.service.admin.marketing.param.ShopCouponParam;
 import com.niu.shop.service.admin.marketing.param.ShopCouponSearchParam;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponInfoVo;
@@ -15,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * 优惠券控制器
@@ -33,11 +31,13 @@ public class CouponController {
     public Result<JSONObject> init() {
         return Result.success(couponService.getInit());
     }
+
     /**
      * 优惠券列表
-     * @param pageParam 分页
+     *
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopCouponListVo>>
+     * @return Result<PageResult < ShopCouponListVo>>
      */
     @GetMapping("")
     public Result<PageResult<ShopCouponListVo>> list(@Validated PageParam pageParam,
@@ -48,6 +48,7 @@ public class CouponController {
 
     /**
      * 优惠券详情
+     *
      * @param id 主键ID
      * @return Result<ShopCouponInfoVo>
      */
@@ -59,6 +60,7 @@ public class CouponController {
 
     /**
      * 优惠券添加
+     *
      * @param addParam 添加参数
      * @return AjaxResult<Object>
      */
@@ -70,6 +72,7 @@ public class CouponController {
 
     /**
      * 优惠券编辑
+     *
      * @param editParam 编辑参数
      * @return Result<Object>
      */
@@ -81,6 +84,7 @@ public class CouponController {
 
     /**
      * 优惠券删除
+     *
      * @param id 参数
      * @return Result<Object>
      */
@@ -92,6 +96,7 @@ public class CouponController {
 
     /**
      * 获取会员优惠券列表
+     *
      * @param pageParam
      * @param id
      * @param keywords
@@ -101,35 +106,39 @@ public class CouponController {
     public Result<PageResult<ShopCouponMemberListVo>> getMemberCoupon(@Validated PageParam pageParam, Integer id, String keywords) {
         return Result.success(couponService.getMemberCoupon(pageParam, id, keywords));
     }
+
     /**
      * 获取选中优惠券
-     * @param couponIds
+     *
+     * @param couponId
      * @return
      */
     @GetMapping("/selected")
-    public List<ShopCouponListVo> getSelectedLists(@Validated @RequestBody String couponIds){
-        return couponService.getSelectedList(couponIds);
+    public Result<?> getSelectedLists(@Validated @RequestParam("coupon_id") String couponId) {
+        return Result.success(couponService.getSelectedList(couponId));
     }
 
     /**
      * 设置优惠券领用状态
+     *
      * @param status
      * @param id
      * @return
      */
     @PutMapping("setstatus/{status}")
-    public Result<Object> setCouponStatus(@Validated @PathVariable("status") Integer status, @Validated @RequestBody Integer id){
+    public Result<Object> setCouponStatus(@Validated @PathVariable("status") Integer status, @Validated @RequestBody Integer id) {
         couponService.setStatus(id, status);
         return Result.success();
     }
 
     /**
      * 优惠券失效
+     *
      * @param id
      * @return
      */
     @PutMapping("invalid/{id}")
-    public Result<Object> couponInvalid(@Validated @PathVariable("id") Integer id){
+    public Result<Object> couponInvalid(@Validated @PathVariable("id") Integer id) {
         couponService.couponInvalid(id);
         return Result.success();
     }

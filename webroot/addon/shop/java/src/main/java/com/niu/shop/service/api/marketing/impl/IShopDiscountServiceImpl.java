@@ -102,7 +102,7 @@ public class IShopDiscountServiceImpl implements IShopDiscountService {
             if (activeGoodsValue.size() > 0) {
                 JSONObject sku = activeGoodsValue.getJSONObject(0);
                 ShopDiscountGoodsListVo.GoodsSku skuVo = JSONUtil.toBean(sku, ShopDiscountGoodsListVo.GoodsSku.class);
-                skuVo.setActiveDiscountPrice(sku.getBigDecimal("discount_price"));
+                skuVo.setActiveDiscountPrice(ObjectUtil.defaultIfNull(sku.getBigDecimal("discount_price"), skuVo.getSalePrice()));
                 skuVo.setActiveDiscountRate(sku.getBigDecimal("discount_rate"));
                 skuVo.setActiveDiscountType(sku.getStr("discount_type"));
                 skuVo.setActiveReduceMoney(sku.getBigDecimal("reduce_money"));

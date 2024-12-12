@@ -1,7 +1,6 @@
 package com.niu.shop.service.core.order.vo;
 
 import cn.hutool.json.JSONObject;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.domain.BeanJsonSerializer;
@@ -105,6 +104,9 @@ public class OrderCreateDataVo implements Serializable {
         protected Integer notSupportDelivery = 0;
         protected BigDecimal deliveryMoney = new BigDecimal(0);
         protected Integer isFreeShipping = 0;
+        protected BigDecimal newcomerPrice;
+        protected int isNewcomer;
+        protected JSONObject extend;
     }
 
     @Data

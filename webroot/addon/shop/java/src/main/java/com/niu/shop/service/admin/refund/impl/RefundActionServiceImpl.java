@@ -317,7 +317,7 @@ public class RefundActionServiceImpl implements IRefundActionService {
      */
     @Async
     private void toTransfer(ShopOrderRefund refund) {
-        if (refund.getMoney().compareTo(new BigDecimal(0)) == 0) {
+        if (refund.getMoney().compareTo(BigDecimal.ZERO) == 0) {
             RefundFinishParam param = new RefundFinishParam();
             param.setOrderRefundNo(refund.getOrderRefundNo());
             coreRefundService.finish(param);

@@ -66,7 +66,7 @@
                         <view>{{t('createExplain')}}</view>
                         <view class="flex-1 ml-[60rpx] text-right leading-[1.5] flex justify-end break-all">{{ detail.remark }}</view>
                     </view>
-                    <view class="justify-between text-[28rpx] card-template-item !items-baseline" v-if="detail.status == 3 || detail.status == 5">
+                    <view class="justify-between text-[28rpx] card-template-item !items-baseline">
                         <view>{{t('reasonRefusal')}}</view>
                         <view class="flex-1 ml-[60rpx] leading-[1.5] text-right" :class="{'#333': detail.shop_reason, 'text-[var(--text-color-light9)]': !detail.shop_reason}">{{ detail.shop_reason || '--' }}</view>
                     </view>

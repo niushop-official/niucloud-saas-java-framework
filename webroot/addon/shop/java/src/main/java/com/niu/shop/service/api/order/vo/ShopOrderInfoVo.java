@@ -1,4 +1,6 @@
 package com.niu.shop.service.api.order.vo;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
@@ -111,7 +113,6 @@ public class ShopOrderInfoVo implements Serializable {
         private Integer verifyExpireTime; // 过期时间 0 为永久
         private Integer isVerify; // 是否需要核销
         private BigDecimal discountMoney;
-        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String extend;
 
         private ICoreUploadService coreUploadService() {
@@ -120,6 +121,11 @@ public class ShopOrderInfoVo implements Serializable {
 
         public String getGoodsImageThumbSmall() {
             return coreUploadService().thumb(this.siteId, this.getGoodsImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+        }
+
+        public JSONObject getExtend() {
+            if (this.extend.isEmpty()) return null;
+            return JSONUtil.parseObj(this.extend);
         }
     }
 

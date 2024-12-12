@@ -1,11 +1,13 @@
 package com.niu.shop.service.core.marketing;
 
-import com.niu.shop.service.core.marketing.vo.ShopNewcomerConfigVo;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.niu.shop.entity.newconsumer.ShopNewcomerMemberRecords;
+import com.niu.shop.service.core.marketing.vo.CoreShopNewcomerConfigVo;
 
-public interface ICoreShopNewcomerService {
-    ShopNewcomerConfigVo getConfig();
+public interface ICoreShopNewcomerService extends IService<ShopNewcomerMemberRecords> {
+    CoreShopNewcomerConfigVo getConfig(Integer siteId);
 
-    void checkIfNewcomer(Integer site, Integer memberId);
+    boolean checkIfNewcomer(Integer site, Integer memberId);
 
-    void afterSave(Integer siteId);
+    void afterSave();
 }

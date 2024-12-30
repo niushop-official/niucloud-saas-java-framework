@@ -1,7 +1,6 @@
 <template>
 	<view :style="themeColor()">
-
-		<u-loading-page :loading="diy.getLoading()" loadingText="" bg-color="#f7f7f7" />
+		<loading-page :loading="diy.getLoading()"></loading-page>
 
 		<view v-show="!diy.getLoading()">
 
@@ -30,12 +29,14 @@
 </template>
 
 <script setup lang="ts">
-    import {ref, computed} from 'vue';
+    import {ref, computed,nextTick} from 'vue';
     import {useDiy} from '@/hooks/useDiy'
     import {redirect} from '@/utils/common';
     import diyGroup from '@/addon/components/diy/group/index.vue'
     import fixedGroup from '@/addon/components/fixed/group/index.vue'
     import useMemberStore from '@/stores/member'
+
+    uni.hideTabBar() // 隐藏tabbar
 
     // 会员信息
     const memberStore = useMemberStore()
@@ -46,6 +47,8 @@
     })
 
     const diyGroupRef = ref(null)
+
+    const wxPrivacyPopupRef:any = ref(null)
 
     // 监听页面加载
     diy.onLoad();
@@ -64,8 +67,16 @@
         if (userInfo.value) {
           useMemberStore().getMemberInfo()
         }
+	    // #ifdef MP
+	    nextTick(()=>{
+		    if(wxPrivacyPopupRef.value) wxPrivacyPopupRef.value.proactive();
+	    })
+	    // #endif
     });
-	
+
+    // 监听页面隐藏
+    diy.onHide();
+
 	// 监听页面卸载
 	diy.onUnload();
 

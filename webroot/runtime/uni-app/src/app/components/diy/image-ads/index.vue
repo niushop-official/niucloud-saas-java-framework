@@ -1,7 +1,6 @@
 <template>
 	<view :style="warpCss">
-		<view :style="maskLayer"></view>
-		<view class="diy-image-ads">
+		<view class="diy-image-ads" :style="imageAdsTempStyle()">
 			<view v-if="diyComponent.list.length == 1" class="leading-0 overflow-hidden" :style="swiperWarpCss">
 				<view @click="diyStore.toRedirect(diyComponent.list[0].link)">
 					<image v-if="diyComponent.list[0].imageUrl" :src="img(diyComponent.list[0].imageUrl)" :style="{height: imgHeight}" mode="heightFix" class="!w-full" :show-menu-by-longpress="true"/>
@@ -30,6 +29,7 @@
     import { img } from '@/utils/common';
 
 	const props = defineProps(['component', 'index', 'pullDownRefreshCount']);
+	const systemInfo = uni.getSystemInfoSync();
 
 	const diyStore = useDiyStore();
 
@@ -40,6 +40,27 @@
 			return props.component;
 		}
 	})
+	
+	// 兼容通屏样式
+	const imageAdsTempStyle = ()=> {
+		let style = "";
+		if(diyComponent.value.isSameScreen && props.index == 0){
+			// #ifdef H5
+			// h5,上移的像素，采取的是平均值
+			if (systemInfo.platform === 'ios') {
+			    style = 'margin-top: -55px;';
+			}else{
+			    style = 'margin-top: -44.5px;';
+			}
+			// #endif
+			
+			// #ifdef MP
+			// 图文导航开启沉浸式且导航栏开启时，导航栏不占位
+			uni.setStorageSync('imageAdsSameScreen', true);
+			// #endif
+		}
+	    return style;
+	}
 
 	const warpCss = computed(() => {
 		var style = '';
@@ -64,23 +85,6 @@
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
 		return style;
 	})
-
-    // 背景图加遮罩层
-    const maskLayer = computed(()=>{
-        var style = '';
-        if(diyComponent.value.componentBgUrl) {
-            style += 'position:absolute;top:0;width:100%;';
-            style += `background: rgba(0,0,0,${diyComponent.value.componentBgAlpha / 10});`;
-            style += `height:${height.value}px;`;
-
-            if (diyComponent.value.topRounded) style += 'border-top-left-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
-            if (diyComponent.value.topRounded) style += 'border-top-right-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
-            if (diyComponent.value.bottomRounded) style += 'border-bottom-left-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
-            if (diyComponent.value.bottomRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
-        }
-
-        return style;
-    });
 
 	watch(
 		() => props.pullDownRefreshCount,
@@ -114,9 +118,6 @@
 		}
 	});
 
-    const instance = getCurrentInstance();
-    const height = ref(0)
-
 	const refresh = () => {
 		// 装修模式下设置默认图
 		if (diyStore.mode == 'decorate') {
@@ -126,13 +127,9 @@
 					item.imgHeight = 330;
 				}
 			});
+		}else{
+			uni.removeStorageSync('imageAdsSameScreen');
 		}
-        nextTick(() => {
-            const query = uni.createSelectorQuery().in(instance);
-            query.select('.diy-image-ads').boundingClientRect((data: any) => {
-                height.value = data.height;
-            }).exec();
-        })
 	}
 </script>
 

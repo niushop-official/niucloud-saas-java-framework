@@ -11,7 +11,7 @@
 							<div class="flex items-center justify-between">
 								<div class="flex items-center">
 									<i class="iconfont icontuodong vues-rank mr-[5px]"></i>
-									<el-input v-focus v-if="index === activeIndex" v-model="inputValue"  class="w-[120px]"  maxlength="10"  @blur="inputBlur"/>
+									<el-input v-focus v-if="index === activeIndex" v-model.trim="inputValue"  class="w-[120px]"  maxlength="10"  @blur="inputBlur"/>
 									<span v-else class="font-600 text-[14px]">{{ item.name }}</span>
 									<el-icon class="text-color ml-[10px] cursor-pointer" @click="edit(index)">
 										<EditPen/>

@@ -92,8 +92,8 @@ public class PageResult<E> {
      * @param list
      * @return
      */
-    public static PageResult build(long page, long limit, long total, List<?> list) {
-        return new PageResult(page, limit, total, list);
+    public static <T> PageResult<T> build(long page, long limit, long total, List<T> list) {
+        return new PageResult<>(page, limit, total, list);
     }
 
 

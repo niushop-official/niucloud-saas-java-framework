@@ -7,9 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>shop</artifactId>
-  <name>shop</name>
   <version>1.0.0</version>
-  <description>shop</description>
   <build>
     <resources>
       <resource>
@@ -29,7 +27,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -37,32 +35,51 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <artifactSet>
-                <excludes />
-              </artifactSet>
-              <relocations>
-                <relocation>
-                  <pattern>com.test.shade.test</pattern>
-                  <shadedPattern>com.test.shade.test.launcher</shadedPattern>
-                </relocation>
-              </relocations>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/services/*</exclude>
+                    <exclude>META-INF/spring/*</exclude>
+                    <exclude>META-INF/**.factories</exclude>
+                    <exclude>META-INF/**.xml</exclude>
+                    <exclude>META-INF/**.properties</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-          <skip>true</skip>
-        </configuration>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks />
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
   <dependencies>
+    <dependency>
+      <groupId>com.niu</groupId>
+      <artifactId>niucloud-core</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>yly</artifactId>
+          <groupId>com.yly.print_sdk_library</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -71,9 +88,9 @@
     </dependency>
   </dependencies>
   <properties>
+    <maven.compiler.target>17</maven.compiler.target>
     <java.version>17</java.version>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.source>17</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 </project>

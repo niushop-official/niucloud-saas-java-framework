@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 import { t } from '@/lang'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ref, computed } from 'vue'
 import menuItem from './menu-item.vue'
 import { CollectionTag } from '@element-plus/icons-vue'

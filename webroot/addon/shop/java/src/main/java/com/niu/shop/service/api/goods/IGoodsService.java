@@ -7,6 +7,7 @@ import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.shop.service.api.goods.param.ShopGoodsComponentsSearchParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsDetailParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsSearchParam;
+import com.niu.shop.service.api.goods.vo.GoodsLabelListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsDetailVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsSkuVo;
@@ -59,4 +60,10 @@ public interface IGoodsService {
      */
     List<ShopGoodsListVo> getGoodsComponents(ShopGoodsComponentsSearchParam param);
 
+    /**
+     * 根据商品标签获取标签名称
+     * @param labelIds
+     * @return
+     */
+    List<GoodsLabelListVo> getGoodsLabelName(String labelIds);
 }

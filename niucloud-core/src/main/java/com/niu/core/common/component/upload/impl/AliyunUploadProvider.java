@@ -51,7 +51,7 @@ public class AliyunUploadProvider extends AbstractUploadProvider implements IUpl
         UploadModelResult uploadModelResult = new UploadModelResult();
         try {
             // 初始化
-            CredentialsProvider credentialsProvider = new DefaultCredentialProvider(this.accessKey, this.accessKey);
+            CredentialsProvider credentialsProvider = new DefaultCredentialProvider(this.accessKey, this.secretKey);
             ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
             clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
             this.ossClient = OSSClientBuilder.create()
@@ -93,7 +93,7 @@ public class AliyunUploadProvider extends AbstractUploadProvider implements IUpl
         DeleteModelResult deleteModelResult = new DeleteModelResult();
         try {
             // 初始化
-            CredentialsProvider credentialsProvider = new DefaultCredentialProvider(this.accessKey, this.accessKey);
+            CredentialsProvider credentialsProvider = new DefaultCredentialProvider(this.accessKey, this.secretKey);
             ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
             clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
             this.ossClient = OSSClientBuilder.create()

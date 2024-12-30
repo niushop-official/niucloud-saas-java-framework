@@ -2,7 +2,7 @@
     <div class="main-container">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <!-- 表单 -->
@@ -16,7 +16,7 @@
 
                 <!-- 优惠券面额 -->
                 <el-form-item :label="t('price')" prop="price">
-                    <el-input v-model="formData.price" clearable :placeholder="t('pricePlaceholder')" class="input-width" maxlength="5" @keyup="filterDigit($event)">
+                    <el-input v-model.trim="formData.price" clearable :placeholder="t('pricePlaceholder')" class="input-width" maxlength="5" @keyup="filterDigit($event)">
                         <template #append>元</template>
                     </el-input>
                 </el-form-item>
@@ -55,7 +55,7 @@
                 <el-form-item v-if="formData.threshold == 1" prop="min_condition_money">
                     最低满
                     <div class="flex items-center px-[5px]">
-                        <el-input v-model="formData.min_condition_money" @keyup="filterDigit($event)" clearable class="!w-[100px]" />
+                        <el-input v-model.trim="formData.min_condition_money" @keyup="filterDigit($event)" clearable class="!w-[100px]" />
                     </div>
                     元可用
                 </el-form-item>
@@ -71,7 +71,7 @@
                 <el-form-item v-show="formData.valid_type == 1">
                     领劵后立即生效，有效期
                     <div class="flex items-center px-[5px]">
-                        <el-input v-model="formData.length" @keyup="filterNumber($event)" clearable class="!w-[100px]" />
+                        <el-input v-model.trim="formData.length" @keyup="filterNumber($event)" clearable class="!w-[100px]" />
                     </div>
                     天
                 </el-form-item>
@@ -120,7 +120,7 @@
                 <el-form-item v-show="formData.limit == 1 && formData.receive_type == 1" prop="remain_count">
                     <div>
                         <el-input onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode) ) )'
-                            v-model="formData.remain_count" clearable :placeholder="t('remainCountPlaceholder')"
+                            v-model.trim="formData.remain_count" clearable :placeholder="t('remainCountPlaceholder')"
                             class="input-width" :min="1" :max="100000" :controls="false" maxlength="6">
                             <template #append>张</template>
                         </el-input>
@@ -131,7 +131,7 @@
                 <!-- 用户可领取数量 -->
                 <el-form-item :label="t('userLimitCount')" prop="limit_count" v-show="formData.receive_type == 1">
                     <el-input onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode) ) )'
-                        v-model="formData.limit_count" clearable :placeholder="t('userLimitCountPlaceholder')"
+                        v-model.trim="formData.limit_count" clearable :placeholder="t('userLimitCountPlaceholder')"
                         class="input-width" :min="1" :max="100000" maxlength="6">
                         <template #append>张</template>
                     </el-input>
@@ -344,7 +344,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
 }
 
 const back = () => {
-    history.back()
+    router.push('/shop/marketing/coupon/list')
 }
 
 </script>

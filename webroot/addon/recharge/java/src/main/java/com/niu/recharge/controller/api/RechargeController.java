@@ -3,7 +3,9 @@ package com.niu.recharge.controller.api;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
+import com.niu.recharge.enums.OrderStatusEnum;
 import com.niu.recharge.service.api.IRechargeOrderService;
+import com.niu.recharge.service.api.IRechargeService;
 import com.niu.recharge.service.api.param.RechargeOrderSearchParam;
 import com.niu.recharge.service.api.vo.RechargeOrderInfoVo;
 import com.niu.recharge.service.api.vo.RechargeOrderListVo;
@@ -13,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/recharge")
@@ -20,6 +23,9 @@ public class RechargeController {
 
     @Resource
     IRechargeOrderService rechargeOrderService;
+
+    @Resource
+    IRechargeService rechargeService;
 
     /**
      * 充值订单创建
@@ -45,6 +51,7 @@ public class RechargeController {
 
     /**
      * 订单详情
+     *
      * @param orderId
      * @return
      */
@@ -52,4 +59,25 @@ public class RechargeController {
     public Result<RechargeOrderInfoVo> detail(@PathVariable("order_id") Integer orderId) {
         return Result.success(rechargeOrderService.detail(orderId));
     }
+
+    @GetMapping("/package")
+    public Result<?> getRechargeLists() {
+        return Result.success(rechargeService.getRechargeLists());
+    }
+
+    @GetMapping("/config")
+    public Result<?> getRechargeConfig() {
+        return Result.success(rechargeService.getRechargeConfig());
+    }
+
+    @GetMapping("/status")
+    public Result<Map<Integer, Map<String, Object>>> status() {
+        return Result.success(OrderStatusEnum.getMap());
+    }
+
+    @GetMapping("/recharge/status")
+    public Result<Map<Integer, Map<String, Object>>> rechargeStatus() {
+        return Result.success(OrderStatusEnum.getMap());
+    }
+
 }

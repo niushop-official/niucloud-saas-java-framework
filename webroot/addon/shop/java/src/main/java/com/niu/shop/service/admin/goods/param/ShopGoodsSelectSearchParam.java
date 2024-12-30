@@ -29,4 +29,6 @@ public class ShopGoodsSelectSearchParam implements Serializable {
     private List<Integer> verifyGoodsIds;
 
     private List<Integer> verifySkuIds;
+
+    private Integer isGift;
 }

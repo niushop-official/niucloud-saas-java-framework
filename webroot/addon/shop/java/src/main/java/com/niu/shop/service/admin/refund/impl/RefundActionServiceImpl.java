@@ -36,6 +36,8 @@ import com.niu.shop.mapper.order.ShopOrderRefundLogMapper;
 import com.niu.shop.mapper.order.ShopOrderRefundMapper;
 import com.niu.shop.mapper.shop_address.ShopAddressMapper;
 import com.niu.shop.service.admin.refund.IRefundActionService;
+import com.niu.shop.service.core.refund.ICoreRefundActionService;
+import com.niu.shop.service.core.refund.param.ActiveRefundParam;
 import com.niu.shop.service.admin.refund.param.AuditApplyParam;
 import com.niu.shop.service.admin.refund.param.AuditRefundGoodsParam;
 import com.niu.shop.service.admin.refund.param.RefundSearchParam;
@@ -84,6 +86,9 @@ public class RefundActionServiceImpl implements IRefundActionService {
 
     @Resource
     com.niu.core.service.core.pay.ICoreRefundService corePayRefundService;
+
+    @Resource
+    ICoreRefundActionService coreRefundActionService;
 
     /**
      * 订单退款列表
@@ -255,7 +260,7 @@ public class RefundActionServiceImpl implements IRefundActionService {
 
         if (model.getStatus().equals(OrderRefundStatusEnum.STORE_AGREE_REFUND_WAIT_TRANSFER.getStatus().toString())) {
             refund = shopOrderRefundMapper.selectById(refund.getRefundId());
-            this.toTransfer(refund);
+            coreRefundService.toTransfer(refund);
         }
 
         // 发送消息
@@ -307,48 +312,19 @@ public class RefundActionServiceImpl implements IRefundActionService {
 
         if (model.getStatus().equals(OrderRefundStatusEnum.STORE_AGREE_REFUND_WAIT_TRANSFER.getStatus().toString())) {
             refund = shopOrderRefundMapper.selectById(refund.getRefundId());
-            this.toTransfer(refund);
+            coreRefundService.toTransfer(refund);
         }
     }
 
     /**
-     * 转账
-     *
+     * 商家主动退款
+     * @param param
      */
-    @Async
-    private void toTransfer(ShopOrderRefund refund) {
-        if (refund.getMoney().compareTo(BigDecimal.ZERO) == 0) {
-            RefundFinishParam param = new RefundFinishParam();
-            param.setOrderRefundNo(refund.getOrderRefundNo());
-            coreRefundService.finish(param);
-        } else {
-            ShopOrder order = shopOrderMapper.selectOne(new QueryWrapper<ShopOrder>()
-                    .select("order_id,order_type,out_trade_no")
-                    .eq("order_id", refund.getOrderId()));
-            if (order == null) throw new CommonException("订单已失效");
-
-            // 创建退款单据
-            PayRefundCreateParam param = new PayRefundCreateParam();
-            param.setSiteId(refund.getSiteId());
-            param.setMoney(refund.getMoney());
-            param.setTradeId(order.getOrderId().toString());
-            param.setTradeType(order.getOrderType());
-            param.setOutTradeNo(order.getOutTradeNo());
-            param.setReason("买家申请退款");
-            String refunNo = corePayRefundService.create(param);
-
-            ShopOrderRefund model = new ShopOrderRefund();
-            model.setRefundId(refund.getRefundId());
-            model.setRefundNo(refunNo);
-            shopOrderRefundMapper.updateById(model);
-
-            // 发起退款
-            PayRefundTransferParam refundParam = new PayRefundTransferParam();
-            refundParam.setRefundNo(refunNo);
-            refundParam.setSiteId(refund.getSiteId());
-            refundParam.setRefundType(RefundTypeEnum.BACK.getKey());
-            refundParam.setVoucher("");
-            corePayRefundService.refund(refundParam);
-        }
+    @Override
+    public void shopActiveRefund(ActiveRefundParam param) {
+        param.setMainType(OrderLogMainTypeEnum.STORE.getType());
+        param.setMainId(RequestUtils.uid());
+        param.setSiteId(RequestUtils.siteId());
+        coreRefundActionService.shopActiveRefund(param);
     }
 }

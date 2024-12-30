@@ -12,6 +12,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +43,12 @@ public class ShopGoodsListVo implements Serializable {
     private Integer isDiscount;
     @JsonProperty("goodsSku")
     private GoodsSku goodsSku;
+    private String labelIds;
+    private Integer brandId;
+    private String brandName;
+    private String logo;
+    private List<GoodsLabelListVo> goodsLabelName;
+    private Brand goodsBrand;
 
     @Data
     public static class GoodsSku {
@@ -78,5 +85,12 @@ public class ShopGoodsListVo implements Serializable {
 
     public String getGoodsCoverThumbMid() {
         return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+    }
+
+    @Data
+    public static class Brand {
+        private Integer brandId;
+        private String brandName;
+        private String logo;
     }
 }

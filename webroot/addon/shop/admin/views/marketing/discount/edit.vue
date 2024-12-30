@@ -2,7 +2,7 @@
     <div class="main-container">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <!-- 表单 -->
@@ -66,13 +66,13 @@
 
                             <el-table-column prop="price" :label="t('price')" min-width="130">
                                 <template #default="{ row }">
-                                    <div>￥{{ row.goods_sku.price }}</div>
+                                    <div>￥{{ row.goodsSku.price }}</div>
                                 </template>
                             </el-table-column>
 
                             <el-table-column :label="t('discounts')" width="170">
                                 <template #default="{ row,$index }">
-                                    <el-form-item v-if="!row.goods_sku.sku_spec_format" :key="row.goods_id" :prop="'goods_list.'+row.index + '.discount_rate'" :rules="[{
+                                    <el-form-item v-if="!row.goodsSku.sku_spec_format" :key="row.goods_id" :prop="'goods_list.'+row.index + '.discount_rate'" :rules="[{
                                         trigger: 'blur',
                                         validator: (rule: any, value: any, callback: any) => {
                                             if (value.length == 0) {
@@ -107,7 +107,7 @@
                             </el-table-column>
                             <el-table-column :label="t('reduceMoney')" width="170">
                                 <template #default="{ row,$index }">
-                                    <el-form-item v-if="!row.goods_sku.sku_spec_format" :key="row.goods_id" :prop="'goods_list.'+row.index + '.reduce_money'" :rules="[{
+                                    <el-form-item v-if="!row.goodsSku.sku_spec_format" :key="row.goods_id" :prop="'goods_list.'+row.index + '.reduce_money'" :rules="[{
                                         trigger: 'blur',
                                         validator: (rule: any, value: any, callback: any) => {
                                                 if (value.length == 0) {
@@ -116,7 +116,7 @@
                                                     callback(t('reduceMoneyTips'))
                                                 } else if (value <=0) {
                                                     callback(t('reduceMoneyTipsTwo'))
-                                                } else if (value >= parseFloat(row.goods_sku.price) ) {
+                                                } else if (value >= parseFloat(row.goodsSku.price) ) {
                                                     callback(t('reduceMoneyTipsThree'))
                                                 } else {
                                                     callback();
@@ -133,7 +133,7 @@
                             </el-table-column>
                             <el-table-column :label="t('promotional')" width="170">
                                 <template #default="{ row,$index }">
-                                    <el-form-item v-if="!row.goods_sku.sku_spec_format" :key="row.goods_id" :prop="'goods_list.'+row.index + '.specify_price'" :rules="[{
+                                    <el-form-item v-if="!row.goodsSku.sku_spec_format" :key="row.goods_id" :prop="'goods_list.'+row.index + '.specify_price'" :rules="[{
                                         trigger: 'blur',
                                         validator: (rule: any, value: any, callback: any) => {
                                                 if (value.length == 0) {
@@ -142,7 +142,7 @@
                                                     callback(t('promotionalTips'))
                                                 } else if (value <=0 ) {
                                                     callback(t('promotionalTipsTwo'))
-                                                }else if (value >= parseFloat(row.goods_sku.price) ) {
+                                                }else if (value >= parseFloat(row.goodsSku.price) ) {
                                                     callback(t('promotionalTipsThree'))
                                                 } else {
                                                     callback();
@@ -159,14 +159,14 @@
                             </el-table-column>
                             <el-table-column :label="t('discountType')" width="130">
                                 <template #default="{ row }">
-                                    <span v-if="!row.goods_sku.sku_spec_format">{{row.discount_type=='discount'?t('discounts'):row.discount_type=='reduce'?t('reduceMoney'):t('promotional')}}</span>
+                                    <span v-if="!row.goodsSku.sku_spec_format">{{row.discount_type=='discount'?t('discounts'):row.discount_type=='reduce'?t('reduceMoney'):t('promotional')}}</span>
                                     <el-form-item v-else>请在设置中查看</el-form-item>
                                 </template>
                             </el-table-column>
                             <el-table-column :label="t('operation')" align="right" min-width="160">
                                 <template #default="{row}">
                                     <!-- <el-button type="primary" link @click="enabledEvent(row)">{{ row.is_enabled?t('noEnabled'):t('enabled') }}</el-button> -->
-                                    <el-button v-if="row.goods_sku.sku_spec_format" type="primary" link @click="skuDiscountSettingsEvent(formData.goods_list[row.index])">
+                                    <el-button v-if="row.goodsSku.sku_spec_format" type="primary" link @click="skuDiscountSettingsEvent(formData.goods_list[row.index])">
                                         {{t('skuDiscountSettings') }}
                                     </el-button>
                                     <el-button type="primary" link @click="deleteEvent(row.index)">{{t('delete') }}
@@ -323,7 +323,7 @@ const validFn = (row: any) => {
         return false
     } else if (row.reduce_money <= 0) {
         return false
-    } else if (row.reduce_money >= parseFloat(row.goods_sku.price)) {
+    } else if (row.reduce_money >= parseFloat(row.goodsSku.price)) {
         return false
     } else if (row.specify_price.length == 0) {
         return false
@@ -331,7 +331,7 @@ const validFn = (row: any) => {
         return false
     } else if (row.specify_price <= 0) {
         return false
-    } else if (row.specify_price >= parseFloat(row.goods_sku.price)) {
+    } else if (row.specify_price >= parseFloat(row.goodsSku.price)) {
         return false
     } else {
         return true
@@ -341,14 +341,14 @@ const onSave = (formEl: FormInstance | undefined) => {
     if (loading.value || !formEl) return
     for (var i = 0; i < formData.value.goods_list.length; i++) {
         let el = formData.value.goods_list[i]
-        if (el.goods_sku.sku_spec_format) {
+        if (el.goodsSku.sku_spec_format) {
             if (!el.valid) {
                 let page = Math.ceil(i + 1 <= goodsTable.limit ? 1 : (i + 1) / goodsTable.limit)
                 goodsTable.list = goodsTable.data[page - 1]
                 goodsTable.page = page
                 break;
             } else {
-                el.sku_list = el.sku_list
+                el.sku_list = el.skuList
             }
         } else {
             if (!validFn(el)) {
@@ -357,13 +357,13 @@ const onSave = (formEl: FormInstance | undefined) => {
                 goodsTable.page = page
                 break;
             } else {
-                el.sku_list[0].discount_rate = el.discount_rate
-                el.sku_list[0].reduce_money = el.reduce_money
-                el.sku_list[0].specify_price = el.specify_price
-                el.sku_list[0].discount_price = el.discount_price
-                el.sku_list[0].discount_type = el.discount_type
-                el.sku_list[0].is_enabled = el.is_enabled
-                el.sku_list = el.sku_list
+                el.skuList[0].discount_rate = el.discount_rate
+                el.skuList[0].reduce_money = el.reduce_money
+                el.skuList[0].specify_price = el.specify_price
+                el.skuList[0].discount_price = el.discount_price
+                el.skuList[0].discount_type = el.discount_type
+                el.skuList[0].is_enabled = el.is_enabled
+                el.sku_list = el.skuList
             }
         }
     }
@@ -405,14 +405,14 @@ const goodsTable = reactive<goodsTableInterface>({
 const goodsSelect = (value: any) => {
     if (formData.value.goods_list.length) {
         let goods_list = deepClone(Object.values(value)).map((el: any, index: number) => {
-             if (!el.goods_sku.sku_spec_format) {
+             if (!el.goodsSku.sku_spec_format) {
                 el.discount_type = 'discount'
                 el.discount_rate = ''
                 el.reduce_money = ''
                 el.specify_price = ''
                 el.is_enabled = 1
             } else {
-                el.sku_list = setSku(el.sku_list)
+                el.skuList = setSku(el.skuList)
             }
             el.valid = false
             el.index = index
@@ -428,14 +428,14 @@ const goodsSelect = (value: any) => {
         formData.value.goods_list = goods_list
     } else {
         formData.value.goods_list = deepClone(Object.values(value)).map((el: any, index: number) => {
-            if (!el.goods_sku.sku_spec_format) {
+            if (!el.goodsSku.sku_spec_format) {
                 el.discount_type = 'discount'
                 el.discount_rate = ''
                 el.reduce_money = ''
                 el.specify_price = ''
                 el.is_enabled = 1
             } else {
-                el.sku_list = setSku(el.sku_list)
+                el.skuList = setSku(el.skuList)
             }
             el.index = index
             el.valid = false
@@ -623,30 +623,30 @@ const saveBatch = () => {
         multipleSelection.value.forEach((v: any) => {
 
             if (v.goods_id === el.goods_id) {
-                if (!el.goods_sku.sku_spec_format) {
+                if (!el.goodsSku.sku_spec_format) {
                     if (batchOperation.value.discount_type == 'discount') {
                         //折扣
                         el.discount_rate = batchOperation.value.discountNumber + ''
                         //实际
-                        el.specify_price = (el.goods_sku.price * (batchOperation.value.discountNumber / 10)).toFixed(2)
-                        el.discount_price = (el.goods_sku.price * (batchOperation.value.discountNumber / 10)).toFixed(2)
+                        el.specify_price = (el.goodsSku.price * (batchOperation.value.discountNumber / 10)).toFixed(2)
+                        el.discount_price = (el.goodsSku.price * (batchOperation.value.discountNumber / 10)).toFixed(2)
                         //减价
-                        el.reduce_money = (el.goods_sku.price - el.specify_price).toFixed(2)
+                        el.reduce_money = (el.goodsSku.price - el.specify_price).toFixed(2)
                     } else if (batchOperation.value.discount_type == 'reduce') {//减价
                         el.reduce_money = batchOperation.value.discountNumber + ''
-                        el.specify_price = el.goods_sku.price - el.reduce_money.toFixed(2)
-                        el.discount_price = (el.goods_sku.price - el.reduce_money).toFixed(2)
-                        el.discount_rate = (el.specify_price / el.goods_sku.price * 10).toFixed(1)
+                        el.specify_price = el.goodsSku.price - el.reduce_money.toFixed(2)
+                        el.discount_price = (el.goodsSku.price - el.reduce_money).toFixed(2)
+                        el.discount_rate = (el.specify_price / el.goodsSku.price * 10).toFixed(1)
 
                     } else {//实际
                         el.specify_price = batchOperation.value.discountNumber + ''
                         el.discount_price = batchOperation.value.discountNumber + ''
-                        el.reduce_money = (el.goods_sku.price - el.specify_price).toFixed(2)
-                        el.discount_rate = (el.specify_price / el.goods_sku.price * 10).toFixed(1)
+                        el.reduce_money = (el.goodsSku.price - el.specify_price).toFixed(2)
+                        el.discount_rate = (el.specify_price / el.goodsSku.price * 10).toFixed(1)
                     }
                     el.discount_type = batchOperation.value.discount_type + ''
                 } else {
-                    el.sku_list.forEach((sku: any) => {
+                    el.skuList.forEach((sku: any) => {
                         if(sku.is_enabled===1){
                             if (batchOperation.value.discount_type == 'discount') {
                             //折扣
@@ -671,9 +671,9 @@ const saveBatch = () => {
                         sku.discount_type = batchOperation.value.discount_type + ''
                         }
                     })
-                    let discount_rate_list = el.sku_list.filter((sku:any)=>sku.is_enabled===1).map((sku:any)=>Number(sku.discount_rate))
-                    let reduce_money_list = el.sku_list.filter((sku:any)=>sku.is_enabled===1).map((sku:any)=>Number(sku.reduce_money))
-                    let specify_price_list = el.sku_list.filter((sku:any)=>sku.is_enabled===1).map((sku:any)=>Number(sku.specify_price))
+                    let discount_rate_list = el.skuList.filter((sku:any)=>sku.is_enabled===1).map((sku:any)=>Number(sku.discount_rate))
+                    let reduce_money_list = el.skuList.filter((sku:any)=>sku.is_enabled===1).map((sku:any)=>Number(sku.reduce_money))
+                    let specify_price_list = el.skuList.filter((sku:any)=>sku.is_enabled===1).map((sku:any)=>Number(sku.specify_price))
                     el.max_discount_rate = Math.max(...discount_rate_list)
                     el.min_discount_rate = Math.min(...discount_rate_list)
                     el.max_reduce_money = Math.max(...reduce_money_list)
@@ -695,10 +695,10 @@ const inputBlur = (row: any, discount_type: string, index: number) => {
     if (discount_type == 'discount') {
         if (row.discount_rate.length) {
             //实际
-            row.specify_price = (row.goods_sku.price * (row.discount_rate / 10)).toFixed(2)
-            row.discount_price = (row.goods_sku.price * (row.discount_rate / 10)).toFixed(2)
+            row.specify_price = (row.goodsSku.price * (row.discount_rate / 10)).toFixed(2)
+            row.discount_price = (row.goodsSku.price * (row.discount_rate / 10)).toFixed(2)
             //减价
-            row.reduce_money = (row.goods_sku.price - row.specify_price).toFixed(2)
+            row.reduce_money = (row.goodsSku.price - row.specify_price).toFixed(2)
             if (formRef.value) {
                 formRef.value.validateField('goods_list.' + index + '.specify_price').catch(() => {})
                 formRef.value.validateField('goods_list.' + index + '.reduce_money').catch(() => {})
@@ -706,9 +706,9 @@ const inputBlur = (row: any, discount_type: string, index: number) => {
         }
     } else if (discount_type == 'reduce') {//减价
         if (row.reduce_money.length) {
-            row.specify_price = (row.goods_sku.price - row.reduce_money).toFixed(2)
-            row.discount_price = (row.goods_sku.price - row.reduce_money).toFixed(2)
-            row.discount_rate = (row.specify_price / row.goods_sku.price * 10).toFixed(1)
+            row.specify_price = (row.goodsSku.price - row.reduce_money).toFixed(2)
+            row.discount_price = (row.goodsSku.price - row.reduce_money).toFixed(2)
+            row.discount_rate = (row.specify_price / row.goodsSku.price * 10).toFixed(1)
             if (formRef.value) {
                 formRef.value.validateField('goods_list.' + index + '.discount_rate').catch(() => {})
                 formRef.value.validateField('goods_list.' + index + '.specify_price').catch(() => {})
@@ -718,20 +718,19 @@ const inputBlur = (row: any, discount_type: string, index: number) => {
     } else {//实际
         if (row.specify_price.length) {
             row.discount_price = row.specify_price + ''
-            row.reduce_money = (row.goods_sku.price - row.specify_price).toFixed(2)
-            row.discount_rate = (row.specify_price / row.goods_sku.price * 10).toFixed(1)
+            row.reduce_money = (row.goodsSku.price - row.specify_price).toFixed(2)
+            row.discount_rate = (row.specify_price / row.goodsSku.price * 10).toFixed(1)
             if (formRef.value) {
                 formRef.value.validateField('goods_list.' + index + '.discount_rate').catch(() => {})
                 formRef.value.validateField('goods_list.' + index + '.reduce_money').catch(() => {})
             }
         }
-
     }
     row.discount_type = discount_type + ''
 
 }
 const back = () => {
-    history.back()
+    router.push('/shop/marketing/discount/list')
 }
 </script>
 

@@ -102,5 +102,5 @@ system:
   api-site-id-name: site-id
   channel-name: channel
   admin-domain:
-  wap-domain: 
+  wap-domain: "http://localhost:5174"
   web-domain:

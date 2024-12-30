@@ -3,6 +3,7 @@ package com.niu.shop.controller.api.cart;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.api.cart.IShopCartService;
+import com.niu.shop.service.api.cart.param.ShopCartCalculateParam;
 import com.niu.shop.service.api.cart.param.ShopCartDeleteParam;
 import com.niu.shop.service.api.cart.param.ShopCartParam;
 import org.springframework.validation.annotation.Validated;
@@ -36,8 +37,18 @@ public class CartController {
      * @return
      */
     @GetMapping("/goods")
-    public Result goods() {
-        return Result.success(cartService.list());
+    public Result goodsList() {
+        return Result.success(cartService.goodsList());
+    }
+
+    /**
+     * 获取购物车商品列表
+     *
+     * @return
+     */
+    @PostMapping("/calculate")
+    public Result calculate(@Validated @RequestBody ShopCartCalculateParam param)  {
+        return Result.success(cartService.calculate(param));
     }
 
     /**
@@ -93,4 +104,6 @@ public class CartController {
     public Result getSum(@RequestParam(value = "goods_id", defaultValue = "0") Integer goodsId) {
         return Result.success(cartService.getSum(goodsId));
     }
+
+
 }

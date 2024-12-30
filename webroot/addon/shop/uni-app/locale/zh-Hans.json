@@ -27,5 +27,6 @@
     "pages.point.list": "积分商品列表",
     "pages.point.detail": "积分商品详情",
     "pages.point.payment": "待付款订单",
-    "pages.point.order_list": "积分兑换记录"
+    "pages.point.order_list": "积分兑换记录",
+    "pages.newcomer.list": "新人专享"
 }

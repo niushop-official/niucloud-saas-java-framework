@@ -59,7 +59,7 @@
 
                 <el-table-column prop="sort" :label="t('sort')" min-width="120" sortable="custom">
                     <template #default="{ row,$index }">
-                        <el-input v-model.trim="row.sort" class="w-[70px]" maxlength="10" @input="sortInputListener($event, row)" />
+                        <el-input v-model.trim="row.sort" class="w-[70px]" maxlength="8" @input="sortInputListener($event, row)" />
                     </template>
                 </el-table-column>
 
@@ -82,7 +82,7 @@
                 </el-form-item>
 
                 <el-form-item :label="t('sort')" >
-                    <el-input v-model.trim="formData.sort"  maxlength="6" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="input-width" @keyup="filterNumber($event)"/>
+                    <el-input v-model.trim="formData.sort"  maxlength="8" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="input-width" @keyup="filterNumber($event)"/>
                 </el-form-item>
 
             </el-form>
@@ -109,7 +109,7 @@
                 </el-form-item>
 
                 <el-form-item :label="t('sort')" >
-                    <el-input v-model.trim="formAttrValueData.sort" maxlength="6" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="!w-[150px]" @keyup="filterNumber($event)"/>
+                    <el-input v-model.trim="formAttrValueData.sort" maxlength="8" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="!w-[150px]" @keyup="filterNumber($event)"/>
                 </el-form-item>
 
                 <template v-if="formAttrValueData.type != 'text'">
@@ -126,7 +126,7 @@
 
                         <el-table-column prop="name" :label="t('sort')" min-width="120">
                             <template #default="{ row }">
-                                <el-input v-model.trim="row.sort" class="!w-[150px]" maxlength="6" :placeholder="t('sortPlaceholder')" clearable show-word-limit @keyup="filterNumber($event)" />
+                                <el-input v-model.trim="row.sort" class="!w-[150px]" maxlength="8" :placeholder="t('sortPlaceholder')" clearable show-word-limit @keyup="filterNumber($event)" />
                             </template>
                         </el-table-column>
 

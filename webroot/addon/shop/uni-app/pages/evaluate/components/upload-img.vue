@@ -1,7 +1,7 @@
 <template>
     <view class="flex flex-wrap">
         <view v-for="(item, index) in value" class="mb-[18rpx] relative" :class="{'mr-[18rpx]': (index + 1) % 4 != 0 }">
-            <u--image class="rounded-[10rpx] overflow-hidden" width="140rpx" height="140rpx" :src="img(item || '')" model="aspectFill">
+            <u--image class="rounded-[10rpx] overflow-hidden" width="140rpx" height="140rpx" :src="img(item || '')" model="aspectFill" @click="imgListPreview(item)">
                 <template #error>
                     <u-icon name="photo" color="#999" size="50"></u-icon>
                 </template>
@@ -80,5 +80,17 @@ const upload = (event:any) => {
 
 const deleteImg = (index:number)=>{
     value.value.splice(index,1)
+}
+
+//预览图片
+const imgListPreview = (item:any) => {
+    if (item === '') return false
+    var urlList = []
+    urlList.push(img(item))  //push中的参数为 :src="item.img_url" 中的图片地址
+    uni.previewImage({
+        indicator: "number",
+        loop: true,
+        urls: urlList
+    })
 }
 </script>

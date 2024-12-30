@@ -16,7 +16,7 @@
                     <template #empty>
                         <span>{{ !categoryTable.loading ? t('emptyData') : '' }}</span>
                     </template>
-                    <el-table-column :label="t('categoryName')" min-width="320">
+                    <el-table-column :label="t('categoryName')" min-width="120">
                         <template #default="{ row }">
                             <i class="order-0 iconfont icontuodong vues-rank mr-[8px]"></i>
                             <span class="order-2">{{ row.category_name }}</span>
@@ -35,7 +35,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="is_show" :label="t('isShow')" width="100">
+                    <el-table-column prop="is_show" :label="t('isShow')" width="400">
                         <template #default="{ row }">
                             <el-tag class="cursor-pointer" :type="row.is_show != 2 ? 'success' : 'danger'" @click="showClick(row)">{{ row.is_show != 2 ? '是' : '否' }}</el-tag>
                         </template>

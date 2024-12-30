@@ -60,7 +60,7 @@
 				</view>
 			</view>
 			
-			<view v-else-if="diyComponent.style == 'style-3'" class="coupon-wrap style-3 relative" :style="{'background-image':'url(' + img('addon/shop/diy/goods_coupon/style3_bg.png') + ')','background-size':'100% 204rpx','background-repeat':'no-repeat'}">
+			<view v-else-if="diyComponent.style == 'style-3'" class="coupon-wrap style-3 relative" :style="{'background-image':'url(' + img('addon/shop/diy/goods_coupon/style3_bg.jpg') + ')','background-size':'100% 204rpx','background-repeat':'no-repeat'}">
 				<view class="desc flex flex-col">
 					<text class="text-[30rpx] text-[#fff] font-500">{{ diyComponent.couponTitle }}</text>
 					<text class="text-[22rpx] text-[rgba(255,255,255,.8)] mt-[10rpx]">{{ diyComponent.couponSubTitle }}</text>
@@ -94,7 +94,24 @@
 					</view>
 				</view>
 			</view>
-
+			<view v-else-if="diyComponent.style == 'style-4'" class="coupon-wrap style-4 relative" :style="couponStyle4Css">
+				<view class="desc flex items-center pt-[6rpx] pb-[26rpx]" @click="toLink('/addon/shop/pages/coupon/list')">
+					<text class="text-[32rpx] text-[#fff] font-500" :style="{color: diyComponent.titleColor}">{{ diyComponent.couponTitle }}</text>
+					<text class="text-[22rpx] text-[rgba(255,255,255,.8)] ml-[10rpx]" :style="{color: diyComponent.subTitleColor}">{{ diyComponent.couponSubTitle }}</text>
+				</view>
+				<scroll-view scroll-x="true" class="coupon-list">
+					<view v-for="(item,index) in couponList" :key="index" class="px-[10rpx] h-[120rpx] inline-flex items-center relative mr-[12rpx] coupon-item box-border min-w-[310rpx]" :style="{'background-color': diyComponent.couponItem.bgColor, 'border-radius': ((diyComponent.couponItem.aroundRadius*2)+'rpx')}" @click="couponItemLink(item)">
+						<view class="flex min-w-[110rpx] max-w-[120rpx] items-baseline justify-center truncate price-font mr-[10rpx]" :style="{'color': diyComponent.couponItem.moneyColor}">
+							<text class="text-[26rpx]">￥</text>
+							<text class="text-[46rpx] font-bold truncate">{{parseFloat(item.price)}}</text>
+						</view>
+						<view class="flex flex-col">
+							<view class="text-[28rpx] font-500" :style="{'color': diyComponent.couponItem.textColor}">{{item.type_name}}</view>
+							<view class="text-[#666] text-[24rpx] truncate max-w-[180rpx] mt-[12rpx]" :style="{'color': diyComponent.couponItem.subTextColor}">{{item.min_condition_money == '0.00' ? '无门槛' : ('满'+parseFloat(item.min_condition_money)+'元可用') }}</view>
+						</view>
+					</view>
+				</scroll-view>
+			</view>
 		</view>
 	</x-skeleton>
 </template>
@@ -136,6 +153,14 @@
 		if (diyComponent.value.topRounded) style += 'border-top-right-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-left-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
+		return style;
+	})
+	
+	
+	const couponStyle4Css = computed(()=>{
+		var style = '';
+		if (diyComponent.value.componentStartBgColor && diyComponent.value.componentEndBgColor) style += `background:linear-gradient(${diyComponent.value.componentGradientAngle},${diyComponent.value.componentStartBgColor},${diyComponent.value.componentEndBgColor});`;
+		else style += 'background-color:' + (diyComponent.value.componentStartBgColor || diyComponent.value.componentEndBgColor) + ';';
 		return style;
 	})
 
@@ -239,7 +264,6 @@
 				white-space: nowrap;
 				padding: 20rpx 0 20rpx 20rpx;
 				box-sizing: border-box;
-				border-radius: 12rpx;
 				overflow: hidden;
 				background: linear-gradient(#EE3928, #EF3F30);
 			}
@@ -262,7 +286,6 @@
 				position: relative;
 				white-space: nowrap;
 				box-sizing: border-box;
-				border-radius: 12rpx;
 				overflow: hidden;
 				.coupon-item-content{
 					position: relative;
@@ -285,7 +308,7 @@
 						border-radius: 50%;
 						top: 50%;
 						transform: rotate(45deg) translateY(-50%);
-						right: -4rpx;
+						right: -5rpx;
 					}
 					&::before{
 						content: "";
@@ -347,6 +370,19 @@
 			}
 			.coupon-buy-btn{
 				border-radius: 50rpx;
+			}
+		}
+		&.style-4{
+			padding: 20rpx 24rpx;
+			.coupon-list{
+				flex: 1;
+				position: relative;
+				white-space: nowrap;
+				box-sizing: border-box;
+				overflow: hidden;
+				.coupon-item{
+					width: calc(50% - 6rpx);
+				}
 			}
 		}
 	}

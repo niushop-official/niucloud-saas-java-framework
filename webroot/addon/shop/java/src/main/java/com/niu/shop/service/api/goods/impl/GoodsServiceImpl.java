@@ -30,12 +30,15 @@ import com.niu.shop.service.api.goods.IGoodsService;
 import com.niu.shop.service.api.goods.param.ShopGoodsComponentsSearchParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsDetailParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsSearchParam;
+import com.niu.shop.service.api.goods.vo.GoodsLabelListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsDetailVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsSkuVo;
 import com.niu.shop.service.api.marketing.IShopDiscountService;
 import com.niu.shop.service.api.marketing.IShopNewcomerService;
 import com.niu.shop.service.api.marketing.vo.ShopNewcomerInfoVo;
+import com.niu.shop.service.core.goods.ICoreGoodsStatService;
+import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
 import com.niu.shop.service.core.order.ICoreOrderConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -96,6 +99,9 @@ public class GoodsServiceImpl implements IGoodsService {
     @Resource
     ShopCouponGoodsMapper shopCouponGoodsMapper;
 
+    @Resource
+    ICoreGoodsStatService coreGoodsStatService;
+
     /**
      * 查询商品列表
      *
@@ -110,11 +116,13 @@ public class GoodsServiceImpl implements IGoodsService {
 
         MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("g")
-                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("g.goods_id,g.site_id,goods_name,goods_type,goods_cover,g.stock,g.sale_num + g.virtual_sale_num as sale_num,status,sort,create_time,member_discount,virtual_verify_type,unit,is_discount");
+                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix))
+                .leftJoin("?_shop_goods_brand sgb ON g.brand_id = sgb.brand_id".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("g.goods_id,g.site_id,goods_name,goods_type,goods_cover,g.stock,g.sale_num + g.virtual_sale_num as sale_num,status,g.sort,g.create_time,member_discount,virtual_verify_type,unit,is_discount,label_ids,g.stock,g.brand_id,sgb.brand_name,sgb.logo");
         queryWrapper.eq("g.site_id", RequestUtils.siteId());
         queryWrapper.eq("g.status", 1);
-        queryWrapper.eq("delete_time", 0);
+        queryWrapper.eq("g.is_gift", 0);
+        queryWrapper.eq("g.delete_time", 0);
         if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) queryWrapper.like("goods_name", searchParam.getKeyword());
         if (ObjectUtil.isNotEmpty(searchParam.getBrandId())) queryWrapper.eq("brand_id", searchParam.getBrandId());
         if (ObjectUtil.isNotEmpty(searchParam.getGoodsCategory()))
@@ -126,8 +134,8 @@ public class GoodsServiceImpl implements IGoodsService {
         if (ObjectUtil.isNotEmpty(searchParam.getOrder())) {
             queryWrapper.orderBy(true, searchParam.getSort().equals("asc"), searchParam.getOrder());
         } else {
-            queryWrapper.orderBy(true, false, "sort");
-            queryWrapper.orderBy(true, false, "create_time");
+            queryWrapper.orderBy(true, false, "g.sort");
+            queryWrapper.orderBy(true, false, "g.create_time");
         }
 
         if (searchParam.getCouponId() != null && searchParam.getCouponId() > 0) {
@@ -170,6 +178,12 @@ public class GoodsServiceImpl implements IGoodsService {
                 goodsSkuVo.setMemberPrice(goodsSku.getPrice());
             }
             vo.setGoodsSku(goodsSkuVo);
+            vo.setGoodsLabelName(getGoodsLabelName(vo.getLabelIds()));
+            if (vo.getBrandId() > 0) {
+                ShopGoodsListVo.Brand brand = new ShopGoodsListVo.Brand();
+                BeanUtils.copyProperties(vo, brand);
+                vo.setGoodsBrand(brand);
+            }
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -185,7 +199,7 @@ public class GoodsServiceImpl implements IGoodsService {
      * @return
      */
     public BigDecimal calculateMemberPrice(MemberLevelInfoVo memberLevel, String calculateType, JSONObject config, BigDecimal price) {
-        if (ObjectUtil.hasEmpty(memberLevel, calculateType, config)) {
+        if (ObjectUtil.hasEmpty(memberLevel, calculateType)) {
             return price;
         }
 
@@ -199,7 +213,7 @@ public class GoodsServiceImpl implements IGoodsService {
                     return price.multiply(new BigDecimal(Double.valueOf(discount / 10)));
                 }
             }
-        } else if (calculateType.equals("fixed_price")) {
+        } else if (calculateType.equals("fixed_price") && config != null) {
             // 按指定价格
             if (config.getStr("level_" + memberLevel.getLevelId()) != null) {
                 return new BigDecimal(Double.valueOf(config.getStr("level_" + memberLevel.getLevelId())));
@@ -217,11 +231,12 @@ public class GoodsServiceImpl implements IGoodsService {
     public List<ShopGoodsListVo> getGoodsComponents(ShopGoodsComponentsSearchParam param) {
         MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("g")
-                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("g.goods_id,g.site_id,goods_name,goods_type,goods_cover,g.stock,g.sale_num + g.virtual_sale_num as sale_num,status,sort,create_time,member_discount,virtual_verify_type,unit,is_discount");
+                .leftJoin("?_shop_goods_brand sgb ON g.brand_id = sgb.brand_id".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("g.goods_id,g.site_id,goods_name,goods_type,goods_cover,g.stock,g.sale_num + g.virtual_sale_num as sale_num,status,g.sort,g.create_time,member_discount,virtual_verify_type,unit,is_discount,label_ids,g.stock,g.brand_id,sgb.brand_name,sgb.logo");
         queryWrapper.eq("g.site_id", RequestUtils.siteId());
         queryWrapper.eq("g.status", 1);
-        queryWrapper.eq("delete_time", 0);
+        queryWrapper.eq("g.is_gift", 0);
+        queryWrapper.eq("g.delete_time", 0);
         queryWrapper.last("limit " + param.getNum());
         if (ObjectUtil.isNotEmpty(param.getOrder())) {
             if (param.getOrder().equals("sale_num")) {
@@ -251,8 +266,20 @@ public class GoodsServiceImpl implements IGoodsService {
                 goodsSkuVo.setMemberPrice(goodsSku.getPrice());
             }
             vo.setGoodsSku(goodsSkuVo);
+            vo.setGoodsLabelName(getGoodsLabelName(vo.getLabelIds()));
+            if (vo.getBrandId() > 0) {
+                ShopGoodsListVo.Brand brand = new ShopGoodsListVo.Brand();
+                BeanUtils.copyProperties(vo, brand);
+                vo.setGoodsBrand(brand);
+            }
         }
         return list;
+    }
+
+    @Override
+    public List<GoodsLabelListVo> getGoodsLabelName(String labelIds) {
+        if (ObjectUtil.isEmpty(labelIds) || JSONUtil.parseArray(labelIds).isEmpty()) return new LinkedList<>();
+        return CollectUtils.convert(shopGoodsLabelMapper.selectList(new QueryWrapper<ShopGoodsLabel>().eq("status", 1).in("label_id", JSONUtil.parseArray(labelIds)).orderByDesc("sort")), GoodsLabelListVo.class);
     }
 
     /**
@@ -341,13 +368,7 @@ public class GoodsServiceImpl implements IGoodsService {
         }
 
         // 商品标签
-        if (!goodsVo.getLabelIds().isEmpty()) {
-            JSONArray labelIds = JSONUtil.parseArray(goodsVo.getLabelIds());
-            if (!labelIds.isEmpty()) {
-                List<ShopGoodsDetailVo.Label> labels = CollectUtils.convert(shopGoodsLabelMapper.selectList(new QueryWrapper<ShopGoodsLabel>().in("label_id", labelIds)), ShopGoodsDetailVo.Label.class);
-                vo.setLabelInfo(labels);
-            }
-        }
+        vo.setLabelInfo(getGoodsLabelName(goods.getLabelIds()));
 
         // 商品品牌
         if (goodsVo.getBrandId() > 0) {
@@ -381,6 +402,12 @@ public class GoodsServiceImpl implements IGoodsService {
                 vo.setTypeName("");
             }
         }
+
+        GoodsAddStatParam addStatParam = new GoodsAddStatParam();
+        addStatParam.setGoodsId(goods.getGoodsId());
+        addStatParam.setSiteId(vo.getSiteId());
+        addStatParam.setAccessNum(1);
+        coreGoodsStatService.addStat(addStatParam);
 
         return vo;
     }

@@ -3,7 +3,7 @@
 	<div class="content-wrap float-btn" v-show="diyStore.editTab == 'content'">
 
 		<div class="edit-attr-item-wrap">
-            <h3 class="mb-[10px]">{{ t('selectStyle') }}</h3>
+            <!-- <h3 class="mb-[10px]">{{ t('selectStyle') }}</h3>
 			<el-form label-width="80px" class="px-[10px]">
 				<el-form-item :label="t('selectStyle')" class="flex">
 					<span class="text-primary flex-1 cursor-pointer" @click="showCouponStyle">{{ diyStore.editComponent.styleName }}</span>
@@ -27,7 +27,7 @@
                     </span>
                 </template>
 
-            </el-dialog>
+            </el-dialog> -->
 			<h3 class="mb-[10px]">{{ t('floatBtnBtton') }}</h3>
 			<el-form label-width="80px" class="px-[10px]">
 				<el-form-item :label="t('floatBtnBtton')">
@@ -41,7 +41,7 @@
                     </ul>
 				</el-form-item>
                 <el-form-item :label="t('floatBtnOffset')">
-					<el-slider v-model="diyStore.editComponent.offset" show-input size="small" class="ml-[10px] horz-blank-slider" :max="100"/>
+					<el-slider v-model="diyStore.editComponent.offset" show-input size="small" class="ml-[10px] diy-nav-slider" :max="100"/>
 				</el-form-item>
 			</el-form>
 		</div>
@@ -49,10 +49,10 @@
 			<h3 class="mb-[10px]">{{ t('floatBtnImageSet') }}</h3>
 			<el-form label-width="80px" class="px-[10px]">
                 <el-form-item :label="t('floatBtnImageSize')">
-					<el-slider v-model="diyStore.editComponent.imageSize" show-input size="small" class="ml-[10px] horz-blank-slider" :min="30" :max="100"/>
+					<el-slider v-model="diyStore.editComponent.imageSize" show-input size="small" class="ml-[10px] diy-nav-slider" :min="30" :max="100"/>
 				</el-form-item>
 				<el-form-item :label="t('floatBtnAroundRadius')">
-					<el-slider v-model="diyStore.editComponent.aroundRadius" show-input size="small" class="ml-[10px] graphic-nav-slider" :max="50"/>
+					<el-slider v-model="diyStore.editComponent.aroundRadius" show-input size="small" class="ml-[10px] diy-nav-slider" :max="50"/>
 				</el-form-item>
 
 				<div class="text-[12px] text-[#999] mb-[15px] mt-[5px]">{{t('floatBtnImageSuggest')}}</div>
@@ -94,7 +94,7 @@ import { img } from '@/utils/common'
 import { range } from 'lodash-es'
 
 const diyStore = useDiyStore()
-diyStore.editComponent.ignore = ['pageBgColor','marginTop','marginBottom','marginBoth'] // 忽略公共属性
+diyStore.editComponent.ignore = ['pageBgColor','marginTop','marginBottom','marginBoth','componentBgUrl'] // 忽略公共属性
 
 // 组件验证
 diyStore.editComponent.verify = (index: number) => {
@@ -121,18 +121,18 @@ const showCouponStyle = () => {
     selectCouponStyle.title = diyStore.editComponent.styleName;
     selectCouponStyle.value = diyStore.editComponent.style;
 }
-const couponStyleList = reactive([
-    {
-        url: 'addon/shop/diy/goods_coupon/style-1.png',
-        title: '风格1',
-        value: 'style-1'
-    },
-    {
-        url: 'addon/shop/diy/goods_coupon/style-2.png',
-        title: '风格2',
-        value: 'style-2'
-    }
-])
+// const couponStyleList = reactive([
+//     {
+//         url: 'addon/shop/diy/goods_coupon/style-1.png',
+//         title: '风格1',
+//         value: 'style-1'
+//     },
+//     {
+//         url: 'addon/shop/diy/goods_coupon/style-2.png',
+//         title: '风格2',
+//         value: 'style-2'
+//     }
+// ])
 //风格点击
 const changeCouponStyle = (item:any) => {
     selectCouponStyle.title = item.title;
@@ -174,7 +174,7 @@ const templateList = ref([
     }
 ])
 
-let selectTemplate = ref({})
+const selectTemplate = ref({})
 templateList.value.forEach((item) => {
     if (item.className == diyStore.editComponent.bottomPosition) {
         selectTemplate.value = item
@@ -222,5 +222,5 @@ defineExpose({})
 </script>
 
 <style lang="scss" scoped>
-	
+
 </style>

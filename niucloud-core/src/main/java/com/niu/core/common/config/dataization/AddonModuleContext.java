@@ -1,6 +1,7 @@
 package com.niu.core.common.config.dataization;
 
 import cn.hutool.core.util.StrUtil;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -9,6 +10,7 @@ import org.springframework.core.io.ResourceLoader;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -426,7 +428,8 @@ public final class AddonModuleContext {
         try {
             return Class.forName(className);
         } catch (ClassNotFoundException e) {
-            //e.printStackTrace();
+            System.out.println("classForName error");
+            e.printStackTrace();
             // ignore
         }
         return null;
@@ -436,9 +439,24 @@ public final class AddonModuleContext {
      * @param addonModule
      */
     public static void add(String addonModule, String classTemplate) {
-        Class<?> classTemplateClass = classForName(classTemplate);
-        if (classTemplateClass != null) {
-            addonModuleMap.put(addonModule, classTemplateClass);
+        if (GlobalConfig.runActive.equalsIgnoreCase("dev")) {
+            Class<?> classTemplateClass = classForName(classTemplate);
+            if (classTemplateClass != null) {
+                addonModuleMap.put(addonModule, classTemplateClass);
+            }
+        } else {
+            try {
+                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                Class<?> clazz = contextClassLoader.loadClass(classTemplate);
+                if (clazz != null) {
+                    addonModuleMap.put(addonModule, clazz);
+                } else {
+                    System.out.println("prod add module clazz null" + addonModule);
+                }
+            } catch (Exception e) {
+                System.out.println("prod add module" + addonModule);
+                e.printStackTrace();
+            }
         }
     }
 

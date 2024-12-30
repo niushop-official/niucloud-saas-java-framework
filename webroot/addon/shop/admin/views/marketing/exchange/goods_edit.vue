@@ -2,7 +2,7 @@
     <div class="main-container" v-loading="loading">
 
 		<el-card class="card !border-none" shadow="never">
-		    <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+		    <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
 		</el-card>
 
         <!-- 表单 -->
@@ -111,6 +111,16 @@
                                 </template>
                             </el-table-column>
                             <el-table-column :label="t('limit')" min-width="200">
+                                <template #header>
+                                    <div style="display: inline-flex; align-items: center">
+                                        <span class="mr-[5px]">{{ t('limit') }}</span>
+                                        <el-tooltip class="box-item" effect="light" :content="t('limitRules')" placement="top">
+                                        <el-icon color="#666">
+                                            <QuestionFilled />
+                                        </el-icon>
+                                        </el-tooltip>
+                                    </div>
+                                </template>
                                 <template #default="{ row,$index }">
                                     <el-form-item v-if="row.is_enabled" :prop="'product_list.'+ $index + '.limit_num'" :rules="[{
                                         trigger: 'blur',
@@ -121,7 +131,11 @@
                                                     callback(t('limitTips'))
                                                 } else if (value <=0) {
                                                     callback(t('limitTipsTwo'))
-                                                } else {
+                                                } else if (value > Number(row.stock)) {
+                                                    callback(t('limitTipsThree'))
+                                                } else if(parseInt(value)>parseInt(row.goods_stock)){
+                                                    callback(t('stockTipsThree'))
+                                                } else { 
                                                     callback();
                                                 }
                                         }
@@ -230,7 +244,7 @@
                                 callback(t('limitTips'))
                             } else if (value <=0) {
                                 callback(t('limitTipsTwo'))
-                            } else {
+                            }else {
                                 callback();
                             }
                         }else{
@@ -711,7 +725,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
             // formData.value.goods_data = JSON.stringify(formData.value.product_list)
             editActiveExchange(formData.value).then(res => {
                 loading.value = false
-                router.push(`/shop/marketing/exchange/goods_list`)
+                router.push('/shop/marketing/exchange/goods_list')
             }).catch(() => {
                 loading.value = false
             })
@@ -719,7 +733,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
     })
 }
 const back = () => {
-    router.push(`/shop/marketing/exchange/goods_list`)
+    router.push('/shop/marketing/exchange/goods_list')
 }
 </script>
 

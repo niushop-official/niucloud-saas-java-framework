@@ -76,7 +76,7 @@
         if(option.order_id){
             order_id.value = option.order_id
             getShopOrderDetailFn(order_id.value)
-            
+
             // #ifdef MP
             nextTick(()=>{
                 if(wxPrivacyPopupRef.value) wxPrivacyPopupRef.value.proactive();
@@ -101,16 +101,21 @@
 				toLink(order_id.value)
 				return false
 			}
-			info.value = res.data.order_goods
 			res.data.order_goods.forEach((el: any) => {
-				form.value.push({
-					order_id: el.order_id,
-					order_goods_id: el.order_goods_id,
-					goods_id: el.goods_id,
-					content: '',
-					images: [],
-					scores: 5
-				})
+				if (el.status != 1 || el.is_enable_refund == 1) {
+					// 排除存在退款的情况
+				}else {
+					info.value.push(el);
+					form.value.push({
+						order_id: el.order_id,
+						order_goods_id: el.order_goods_id,
+						goods_id: el.goods_id,
+						content: '',
+						images: [],
+						scores: 5
+					})
+				}
+
 			})
 			loading.value = false
 		}).catch(() => {

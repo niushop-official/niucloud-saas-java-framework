@@ -15,7 +15,7 @@ public class OrderConfigParam implements Serializable {
     /**
      * 订单关闭配置
      */
-    private Boolean isClose = false; // 是否关闭
+    private String isClose; // 是否关闭
     private Integer closeLength = 60; // 关闭时长
 
     /**
@@ -28,7 +28,7 @@ public class OrderConfigParam implements Serializable {
     /**
      * 订单完成配置
      */
-    private Boolean isFinish = false; // 是否自动完成
+    private String isFinish; // 是否自动完成
     private Integer finishLength = 7; // 完成时长
 
     /**
@@ -41,7 +41,7 @@ public class OrderConfigParam implements Serializable {
     /**
      * 订单退款配置
      */
-    private Boolean noAllowRefund = false; // 退款允许
+    private String noAllowRefund; // 退款允许
     private Integer refundLength = 30; // 退款时长
 
 

@@ -19,12 +19,15 @@
 						<el-form-item :label="t('outTradeNo')" v-if="formData.order_main.out_trade_no">
 							<div class="input-width">{{ formData.order_main.out_trade_no }}</div>
 						</el-form-item>
+						<el-form-item :label="t('payType')" v-if="formData.pay_refund">
+							<div class="input-width">{{ formData.pay_refund.type_name }}</div>
+						</el-form-item>
 					</el-col>
 					<el-col :span="8">
 						<el-form-item :label="t('deliveryType')">
 							<div class="input-width">{{ formData.order_main.delivery_type_name }}</div>
 						</el-form-item>
-						<div  v-if="formData.order_main.delivery_type == 'express' || formData.order_main.delivery_type == 'local_delivery'">
+						<div v-if="formData.order_main.delivery_type == 'express' || formData.order_main.delivery_type == 'local_delivery'">
 							<el-form-item :label="t('takerName')">
 								<div class="input-width">{{ formData.order_main.taker_name }}</div>
 							</el-form-item>
@@ -33,6 +36,20 @@
 							</el-form-item>
 							<el-form-item :label="t('takerFullAddress')">
 								<div class="input-width">{{ formData.order_main.taker_full_address }}</div>
+							</el-form-item>
+						</div>
+						<div v-if="formData.order_main.delivery_type == 'store'">
+							<el-form-item :label="t('storeName')">
+								<div class="input-width">{{ formData.store.store_name }}</div>
+							</el-form-item>
+							<el-form-item :label="t('storeAddress')">
+								<div class="input-width">{{ formData.store.full_address }}</div>
+							</el-form-item>
+							<el-form-item :label="t('storeMobile')">
+								<div class="input-width">{{ formData.store.store_mobile }}</div>
+							</el-form-item>
+							<el-form-item :label="t('tradeTime')">
+								<div class="input-width">{{ formData.store.trade_time }}</div>
 							</el-form-item>
 						</div>
 					</el-col>
@@ -60,7 +77,8 @@
 					</el-col>
 					<el-col :span="8">
 						<el-form-item :label="t('refundMoney')">
-							<div class="input-width">￥{{ formData.apply_money }}</div>
+							<div class="input-width" v-if="formData.status == 8">￥{{ formData.money }}</div>
+							<div class="input-width" v-else>￥{{ formData.apply_money }}</div>
 						</el-form-item>
 						<el-form-item :label="t('refundReason')">
 							<div class="input-width">{{ formData.reason }}</div>
@@ -138,6 +156,7 @@
 								</div>
 								<div class="flex flex-col flex-1">
 									<span>{{ row.goods_name }}</span>
+									<span class="text-[12px] text-[#999] truncate">{{ row.sku_name }}</span>
 								</div>
 							</div>
 						</template>
@@ -184,7 +203,7 @@
 		<el-dialog v-model="refuseShowDialog" :title="t('orderRefundRefuse')" width="460px" class="diy-dialog-wrap" :destroy-on-close="true">
 			<el-form :model="refuseFormData" label-width="90px" ref="refuseFormRef" :rules="refundFormRules" class="page-form">
 				<el-form-item :label="t('refuseReason')" prop="shop_reason">
-					<el-input v-model="refuseFormData.shop_reason" type="textarea" rows="4" clearable class="input-width" maxlength="200" show-word-limit />
+					<el-input v-model.trim="refuseFormData.shop_reason" type="textarea" rows="4" clearable class="input-width" maxlength="200" show-word-limit />
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -201,7 +220,12 @@
 					<span>￥{{ refuseFormData.apply_money }}</span>
 				</el-form-item>
 				<el-form-item :label="t('agreeMoney')" prop="money">
-					<el-input v-model="refuseFormData.money" clearable class="input-width" />
+					<div>
+						<el-input v-model.trim="refuseFormData.money" clearable class="input-width" />
+						<div  class="mt-[10px] text-[#999] text-[12px] leading-[20px]" v-if="formData.gift_balance && (Number(formData.gift_balance) > Number(formData.member.balance))">
+							当前订单需退还{{ formData.gift_balance}}元赠品余额。若用户余额不足，则默认不进行扣除。请联系客户确认退款金额。
+						</div>
+					</div>
 				</el-form-item>
 				<el-form-item :label="t('refundDeliveryAddress')" prop="refund_address_id" v-if="refuseFormData.refund_type == 2" >
 					<el-select v-model="refuseFormData.refund_address_id" clearable class="input-item">
@@ -220,7 +244,7 @@
 		<el-dialog v-model="deliveryRefuseDialog" :title="t('orderRefundRefuse')" width="460px" class="diy-dialog-wrap" :destroy-on-close="true">
 			<el-form :model="deliveryRefuseFormData" label-width="90px" ref="deliveryRefuseFormRef" :rules="deliveryRefundFormRules" class="page-form">
 				<el-form-item :label="t('refuseReason')" prop="shop_reason">
-					<el-input v-model="deliveryRefuseFormData.shop_reason" type="textarea" rows="4" clearable class="input-width" maxlength="200" show-word-limit />
+					<el-input v-model.trim="deliveryRefuseFormData.shop_reason" type="textarea" rows="4" clearable class="input-width" maxlength="200" show-word-limit />
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -436,7 +460,7 @@ const deliveryRefuseEvent = () => {
 
 const transferEvent = () => {
     const routeUrl = router.resolve({
-        path: '/member/refund/detail',
+        path: '/finance/refund/detail',
         query: { refund_no: formData.value.refund_no }
     })
     window.open(routeUrl.href, '_blank')

@@ -1,15 +1,18 @@
 package com.niu.core.service.api.member.impl;
 
-import cn.hutool.json.JSONObject;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.MemberCashOut;
 import com.niu.core.entity.member.MemberCashOutAccount;
+import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferTypeEnum;
 import com.niu.core.mapper.member.MemberCashOutAccountMapper;
 import com.niu.core.mapper.member.MemberCashOutMapper;
@@ -17,14 +20,14 @@ import com.niu.core.service.admin.member.vo.CashOutConfigVo;
 import com.niu.core.service.api.member.IMemberCashOutService;
 import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.api.member.vo.*;
+import com.niu.core.service.core.member.ICoreMemberCashOutService;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
-import com.niu.core.service.core.sys.ICoreConfigService;
+import com.niu.core.service.core.member.param.MemberCashOutApplyParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,6 +44,9 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
     @Autowired
     private ICoreMemberConfigService coreMemberConfigService;
 
+    @Autowired
+    private ICoreMemberCashOutService coreMemberCashOutService;
+
     @Override
     public PageResult<?> cashOutList(PageParam pageParam, MemberCashOutListParam param) {
         Integer page = pageParam.getPage();
@@ -50,8 +56,8 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         queryWrapper.select("id,site_id,cash_out_no,member_id,account_type,transfer_type,transfer_realname,transfer_mobile,transfer_bank,transfer_account,transfer_status,transfer_time,apply_money,rate,service_money,money,audit_time,status,remark,create_time,refuse_reason");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
-        queryWrapper.like("status", param.getStatus());
-        queryWrapper.like("create_time", param.getCreateTime());
+        if (ObjectUtil.isNotEmpty(param.getStatus())) queryWrapper.like("status", param.getStatus());
+        if (ObjectUtil.isNotEmpty(param.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "create_time", param.getCreateTime());
         queryWrapper.orderByDesc("create_time");
 
         IPage<MemberCashOut> iPage = this.memberCashOutMapper.selectPage(new Page<>(page, limit), queryWrapper);
@@ -101,7 +107,9 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
      */
     @Override
     public boolean cashOutApply(MemberCashOutApplyParam param) {
-        //
+        param.setMemberId(RequestUtils.memberId());
+        param.setSiteId(RequestUtils.siteId());
+        coreMemberCashOutService.apply(param);
         return true;
     }
 
@@ -113,7 +121,18 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
      */
     @Override
     public boolean cashOutCancel(MemberCashOutCancelParam param) {
-        //
+        MemberCashOut cashOut = memberCashOutMapper.selectOne(new QueryWrapper<MemberCashOut>()
+                .eq("member_id", param.memberId())
+                .eq("site_id", param.siteId())
+                .eq("id", param.getId()));
+        if (ObjectUtil.isEmpty(cashOut)) throw new CommonException("提现申请不存在");
+        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_AUDIT.getStatus())) throw new CommonException("当前提现申请未处于待审核状态");
+
+        cashOut.setStatus(MemberCashOutStatusEnum.CANCEL.getStatus());
+        cashOut.setCancelTime(System.currentTimeMillis() / 1000);
+        memberCashOutMapper.updateById(cashOut);
+
+        coreMemberCashOutService.giveback(cashOut);
         return true;
     }
 
@@ -125,6 +144,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
+        if (ObjectUtil.isNotEmpty(param.getAccountType())) queryWrapper.eq("account_type", param.getAccountType());
         queryWrapper.orderByDesc(Arrays.asList("create_time"));
         IPage<MemberCashOutAccount> iPage = this.memberCashOutAccountMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<MemberCashOutAccountVo> dataList = CollectUtils.convert(iPage.getRecords(), MemberCashOutAccountVo.class);
@@ -150,6 +170,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
+        if (ObjectUtil.isNotEmpty(param.getAccountType())) queryWrapper.eq("account_type", param.getAccountType());
         queryWrapper.orderByDesc("create_time");
         queryWrapper.last("limit 1");
         MemberCashOutAccount memberCashOutAccount = this.memberCashOutAccountMapper.selectOne(queryWrapper);

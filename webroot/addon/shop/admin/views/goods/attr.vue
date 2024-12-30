@@ -12,7 +12,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="goodsAttrTable.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('attrName')" prop="attr_name">
-                        <el-input v-model="goodsAttrTable.searchParam.attr_name" :placeholder="t('attrNamePlaceholder')" />
+                        <el-input v-model.trim="goodsAttrTable.searchParam.attr_name" :placeholder="t('attrNamePlaceholder')" />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="loadShopGoodsAttrList()">{{ t('search') }}</el-button>
@@ -31,7 +31,7 @@
 
                     <el-table-column prop="sort" :label="t('sort')" min-width="120" sortable="custom">
                         <template #default="{ row }">
-                            <el-input v-model="row.sort" class="!w-[100px]" maxlength="8" @blur="sortInputListener(row.sort, row)" />
+                            <el-input v-model.trim="row.sort" class="!w-[100px]" maxlength="8" @blur="sortInputListener(row.sort, row)" />
                         </template>
                     </el-table-column>
 
@@ -60,7 +60,7 @@
                 </el-form-item>
 
                 <el-form-item :label="t('sort')" >
-                    <el-input v-model.trim="formData.sort"  maxlength="6" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="input-width" @keyup="filterNumber($event)"/>
+                    <el-input v-model.trim="formData.sort"  maxlength="8" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="input-width" @keyup="filterNumber($event)"/>
                 </el-form-item>
 
             </el-form>

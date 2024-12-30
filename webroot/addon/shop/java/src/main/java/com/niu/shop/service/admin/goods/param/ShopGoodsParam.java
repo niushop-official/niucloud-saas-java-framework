@@ -32,6 +32,8 @@ public class ShopGoodsParam implements Serializable {
     @NotNull(message = "商品图片不能为空")
     private String goodsImage;
 
+    private String goodsVideo = "";
+
     @NotNull(message = "goods_category参数缺失")
     private Integer[] goodsCategory;
 
@@ -59,6 +61,8 @@ public class ShopGoodsParam implements Serializable {
     @NotNull(message = "attr_format参数缺失")
     private String attrFormat;
 
+    private Integer isGift = 0;
+
     @NotNull(message = "spec_type参数缺失")
     private String specType;
 
@@ -81,6 +85,15 @@ public class ShopGoodsParam implements Serializable {
     private String unit = "件";
 
     private Integer virtualSaleNum = 0;
+
+    private Integer isLimit = 0;
+
+    private Integer limitType = 1;
+
+    private Integer maxBuy = 0;
+
+    private Integer minBuy = 0;
+
 
     @NotNull(message = "goods_sku_data参数缺失")
     private Map<String, SkuData> goodsSkuData;

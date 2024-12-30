@@ -30,7 +30,7 @@
                         <template #default="{ row }">
                             <div class="flex cursor-pointer">
                                 <div class="flex items-center min-w-[50px] mr-[10px]">
-                                    <el-image v-if="row.goods_cover_thumb_small" class="w-[50px] h-[50px]" :src="img(row.goods_cover_thumb_small)" fit="contain">
+                                    <el-image v-if="row.goods.goods_cover_thumb_small" class="w-[50px] h-[50px]" :src="img(row.goods.goods_cover_thumb_small)" fit="contain">
                                         <template #error>
                                             <div class="image-slot">
                                                 <img class="w-[50px] h-[50px]" src="@/addon/shop/assets/goods_default.png" />
@@ -41,7 +41,7 @@
                                     <img v-else class="w-[50px] h-[50px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
                                 </div>
                                 <div class="flex">
-                                    <p class="multi-hidden">{{ row.goods_name }}</p>
+                                    <p class="multi-hidden">{{ row.goods.goods_name }}</p>
                                 </div>
                             </div>
                         </template>

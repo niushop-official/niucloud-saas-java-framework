@@ -789,16 +789,60 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         queryWrapper.setAlias("g")
                 .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
         queryWrapper.select("g.goods_id,g.site_id,g.goods_image,goods_name,goods_type,goods_cover,g.stock,g.sale_num,status,sort,create_time,member_discount");
-        queryWrapper.eq("g.status", 1);
         queryWrapper.eq("g.site_id", RequestUtils.siteId());
         queryWrapper.eq("delete_time", 0);
-        if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) queryWrapper.like("goods_name", searchParam.getKeyword());
+
+        if (ObjectUtil.isNotEmpty(searchParam.getIsGift()) && searchParam.getIsGift() == 1) {
+            queryWrapper.ge("g.is_gift", 0);
+        } else {
+            queryWrapper.eq("g.is_gift", 0);
+        }
+
+        if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
+            queryWrapper.and(i -> i.like("goods_name", searchParam.getKeyword()).or().like("sub_title", searchParam.getKeyword()));
+        }
+
+        if (ObjectUtil.isNotEmpty(searchParam.getSkuIds())) {
+            List<ShopGoodsSku> selectGoodsList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().select("goods_id").in("sku_id", searchParam.getSkuIds()).groupBy("goods_id"));
+            if (ObjectUtil.isNotEmpty(selectGoodsList)) {
+                List<Integer> goodsIds = selectGoodsList.stream().map(i -> i.getGoodsId()).toList();
+                if (ObjectUtil.isEmpty(searchParam.getGoodsIds())) searchParam.setGoodsIds(goodsIds);
+            }
+        }
+
+        if (searchParam.getSelectType().equals("all")) {
+            queryWrapper.gt("g.stock", 0);
+            queryWrapper.eq("g.status", 1);
+        }
+
+        if (searchParam.getSelectType().equals("selected") && ObjectUtil.isNotEmpty(searchParam.getGoodsIds())) {
+            queryWrapper.in("g.goods_id", searchParam.getGoodsIds());
+        }
+
         if (ObjectUtil.isNotEmpty(searchParam.getGoodsType()))
             queryWrapper.eq("goods_type", searchParam.getGoodsType());
+
         if (ObjectUtil.isNotEmpty(searchParam.getGoodsCategory()))
             queryWrapper.like("goods_category", "\"" + searchParam.getGoodsCategory() + "\"");
-        if (ObjectUtil.isEmpty(searchParam.getGoodsIds())) queryWrapper.gt("g.stock", 0);
-        if (searchParam.getSelectType().equals("selected")) queryWrapper.in("g.goods_id", searchParam.getGoodsIds());
+
+        List<Integer> verifyGoodsIds = new LinkedList<>();
+        List<Integer> verifySkuIds = new LinkedList<>();
+
+        // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
+        if (ObjectUtil.isNotEmpty(searchParam.getVerifyGoodsIds())) {
+            List<ShopGoods> verifyGoodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().select("goods_id").in("goods_id", searchParam.getVerifyGoodsIds()).eq("site_id", RequestUtils.siteId()).eq("delete_time", 0).eq("status", 1));
+            if (ObjectUtil.isNotEmpty(verifyGoodsList)) {
+                verifyGoodsIds = verifyGoodsList.stream().map(i -> i.getGoodsId()).collect(Collectors.toList());
+            }
+        }
+
+        if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds())) {
+            List<ShopGoodsSku> verifySkuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().in("sku_id", searchParam.getVerifySkuIds()).select("sku_id"));
+            if (ObjectUtil.isNotEmpty(verifySkuList)) {
+                verifySkuIds = verifySkuList.stream().map(i -> i.getSkuId()).collect(Collectors.toList());
+            }
+        }
+
         queryWrapper.orderByDesc("g.goods_id");
 
         IPage<ShopSelectGoodsListVo.ListVo> iPage = shopGoodsMapper.selectJoinPage(new Page<>(page, limit), ShopSelectGoodsListVo.ListVo.class, queryWrapper);
@@ -825,20 +869,6 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         ShopSelectGoodsListVo vo = new ShopSelectGoodsListVo();
         BeanUtils.copyProperties(pageResutl, vo);
 
-        // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
-        List<Integer> verifyGoodsIds = new LinkedList<>();
-        List<Integer> verifySkuIds = new LinkedList<>();
-
-        if (ObjectUtil.isNotEmpty(searchParam.getVerifyGoodsIds())) {
-            verifyGoodsIds = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().in("goods_id", searchParam.getVerifyGoodsIds()).select("goods_id"))
-                    .stream().map(i -> i.getGoodsId()).collect(Collectors.toList());
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds())) {
-            verifySkuIds = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().in("sku_id", searchParam.getVerifySkuIds()).select("sku_id"))
-                    .stream().map(i -> i.getSkuId()).collect(Collectors.toList());
-        }
-
         vo.setVerifyGoodsIds(verifyGoodsIds);
         vo.setVerifySkuIds(verifySkuIds);
 
@@ -852,38 +882,53 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
      */
     @Override
     public List<ShopSelectGoodsListVo.ListVo> getSelectGoodsSku(ShopGoodsSelectSearchParam searchParam) {
-        List<ShopSelectGoodsListVo.ListVo> list = new LinkedList<>();
+        MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
+        queryWrapper.setAlias("g")
+                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("g.goods_id,g.site_id,g.goods_image,goods_name,goods_type,goods_cover,g.stock,g.sale_num,status,sort,create_time,member_discount");
+        queryWrapper.eq("g.site_id", RequestUtils.siteId());
+        queryWrapper.eq("g.status", 1);
+        queryWrapper.eq("delete_time", 0);
+
+        if (ObjectUtil.isNotEmpty(searchParam.getIsGift()) && searchParam.getIsGift() == 1) {
+            queryWrapper.ge("g.is_gift", 0);
+        } else {
+            queryWrapper.eq("g.is_gift", 0);
+        }
+
+        // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
         if (ObjectUtil.isNotEmpty(searchParam.getVerifyGoodsIds())) {
-            List<ShopGoods> goodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>()
-                    .in("goods_id", searchParam.getVerifyGoodsIds())
-                    .eq("site_id", RequestUtils.siteId())
-                    .eq("delete_time", 0));
-            for (ShopGoods item : goodsList) {
-                ShopSelectGoodsListVo.ListVo vo = new ShopSelectGoodsListVo.ListVo();
-                BeanUtils.copyProperties(item, vo);
-                List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", vo.getGoodsId()));
-                vo.setSkuList(skuList);
-                list.add(vo);
+            List<ShopGoods> verifyGoodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().select("goods_id").in("goods_id", searchParam.getVerifyGoodsIds()).eq("site_id", RequestUtils.siteId()).eq("delete_time", 0).eq("status", 1));
+            if (ObjectUtil.isNotEmpty(verifyGoodsList)) {
+                List<Integer> verifyGoodsIds = verifyGoodsList.stream().map(i -> i.getGoodsId()).collect(Collectors.toList());
+                queryWrapper.in("g.goods_id", verifyGoodsIds);
             }
         }
 
-        if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds()) && ObjectUtil.isNotEmpty(searchParam.getSkuIds())) {
-            QueryWrapper<ShopGoodsSku> skuWrapper = new QueryWrapper<>();
-            skuWrapper.in("sku_id", searchParam.getSkuIds()).groupBy("goods_id").select("sku_id");
-            List<Integer> goodsIds = shopGoodsSkuMapper.selectList(skuWrapper)
-                    .stream().map(i -> i.getSkuId()).collect(Collectors.toList());
-
-            List<ShopGoods> goodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>()
-                    .in("goods_id", goodsIds)
-                    .eq("site_id", RequestUtils.siteId())
-                    .eq("delete_time", 0));
-            for (ShopGoods item : goodsList) {
-                ShopSelectGoodsListVo.ListVo vo = new ShopSelectGoodsListVo.ListVo();
-                BeanUtils.copyProperties(item, vo);
-                List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", vo.getGoodsId()));
-                vo.setSkuList(skuList);
-                list.add(vo);
+        if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds())) {
+            List<ShopGoodsSku> verifySkuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().in("sku_id", searchParam.getVerifySkuIds()).select("goods_id").groupBy("goods_id"));
+            if (ObjectUtil.isNotEmpty(verifySkuList)) {
+                List<Integer> verifyGoodsIds = verifySkuList.stream().map(i -> i.getGoodsId()).collect(Collectors.toList());
+                queryWrapper.in("g.goods_id", verifyGoodsIds);
             }
+        }
+
+        List<ShopSelectGoodsListVo.ListVo> list = shopGoodsMapper.selectJoinList(ShopSelectGoodsListVo.ListVo.class, queryWrapper);
+        for (ShopSelectGoodsListVo.ListVo vo: list) {
+            vo.setGoodsImage(vo.getGoodsImage());
+
+            List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", vo.getGoodsId()));
+            vo.setSkuList(skuList);
+
+            for (ShopGoodsSku item : skuList) {
+                if (item.getIsDefault().equals(1)) {
+                    ShopSelectGoodsListVo.GoodsSku goodsSkuVo = new ShopSelectGoodsListVo.GoodsSku();
+                    BeanUtils.copyProperties(item, goodsSkuVo);
+                    vo.setGoodsSku(goodsSkuVo);
+                }
+            }
+            vo.setGoodsCoverThumbSmall(coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
+            vo.setGoodsCoverThumbMid(coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
         }
         return list;
     }

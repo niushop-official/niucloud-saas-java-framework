@@ -27,7 +27,7 @@ public class DiscountCalculateListener extends GoodsMarketCalculateEventDefiner 
         OrderCreateDataVo vo = event.getVo();
         OrderCreateDataVo.Sku skuInfo = event.getSkuInfo();
 
-        if (skuInfo.getGoods().getIsDiscount().equals(1)) {
+        if (skuInfo.getGoods().getIsDiscount().equals(1) && ObjectUtil.isNotEmpty(vo.getExtendData()) && vo.getExtendData().getStr("activity_type", "").equals("discount")) {
             ShopActiveGoods discountGoods = shopActiveGoodsMapper.selectOne(new QueryWrapper<ShopActiveGoods>()
                     .eq("goods_id", skuInfo.getGoodsId())
                     .eq("active_class", ActiveClassEnum.DISCOUNT.getType())

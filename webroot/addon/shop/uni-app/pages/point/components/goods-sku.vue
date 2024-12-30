@@ -48,6 +48,7 @@
 					</view>
 					<view class="flex justify-between items-center mt-[8rpx]">
 						<view class="text-[28rpx]">购买数量</view>
+						<text v-if="goodsDetail.detail.limit_num > 0" class="ml-[20rpx] mr-[auto] text-[24rpx] text-[var(--primary-color)]">(限购{{ goodsDetail.detail.limit_num }}{{ goodsDetail.goods.unit }})</text>
 						<u-number-box :min="1" :max="parseInt(goodsDetail.detail.limit_num)<goodsDetail.stock?parseInt(goodsDetail.detail.limit_num):goodsDetail.stock" integer :step="1" input-width="68rpx" v-model="buyNum" input-height="52rpx">
 							<template #minus>
 								<text class="text-[30rpx] nc-iconfont nc-icon-jianV6xx font-500" :class="{ '!text-[var(--text-color-light9)]': buyNum <= 1 }"></text>
@@ -115,8 +116,11 @@
 	
 	const goodsSkuInputFn = ()=>{
 		setTimeout(() => {
-			if(buyNum.value >= goodsDetail.value.stock){
-				buyNum.value = goodsDetail.value.stock;
+			if(!buyNum.value || buyNum.value <= 0 ){
+				buyNum.value =  1;
+			}
+			if(buyNum.value >= Number(goodsDetail.value.detail.limit_num)){
+				buyNum.value = goodsDetail.value.detail.limit_num;
 			}
 		},0)
 	}
@@ -126,8 +130,8 @@
 			if(!buyNum.value || buyNum.value <= 0 ){
 				buyNum.value = 1;
 			}
-			if(buyNum.value >= goodsDetail.value.stock){
-				buyNum.value = goodsDetail.value.stock;
+			if(buyNum.value >=  Number(goodsDetail.value.detail.limit_num)){
+				buyNum.value = goodsDetail.value.detail.limit_num;
 			}
 		},0)
 	}

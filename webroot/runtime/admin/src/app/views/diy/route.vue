@@ -9,7 +9,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="diyRouteTableData.searchParam" ref="searchFormDiyRouteRef">
                     <el-form-item :label="t('title')" prop="title">
-                        <el-input v-model="diyRouteTableData.searchParam.title" :placeholder="t('titlePlaceholder')" />
+                        <el-input v-model.trim="diyRouteTableData.searchParam.title" :placeholder="t('titlePlaceholder')" />
                     </el-form-item>
                     <el-form-item :label="t('forAddon')" prop="addon_name">
                         <el-select v-model="diyRouteTableData.searchParam.addon_name" :placeholder="t('forAddonPlaceholder')">
@@ -54,7 +54,7 @@
                 </el-table-column>
             </el-table>
             <div class="mt-[16px] flex justify-end">
-                <el-pagination v-model:current-page="diyRouteTableData.page" v-model:page-size="diyRouteTableData.limit" layout="total, sizes, prev, pager, next, jumper" :total="diyRouteTableData.total" @size-change="loadDiyRouteList()" @current-change="loadDiyRouteList" />
+                <el-pagination v-model:current-page="diyRouteTableData.page" v-model:page-size="diyRouteTableData.limit" layout="total, sizes, prev, pager, next, jumper" :total="diyRouteTableData.total" @size-change="getDiyRouteListFn" @current-change="loadDiyRouteList" />
             </div>
         </el-card>
 
@@ -70,10 +70,10 @@
                     <span>{{ sharePage }}</span>
                 </el-form-item>
                 <el-form-item :label="t('shareTitle')" prop="title">
-                    <el-input v-model="shareFormData[tabShareType].title" :placeholder="t('shareTitlePlaceholder')" clearable maxlength="30" show-word-limit />
+                    <el-input v-model.trim="shareFormData[tabShareType].title" :placeholder="t('shareTitlePlaceholder')" clearable maxlength="30" show-word-limit />
                 </el-form-item>
                 <el-form-item :label="t('shareDesc')" prop="desc" v-if="tabShareType == 'wechat'">
-                    <el-input v-model="shareFormData[tabShareType].desc" :placeholder="t('shareDescPlaceholder')" type="textarea" rows="4" clearable maxlength="100" show-word-limit />
+                    <el-input v-model.trim="shareFormData[tabShareType].desc" :placeholder="t('shareDescPlaceholder')" type="textarea" rows="4" clearable maxlength="100" show-word-limit />
                 </el-form-item>
                 <el-form-item :label="t('shareImageUrl')" prop="url">
                     <upload-image v-model="shareFormData[tabShareType].url" :limit="1" />
@@ -99,6 +99,7 @@ import { ElMessage, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { useClipboard } from '@vueuse/core'
 import { getUrl } from '@/app/api/sys'
+import { cloneDeep } from 'lodash-es'
 
 const route = useRoute()
 const router = useRouter()
@@ -121,6 +122,8 @@ const diyRouteTableData = reactive({
     }
 })
 
+const diyRouteList: any = ref([])
+
 const wapDomain = ref('')
 const getDomain = async () => {
     wapDomain.value = (await getUrl()).data.wap_url
@@ -130,42 +133,60 @@ getDomain()
 
 const apps: any = reactive({}) // 应用插件列表
 
-getDiyRouteAppList().then(res=>{
-    if(res.data){
+getDiyRouteAppList().then(res=> {
+    if (res.data) {
         for (const key in res.data) {
             apps[key] = res.data[key];
         }
     }
 });
 
+const getDiyRouteListFn = () => {
+    getDiyRouteList({}).then(res => {
+        diyRouteTableData.loading = false
+        diyRouteList.value = cloneDeep(res.data)
+        loadDiyRouteList(diyRouteTableData.page)
+    }).catch(() => {
+        diyRouteTableData.loading = false
+    });
+}
+
+getDiyRouteListFn();
+
 /**
  * 获取自定义路由列表
  */
 const loadDiyRouteList = (page: number = 1) => {
-    diyRouteTableData.loading = true
     diyRouteTableData.page = page
 
-    getDiyRouteList({
-        page: diyRouteTableData.page,
-        limit: diyRouteTableData.limit,
-        ...diyRouteTableData.searchParam
-    }).then(res => {
-        diyRouteTableData.loading = false
+    const tempData = cloneDeep(diyRouteList.value)
+    const data: any = [];
 
-        const len = Math.ceil(res.data.length / diyRouteTableData.limit)
-        const data = JSON.parse(JSON.stringify(res.data))
-        const dataGather = []
-        for (let i = 0; i < len; i++) {
-            dataGather[i] = data.splice(0, diyRouteTableData.limit)
+    // 筛选条件
+    for (let i = 0; i < tempData.length; i++) {
+        let isAdd = true;
+        if (diyRouteTableData.searchParam.title && tempData[i].title.indexOf(diyRouteTableData.searchParam.title) == -1) {
+            isAdd = false;
         }
-        diyRouteTableData.data = dataGather[diyRouteTableData.page - 1]
 
-        diyRouteTableData.total = res.data.length
-    }).catch(() => {
-        diyRouteTableData.loading = false
-    })
+        if (diyRouteTableData.searchParam.addon_name && tempData[i].addon_info && tempData[i].addon_info.key != diyRouteTableData.searchParam.addon_name) {
+            isAdd = false;
+        }
+
+        if (isAdd) {
+            data.push(tempData[i]);
+        }
+    }
+
+    diyRouteTableData.total = data.length
+    const len = Math.ceil(data.length / diyRouteTableData.limit)
+    const dataGather = []
+
+    for (let i = 0; i < len; i++) {
+        dataGather[i] = data.splice(0, diyRouteTableData.limit)
+    }
+    diyRouteTableData.data = dataGather[diyRouteTableData.page - 1]
 }
-loadDiyRouteList()
 
 // 获取自定义页面模板
 getDiyTemplate({}).then(res => {
@@ -232,7 +253,7 @@ const openShare = async (row: any) => {
         name: row.name
     })).data
 
-    if (info && info.title) {
+    if (info.title) {
         row.id = info.id
         row.title = info.title
         row.name = info.name
@@ -273,7 +294,7 @@ const shareEvent = async (formEl: FormInstance | undefined) => {
                 share: JSON.stringify(shareFormData),
                 ...diyRouteData
             }).then(() => {
-                loadDiyRouteList()
+                getDiyRouteListFn()
                 shareDialogVisible.value = false
             }).catch(() => {
             })
@@ -284,7 +305,7 @@ const shareEvent = async (formEl: FormInstance | undefined) => {
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()
-    loadDiyRouteList()
+    getDiyRouteListFn()
 }
 </script>
 

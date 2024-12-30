@@ -7,6 +7,7 @@ import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.entity.manjian.ShopManjian;
 import com.niu.shop.enums.order.OrderDeliveryStatusEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderGoodsRefundEnum;
@@ -121,6 +122,11 @@ public class ShopOrderInfoVo implements Serializable {
         private BigDecimal discountMoney;
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String extend;
+        private String unit;
+        private Integer isGift; // 是否是赠品
+        private Integer shopActiveRefund; //商家主动退款0：否 1：是
+        private BigDecimal shopActiveRefundMoney; //商家主动退款金额
+        private ShopManjian manjianInfo;
 
         private ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);

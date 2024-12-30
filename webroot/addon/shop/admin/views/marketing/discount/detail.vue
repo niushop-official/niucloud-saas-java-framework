@@ -2,7 +2,7 @@
     <div class="main-container" v-loading="loading">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <el-form class="page-form mt-[15px]" :model="formData" label-width="100px" ref="formRef" label-position="left" v-if="Object.keys(formData).length">
@@ -117,7 +117,7 @@
                     </el-table-column>
                     <el-table-column :label="t('price')" min-width="120">
                         <template #default="{ row }">
-                            <span v-if="row.goods_sku">￥{{ row.goods_sku.price }}</span>
+                            <span v-if="row.goodsSku">￥{{ row.goodsSku.price }}</span>
                         </template>
                     </el-table-column>
                     <el-table-column prop="active_goods_order_money" :label="t('paymentAmount')" min-width="100" />
@@ -246,6 +246,10 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
+
+const back = () => {
+    router.push('/shop/marketing/discount/list')
+}
 
 const formData:Record<string, any> = ref({})
 const loading = ref(false)

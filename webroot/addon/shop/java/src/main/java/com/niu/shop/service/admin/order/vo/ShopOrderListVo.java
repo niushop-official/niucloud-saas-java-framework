@@ -117,6 +117,7 @@ public class ShopOrderListVo implements Serializable {
         private Integer verifyExpireTime; // 过期时间 0 为永久
         private Integer isVerify; // 是否需要核销
         private BigDecimal discountMoney;
+        private Integer isGift;
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String extend;
 

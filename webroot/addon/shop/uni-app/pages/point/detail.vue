@@ -240,7 +240,7 @@ import goodsSku from '@/addon/shop/pages/point/components/goods-sku.vue';
 import useMemberStore from '@/stores/member'
 import { useShare }from '@/hooks/useShare'
 import sharePoster from '@/components/share-poster/share-poster.vue'
-import {useGoods} from '@/hooks/useGoods'
+import {useGoods} from '@/addon/shop/hooks/useGoods'
 
 const diyGoods = useGoods();
 // 分享
@@ -581,6 +581,7 @@ onUnload(()=>{
 })
 </script>
 <style lang="scss" scoped>
+@import '@/addon/shop/styles/common.scss';
 .remove-border {
 	&::after {
 		border: none;

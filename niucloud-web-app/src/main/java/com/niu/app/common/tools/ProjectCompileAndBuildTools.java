@@ -400,7 +400,7 @@ public class ProjectCompileAndBuildTools {
                 FileUtils.deleteDirectory(destDir);
             }
 
-            String[] exclusionDir = {"node_modules", ".output", "nuxt"};
+            String[] exclusionDir = {"node_modules", ".output", "nuxt", "dist"};
             FileUtils.copyDirectory(srcDir, destDir, createExclusionFilter(exclusionDir));
 
             // 移除插件

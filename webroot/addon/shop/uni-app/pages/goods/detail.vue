@@ -14,7 +14,7 @@
 				</view>
 				<!-- <view class="media-mode absolute top-0 left-0 w-full h-full transition-transform duration-300 ease-linear transform"
 					:class="{'translate-x-0':switchMedia === 'video','-translate-x-full':switchMedia != 'video'}">
-					<video id="goodsVideo" class="w-full h-full" :src="img(goodsDetail.goods.goods_video)" :poster="img(goodsDetail.goods.goods_cover_thumb_big)" objectFit="cover"></video>
+					<video id="goodsVideo" class="w-full h-full" :src="img(goodsDetail.goods.goods_video)" :poster="img(goodsDetail.goods.goods_cover_thumb_mid)" objectFit="cover"></video>
 				</view> -->
 				<!-- 切换视频、图片 -->
 				<!-- <view class="media-mode absolute bottom-[74rpx] w-full text-center leading-[50rpx] " v-if="goodsDetail.goods.goods_video != ''">
@@ -27,12 +27,12 @@
 					<text class="text-[26rpx] mr-[10rpx] font-500 leading-[36rpx]" v-if="priceType == 'newcomer_price'">新人价</text>
 					<text class="text-[26rpx] mr-[10rpx] font-500 leading-[36rpx]" v-else-if="priceType == 'discount_price'">折扣价</text>
 					<text class="text-[26rpx] mr-[10rpx] font-500 leading-[36rpx]" v-else-if="priceType == 'member_price'">会员价</text>
-					<view class="inline-block">
+					<view class="inline-block mr-[14rpx]">
 						<text class="text-[32rpx] price-font mr-[4rpx]">￥</text>
 						<text class="text-[48rpx] -mb-[4rpx] price-font">{{ parseFloat(goodsPrice).toFixed(2).split('.')[0] }}</text>
 						<text class="text-[32rpx] price-font">.{{ parseFloat(goodsPrice).toFixed(2).split('.')[1] }}</text>
 					</view>
-					<view class="inline-block ml-[14rpx]">
+					<view class="inline-block">
 						<text class="text-[26rpx] mr-[6rpx]" v-if="goodsDetail.price">售价:</text>
 						<text class="text-[26rpx] price-font leading-[36rpx]">￥{{ goodsDetail.price }}</text>
 					</view>
@@ -40,7 +40,7 @@
 				<view v-if="priceType == 'discount_price'" class="flex flex-col text-[#fff] items-end h-[59rpx] justify-between">
 					<image class="h-[28rpx] w-[auto] mr-[2rpx]" :src="img('addon/shop/detail/discount_price.png')" mode="heightFix"></image>
 					<view class="flex items-center text-[24rpx] -mb-[10rpx] overflow-hidden h-[28rpx]">
-						<text class="mr-[4rpx]">距结束</text>
+						<text class="mr-[4rpx] whitespace-nowrap">距结束</text>
 						<up-count-down class="text-[#fff] text-[28rpx]" :time="discountTime" format="DD:HH:mm:ss" @change="onChange">
 							<view class="flex">
 								<view class="text-[24rpx] flex items-center" v-if="timeData.days>0">
@@ -68,10 +68,10 @@
 			<view class="bg-[var(--page-bg-color)] rounded-[40rpx] overflow-hidden -mt-[34rpx] relative">
 				<view class="datail-title relative px-[30rpx]" :class="{'pt-[40rpx]': priceType != '','pt-[30rpx]': priceType == ''}">
 					<view class="text-[var(--price-text-color)] flex items-baseline mb-[12rpx]" v-if="priceType === ''">
-						<view class="inline-block">
-							<text class="text-[32rpx] font-medium price-font">￥</text>
-							<text class="text-[48rpx] price-font">{{ parseFloat(goodsPrice).toFixed(2).split('.')[0] }}</text>
-							<text class="text-[32rpx] mr-[10rpx] price-font">.{{ parseFloat(goodsPrice).toFixed(2).split('.')[1] }}</text>
+						<view class="inline-block goods-price-time">
+							<text class="price-font text-[32rpx]">￥</text>
+							<text class="price-font text-[48rpx]">{{ parseFloat(goodsPrice).toFixed(2).split('.')[0] }}</text>
+							<text class="price-font text-[32rpx] mr-[10rpx]">.{{ parseFloat(goodsPrice).toFixed(2).split('.')[1] }}</text>
 						</view>
 						<!-- <text class="text-[26rpx] text-[var(--text-color-light9)] line-through price-font" v-if="goodsDetail.market_price && parseFloat(goodsDetail.market_price)">
 							￥{{ goodsDetail.market_price }}
@@ -88,7 +88,7 @@
 							<text class="whitespace-nowrap mr-[4rpx]">划线价:</text>
 							<text class="line-through">￥{{ goodsDetail.market_price }}</text>
 						</view>
-						<view class="text-[24rpx] leading-[34rpx] text-[var(--text-color-light6)]" v-if="goodsDetail.stock && parseFloat(goodsDetail.stock)">
+						<view class="text-[24rpx] leading-[34rpx] text-[var(--text-color-light6)]">
 							<text class="whitespace-nowrap mr-[4rpx]">库存:</text>
 							<text class="">{{ goodsDetail.stock }}</text>
 							<text class="">{{ goodsDetail.goods.unit }}</text>
@@ -101,13 +101,10 @@
 					</view>
 					<view class="flex flex-wrap mt-[16rpx]" v-if="goodsDetail.label_info && goodsDetail.label_info.length">
 						<block v-for="item in goodsDetail.label_info" :key="item.label_id">
-							<!-- <image class="img-tag middle" v-if="item.style_type == 'icon' && item.icon" :src="img(item.icon)" mode="heightFix" @error="diyGoods.error(item,'icon')"></image>
+							<image class="img-tag middle" v-if="item.style_type == 'icon' && item.icon" :src="img(item.icon)" mode="heightFix" @error="diyGoods.error(item,'icon')"></image>
 							<view class="base-tag middle" v-else-if="item.style_type == 'diy' || !item.icon" :style="diyGoods.baseTagStyle(item)">
 								{{item.label_name}}
-							</view> -->
-                            <view class="base-tag middle primary-btn-bg text-white border-none">
-                            	{{item.label_name}}
-                            </view>
+							</view>
 						</block>
 					</view>
 				</view>
@@ -141,6 +138,14 @@
 									{{ item.title }}
 								</text>
 							</block>
+						</view>
+						<text class="nc-iconfont nc-icon-youV6xx text-[26rpx] text-[var(--text-color-light6)] ml-[8rpx]"></text>
+					</view>
+					<view class="card-template-item" @click="manjianOpenFn" v-if="Object.keys(manjianData).length">
+						<text class="text-[#333] text-[26rpx] leading-[30rpx] font-400 shrink-0 mr-[20rpx]">优惠</text>
+						<view class="ml-auto flex-1 flex-nowrap flex items-center overflow-hidden h-[44rpx] justify-end">
+							<view class="bg-[var(--primary-color-light)] text-[var(--primary-color)] rounded-[6rpx]	text-[22rpx] flex items-center justify-center w-[86rpx] h-[34rpx] mr-[6rpx]">满减送</view>
+							<view class="truncate max-w-[430rpx] text-[26rpx]">{{manjianData.name}}</view>
 						</view>
 						<text class="nc-iconfont nc-icon-youV6xx text-[26rpx] text-[var(--text-color-light6)] ml-[8rpx]"></text>
 					</view>
@@ -201,6 +206,8 @@
 					</view>
 				</view>
 
+				<ns-goods-recommend></ns-goods-recommend>
+
 				<view class="tab-bar-placeholder"></view>
 				<view class="border-[0] border-t-[2rpx] border-solid border-[#f5f5f5] w-[100%] flex justify-between pl-[32rpx] pr-[4rpx] bg-[#fff] box-border fixed left-0 bottom-0 tab-bar z-1 items-center">
 					<view class="flex items-center">
@@ -234,20 +241,29 @@
 						<!-- #endif -->
 					</view>
 					<view class="flex flex-1" v-if="goodsDetail.goods.status == 1">
-						<button
-							v-if="goodsDetail.type == '' && (goodsDetail.goods.goods_type == 'real' || (goodsDetail.goods.goods_type == 'virtual' && goodsDetail.goods.virtual_receive_type != 'verify'))"
-							class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !m-0 !mr-[16rpx] leading-[70rpx] rounded-full remove-border"
-							style="background: linear-gradient(127deg, #FFB000 0%, #FFA029 100%);" @click="buyFn('join_cart')">
-							加入购物车</button>
-						<button
-							v-if="isShowSingleSku"
-							:style="{ width : (goodsDetail.goods.goods_type == 'real' || (goodsDetail.goods.goods_type == 'virtual' && goodsDetail.goods.virtual_receive_type != 'verify')) ?  '200rpx' : '420rpx' + '!important'  }"
-							class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] primary-btn-bg !m-0 !mr-[16rpx] leading-[70rpx] rounded-full remove-border"
-							@click="buyFn('buy_now')">立即购买</button>
-						<button v-else
-							:style="{ width : (goodsDetail.goods.goods_type == 'real' || (goodsDetail.goods.goods_type == 'virtual' && goodsDetail.goods.virtual_receive_type != 'verify')) ?  '200rpx' : '420rpx' + '!important'  }"
-							class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !bg-[#ccc] !m-0 !mr-[16rpx] leading-[70rpx] rounded-full remove-border"
-							>已售罄</button>
+						<button v-if="goodsDetail.goods.is_gift"
+							class="!w-[420rpx] flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !bg-[#ccc] !m-0 leading-[70rpx] rounded-full remove-border"
+							>商品为赠品不可购买</button>
+						<block v-else-if="maxBuy > 0 || maxBuy == -1">
+							<button
+								v-if="goodsDetail.type == '' && (goodsDetail.goods.goods_type == 'real' || (goodsDetail.goods.goods_type == 'virtual' && goodsDetail.goods.virtual_receive_type != 'verify'))"
+								class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !m-0 !mr-[16rpx] leading-[70rpx] rounded-full remove-border"
+								style="background: linear-gradient(127deg, #FFB000 0%, #FFA029 100%);" @click="buyFn('join_cart')">
+								加入购物车</button>
+							<button
+								v-if="isShowSingleSku"
+								:style="{ width : (goodsDetail.goods.goods_type == 'real' || (goodsDetail.goods.goods_type == 'virtual' && goodsDetail.goods.virtual_receive_type != 'verify')) ?  '200rpx' : '400rpx' + '!important'  }"
+								class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] primary-btn-bg !m-0 !mr-[16rpx] leading-[70rpx] rounded-full remove-border"
+								@click="buyFn('buy_now')">立即购买</button>
+							<button v-else
+								:style="{ width : (goodsDetail.goods.goods_type == 'real' || (goodsDetail.goods.goods_type == 'virtual' && goodsDetail.goods.virtual_receive_type != 'verify')) ?  '200rpx' : '400rpx' + '!important'  }"
+								class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !bg-[#ccc] !m-0 !mr-[16rpx] leading-[70rpx] rounded-full remove-border"
+								>已售罄</button>
+						</block>
+						<button v-else-if="maxBuy == 0"
+							:style="{ width : '420rpx' + '!important'  }"
+							class="flex-1 !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !bg-[#ccc] !m-0 leading-[70rpx] rounded-full remove-border"
+							>已达限购数量</button>
 					</view>
 					<view class="flex flex-1" v-else>
 						<button class="w-[100%] !h-[70rpx] font-500 text-[26rpx] !text-[#fff] !bg-[#ccc] !m-0 leading-[70rpx] rounded-full remove-border">该商品已下架</button>
@@ -328,10 +344,10 @@
 					</view>
 				</u-popup>
 			</view>
-			<ns-goods-sku ref="goodsSkuRef" :goods-detail="goodsDetail" @change="specSelectFn"></ns-goods-sku>
+			<ns-goods-sku v-if="loading" ref="goodsSkuRef" :goods-detail="goodsDetail" @change="specSelectFn"></ns-goods-sku>
+			<ns-goods-manjian ref="manjianShowRef"></ns-goods-manjian>
 			<share-poster ref="sharePosterRef" posterType="shop_goods" :posterId="goodsDetail.goods.poster_id" :posterParam="posterParam" :copyUrlParam="copyUrlParam" />
 		</view>
-		<loading-page :loading="loading"></loading-page>
 
 		<!-- #ifdef MP-WEIXIN -->
 		<!-- 小程序隐私协议 -->
@@ -341,25 +357,28 @@
 </template>
 
 <script setup lang="ts">
-import {computed, getCurrentInstance, nextTick, ref} from 'vue';
-import {onLoad, onPageScroll, onShow, onUnload} from '@dcloudio/uni-app'
-import {deepClone, getToken, goback, handleOnloadParams, img, redirect} from '@/utils/common';
-import {cancelCollect, collect, getEvaluateList, getGoodsDetail} from '@/addon/shop/api/goods';
-import {getCoupon, getShopCouponList} from '@/addon/shop/api/coupon';
+import { ref, computed, getCurrentInstance, nextTick } from 'vue';
+import { onLoad, onShow, onUnload,onPageScroll } from '@dcloudio/uni-app'
+import { img, redirect,handleOnloadParams, getToken, deepClone, goback } from '@/utils/common';
+import { t } from '@/locale';
+import { getGoodsDetail, browse, collect, cancelCollect, getEvaluateList, getManjian } from '@/addon/shop/api/goods';
+import { getShopCouponList, getCoupon } from '@/addon/shop/api/coupon';
 import nsGoodsSku from '@/addon/shop/components/ns-goods-sku/ns-goods-sku.vue';
+import nsGoodsManjian from '@/addon/shop/components/ns-goods-manjian/ns-goods-manjian.vue';
 import useCartStore from '@/addon/shop/stores/cart'
-import {useLogin} from '@/hooks/useLogin'
+import { useLogin } from '@/hooks/useLogin'
 import useMemberStore from '@/stores/member'
-import {useShare} from '@/hooks/useShare'
+import { useShare }from '@/hooks/useShare'
 import sharePoster from '@/components/share-poster/share-poster.vue'
-import {useGoods} from '@/hooks/useGoods'
+import {useGoods} from '@/addon/shop/hooks/useGoods'
+import nsGoodsRecommend from '@/addon/shop/components/ns-goods-recommend/ns-goods-recommend.vue';
 
 const diyGoods = useGoods();
-// 使用 reactive 创建响应式对象  
+// 使用 reactive 创建响应式对象
 const timeData = ref({});
-// 定义 onChange 方法  
-const onChange = (e) => {  
-  timeData.value = e;  
+// 定义 onChange 方法
+const onChange = (e) => {
+  timeData.value = e;
 };
 
 // 分享
@@ -376,6 +395,7 @@ const cartTotalNum = computed(() => cartStore.totalNum)
 const goodsSkuRef: any = ref(null);
 const goodsDetail: any = ref({});
 const switchMedia: any = ref('img');
+const manjianShowRef: any = ref(null); //满减送
 
 const isAttrFormatShow = ref(false); //控制属性是否展开
 
@@ -391,25 +411,37 @@ const sendMessageImg = ref('')
 
 const wxPrivacyPopupRef:any = ref(null)
 const videoContext: any = ref(null)
-
+let pageParameter = {};
 onLoad((option: any) => {
 	// #ifdef MP-WEIXIN
 	// 处理小程序场景值参数
 	option = handleOnloadParams(option);
 	// #endif
+	pageParameter = option;
+})
 
+onShow(() => {
+	loading.value = false;
+	// 删除配送方式
+	uni.removeStorageSync('distributionType');
+	cartStore.getList();
+	getManjianInfo();
+	getDetailInfo();
+})
+
+const getDetailInfo = ()=>{
 	getGoodsDetail({
-		goods_id: option.goods_id || '',
-		sku_id: option.sku_id || '',
-		type: option.type || ''  // 来源营销活动类型，例如：discount：限时折扣，newcomer_discount：新人价
+		goods_id: pageParameter.goods_id || '',
+		sku_id: pageParameter.sku_id || '',
+		type: pageParameter.type || ''  // 来源营销活动类型，例如：discount：限时折扣，newcomer_discount：新人价
 	}).then((res: any) => {
 		if (!res.data.goods || JSON.stringify(res.data) === '[]') {
-            let goBackParameter = {
-                url:'/addon/shop/pages/index',
-                title: '找不到该商品',
-                mode: 'reLaunch'
-            };
-            goback(goBackParameter)
+	        let goBackParameter = {
+	            url:'/addon/shop/pages/index',
+	            title: '找不到该商品',
+	            mode: 'reLaunch'
+	        };
+	        goback(goBackParameter)
 			return false
 		}
 
@@ -420,6 +452,8 @@ onLoad((option: any) => {
 		goodsDetail.value.goods.goods_image.forEach((item: any, index: any) => {
 			goodsDetail.value.goods.goods_image[index] = img(item);
 		})
+
+		loading.value = true;
 
 		let data: any = deepClone(res.data);
 		goodsDetail.value.goods.attr_format = []
@@ -438,7 +472,7 @@ onLoad((option: any) => {
 			sendMessagePath.value += '&type=' + goodsDetail.value.type;
 		}
 		sendMessageImg.value = img(goodsDetail.value.goods.goods_cover_thumb_mid)
-		
+
 		// 分享 - start
 		let share = {
 			title: goodsDetail.value.goods.goods_name,
@@ -457,19 +491,26 @@ onLoad((option: any) => {
 			}
 		});
 		// 分享 - end
-		
+
 		// 折扣信息
 		if (Object.keys(goodsDetail.value.goods).length && goodsDetail.value.type == 'discount' && goodsDetail.value.goods.is_discount && Object.keys(goodsDetail.value.discount_info).length) {
 			let now = new Date();
 			let timestamp: any = now.getTime();
 			discountTime.value = goodsDetail.value.discount_info.active.end_time * 1000 - timestamp.toFixed(0)
 		}
+		// 商品限购
+		goodsMaxBuy(goodsDetail.value);
 
 		// 获取优惠券列表
 		getShopCouponListFn();
 
 		// 获取评价
 		getEvaluateListFn();
+
+		if(getToken()) {
+			// 我的足迹
+			myBrowseFn(goodsDetail.value.goods.goods_id);
+		}
 
 		copyUrlFn();
 
@@ -490,13 +531,53 @@ onLoad((option: any) => {
 			// #endif
 		})
 	})
-})
+}
 
-onShow(() => {
-	// 删除配送方式
-	uni.removeStorageSync('distributionType');
-	cartStore.getList();
-})
+// 我的足迹
+const myBrowseFn = (goods_id:any)=>{
+	browse({
+		goods_id
+	}).then((res: any) => {})
+}
+
+// 获取满减信息
+let manjianData = ref({})
+const getManjianInfo = ()=>{
+	getManjian({
+		goods_id: pageParameter.goods_id || '',
+		sku_id: pageParameter.sku_id || ''
+	}).then((res: any) => {
+		if(Object.keys(res.data).length){
+			manjianData.value.condition_type = res.data.condition_type;
+			manjianData.value.rule_json = res.data.rule_json;
+			manjianData.value.name = res.data.manjian_name;
+		}
+	})
+}
+
+// 商品限购
+const maxBuy = ref(-1);
+const goodsMaxBuy = (data:any = {})=>{
+	// 限购 - 是否开启限购
+	if(data.goods.is_limit && userInfo.value && data.goods.stock > 0){
+		if(data.goods.max_buy){
+			let max_buy = 0;
+			if(data.goods.limit_type == 1){ //单次限购
+				max_buy = data.goods.max_buy;
+			}else{ // 单人限购
+				let buyVal = data.goods.max_buy - (data.goods.has_buy||0);
+				max_buy = buyVal > 0 ? buyVal : 0;
+			}
+
+			if(max_buy > data.goods.stock){
+				maxBuy.value = data.goods.stock
+			}else if(max_buy <= data.goods.stock){
+				maxBuy.value = max_buy;
+			}
+		}
+	}
+}
+
 
 const specSelectFn = (id: any) => {
 	goodsDetail.value.skuList.forEach((item: any, index: any) => {
@@ -528,7 +609,7 @@ const isShowSingleSku = computed(() => {
 // 判断商品属性模块是否展示
 const isGoodsPropertyTemp = computed(() => {
 	let bool = false;
-	if(goodsDetail.value.service && goodsDetail.value.service.length || 
+	if(goodsDetail.value.service && goodsDetail.value.service.length ||
 	goodsDetail.value.goodsSpec && goodsDetail.value.goodsSpec.length ||
 	goodsDetail.value.goods.goods_type == 'real'&&goodsDetail.value.delivery_type_list&&goodsDetail.value.delivery_type_list.length || couponList.value.length){
 		bool = true;
@@ -536,8 +617,14 @@ const isGoodsPropertyTemp = computed(() => {
 	return bool;
 })
 
+const manjianOpenFn = () =>{
+	manjianShowRef.value.open(manjianData.value);
+}
+
 const buyFn = (type: any) => {
-	goodsSkuRef.value.open(type)
+	if(goodsSkuRef.value){
+		goodsSkuRef.value.open(type)
+	}
 }
 
 // 收藏
@@ -551,7 +638,7 @@ const collectFn = () => {
 		});
 		return false
 	}
-	let api = isCollect.value ? cancelCollect(goodsDetail.value.goods_id) : collect(goodsDetail.value.goods_id);
+	let api = isCollect.value ? cancelCollect({ goods_ids: [goodsDetail.value.goods_id]}) : collect(goodsDetail.value.goods_id);
 	api.then(res => {
 		isCollect.value = !isCollect.value;
 		if (isCollect.value) {
@@ -649,7 +736,7 @@ const imgListPreview = (item:any,index:any) => {
 			urls: urlList
 		})
 	}
-	
+
 }
 
 // 返回上一页
@@ -798,7 +885,8 @@ const priceType = ref('') //''=>原价，新人价=>newcomer_price，discount_pr
 // 商品价格
 const goodsPrice = computed(() => {
     let price = "0.00";
-	if (Object.keys(goodsDetail.value).length && goodsDetail.value.type == 'newcomer_discount' && goodsDetail.value.is_newcomer && goodsDetail.value.newcomer_price != goodsDetail.value.price) {		// 新人价
+	if (Object.keys(goodsDetail.value).length && goodsDetail.value.type == 'newcomer_discount' && goodsDetail.value.is_newcomer && goodsDetail.value.newcomer_price != goodsDetail.value.price) {
+		// 新人价
 		price = goodsDetail.value.newcomer_price;
 		priceType.value = 'newcomer_price'
 	} else if (Object.keys(goodsDetail.value).length && goodsDetail.value.type == 'discount' && Object.keys(goodsDetail.value.goods).length && goodsDetail.value.goods.is_discount && goodsDetail.value.sale_price != goodsDetail.value.price) {
@@ -824,6 +912,7 @@ onUnload(()=>{
 })
 </script>
 <style lang="scss" scoped>
+@import '@/addon/shop/styles/common.scss';
 :deep(.uni-video-bar){
 	bottom: 34rpx !important;
 }
@@ -889,10 +978,27 @@ onUnload(()=>{
 		border-radius: 20rpx;
 		padding: 0 30rpx;
 		display: inline-block;
-	
+
 		&:last-child {
 			margin-left: 40rpx;
 		}
 	}
 }
+/*  #ifdef MP  */
+.goods-price-time{
+	animation: fadein .1s;
+}
+/* 进入动画 */
+@keyframes fadein {
+  0% {
+	opacity: 0;
+  }
+  99% {
+  	opacity: 0;
+  }
+  100% {
+	opacity: 1;
+  }
+}
+/*  #endif  */
 </style>

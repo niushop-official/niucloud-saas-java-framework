@@ -45,5 +45,8 @@ public class ShopOrderGoods implements Serializable {
     private Integer verifyCount; // 已核销次数
     private Long verifyExpireTime; // 过期时间 0 为永久
     private Integer isVerify; // 是否需要核销
+    private Integer isGift; // 是否是赠品
+    private Integer shopActiveRefund; //商家主动退款0：否 1：是
+    private BigDecimal shopActiveRefundMoney; //商家主动退款金额
 
 }

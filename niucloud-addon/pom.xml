@@ -14,13 +14,6 @@
   <name>niucloud-addon</name>
   <description>niucloud 应用管理模块</description>
   <modules>
-    <module>tour</module>
-    <module>sms-email</module>
-    <module>recharge</module>
-    <module>cms</module>
-    <module>shop</module>
-    <module>shop_giftcard</module>
-    <module>shop_fenxiao</module>
   </modules>
   <dependencies>
     <dependency>

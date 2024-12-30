@@ -28,6 +28,7 @@
   "batchOnGoods": "批量上架",
   "batchOffGoods": "批量下架",
   "batchDeleteGoods": "批量删除",
+  "batchSetting": "批量设置",
   "batchEmptySelectedGoodsTips": "请选择要操作的商品",
 
   "goodsInfo": "商品",
@@ -102,10 +103,49 @@
   "memberLevel": "会员等级",
   "memberPricePlaceholder": "请输入会员价",
   "discountHint": "会员折扣说明：按照默认会员等级折扣优惠",
-  "fixedPriceHint": "会员价说明：指定优惠价格，商品未参与活动时，按照会员价优惠，若商品参与活动，则以活动价为准"
-  
-  
-  
-  
-  
+  "fixedPriceHint": "会员价说明：指定优惠价格，商品未参与活动时，按照会员价优惠，若商品参与活动，则以活动价为准",
+
+
+  "addGoodsLabel": "添加商品标签",
+  "addGoodsService": "添加商品服务",
+  "addGoodsCategory": "添加分类",
+  "addGoodsBrand": "添加品牌",
+  "addGoodsPoster": "添加海报",
+  "virtualSaleNumPlaceholder": "请输入虚拟销量",
+  "posterPlaceholder": "请选择商品海报",
+  "goodsCategoryPlaceholderTwo": "请选择商品分类",
+  "virtualSaleNumDesc": "虚拟销量只在前台展示中参与计算",
+  "virtualSaleNumTips": "虚拟销量格式输入错误",
+  "virtualSaleNumNotZeroTips": "虚拟销量不能小于0",
+  "giftTips": "当商品设置为赠品时，该商品仅用于活动赠送，不会在前台展示或出售",
+  "yes": "是",
+  "no": "否",
+  "isFreeShipping": "是否免邮",
+  "feeType": "运费设置",
+  "selectTemplate": "选择模板",
+  "fixedShipping": "统一运费",
+  "deliveryMoney": "固定运费",
+  "deliveryMoneyPlaceholder": "请输入固定运费",
+  "deliveryMoneyTips": "固定运费格式输入错误",
+  "deliveryMoneyNotZeroTips": "固定运费不能小于0",
+  "deliveryTemplateId": "运费模板",
+  "deliveryTemplateIdPlaceholder": "请选择运费模板",
+  "addDeliveryTemplateId": "添加运费模板",
+  "deliveryType": "配送方式",
+  "deliveryTypePlaceholder": "请选择配送方式",
+  "yuan":"元",
+  "label":"商品标签",
+  "service":"商品服务",
+  "virtualSaleNum": "虚拟销量",
+  "goodsBrand": "商品品牌",
+  "goodsPoster": "商品海报",
+  "isGift": "是否赠品",
+  "batchSettingTip": "每次仅能设置一项，点击确认成功之后生效",
+  "setStock": "修改库存",
+  "addStock": "增加库存",
+  "reduceStock": "减少库存",
+  "stockNum": "目标数值",
+  "stockNumTips": "批量调整商品库存，若商品正在参与营销活动，则不会修改库存"
+
+
 }

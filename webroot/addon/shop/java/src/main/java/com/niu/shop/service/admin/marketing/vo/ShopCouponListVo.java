@@ -5,11 +5,9 @@ import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.shop.enums.coupon.CouponReceiveTypeEnum;
 import com.niu.shop.enums.coupon.CouponStatusEnum;
 import com.niu.shop.enums.coupon.CouponTypeEnum;
-import com.niu.shop.enums.goods.GoodsTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.math.BigDecimal;
 
 /**
@@ -23,10 +21,10 @@ public class ShopCouponListVo implements Serializable {
     private Integer id;  // 自增ID
     private Integer siteId;  // 站点id
     private String title;  // 名称
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long startTime; // 活动开启时间
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long endTime; // 活动结束时间
+    //    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private String startTime; // 活动开启时间
+    //    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private String endTime; // 活动结束时间
     private Integer remainCount;  // 剩余数量
     private Integer receiveCount;  // 已领取数量
     private Integer limitCount;  // 单个会员限制领取数量
@@ -49,6 +47,7 @@ public class ShopCouponListVo implements Serializable {
 
     /**
      * 获取券类型
+     *
      * @return
      */
     public String getTypeName() {
@@ -57,6 +56,7 @@ public class ShopCouponListVo implements Serializable {
 
     /**
      * 获取券领取类型
+     *
      * @return
      */
     public String getReceiveTypeName() {
@@ -65,6 +65,7 @@ public class ShopCouponListVo implements Serializable {
 
     /**
      * 获取状态名称
+     *
      * @return
      */
     public String getStatusName() {
@@ -73,13 +74,13 @@ public class ShopCouponListVo implements Serializable {
 
     /**
      * 获取全部数量
+     *
      * @return
      */
-    public Integer getSumCount(){
-        if(this.remainCount != -1)
-        {
+    public Integer getSumCount() {
+        if (this.remainCount != -1) {
             return this.remainCount + this.receiveCount;
-        }else{
+        } else {
             return -1;
         }
     }

@@ -28,7 +28,6 @@ import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
 import storage from '@/utils/storage'
 import { useClipboard } from '@vueuse/core'
-
 import { getUrl } from '@/app/api/sys'
 
 const goods: any = reactive({})

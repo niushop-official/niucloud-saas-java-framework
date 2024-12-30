@@ -93,7 +93,7 @@ public class Member implements Serializable {
     private Long lastVisitTime;
 
     /** 最后消费时间 */
-    private Integer lastConsumTime;
+    private Long lastConsumTime;
 
     /** 性别 0保密 1男 2女 */
     private Integer sex;

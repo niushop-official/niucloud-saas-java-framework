@@ -38,6 +38,7 @@ import com.niu.shop.service.core.delivery.ICoreLocalDeliveryService;
 import com.niu.shop.service.core.delivery.ICoreStoreService;
 import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
+import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.order.ICoreOrderDiscountService;
 import com.niu.shop.service.core.order.ICoreOrderEventService;
 import com.niu.shop.service.core.order.ICoreOrderService;
@@ -52,6 +53,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -98,6 +100,9 @@ public abstract class OrderCreateHelper {
 
     @Resource
     ICoreOrderService coreOrderService;
+
+    @Resource
+    ICoreManjianService coreManjianService;
 
     /**
      * @param orderKey
@@ -239,6 +244,13 @@ public abstract class OrderCreateHelper {
                     address = memberAddressMapper.selectOne(new QueryWrapper<MemberAddress>().eq("id", param.getDelivery().getTakeAddressId()).eq("member_id", param.getMemberId()));
                 } else {
                     address = memberAddressMapper.selectOne(new QueryWrapper<MemberAddress>().eq("is_default", 1).eq("member_id", param.getMemberId()));
+
+                    //如果没有默认地址，将第一个地址设置作为订单地址
+                    if(ObjectUtil.isEmpty(address))
+                    {
+                        address = memberAddressMapper.selectOne(new QueryWrapper<MemberAddress>().eq("member_id", param.getMemberId()).last("LIMIT 1"));
+
+                    }
                 }
 
                 if (deliveryType.equals(OrderDeliveryTypeEnum.LOCAL_DELIVERY.getType()) && ObjectUtil.isNotEmpty(address) && address.getLat().isEmpty()) {
@@ -267,8 +279,21 @@ public abstract class OrderCreateHelper {
             vo.getGoodsData().get(key).setDiscountMoney(new BigDecimal(0));
         }
 
+        this.calculateManjian(vo);
         this.calculateCoupon(vo, param);
+
+
     }
+
+    /**
+     * 计算满减
+     * @param vo
+     */
+    protected void calculateManjian(OrderCreateDataVo vo) {
+        coreManjianService.calculate(vo);
+
+    }
+
 
     /**
      * 计算优惠券优惠
@@ -344,6 +369,7 @@ public abstract class OrderCreateHelper {
                 }
 
                 vo.getBasic().setDiscountMoney(vo.getBasic().getDiscountMoney().add(discountMoney));
+                vo.getBasic().setCouponMoney(vo.getBasic().getCouponMoney().add(discountMoney));
 
                 OrderCreateDataVo.Discount discount = new OrderCreateDataVo.Discount();
                 discount.setMatchGoodsIds(matchGoods.stream().map(i -> i.getSkuId()).toArray(Integer[]::new));
@@ -357,7 +383,10 @@ public abstract class OrderCreateHelper {
                 vo.getDiscount().put("coupon", discount);
             }
         } else {
-            if (vo.getDiscount().get("coupon") != null) vo.getDiscount().remove("coupon");
+            if (vo.getDiscount().get("coupon") != null) {
+                vo.getDiscount().remove("coupon");
+                vo.getBasic().setCouponMoney(BigDecimal.ZERO);
+            }
         }
     }
 
@@ -395,6 +424,28 @@ public abstract class OrderCreateHelper {
             }
 
             coreOrderDiscountService.inserAll(discountList);
+
+        }
+
+        //扩展增加类似满减
+
+        if(ObjectUtil.isNotEmpty(vo.getDiscountList()))
+        {
+            List<ShopOrderDiscount> discountListAll = new LinkedList<>();
+            for (Map.Entry<String, Map<Integer, OrderCreateDataVo.Discount>> entry : vo.getDiscountList().entrySet()) {
+
+                for (OrderCreateDataVo.Discount item : entry.getValue().values()) {
+
+                    ShopOrderDiscount orderDiscount = new ShopOrderDiscount();
+                    BeanUtil.copyProperties(item, orderDiscount);
+                    orderDiscount.setOrderId(vo.getOrderId());
+                    orderDiscount.setCreateTime(System.currentTimeMillis() / 1000);
+                    orderDiscount.setSiteId(vo.getSiteId());
+                    discountListAll.add(orderDiscount);
+                }
+
+                coreOrderDiscountService.inserAll(discountListAll);
+            }
         }
     }
 

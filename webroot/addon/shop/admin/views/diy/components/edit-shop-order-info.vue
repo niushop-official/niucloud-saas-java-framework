@@ -28,7 +28,7 @@
 			<h3 class="mb-[10px]">{{ t('titleStyle') }}</h3>
 			<el-form label-width="80px" class="px-[10px]">
 				<el-form-item :label="t('textFontSize')">
-					<el-slider v-model="diyStore.editComponent.fontSize" show-input size="small" class="ml-[10px] article-slider" :min="12" :max="30" />
+					<el-slider v-model="diyStore.editComponent.fontSize" show-input size="small" class="ml-[10px] diy-nav-slider" :min="12" :max="30" />
 				</el-form-item>
 				<el-form-item :label="t('textFontWeight')">
 					<el-radio-group v-model="diyStore.editComponent.fontWeight">
@@ -55,7 +55,7 @@
 			<h3 class="mb-[10px]">{{ t('textSet') }}</h3>
 			<el-form label-width="90px" class="px-[10px]">
 				<el-form-item :label="t('textFontSize')">
-					<el-slider v-model="diyStore.editComponent.item.fontSize" show-input size="small" class="ml-[10px] graphic-nav-slider" :min="12" :max="16"/>
+					<el-slider v-model="diyStore.editComponent.item.fontSize" show-input size="small" class="ml-[10px] diy-nav-slider" :min="12" :max="16"/>
 				</el-form-item>
 				<el-form-item :label="t('textFontWeight')">
 					<el-radio-group v-model="diyStore.editComponent.item.fontWeight">
@@ -81,7 +81,7 @@ import { ref } from 'vue'
 import useDiyStore from '@/stores/modules/diy'
 
 const diyStore = useDiyStore()
-diyStore.editComponent.ignore = [] // 忽略公共属性
+diyStore.editComponent.ignore = ['componentBgUrl'] // 忽略公共属性
 
 const showDialog = ref(false)
 

@@ -31,6 +31,10 @@ public class ShopGoodsInfoVo implements Serializable {
     private Integer status;  // 商品状态（1.正常0下架）
     private Integer sort;  // 排序
     private String deliveryType;  // 支持的配送方式
+    private Integer isLimit = 0;
+    private Integer limitType = 1;
+    private Integer maxBuy = 0;
+    private Integer minBuy = 0;
     private Integer isFreeShipping;  // 是否免邮
     private String feeType;  // 运费设置，选择模板：template，固定运费：fixed
     private BigDecimal deliveryMoney;  // 固定运费
@@ -45,5 +49,6 @@ public class ShopGoodsInfoVo implements Serializable {
     private Integer isDiscount;  // 是否参与限时折扣
     private String memberDiscount;  // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
     private Integer posterId;  // 海报id
+    private Integer isGift;
 
 }

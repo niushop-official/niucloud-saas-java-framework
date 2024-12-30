@@ -31,6 +31,7 @@ import com.niu.shop.mapper.exchange.ShopPointExchangeMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.api.goods.IGoodsService;
+import com.niu.shop.service.core.goods.ICoreGoodsLimitBuyService;
 import com.niu.shop.service.core.order.ICoreOrderCreateService;
 import com.niu.shop.service.core.order.helper.OrderCreateHelper;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
@@ -81,6 +82,9 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
     @Resource
     ShopPointExchangeMapper shopPointExchangeMapper;
 
+    @Resource
+    ICoreGoodsLimitBuyService coreGoodsLimitBuyService;
+
     /**
      * 计算
      *
@@ -100,6 +104,8 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         // 计算运费
         calculateDelivery(vo, param);
 
+        //检测限购
+        checkGoodsLimitBuy(vo);
         // 计算优惠
         calculateDiscount(vo, param);
 
@@ -148,6 +154,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         order.setBody(vo.getBasic().getBody());
         order.setMemberId(vo.getMemberId());
         order.setGoodsMoney(vo.getBasic().getGoodsMoney());
+
         order.setDeliveryMoney(vo.getBasic().getDeliveryMoney());
         order.setDiscountMoney(vo.getBasic().getDiscountMoney());
         order.setOrderMoney(vo.getBasic().getOrderMoney());
@@ -174,7 +181,36 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         order.setCreateTime(System.currentTimeMillis() / 1000);
 
         // 订单项
+
         List<ShopOrderGoods> orderGoods = new LinkedList<>();
+
+        if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
+        {
+            vo.getGiftGoods().forEach( (Integer key, OrderCreateDataVo.Sku skuItem) -> {
+
+                ShopOrderGoods item = new ShopOrderGoods();
+                item.setSiteId(vo.getSiteId());
+                item.setMemberId(vo.getMemberId());
+                item.setSkuId(skuItem.getSkuId());
+                item.setGoodsId(skuItem.getGoodsId());
+                item.setGoodsName(skuItem.getGoods().getGoodsName());
+                item.setGoodsImage(skuItem.getGoods().getGoodsCover());
+                item.setSkuName(skuItem.getSkuName());
+                item.setSkuImage(skuItem.getSkuImage());
+                item.setPrice(skuItem.getPrice());
+                item.setOriginalPrice(skuItem.getOriginalPrice());
+                item.setNum(skuItem.getNum());
+                item.setGoodsMoney(skuItem.getGoodsMoney());
+                item.setGoodsType(skuItem.getGoods().getGoodsType());
+                item.setDiscountMoney(skuItem.getDiscountMoney());
+                item.setOrderGoodsMoney(skuItem.getGoodsMoney().subtract(skuItem.getDiscountMoney()));
+                item.setStatus(1);
+                item.setIsGift(1);
+                orderGoods.add(item);
+            });
+
+        }
+
         for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
             ShopOrderGoods item = new ShopOrderGoods();
             item.setSiteId(vo.getSiteId());
@@ -193,6 +229,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             item.setDiscountMoney(sku.getDiscountMoney());
             item.setOrderGoodsMoney(sku.getGoodsMoney().subtract(sku.getDiscountMoney()));
             item.setStatus(1);
+            item.setIsGift(0);
             orderGoods.add(item);
         }
 
@@ -207,7 +244,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
      */
     private OrderCreateDataVo confirm(OrderCalculateParam param) {
         OrderCreateDataVo vo = new OrderCreateDataVo();
-        BeanUtil.copyProperties(param, vo);
+        BeanUtil.copyProperties(param, vo, "discount");
 
         // 查询会员信息
         OrderCreateDataVo.Buyer buyer = new OrderCreateDataVo.Buyer();
@@ -224,6 +261,15 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         this.getDelivery(vo, param);
 
         return vo;
+    }
+
+    /**
+     * 检测限购
+     * @param vo
+     */
+    private void checkGoodsLimitBuy(OrderCreateDataVo vo){
+        String res = coreGoodsLimitBuyService.checkGoodsLimitBuy(vo.getMemberId(), vo.getLimitBuy());
+        if(!res.equals("")) throw new CommonException(res);
     }
 
     /**
@@ -265,6 +311,27 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 Assert.notNull(goods, "购物车数据已过期");
                 BeanUtil.copyProperties(goods, goodsVo);
                 skuVo.setGoods(goodsVo);
+
+                //查询商品限购信息
+                OrderCreateDataVo.LimitBuy limitBuy = new OrderCreateDataVo.LimitBuy();
+                limitBuy.setGoodsId(skuVo.getGoodsId());
+                limitBuy.setSiteId(skuVo.getSiteId());
+                limitBuy.setGoodsName(skuVo.getGoods().getGoodsName());
+                limitBuy.setStock(skuVo.getGoods().getStock());
+                limitBuy.setNum(skuVo.getNum());
+                limitBuy.setIsLimit(skuVo.getGoods().getIsLimit());
+                limitBuy.setLimitType(skuVo.getGoods().getLimitType());
+                limitBuy.setMaxBuy(skuVo.getGoods().getMaxBuy());
+                limitBuy.setMinBuy(skuVo.getGoods().getMinBuy());
+                if(ObjectUtil.isEmpty(vo.getLimitBuy()))
+                {
+                    vo.setLimitBuy(new HashMap<>());
+                }
+                if(vo.getLimitBuy().containsKey("goods_" + skuVo.getGoodsId().toString()))
+                {
+                    limitBuy.setNum(limitBuy.getNum() + skuVo.getNum());
+                }
+                vo.getLimitBuy().put("goods_" + skuVo.getGoodsId().toString(), limitBuy);
 
                 if (ObjectUtil.isNotEmpty(vo.getBuyer().getMemberLevel())) {
                     JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(memberPrice) ? JSONUtil.parseObj(memberPrice) : new JSONObject();

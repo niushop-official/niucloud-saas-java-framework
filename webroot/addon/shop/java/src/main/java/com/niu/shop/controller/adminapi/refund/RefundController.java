@@ -3,6 +3,7 @@ package com.niu.shop.controller.adminapi.refund;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.refund.IRefundActionService;
+import com.niu.shop.service.core.refund.param.ActiveRefundParam;
 import com.niu.shop.service.admin.refund.param.AuditApplyParam;
 import com.niu.shop.service.admin.refund.param.AuditRefundGoodsParam;
 import com.niu.shop.service.admin.refund.param.RefundSearchParam;
@@ -76,5 +77,16 @@ public class RefundController {
     @GetMapping("/address")
     public Result refundAddress() {
         return Result.success(shopAddressService.refundAddress());
+    }
+
+    /**
+     * 商家主动退款
+     * @param param
+     * @return
+     */
+    @PostMapping("/active")
+    public Result active(@RequestBody ActiveRefundParam param) {
+        refundActionService.shopActiveRefund(param);
+        return Result.success();
     }
 }

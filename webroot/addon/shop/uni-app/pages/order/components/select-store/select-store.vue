@@ -24,7 +24,7 @@
 				<view class="h-[50vh] flex items-center flex-col justify-center" v-if="loading">
 					<u-loading-icon :vertical="true"></u-loading-icon>
 				</view>
-				<view class="h-[50vh] flex items-center flex-col justify-center" v-if="!loading && !storeList.length">
+				<view class="h-[95%] flex items-center flex-col justify-center" v-if="!loading && !storeList.length">
 					<u-empty text="没有可选择的自提点" :icon="img('static/resource/images/empty.png')"/>
 				</view>
 			</scroll-view>
@@ -50,47 +50,59 @@
         lat:0,
         lng:0
     })
-
-    const open = ()=> {
-	    if (!loaded.value) {
+	
+	const getStoreListFn = (callback:any)=>{
+		if (!loaded.value) {
 		    loaded.value = true
-
-		    uni.getLocation({
-			    type: 'gcj02',
-			    success: (res) => {
-				    latlng.lat = res.latitude
-				    latlng.lng = res.longitude
-			    },
-			    fail: (res) => {
-				    if (res.errno) {
-					    if (res.errno == 104) {
-						    let msg = '用户未授权隐私权限，获取位置失败';
-						    uni.showToast({ title: msg, icon: 'none' })
-					    } else if (res.errno == 112) {
-						    let msg = '隐私协议中未声明，获取位置失败';
-						    uni.showToast({ title: msg, icon: 'none' })
+			
+			if(uni.getStorageSync('location_address')){
+				let location_address = uni.getStorageSync('location_address');
+				latlng.lat = location_address.latitude;
+				latlng.lng = location_address.longitude;
+			}else{
+				uni.getLocation({
+				    type: 'gcj02',
+				    success: (res) => {
+					    latlng.lat = res.latitude
+					    latlng.lng = res.longitude
+				    },
+				    fail: (res) => {
+					    if (res.errno) {
+						    if (res.errno == 104) {
+							    let msg = '用户未授权隐私权限，获取位置失败';
+							    uni.showToast({ title: msg, icon: 'none' })
+						    } else if (res.errno == 112) {
+							    let msg = '隐私协议中未声明，获取位置失败';
+							    uni.showToast({ title: msg, icon: 'none' })
+						    }
+					    }
+					    if (res.errMsg) {
+						    if (res.errMsg.indexOf('getLocation:fail') != -1 || res.errMsg.indexOf('deny') != -1 || res.errMsg.indexOf('denied') != -1) {
+							    let msg = '用户未授权获取位置权限，将无法提供距离最近的门店';
+							    uni.showToast({ title: msg, icon: 'none' })
+						    } else {
+							    uni.showToast({ title: res.errMsg, icon: 'none' })
+						    }
 					    }
 				    }
-				    if (res.errMsg) {
-					    if (res.errMsg.indexOf('getLocation:fail') != -1 || res.errMsg.indexOf('deny') != -1 || res.errMsg.indexOf('denied') != -1) {
-						    let msg = '用户未授权获取位置权限，将无法提供距离最近的门店';
-						    uni.showToast({ title: msg, icon: 'none' })
-					    } else {
-						    uni.showToast({ title: res.errMsg, icon: 'none' })
-					    }
-				    }
-			    }
-		    });
-
+				});
+			}
+		
 		    setTimeout(() => {
 			    getStoreList({ latlng }).then(({ data }) => {
 				    storeList.value = data
+					if(typeof callback == 'function'){
+						callback(data);
+					}
 				    loading.value = false
 			    }).catch(() => {
 				    loading.value = false
 			    })
 		    }, 1500)
-	    }
+		}
+	}
+
+    const open = ()=> {
 	    show.value = true
     }
 
@@ -120,7 +132,8 @@
     }
 
     defineExpose({
-    	open
+    	open,
+		getData: getStoreListFn
     })
 </script>
 

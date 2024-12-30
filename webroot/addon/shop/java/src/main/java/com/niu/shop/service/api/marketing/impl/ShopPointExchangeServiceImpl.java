@@ -3,6 +3,7 @@ package com.niu.shop.service.api.marketing.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.TypeReference;
@@ -54,24 +55,18 @@ import java.util.stream.Collectors;
 public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     private static final List<String> PRESETS_ORDER_COLUMN = List.of("total_order_num", "total_exchange_num", "price");
-
-    @Resource
-    private ShopPointExchangeMapper shopPointExchangeMapper;
-
     @Resource
     ICoreUploadService coreUploadService;
-
     @Resource
     IGoodsService goodsService;
-
     @Resource
     MemberAccountLogMapper memberAccountLogMapper;
-
     @Resource
     ICoreOrderCreateService orderCreateService;
-
     @Resource
     MemberMapper memberMapper;
+    @Resource
+    private ShopPointExchangeMapper shopPointExchangeMapper;
 
     @Override
     public PageResult<ShopPointExchangeListVo> list(PageParam pageParam, ShopPointExchangeSearchParam searchParam) {
@@ -79,7 +74,8 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopPointExchange> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("site_id", RequestUtils.siteId());
+        queryWrapper.eq("site_id", RequestUtils.siteId())
+                .eq("status", 1);
         if (ObjectUtil.isNotEmpty(searchParam.getStatus())) queryWrapper.eq("status", searchParam.getStatus());
         if (ObjectUtil.isNotEmpty(searchParam.getNames()))
             queryWrapper.like("names", "%" + searchParam.getNames() + "%");
@@ -113,7 +109,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             list.add(vo);
         }
 
-        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+        return PageResult.build(iPage, list);
     }
 
     @Override
@@ -254,7 +250,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
                     .findFirst();
             productDetailOptional.ifPresent(detail -> {
                 BeanUtils.copyProperties(detail, skuListDTO);
-                skuListDTO.setSalePrice(detail.getPrice().toString());
+                skuListDTO.setSalePrice(detail.getPrice());
             });
 
             return skuListDTO;
@@ -278,6 +274,11 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             labelInfoDTO.setLabelId(label.getLabelId());
             labelInfoDTO.setLabelName(label.getLabelName());
             labelInfoDTO.setMemo(label.getMemo());
+            labelInfoDTO.setStyleType(label.getStyleType());
+            labelInfoDTO.setIcon(label.getIcon());
+            if (ObjectUtil.isNotEmpty(label.getColorJson())) {
+                labelInfoDTO.setColorJson(JSONUtil.toBean(JSONUtil.parseObj(label.getColorJson()), ShopPointExchangeInfoVo.LabelInfoDTO.ColorJsonDTO.class));
+            }
             return labelInfoDTO;
         }).collect(Collectors.toList());
         shopPointExchangeInfoVo.setLabelInfo(labels);
@@ -296,9 +297,6 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
         if (ObjectUtil.isNotEmpty(searchParam.getNames())) {
             queryWrapper.like("names", searchParam.getNames());
-        }
-        if (ObjectUtil.isNotEmpty(searchParam.getNames())) {
-            queryWrapper.eq("status", searchParam.getStatus());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getIds())) {
             queryWrapper.in("id", searchParam.getIds());

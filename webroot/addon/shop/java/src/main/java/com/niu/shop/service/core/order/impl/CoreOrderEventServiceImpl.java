@@ -6,11 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.utils.NoticeUtils;
-import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.service.core.member.ICoreMemberService;
-import com.niu.core.service.core.notice.ICoreNoticeService;
 import com.niu.shop.entity.cart.ShopCart;
-import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.order.ShopInvoice;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDiscount;
@@ -19,14 +16,16 @@ import com.niu.shop.entity.order.config.ShopOrderInvoice;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.enums.order.*;
 import com.niu.shop.mapper.cart.ShopCartMapper;
-import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.order.ShopInvoiceMapper;
 import com.niu.shop.mapper.order.ShopOrderDiscountMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.service.admin.marketing.IShopDiscountService;
 import com.niu.shop.service.core.goods.ICoreGoodsService;
+import com.niu.shop.service.core.goods.ICoreGoodsStatService;
+import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
+import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.order.*;
 import com.niu.shop.service.core.order.param.*;
 import com.niu.shop.service.core.order.vo.OrderConfigVo;
@@ -42,7 +41,6 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -90,6 +88,12 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
     @Resource
     ICoreMemberService coreMemberService;
 
+    @Resource
+    ICoreManjianService manjianService;
+
+    @Resource
+    ICoreGoodsStatService coreGoodsStatService;
+
     /**
      * 订单关闭之后
      *
@@ -104,7 +108,7 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
 
         List<ShopOrderGoods> orderGoods = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", order.getOrderId()));
 
-        for (ShopOrderGoods item: orderGoods) {
+        for (ShopOrderGoods item : orderGoods) {
             // 扣除销量
             coreGoodsService.decSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
             // 返还库存
@@ -146,12 +150,36 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
             // 创建发票
             this.createInvoice(vo);
 
-            for (OrderCreateDataVo.Sku item: vo.getGoodsData().values()) {
+            for (OrderCreateDataVo.Sku item : vo.getGoodsData().values()) {
                 // 增加销量
                 coreGoodsService.incSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
                 // 减少库存
                 coreGoodsService.decStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+
+                GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
+                goodsAddStatParam.setSiteId(item.getSiteId());
+                goodsAddStatParam.setGoodsId(item.getGoodsId());
+                goodsAddStatParam.setSaleNum(item.getNum());
+                coreGoodsStatService.addStat(goodsAddStatParam);
             }
+
+            //赠品同步增加销量减少库存
+            if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
+            {
+                for (OrderCreateDataVo.Sku item : vo.getGiftGoods().values()) {
+                    // 增加销量
+                    coreGoodsService.incSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+                    // 减少库存
+                    coreGoodsService.decStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+
+                    GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
+                    goodsAddStatParam.setSiteId(item.getSiteId());
+                    goodsAddStatParam.setGoodsId(item.getGoodsId());
+                    goodsAddStatParam.setSaleNum(item.getNum());
+                    coreGoodsStatService.addStat(goodsAddStatParam);
+                }
+            }
+
 
             // 清除购物车
             if (ObjectUtil.isNotEmpty(vo.getCartIds())) {
@@ -169,7 +197,8 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
                 order.setTimeout(System.currentTimeMillis() / 1000 + orderConfig.getCloseOrderInfo().getCloseLength() * 60);
                 shopOrderMapper.updateById(order);
             }
-
+            //订单创建成功之后事件，增加满减赠品记录
+            manjianService.addGiveRecords(vo);
             // 添加订单日志
             AddOrderLogParam logParam = new AddOrderLogParam();
             logParam.setOrderId(vo.getOrderId());
@@ -267,6 +296,9 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         NoticeUtils.send(order.getSiteId(), "shop_order_pay", noticeParam);
 
         shopDiscountService.orderPayAfter(order);
+
+        //满减赠送赠品
+        manjianService.giftGrant(order);
     }
 
     /**

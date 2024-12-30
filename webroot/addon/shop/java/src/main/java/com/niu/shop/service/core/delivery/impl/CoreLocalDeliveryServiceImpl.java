@@ -37,6 +37,12 @@ public class CoreLocalDeliveryServiceImpl implements ICoreLocalDeliveryService {
             return;
         }
 
+        MemberAddress address = (MemberAddress) vo.getDelivery().getTakeAddress();
+        if (ObjectUtil.hasEmpty(address.getLat(), address.getLng())) {
+            vo.getError().add("选择的收货地址缺少经纬度");
+            return;
+        }
+
         BigDecimal goodsMoney = new BigDecimal(0);
         BigDecimal goodsWeight = new BigDecimal(0);
 
@@ -84,7 +90,7 @@ public class CoreLocalDeliveryServiceImpl implements ICoreLocalDeliveryService {
                         Double.valueOf(item.getAreaJson().getCenter().getLat().doubleValue()),
                         Double.valueOf(item.getAreaJson().getCenter().getLng().doubleValue())
                 );
-                if (new BigDecimal(item.getAreaJson().getRadius()).compareTo(new BigDecimal(distance * 1000)) != -1) {
+                if (new BigDecimal(item.getAreaJson().getRadius()).compareTo(new BigDecimal(distance)) >= 0) {
                     inArea = item;
                     break;
                 }
@@ -124,7 +130,7 @@ public class CoreLocalDeliveryServiceImpl implements ICoreLocalDeliveryService {
                     Double.valueOf(address.getLng()),
                     Double.valueOf(local.getCenters().getLat().doubleValue()),
                     Double.valueOf(local.getCenters().getLng().doubleValue())
-            ));
+            )).divide(new BigDecimal(1000), 2, BigDecimal.ROUND_HALF_UP);
             if (distance.compareTo(local.getBaseDist()) == 1) {
                 BigDecimal gradPrice = new BigDecimal(Math.ceil(distance.subtract(local.getBaseDist()).divide(local.getGradDist(), 2, BigDecimal.ROUND_HALF_UP).doubleValue())).multiply(local.getGradPrice());
                 deliveryMoney = deliveryMoney.add(gradPrice);

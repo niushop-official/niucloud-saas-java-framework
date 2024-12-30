@@ -83,10 +83,10 @@
 						<el-color-picker v-model="diyStore.editComponent.priceStyle.mainColor" show-alpha :predefine="diyStore.predefineColors" />
 					</el-form-item>
 					<el-form-item :label="t('topRounded')">
-						<el-slider v-model="diyStore.editComponent.topElementRounded" show-input size="small" class="ml-[10px] graphic-nav-slider" :max="50" />
+						<el-slider v-model="diyStore.editComponent.topElementRounded" show-input size="small" class="ml-[10px] diy-nav-slider" :max="50" />
 					</el-form-item>
 					<el-form-item :label="t('bottomRounded')">
-						<el-slider v-model="diyStore.editComponent.bottomElementRounded" show-input size="small" class="ml-[10px] graphic-nav-slider" :max="50" />
+						<el-slider v-model="diyStore.editComponent.bottomElementRounded" show-input size="small" class="ml-[10px] diy-nav-slider" :max="50" />
 					</el-form-item>
 				</el-form>
 			</div>

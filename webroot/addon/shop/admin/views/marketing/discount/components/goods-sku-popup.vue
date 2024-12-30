@@ -30,7 +30,7 @@
 
 					<el-table-column :label="t('discounts')" width="170">
 						<template #default="{ row }">
-							<el-form-item v-if="row.is_enabled" :key="row.sku_id" :prop="'sku_list.'+row.index + '.discount_rate'" :rules="[{
+							<el-form-item v-if="row.is_enabled" :key="row.sku_id" :prop="'skuList.'+row.index + '.discount_rate'" :rules="[{
                                         trigger: 'blur',
                                         validator: (rule: any, value: any, callback: any) => {
                                             if (value.length == 0) {
@@ -53,7 +53,7 @@
 					</el-table-column>
 					<el-table-column :label="t('reduceMoney')" width="170">
 						<template #default="{ row }">
-							<el-form-item v-if="row.is_enabled" :key="row.sku_id" :prop="'sku_list.'+row.index + '.reduce_money'" :rules="[{
+							<el-form-item v-if="row.is_enabled" :key="row.sku_id" :prop="'skuList.'+row.index + '.reduce_money'" :rules="[{
                                         trigger: 'blur',
                                         validator: (rule: any, value: any, callback: any) => {
                                                 if (value.length == 0) {
@@ -76,7 +76,7 @@
 					</el-table-column>
 					<el-table-column :label="t('promotional')" width="170">
 						<template #default="{ row }">
-							<el-form-item v-if="row.is_enabled" :key="row.sku_id" :prop="'sku_list.'+row.index + '.specify_price'" :rules="[{
+							<el-form-item v-if="row.is_enabled" :key="row.sku_id" :prop="'skuList.'+row.index + '.specify_price'" :rules="[{
                                         trigger: 'blur',
                                         validator: (rule: any, value: any, callback: any) => {
                                                 if (value.length == 0) {
@@ -148,7 +148,7 @@
 
     const showDialog = ref(false);
     const emit = defineEmits(["skuSave"]);
-    const formData: Record<string, any> = ref({sku_list: []})
+    const formData: Record<string, any> = ref({skuList: []})
     const formRef = ref<FormInstance>()
 
     // 表单验证规则
@@ -161,7 +161,7 @@
     const show = (data: any) => {
         formData.value = deepClone(data)
         //设置校验下标
-        formData.value.sku_list.forEach((el: any, index: number) => {
+        formData.value.skuList.forEach((el: any, index: number) => {
             el.index = index
         })
         setGoodsList()
@@ -186,10 +186,10 @@
     })
 
     const setGoodsList = (page = 1) => {
-        if (formData.value.sku_list.length) {
-            goodsTable.data = splitArray(formData.value.sku_list, goodsTable.limit)
+        if (formData.value.skuList.length) {
+            goodsTable.data = splitArray(formData.value.skuList, goodsTable.limit)
             goodsTable.list = goodsTable.data[page - 1]
-            goodsTable.total = parseInt(formData.value.sku_list.length.toString())
+            goodsTable.total = parseInt(formData.value.skuList.length.toString())
             nextTick(()=>{
                 batchOperation.value.discountNumber = ''
                 multipleSelection.value = []
@@ -332,11 +332,11 @@
                 return
             }
         }
-        formData.value.sku_list.forEach((el: any, index: number) => {
+        formData.value.skuList.forEach((el: any, index: number) => {
             multipleSelection.value.forEach((v: any) => {
 
                 if (v.sku_id === el.sku_id&&el.is_enabled===1) {
-
+                    
                     if (batchOperation.value.discount_type == 'discount') {
                         //折扣
                         el.discount_rate = batchOperation.value.discountNumber + ''
@@ -359,9 +359,9 @@
                     }
                     el.discount_type = batchOperation.value.discount_type + ''
                     if (formRef.value) {
-                        formRef.value.validateField('sku_list.' + index + '.discount_rate')
-                        formRef.value.validateField('sku_list.' + index + '.specify_price')
-                        formRef.value.validateField('sku_list.' + index + '.reduce_money')
+                        formRef.value.validateField('skuList.' + index + '.discount_rate')
+                        formRef.value.validateField('skuList.' + index + '.specify_price')
+                        formRef.value.validateField('skuList.' + index + '.reduce_money')
                     }
                 }
             })
@@ -399,10 +399,10 @@
         }
         row.discount_type = discount_type + ''
         if (formRef.value) {
-            // console.log('sku_list.' + index + '.discount_rate')
-            // formRef.value.validateField('sku_list.'+ index + '.discount_rate').catch(()=>{})
-            // formRef.value.validateField('sku_list.'+ index + '.specify_price').catch(()=>{})
-            // formRef.value.validateField('sku_list.'+ index + '.reduce_money').catch(()=>{})
+            // console.log('skuList.' + index + '.discount_rate')
+            // formRef.value.validateField('skuList.'+ index + '.discount_rate').catch(()=>{})
+            // formRef.value.validateField('skuList.'+ index + '.specify_price').catch(()=>{})
+            // formRef.value.validateField('skuList.'+ index + '.reduce_money').catch(()=>{})
         }
     }
 
@@ -457,22 +457,22 @@
 
     const save = (formEl: FormInstance | undefined) => {
         if (!formEl) return
-        for (var i = 0; i < formData.value.sku_list.length; i++) {
-            if (!validFn(formData.value.sku_list[i])) {
+        for (var i = 0; i < formData.value.skuList.length; i++) {
+            if (!validFn(formData.value.skuList[i])) {
                 let page = Math.ceil(i + 1 <= goodsTable.limit ? 1 : (i + 1) / goodsTable.limit)
                 goodsTable.list = goodsTable.data[page - 1]
                 goodsTable.page = page
                 break;
             }
-
+            
         }
         nextTick(async () => {
             await formEl.validate((valid) => {
                 if (valid) {
                     formData.value.valid = true
-                    let discount_rate_list = formData.value.sku_list.filter((el:any)=>el.is_enabled===1).map((el:any)=>Number(el.discount_rate))
-                    let reduce_money_list = formData.value.sku_list.filter((el:any)=>el.is_enabled===1).map((el:any)=>Number(el.reduce_money))
-                    let specify_price_list = formData.value.sku_list.filter((el:any)=>el.is_enabled===1).map((el:any)=>Number(el.specify_price))
+                    let discount_rate_list = formData.value.skuList.filter((el:any)=>el.is_enabled===1).map((el:any)=>Number(el.discount_rate))
+                    let reduce_money_list = formData.value.skuList.filter((el:any)=>el.is_enabled===1).map((el:any)=>Number(el.reduce_money))
+                    let specify_price_list = formData.value.skuList.filter((el:any)=>el.is_enabled===1).map((el:any)=>Number(el.specify_price))
                     formData.value.max_discount_rate = Math.max(...discount_rate_list)
                     formData.value.min_discount_rate = Math.min(...discount_rate_list)
                     formData.value.max_reduce_money = Math.max(...reduce_money_list)

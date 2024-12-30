@@ -1,9 +1,9 @@
 <template>
-	<view class="shop-newcomer overflow-hidden" :style="warpCss" v-if="list && Object.keys(list).length && ( (newcomerTime > 0 && isJoin == 0) || diyStore.mode == 'decorate')">
+	<view class="shop-newcomer overflow-hidden" :style="warpCss" v-if="list && Object.keys(list).length">
 		<view class="style-1 p-[20rpx]" v-if="diyComponent.style.value == 'style-1'">
 			<view class="head flex justify-between items-center mb-[16rpx]" @click="toListFn()">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
-				<view class="time-wrap flex items-center ml-[auto]">
+				<view class="time-wrap flex items-center ml-[auto]" v-show="timeData && Object.keys(timeData).length">
 					<text v-if="!getToken() && diyStore.mode != 'decorate'" class="text-[26rpx]" :style="{color: diyComponent.countDown.otherColor}">活动未开始</text>
 					<block v-else-if="activeState()">
 						<text :style="{color: diyComponent.countDown.otherColor}" class="mr-[10rpx] text-[24rpx]">距结束还有</text>
@@ -31,12 +31,14 @@
 			</view>
 			<scroll-view scroll-x="true" class="content">
 				<view class="flex">
-					<view class="inline-flex bg-[#fff] p-[16rpx] rounded-[var(--goods-rounded-big)] box-border" @click="toDetail(list[0])">
-						<u--image radius="var(--goods-rounded-big)" width="150rpx" height="150rpx" :src="img(list[0].sku_image || '')" model="aspectFill">
-							<template #error>
-								<image class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-							</template>
-						</u--image>
+					<view class="inline-flex bg-[#fff] p-[16rpx] box-border" :style="commonTempCss()" @click="toDetail(list[0])">
+						<view class="w-[150rpx] h-[150rpx] flex items-center justify-center">
+							<u--image radius="var(--goods-rounded-big)" width="150rpx" height="150rpx" :src="img(list[0].sku_image || '')" model="aspectFill">
+								<template #error>
+									<image class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+								</template>
+							</u--image>
+						</view>
 						<view class="flex flex-col ml-[20rpx] py-[4rpx] flex-1">
 							<view class="text-[26rpx] w-[200rpx] whitespace-pre-wrap leading-[1.4] multi-hidden" v-if="list[0].goods">{{list[0].goods.goods_name}}</view>
 							<view class="flex items-center justify-between mt-[auto]">
@@ -49,12 +51,14 @@
 						</view>
 					</view>
 					<block v-for="(item,index) in list" :key="index">
-						<view v-if="index > 0" class="ml-[10rpx] inline-flex flex-col items-center p-[16rpx] bg-[#fff] rounded-[var(--goods-rounded-big)] box-border" @click="toDetail(item)">
-							<u--image radius="var(--goods-rounded-big)" width="110rpx" height="110rpx" :src="img(item.sku_image || '')" model="aspectFill">
-								<template #error>
-									<image class="w-[110rpx] h-[110rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-								</template>
-							</u--image>
+						<view v-if="index > 0" class="ml-[10rpx] inline-flex flex-col items-center p-[16rpx] bg-[#fff] box-border" :style="commonTempCss()" @click="toDetail(item)">
+							<view class="w-[110rpx] h-[110rpx] flex items-center justify-center">
+								<u--image radius="var(--goods-rounded-big)" width="110rpx" height="110rpx" :src="img(item.sku_image || '')" model="aspectFill">
+									<template #error>
+										<image class="w-[110rpx] h-[110rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									</template>
+								</u--image>
+							</view>
 							<view class="flex items-center mt-[auto]">
 								<text class="text-[24rpx] font-500">￥</text>
 								<text class="text-[24rpx] font-500 truncate">{{goodsPrice(item)}}</text>
@@ -67,7 +71,7 @@
 		<view class="style-2 p-[20rpx]" v-if="diyComponent.style.value == 'style-2'">
 			<view class="head flex justify-between items-center mb-[16rpx]" @click="toListFn()">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
-				<view class="time-wrap flex items-center ml-[auto]">
+				<view class="time-wrap flex items-center ml-[auto]" v-show="timeData && Object.keys(timeData).length">
 					<text v-if="!getToken() && diyStore.mode != 'decorate'" class="text-[26rpx]" :style="{color: diyComponent.countDown.otherColor}">活动未开始</text>
 					<block v-else-if="activeState()">
 						<text :style="{color: diyComponent.countDown.otherColor}" class="mr-[10rpx] text-[24rpx]">倒计时</text>
@@ -96,12 +100,14 @@
 			</view>
 			<scroll-view scroll-x="true" class="content">
 				<view class="flex">
-					<view v-for="(item,index) in list" :key="index" class="item-bg mr-[10rpx] inline-flex flex-col items-center p-[6rpx] bg-[#fff] rounded-[var(--rounded-small)] box-border" @click="toDetail(item)">
-						<u--image radius="var(--goods-rounded-small)" width="146rpx" height="146rpx" :src="img(item.sku_image || '')" model="aspectFill">
-							<template #error>
-								<image class="w-[146rpx] h-[146rpx] rounded-[var(--goods-rounded-small)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-							</template>
-						</u--image>
+					<view v-for="(item,index) in list" :key="index" class="item-bg mr-[10rpx] inline-flex flex-col items-center p-[6rpx] bg-[#fff] box-border" :style="commonTempCss()" @click="toDetail(item)">
+						<view class="flex items-center justify-center w-[146rpx] h-[146rpx]">
+							<u--image radius="var(--goods-rounded-small)" width="146rpx" height="146rpx" :src="img(item.sku_image || '')" model="aspectFill">
+								<template #error>
+									<image class="w-[146rpx] h-[146rpx] rounded-[var(--goods-rounded-small)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+								</template>
+							</u--image>
+						</view>
 						<image class="h-[32rpx] w-[auto] mt-[12rpx] mb-[8rpx]" :src="img('addon/shop/diy/newcomer/style_2_img.png')" mode="heightFix"></image>
 						<view class="flex items-center text-[#fff] pb-[4rpx]">
 							<text class="text-[20rpx] font-500">￥</text>
@@ -114,7 +120,7 @@
 		<view class="style-3 pt-[20rpx] pb-[10rpx] px-[10rpx]" v-if="diyComponent.style.value == 'style-3'">
 			<view class="head flex mx-[10rpx] items-center mb-[12rpx]" @click="toListFn()">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto] mr-[16rpx]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
-				<view class="time-wrap flex items-center">
+				<view class="time-wrap flex items-center" v-show="timeData && Object.keys(timeData).length">
 					<text v-if="!getToken() && diyStore.mode != 'decorate'" :style="{color: diyComponent.countDown.otherColor}" class="text-[26rpx]">活动未开始</text>
 					<up-count-down v-else-if="activeState()" class="text-[#fff] text-[28rpx]" :time="newcomerTime" format="HH:mm:ss" @change="onChange">
 						<view class="flex">
@@ -143,7 +149,7 @@
 			</view>
 			<scroll-view scroll-x="true" class="content bg-[#fff] box-border p-[16rpx] rounded-[var(--rounded-small)]">
 				<view class="flex">
-					<view v-for="(item,index) in list" :key="index" class="item-bg inline-flex flex-col items-center box-border" :class="{'mr-[16rpx]': index != (list.length-1)}" @click="toDetail(item)">
+					<view v-for="(item,index) in list" :key="index" class="item-bg inline-flex flex-col items-center box-border" :class="{'mr-[16rpx]': index != (list.length-1)}" :style="commonTempCss()" @click="toDetail(item)">
 						<view class="bg-[#f8f8f8] flex items-center justify-center w-[152rpx] h-[152rpx]">
 							<u--image radius="var(--goods-rounded-small)" width="152rpx" height="152rpx" :src="img(item.sku_image || '')" model="aspectFill">
 								<template #error>
@@ -163,7 +169,7 @@
 		<view class="style-4 p-[20rpx] pt-[24rpx]" v-if="diyComponent.style.value == 'style-4'"  :style="{ background: 'url(' + img('addon/shop/diy/newcomer/style_4_head.png') + ') no-repeat'}">
 			<view class="head flex mx-[10rpx] items-center justify-between mb-[24rpx]">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
-				<view class="time-wrap ml-[auto] flex items-center -mt-[8rpx]">
+				<view class="time-wrap ml-[auto] flex items-center -mt-[8rpx]" v-show="timeData && Object.keys(timeData).length">
 					<text v-if="!getToken() && diyStore.mode != 'decorate'" :style="{color: diyComponent.countDown.otherColor}" class="w-[200rpx] text-center text-[26rpx] pb-[4rpx]">活动未开始</text>
 					<block v-else-if="activeState()">
 						<text :style="{color: diyComponent.countDown.otherColor}" class="mr-[8rpx] text-[24rpx]">本场仅剩</text>
@@ -191,8 +197,8 @@
 			</view>
 			<scroll-view scroll-x="true" class="content">
 				<view class="flex">
-					<view v-for="(item,index) in list" :key="index" class="item-bg inline-flex flex-col items-center box-border" :class="{'mr-[20rpx]': index != (list.length-1)}" @click="toDetail(item)">
-						<view class="relative flex items-center justify-center w-[100%] pt-[40rpx] mb-[10rpx]">
+					<view v-for="(item,index) in list" :key="index" class="item-bg inline-flex flex-col items-center box-border" :class="{'mr-[20rpx]': index != (list.length-1)}" :style="commonTempCss()" @click="toDetail(item)">
+						<view class="relative flex items-center justify-center w-[100%] h-[130rpx] pt-[40rpx] mb-[10rpx]">
 							<u--image radius="var(--goods-rounded-small)" width="130rpx" height="130rpx" :src="img(item.sku_image || '')" model="aspectFill">
 								<template #error>
 									<image class="w-[130rpx] h-[130rpx] rounded-[var(--goods-rounded-small)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
@@ -233,17 +239,17 @@
 			return props.component;
 		}
 	})
-	
+
 	/********* 倒计时 - start ***********/
-	// 使用 reactive 创建响应式对象  
+	// 使用 reactive 创建响应式对象
 	const timeData = ref({});
-	// 定义 onChange 方法  
-	const onChange = (e) => {  
-	  timeData.value = e;  
+	// 定义 onChange 方法
+	const onChange = (e) => {
+	  timeData.value = e;
 	};
 	const newcomerTime: any = ref('');
 	/********* 倒计时 - end ***********/
-	
+
 	const goodsPrice = (data: any)=> {
 		let price: any = 0;
 		if (data && data.newcomer_price) {
@@ -251,25 +257,24 @@
 		}
 		return price;
 	}
-	
+
 	// 将天转换成时
 	const dayTransitionHours = ()=>{
-		let val = timeData.value.days * 24 + timeData.value.hours;
-		val = val && val != NaN ? val : 0;
-		val = val >=10 ? val : '0' + val;
-		return val;
+		let num = timeData.value.days * 24 + timeData.value.hours;
+		num = num ? num : 0;
+		num = num >=10 ? num : '0' + num;
+		return num;
 	}
-	
+
 	// 活动状态
 	const activeState = ()=>{
 		let bool = true;
-		if(diyStore.mode != 'decorate' && timeData.value.days <= 0 && timeData.value.hours <= 0 && timeData.value.minutes <= 0 && timeData.value.seconds <= 0 && timeData.value.milliseconds <= 0)
-		{
+		if(diyStore.mode != 'decorate' && timeData.value.days <= 0 && timeData.value.hours <= 0 && timeData.value.minutes <= 0 && timeData.value.seconds <= 0 && timeData.value.milliseconds <= 0){
 			bool = false;
-		} 
+		}
 		return bool;
 	}
-	
+
 	const warpCss = computed(() => {
 		var style = '';
         style += 'position:relative;';
@@ -278,18 +283,13 @@
             else style += 'background-color:' + diyComponent.value.componentStartBgColor + ';';
         }
 
-        if(diyComponent.value.componentBgUrl) {
-            style += `background-image:url('${ img(diyComponent.value.componentBgUrl) }');`;
-            style += 'background-size: cover;background-repeat: no-repeat;';
-        }
-
 		if (diyComponent.value.topRounded) style += 'border-top-left-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
 		if (diyComponent.value.topRounded) style += 'border-top-right-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-left-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
 		return style;
 	})
-	
+
 	// 倒计时样式
 	const countDownTextCss = computed(() => {
 		var style = '';
@@ -303,6 +303,17 @@
 		return style;
 	})
 	
+	
+	// 公共模块颜色
+	const commonTempCss = ()=>{
+		var style = '';
+		if (diyComponent.value.topElementRounded) style += 'border-top-left-radius:' + diyComponent.value.topElementRounded * 2 + 'rpx;';
+		if (diyComponent.value.topElementRounded) style += 'border-top-right-radius:' + diyComponent.value.topElementRounded * 2 + 'rpx;';
+		if (diyComponent.value.bottomElementRounded) style += 'border-bottom-left-radius:' + diyComponent.value.bottomElementRounded * 2 + 'rpx;';
+		if (diyComponent.value.bottomElementRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomElementRounded * 2 + 'rpx;';
+		return style;
+	}
+
 	// 副标题样式
 	const subTitleCss = computed(() => {
 		var style = '';
@@ -315,10 +326,8 @@
 		if (diyComponent.value.subTitle.textColor) style += 'color:' + diyComponent.value.subTitle.textColor + ';';
 		return style;
 	})
-	
-	const list: any = ref([])
-	const isJoin = ref(0) // 是否参与过新人专享活动，1：是，0：否
 
+	const list: any = ref([])
 	const getNewcomerListFn = () => {
 		let data = {
 			limit: diyComponent.value.source == 'all' ? diyComponent.value.num : '',
@@ -326,7 +335,6 @@
 		}
 		getNewcomersComponentsList(data).then((res: any) => {
 			newcomerTime.value = res.data.validity_time;
-			isJoin.value = res.data.is_join;
 			let now = new Date();
 			let timestamp: any = now.getTime();
 			newcomerTime.value = Number(newcomerTime.value) * 1000 - timestamp;
@@ -442,7 +450,6 @@
 			}
 			.item-bg{
 				background: linear-gradient(#FFFFFF 60%, #f7f7f7 100%);
-				border-radius: 20rpx;
 			}
 			.btn-bg{
 				background: linear-gradient( 140deg, #FE2B2B 0%, #FF7236 100%);

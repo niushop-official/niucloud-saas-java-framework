@@ -1,7 +1,12 @@
 package com.niu.shop.service.api.cart;
 
+import cn.hutool.json.JSONObject;
+import com.niu.shop.service.api.cart.param.ShopCartCalculateParam;
 import com.niu.shop.service.api.cart.param.ShopCartDeleteParam;
 import com.niu.shop.service.api.cart.param.ShopCartParam;
+import com.niu.shop.service.api.cart.vo.ShopCartCalculateResVo;
+import com.niu.shop.service.api.cart.vo.ShopCartCalculateVo;
+import com.niu.shop.service.api.cart.vo.ShopCartGoodsListVo;
 import com.niu.shop.service.api.cart.vo.ShopCartListVo;
 
 import java.util.List;
@@ -17,6 +22,27 @@ public interface IShopCartService {
      * @return PageResult<ShopCartListVo>
      */
     List<ShopCartListVo> list();
+
+    /**
+     * 购物车商品列表
+     * @return PageResult<ShopCartListVo>
+     */
+    List<ShopCartGoodsListVo> goodsList();
+
+    /**
+     * 购物车计算
+     * @param calculateParam
+     * @return
+     */
+    ShopCartCalculateResVo calculate(ShopCartCalculateParam calculateParam);
+
+    /**
+     * 购物车计算获取商品
+     * @param calculateParam
+     * @return
+     */
+    ShopCartCalculateVo getGoods(ShopCartCalculateParam calculateParam);
+
 
     /**
      * 购物车添加
@@ -48,4 +74,6 @@ public interface IShopCartService {
      * @return
      */
     Integer getSum(Integer goodsId);
+
+
 }

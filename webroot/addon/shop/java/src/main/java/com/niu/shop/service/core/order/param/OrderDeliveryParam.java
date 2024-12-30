@@ -19,7 +19,11 @@ public class OrderDeliveryParam implements Serializable {
 
     private String deliveryType;
 
+    private String deliveryWay;
+
     private String remark;
+
+    private Integer electronicSheetId;
 
     /**
      * 物流配送填写物流公司以及编码

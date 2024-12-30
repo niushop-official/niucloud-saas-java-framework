@@ -53,7 +53,7 @@ public class MemberCashOutInfoVo implements Serializable {
         return MemberCashOutStatusEnum.getNameByStatus(this.status);
     }
 
-    public String getRransferTypeName() {
+    public String getTransferTypeName() {
         if (this.transferType.isEmpty()) return "";
         return TransferTypeEnum.getNameByType(this.transferType);
     }

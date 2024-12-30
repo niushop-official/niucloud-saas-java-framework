@@ -87,9 +87,10 @@
                                     </el-image>
                                     <img v-else class="w-[70px] h-[70px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
                                 </div>
-                                <div class="ml-2">
+                                <div class="ml-2  flex flex-col items-start">
                                     <span :title="row.goods_name" class="multi-hidden">{{ row.goods_name }}</span>
                                     <span class="text-primary text-[12px]">{{ row.goods_type_name }}</span>
+                                    <span class="px-[4px]  text-[12px] text-[#fff] rounded-[4px] bg-primary leading-[18px]" v-if="row.is_gift == 1">赠品</span>
                                 </div>
                             </div>
                         </template>
@@ -98,7 +99,7 @@
                     <el-table-column prop="price" :label="t('skuPrice')" min-width="120" align="right" sortable="custom">
                         <template #default="{ row }">
                             <div class="cursor-pointer price-wrap" @click="editPriceEvent(row)">
-                                <span>￥{{ row.goods_sku.price }}</span>
+                                <span>￥{{ row.goodsSku.price }}</span>
                                 <el-icon class="icon-wrap ml-[5px] invisible">
                                     <EditPen />
                                 </el-icon>
@@ -125,7 +126,7 @@
                     </el-table-column>
                     <el-table-column prop="sort" :label="t('sort')" min-width="120" sortable="custom">
                         <template #default="{ row }">
-                            <el-input v-model="row.sort" class="w-[70px]" maxlength="8" @blur="sortInputListener(row.sort, row)" />
+                            <el-input v-model.trim="row.sort" class="w-[70px]" maxlength="8" @blur="sortInputListener(row.sort, row)" />
                         </template>
                     </el-table-column>
 
@@ -182,7 +183,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
-import { debounce, img, filterDigit } from '@/utils/common'
+import { debounce, img, filterDigit,setTablePageStorage,getTablePageStorage } from '@/utils/common'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { cloneDeep } from 'lodash-es'
@@ -535,12 +536,15 @@ const loadGoodsList = (page: number = 1) => {
         goodsTable.loading = false
         goodsTable.data = res.data.data
         goodsTable.total = res.data.total
+        multipleSelection.value = [];
+        toggleCheckbox.value = false;
+        setTablePageStorage(goodsTable.page,goodsTable.limit,searchData);
     }).catch(() => {
         goodsTable.loading = false
     })
 }
 
-loadGoodsList()
+loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
 
 /**
  * 添加商品

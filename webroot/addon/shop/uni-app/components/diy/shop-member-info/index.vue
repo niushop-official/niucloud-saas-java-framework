@@ -13,11 +13,11 @@
 						<view class="text-[26rpx] font-400 leading-[28rpx] ml-[10rpx]" v-if="info.mobile">{{info.mobile.replace(info.mobile.substring(3,7), "****")}}</view>
 
 						<!-- #ifdef H5 -->
-						<view v-else-if="!info.mobile" @click="bindMobileFn" class="text-[22rpx] ml-[10rpx] px-[6rpx] border-[1rpx] border-solid border-[#E3E4E9] rounded-[8rpx] h-[34rpx] flex-center" :style="{ borderColor : diyComponent.textColor }">{{ t('bindMobile') }}</view>
+						<view v-else-if="!info.mobile" @click="bindMobileFn" class="text-[22rpx] ml-[10rpx] px-[6rpx] border-[1rpx] border-solid border-[#E3E4E9] rounded-[8rpx] h-[34rpx] flex-center" :style="diyComponent.textColor ? { boxShadow: '0 0 0 1rpx ' + diyComponent.textColor, border: 'none' } : {}">{{ t('bindMobile') }}</view>
 						<!-- #endif -->
 
 						<!-- #ifdef MP-WEIXIN -->
-						<button v-else-if="!info.mobile" class="text-[22rpx] ml-[10rpx] bg-[#fff] px-[6rpx] border-[1rpx] border-solid border-[#E3E4E9] rounded-[8rpx] h-[37rpx] flex-center mr-0" :style="{ borderColor : diyComponent.textColor }" open-type="getPhoneNumber" @getphonenumber="memberStore.bindMobile">{{t('bindMobile')}}</button>
+						<button v-else-if="!info.mobile" class="text-[22rpx] ml-[10rpx] bg-[#fff] px-[6rpx] border-[1rpx] border-solid border-[#E3E4E9] rounded-[8rpx] h-[37rpx] flex-center mr-0" :style="diyComponent.textColor ? { boxShadow: '0 0 0 1rpx ' + diyComponent.textColor, border: 'none' } : {}" open-type="getPhoneNumber" @getphonenumber="memberStore.bindMobile">{{t('bindMobile')}}</button>
 						<!-- #endif -->
 
 					</view>

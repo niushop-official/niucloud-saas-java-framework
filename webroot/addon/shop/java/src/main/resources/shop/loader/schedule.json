@@ -36,6 +36,18 @@
 		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
 	},
 	{
+		"key": "ManjianStartJob",
+		"name": "满减活动到时自动开启",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
+		"key": "ManjianEndJob",
+		"name": "满减活动到时自动关闭",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
 		"key": "CouponMemberExpireJob",
 		"name": "优惠券到期自动过期",
 		"desc": "",

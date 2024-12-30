@@ -14,17 +14,11 @@ import com.niu.core.entity.pay.Pay;
 import com.niu.core.mapper.pay.PayMapper;
 import com.niu.shop.entity.delivery.ShopDeliveryCompany;
 import com.niu.shop.entity.delivery.ShopStore;
-import com.niu.shop.entity.order.ShopOrder;
-import com.niu.shop.entity.order.ShopOrderDelivery;
-import com.niu.shop.entity.order.ShopOrderGoods;
-import com.niu.shop.entity.order.ShopOrderRefund;
+import com.niu.shop.entity.order.*;
 import com.niu.shop.enums.order.*;
 import com.niu.shop.mapper.delivery.ShopDeliveryCompanyMapper;
 import com.niu.shop.mapper.delivery.ShopStoreMapper;
-import com.niu.shop.mapper.order.ShopOrderDeliveryMapper;
-import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
-import com.niu.shop.mapper.order.ShopOrderMapper;
-import com.niu.shop.mapper.order.ShopOrderRefundMapper;
+import com.niu.shop.mapper.order.*;
 import com.niu.shop.service.api.order.param.DeliveryPackageSearchParam;
 import com.niu.shop.service.api.order.param.ShopOrderSearchParam;
 import com.niu.shop.service.api.order.vo.DeliveryPackageVo;
@@ -60,6 +54,9 @@ public class OrderServiceImpl implements IOrderService {
 
     @Resource
     ShopOrderGoodsMapper shopOrderGoodsMapper;
+
+    @Resource
+    ShopOrderDiscountMapper shopOrderDiscountMapper;
 
     @Resource
     ICoreOrderConfigService coreOrderConfigService;
@@ -101,8 +98,8 @@ public class OrderServiceImpl implements IOrderService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.eq("member_id", RequestUtils.memberId());
         if (ObjectUtil.isNotEmpty(searchParam.getOrderNo())) queryWrapper.like("order_no", searchParam.getOrderNo());
-        if (ObjectUtil.isNotEmpty(searchParam.getStatus())) queryWrapper.like("status", searchParam.getStatus());
-        if (ObjectUtil.isNotEmpty(searchParam.getActivityType())) queryWrapper.like("activity_type", searchParam.getActivityType());
+        if (ObjectUtil.isNotEmpty(searchParam.getStatus())) queryWrapper.eq("status", searchParam.getStatus());
+        if (ObjectUtil.isNotEmpty(searchParam.getActivityType())) queryWrapper.eq("activity_type", searchParam.getActivityType());
         queryWrapper.orderByDesc("create_time");
 
         OrderConfigVo orderConfig = coreOrderConfigService.getConfig(RequestUtils.siteId());
@@ -184,6 +181,25 @@ public class OrderServiceImpl implements IOrderService {
         if (vo.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType())) {
             List<ShopOrderInfoVo.OrderDelivery> orderDelivery = CollectUtils.convert(shopOrderDeliveryMapper.selectList(new QueryWrapper<ShopOrderDelivery>().eq("order_id", vo.getOrderId())), ShopOrderInfoVo.OrderDelivery.class);
             vo.setOrderDelivery(orderDelivery);
+        }
+
+        //查询订单优惠信息
+        List<ShopOrderDiscount> shopOrderDiscountList = shopOrderDiscountMapper.selectList(new QueryWrapper<ShopOrderDiscount>().eq("order_id", vo.getOrderId()));
+
+        if(ObjectUtil.isNotEmpty(shopOrderDiscountList))
+        {
+            for(ShopOrderDiscount shopOrderDiscount : shopOrderDiscountList)
+            {
+                if(shopOrderDiscount.getDiscountType().equals("coupon"))
+                {
+                    vo.setCouponMoney(vo.getCouponMoney().add(shopOrderDiscount.getMoney()));
+                }
+                if(shopOrderDiscount.getDiscountType().equals("manjian"))
+                {
+                    vo.setManjianDiscountMoney(vo.getManjianDiscountMoney().add(shopOrderDiscount.getMoney()));
+                }
+            }
+            vo.setOrderDiscount(shopOrderDiscountList);
         }
 
         return vo;

@@ -22,7 +22,7 @@
             <!-- 批量设置 -->
             <div class="batch-operation-sku" v-if="activeGoodsCount == 0 && goodsTable.data.length > 1">
                 <label>{{ t('batchOperationSku') }}</label>
-                <el-input v-model="batchOperation.value" clearable :placeholder="t('stock')" class="set-input" maxlength="8" :autofocus="true" />
+                <el-input v-model.trim="batchOperation.value" clearable :placeholder="t('stock')" class="set-input" maxlength="8" :autofocus="true" />
                 <el-button type="primary" @click="saveBatch">{{ t('confirm') }}</el-button>
             </div>
 
@@ -35,7 +35,7 @@
                 <el-table-column prop="price" :label="t('price')" min-width="120" />
                 <el-table-column prop="stock" :label="t('stock')" min-width="120">
                     <template #default="{ row }">
-                        <el-input v-model="row.stock" clearable placeholder="0" maxlength="8" :disabled="activeGoodsCount > 0" />
+                        <el-input v-model.trim="row.stock" clearable placeholder="0" maxlength="8" :disabled="activeGoodsCount > 0" />
                     </template>
                 </el-table-column>
 

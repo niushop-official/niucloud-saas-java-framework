@@ -17,8 +17,6 @@ import { useRoute, useRouter } from 'vue-router'
 import useSystemStore from '@/stores/modules/system'
 import useUserStore from '@/stores/modules/user'
 import menuItem from './menu-item.vue'
-import storage from '@/utils/storage'
-import { img } from '@/utils/common'
 
 const logo = ref('@/app/assets/images/login_logo.png')
 const systemStore = useSystemStore()

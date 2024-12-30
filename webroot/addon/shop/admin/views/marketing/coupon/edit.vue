@@ -2,7 +2,7 @@
     <div class="main-container">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <!-- 表单 -->
@@ -11,12 +11,12 @@
                 <!-- 优惠券信息 -->
                 <!-- 优惠券名称 -->
                 <el-form-item :label="t('title')" prop="title">
-                    <el-input v-model="formData.title" clearable :placeholder="t('titlePlaceholder')" class="input-width" :maxlength="20" />
+                    <el-input v-model.trim="formData.title" clearable :placeholder="t('titlePlaceholder')" class="input-width" :maxlength="20" />
                 </el-form-item>
 
                 <!-- 优惠券面额 -->
                 <el-form-item :label="t('price')" prop="price">
-                    <el-input v-model="formData.price" @keyup="filterDigit($event)"  clearable :placeholder="t('pricePlaceholder')" class="input-width" maxlength="5" />
+                    <el-input v-model.trim="formData.price" @keyup="filterDigit($event)"  clearable :placeholder="t('pricePlaceholder')" class="input-width" maxlength="5" />
                 </el-form-item>
 
                 <!-- 优惠券类型 -->
@@ -53,7 +53,7 @@
                 <el-form-item v-if="formData.threshold == 1" prop="min_condition_money">
                     最低满
                     <div class="flex items-center px-[5px]">
-                        <el-input v-model="formData.min_condition_money" @keyup="filterDigit($event)" clearable class="!w-[100px]" />
+                        <el-input v-model.trim="formData.min_condition_money" @keyup="filterDigit($event)" clearable class="!w-[100px]" />
                     </div>
                     元可用
                 </el-form-item>
@@ -69,7 +69,7 @@
                 <el-form-item v-show="formData.valid_type == 1">
                     领劵后立即生效，有效期
                     <div class="flex items-center px-[5px]">
-                        <el-input v-model="formData.length" @keyup="filterNumber($event)" clearable class="!w-[100px]" />
+                        <el-input v-model.trim="formData.length" @keyup="filterNumber($event)" clearable class="!w-[100px]" />
                     </div>
                     天
                 </el-form-item>
@@ -118,7 +118,7 @@
                 <el-form-item v-show="formData.limit == 1 && formData.receive_type == 1" prop="remain_count">
                     <div>
                         <el-input onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode) ) )'
-                            v-model="formData.remain_count" clearable :placeholder="t('remainCountPlaceholder')"
+                            v-model.trim="formData.remain_count" clearable :placeholder="t('remainCountPlaceholder')"
                             class="input-width" :min="formData.remain_count" :max="100000" :controls="false" maxlength="6">
                             <template #append>张</template>
                         </el-input>
@@ -128,7 +128,7 @@
                 <!-- 用户可领取数量 -->
                 <el-form-item :label="t('userLimitCount')" prop="limit_count" v-show="formData.receive_type == 1">
                     <el-input onkeypress='return( /[\d]/.test(String.fromCharCode(event.keyCode) ) )'
-                        v-model="formData.limit_count" clearable :placeholder="t('userLimitCountPlaceholder')"
+                        v-model.trim="formData.limit_count" clearable :placeholder="t('userLimitCountPlaceholder')"
                         class="input-width" :min="1" :max="100000" maxlength="6">
                         <template #append>张</template>
                     </el-input>
@@ -158,7 +158,6 @@ import { ArrowLeft } from '@element-plus/icons-vue'
 import { filterNumber, filterDigit } from '@/utils/common'
 import goodsSelectPopup from '@/addon/shop/views/goods/components/goods-select-popup.vue'
 import { cloneDeep } from 'lodash-es'
-import Test from "@/utils/test"
 
 const route = useRoute()
 const router = useRouter()
@@ -331,7 +330,7 @@ const getCouponInfoFn = (id: any) => {
     loading.value = true
     getCouponInfo(id).then(res => {
         formData.value = Object.assign(formData.value, res.data)
-        if (!Test.empty(formData.value.start_time) && !Test.empty(formData.value.end_time)) {
+        if (parseInt(formData.value.start_time) != 0 && parseInt(formData.value.end_time) != 0) {
             const start_time = new Date(formData.value.start_time)
             const end_time = new Date(formData.value.end_time)
             formData.value.receive_type_time = 1
@@ -371,7 +370,7 @@ const goodsCategoryFormatting = (data: any) => {
 }
 
 const back = () => {
-    history.back()
+    router.push('/shop/marketing/coupon/list')
 }
 </script>
 

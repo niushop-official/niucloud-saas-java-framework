@@ -48,7 +48,6 @@ import useSystemStore from '@/stores/modules/system'
 import useUserStore from '@/stores/modules/user'
 import { ADMIN_ROUTE,findFirstValidRoute } from "@/router/routers"
 import { img, isUrl } from '@/utils/common'
-import { getWebsite } from '@/app/api/sys'
 import menuItem from './menu-item.vue'
 
 const route = useRoute()
@@ -79,17 +78,6 @@ watch(route, () => {
     oneMenuActive.value = route.matched[1].name == ADMIN_ROUTE.children[0].name ? route.matched[2].name : route.matched[1].name
 }, { immediate: true })
 
-// const logoShow = ref<boolean>(false)
-// const getWebsiteFn = ()=>{
-//     getWebsite().then((res:any)=>{
-//         logoUrl.value = res.data.icon
-//         console.log(res)
-//         logoShow.value = true
-//     }).catch(()=>{
-//         logoShow.value = true
-//     })
-// }
-// getWebsiteFn()
 </script>
 
 <style lang="scss">

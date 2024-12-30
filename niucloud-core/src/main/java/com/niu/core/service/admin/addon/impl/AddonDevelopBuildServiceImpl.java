@@ -56,7 +56,9 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
         this.addonPath = WebAppEnvs.get().webRootDownAddon + addon + "/";
 
         try {
-            FileUtils.cleanDirectory(new File(this.addonPath));
+            for (File child : new File(this.addonPath).listFiles()) {
+                if (child.isDirectory() && !child.getName().equals("sql")) FileUtils.cleanDirectory(child);
+            }
             FileUtils.copyFile(infoFile, new File(this.addonPath + "info.json"));
         } catch (Exception e) {
             throw new CommonException(e.getMessage());

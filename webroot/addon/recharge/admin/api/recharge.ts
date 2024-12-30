@@ -8,7 +8,7 @@ import request from '@/utils/request'
  * @returns
  */
 export function getRechargeOrderList(params: Record<string, any>) {
-    return request.get(`recharge/order`, {params})
+    return request.get(`recharge/order`, { params })
 }
 
 /**
@@ -17,7 +17,7 @@ export function getRechargeOrderList(params: Record<string, any>) {
  * @returns
  */
 export function getRechargeStat(params: Record<string, any>) {
-    return request.get(`recharge/order/stat`, {params})
+    return request.get(`recharge/order/stat`, { params })
 }
 
 /**
@@ -26,7 +26,7 @@ export function getRechargeStat(params: Record<string, any>) {
  * @returns
  */
 export function getRechargeOrderInfo(order_id: number) {
-    return request.get(`recharge/order/${order_id}`);
+    return request.get(`recharge/order/${ order_id }`);
 }
 
 /**
@@ -42,7 +42,7 @@ export function getRechargeOrderStatusList() {
  * @returns
  */
 export function getRechargeRefund(params: Record<string, any>) {
-    return request.get(`recharge/refund`, {params})
+    return request.get(`recharge/refund`, { params })
 }
 
 /**
@@ -58,7 +58,7 @@ export function getRechargeRefundStatus() {
  * @returns
  */
 export function rechargeRefund(order_id: number) {
-    return request.put(`recharge/refund/${order_id}`, {}, {showSuccessMessage: true});
+    return request.put(`recharge/refund/${ order_id }`, {}, { showSuccessMessage: true });
 }
 
 /**
@@ -67,4 +67,105 @@ export function rechargeRefund(order_id: number) {
  */
 export function getRechargeRefundStat() {
     return request.get(`recharge/refund/stat`);
+}
+
+/**
+ * 获取充值套餐列表
+ * @param params
+ * @returns
+ */
+export function getRechargePackageList(params: Record<string, any>) {
+    return request.get(`recharge/package`, { params })
+}
+
+/**
+ * 获取充值套餐状态
+ * @returns
+ */
+export function getRechargePackageStatusList() {
+    return request.get(`recharge/package/status`)
+}
+
+/**
+ * 添加套餐
+ * @param params
+ * @returns
+ */
+export function addRechargePackage(params: Record<string, any>) {
+    return request.post('recharge/package', params, { showErrorMessage: true, showSuccessMessage: true })
+}
+
+/**
+ * 编辑套餐
+ * @param params
+ * @returns
+ */
+export function editRechargePackage(params: Record<string, any>) {
+    return request.put(`recharge/package/${ params.recharge_id }`, params, {
+        showErrorMessage: true,
+        showSuccessMessage: true
+    })
+}
+
+/**
+ * 获取充值套餐详情
+ * @param params
+ * @returns
+ */
+export function getRechargePackageInfo(params: Record<string, any>) {
+    return request.get(`recharge/package/init`, { params });
+}
+
+/**
+ * 删除套餐
+ * @param recharge_id
+ * @returns
+ */
+export function deleteRechargePackage(recharge_id: number) {
+    return request.delete(`recharge/package/${ recharge_id }`, { showSuccessMessage: true })
+}
+
+/**
+ * 设置充值套餐配置
+ * @param params
+ */
+export function setRechargeConfig(params: Record<string, any>) {
+    return request.post(`recharge/package/config`, params, { showErrorMessage: true, showSuccessMessage: true })
+}
+
+/**
+ * 获取充值套餐配置
+ * @returns
+ */
+export function getRechargeConfig() {
+    return request.get(`recharge/package/config`)
+}
+
+/**
+ * 修改充值套餐状态
+ * @param params
+ * @returns
+ */
+export function editRechargeStatus(params: Record<string, any>) {
+    return request.put(`recharge/package/status`, params, {
+        showErrorMessage: true,
+        showSuccessMessage: true
+    })
+}
+
+/**
+ * 充值套餐修改排序
+ * @param params
+ * @returns
+ */
+export function modifyRechargeSort(params: Record<string, any>) {
+    return request.put(`recharge/package/sort`, params, { showSuccessMessage: true })
+}
+
+/**
+ * 获取充值套餐规则字典
+ * @returns
+ */
+export function getPackageGiftDict() {
+    return request.get(`recharge/dict/package_gift`)
 }

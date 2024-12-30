@@ -38,19 +38,19 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
         OrderConfigVo vo = new OrderConfigVo();
         //订单关闭配置
         ShopOrderClose shopOrderClose = new ShopOrderClose();
-        shopOrderClose.setIsClose(orderConfigParam.getIsClose());
+        shopOrderClose.setIsClose("1".equals(orderConfigParam.getIsClose()) || "true".equals(orderConfigParam.getIsClose()));
         shopOrderClose.setCloseLength(orderConfigParam.getCloseLength());
         vo.setCloseOrderInfo(shopOrderClose);
 
         //订单完成配置
         ShopOrderFinish shopOrderFinish = new ShopOrderFinish();
-        shopOrderFinish.setIsFinish(orderConfigParam.getIsFinish());
+        shopOrderFinish.setIsFinish("1".equals(orderConfigParam.getIsFinish()) || "true".equals(orderConfigParam.getIsFinish()));
         shopOrderFinish.setFinishLength(orderConfigParam.getFinishLength());
         vo.setConfirm(shopOrderFinish);
 
         //订单退款配置
         ShopOrderRefund shopOrderRefund = new ShopOrderRefund();
-        shopOrderRefund.setNoAllowRefund(orderConfigParam.getNoAllowRefund());
+        shopOrderRefund.setNoAllowRefund("1".equals(orderConfigParam.getNoAllowRefund()) || "true".equals(orderConfigParam.getNoAllowRefund()));
         shopOrderRefund.setRefundLength(orderConfigParam.getRefundLength());
         vo.setRefund(shopOrderRefund);
 

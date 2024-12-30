@@ -6,7 +6,7 @@
 			<h3 class="mb-[10px]">{{ t('goodsSearchSet') }}</h3>
 			<el-form label-width="100px" class="px-[10px]">
 				<el-form-item :label="t('goodsSearchText')">
-					<el-input v-model="diyStore.editComponent.text" :placeholder="t('goodsSearchTextPlaceholder')" clearable maxlength="20" show-word-limit />
+					<el-input v-model.trim="diyStore.editComponent.text" :placeholder="t('goodsSearchTextPlaceholder')" clearable maxlength="20" show-word-limit />
 				</el-form-item>
 			</el-form>
 		</div>

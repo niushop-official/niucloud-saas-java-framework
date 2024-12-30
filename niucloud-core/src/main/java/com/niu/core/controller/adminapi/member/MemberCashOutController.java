@@ -6,6 +6,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferTypeEnum;
 import com.niu.core.service.admin.member.IMemberCashOutService;
+import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
 import com.niu.core.service.admin.member.param.MemberCashOutParam;
 import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
@@ -67,7 +68,7 @@ public class MemberCashOutController {
      * @param action
      */
     @PutMapping("/audit/{id}/{action}")
-    public Result audit(@PathVariable Integer id, String action, @RequestBody MemberCashOutAuditParam param) {
+    public Result audit(@PathVariable(name = "id") Integer id, @PathVariable(name = "action") String action, @RequestBody MemberCashOutAuditParam param) {
         param.setId(id);
         param.setAction(action);
         memberCashOutService.audit(param);
@@ -80,6 +81,18 @@ public class MemberCashOutController {
     @GetMapping("/transfertype")
     public Result<Map> getTransferType() {
         return Result.success(TransferTypeEnum.getMap());
+    }
+
+    /**
+     * 转账
+     * @param param
+     * @return
+     */
+    @PutMapping("/transfer/{id}")
+    public Result transfer(@PathVariable Integer id, @RequestBody CashOutTransferParam param) {
+        param.setId(id);
+        memberCashOutService.transfer(param);
+        return Result.success();
     }
 
     /**

@@ -10,6 +10,7 @@ import com.niu.core.service.core.sys.ICoreUploadService;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * 商品收藏记录实体
@@ -28,13 +29,16 @@ public class ShopGoodsCollectVo implements Serializable {
     private Long createTime; // 收藏时间
     private String goodsName;
     private String goodsCover;
+    private String skuName;
+    private BigDecimal price;
+    private Integer status;
 
     private ICoreUploadService coreUploadService() {
         return SpringContext.bean(ICoreUploadService.class);
     }
 
-    public String getGoodsCoverThumbSmall() {
-        return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+    public String getGoodsCoverThumbMid() {
+        return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
     }
 
 }

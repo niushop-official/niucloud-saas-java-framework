@@ -85,6 +85,13 @@
         "url": "/app/pages/verify/index",
         "is_share": 1,
         "action": ""
+      },
+      {
+        "name": "MEMBER_CONTACT",
+        "title": "客服",
+        "url": "/app/pages/member/contact",
+        "is_share": 0,
+        "action": ""
       }
     ],
     "name": "MEMBER_LINK"

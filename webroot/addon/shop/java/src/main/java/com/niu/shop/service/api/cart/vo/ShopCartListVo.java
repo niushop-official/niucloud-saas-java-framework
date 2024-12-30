@@ -51,6 +51,7 @@ public class ShopCartListVo implements Serializable {
         private Integer isDiscount; // 是否参与限时折扣
         private String memberDiscount;
         private Long deleteTime; // 创建时间
+        private Integer hasBuy; //已购买数量
 
         private ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);

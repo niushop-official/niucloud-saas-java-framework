@@ -124,10 +124,10 @@
 						<template #default="{ row }">
 							<el-button type="primary" link @click="infoEvent(row)">{{ t('info') }}</el-button>
 
-							<el-button
-								v-if="[1, 10].includes(row.order_status_info.status) && row.is_enable_refund && row.refund_status == 0"
-								type="primary" link @click="refundFn(row)">{{ t('refundBtn') }}
-							</el-button>
+<!--							<el-button-->
+<!--								v-if="[1, 10].includes(row.order_status_info.status) && row.is_enable_refund && row.refund_status == 0"-->
+<!--								type="primary" link @click="refundFn(row)">{{ t('refundBtn') }}-->
+<!--							</el-button>-->
 
 							<template v-for="(item, index) in row.order_status_info.action" :key="index">
 								<el-button type="primary" link  @click="orderEvent(row, item.class)">{{ item.name }}</el-button>
@@ -154,23 +154,21 @@
 				</span>
 			</template>
 		</el-dialog>
+
+		<recharge-detail  ref="rechargeDetailDialog" />
 	</div>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
-import {
-    getRechargeOrderStatusList,
-    getRechargeOrderList,
-    rechargeRefund,
-    getRechargeStat
-} from '@/addon/recharge/api/recharge'
+import { getRechargeOrderStatusList, getRechargeOrderList, rechargeRefund, getRechargeStat } from '@/addon/recharge/api/recharge'
 import { getChannelType } from '@/app/api/sys'
 import { img } from '@/utils/common'
 import { useRouter, useRoute } from 'vue-router'
 import { AnyObject } from '@/types/global'
 import type { FormInstance } from 'element-plus'
+import rechargeDetail from '@/addon/recharge/views/order/components/recharge-detail.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -178,6 +176,7 @@ const pageName = route.meta.title
 const memberId: number = parseInt(route.query.id as string || '0')
 
 const channelList = ref([])
+const rechargeDetailDialog: Record<string, any> | null = ref(null)
 const setChannelList = async () => {
     channelList.value = await (await getChannelType()).data
 }
@@ -197,7 +196,8 @@ const orderTableData = reactive({
         pay_time: [],
         order_from: '',
         start_money: '',
-        end_money: ''
+        end_money: '',
+        recharge_id:route.query.recharge_id
     }
 })
 
@@ -247,7 +247,9 @@ loadOrderList()
  * @param data
  */
 const infoEvent = (data: any) => {
-    router.push(`/recharge/order/detail?order_id=${data.order_id}`)
+    rechargeDetailDialog.value.setFormData(data.order_id)
+    rechargeDetailDialog.value.showDialog = true
+    // router.push(`/recharge/order/detail?order_id=${data.order_id}`)
 }
 
 /**
@@ -279,7 +281,7 @@ const confirmRefund = () => {
     rechargeRefund(refundData?.order_id).then(res => {
         refundShowDialog.value = false
         refundLoading.value = false
-		loadOrderList()
+        loadOrderList()
     }).catch(() => {
         refundLoading.value = false
     })

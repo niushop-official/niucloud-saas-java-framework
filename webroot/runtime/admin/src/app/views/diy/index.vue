@@ -12,7 +12,7 @@
                             <div class="font-bold text-xl mb-[40px]">{{ t('developTitle') }}</div>
                             <div class="mb-[20px] flex flex-col">
                                 <text class="mb-[10px]">{{ t('wapDomain') }}</text>
-                                <el-input v-model="wapDomain" :placeholder="t('wapDomainPlaceholder')" clearable />
+                                <el-input v-model.trim="wapDomain" :placeholder="t('wapDomainPlaceholder')" clearable />
                             </div>
                             <div class="flex">
                                 <el-button type="primary" @click="saveDomain()">{{ t('confirm') }}</el-button>
@@ -31,7 +31,7 @@
 
                 <div class="w-[700px]">
                     <div class="flex flex-wrap">
-                        <diy-link v-model="link" :ignore="['DIY_LINK']" @success="changePage">
+                        <diy-link v-model="link" :ignore="['DIY_LINK','DIY_JUMP_OTHER_APPLET','DIY_MAKE_PHONE_CALL']" @success="changePage">
                             <el-button type="primary">{{ t('changePage') }}</el-button>
                         </diy-link>
                         <el-button type="primary" @click="toDecorate()" v-show="page.use_template.action == 'decorate'" class="ml-[12px]">{{ t('decorate') }}</el-button>
@@ -80,7 +80,7 @@ const page: any = reactive({})
 const router = useRouter()
 const wapDomain = ref('')
 const wapImage = ref('')
-const link = ref({
+const link: any = ref({
     name: ''
 })
 

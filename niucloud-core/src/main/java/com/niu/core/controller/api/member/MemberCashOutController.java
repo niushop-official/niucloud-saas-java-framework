@@ -6,8 +6,10 @@ import com.niu.core.common.domain.Result;
 import com.niu.core.common.utils.object.ObjectUtils;
 import com.niu.core.service.api.member.IMemberCashOutService;
 import com.niu.core.service.api.member.param.*;
+import com.niu.core.service.core.member.param.MemberCashOutApplyParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -71,8 +73,8 @@ public class MemberCashOutController {
      *
      * @return
      */
-    @PostMapping("/cash_out/cash_out/apply")
-    public Result<?> apply(MemberCashOutApplyParam param) {
+    @PostMapping("/cash_out/apply")
+    public Result<?> apply(@Validated @RequestBody MemberCashOutApplyParam param) {
         memberCashOutService.cashOutApply(param);
         return Result.success();
     }
@@ -129,7 +131,8 @@ public class MemberCashOutController {
      */
     @PostMapping("/cashout_account")
     public Result<?> add(@RequestBody MemberCashOutAccountAddParam param) {
-        return Result.success(memberCashOutService.addAccount(param));
+        memberCashOutService.addAccount(param);
+        return Result.success();
     }
 
     /**
@@ -139,7 +142,8 @@ public class MemberCashOutController {
      */
     @PutMapping("/cashout_account/{account_id}")
     public Result<?> edit(@PathVariable("account_id") Integer accountId, @RequestBody MemberCashOutAccountEditParam param) {
-        return Result.success(memberCashOutService.editAccount(accountId, param));
+        memberCashOutService.editAccount(accountId, param);
+        return Result.success();
     }
 
     /**
@@ -151,7 +155,8 @@ public class MemberCashOutController {
     public Result<?> delete(@PathVariable("account_id") Integer accountId) {
         MemberCashOutAccountDeleteParam param = ObjectUtils.create(MemberCashOutAccountDeleteParam.class);
         param.setAccountId(accountId);
-        return Result.success(memberCashOutService.deleteAccount(param));
+        memberCashOutService.deleteAccount(param);
+        return Result.success();
     }
 
 }

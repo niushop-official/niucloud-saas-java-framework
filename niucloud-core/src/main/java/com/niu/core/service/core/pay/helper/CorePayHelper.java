@@ -56,7 +56,7 @@ public class CorePayHelper {
      */
     private String buildNotifyUrl(Integer siteId, String channel, String type, String action) {
         String[] param = {siteId.toString(), channel, type, action};
-        return RequestUtils.handler().getScheme() + "://" + RequestUtils.getRequestDomain() + "/api/pay/notify/" + String.join("/", param);
+        return RequestUtils.getDomain(true) + "/api/pay/notify/" + String.join("/", param);
     }
 
     /**

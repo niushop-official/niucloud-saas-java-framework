@@ -15,7 +15,7 @@
 					<text class="flex items-center justify-center text-[44rpx] mt-[54rpx] ml-[8rpx] text-[#F7D894] bg-[var(--price-text-color)] rounded-full w-[70rpx] h-[70rpx]">元</text>
 				</view>
 				<view class="h-[64rpx] leading-[64rpx] text-[42rpx] text-[#E22D17] mt-[10rpx] text-center">
-					<text v-if="detail.min_condition_money == 0">无门槛</text>
+					<text v-if="detail.min_condition_money === '0.00'">无门槛</text>
 					<text v-else>满{{ detail.coupon_min_price }}元可用</text>
 				</view>
 				<view class="text-[26rpx] h-[36rpx] text-[#E22D17] mt-[44rpx] text-center flex justify-center items-center">

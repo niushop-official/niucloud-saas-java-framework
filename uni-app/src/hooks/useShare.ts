@@ -1,6 +1,7 @@
 import { img, isWeixinBrowser, currRoute, currShareRoute } from '@/utils/common'
 import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { getShareInfo } from '@/app/api/diy';
+import useSystemStore from '@/stores/system';
 
 // #ifdef H5
 import wechat from '@/utils/wechat'
@@ -8,7 +9,6 @@ import wechat from '@/utils/wechat'
 
 export const useShare = () => {
     var wechatOptions: any = {};
-
     var weappOptions: any = {};
 
     const wechatInit = () => {
@@ -61,23 +61,33 @@ export const useShare = () => {
         }
         // #endif
 
-        if (options && options.wechat && options.weapp) {
+        if (options) {
 
-            // #ifdef H5
-            wechatOptions.title = options.wechat.title || ''
-            wechatOptions.link = options.wechat.link || h5Link
-            wechatOptions.desc = options.wechat.desc || ''
-            wechatOptions.imgUrl = options.wechat.url ? img(options.wechat.url) : ''
-            wechatShare()
-            // #endif
+            if (options.wechat) {
 
-            // #ifdef MP-WEIXIN
-            weappOptions.title = options.weapp.title || ''
-            weappOptions.query = options.weapp.path || queryStr.join('&')
-            weappOptions.imageUrl = options.weapp.url ? img(options.weapp.url) : ''
-            // #endif
+                // #ifdef H5
+                wechatOptions.title = options.wechat.title || ''
+                wechatOptions.link = options.wechat.link || h5Link
+                wechatOptions.desc = options.wechat.desc || ''
+                wechatOptions.imgUrl = options.wechat.url ? img(options.wechat.url) : ''
+                // wechatOptions.success = options.wechat.callback || null;
+                // useSystemStore().shareCallback = options.wechat.callback || null;
+                wechatShare()
+                // #endif
+            }
 
-            uni.setStorageSync('weappOptions', weappOptions)
+            if (options.weapp) {
+
+                // #ifdef MP-WEIXIN
+                weappOptions.title = options.weapp.title || ''
+                if (options.weapp.path) weappOptions.path = options.weapp.path
+                weappOptions.imageUrl = options.weapp.url ? img(options.weapp.url) : ''
+                useSystemStore().shareCallback = options.weapp.callback || null;
+                uni.setStorageSync('weappOptions', weappOptions)
+                // #endif
+
+            }
+
         } else {
             getShareInfo({
                 route: '/' + currRoute(),
@@ -113,9 +123,10 @@ export const useShare = () => {
 
     // 小程序分享，分享给好友
     const shareApp = (options = {}) => {
-        onShareAppMessage(() => {
+        return onShareAppMessage(() => {
             let config: any = uni.getStorageSync('weappOptions')
             if (!config) config = {}
+            if (useSystemStore().shareCallback) useSystemStore().shareCallback();
             return {
                 ...config,
                 ...options
@@ -126,9 +137,10 @@ export const useShare = () => {
 
     // 小程序分享，分享到朋友圈
     const shareTime = (options = {}) => {
-        onShareTimeline(() => {
+        return onShareTimeline(() => {
             let config: any = uni.getStorageSync('weappOptions')
             if (!config) config = {}
+            if (useSystemStore().shareCallback) useSystemStore().shareCallback();
             return {
                 ...config,
                 ...options

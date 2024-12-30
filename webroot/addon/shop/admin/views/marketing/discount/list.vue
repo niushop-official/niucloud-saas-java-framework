@@ -65,6 +65,7 @@
                 </div>
             </div>
         </el-card>
+        <discount-detail ref="discountDetailDialog"></discount-detail>
     </div>
 </template>
 
@@ -74,6 +75,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { getActiveDiscountPageList,getActiveDiscountStatusList,closeActiveDiscount,deleteActiveDiscount } from "@/addon/shop/api/marketing";
 import { t } from '@/lang'
+import discountDetail from '@/addon/shop/views/marketing/discount/components/discount-detail.vue'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const router = useRouter()
 const route = useRoute()
@@ -104,11 +107,12 @@ const loadDiscountList = (page: number = 1) => {
         tableData.loading = false
         tableData.data = res.data.data
         tableData.total = res.data.total
+        setTablePageStorage(tableData.page, tableData.limit, tableData.searchParam);
     }).catch(() => {
         tableData.loading = false
     })
 }
-loadDiscountList()
+loadDiscountList(getTablePageStorage(tableData.searchParam).page);
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()
@@ -127,8 +131,11 @@ const handleChange = () => {
     router.push('/shop/marketing/discount/add')
 }
 //详情
+const discountDetailDialog: Record<string, any> | null = ref(null)
 const detailEvent=(id:number)=>{
-    router.push({path:'/shop/marketing/discount/detail',query:{id}})
+    let data = {id: id};
+    discountDetailDialog.value.setFormData(data);
+    discountDetailDialog.value.showDialog = true;
 }
 //编辑折扣券
 const editEvent = (id:number)=>{

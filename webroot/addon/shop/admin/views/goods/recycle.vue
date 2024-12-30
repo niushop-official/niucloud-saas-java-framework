@@ -56,7 +56,7 @@
 
                     <el-table-column prop="price" :label="t('price')" min-width="120" align="right" sortable="custom">
                         <template #default="{ row }">
-                            <div>￥{{ row.goods_sku.price }}</div>
+                            <div>￥{{ row.goodsSku.price }}</div>
                         </template>
                     </el-table-column>
 

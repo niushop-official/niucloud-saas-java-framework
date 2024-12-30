@@ -43,7 +43,8 @@
 					    <view>{{t('refundMoney')}}</view>
 						<view class="price-font text-[var(--price-text-color)]">
 							<text class="text-[24rpx] mr-[4rpx]">￥</text>
-							<text class="text-[28rpx]">{{ parseFloat(detail.apply_money).toFixed(2) }}</text>
+							<text class="text-[28rpx]" v-if="detail.status == 8">{{ parseFloat(detail.money).toFixed(2) }}</text>
+                            <text class="text-[28rpx]" v-else>{{ parseFloat(detail.apply_money).toFixed(2) }}</text>
 						</view>
 					</view>
                     <view class="justify-between text-[28rpx] card-template-item">
@@ -66,9 +67,9 @@
                         <view>{{t('createExplain')}}</view>
                         <view class="flex-1 ml-[60rpx] text-right leading-[1.5] flex justify-end break-all">{{ detail.remark }}</view>
                     </view>
-                    <view class="justify-between text-[28rpx] card-template-item !items-baseline">
+                    <view class="justify-between text-[28rpx] card-template-item !items-baseline" v-if="detail.shop_reason">
                         <view>{{t('reasonRefusal')}}</view>
-                        <view class="flex-1 ml-[60rpx] leading-[1.5] text-right" :class="{'#333': detail.shop_reason, 'text-[var(--text-color-light9)]': !detail.shop_reason}">{{ detail.shop_reason || '--' }}</view>
+                        <view class="flex-1 ml-[60rpx] leading-[1.5] text-right text-[#333]">{{ detail.shop_reason }}</view>
                     </view>
                 </view>
 
@@ -102,7 +103,7 @@
 						</view>
 						<!-- #endif -->
 					</view>
-					
+
                     <view class="flex justify-end">
                         <view class="min-w-[180rpx] box-border text-[26rpx] h-[70rpx] flex-center border-[2rpx] border-solid border-[#ccc] text-[#333] rounded-full ml-[20rpx]" @click="refundBtnFn('cancel')" v-if="['6','7','8','-1'].indexOf(detail.status) == -1">{{t('refundApply')}}</view>
                         <view v-if="['3'].indexOf(detail.status) != -1" class="min-w-[180rpx] box-border text-[#333] text-[26rpx] h-[70rpx] flex-center border-[2rpx] border-solid border-[#ccc] rounded-full ml-[20rpx] px-[20rpx]" @click.stop="refundBtnFn('edit')" >编辑退款信息</view>
@@ -279,7 +280,7 @@ const refundDetailFn = (refundNo: any) => {
 			formData.value.express_company = detail.value.delivery.express_company
 			formData.value.remark = detail.value.delivery.remark
 		}
-		
+
 		sendMessageTitle.value = detail.value.order_goods.goods_name
 		sendMessageImg.value = img(detail.value.order_goods.goods_image_thumb_small || '')
 		loading.value = false;

@@ -1,7 +1,7 @@
 <template>
     <div class="main-container">
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <el-card class="box-card mt-[15px] !border-none" shadow="never" v-loading="loading">
@@ -31,7 +31,7 @@
                         <el-tabs v-model="activeName" class="demo-tabs mt-[15px]">
                             <el-tab-pane :label="t('navImage')" name="navPicture">
                                 <div ref="navItemRef">
-                                    <div v-for="(item,index) in diyBottomData.value.list" :key="'a'+index" :data-id="index"  class="item-wrap border-2 border-dashed pt-[18px] m-[10px] mb-[15px] relative list-item">
+                                    <div v-for="(item,index) in diyBottomData.value.list" :key="'a'+index" :data-id="index"  class="item-wrap border-2 border-dashed pt-[18px] m-[10px] mb-[15px] relative list-item" :class="{ 'not-sort': useDrag }">
                                         <el-form-item :label="t('navIconOne')">
                                             <div class="flex align-center">
                                                 <div class="flex flex-col justify-center items-center">
@@ -45,10 +45,10 @@
                                             </div>
                                         </el-form-item>
                                         <el-form-item :label="t('navTitleOne')">
-                                            <el-input class="!w-[215px]" v-model="item.text" :placeholder="t('titleContent')" maxlength="5" show-word-limit />
+                                            <el-input class="!w-[215px]" v-model.trim="item.text" :placeholder="t('titleContent')" maxlength="5" show-word-limit />
                                         </el-form-item>
                                         <el-form-item :label="t('navLinkOne')">
-                                            <diy-link v-model="item.link"/>
+                                            <diy-link v-model="item.link" @confirm="diyLinkFn" />
                                         </el-form-item>
                                         <el-icon class="close-icon cursor-pointer -top-[11px] -right-[8px]" @click="deleteNav(index)">
                                             <CircleCloseFilled />
@@ -69,21 +69,21 @@
                                 <el-form-item :label="t('textColor')">
                                     <div class="flex align-center">
                                         <el-color-picker v-model="diyBottomData.value.textColor" />
-                                        <el-input class="ml-[10px]" v-model="diyBottomData.value.textColor" disabled />
+                                        <el-input class="ml-[10px]" v-model.trim="diyBottomData.value.textColor" disabled />
                                         <el-button class="ml-[10px]" type="primary" @click="diyBottomData.value.textColor = '#333333'">{{ t('reset') }}</el-button>
                                     </div>
                                 </el-form-item>
                                 <el-form-item :label="t('textSelectColor')">
                                     <div class="flex align-center">
                                         <el-color-picker v-model="diyBottomData.value.textHoverColor" />
-                                        <el-input class="ml-[10px]" v-model="diyBottomData.value.textHoverColor" disabled />
+                                        <el-input class="ml-[10px]" v-model.trim="diyBottomData.value.textHoverColor" disabled />
                                         <el-button class="ml-[10px]" type="primary" @click="diyBottomData.value.textHoverColor = '#333333'">{{ t('reset') }}</el-button>
                                     </div>
                                 </el-form-item>
                                 <el-form-item :label="t('backgroundColor')">
                                     <div class="flex align-center">
                                         <el-color-picker v-model="diyBottomData.value.backgroundColor" />
-                                        <el-input class="ml-[10px]" v-model="diyBottomData.value.backgroundColor" disabled />
+                                        <el-input class="ml-[10px]" v-model.trim="diyBottomData.value.backgroundColor" disabled />
                                         <el-button class="ml-[10px]" type="primary" @click="diyBottomData.value.backgroundColor = '#FFFFFF'">{{ t('reset') }}</el-button>
                                     </div>
                                 </el-form-item>
@@ -238,6 +238,7 @@ onMounted(() => {
     const sortable = Sortable.create(navItemRef.value, {
         group: 'item-wrap',
         animation: 200,
+        filter: '.not-sort', // 过滤.not-sort的元素
         onEnd: event => {
             const temp = diyBottomData.value.list[event.oldIndex!]
             diyBottomData.value.list.splice(event.oldIndex!, 1)
@@ -253,6 +254,10 @@ onMounted(() => {
     })
 })
 
+const useDrag = ref(false)
+const diyLinkFn = (val) => {
+    useDrag.value = val
+}
 </script>
 <style lang="scss" scoped>
 .close-icon {

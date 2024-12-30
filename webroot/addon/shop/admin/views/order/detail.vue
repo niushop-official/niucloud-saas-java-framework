@@ -75,12 +75,17 @@
 						<span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="finish" v-if="formData.status == 3">{{ t('finish') }}</span>
 						<span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="openElectronicSheetPrintDialog" v-if="formData.delivery_type == 'express' && formData.status == 3">{{ t('electronicSheetPrintTitle') }}</span>
 						<span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="printTicketEvent" v-if="formData.delivery_type == 'virtual' && (formData.status == 2 || formData.status == 3 || formData.status == 5)">{{ t('printTicket') }}</span>
-                        <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="orderEditAddressFn" v-if="(formData.status == 1 || formData.status == 2) && formData.delivery_type != 'virtual'">{{ t('editAddress') }}</span>
+                        <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="orderEditAddressFn" v-if="formData.status == 1 && formData.delivery_type != 'virtual' && formData.activity_type != 'giftcard'">{{ t('editAddress') }}</span>
+                        <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="refundEvent" v-if="formData.is_refund_show && formData.status != 1 && formData.status != -1 && formData.is_enable_refund == 1">{{ t('voluntaryRefund') }}</span>
 						<div class="flex" v-if="formData.order_delivery">
 							<template v-for="(item, index) in formData.order_delivery" :key="index">
 								<span v-if="item.delivery_type == 'express' && item.sub_delivery_type == 'express'"
 								      class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#ff7f5b] bg-[#fff0e5] cursor-pointer"
 								      @click="packageEvent(item.id, formData.taker_mobile)">{{ t('package') }}{{ index + 1 }}
+								</span>
+								<span v-if="item.delivery_type == 'express' && item.sub_delivery_type == 'none_express'"
+								      class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#ff7f5b] bg-[#fff0e5] cursor-pointer"
+								      @click="packageEvent(item.id, formData.taker_mobile)">{{ t('noLogisticsRequired') }}
 								</span>
 							</template>
 						</div>
@@ -103,9 +108,10 @@
 								<div class="flex items-center shrink-0">
 									<img class="w-[50px] h-[50px] mr-[10px]" :src="img(row.goods_image)" />
 								</div>
-								<div class="flex flex-col">
+								<div class="flex flex-col items-start">
 									<p class="multi-hidden text-[14px]">{{ row.goods_name }}</p>
 									<span class="text-[12px] text-[#999]">{{ row.sku_name }}</span>
+									<span class="px-[4px]  text-[12px] text-[#fff] rounded-[4px] bg-primary leading-[18px]" v-if="row.is_gift == 1">赠品</span>
 								</div>
 							</div>
 						</template>
@@ -117,7 +123,11 @@
 									<span v-if="parseFloat(row.price)">+￥{{ row.price }}</span>
 								</span>
 								<span v-else class="text-[13px]">￥{{ row.price }}</span>
-								<span class="text-[13px] mt-[5px]">{{ row.num }}{{ t('piece') }}</span>
+								<span v-if="row.extend && row.extend.newcomer_price" class="text-[13px] mt-[5px]">
+									<span v-if="parseFloat(row.extend.newcomer_price) && row.num > 1">{{ row.num }}{{ t('piece') }}<span class="text-[#999]">（第1{{ t('piece') }}，￥{{parseFloat(row.extend.newcomer_price).toFixed(2)}}/{{ t('piece') }}；第{{row.num>2?'2~'+row.num:'2'}}{{ t('piece') }}，￥{{parseFloat(row.price).toFixed(2)}}/{{ t('piece') }}）</span></span>
+									<span v-else>{{ row.num }}{{ t('piece') }}</span>
+								</span>
+								<span v-else class="text-[13px] mt-[5px]">{{ row.num }}{{ t('piece') }}</span>
 							</div>
 						</template>
 					</el-table-column>
@@ -133,6 +143,14 @@
 								</span>
 								<span v-else class="text-[14px]">￥{{ formData.goods_money }}</span>
 							</div>
+						</div>
+						<div class="flex mb-[10px]" v-if="formData.coupon_money > 0">
+							<div class="text-base flex-1">{{ t('couponMoney') }}</div>
+							<div class="text-base flex-1 pl-[30px]">{{ formData.coupon_money }}</div>
+						</div>
+						<div class="flex mb-[10px]" v-if="formData.manjian_discount_money > 0">
+							<div class="text-base flex-1">{{ t('manjianDiscountMoney') }}</div>
+							<div class="text-base flex-1 pl-[30px]">{{ formData.manjian_discount_money }}</div>
 						</div>
 						<div class="flex mb-[10px]">
 							<div class="text-base flex-1">{{ t('discountMoney') }}</div>
@@ -193,6 +211,7 @@
 		<delivery-package ref="packageDialog" />
 		<electronic-sheet-print ref="electronicSheetPrintDialog" @complete="loadOrderList" />
         <order-edit-address ref="orderEditAddressDialog" @complete="loadOrderList"/>
+        <shop-active-refund ref="shopActiveRefundDialog" @complete="setFormData(orderId)" />
 	</div>
 </template>
 
@@ -207,6 +226,7 @@ import orderEditAddress from '@/addon/shop/views/order/components/order-edit-add
 import deliveryPackage from '@/addon/shop/views/order/components/delivery-package.vue'
 import AdjustMoney from '@/addon/shop/views/order/components/adjust-money.vue'
 import electronicSheetPrint from '@/addon/shop/views/order/components/electronic-sheet-print.vue'
+import ShopActiveRefund from '@/addon/shop/views/order/components/shop-active-refund.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { img } from '@/utils/common'
 import { ElMessageBox } from 'element-plus'
@@ -225,6 +245,14 @@ const setFormData = async(orderId: number = 0) => {
     formData.value = null
     await getOrderDetail(orderId).then(({ data }) => {
         formData.value = data
+        let refundOrderNum = 0;
+        formData.value.order_goods.forEach((orderItem,orderIndex) => {
+            if(orderItem.status == 1){
+                refundOrderNum++;
+            }
+        });
+        formData.value.is_refund_show = refundOrderNum > 0 ? true : false;
+        console.log("formData.value",formData.value)
     }).catch(() => {
     })
     loading.value = false
@@ -318,7 +346,6 @@ const orderEditAddressFn = async () =>{
     orderEditAddressDialog.value.setFormData(data)
 }
 
-
 /**
  * 打印小票
  */
@@ -340,6 +367,16 @@ const printTicketEvent = () => {
     }).catch(() => {
         repeat.value = false
     })
+}
+
+
+/**
+ * 商家主动退款
+ */
+ const shopActiveRefundDialog: Record<string, any> | null = ref(null)
+const refundEvent = () => {
+    shopActiveRefundDialog.value.setFormData(formData.value)
+    shopActiveRefundDialog.value.showDialog = true
 }
 </script>
 

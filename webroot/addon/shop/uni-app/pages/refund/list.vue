@@ -43,8 +43,14 @@
 							<text class="text-[22rpx] leading-[30rpx] font-400 mr-[4rpx]">{{ t('refundMoney') }}：</text>
 							<view class="price-font leading-[42rpx] text-[var(--price-text-color)]">
 								<text class="text-[22rpx]">￥</text>
-								<text class="text-[36rpx] font-500">{{ parseFloat(item.apply_money).toFixed(2).split('.')[0] }}</text>
-								<text class="text-[22rpx] font-500">.{{ parseFloat(item.apply_money).toFixed(2).split('.')[1] }}</text>
+								<template v-if="item.status == 8">
+									<text class="text-[36rpx] font-500">{{ parseFloat(item.money).toFixed(2).split('.')[0] }}</text>
+									<text class="text-[22rpx] font-500">.{{ parseFloat(item.money).toFixed(2).split('.')[1] }}</text>
+								</template>
+								<template v-else>
+									<text class="text-[36rpx] font-500">{{ parseFloat(item.apply_money).toFixed(2).split('.')[0] }}</text>
+									<text class="text-[22rpx] font-500">.{{ parseFloat(item.apply_money).toFixed(2).split('.')[1] }}</text>
+								</template>
 							</view>
 						</view>
 					</view>

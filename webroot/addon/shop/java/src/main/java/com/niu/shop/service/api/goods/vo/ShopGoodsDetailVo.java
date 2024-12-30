@@ -49,6 +49,10 @@ public class ShopGoodsDetailVo implements Serializable {
     private Integer evaluateIsShow;
     private Integer exchangeId;
     private ShopDiscountGoodsInfoVo discountInfo;
+    private Integer isLimit = 0;
+    private Integer limitType = 1;
+    private Integer maxBuy = 0;
+    private Integer minBuy = 0;
 
     @JsonProperty("skuList")
     private List<Sku> skuList;
@@ -60,7 +64,7 @@ public class ShopGoodsDetailVo implements Serializable {
 
     private List<Service> service = new LinkedList<>();
 
-    private List<Label> labelInfo = new LinkedList<>();
+    private List<GoodsLabelListVo> labelInfo = new LinkedList<>();
 
     private Brand brandInfo;
     private int isNewcomer;
@@ -86,6 +90,7 @@ public class ShopGoodsDetailVo implements Serializable {
         private List<String> goodsImageThumbBig;
         private List<String> goodsImageThumbSmall;
         private List<String> goodsImageThumbMid;
+        private String goodsVideo;
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String goodsCategory; // 商品分类
         private String goodsDesc; // 商品介绍
@@ -118,6 +123,11 @@ public class ShopGoodsDetailVo implements Serializable {
         private Integer posterId; // 海报id
         private Integer isCollect = 0;
         private int hasBuy;
+        private Integer isLimit = 0;
+        private Integer limitType = 1;
+        private Integer maxBuy = 0;
+        private Integer minBuy = 0;
+        private Integer isGift = 0;
         private Map<String, DeliveryConfigVo> deliveryTypeList;
 
         private ICoreUploadService coreUploadService() {
@@ -210,13 +220,6 @@ public class ShopGoodsDetailVo implements Serializable {
         private String serviceName; // 服务名称
         private String image; // 图片
         private String desc; // 描述
-    }
-
-    @Data
-    public static class Label {
-        private Integer labelId; // 站点id
-        private String labelName; // 标签名称
-        private String memo; // 标签说明
     }
 
     @Data

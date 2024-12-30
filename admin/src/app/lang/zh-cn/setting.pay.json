@@ -13,9 +13,9 @@
     "mchId": "商户号",
     "mchIdPlaceholder": "请输入商户号",
     "mchIdTips": "微信支付商户号（MCHID）",
-    "mchSecretKey": "API密钥",
-    "mchSecretKeyPlaceholder": "请输入API密钥",
-    "mchSecretKeyTips": "微信支付商户API密钥（paySignKey）",
+    "mchSecretKey": "APIv3密钥",
+    "mchSecretKeyPlaceholder": "请输入APIv3密钥",
+    "mchSecretKeyTips": "微信支付商户APIv3密钥（paySignKey）",
     "mchSecretCert": "商户私钥",
     "mchSecretCertPlaceholder": "请上传商户私钥",
     "mchSecretCertTips": "微信支付API证书（apiclient_key.pem）",
@@ -57,5 +57,13 @@
     "collectionNamePlaceholder": "请输入收款账户名称",
     "collectionBankPlaceholder": "请输入收款银行",
     "collectionAccountPlaceholder": "请输入收款账号",
-    "collectionDescPlaceholder": "请输入转账说明"
+    "collectionDescPlaceholder": "请输入转账说明",
+    "jsapiDir": "JSAPI支付授权目录",
+    "jsapiDirTips": "需在微信商户号>产品中心>开发配置>支付配置 支付授权目录中添加该链接",
+    "h5Domain": "H5支付域名",
+    "h5DomainTips": "需在微信商户号>产品中心>开发配置>支付配置 H5支付域名中添加该域名",
+    "nativeDomain": "Native支付回调链接",
+    "nativeDomainTips": "需在微信商户号>产品中心>开发配置>支付配置 Native支付回调链接中添加该链接",
+    "wechatpayPublicCert": "微信支付公钥",
+    "wechatpayPublicCertId": "微信支付公钥ID"
 }

@@ -1,7 +1,7 @@
 <template>
 	<div class="main-container">
         <el-card class="box-card !border-none" shadow="never">
-            <el-page-header :content="formData.company_id ? t('updateCompany') : t('addCompany')" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="formData.company_id ? t('updateCompany') : t('addCompany')" :icon="ArrowLeft" @back="back()" />
         </el-card>
 		<el-card class="box-card mt-[15px] !border-none" shadow="never">
             <el-form :model="formData" label-width="130px" ref="formRef" :rules="formRules" class="page-form" v-loading="loading">
@@ -125,6 +125,10 @@ const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
 const loading = ref(true)
+
+const back = () => {
+    router.push('/shop/order/delivery/company')
+}
 
 /**
  * 表单数据
@@ -295,10 +299,6 @@ const save = async (formEl: FormInstance | undefined) => {
             })
         }
     })
-}
-
-const back = () => {
-    router.push('/shop/order/delivery/company')
 }
 
 </script>

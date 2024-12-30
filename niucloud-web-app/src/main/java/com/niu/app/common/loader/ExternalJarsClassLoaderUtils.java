@@ -29,12 +29,25 @@ public class ExternalJarsClassLoaderUtils {
         try {
             File jarFile = new File(jarPath);
             URL jarUrl = jarFile.toURI().toURL();
-            URLClassLoader classLoader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
-            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-            method.invoke(classLoader, jarUrl);
+            CustomURLClassLoader customClassLoader = new CustomURLClassLoader(new URL[]{}, Thread.currentThread().getContextClassLoader());
+            customClassLoader.addURL(jarUrl);
+
+            // 如果需要将自定义类加载器设置为当前线程的上下文类加载器
+            Thread.currentThread().setContextClassLoader(customClassLoader);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static class CustomURLClassLoader extends URLClassLoader {
+
+        public CustomURLClassLoader(URL[] urls, ClassLoader parent) {
+            super(urls, parent);
+        }
+
+        @Override
+        protected synchronized void addURL(URL url) {
+            super.addURL(url);
         }
     }
 

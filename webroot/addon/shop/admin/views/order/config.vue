@@ -7,8 +7,13 @@
 
             <el-form :model="formData" label-width="95" ref="formRef" :rules="rules" class="page-form" v-loading="loading">
                 <el-card class="box-card !border-none" shadow="never">
-                    <h3 class="panel-title !text-sm pl-[15px]">{{ t('closeOrderInfo') }}</h3>
-                    <el-form-item prop="close_length">
+                    <div class="flex justify-start items-center">
+                        <h3 class="panel-title !text-sm pl-[15px]">{{ t('closeOrderInfo') }}</h3>
+                        <el-form-item class="ml-[-80px]" prop="is_close">
+                            <el-checkbox v-model="formData.is_close"  true-label="1" false-label="2" />
+                        </el-form-item>
+                    </div>
+                    <el-form-item prop="close_length" v-if="formData.is_close == '1'">
                         <div>
                             <p class="!text-sm">
                                 <span>{{ t('closeOrderInfoLeft') }}</span>
@@ -17,14 +22,16 @@
                             </p>
                             <p class="text-[12px] text-[#a9a9a9] leading-normal  mt-[5px]">{{ t('closeOrderInfoBottom') }}</p>
                         </div>
-                    </el-form-item>
-                    <el-form-item prop="is_close">
-                        <el-checkbox v-model="formData.is_close" :label="t('isClose')" :true-label="true" :false-label="false" />
-                    </el-form-item>
+                    </el-form-item>               
                 </el-card>
                 <el-card class="box-card !border-none" shadow="never">
-                    <h3 class="panel-title !text-sm pl-[15px]">{{ t('confirm') }}</h3>
-                    <el-form-item prop="finish_length">
+                    <div class="flex justify-start items-center">
+                        <h3 class="panel-title !text-sm pl-[15px]">{{ t('confirm') }}</h3>
+                        <el-form-item  class="ml-[-80px]"  prop="is_finish">
+                            <el-checkbox v-model="formData.is_finish"  true-label="1" false-label="2" />
+                        </el-form-item>
+                    </div>
+                    <el-form-item prop="finish_length" v-if="formData.is_finish == '1'">
                         <div>
                             <p class="!text-sm">
                                 <span>{{ t('confirmLeft') }}</span>
@@ -34,13 +41,15 @@
                             <p class="text-[12px] text-[#a9a9a9] leading-normal  mt-[5px]">{{ t('confirmBottom') }}</p>
                         </div>
                     </el-form-item>
-                    <el-form-item prop="is_finish">
-                        <el-checkbox v-model="formData.is_finish" :label="t('isFinish')" :true-label="true" :false-label="false" />
-                    </el-form-item>
                 </el-card>
                 <el-card class="box-card !border-none" shadow="never">
-                    <h3 class="panel-title !text-sm pl-[15px]">{{ t('refund') }}</h3>
-                    <el-form-item prop="refund_length">
+                    <div class="flex justify-start items-center">
+                        <h3 class="panel-title !text-sm pl-[15px]">{{ t('refund') }}</h3>
+                        <el-form-item  class="ml-[-80px]" prop="no_allow_refund">
+                            <el-checkbox v-model="formData.no_allow_refund" true-label="1" false-label="2" />
+                        </el-form-item>
+                    </div>    
+                    <el-form-item prop="refund_length" v-if="formData.no_allow_refund == '1'">
                         <div>
                             <p class="!text-sm">
                                 <span>{{ t('refundLeft') }}</span>
@@ -49,10 +58,7 @@
                             </p>
                             <p class="text-[12px] text-[#a9a9a9] leading-normal  mt-[5px]">{{ t('refundBottom') }}</p>
                         </div>
-                    </el-form-item>
-                    <el-form-item prop="no_allow_refund">
-                        <el-checkbox v-model="formData.no_allow_refund" :label="t('noAllowRefund')" :true-label="true" :false-label="false" />
-                    </el-form-item>
+                    </el-form-item>           
                 </el-card>
                 <el-card class="box-card !border-none" shadow="never">
                     <h3 class="panel-title !text-sm pl-[15px]">{{ t('evaluate') }}</h3>

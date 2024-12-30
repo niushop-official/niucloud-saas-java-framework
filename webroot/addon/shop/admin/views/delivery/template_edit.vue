@@ -28,22 +28,22 @@
                         </el-table-column>
                         <el-table-column :label="feeLabel.first">
                             <template #default="{ $index }">
-                                <el-input v-model="feeData[$index].snum"  maxlength="8"  @keyup="filterDigit($event)" @blur="feeData[$index].snum = $event.target.value"/>
+                                <el-input v-model.trim="feeData[$index].snum"  maxlength="8"  @keyup="filterDigit($event)" @blur="feeData[$index].snum = $event.target.value"/>
                             </template>
                         </el-table-column>
                         <el-table-column :label="t('fee')">
                             <template #default="{ $index }">
-                                <el-input v-model="feeData[$index].sprice"  maxlength="8" @keyup="filterDigit($event)" @blur="feeData[$index].sprice = $event.target.value"/>
+                                <el-input v-model.trim="feeData[$index].sprice"  maxlength="8" @keyup="filterDigit($event)" @blur="feeData[$index].sprice = $event.target.value"/>
                             </template>
                         </el-table-column>
                         <el-table-column :label="feeLabel.continue">
                             <template #default="{ $index }">
-                                <el-input v-model="feeData[$index].xnum" maxlength="8" @keyup="filterDigit($event)" @blur="feeData[$index].xnum = $event.target.value"/>
+                                <el-input v-model.trim="feeData[$index].xnum" maxlength="8" @keyup="filterDigit($event)" @blur="feeData[$index].xnum = $event.target.value"/>
                             </template>
                         </el-table-column>
                         <el-table-column :label="t('continueFee')">
                             <template #default="{ $index }">
-                                <el-input v-model="feeData[$index].xprice" @keyup="filterDigit($event)"  maxlength="8"  @blur="feeData[$index].xprice = $event.target.value"/>
+                                <el-input v-model.trim="feeData[$index].xprice" @keyup="filterDigit($event)"  maxlength="8"  @blur="feeData[$index].xprice = $event.target.value"/>
                             </template>
                         </el-table-column>
                         <el-table-column :label="t('operation')" align="right" width="150">
@@ -65,18 +65,18 @@
                         <el-table-column :label="t('freeShippingArea')">
                             <template #default="{ row, $index }">
                                 <div class="area-input">
-                                    <el-input v-model="row.free_shipping_area_names" :placeholder="t('areaPlaceholder')" readonly @click="selectArea('free_shipping', $index)" />
+                                    <el-input v-model.trim="row.free_shipping_area_names" :placeholder="t('areaPlaceholder')" readonly @click="selectArea('free_shipping', $index)" />
                                 </div>
                             </template>
                         </el-table-column>
                         <el-table-column :label="freeShippingLabel">
                             <template #default="{ $index }">
-                                <el-input v-model="freeShippingData[$index].free_shipping_num" @keyup="filterDigit($event)"  maxlength="8" @blur="freeShippingData[$index].free_shipping_num = $event.target.value"/>
+                                <el-input v-model.trim="freeShippingData[$index].free_shipping_num" @keyup="filterDigit($event)"  maxlength="8" @blur="freeShippingData[$index].free_shipping_num = $event.target.value"/>
                             </template>
                         </el-table-column>
                         <el-table-column :label="t('freeShippingPrice')">
                             <template #default="{ $index }">
-                                <el-input v-model="freeShippingData[$index].free_shipping_price"  @keyup="filterDigit($event)"  maxlength="8"  @blur="freeShippingData[$index].free_shipping_price = $event.target.value"/>
+                                <el-input v-model.trim="freeShippingData[$index].free_shipping_price"  @keyup="filterDigit($event)"  maxlength="8"  @blur="freeShippingData[$index].free_shipping_price = $event.target.value"/>
                             </template>
                         </el-table-column>
                         <el-table-column :label="t('operation')" align="right" width="150">
@@ -99,7 +99,7 @@
                         <el-table-column :label="t('noDelivery')">
                             <template #default="{ row, $index }">
                                 <div class="area-input">
-                                    <el-input v-model="row.no_delivery_area_names" readonly @click="selectArea('no_delivery', $index)" :placeholder="t('areaPlaceholder')" />
+                                    <el-input v-model.trim="row.no_delivery_area_names" readonly @click="selectArea('no_delivery', $index)" :placeholder="t('areaPlaceholder')" />
                                 </div>
                             </template>
                         </el-table-column>
@@ -142,7 +142,7 @@
 <script lang="ts" setup>
 import { ref, reactive, computed } from 'vue'
 import { t } from '@/lang'
-import type { ElTree, FormInstance,ElMessage } from 'element-plus'
+import { ElTree, FormInstance, ElMessage } from 'element-plus'
 import { addShippingTemplate, editShippingTemplate, getShippingTemplateInfo } from '@/addon/shop/api/delivery'
 import { AnyObject } from '@/types/global'
 import { useRoute, useRouter } from 'vue-router'
@@ -424,11 +424,11 @@ const onSave = async (formEl: FormInstance | undefined) => {
 
     await formEl.validate(async (valid) => {
         if (valid) {
-            if(formData.is_free_shipping && freeShippingData.value.length == 0){
+            if (formData.is_free_shipping && freeShippingData.value.length == 0) {
                 ElMessage.error(t('freeShippingPlaceholder'))
                 return
             }
-            if(formData.no_delivery && noDeliveryData.value.length == 0){
+            if (formData.no_delivery && noDeliveryData.value.length == 0) {
                 ElMessage.error('noDeliveryPlaceholder')
                 return
             }

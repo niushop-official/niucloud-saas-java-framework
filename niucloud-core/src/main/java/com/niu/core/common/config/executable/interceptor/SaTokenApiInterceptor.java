@@ -1,6 +1,7 @@
 package com.niu.core.common.config.executable.interceptor;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -33,6 +34,9 @@ public class SaTokenApiInterceptor extends SaInterceptor {
 
         /** 设置请求类型 */
         RequestUtils.setAppType(AppTypeEnum.API.getName());
+
+        // 是否忽略认证
+        if (PermissionAuthorizer.getInstance().existAnnotation(request, SaIgnore.class)) return true;
 
         /** 检测当前路由是否需要登录 */
         Boolean isCheckLogin=PermissionAuthorizer.getInstance().existAnnotation(request, SaCheckLogin.class);

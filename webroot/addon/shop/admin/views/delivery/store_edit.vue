@@ -1,63 +1,63 @@
 <template>
-    <div class="main-container">
+	<div class="main-container">
         <el-card class="card !border-none mb-[15px]" shadow="never">
             <el-page-header :content="id ? t('updateStore') : t('addStore')" :icon="ArrowLeft" @back="back" />
         </el-card>
-        
-        <el-card class="box-card !border-none" shadow="never">
-            <el-form :model="formData" label-width="140px" ref="formRef" :rules="formRules" class="page-form">
-                <el-form-item :label="t('storeName')" prop="store_name">
-                    <el-input v-model.trim="formData.store_name" clearable :placeholder="t('storeNamePlaceholder')" class="input-width" />
-                </el-form-item>
-                <el-form-item :label="t('storeDesc')">
-                    <el-input v-model.trim="formData.store_desc" type="textarea" rows="4" clearable :placeholder="t('storeDescPlaceholder')" class="input-width" />
-                </el-form-item>
-                <el-form-item :label="t('storeLogo')">
-                    <upload-image v-model="formData.store_logo" />
-                </el-form-item>
-                <el-form-item :label="t('storeMobile')" prop="store_mobile">
-                    <el-input v-model.trim="formData.store_mobile" clearable :placeholder="t('storeMobilePlaceholder')" class="input-width" @keyup="filterNumber($event)" @blur="formData.store_mobile = $event.target.value"/>
-                </el-form-item>
-                <el-form-item :label="t('tradeTime')" prop="trade_time">
-                    <div>
-                        <el-input v-model.trim="formData.trade_time" clearable :placeholder="t('tradeTimePlaceholder')" class="input-width" />
-                        <p class="text-[12px] text-[#999]">{{ t('tradeTimeTips') }}</p>
-                    </div>
-                </el-form-item>
-                <el-form-item :label="t('storeAddress')" prop="address_area">
-                    <el-select v-model="formData.province_name" value-key="id" clearable class="w-[200px]" @change="checkCity">
-                        <el-option :label="t('provincePlaceholder')" value="" />
-                        <el-option v-for="(provinceId, provinceIndex) in areaList.province " :key="provinceIndex" :label="provinceId.name" :value="provinceId" />
-                    </el-select>
-                    <el-select v-model="formData.city_name" value-key="id" clearable class="w-[200px] ml-3" @change="checkDistrict">
-                        <el-option :label="t('cityPlaceholder')" value="" />
-                        <el-option v-for="(cityId, cityIndex) in areaList.city " :key="cityIndex" :label="cityId.name" :value="cityId" />
-                    </el-select>
-                    <el-select v-model="formData.district_name" value-key="id" clearable class="w-[200px] ml-3" @change="check">
-                        <el-option :label="t('districtPlaceholder')" value="" />
-                        <el-option v-for="(districtId, districtIndex) in areaList.district " :key="districtIndex" :label="districtId.name" :value="districtId" />
-                    </el-select>
-                </el-form-item>
-                <el-form-item :label="t('storeAddressDetail')" prop="address">
-                    <div>
-                        <div>
-                            <el-input v-model.trim="formData.address" clearable :placeholder="t('storeAddressDetailPlaceholder')" class="input-width" />
-                            <el-button class="ml-3" @click="searchOn">{{ t('search') }}</el-button>
-                        </div>
-                        <div class="mt-4">
-                            <div id="TxMap" class="map-item w-[800px] h-[500px]"></div>
-                        </div>
-                    </div>
-                </el-form-item>
-            </el-form>
-        </el-card>
-        <div class="fixed-footer-wrap">
-            <div class="fixed-footer">
-                <el-button type="primary" @click="onSave(formRef)">{{ t('save') }}</el-button>
-                <el-button @click="back()">{{ t('cancel') }}</el-button>
-            </div>
-        </div>
-    </div>
+		<el-card class="box-card !border-none" shadow="never" v-loading="loading">
+			<el-form :model="formData" label-width="140px" ref="formRef" :rules="formRules" class="page-form">
+				<el-form-item :label="t('storeName')" prop="store_name">
+				    <el-input v-model.trim="formData.store_name" clearable :placeholder="t('storeNamePlaceholder')"
+				        class="input-width" />
+				</el-form-item>
+				<el-form-item :label="t('storeDesc')">
+				    <el-input v-model.trim="formData.store_desc" type="textarea" rows="4" clearable
+				        :placeholder="t('storeDescPlaceholder')" class="input-width" />
+				</el-form-item>
+				<el-form-item :label="t('storeLogo')">
+				    <upload-image v-model="formData.store_logo" />
+				</el-form-item>
+				<el-form-item :label="t('storeMobile')" prop="store_mobile">
+				    <el-input v-model.trim="formData.store_mobile" clearable :placeholder="t('storeMobilePlaceholder')"
+				        class="input-width" @keyup="filterNumber($event)"
+				        @blur="formData.store_mobile = $event.target.value" />
+				</el-form-item>
+				<el-form-item :label="t('tradeTime')" prop="trade_time">
+				    <div>
+				        <el-input v-model.trim="formData.trade_time" clearable :placeholder="t('tradeTimePlaceholder')"
+				            class="input-width" />
+				        <p class="text-[12px] text-[#999]">{{ t('tradeTimeTips') }}</p>
+				    </div>
+				</el-form-item>
+				<el-form-item :label="t('storeAddress')" prop="address_area">
+					<el-select v-model="formData.province_id" value-key="id" clearable class="w-[200px]"  ref="provinceRef">
+						<el-option :label="t('provincePlaceholder')" :value="0"/>
+						<el-option v-for="(item, index) in areaList.province" :key="index" :label="item.name"  :value="item.id"/>
+					</el-select>
+					<el-select v-model="formData.city_id" value-key="id" clearable class="w-[200px] ml-3" ref="cityRef">
+						<el-option :label="t('cityPlaceholder')" :value="0"/>
+						<el-option v-for="(item, index) in areaList.city " :key="index" :label="item.name"  :value="item.id"/>
+					</el-select>
+					<el-select v-model="formData.district_id" value-key="id" clearable class="w-[200px] ml-3"  ref="districtRef">
+						<el-option :label="t('districtPlaceholder')" :value="0"/>
+						<el-option v-for="(item, index) in areaList.district " :key="index" :label="item.name"  :value="item.id"/>
+					</el-select>
+				</el-form-item>
+				<el-form-item prop="address">
+					<el-input v-model.trim="formData.address" clearable :placeholder="t('addressPlaceholder')"  class="input-width"/>
+				</el-form-item>
+
+				<el-form-item>
+					<div id="container" class="w-[800px] h-[520px] relative" v-loading="mapLoading"></div>
+				</el-form-item>
+			</el-form>
+		</el-card>
+		<div class="fixed-footer-wrap">
+			<div class="fixed-footer !z-[9999]">
+				<el-button type="primary" @click="onSave(formRef)">{{ t('save') }}</el-button>
+				<el-button @click="back()">{{ t('cancel') }}</el-button>
+			</div>
+		</div>
+	</div>
 </template>
 
 <script lang="ts" setup>
@@ -65,20 +65,115 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { t } from '@/lang'
 import type { FormInstance } from 'element-plus'
 import { getStoreInfo, addStore, editStore } from '@/addon/shop/api/delivery'
-import { useRoute, useRouter } from 'vue-router'
-import { getAreaListByPid, getAreatree, getAddressInfo, getContraryAddress, getMap } from '@/app/api/sys'
-import { AnyObject } from '@/types/global'
-import { filterNumber } from '@/utils/common'
-import { ElMessage } from 'element-plus'
+import { getMap, getAreaListByPid, getAreaByCode } from '@/app/api/sys'
+import { useRoute } from 'vue-router'
+import { createMarker, latLngToAddress, addressToLatLng } from '@/utils/qqmap'
+import { filterNumber, debounce } from '@/utils/common'
 
 const route = useRoute()
-const router = useRouter()
 const id: number = parseInt(route.query.id as string)
 const loading = ref(false)
+const pageName = route.meta.title
+interface areaType{
+    province: any[],
+    city: any[],
+    district: any[]
+}
+const areaList = reactive<areaType>({
+    province: [],
+    city: [],
+    district: []
+})
+const provinceRef = ref()
+const cityRef = ref()
+const districtRef = ref()
 
 /**
- * 表单数据
+ * 获取省
  */
+getAreaListByPid(0).then(res => {
+    areaList.province = res.data
+})
+
+let mapKey: string = ''
+onMounted(() => {
+    const mapScript = document.createElement('script')
+    getMap().then(res => {
+        mapKey = res.data.key
+        mapScript.type = 'text/javascript'
+        mapScript.src = 'https://map.qq.com/api/gljs?libraries=tools,service&v=1.exp&key=' + res.data.key
+        document.body.appendChild(mapScript)
+    })
+    mapScript.onload = () => {
+        setTimeout(() => {
+            initMap()
+        }, 500)
+    }
+})
+
+/**
+* 初始化地图
+ */
+let map: any
+let marker: any
+const mapLoading = ref(true)
+const initMap = () => {
+    const TMap = (window as any).TMap
+    const LatLng = TMap.LatLng
+    const center = new LatLng(formData.latitude, formData.longitude)
+
+    map = new TMap.Map('container', {
+        center,
+        zoom: 14
+    })
+
+    map.on('tilesloaded', () => {
+        mapLoading.value = false
+    })
+
+    marker = createMarker(map)
+
+    map.on('click', (evt: any) => {
+        map.setCenter(evt.latLng)
+        marker.updateGeometries({
+            id: 'center',
+            position: evt.latLng
+        })
+        latLngChange(evt.latLng.lat, evt.latLng.lng)
+    })
+
+    latLngChange(center.lat, center.lng)
+}
+
+const storeArea = reactive({
+    province_id: 0,
+    city_id: 0,
+    district_id: 0
+})
+
+const latLngChange = (lat: number, lng: number) => {
+    latLngToAddress({ mapKey, lat, lng }).then(({ message, result }) => {
+        if (message == 'query ok' || message == 'Success') {
+            formData.latitude = result.location.lat
+            formData.longitude = result.location.lng
+            formData.address = result.formatted_addresses.recommend
+
+            getAreaByCode(result.ad_info.adcode).then(({ data }) => {
+                storeArea.province_id = data.province ? data.province.id : 0
+                storeArea.city_id = data.city ? data.city.id : 0
+                storeArea.district_id = data.district ? data.district.id : 0
+            })
+        } else {
+            console.error(message, result)
+        }
+    }).catch(err => {
+        console.log(err)
+    })
+}
+
+/**
+* 表单数据
+*/
 const initialFormData = {
     store_id: 0,
     store_name: '',
@@ -93,18 +188,21 @@ const initialFormData = {
     district_name: '',
     address: '',
     full_address: '',
-    longitude: '',
-    latitude: '',
+    longitude: 116.397190,
+    latitude: 39.908626,
     trade_time: ''
 }
+
 const formData: Record<string, any> = reactive({ ...initialFormData })
 
 const setFormData = async (id: number = 0) => {
+    loading.value = true
     Object.assign(formData, initialFormData)
     const data = await (await getStoreInfo(id)).data
     Object.keys(formData).forEach((key: string) => {
         if (data[key] != undefined) formData[key] = data[key]
     })
+    loading.value = false
 }
 if (id) setFormData(id)
 
@@ -122,45 +220,179 @@ const formRules = computed(() => {
         store_mobile: [
             { required: true, message: t('storeMobilePlaceholder'), trigger: 'blur' }
         ],
-        province_id: [
-            { required: true, message: t('provinceIdPlaceholder'), trigger: 'blur' }
-        ],
-        city_id: [
-            { required: true, message: t('cityIdPlaceholder'), trigger: 'blur' }
-        ],
-        district_id: [
-            { required: true, message: t('districtIdPlaceholder'), trigger: 'blur' }
-        ],
-        address_area: [
-            { required: true, validator: validatePass, trigger: 'blur' }
-        ],
-        address: [
-            { required: true, message: t('storeAddressDetailPlaceholder'), trigger: 'blur' }
-        ],
         trade_time: [
             { required: true, message: t('tradeTimePlaceholder'), trigger: 'blur' }
+        ],
+        address_area: [
+            {
+                validator: (rule: any, value: any, callback: any) => {
+                    if (!formData.province_id) {
+                        callback(new Error(t('provincePlaceholder')))
+                    }
+                    if (!formData.city_id) {
+                        callback(new Error(t('cityPlaceholder')))
+                    }
+                    if (areaList.district.length && !formData.district_id) {
+                        callback(new Error(t('districtPlaceholder')))
+                    }
+                    callback()
+                }
+            }
+        ],
+        address: [
+            { required: true, message: t('addressPlaceholder'), trigger: 'blur' }
         ]
     }
 })
 
-const validatePass = (rule: any, value: any, callback: any) => {
-    if (formData.province_name == '' || formData.city_name == '' || formData.district_name == '') {
-        callback(new Error(t('storeAddressPlaceholder')))
+/**
+ * 获取市
+ */
+watch(() => formData.province_id, (nval) => {
+    if (nval) {
+        getAreaListByPid(formData.province_id).then(res => {
+            areaList.city = res.data
+
+            const cityId = formData.city_id
+            if (cityId) {
+                let isExist = false
+                for (let i = 0; i < res.data.length; i++) {
+                    if (cityId == res.data[i].id) {
+                        isExist = true
+                        break
+                    }
+                }
+                if (isExist) {
+                    formData.city_id = cityId
+                    return
+                }
+            }
+            formData.city_id = 0
+            areaChange()
+        })
+    } else {
+        formData.city_id = 0
     }
-    callback()
-}
+})
+
+/**
+* 获取区
+ */
+watch(() => formData.city_id, (nval) => {
+    if (nval) {
+        getAreaListByPid(formData.city_id).then(res => {
+            areaList.district = res.data
+
+            const districtId = formData.district_id
+            if (districtId) {
+                let isExist = false
+                for (let i = 0; i < res.data.length; i++) {
+                    if (districtId == res.data[i].id) {
+                        isExist = true
+                        break
+                    }
+                }
+                if (isExist) {
+                    formData.district_id = districtId
+                    return
+                }
+            }
+            areaChange()
+            formData.district_id = 0
+        })
+    } else {
+        formData.district_id = 0
+    }
+})
+
+watch(() => formData.district_id, (nval) => {
+    if (nval) {
+        areaChange()
+    }
+})
+
+const areaChange = debounce(() => {
+    setTimeout(() => {
+        const address = [
+            formData.province_id ? provinceRef.value.states.selectedLabel : '',
+            formData.city_id ? cityRef.value.states.selectedLabel : '',
+            formData.district_id ? districtRef.value.states.selectedLabel : ''
+        ]
+
+        addressToLatLng({ mapKey, address: address.join('') }).then(({ message, result }) => {
+            if (message == 'Success' || message == 'query ok') {
+                const latLng = new (window as any).TMap.LatLng(result.location.lat, result.location.lng)
+                map.setCenter(latLng)
+                marker.updateGeometries({
+                    id: 'center',
+                    position: latLng
+                })
+                formData.latitude = result.location.lat
+                formData.longitude = result.location.lng
+            } else {
+                console.error(message, result)
+            }
+        })
+    }, 500)
+}, 500)
+
+/**
+ * 地图点选获取市
+ */
+watch(() => storeArea.province_id, (nval) => {
+    if (nval) {
+        getAreaListByPid(storeArea.province_id).then(res => {
+            areaList.city = res.data
+            formData.province_id = storeArea.province_id
+            formData.city_id = storeArea.city_id
+        })
+    }
+})
+
+/**
+* 地图点选获取区
+ */
+watch(() => storeArea.city_id, (nval) => {
+    if (nval) {
+        getAreaListByPid(storeArea.city_id).then(res => {
+            areaList.district = res.data
+            formData.city_id = storeArea.city_id
+            formData.district_id = storeArea.district_id
+        })
+    }
+})
+
+/**
+ * 地图点选获取区
+ */
+watch(() => storeArea.district_id, (nval) => {
+    if (nval) {
+        formData.district_id = storeArea.district_id
+    }
+})
 
 const onSave = async (formEl: FormInstance | undefined) => {
     if (loading.value || !formEl) return
     await formEl.validate(async (valid) => {
         if (valid) {
             loading.value = true
+
             const data = formData
+            formData.province_name = formData.province_id ? provinceRef.value.states.selectedLabel : '',
+            formData.city_name = formData.city_id ? cityRef.value.states.selectedLabel : '',
+            formData.district_name = formData.district_id ? districtRef.value.states.selectedLabel : ''
+            const address = [
+                data.province_id ? provinceRef.value.states.selectedLabel : '',
+                data.city_id ? cityRef.value.states.selectedLabel : '',
+                data.district_id ? districtRef.value.states.selectedLabel : '',
+                data.address
+            ]
+            data.full_address = address.join('')
 
             const save = id ? editStore : addStore
             save(data).then(res => {
                 loading.value = false
-                router.push('/shop/order/delivery/store')
+                history.back()
             }).catch(() => {
                 loading.value = false
             })
@@ -168,157 +400,9 @@ const onSave = async (formEl: FormInstance | undefined) => {
     })
 }
 
-interface AreaList {
-    province: { id: number, name: string }[]
-    city: { id: number, name: string }[]
-    district: { id: number, name: string }[]
-}
-const areaList = reactive<AreaList>({
-    province: [],
-    city: [],
-    district: []
-})
-const checkAreaTressFn = () => {
-    getAreatree(1).then(res => {
-        areaList.province = res.data
-    })
-}
-checkAreaTressFn()
-const checkCity = (arr:AnyObject) => {
-    if (Object.keys(arr).length == 0) {
-        arr.id = formData.province_id
-    } else {
-        formData.province_id = arr.id
-        formData.province_name = arr.name
-    }
-    getAreaListByPid(arr.id).then(res => {
-        areaList.city = res.data
-    })
-}
-const checkDistrict = (arr:AnyObject) => {
-    if (Object.keys(arr).length == 0) {
-        arr.id = formData.city_id
-    } else {
-        formData.city_id = arr.id
-        formData.city_name = arr.name
-    }
-    getAreaListByPid(arr.id).then(res => {
-        areaList.district = res.data
-    })
-}
-const check = (arr:AnyObject) => {
-    formData.district_id = arr.id
-    formData.district_name = arr.name
-}
-
-const searchOn = () => {
-    if (formData.province_id && formData.city_id && formData.district_id && formData.address) {
-        formData.full_address = formData.province_name + formData.city_name + formData.district_name + formData.address
-        getAddressInfo({
-            address: formData.full_address
-        }).then(res => {
-            formData.latitude = res.data.result.location.lat
-            formData.longitude = res.data.result.location.lng
-        })
-    }
-}
-
-let mapFn:any
-const initMap = () => {
-    // 定义地图中心点坐标
-    let latitude = formData.latitude
-    let longitude = formData.longitude
-    if (formData.latitude == 0) latitude = '39.90469'
-    if (formData.longitude == 0) longitude = '116.40717'
-    const center = new window.TMap.LatLng(latitude, longitude)
-    // 定义map变量，调用 TMap.Map() 构造函数创建地图
-    mapFn = new window.TMap.Map('TxMap', {
-        center, // 设置地图中心点坐标
-        zoom: 17, // 设置地图缩放级别
-        viewMode: '2D', // 设置2D模式
-        showControl: true // 去掉控件
-    })
-
-    mapFn.on('click', (evt:any) => {
-        const evtModel = {
-            lat: evt.latLng.getLat().toFixed(6),
-            lng: evt.latLng.getLng().toFixed(6)
-        }
-        checkAddressInfo(evtModel.lat, evtModel.lng, 1)
-        markerLayer.updateGeometries({
-            id: 'shop',
-            position: evt.latLng
-        })
-    })
-
-    const markerLayer = new window.TMap.MultiMarker({
-        id: 'marker-layer',
-        map: mapFn, // 显示Marker图层的底图
-        minimumClusterSize: 1
-    })
-
-    markerLayer.updateGeometries({
-        id: 'shop',
-        position: center
-    })
-
-    mapFn.on('idle', () => {
-        watch(() => formData.latitude, (newVal, oldVal) => {
-            const latLng = new window.TMap.LatLng(formData.latitude, formData.longitude)
-            mapFn.panTo(latLng, 1)
-            markerLayer.updateGeometries({
-                id: 'shop',
-                position: latLng
-            })
-        })
-    })
-}
-onMounted(() => {
-    const mapScript = document.createElement('script')
-    getMap().then(res => {
-        mapScript.type = 'text/javascript'
-        mapScript.src = 'https://map.qq.com/api/gljs?v=1.exp&key=' + res.data.key
-        document.body.appendChild(mapScript)
-    })
-    mapScript.onload = () => {
-        // 加载完成后初始化地图
-        setTimeout(() => {
-            // 需要定时执行的代码
-            initMap()
-        }, 500)
-    }
-})
-
-const checkAddressInfo = (lat:string, lng:string, type:number) => {
-    getContraryAddress({
-        location: lat + ',' + lng
-    }).then(res => {
-        if(res.data.result) {
-            formData.province_name = res.data.result.address_component.province
-            formData.city_name = res.data.result.address_component.city
-            formData.district_name = res.data.result.address_component.district
-            if (type == 1) {
-                formData.address = res.data.result.formatted_addresses.recommend
-                formData.full_address = formData.province_name + formData.city_name + formData.district_name + formData.address
-                formData.latitude = lat
-                formData.longitude = lng
-            }
-        }else{
-            ElMessage({
-                type: 'warning',
-                message: res.data.message
-            })
-        }
-    })
-}
-
 const back = () => {
-    router.push('/shop/order/delivery/store')
+    history.back()
 }
 </script>
 
-<style lang="scss" scoped>
-.fixed-footer {
-    z-index: 4 !important
-}
-</style>
+<style lang="scss" scoped></style>

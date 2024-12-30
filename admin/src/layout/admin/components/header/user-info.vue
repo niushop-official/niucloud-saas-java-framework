@@ -2,7 +2,8 @@
     <div>
         <el-dropdown @command="clickEvent" :tabindex="1">
             <div class="userinfo flex h-full items-center">
-                <el-avatar :size="25" :icon="UserFilled" :src="userStore.userInfo.head_img ? img(userStore.userInfo.head_img) : ''"/>
+                <el-avatar v-if="userStore.userInfo.head_img" :size="25" :icon="UserFilled" :src="img(userStore.userInfo.head_img)"/>
+                <img v-else src="@/app/assets/images/member_head.png" class="w-[25px] rounded-full" />
                 <div class="user-name pl-[8px]">{{ userStore.userInfo.username }}</div>
                 <icon name="element ArrowDown" class="ml-[5px]" />
             </div>
@@ -93,10 +94,10 @@ const getUserInfoFn = ()=>{
     userInfoEditRef.value?.open()
 }
 // 修改密码 --- start
-let changePasswordDialog = ref(false)
+const changePasswordDialog = ref(false)
 const formRef = ref<FormInstance>();
 // 提交信息
-let saveInfo = reactive({
+const saveInfo = reactive({
     original_password: '',
     password: '',
     password_copy: ''
@@ -137,7 +138,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
         }
     });
 }
-// 修改密码 --- end
 </script>
 
 <style lang="scss" scoped>

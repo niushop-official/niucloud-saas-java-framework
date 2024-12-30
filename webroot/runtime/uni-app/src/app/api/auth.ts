@@ -4,6 +4,9 @@ import request from '@/utils/request'
  * 用户名登录
  */
 export function usernameLogin(data : AnyObject) {
+    if(uni.getStorageSync('pid')){
+        data.pid = uni.getStorageSync('pid');
+    }
     return request.get('login', data, { showErrorMessage: true })
 }
 
@@ -11,14 +14,17 @@ export function usernameLogin(data : AnyObject) {
  * 手机验证码登录
  */
 export function mobileLogin(data : AnyObject) {
+    if(uni.getStorageSync('pid')){
+        data.pid = uni.getStorageSync('pid');
+    }
     return request.post('login/mobile', data, { showErrorMessage: true })
 }
 
 /**
  * 获取登录配置
  */
-export function getConfig() {
-    return request.get('login/config')
+export function getConfig(params: Record<string, any>) {
+    return request.get('login/config', params)
 }
 
 /**
@@ -111,7 +117,7 @@ export function bind(data : AnyObject) {
 }
 
 /**
- * 记录会员访问日志
+ * 记录会员访问日志【目前只更新最后访问时间】
  */
 export function memberLog(data : AnyObject) {
     return request.post('member/log', data, { showErrorMessage: false })

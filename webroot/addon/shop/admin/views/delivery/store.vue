@@ -81,6 +81,7 @@ import { getStoreList, deleteStore } from '@/addon/shop/api/delivery'
 import { img } from '@/utils/common'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const route = useRoute()
 const pageName = route.meta.title
@@ -114,11 +115,12 @@ const loadStoreList = (page: number = 1) => {
         storeTable.loading = false
         storeTable.data = res.data.data
         storeTable.total = res.data.total
+        setTablePageStorage(storeTable.page, storeTable.limit, storeTable.searchParam);
     }).catch(() => {
         storeTable.loading = false
     })
 }
-loadStoreList()
+loadStoreList(getTablePageStorage(storeTable.searchParam).page);
 
 const router = useRouter()
 

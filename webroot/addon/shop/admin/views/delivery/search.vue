@@ -1,15 +1,8 @@
 <template>
 	<div class="main-container">
-		<div class="flex ml-[18px] justify-between items-center mt-[20px]">
-			<div class="detail-head !m-0">
-				<div class="left" @click="router.push('/shop/order/delivery')">
-					<span class="iconfont iconxiangzuojiantou !text-xs"></span>
-					<span class="ml-[1px]">{{ t('returnToPreviousPage') }}</span>
-				</div>
-				<span class="adorn">|</span>
-				<span class="right">{{ pageName }}</span>
-			</div>
-		</div>
+		<el-card class="card !border-none mb-[15px]" shadow="never">
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="router.push({ path: '/shop/order/delivery' })" />
+        </el-card>
 		<el-form :model="formData" label-width="150px" ref="formRef" :rules="formRules" class="page-form" v-loading="loading">
 			<el-card class="box-card !border-none" shadow="never">
 				<el-form-item :label="t('interfaceType')" prop="interface_type">
@@ -56,14 +49,14 @@
 <!--				<div v-if="formData.interface_type == 2">-->
 <!--					<el-form-item label="APPKEY" class="input-item">-->
 <!--						<div>-->
-<!--							<el-input v-model="formData.kd100_app_key" clearable :placeholder="t('kd100AppKeyPlaceholder')" class="input-width" />-->
+<!--							<el-input v-model.trim="formData.kd100_app_key" clearable :placeholder="t('kd100AppKeyPlaceholder')" class="input-width" />-->
 <!--							<p class="text-[12px] text-[#b2b2b2]">{{ t('kd100AppKeyTips') }}</p>-->
 <!--						</div>-->
 <!--					</el-form-item>-->
 
 <!--					<el-form-item label="CUSTOMER" class="input-item">-->
 <!--						<div>-->
-<!--							<el-input v-model="formData.kd100_customer" :placeholder="t('kd100CustomerPlaceholder')" class="input-width" clearable />-->
+<!--							<el-input v-model.trim="formData.kd100_customer" :placeholder="t('kd100CustomerPlaceholder')" class="input-width" clearable />-->
 <!--							<p class="text-[12px] text-[#b2b2b2]">{{ t('kd100CustomerTips') }}</p>-->
 <!--						</div>-->
 <!--					</el-form-item>-->
@@ -83,6 +76,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { FormInstance, FormRules } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { setDeliverySearch, getDeliverySearch } from '@/addon/shop/api/delivery'

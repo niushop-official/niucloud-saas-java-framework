@@ -33,6 +33,10 @@ public class ShopVirtualGoodsInitVo implements Serializable {
         private String unit;  // 单位
         private Integer stock;  // 商品库存（总和）
         private Integer virtualSaleNum;  // 虚拟销量
+        private Integer isLimit = 0;
+        private Integer limitType = 1;
+        private Integer maxBuy = 0;
+        private Integer minBuy = 0;
         private String status;  // 商品状态（1.正常0下架）
         private Integer sort;  // 排序
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
@@ -55,6 +59,7 @@ public class ShopVirtualGoodsInitVo implements Serializable {
         private List<SpecInfo> specList;
         private Long activeGoodsCount;
         private Integer orderGoodsCount = 0;
+        private Integer isGift;
     }
 
     @Data

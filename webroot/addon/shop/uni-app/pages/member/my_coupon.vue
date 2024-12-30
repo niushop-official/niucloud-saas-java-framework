@@ -31,7 +31,7 @@
                         </view>
                         <view class="ml-[30rpx] flex-1 h-[100%] box-border py-[20rpx]">
                             <view class="text-[26rpx] leading-[40rpx] text-left font-500">
-                                <text v-if="item.min_condition_money == 0">无门槛</text>
+                                <text v-if="item.min_condition_money === '0.00'">无门槛</text>
                                 <text v-else>满{{ item.coupon_min_price }}元可用</text>
                             </view>
                             <view class="mt-[10rpx] flex items-center">
@@ -57,7 +57,7 @@
                         </view>
                         <view class="ml-[30rpx] flex-1 h-[100%] box-border py-[20rpx]">
                             <view class="text-[26rpx] leading-[40rpx] text-left font-500">
-                                <text v-if="item.min_condition_money == 0">无门槛</text>
+                                <text v-if="item.min_condition_money === '0.00'">无门槛</text>
                                 <text v-else>满{{ item.coupon_min_price }}元可用</text>
                             </view>
                             <view class="text-[20rpx]  mt-[10rpx] flex items-center">

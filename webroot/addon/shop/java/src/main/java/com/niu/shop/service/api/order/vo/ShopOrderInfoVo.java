@@ -7,6 +7,7 @@ import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.entity.order.ShopOrderDiscount;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderStatusEnum;
 import lombok.Data;
@@ -86,6 +87,9 @@ public class ShopOrderInfoVo implements Serializable {
     private Long expireTime;
     private Store store;
     private List<OrderDelivery> orderDelivery;
+    private List<ShopOrderDiscount> orderDiscount;
+    private BigDecimal couponMoney = BigDecimal.ZERO;
+    private BigDecimal manjianDiscountMoney = BigDecimal.ZERO;
 
     @Data
     public static class OrderGoods {
@@ -114,6 +118,7 @@ public class ShopOrderInfoVo implements Serializable {
         private Integer isVerify; // 是否需要核销
         private BigDecimal discountMoney;
         private String extend;
+        private Integer isGift;
 
         private ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);

@@ -47,18 +47,24 @@
 						</view>
 						<view class="flex justify-between items-center mt-[20rpx]">
 							<view class="text-[28rpx]">购买数量</view>
-							<u-number-box :min="1" :max="goodsDetail.stock" integer :step="1" input-width="68rpx" v-model="buyNum" input-height="52rpx">
+							<text v-if="maxBuyShow > 0 && minBuyShow > 1" class="ml-[20rpx] mr-[auto] text-[24rpx] text-[var(--primary-color)]">
+								({{ minBuyShow }}{{ goodsDetail.goods.unit }}起售，限购{{ maxBuyShow }}{{ goodsDetail.goods.unit }})
+							</text>
+							<text v-else-if="maxBuyShow > 0" class="ml-[20rpx] mr-[auto] text-[24rpx] text-[var(--primary-color)]">(限购{{ maxBuyShow }}{{ goodsDetail.goods.unit }})</text>
+							<text v-else-if="minBuyShow > 1" class="ml-[20rpx] mr-[auto] text-[24rpx] text-[var(--primary-color)]">({{ minBuyShow }}{{ goodsDetail.goods.unit }}起售)</text>
+
+							<u-number-box :min="minBuy" :max="maxBuy" integer :step="1" input-width="68rpx" v-model="buyNum" input-height="52rpx">
 								<template #minus>
-									<view class="relative w-[30rpx] h-[30rpx]">
-										<text class="text-[30rpx] nc-iconfont nc-icon-jianV6xx font-500 absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" :class="{ '!text-[var(--text-color-light9)]': buyNum <= 1 }"></text>
+									<view class="relative w-[30rpx] h-[30rpx]" @click="reduceNumChange">
+										<text class="text-[30rpx] nc-iconfont nc-icon-jianV6xx font-500 absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" :class="{ '!text-[var(--text-color-light9)]': buyNum <= minBuy }"></text>
 									</view>
 								</template>
 								<template #input>
 									<input class="text-[#303133] text-[28rpx] mx-[10rpx] w-[80rpx] h-[44rpx] bg-[var(--temp-bg)] leading-[44rpx] text-center rounded-[6rpx]" type="number" @input="goodsSkuInputFn" @blur="goodsSkuBlurFn" v-model="buyNum"  />
 								</template>
 								<template #plus>
-									<view class="relative w-[30rpx] h-[30rpx]">
-										<text class="text-[30rpx] nc-iconfont nc-icon-jiahaoV6xx font-500 absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" :class="{ '!text-[var(--text-color-light9)]': buyNum >= goodsDetail.stock }"></text>
+									<view class="relative w-[30rpx] h-[30rpx]" @click="addNumChange">
+										<text class="text-[30rpx] nc-iconfont nc-icon-jiahaoV6xx font-500 absolute flex items-center justify-center -left-[8rpx] -bottom-[8rpx] -right-[8rpx] -top-[8rpx]" :class="{ '!text-[var(--text-color-light9)]': buyNum >= maxBuy }"></text>
 									</view>
 								</template>
 							</u-number-box>
@@ -88,15 +94,16 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, toRaw} from 'vue';
-import {getToken, img, redirect} from '@/utils/common'
-import useCartStore from '@/addon/shop/stores/cart'
-import {useLogin} from '@/hooks/useLogin'
-import useMemberStore from '@/stores/member'
-import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
-import {cloneDeep} from 'lodash-es'
+	import { ref, computed, toRaw } from 'vue';
+	import { img, redirect, getToken } from '@/utils/common'
+	import useCartStore from '@/addon/shop/stores/cart'
+	import { useLogin } from '@/hooks/useLogin'
+	import useMemberStore from '@/stores/member'
+	import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
+	import { cloneDeep } from 'lodash-es'
+	import { t } from '@/locale'
 
-const props = defineProps(['goodsDetail']);
+	const props = defineProps(['goodsDetail']);
 	const goodsSkuPop = ref(false);
 	const callback:any = ref(null);
 	const currSpec = ref({
@@ -105,6 +112,11 @@ const props = defineProps(['goodsDetail']);
 	})
 	const openType = ref("");
 	const buyNum = ref(1)
+
+	const maxBuy = ref(0); // 限购
+	const minBuy = ref(0); // 起售
+	const maxBuyShow = ref(0); // 限购
+	const minBuyShow = ref(0); // 起售
 
 	// 商品价格
 	const goodsPrice = computed(() => {
@@ -158,18 +170,34 @@ const props = defineProps(['goodsDetail']);
 
 	const goodsSkuInputFn = ()=>{
 		setTimeout(() => {
-			if(buyNum.value >= goodsDetail.value.stock){
-				buyNum.value = goodsDetail.value.stock;
+			if(!buyNum.value || buyNum.value <= minBuy.value ){
+				buyNum.value = minBuy.value || 1;
+			}
+			if(buyNum.value >= maxBuy.value){
+				buyNum.value = maxBuy.value;
+			}
+			// 起售大于库存，初始值也应该是零
+			if(minBuy.value > goodsDetail.value.detail.stock){
+				buyNum.value = 0;
 			}
 		},0)
 	}
 	const goodsSkuBlurFn = ()=>{
 		setTimeout(() => {
-			if(!buyNum.value || buyNum.value <= 0 ){
-				buyNum.value = 1;
+			if(!buyNum.value || buyNum.value <= minBuy.value ){
+				buyNum.value = minBuy.value || 1;
 			}
-			if(buyNum.value >= goodsDetail.value.stock){
-				buyNum.value = goodsDetail.value.stock;
+			if(buyNum.value >= maxBuy.value){
+				buyNum.value = maxBuy.value;
+			}
+
+			// 起售大于库存，初始值也应该是零
+			if(minBuy.value > goodsDetail.value.detail.stock){
+				buyNum.value = 0;
+				uni.showToast({
+				    title: '商品库存小于起购数量',
+				    icon: 'none'
+				});
 			}
 		},0)
 	}
@@ -214,13 +242,50 @@ const props = defineProps(['goodsDetail']);
 				})
 			}
 		}
+
+		// 限购 - 是否开启限购
+		if(data.goods.is_limit){
+			if(data.goods.max_buy){
+				let max_buy = 0;
+				if(data.goods.limit_type == 1){ //单次限购
+					max_buy = data.goods.max_buy;
+				}else{ // 单人限购
+					let buyVal = data.goods.max_buy - (data.goods.has_buy||0);
+					max_buy = buyVal > 0 ? buyVal : 0;
+				}
+				if(max_buy > data.detail.stock){
+					maxBuy.value = data.detail.stock
+				}else if(max_buy <= data.detail.stock){
+					maxBuy.value = max_buy;
+				}
+
+				// 限购开启且最大购买变为零时，初始值也应该是零
+				if(maxBuy.value == 0){
+					buyNum.value = 0;
+				}
+			}
+			// 仅用于展示
+			maxBuyShow.value = data.goods.max_buy; // 限购
+		}else{
+			maxBuy.value = data.detail.stock;
+		}
+
+		// 起售
+		minBuy.value = data.goods.min_buy > 0 ? data.goods.min_buy : 1;
+		// 起售大于库存，初始值也应该是零
+		if(minBuy.value > data.detail.stock){
+			buyNum.value = 0;
+		}else{
+			buyNum.value = minBuy.value;
+		}
+		// 仅用于展示
+		minBuyShow.value = data.goods.min_buy;
 		return data;
 	})
 
 	const change = (data: any, index: any)=>{
 		currSpec.value.name[index] = data.name;
-		buyNum.value = 1
-		getSkuId();
+		getSkuId(); // 刷新当前规格信息
 	}
 
 	const emits = defineEmits(['change'])
@@ -231,6 +296,34 @@ const props = defineProps(['goodsDetail']);
 				emits('change',skuItem.sku_id)
 			}
 		})
+	}
+
+	const addNumChange = () => {
+		if(minBuy.value && minBuy.value > goodsDetail.value.detail.stock){
+			uni.showToast({ title: '商品库存小于起购数量', icon: 'none' })
+			return;
+		}
+		if(goodsDetail.value.goods.is_limit){
+			let tips = `该商品单次限购${goodsDetail.value.goods.max_buy}件`;
+			if(goodsDetail.value.goods.limit_type != 1){ //单次限购
+				tips = `该商品每人限购${goodsDetail.value.goods.max_buy}件`;
+				if(goodsDetail.value.goods.max_buy - maxBuy.value){
+					tips += `,已购${goodsDetail.value.goods.max_buy - maxBuy.value}件`;
+				}
+			}
+			if(buyNum.value >= maxBuy.value){
+				uni.showToast({ title: tips, icon: 'none' })
+			}
+		}
+	}
+
+	const reduceNumChange = () => {
+		if(minBuy.value > 1){
+			let tips = `该商品起购${minBuy.value}件`;
+			if(buyNum.value <= minBuy.value){
+				uni.showToast({ title: tips, icon: 'none' })
+			}
+		}
 	}
 
 	//强制绑定手机号
@@ -264,14 +357,34 @@ const props = defineProps(['goodsDetail']);
         // 加入购物车
         if (openType.value == 'join_cart') {
             let num = 0;
+			let limitNum = 0;
             let cartId = "";
 
             if (cartList.value['goods_' + goodsDetail.value.goods_id] && cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id]) {
                 num = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id].num);
                 cartId = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id].id)
             }
+			if (cartList.value['goods_' + goodsDetail.value.goods_id] && cartList.value['goods_' + goodsDetail.value.goods_id]) {
+			    limitNum = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id].totalNum);
+			}
 
             num += Number(buyNum.value);
+			limitNum += Number(buyNum.value);
+			/************** 限购-start **************/
+			if(goodsDetail.value.goods.is_limit){
+				let tips = `该商品单次限购${goodsDetail.value.goods.max_buy}件`;
+				if(goodsDetail.value.goods.limit_type != 1){ //单次限购
+					tips = `该商品每人限购${goodsDetail.value.goods.max_buy}件`;
+					if(goodsDetail.value.goods.max_buy - maxBuy.value){
+						tips += `,已购${goodsDetail.value.goods.max_buy - maxBuy.value}件`;
+					}
+				}
+				if(limitNum > maxBuy.value){
+					uni.showToast({ title: tips, icon: 'none' })
+					return false;
+				}
+			}
+			/************** 限购-end **************/
             cartStore.increase({
                 id: cartId || '',
                 goods_id: goodsDetail.value.goods_id,

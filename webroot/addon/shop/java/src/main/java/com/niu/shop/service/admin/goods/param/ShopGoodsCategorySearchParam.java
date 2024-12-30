@@ -13,4 +13,6 @@ public class ShopGoodsCategorySearchParam implements Serializable {
     private String categoryName;
 
     private Integer isShow;
+
+    private Integer level;
 }

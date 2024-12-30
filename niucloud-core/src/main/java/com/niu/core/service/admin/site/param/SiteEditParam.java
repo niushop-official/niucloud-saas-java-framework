@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * 编辑站点参数
-*/
+ */
 @Data
 public class SiteEditParam implements Serializable {
 

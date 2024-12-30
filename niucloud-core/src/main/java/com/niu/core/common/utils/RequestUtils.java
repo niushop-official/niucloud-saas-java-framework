@@ -259,7 +259,6 @@ public class RequestUtils {
      * @return
      */
     public static String getDomain(Boolean isScheme) {
-        HttpServletRequest request = handler();
-        return isScheme ? request.getScheme() + "://" + request.getServerName() : request.getServerName();
+        return isScheme ? getRequestSecure() + "://" + getRequestDomain() : getRequestDomain();
     }
 }

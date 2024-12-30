@@ -39,28 +39,36 @@ export function getGoodsDetail(params: Record<string, any>) {
  * 获取商品规格
  */
 export function getGoodsSku(sku_id: any) {
-    return request.get(`shop/goods/sku/${sku_id}`)
+    return request.get(`shop/goods/sku/${ sku_id }`)
+}
+
+/**
+ * 收藏列表
+ */
+export function getCollectList(params: Record<string, any>) {
+    return request.get(`shop/goods/collect`, params)
+}
+
+/**
+ * 取消收藏
+ */
+export function cancelCollect(params: Record<string, any>) {
+    return request.put(`shop/goods/collect`, params, { showSuccessMessage: true })
 }
 
 /**
  *  收藏
  */
 export function collect(goods_id: any) {
-    return request.post(`shop/goods/collect/${goods_id}`)
+    return request.post(`shop/goods/collect/${ goods_id }`)
 }
 
-/**
- *  取消收藏
- */
-export function cancelCollect(goods_id: any) {
-    return request.delete(`shop/goods/collect/${goods_id}`)
-}
 
 /**
  * 获取评价
  */
 export function getEvaluateList(goods_id: any) {
-    return request.get(`shop/goods/evaluate/list`, {goods_id})
+    return request.get(`shop/goods/evaluate/list`, { goods_id })
 }
 
 /**
@@ -68,4 +76,31 @@ export function getEvaluateList(goods_id: any) {
  */
 export function getGoodsComponents(params: Record<string, any>) {
     return request.get(`shop/goods/components`, params)
+}
+
+/**
+ * 获取商品满减信息
+ */
+export function getManjian(params: Record<string, any>) {
+    return request.get(`shop/manjian/info`, params)
+}
+
+/**
+ *  商品足迹添加
+ */
+export function browse(params: Record<string, any>) {
+    return request.post(`shop/goods/browse`, params, { showSuccessMessage: false })
+}
+/**
+ *  商品足迹列表
+ */
+export function getBrowse(params: Record<string, any>) {
+    return request.get(`shop/goods/browse`, params)
+}
+
+/**
+ * 商品足迹删除
+ */
+export function delBrowse(params: Record<string, any>) {
+    return request.delete(`shop/goods/browse`, params)
 }

@@ -5,6 +5,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.admin.member.vo.CashOutConfigVo;
 import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.api.member.vo.*;
+import com.niu.core.service.core.member.param.MemberCashOutApplyParam;
 
 public interface IMemberCashOutService {
 

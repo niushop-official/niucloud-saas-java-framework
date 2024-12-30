@@ -10,6 +10,7 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.component.context.cache.CachedServiceImpl;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteAddonInitRecord;
@@ -37,10 +38,14 @@ import java.util.List;
 @Service
 public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> implements ICoreSiteService {
 
-    /** 站点tag */
+    /**
+     * 站点tag
+     */
     public static String cacheTagName = CacheTagEnum.SITE_CASH.getTagName();
 
-    /** 是否使用缓存 */
+    /**
+     * 是否使用缓存
+     */
     public static final boolean useCache = true;
 
     @Resource
@@ -143,7 +148,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
     @Override
     public SiteInfoVo getSiteCache(Integer siteId) {
 
-        SiteInfoCacheVo cache = cached.rememberObject(useCache, cacheTagName, Arrays.asList("getSiteCache", siteId), uniqueKey ->{
+        SiteInfoCacheVo cache = cached.rememberObject(useCache, cacheTagName, Arrays.asList("getSiteCache", siteId), uniqueKey -> {
             MPJQueryWrapper<Site> siteMPJQueryWrapper = new MPJQueryWrapper<>();
             siteMPJQueryWrapper.select("ns.site_id, ns.site_name, ns.group_id, ns.keywords, ns.app_type, ns.logo, ns.`desc`, ns.status, ns.latitude, ns.longitude, ns.province_id, ns.city_id, ns.district_id, ns.address, ns.full_address, ns.phone, ns.business_hours, ns.create_time, ns.expire_time, ns.front_end_name, ns.front_end_logo, ns.front_end_icon, ns.icon, ns.member_no, ns.app, ns.addons, ns.initalled_addon, ns.site_domain, nsg.group_name")
                     .setAlias("ns")
@@ -169,8 +174,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
                 siteInfoVo.setApps(new ArrayList<>());
             }
         }*/
-        if(ObjectUtil.isNotEmpty(cache))
-        {
+        if (ObjectUtil.isNotEmpty(cache)) {
             BeanUtil.copyProperties(cache, siteInfoVo);
             siteInfoVo.setAddonKeys(getAddonKeysBySiteId(siteInfoVo.getSiteId()));
             if (siteInfoVo.getAddonKeys().size() != 0) {
@@ -219,14 +223,13 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
 
     /**
      * 站点到期关闭
-     *
      */
     @Override
     public void siteExpireClose() {
         Site model = new Site();
         model.setStatus(SiteStatusEnum.EXPIRE.getCode());
         siteMapper.update(model, new QueryWrapper<Site>()
-                .gt("expire_time",0)
+                .gt("expire_time", 0)
                 .lt("expire_time", System.currentTimeMillis() / 1000)
                 .ne("status", SiteStatusEnum.EXPIRE.getCode())
         );

@@ -1,9 +1,9 @@
 package com.niu.shop.service.core.order.impl;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
-import com.niu.core.common.utils.object.ObjectUtils;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.order.ShopOrder;
@@ -15,18 +15,19 @@ import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderGoodsRefundEnum;
 import com.niu.shop.enums.order.OrderStatusEnum;
 import com.niu.shop.event.order.OrderDeliveryAfterEvent;
-import com.niu.shop.event.order.OrderPayAfterEvent;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderDeliveryMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
+import com.niu.shop.service.core.delivery.ICoreElectronicSheetService;
+import com.niu.shop.service.core.delivery.param.ShopDeliveryPrintElectronicSheetParam;
+import com.niu.shop.service.core.delivery.vo.ElectronicSheetPrintVo;
 import com.niu.shop.service.core.order.ICoreOrderDeliveryService;
 import com.niu.shop.service.core.order.ICoreOrderEventService;
 import com.niu.shop.service.core.order.ICoreOrderFinishService;
 import com.niu.shop.service.core.order.param.OrderDeliveryDataParam;
 import com.niu.shop.service.core.order.param.OrderDeliveryParam;
 import com.niu.shop.service.core.order.param.OrderFinishParam;
-import net.sf.ehcache.util.SetAsList;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,9 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
     ICoreOrderEventService coreOrderEventService;
 
     @Resource
+    ICoreElectronicSheetService coreElectronicSheetService;
+
+    @Resource
     public void setOrderFinishService(@Lazy ICoreOrderFinishService orderFinishService) {
         this.orderFinishService = orderFinishService;
     }
@@ -70,27 +74,42 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
         Integer orderId = orderDeliveryParam.getOrderId();
         Integer siteId = orderDeliveryParam.getSiteId();
-        Integer[] orderGoodsIds = orderDeliveryParam.getOrderGoodsIds();
+        List<Integer> orderGoodsIds = new ArrayList<>(Arrays.asList(orderDeliveryParam.getOrderGoodsIds()));
         ShopOrder shopOrder = shopOrderMapper.selectOne(new QueryWrapper<ShopOrder>()
-                        .eq("order_id", orderId)
-                        .eq("site_id", siteId));
-        if(ObjectUtil.isEmpty(shopOrder)) throw new CommonException("订单信息不能为空");
+                .eq("order_id", orderId)
+                .eq("site_id", siteId));
+        if (ObjectUtil.isEmpty(shopOrder)) throw new CommonException("订单信息不能为空");
 
-        if(!shopOrder.getStatus().equals(OrderStatusEnum.WAIT_DELIVERY.getStatus().toString())) throw new CommonException("订单状态不是待发货状态");
+        if (!shopOrder.getStatus().equals(OrderStatusEnum.WAIT_DELIVERY.getStatus().toString()))
+            throw new CommonException("订单状态不是待发货状态");
+
+        // 赠品跟随下单商品一起发货
+        List<ShopOrderGoods> giftOrderGoods = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>()
+                .select("order_goods_id")
+                .eq("order_id", orderId)
+                .eq("is_gift", 1)
+                .eq("status", OrderGoodsRefundEnum.NORMAL.getStatus())
+                .eq("delivery_status", OrderDeliveryStatusEnum.WAIT_DELIVERY.getStatus())
+        );
+        if (ObjectUtil.isNotEmpty(giftOrderGoods)) {
+            giftOrderGoods.stream().forEach(i -> orderGoodsIds.add(i.getOrderGoodsId()));
+        }
+
         List<ShopOrderGoods> orderGoodsData = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>()
                 .eq("order_id", orderId)
-                .in("order_goods_id",  Arrays.asList(orderGoodsIds))
+                .in("order_goods_id", orderGoodsIds)
                 .eq("status", OrderGoodsRefundEnum.NORMAL.getStatus())
                 .eq("delivery_status", OrderDeliveryStatusEnum.WAIT_DELIVERY.getStatus()));
 
-        if(orderGoodsData.size() != orderGoodsIds.length) throw new CommonException("订单中存在已退款的商品，不能发货");
+        if (orderGoodsData.size() != orderGoodsIds.size()) throw new CommonException("订单中存在已退款的商品，不能发货");
 
         List<String> hasGoodsTypeArray = new ArrayList<>();
         for (ShopOrderGoods orderGoods : orderGoodsData) {
-            if(!hasGoodsTypeArray.contains(orderGoods.getGoodsType())) hasGoodsTypeArray.add(orderGoods.getGoodsType());
+            if (!hasGoodsTypeArray.contains(orderGoods.getGoodsType()) && orderGoods.getIsGift() == 0)
+                hasGoodsTypeArray.add(orderGoods.getGoodsType());
         }
 
-        if(hasGoodsTypeArray.size() >1) throw new CommonException("一次发货只能发送一种商品类型的订单项");
+        if (hasGoodsTypeArray.size() > 1) throw new CommonException("一次发货只能发送一种商品类型的订单项");
         String goodsType = hasGoodsTypeArray.get(0);
 
         OrderDeliveryDataParam orderDeliveryDataParam = new OrderDeliveryDataParam();
@@ -98,29 +117,27 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
         orderDeliveryDataParam.setOrderGoodsData(orderGoodsData);
         orderDeliveryDataParam.setParam(orderDeliveryParam);
 
-        if(ObjectUtil.isNotEmpty(goodsType)){
-            if(goodsType.equals(GoodsTypeEnum.VIRTUAL.getType()))
-            {
-                if(!orderDeliveryParam.getDeliveryType().equals(OrderDeliveryTypeEnum.VIRTUAL.getType())) throw new CommonException("虚拟商品只支持虚拟发货");
+        if (ObjectUtil.isNotEmpty(goodsType)) {
+            if (goodsType.equals(GoodsTypeEnum.VIRTUAL.getType())) {
+                if (!orderDeliveryParam.getDeliveryType().equals(OrderDeliveryTypeEnum.VIRTUAL.getType()))
+                    throw new CommonException("虚拟商品只支持虚拟发货");
                 this.virtual(orderDeliveryDataParam);
-            }else{
-               if(!OrderDeliveryTypeEnum.getMap().containsKey(orderDeliveryParam.getDeliveryType())) throw new CommonException("不支持的配送方式");
+            } else {
+                if (!OrderDeliveryTypeEnum.getMap().containsKey(orderDeliveryParam.getDeliveryType()))
+                    throw new CommonException("不支持的配送方式");
 
-               //物流配送
-               if(shopOrder.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType()))
-                {
+                //物流配送
+                if (shopOrder.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType())) {
                     this.express(orderDeliveryDataParam);
                 }
 
-               //同城配送
-                if(shopOrder.getDeliveryType().equals(OrderDeliveryTypeEnum.LOCAL_DELIVERY.getType()))
-                {
+                //同城配送
+                if (shopOrder.getDeliveryType().equals(OrderDeliveryTypeEnum.LOCAL_DELIVERY.getType())) {
                     this.localDelivery(orderDeliveryDataParam);
                 }
 
                 //门店自提
-                if(shopOrder.getDeliveryType().equals(OrderDeliveryTypeEnum.STORE.getType()))
-                {
+                if (shopOrder.getDeliveryType().equals(OrderDeliveryTypeEnum.STORE.getType())) {
                     this.store(orderDeliveryDataParam);
                 }
 
@@ -149,8 +166,7 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
         Integer deliveryId = this.packages(shopOrderDelivery);
 
         //虚拟商品自动收货
-        for (ShopOrderGoods orderGoods : orderGoodsData)
-        {
+        for (ShopOrderGoods orderGoods : orderGoodsData) {
 
             orderGoods.setDeliveryStatus(OrderDeliveryStatusEnum.DELIVERY_FINISH.getStatus());
             orderGoods.setDeliveryId(deliveryId);
@@ -160,37 +176,30 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
         //调用虚拟配送(生成核销码)
         List<Integer> goodsIds = orderGoodsData.stream().map(ShopOrderGoods::getGoodsId).collect(Collectors.toList());
         List<ShopGoods> tempGoodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().in("goods_id", goodsIds));
-        for (ShopOrderGoods orderGoods : orderGoodsData)
-        {
-            for (ShopGoods shopGoods : tempGoodsList)
-            {
-                if (orderGoods.getGoodsId().equals(shopGoods.getGoodsId()))
-                {
-                    if(shopGoods.getVirtualReceiveType().equals("verify"))
-                    {
+        for (ShopOrderGoods orderGoods : orderGoodsData) {
+            for (ShopGoods shopGoods : tempGoodsList) {
+                if (orderGoods.getGoodsId().equals(shopGoods.getGoodsId())) {
+                    if (shopGoods.getVirtualReceiveType().equals("verify")) {
                         //生成核销码
                         Long expireTime;
-                        if(shopGoods.getVirtualVerifyType() == 0)
-                        {
+                        if (shopGoods.getVirtualVerifyType() == 0) {
                             expireTime = 0L;
-                        }else if(shopGoods.getVirtualVerifyType() == 1){
+                        } else if (shopGoods.getVirtualVerifyType() == 1) {
 
                             expireTime = System.currentTimeMillis() / 1000 + shopGoods.getVirtualIndate() * 86400;
-                        }else {
-                            expireTime = (long)shopGoods.getVirtualIndate();
+                        } else {
+                            expireTime = (long) shopGoods.getVirtualIndate();
                         }
                         orderGoods.setVerifyExpireTime(expireTime);
                         orderGoods.setIsVerify(1);
                         shopOrderGoodsMapper.updateById(orderGoods);
-                    }else if(shopGoods.getVirtualReceiveType().equals("auto"))
-                    {
+                    } else if (shopGoods.getVirtualReceiveType().equals("auto")) {
                         orderFinishService.orderGoodsTake(orderGoods.getOrderId(), new Integer[]{orderGoods.getOrderGoodsId()});
                     }
 
                 }
             }
         }
-
 
 
     }
@@ -204,7 +213,6 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
     @Override
     public void express(OrderDeliveryDataParam orderDeliveryDataParam) {
-
         ShopOrder orderData = orderDeliveryDataParam.getOrderData();
         List<ShopOrderGoods> orderGoodsData = orderDeliveryDataParam.getOrderGoodsData();
         OrderDeliveryParam orderDeliveryParam = orderDeliveryDataParam.getParam();
@@ -219,11 +227,36 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
         shopOrderDelivery.setRemark(orderDeliveryParam.getRemark());
         shopOrderDelivery.setExpressCompanyId(orderDeliveryParam.getExpressCompanyId());
         shopOrderDelivery.setExpressNumber(orderDeliveryParam.getExpressNumber());
+
+        switch (orderDeliveryDataParam.getParam().getDeliveryWay()) {
+            case "manual_write" -> {
+                if (ObjectUtil.isNotEmpty(orderDeliveryDataParam.getParam().getExpressNumber())) {
+                    QueryWrapper<ShopOrderDelivery> queryWrapper = new QueryWrapper<>();
+                    queryWrapper.eq("order_id", orderDeliveryParam.getOrderId())
+                            .eq("site_id", orderDeliveryParam.getSiteId())
+                            .eq("express_number", orderDeliveryParam.getExpressNumber());
+                    if (shopOrderDeliveryMapper.selectCount(queryWrapper) > 0) {
+                        throw new RuntimeException("物流单号不能重复");
+                    }
+                }
+            }
+            case "electronic_sheet" -> {
+                ShopDeliveryPrintElectronicSheetParam param = new ShopDeliveryPrintElectronicSheetParam();
+                param.setSiteId(orderDeliveryDataParam.getOrderData().getSiteId());
+                param.setOrderId(orderDeliveryDataParam.getOrderData().getOrderId());
+                param.setElectronicSheetId(orderDeliveryDataParam.getParam().getElectronicSheetId());
+                param.setOrderGoodsIds(CollStreamUtil.toList(orderDeliveryDataParam.getOrderGoodsData(), ShopOrderGoods::getGoodsId));
+
+                List<ElectronicSheetPrintVo> voList = coreElectronicSheetService.printElectronicSheet(param);
+                if (ObjectUtil.isNotEmpty(voList)) {
+                    shopOrderDelivery.setExpressNumber(String.valueOf(voList.get(0).getOrderInfo().get("LogisticCode")));
+                }
+            }
+        }
+
         Integer deliveryId = this.packages(shopOrderDelivery);
 
-        for (ShopOrderGoods orderGoods : orderGoodsData)
-        {
-
+        for (ShopOrderGoods orderGoods : orderGoodsData) {
             orderGoods.setDeliveryStatus(OrderDeliveryStatusEnum.DELIVERY_FINISH.getStatus());
             orderGoods.setDeliveryId(deliveryId);
             shopOrderGoodsMapper.updateById(orderGoods);
@@ -248,8 +281,7 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
         shopOrderDelivery.setLocalDeliverId(orderDeliveryParam.getLocalDeliverId());
         Integer deliveryId = this.packages(shopOrderDelivery);
 
-        for (ShopOrderGoods orderGoods : orderGoodsData)
-        {
+        for (ShopOrderGoods orderGoods : orderGoodsData) {
 
             orderGoods.setDeliveryStatus(OrderDeliveryStatusEnum.DELIVERY_FINISH.getStatus());
             orderGoods.setDeliveryId(deliveryId);
@@ -274,8 +306,7 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
         shopOrderDelivery.setRemark(orderDeliveryParam.getRemark());
         Integer deliveryId = this.packages(shopOrderDelivery);
 
-        for (ShopOrderGoods orderGoods : orderGoodsData)
-        {
+        for (ShopOrderGoods orderGoods : orderGoodsData) {
 
             orderGoods.setDeliveryStatus(OrderDeliveryStatusEnum.DELIVERY_FINISH.getStatus());
             orderGoods.setDeliveryId(deliveryId);
@@ -290,9 +321,9 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
                 .eq("order_id", orderDeliveryParam.getOrderId())
                 .eq("delivery_status", OrderDeliveryStatusEnum.WAIT_DELIVERY.getStatus())
                 .ne("status", OrderGoodsRefundEnum.REFUND_FINISH.getStatus())
-            );
+        );
 
-        if(count == 0L){
+        if (count == 0L) {
             this.finish(orderDeliveryParam);
         }
         return true;
@@ -325,11 +356,9 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
         //如果有且只有一个虚拟商品并且已经收货，则订单完成
         List<ShopOrderGoods> orderGoodsList = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", orderDeliveryParam.getOrderId()));
-        if(orderGoodsList.size() == 1)
-        {
+        if (orderGoodsList.size() == 1) {
             ShopOrderGoods orderGoods = orderGoodsList.get(0);
-            if(orderGoods.getGoodsType().equals(GoodsTypeEnum.VIRTUAL.getType()) && orderGoods.getDeliveryStatus().equals(OrderDeliveryStatusEnum.TAKED.getStatus()))
-            {
+            if (orderGoods.getGoodsType().equals(GoodsTypeEnum.VIRTUAL.getType()) && orderGoods.getDeliveryStatus().equals(OrderDeliveryStatusEnum.TAKED.getStatus())) {
                 OrderFinishParam finishParam = new OrderFinishParam();
                 finishParam.setOrderId(orderDeliveryParam.getOrderId());
                 finishParam.setSiteId(orderDeliveryParam.getSiteId());

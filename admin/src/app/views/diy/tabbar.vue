@@ -17,7 +17,13 @@
                     </template>
                 </el-table-column>
 
-                <el-table-column prop="key" :label="t('key')" min-width="80"/>
+                <el-table-column prop="key" :label="t('key')" min-width="120"/>
+
+                <el-table-column :label="t('type')" min-width="120">
+                    <template #default="{ row }">
+                        <span>{{ row.info.type === 'app' ? t('app') : t('addon') }}</span>
+                    </template>
+                </el-table-column>
 
                 <el-table-column :label="t('operation')" fixed="right" align="right" min-width="160">
                     <template #default="{ row }">
@@ -42,6 +48,7 @@
     import { t } from '@/lang'
     import { getDiyBottomList } from '@/app/api/diy'
     import { useRoute, useRouter } from 'vue-router'
+    import { cloneDeep } from 'lodash-es'
 
     const route = useRoute()
     const router = useRouter()
@@ -64,7 +71,7 @@
             bottomNavTableData.loading = false
 
             const len = Math.ceil(res.data.length / bottomNavTableData.limit)
-            const data = JSON.parse(JSON.stringify(res.data))
+            const data = cloneDeep(res.data)
             const dataGather = []
             for (let i = 0; i < len; i++) {
                 dataGather[i] = data.splice(0, bottomNavTableData.limit)

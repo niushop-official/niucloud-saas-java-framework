@@ -1,36 +1,36 @@
 <template>
     <el-dialog v-model="showDialog" :title="t('electronicSheetPrintTitle')" :width="printDialogWidth" class="diy-dialog-wrap" :destroy-on-close="true" :close-on-click-modal="false">
 
-	    <el-alert type="warning" :closable="false" class="!mb-[10px]">
-		    <template #default>
-			    <p>注意事项：</p>
-			    <p>* 待收货状态并且配送方式为物流配送的订单支持打印电子面单</p>
-			    <p>* 无需物流、虚拟发货不支持打印电子面单</p>
-			    <p>* 请对应物流公司选择面单模板</p>
-			    <p>* 批量打印时，只能选择一种面单模板</p>
-			    <p>* 单个打印时，如果有多个包裹，会展示商品信息，支持多包裹打印电子面单</p>
-			    <p>* 多包裹打印时，请不要重复选择面单模板</p>
-		    </template>
-	    </el-alert>
+    <el-alert type="warning" :closable="false" class="!mb-[10px]">
+        <template #default>
+            <p>注意事项：</p>
+            <p>* 配送方式为物流配送的订单支持打印电子面单</p>
+            <p>* 无需物流、虚拟发货不支持打印电子面单</p>
+            <p>* 请对应物流公司选择面单模板</p>
+            <p>* 批量打印时，只能选择一种面单模板</p>
+            <p>* 单个打印时，如果有多个包裹，会展示商品信息，支持多包裹打印电子面单</p>
+            <p>* 多包裹打印时，请不要重复选择面单模板</p>
+        </template>
+    </el-alert>
 
-	    <el-form :model="formData" ref="formRef" :rules="formRules" class="page-form es-form" v-loading="loading">
+        <el-form :model="formData" ref="formRef" :rules="formRules" class="page-form es-form" v-loading="loading">
 
-		    <!-- 单个订单打印，更加详细，展示包裹 -->
-		    <template v-if="formData.print_type == 'single'">
+            <!-- 单个订单打印，更加详细，展示包裹 -->
+            <template v-if="formData.print_type == 'single'">
 
-			    <template v-if="packageList.length">
+                <template v-if="packageList.length">
 
-				    <el-tabs v-model="currentPackageIndex" @tab-change="handleClick">
-					    <el-tab-pane v-for="(item,index) in packageList" :label="'包裹' + (index + 1)" :name="index" />
-				    </el-tabs>
+                    <el-tabs v-model="currentPackageIndex" @tab-change="handleClick">
+                        <el-tab-pane v-for="(item,index) in packageList" :label="'包裹' + (index + 1)" :name="index" />
+                    </el-tabs>
 
-				    <el-form-item :label="t('electronicSheetTemplate')">
-					    <el-select v-model="formData.list[currentPackageIndex].electronic_sheet_id" :placeholder="t('electronicSheetTemplatePlaceholder')" clearable class="input-width">
-						    <el-option v-for="(item) in electronicSheetData" :key="item.id" :label="item.template_name" :value="item.id" />
-					    </el-select>
-				    </el-form-item>
+                    <el-form-item :label="t('electronicSheetTemplate')">
+                        <el-select v-model="formData.list[currentPackageIndex].electronic_sheet_id" :placeholder="t('electronicSheetTemplatePlaceholder')" clearable class="input-width">
+                            <el-option v-for="(item) in electronicSheetData" :key="item.id" :label="item.template_name" :value="item.id" />
+                        </el-select>
+                    </el-form-item>
 
-				    <el-form-item :label="t('company')">
+                    <el-form-item :label="t('company')">
 					    <div class="truncate">{{ packageList[currentPackageIndex].company.company_name }}</div>
 				    </el-form-item>
 

@@ -22,10 +22,19 @@ public class LoginConfigParam implements Serializable {
     @NotNull(message = "is_auth_register参数缺失")
     private Integer isAuthRegister;  // 是否第三方自动注册
 
+    @NotNull(message = "is_force_access_user_info参数缺失")
+    private Integer isForceAccessUserInfo;
+
     @NotNull(message = "is_bind_mobile参数缺失")
     private Integer isBindMobile;  // 是否强制绑定手机
 
     @NotNull(message = "agreement_show参数缺失")
     private Integer agreementShow;  // 政策协议是否展示
+
+    @NotNull(message = "bg_url参数缺失")
+    private String bgUrl;
+
+    @NotNull(message = "desc参数缺失")
+    private String desc;
 
 }

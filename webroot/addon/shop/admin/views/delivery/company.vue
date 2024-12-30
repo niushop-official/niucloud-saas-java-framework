@@ -71,6 +71,7 @@ import { getCompanyPageList, deleteCompany } from '@/addon/shop/api/delivery'
 import { img } from '@/utils/common'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const route = useRoute()
 const router = useRouter()
@@ -108,11 +109,13 @@ const loadCompanyList = (page: number = 1) => {
         companyTable.loading = false
         companyTable.data = res.data.data
         companyTable.total = res.data.total
+	    setTablePageStorage(companyTable.page, companyTable.limit, companyTable.searchParam);
     }).catch(() => {
         companyTable.loading = false
     })
 }
-loadCompanyList()
+
+loadCompanyList(getTablePageStorage(companyTable.searchParam).page);
 
 /**
  * 添加物流公司

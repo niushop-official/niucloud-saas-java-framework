@@ -14,6 +14,8 @@ public class RechargeOrderCreateParam implements Serializable {
 
     private BigDecimal rechargeMoney;
 
+    private Integer rechargeId;
+
     private Integer siteId;
 
     private Integer memberId;

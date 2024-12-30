@@ -27,6 +27,7 @@
     "limitPlaceholder":"请输入兑换限制",
     "limitTips":"[兑换限制]格式错误",
     "limitTipsTwo":"兑换限制数量不可小于等于0",
+    "limitTipsThree":"兑换限制数量不能大于兑换库存",
     "limitUnit":"件/人",
     "integralUnit":"积分",
     "prickUnit":"元",
@@ -37,6 +38,7 @@
     "newPrice":"价格",
     "moneyTips":"[价格]格式错误",
     "moneyTipsTwo":"价格不可小于0",
+    "limitRules":"每人每单可兑换件数",
     
     "couponSelect":"选择优惠券",
     "couponSelectPlaceholder":"请选择优惠券",

@@ -10,6 +10,8 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.entity.member.Member;
+import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.shop.entity.order.ShopOrder;
@@ -66,6 +68,9 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
 
     @Resource
     ICoreOrderEventService coreOrderEventService;
+
+    @Resource
+    MemberMapper memberMapper;
 
     @Override
     public ShopOrder orderInfo(Integer orderId) {
@@ -148,6 +153,14 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
                 coreOrderEventService.orderPayAfter(finalOrder, param);
             }
         });
+        //更新会员最后下单时间
+        if(order.getMemberId() != 0)
+        {
+            Member updateMember = new Member();
+            updateMember.setLastConsumTime(System.currentTimeMillis() / 1000);
+            memberMapper.update(updateMember, new QueryWrapper<Member>().eq("member_id", order.getMemberId()));
+
+        }
         // 订单支付之后事件
         OrderPayAfterEvent event = new OrderPayAfterEvent();
         event.setSiteId(order.getSiteId());

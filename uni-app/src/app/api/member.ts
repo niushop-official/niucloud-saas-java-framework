@@ -47,6 +47,9 @@ export function modifyMember(data : AnyObject) {
  * 登录会员绑定手机号
  */
 export function bindMobile(data : AnyObject) {
+	if(uni.getStorageSync('pid')){
+		data.pid = uni.getStorageSync('pid');
+	}
 	return request.put('member/mobile', data, { showErrorMessage: true })
 }
 
@@ -246,4 +249,11 @@ export function getMemberAccountPointcount() {
  */
 export function getTaskPoint() {
 	return request.get(`task/point`)
+}
+
+/**
+ * 充值配置
+ */
+export function rechargeConfig() {
+	return request.get('recharge/config')
 }

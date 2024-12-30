@@ -59,7 +59,7 @@ public class RechargeOrderServiceImpl implements IRechargeOrderService {
      */
     @Override
     public PageResult<RechargeOrderListVo> list(PageParam pageParam, RechargeOrderSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
+        Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<RechargeOrder> queryWrapper = new QueryWrapper<>();
@@ -67,11 +67,12 @@ public class RechargeOrderServiceImpl implements IRechargeOrderService {
         queryWrapper.eq("member_id", RequestUtils.memberId());
         queryWrapper.orderByDesc("create_time");
 
-        if (ObjectUtil.isNotEmpty(searchParam.getOrderStatus())) queryWrapper.like("order_status", searchParam.getOrderStatus());
+        if (ObjectUtil.isNotEmpty(searchParam.getOrderStatus()))
+            queryWrapper.like("order_status", searchParam.getOrderStatus());
 
         IPage<RechargeOrder> iPage = rechargeOrderMapper.selectPage(new Page<RechargeOrder>(page, limit), queryWrapper);
         List<RechargeOrderListVo> list = new LinkedList<>();
-        for(RechargeOrder item : iPage.getRecords()) {
+        for (RechargeOrder item : iPage.getRecords()) {
             RechargeOrderListVo vo = new RechargeOrderListVo();
             BeanUtils.copyProperties(item, vo);
             List<RechargeOrderItem> itemList = rechargeOrderItemMapper.selectList(new QueryWrapper<RechargeOrderItem>().eq("order_id", item.getOrderId()));
@@ -79,7 +80,7 @@ public class RechargeOrderServiceImpl implements IRechargeOrderService {
             list.add(vo);
         }
 
-        return PageResult.build(page,limit,iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -106,4 +107,6 @@ public class RechargeOrderServiceImpl implements IRechargeOrderService {
 
         return vo;
     }
+
+
 }

@@ -5,9 +5,11 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.marketing.param.ShopCouponParam;
 import com.niu.shop.service.admin.marketing.param.ShopCouponSearchParam;
+import com.niu.shop.service.admin.marketing.param.ShopCouponSelectParam;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponInfoVo;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponListVo;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponMemberListVo;
+import com.niu.shop.service.admin.marketing.vo.ShopCouponSelectVo;
 
 import java.util.List;
 
@@ -30,6 +32,8 @@ public interface ICouponService {
      */
     PageResult<ShopCouponListVo> getPage(PageParam pageParam, ShopCouponSearchParam searchParam);
 
+
+    ShopCouponSelectVo getSelectPage(PageParam pageParam, ShopCouponSelectParam searchParam);
     /**
      * 查询指定优惠券
      * @param couponIds

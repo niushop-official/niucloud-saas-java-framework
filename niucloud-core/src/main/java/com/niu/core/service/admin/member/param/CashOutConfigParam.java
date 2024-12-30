@@ -27,9 +27,9 @@ public class CashOutConfigParam implements Serializable {
     private Integer rate = 0;  // 手续费比率
 
     @NotNull(message = "is_auto_verify参数缺失")
-    private Integer isAutoVerify = 0;  // 是否自动审核
+    private String isAutoVerify = "0";  // 是否自动审核
 
     @NotNull(message = "is_auto_transfer参数缺失")
-    private Integer isAutoTransfer = 0;  // 是否自动转账
+    private String isAutoTransfer = "0";  // 是否自动转账
 
 }

@@ -34,6 +34,7 @@ public class ShopCouponMemberListVo implements Serializable {
     private String statusName;
     private String title;  // 优惠券名称
     private BigDecimal price;  // 面值
+    @JsonSerialize(using = BeanJsonSerializer.BigDecimalFormatSerializer.class)
     private BigDecimal minConditionMoney;  // 最低使用门槛
     private Integer receiveType;  // 领取方式
     private String receiveTypeName;

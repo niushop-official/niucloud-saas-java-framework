@@ -1,10 +1,9 @@
 package com.niu.core.service.admin.site.vo;
 
-import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.entity.addon.Addon;
+import com.niu.core.enums.site.SiteStatusEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -36,13 +35,14 @@ public class SiteInfoVo implements Serializable {
     private String fullAddress;  // 完整地址
     private String phone;  // 客服电话
     private String businessHours;  // 营业时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long expireTime;  // 到期时间（如果是0 无限期）
     private String frontEndName;  // 前台名称
     private String frontEndLogo;  // 前台logo
     private String frontEndIcon;  // 前台icon
     private String icon;  // 网站图标
     private String memberNo;  // 最大会员码值
-     @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String app;  // 站点应用
     @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String addons;  // 站点包含的插件
@@ -51,6 +51,10 @@ public class SiteInfoVo implements Serializable {
     private List<String> addonKeys;
     private String initalledAddon;  // 站点已执行初始化方法的插件
     private String siteDomain;  // 站点域名
+    private String statusName;
 
+    public String getStatusName() {
+        return SiteStatusEnum.getNameByCode(this.status);
+    }
 
 }

@@ -1,5 +1,9 @@
 package com.niu.core.common.utils;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -19,5 +23,15 @@ public class CommonUtils {
         } catch (MalformedURLException e) {
             return false;
         }
+    }
+
+    /**
+     * 全局唯一ID
+     * @return
+     */
+    public static String createNo() {
+        Snowflake snowflake = IdUtil.getSnowflake(1, 1);
+        long id = snowflake.nextId();
+        return DateUtil.format(DateUtil.date(System.currentTimeMillis()), "yyyyMMdd") + id;
     }
 }

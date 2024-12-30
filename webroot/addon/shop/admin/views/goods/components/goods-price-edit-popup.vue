@@ -24,7 +24,7 @@
                 <label>{{ t('batchOperationSku') }}</label>
 
                 <div v-if="batchOperation.field">
-                    <el-input v-model="batchOperation.value" clearable :placeholder="t(batchOperation.field)" class="set-input" maxlength="8" :autofocus="true" />
+                    <el-input v-model.trim="batchOperation.value" clearable :placeholder="t(batchOperation.field)" class="set-input" maxlength="8" :autofocus="true" />
                     <el-button type="primary" @click="saveBatch">{{ t('confirm') }}</el-button>
                     <el-button @click="clearBatch">{{ t('cancel') }}</el-button>
                 </div>
@@ -43,19 +43,19 @@
                 <el-table-column prop="sku_name" :label="t('skuName')" min-width="120" v-if="goodsTable.data.length > 1" />
                 <el-table-column prop="price" :label="t('price')" min-width="120">
                     <template #default="{ row }">
-                        <el-input v-model="row.price" clearable placeholder="0.00" maxlength="8" :disabled="activeGoodsCount > 0" />
+                        <el-input v-model.trim="row.price" clearable placeholder="0.00" maxlength="8" :disabled="activeGoodsCount > 0" />
                     </template>
                 </el-table-column>
 
                 <el-table-column prop="market_price" :label="t('marketPrice')" min-width="120">
                     <template #default="{ row }">
-                        <el-input v-model="row.market_price" clearable placeholder="0.00" maxlength="8" />
+                        <el-input v-model.trim="row.market_price" clearable placeholder="0.00" maxlength="8" />
                     </template>
                 </el-table-column>
 
                 <el-table-column prop="cost_price" :label="t('costPrice')" min-width="120">
                     <template #default="{ row }">
-                        <el-input v-model="row.cost_price" clearable placeholder="0.00" maxlength="8" />
+                        <el-input v-model.trim="row.cost_price" clearable placeholder="0.00" maxlength="8" />
                     </template>
                 </el-table-column>
 

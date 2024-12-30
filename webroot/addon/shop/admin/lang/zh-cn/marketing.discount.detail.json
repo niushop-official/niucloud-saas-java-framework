@@ -33,7 +33,5 @@
   "consumptionMoney": "消费总额",
   "participationNum": "参与次数",
   "orderTime": "最后下单时间",
-  "memberInfo": "会员信息",
-  "startDate": "开始时间",
-  "endDate": "结束时间"
+  "memberInfo": "会员信息"
 }

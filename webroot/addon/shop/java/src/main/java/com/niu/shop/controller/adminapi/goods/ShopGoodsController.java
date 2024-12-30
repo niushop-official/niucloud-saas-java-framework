@@ -191,12 +191,14 @@ public class ShopGoodsController {
      */
     @GetMapping("/selectgoodssku")
     public Result getSelectGoodsSku(@Validated ShopGoodsSelectSearchParam searchParam,
-             @RequestParam(name = "goods_ids[]", required = false) List<Integer> goodsIds,
-             @RequestParam(name = "verify_goods_ids[]", required = false) List<Integer> verifyGoodsIds,
-             @RequestParam(name = "verify_sku_ids[]", required = false) List<Integer> verifySkuIds) {
-        searchParam.setGoodsIds(goodsIds);
-        searchParam.setVerifyGoodsIds(verifyGoodsIds);
-        searchParam.setVerifySkuIds(verifySkuIds);
+            @RequestParam(name = "goods_ids[]", required = false) List<Integer> goodsIds,
+            @RequestParam(name = "sku_ids[]", required = false) List<Integer> skuIds,
+            @RequestParam(name = "verify_goods_ids[]", required = false) List<Integer> verifyGoodsIds,
+            @RequestParam(name = "verify_sku_ids[]", required = false) List<Integer> verifySkuIds) {
+            searchParam.setGoodsIds(goodsIds);
+            searchParam.setSkuIds(skuIds);
+            searchParam.setVerifyGoodsIds(verifyGoodsIds);
+            searchParam.setVerifySkuIds(verifySkuIds);
         return Result.success(goodsService.getSelectGoodsSku(searchParam));
     }
 

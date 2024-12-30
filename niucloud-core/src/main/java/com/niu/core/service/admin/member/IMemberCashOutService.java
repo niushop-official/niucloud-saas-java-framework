@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.member;
 
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
 import com.niu.core.service.admin.member.param.MemberCashOutParam;
 import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
@@ -39,4 +40,9 @@ public interface IMemberCashOutService {
      * @param param
      */
     void audit(MemberCashOutAuditParam param);
+
+    /**
+     * 转账
+     */
+    void transfer(CashOutTransferParam param);
 }

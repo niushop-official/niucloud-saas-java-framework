@@ -25,6 +25,7 @@ public class ShopGoodsInitVo implements Serializable {
         private String subTitle;  // 副标题
         private String goodsCover;  // 商品封面
         private String goodsImage;  // 商品图片
+        private String goodsVideo;
         private Integer[] goodsCategory;  // 商品分类
         private String goodsDesc;  // 商品介绍
         private Object brandId;  // 商品品牌id
@@ -33,6 +34,10 @@ public class ShopGoodsInitVo implements Serializable {
         private String unit;  // 单位
         private Integer stock;  // 商品库存（总和）
         private Integer virtualSaleNum;  // 虚拟销量
+        private Integer isLimit = 0;
+        private Integer limitType = 1;
+        private Integer maxBuy = 0;
+        private Integer minBuy = 0;
         private String status;  // 商品状态（1.正常0下架）
         private Integer sort;  // 排序
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
@@ -50,6 +55,7 @@ public class ShopGoodsInitVo implements Serializable {
         private String specType = "single";
         private List<SpecInfo> specList;
         private Long activeGoodsCount;
+        private Integer isGift;
     }
 
     @Data

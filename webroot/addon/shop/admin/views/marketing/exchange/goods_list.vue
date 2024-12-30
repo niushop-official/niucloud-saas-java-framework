@@ -100,7 +100,7 @@
 <script lang="ts" setup>
 import { t } from '@/lang'
 import { reactive, ref } from 'vue'
-import { img } from '@/utils/common'
+import { img,setTablePageStorage,getTablePageStorage } from '@/utils/common'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import goodsSpreadPopup from '@/addon/shop/views/goods/components/goods-spread-popup.vue'
@@ -136,11 +136,12 @@ const loadExchangeGoodsList = (page: number = 1) => {
         tableData.loading = false
         tableData.data = res.data.data
         tableData.total = res.data.total
+        setTablePageStorage(tableData.page, tableData.limit, tableData.searchParam);
     }).catch(() => {
         tableData.loading = false
     })
 }
-loadExchangeGoodsList()
+loadExchangeGoodsList(getTablePageStorage(tableData.searchParam).page);
 // 获取状态列表
 const statusOption = ref([])
 const getActiveExchangeStatusFn = () => {

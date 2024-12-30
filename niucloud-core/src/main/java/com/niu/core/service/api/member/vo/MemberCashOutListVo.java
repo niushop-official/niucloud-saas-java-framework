@@ -2,6 +2,8 @@ package com.niu.core.service.api.member.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.enums.member.AccountTypeEnum;
+import com.niu.core.enums.pay.TransferTypeEnum;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -41,9 +43,13 @@ public class MemberCashOutListVo {
     // 转账状态
     private String transferStatus;
 
+    // 申请时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long createTime;
+
     // 转账时间
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Integer transferTime;
+    private Long transferTime;
 
     // 失败原因
     private String transferFailReason;
@@ -77,14 +83,14 @@ public class MemberCashOutListVo {
      * @return
      */
     public String getAccountTypeName() {
-        return "";
+        return AccountTypeEnum.getNameByType(this.accountType);
     }
 
     /**
      * @return
      */
     public String getTransferTypeName() {
-        return "";
+        return TransferTypeEnum.getNameByType(this.transferType);
     }
 
     public String getStatusName() {

@@ -29,7 +29,7 @@ CREATE TABLE `{{prefix}}cms_article_category` (
   site_id int NOT NULL DEFAULT 0,
   `name` varchar(255) NOT NULL DEFAULT '' COMMENT '分类名称',
   `sort` int(11) NOT NULL DEFAULT '0' COMMENT '排序',
-  `is_show` tinyint(4) NOT NULL DEFAULT '1' COMMENT '是否显示:1-是0-否',
+  `is_show` tinyint(4) NOT NULL DEFAULT '1' COMMENT '是否显示:1-是 0-否',
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`category_id`),

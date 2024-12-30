@@ -16,6 +16,6 @@ public class CashOutConfigVo implements Serializable {
     private LinkedList<String> transferType = new LinkedList<String>();  // 提现方式
     private Integer min = 0;  // 最低提现金额
     private Integer rate = 0;  // 手续费比率
-    private Integer isAutoVerify = 0;  // 是否自动审核
-    private Integer isAutoTransfer = 0;  // 是否自动转账
+    private String isAutoVerify = "0";  // 是否自动审核
+    private String isAutoTransfer = "0";  // 是否自动转账
 }

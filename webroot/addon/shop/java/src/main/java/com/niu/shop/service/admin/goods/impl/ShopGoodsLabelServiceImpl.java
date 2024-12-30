@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.exception.CommonException;
@@ -45,19 +47,21 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
         Integer page  = pageParam.getPage();
         Integer limit =pageParam.getLimit();
 
-        QueryWrapper<ShopGoodsLabel> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("site_id", RequestUtils.siteId());
+        MPJQueryWrapper<ShopGoodsLabel> queryWrapper = new MPJQueryWrapper<>();
+        queryWrapper.setAlias("l")
+                .leftJoin("?_shop_goods_label_group lg ON l.group_id = lg.group_id".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("l.*, lg.group_name");
+        queryWrapper.eq("l.site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getLabelName())) queryWrapper.like("label_name", searchParam.getLabelName());
         queryWrapper.orderByDesc("label_id");
 
-        IPage<ShopGoodsLabel> iPage = shopGoodsLabelMapper.selectPage(new Page<>(page, limit), queryWrapper);
-        List<ShopGoodsLabelListVo> list = new LinkedList<>();
-        for (ShopGoodsLabel item : iPage.getRecords()) {
-            ShopGoodsLabelListVo vo = new ShopGoodsLabelListVo();
-            BeanUtils.copyProperties(item, vo);
-            list.add(vo);
+        IPage<ShopGoodsLabelListVo> iPage = shopGoodsLabelMapper.selectJoinPage(new Page<>(page, limit), ShopGoodsLabelListVo.class, queryWrapper);
+        for (ShopGoodsLabelListVo vo : iPage.getRecords()) {
+            ShopGoodsLabelListVo.Group group = new ShopGoodsLabelListVo.Group();
+            BeanUtils.copyProperties(vo, group);
+            vo.setGroup(group);
         }
-        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     /**
@@ -113,12 +117,11 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
         if (count > 0) throw new CommonException("标签已存在");
 
         ShopGoodsLabel model = new ShopGoodsLabel();
-
+        BeanUtils.copyProperties(addParam, model);
         model.setSiteId(RequestUtils.siteId());
-        model.setLabelName(addParam.getLabelName());
-        model.setMemo(addParam.getMemo());
         model.setSort(ObjectUtil.isNotEmpty(addParam.getSort()) ? Integer.parseInt(addParam.getSort()) : 0);
         model.setCreateTime(System.currentTimeMillis() / 1000);
+        model.setColorJson(addParam.getColorJson().toString());
 
         shopGoodsLabelMapper.insert(model);
     }
@@ -143,10 +146,9 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
 
         Assert.notNull(model, "标签不存在");
 
-        model.setLabelName(editParam.getLabelName());
-        model.setMemo(editParam.getMemo());
-        model.setSort(ObjectUtil.isNotEmpty(editParam.getSort()) ? Integer.parseInt(editParam.getSort()) : 0);
+        BeanUtils.copyProperties(editParam, model);
         model.setUpdateTime(System.currentTimeMillis() / 1000);
+        model.setColorJson(editParam.getColorJson().toString());
 
         shopGoodsLabelMapper.updateById(model);
     }

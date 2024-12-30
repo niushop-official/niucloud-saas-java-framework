@@ -54,12 +54,12 @@
                     <el-button class="page-btn absolute right-[20px]" @click="diyStore.changeCurrentIndex(-99)">{{ t('pageSet') }}</el-button>
                     <div class="diy-view-wrap w-[375px] shadow-lg mx-auto">
                         <div class="preview-head bg-no-repeat bg-center bg-cover cursor-pointer h-[64px]" :class="[diyStore.global.topStatusBar.style]" :style="{backgroundColor :diyStore.global.topStatusBar.bgColor}" @click="diyStore.changeCurrentIndex(-99)">
-                            <div v-if="diyStore.global.topStatusBar.style == 'style-1'" class="content-wrap">
+                            <div v-if="diyStore.global.topStatusBar.style == 'style-1' && diyStore.global.topStatusBar.isShow" class="content-wrap">
                                 <div class="title-wrap" :style="{ fontSize: '14px', color: diyStore.global.topStatusBar.textColor, textAlign: diyStore.global.topStatusBar.textAlign }">
                                     {{ diyStore.global.title }}
                                 </div>
                             </div>
-                            <div v-if="diyStore.global.topStatusBar.style == 'style-2'" class="content-wrap">
+                            <div v-if="diyStore.global.topStatusBar.style == 'style-2' && diyStore.global.topStatusBar.isShow" class="content-wrap">
                                 <div class="title-wrap" :style="{ color: diyStore.global.topStatusBar.textColor }">
                                     <div class="h-[28px] max-w-[150px] mr-[8px]" v-if="diyStore.global.topStatusBar.imgUrl">
                                         <img class="max-w-[100%] max-h-[100%]" :src="img(diyStore.global.topStatusBar.imgUrl)" mode="heightFix" />
@@ -67,16 +67,16 @@
                                     <div :style="{ color: diyStore.global.topStatusBar.textColor }">{{ diyStore.global.title }}</div>
                                 </div>
                             </div>
-                            <div v-if="diyStore.global.topStatusBar.style == 'style-3'" class="content-wrap">
+                            <div v-if="diyStore.global.topStatusBar.style == 'style-3' && diyStore.global.topStatusBar.isShow" class="content-wrap">
                                 <div class="title-wrap" v-if="diyStore.global.topStatusBar.imgUrl">
                                     <img class="max-w-[100%] max-h-[100%]" :src="img(diyStore.global.topStatusBar.imgUrl)" />
                                 </div>
                                 <div class="search">
-                                    <span class="iconfont iconsousuo absolute left-[10px]"></span>
-                                    <span class="text-[14px]">{{diyStore.global.topStatusBar.inputPlaceholder}}</span>
+                                    <span class="nc-iconfont nc-icon-sousuo-duanV6xx1 !text-[12px] absolute left-[10px]"></span>
+                                    <span class="text-[12px]">{{diyStore.global.topStatusBar.inputPlaceholder}}</span>
                                 </div>
                             </div>
-                            <div v-if="diyStore.global.topStatusBar.style == 'style-4'" class="content-wrap">
+                            <div v-if="diyStore.global.topStatusBar.style == 'style-4' && diyStore.global.topStatusBar.isShow" class="content-wrap">
                                 <span class="iconfont iconxiazai19 !text-[14px]" :style="{ color: diyStore.global.topStatusBar.textColor }"></span>
                                 <div class="title-wrap" :style="{ color: diyStore.global.topStatusBar.textColor }">我的位置</div>
                                 <span class="iconfont iconxiangyoujiantou !text-[12px]" :style="{ color: diyStore.global.topStatusBar.textColor }"></span>
@@ -109,7 +109,7 @@
                                 <div class="font-bold text-xl mb-[40px]">{{ t('developTitle') }}</div>
                                 <div class="mb-[20px] flex flex-col">
                                     <text class="mb-[10px]">{{ t('wapDomain') }}</text>
-                                    <el-input v-model="wapDomain" :placeholder="t('wapDomainPlaceholder')" clearable />
+                                    <el-input v-model.trim="wapDomain" :placeholder="t('wapDomainPlaceholder')" clearable />
                                 </div>
                                 <el-button type="primary" @click="saveWapDomain">{{ t('confirm') }}</el-button>
                                 <el-button type="primary" @click="settingTips()" plain>{{ t('settingTips') }}</el-button>
@@ -165,7 +165,7 @@
                                             </el-form-item>
 
                                             <el-form-item :label="t('componentBgAlpha')" v-if="diyStore.editComponent.ignore.indexOf('componentBgUrl') == -1 && diyStore.editComponent.componentBgUrl">
-                                                <el-slider v-model="diyStore.editComponent.componentBgAlpha" show-input size="small" :min="0" :max="10" class="ml-[10px] horz-blank-slider" />
+                                                <el-slider v-model="diyStore.editComponent.componentBgAlpha" show-input size="small" :min="0" :max="10" class="ml-[10px] diy-nav-slider" />
                                             </el-form-item>
 
                                             <el-form-item :label="t('componentBgColor')" v-if="diyStore.editComponent.ignore.indexOf('componentBgColor') == -1">
@@ -182,19 +182,19 @@
                                             </el-form-item>
 
                                             <el-form-item :label="t('marginTop')" v-if="diyStore.editComponent.ignore.indexOf('marginTop') == -1">
-                                                <el-slider v-model="diyStore.editComponent.margin.top" show-input size="small" :min="-100" class="ml-[10px] horz-blank-slider" />
+                                                <el-slider v-model="diyStore.editComponent.margin.top" show-input size="small" :min="-100" class="ml-[10px] diy-nav-slider" />
                                             </el-form-item>
                                             <el-form-item :label="t('marginBottom')" v-if="diyStore.editComponent.ignore.indexOf('marginBottom') == -1">
-                                                <el-slider v-model="diyStore.editComponent.margin.bottom" show-input size="small" class="ml-[10px] horz-blank-slider" />
+                                                <el-slider v-model="diyStore.editComponent.margin.bottom" show-input size="small" class="ml-[10px] diy-nav-slider" />
                                             </el-form-item>
                                             <el-form-item :label="t('marginBoth')" v-if="diyStore.editComponent.ignore.indexOf('marginBoth') == -1">
-                                                <el-slider v-model="diyStore.editComponent.margin.both" show-input size="small" class="ml-[10px] horz-blank-slider" />
+                                                <el-slider v-model="diyStore.editComponent.margin.both" show-input size="small" class="ml-[10px] diy-nav-slider" />
                                             </el-form-item>
                                             <el-form-item :label="t('topRounded')" v-if="diyStore.editComponent.ignore.indexOf('topRounded') == -1">
-                                                <el-slider v-model="diyStore.editComponent.topRounded" show-input size="small" class="ml-[10px] horz-blank-slider" :max="100" />
+                                                <el-slider v-model="diyStore.editComponent.topRounded" show-input size="small" class="ml-[10px] diy-nav-slider" :max="100" />
                                             </el-form-item>
                                             <el-form-item :label="t('bottomRounded')" v-if="diyStore.editComponent.ignore.indexOf('bottomRounded') == -1">
-                                                <el-slider v-model="diyStore.editComponent.bottomRounded" show-input size="small" class="ml-[10px] horz-blank-slider" :max="100" />
+                                                <el-slider v-model="diyStore.editComponent.bottomRounded" show-input size="small" class="ml-[10px] diy-nav-slider" :max="100" />
                                             </el-form-item>
                                         </el-form>
                                     </div>
@@ -236,6 +236,8 @@ route.query.url = route.query.url || '' // 页面路径
 route.query.type = route.query.type || '' // 页面模板，新页面传入
 route.query.title = route.query.title || ''
 route.query.back = route.query.back || '/site/diy/list'
+
+console.log('route',route.path)
 
 const backPath = route.query.back
 const template = ref('');
@@ -298,6 +300,9 @@ const modulesFiles = import.meta.glob('./components/*.vue', { eager: true })
 const addonModulesFiles = import.meta.glob('@/addon/**/views/diy/components/*.vue', { eager: true })
 addonModulesFiles && Object.assign(modulesFiles, addonModulesFiles)
 
+// todo 考虑用一个编辑页面实现，方便后期维护，根据路由判断，是微页面还是系统表单
+// todo 系统表单可以使用自定义组件，微页面不能用系统表单组件
+
 const modules = {}
 for (const [key, value] of Object.entries(modulesFiles)) {
     const moduleName = key.split('/').pop()
@@ -337,15 +342,14 @@ const changeTemplatePage = (value:any)=> {
             type: 'warning'
         }).then(() => {
             diyStore.changeCurrentIndex(-99)
+            diyStore.init(); // 清空
             if (value) {
-                let data = templatePages[value].data;
+                let data = cloneDeep(templatePages[value].data);
                 diyStore.global = data.global;
                 if (data.value.length) {
                     diyStore.value = data.value
                 }
             } else {
-                // 清空
-                diyStore.init();
                 if (route.query.title) diyStore.global.title = diyStore.typeName
             }
         }).catch(() => {
@@ -353,15 +357,14 @@ const changeTemplatePage = (value:any)=> {
             template.value = oldTemplate.value;
         });
     } else {
+        diyStore.init(); // 清空
         if (value) {
-            let data = templatePages[value].data;
+            let data = cloneDeep(templatePages[value].data);
             diyStore.global = data.global;
             if (data.value.length) {
                 diyStore.value = data.value
             }
         } else {
-            // 清空
-            diyStore.init();
             if (route.query.title) diyStore.global.title = diyStore.typeName
         }
     }
@@ -681,6 +684,11 @@ const settingTips = () => {
         }
     }
 }
+.diy-nav-slider {
+    .el-slider__input {
+        width: 100px;
+    }
+}
 </style>
 <style lang="scss" scoped>
 .full-container {
@@ -793,6 +801,7 @@ const settingTips = () => {
                 align-items: center;
                 margin-right: 105px;
                 overflow: hidden;
+                box-sizing: border-box;
 
                 span {
                     overflow: hidden; //超出的文本隐藏

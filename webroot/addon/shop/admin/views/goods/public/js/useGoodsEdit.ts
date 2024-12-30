@@ -35,6 +35,7 @@ export function useGoodsEdit(params: any = {}) {
         goods_name: '',
         sub_title: '',
         goods_image: '',
+        goods_video:'',
         goods_category: '',
         brand_id: '',
         poster_id: '',
@@ -42,6 +43,7 @@ export function useGoodsEdit(params: any = {}) {
         service_ids: [],
         supplier_id: '',
         status: '1',
+        is_gift: 0,
         sort: '',
 
         addon_shop_supplier: [],
@@ -56,13 +58,20 @@ export function useGoodsEdit(params: any = {}) {
         unit: '',
         virtual_sale_num: '',
         member_discount: '',
+        is_limit: 0,
+        limit_type: 1,
+        max_buy: '',
+        min_buy: '',
 
         // 商品参数
         attr_format: [],
         attr_id: '',
 
         // 商品详情
-        goods_desc: ''
+        goods_desc: '',
+        skuCheckAll :false,// 是否全选
+        skuIsIndeterminate : false,// 是否部分选中
+        skuCheckedCities: [],// 选中的规格
     })
 
     Object.assign(formData, params.formData);
@@ -334,6 +343,7 @@ export function useGoodsEdit(params: any = {}) {
             formData.sub_title = data.goods_info.sub_title
             formData.goods_type = data.goods_info.goods_type
             formData.goods_image = data.goods_info.goods_image
+            formData.goods_video = data.goods_info.goods_video
             formData.goods_category = data.goods_info.goods_category
             formData.brand_id = data.goods_info.brand_id
             formData.poster_id = data.goods_info.poster_id
@@ -342,6 +352,7 @@ export function useGoodsEdit(params: any = {}) {
             formData.supplier_id = data.goods_info.supplier_id
             formData.status = data.goods_info.status
             formData.sort = data.goods_info.sort
+            formData.is_gift = data.goods_info.is_gift
 
             /*************** 商品参数-start ****************/
             formData.attr_format = data.goods_info.attr_format ? JSON.parse(data.goods_info.attr_format) : []
@@ -422,6 +433,10 @@ export function useGoodsEdit(params: any = {}) {
 
             formData.unit = data.goods_info.unit
             formData.virtual_sale_num = data.goods_info.virtual_sale_num
+            formData.is_limit = data.goods_info.is_limit
+            formData.limit_type = data.goods_info.limit_type
+            formData.max_buy = data.goods_info.max_buy
+            formData.min_buy = data.goods_info.min_buy
 
             // 商品详情
             formData.goods_desc = data.goods_info.goods_desc
@@ -536,6 +551,7 @@ export function useGoodsEdit(params: any = {}) {
         // 渲染商品规格数据、表格
         refreshGoodsSkuData()
         refreshSkuTable()
+
     })
 
     // 删除规格值
@@ -661,6 +677,9 @@ export function useGoodsEdit(params: any = {}) {
             }
             goodsSkuData[key] = skuData[key]
         }
+        formData.skuCheckAll = false;// 是否全选
+        formData.skuIsIndeterminate = false,// 是否部分选中
+        formData.skuCheckedCities = []// 选中的规格
     }
 
     // 匹配规格值
@@ -730,8 +749,28 @@ export function useGoodsEdit(params: any = {}) {
 
     Object.assign(batchOperation, appendBatchOperation);
 
+    const skuHandleCheckAllChange = (value: any) => {
+        formData.skuIsIndeterminate = false
+        if( value ) {
+            formData.skuCheckedCities = Object.keys(goodsSkuData)
+        } else {
+            formData.skuCheckedCities = []
+        }
+    }
+    const handleCheckedCitiesChange = (value: any) => {
+        const checkedCount = value.length
+        formData.skuCheckAll = checkedCount === Object.keys(goodsSkuData).length
+        formData.skuIsIndeterminate = checkedCount > 0 && checkedCount < Object.keys(goodsSkuData).length
+    }
     // 批量设置确认
     const saveBatch = () => {
+        if( formData.skuCheckedCities.length == 0 ) {
+            ElMessage({
+                type: 'warning',
+                message: `${ t('pleaseSelectSku') }`
+            })
+            return
+        }
         // 验证输入内容
         if (batchOperation.price && (isNaN(batchOperation.price) || !regExp.digit.test(batchOperation.price))) {
             ElMessage({
@@ -776,33 +815,19 @@ export function useGoodsEdit(params: any = {}) {
 
         }
 
-        if (batchOperation.spec) {
-            // 设置指定规格
-            if (batchOperation.price) goodsSkuData[batchOperation.spec].price = batchOperation.price
-            if (batchOperation.market_price) goodsSkuData[batchOperation.spec].market_price = batchOperation.market_price
-            if (batchOperation.cost_price) goodsSkuData[batchOperation.spec].cost_price = batchOperation.cost_price
-            if (batchOperation.stock) goodsSkuData[batchOperation.spec].stock = batchOperation.stock
+        // 设置全部规格
+        formData.skuCheckedCities.forEach((key: any) => {
+            if (batchOperation.price) goodsSkuData[key].price = batchOperation.price
+            if (batchOperation.market_price) goodsSkuData[key].market_price = batchOperation.market_price
+            if (batchOperation.cost_price) goodsSkuData[key].cost_price = batchOperation.cost_price
+            if (batchOperation.stock) goodsSkuData[key].stock = batchOperation.stock
 
             for (let field in appendRefreshGoodsSkuData) {
-                if (batchOperation[field]) goodsSkuData[batchOperation.spec][field] = batchOperation[field]
+                if (batchOperation[field]) goodsSkuData[key][field] = batchOperation[field]
             }
 
-            if (batchOperation.sku_no) goodsSkuData[batchOperation.spec].sku_no = batchOperation.sku_no
-        } else {
-            // 设置全部规格
-            for (const key in goodsSkuData) {
-                if (batchOperation.price) goodsSkuData[key].price = batchOperation.price
-                if (batchOperation.market_price) goodsSkuData[key].market_price = batchOperation.market_price
-                if (batchOperation.cost_price) goodsSkuData[key].cost_price = batchOperation.cost_price
-                if (batchOperation.stock) goodsSkuData[key].stock = batchOperation.stock
-
-                for (let field in appendRefreshGoodsSkuData) {
-                    if (batchOperation[field]) goodsSkuData[key][field] = batchOperation[field]
-                }
-
-                if (batchOperation.sku_no) goodsSkuData[key].sku_no = batchOperation.sku_no
-            }
-        }
+            if (batchOperation.sku_no) goodsSkuData[key].sku_no = batchOperation.sku_no
+        })
 
         // 保存完清空
         batchOperation.price = ''
@@ -985,6 +1010,38 @@ export function useGoodsEdit(params: any = {}) {
                     }
                 }
             ],
+            max_buy: [
+                {
+                    trigger: 'blur',
+                    validator: (rule: any, value: any, callback: any) => {
+                        if (value === '') {
+                            callback(new Error(t('maxBuyPlaceholder')))
+                        } else if (isNaN(value) || !regExp.number.test(value)) {
+                            callback(new Error(t('maxBuyTips')))
+                        } else if (value < 1) {
+                            callback(new Error(t('maxBuyNotZeroTips')))
+                        } else {
+                            callback()
+                        }
+                    }
+                }
+            ],
+            min_buy: [
+                {
+                    trigger: 'blur',
+                    validator: (rule: any, value: any, callback: any) => {
+                        if (isNaN(value) || !regExp.number.test(value)) {
+                            callback(new Error(t('minBuyFormatErrorTips')))
+                        } else if (value < 0) {
+                            callback(new Error(t('minBuyNotZeroTips')))
+                        } else if (formData.is_limit == 1 && value > Number(formData.max_buy)) {
+                            callback(new Error(t('minBuyGreaterThanMaxBuyTips')))
+                        } else {
+                            callback()
+                        }
+                    }
+                }
+            ],
             goods_desc: [
                 {
                     required: true,
@@ -1113,6 +1170,11 @@ export function useGoodsEdit(params: any = {}) {
                 key: 'price_stock',
                 verify: false,
                 ref: formRefArr.skuFormRef
+            },
+            {
+                key: 'price_stock',
+                verify: false,
+                ref: formRefArr.priceStockCommonFormRef
             }
         ];
         formRef = formRef.concat(verifyArr);
@@ -1407,14 +1469,10 @@ export function useGoodsEdit(params: any = {}) {
 
     // 商品参数多选监听
     const attrCheckboxChange = (index: any, data: any) => {
-        attrTableData.forEach((item: any, index: any, array: any) => {
-            if (item.type == 'checkbox') {
-                array[index].select_child_val = [];
-                item.child.forEach((childItem: any, childIndex: any) => {
-                    if (data.indexOf(childItem.id) > -1) {
-                        array[index].select_child_val.push(childItem.name);
-                    }
-                });
+        attrTableData[index].select_child_val = []
+        attrTableData[index].child.forEach((childItem: any, childIndex: any) => {
+            if (data.indexOf(childItem.id) > -1) {
+                attrTableData[index].select_child_val.push(childItem.name);
             }
         });
     }
@@ -1470,6 +1528,8 @@ export function useGoodsEdit(params: any = {}) {
         specStockSum,
 
         batchOperation,
+        skuHandleCheckAllChange,
+        handleCheckedCitiesChange,
         saveBatch,
 
         regExp,

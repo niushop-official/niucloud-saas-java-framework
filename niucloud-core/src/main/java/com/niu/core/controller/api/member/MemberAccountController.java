@@ -73,7 +73,11 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/account/money")
-    public Result<?> money(@Validated PageParam pageParam, @Validated AccountMoneyFlowParam param) {
+    public Result<?> money(@Validated PageParam pageParam, @Validated AccountMoneyFlowParam param, @RequestParam(name = "create_time[0]", defaultValue = "") String startTime, @RequestParam(name = "create_time[1]", defaultValue = "") String endTime) {
+
+        if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            param.setCreateTime(new String[]{ startTime, endTime });
+        }
         return Result.success(memberAccountService.moneyFlow(pageParam, param));
     }
 
@@ -95,7 +99,11 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/account/commission")
-    public Result<?> commission(@Validated PageParam pageParam, @Validated AccountCommissionFlowParam param) {
+    public Result<?> commission(@Validated PageParam pageParam, @Validated AccountCommissionFlowParam param, @RequestParam(name = "create_time[0]", defaultValue = "") String startTime, @RequestParam(name = "create_time[1]", defaultValue = "") String endTime) {
+
+        if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            param.setCreateTime(new String[]{ startTime, endTime });
+        }
         return Result.success(memberAccountService.commissionFlow(pageParam, param));
     }
 

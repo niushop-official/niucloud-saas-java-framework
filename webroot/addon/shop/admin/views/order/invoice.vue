@@ -22,7 +22,7 @@
                     <el-form-item>
                         <el-button type="primary" @click="loadInvoiceList()">{{ t('search') }}</el-button>
                         <el-button @click="resetForm(searchFormRef)">{{ t('reset') }}</el-button>
-                        <!-- <el-button type="primary" @click="exportEvent">{{ t('export') }}</el-button> -->
+                        <el-button type="primary" @click="exportEvent">{{ t('export') }}</el-button>
                     </el-form-item>
                 </el-form>
             </el-card>
@@ -74,8 +74,7 @@
                 </div>
                 <invoice-detail ref="invoiceDetailDialog" @complete="loadInvoiceList()" />
                 <invoice-dialog ref="invoiceListDialog" @complete="loadInvoiceList()" />
-                <export-sure ref="exportSureDialog" :show="flag" type="shop_invoice"
-                    :searchParam="invoiceManagementTableData.searchParam" @close="handleClose" />
+                <export-sure ref="exportSureDialog" :show="flag" type="shop_invoice" :searchParam="invoiceManagementTableData.searchParam" @close="handleClose" />
             </div>
         </el-card>
 
@@ -90,10 +89,10 @@ import { FormInstance } from 'element-plus'
 import InvoiceDetail from '@/addon/shop/views/order/components/invoice-detail.vue'
 import InvoiceDialog from '@/addon/shop/views/order/components/invoice-dialog.vue'
 import { useRouter, useRoute } from 'vue-router'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const route = useRoute()
 const router = useRouter()
-
 const pageName = route.meta.title
 
 const invoiceManagementTableData = reactive({
@@ -138,11 +137,13 @@ const loadInvoiceList = (page: number = 1) => {
         invoiceManagementTableData.loading = false
         invoiceManagementTableData.data = res.data.data
         invoiceManagementTableData.total = res.data.total
+        setTablePageStorage(invoiceManagementTableData.page, invoiceManagementTableData.limit, invoiceManagementTableData.searchParam);
     }).catch(() => {
         invoiceManagementTableData.loading = false
     })
 }
-loadInvoiceList()
+
+loadInvoiceList(getTablePageStorage(invoiceManagementTableData.searchParam).page);
 
 const invoiceDetailDialog: Record<string, any> | null = ref(null)
 /**

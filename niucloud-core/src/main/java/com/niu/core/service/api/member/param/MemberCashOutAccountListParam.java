@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class MemberCashOutAccountListParam implements ApiBaseParam {
 
-
+    private String accountType;
 
 }

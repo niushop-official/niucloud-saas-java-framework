@@ -1,6 +1,6 @@
 <template>
     <view class="discount bg-[var(--page-bg-color)] min-h-[100vh]" :style="themeColor()">
-        <view class="fixed top-0 left-0 w-full z-10 text-[0]">
+        <view  class="fixed top-0 left-0 w-full z-10 text-[0]">
 			<!-- #ifdef MP-WEIXIN -->
 			<view class="absolute top-0 left-0 right-0 z-999">
 				<top-tabbar :data="param"  class="top-header"/>
@@ -9,7 +9,7 @@
 			<u-swiper v-if="bannerList.length" :list="imgList" :indicator="bannerList.length" :indicatorStyle="{'bottom': '60rpx',}" :autoplay="true" :height="headStyle"  @click="toRedirect"></u-swiper>
 			<image v-if="!bannerListLoading&&!bannerList.length" :src="img('addon/shop/discount/discount_banner.png')" mode="scaleToFill" class="w-full" :style="{height: headStyle}" :show-menu-by-longpress="true"/>
 			<view class="relative w-full h-[110rpx] mt-[-40rpx] z-5" v-if="discountList.length">
-                <view class="bg-[#f24f3d] w-[750rpx] rounded-tl-[24rpx] rounded-tr-[24rpx] h-[96rpx] absolute left-0 bottom-0"></view>
+                <view class="bg-[#f24f3d] w-[750rpx] rounded-tl-[24rpx] rounded-tr-[24rpx] h-[96rpx] absolute left-0 bottom-[1rpx]"></view>
                 <scroll-view :scroll-x="true" class="h-[110rpx] absolute left-0 bottom-0 z-5">
                     <view class="flex items-end h-[100%]" :style="{'width':187.5*discountList.length+'rpx'}" >
                         <view class="w-[187.5rpx] h-[100rpx] relative flex-shrink-0" v-for="(item,index) in discountList" @click="navClick(item)">
@@ -58,11 +58,13 @@
 
 							<view class="relative overflow-hidden w-full h-[88rpx] flex justify-between mt-[20rpx] rounded-[100rpx]" :class="{'bg-[var(--primary-color-light)]': item.activeGoods.active_goods_status=='active','bg-[#FFF6F1]': item.activeGoods.active_goods_status!='active' }">
 								<view class="mr-[20rpx] pl-[30rpx] flex-1 flex flex-col justify-center">
-									<view class="text-[var(--price-text-color)] flex items-baseline" :class="{'!text-[#FF8540]':item.activeGoods.active_goods_status!='active'}">
-										<text class="text-[26rpx] leading-[26rpx] font-500 mr-[4rpx] price-font">￥</text>
-										<text class="text-[44rpx] leading-[40rpx] font-500 price-font">{{parseFloat(item.goodsSku.active_discount_price).toFixed(2).split('.')[0]}}.</text>
-										<text class="text-[26rpx] leading-[28rpx] font-500 price-font">{{parseFloat(item.goodsSku.active_discount_price).toFixed(2).split('.')[1]}}</text>
-										<view v-if="item.goodsSku.active_discount_rate<10" class="px-[4rpx] border-[1rpx] border-[var(--primary-color)] border-solid  text-[18rpx] ml-[6rpx] rounded-[4rpx] leading-[24rpx] transform translate-y-[-4rpx]" :class="{'!border-[#FF8540]':item.activeGoods.active_goods_status!='active'}">{{item.goodsSku.active_discount_rate}}折</view>
+									<view class="flex items-end">
+										<view class="text-[var(--price-text-color)] flex items-baseline" :class="{'!text-[#FF8540]':item.activeGoods.active_goods_status!='active'}">
+											<text class="text-[26rpx] leading-[26rpx] font-500 mr-[4rpx] price-font">￥</text>
+											<text class="text-[44rpx] leading-[40rpx] font-500 price-font">{{parseFloat(item.goodsSku.active_discount_price).toFixed(2).split('.')[0]}}.</text>
+											<text class="text-[26rpx] leading-[28rpx] font-500 price-font">{{parseFloat(item.goodsSku.active_discount_price).toFixed(2).split('.')[1]}}</text>
+										</view>
+										<view v-if="item.goodsSku.active_discount_rate<10" class="mb-[4rpx] text-[var(--price-text-color)] px-[4rpx] border-[1rpx] border-[var(--primary-color)] border-solid  text-[18rpx] ml-[4rpx] rounded-[4rpx] leading-[24rpx]" :class="{'!border-[#FF8540]':item.activeGoods.active_goods_status!='active'}">{{item.goodsSku.active_discount_rate}}折</view>
 									</view>
 									<view class="flex items-center mt-[4rpx]">
 										<view class="w-[20rpx] h-[20rpx] mr-[4rpx] rounded-[20rpx] text-[#fff] bg-[var(--primary-color)] flex items-center justify-center" :class="{'!bg-[#FF8540]':item.activeGoods.active_goods_status!='active'}">
@@ -86,9 +88,7 @@
             </view>
         </mescroll-body>
 		
-		<view v-if="!discountList.length && !loading" class="h-[calc(100vh-550rpx)] fixed left-0 right-0" :style="{'top':mescrollTop}">
-			<!-- <u-empty text="暂无活动，请看看其他商品吧！" width="347rpx" height="265rpx" :icon="img('static/resource/images/system/empty.png')"/>
-			<button shape="circle" plain="true" class="w-[220rpx] mt-[42rpx] text-[28rpx] h-[66rpx] leading-[62rpx] !text-[var()] !border-[var(--primary-color)] border-[2rpx] rounded-full" @click="redirect({ url: '/addon/shop/pages/goods/list' })">去逛逛</button> -->
+		<view v-if="!discountList.length && !loading" class="h-[calc(100vh-550rpx)]" :style="{'padding-top':mescrollTop}">
 			<mescroll-empty  :option="{tip : '暂无商品，请看看其他商品吧！','btnText': '去逛逛'}" @emptyclick="redirect({ url: '/addon/shop/pages/goods/list' })"></mescroll-empty>
 		</view>
 		<loading-page :loading="bannerListLoading"></loading-page>
@@ -105,7 +105,7 @@ import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.v
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js'
 import { onPageScroll, onReachBottom } from '@dcloudio/uni-app'
 import { topTabar } from '@/utils/topTabbar'
-import {useGoods} from '@/hooks/useGoods'
+import {useGoods} from '@/addon/shop/hooks/useGoods'
 
 let menuButtonInfo: any = {};
 // 如果是小程序，获取右上角胶囊的尺寸信息，避免导航栏右侧内容与胶囊重叠(支付宝小程序非本API，尚未兼容)
@@ -147,7 +147,7 @@ const getActiveDiscountConfigFn = ()=>{
 
 getActiveDiscountConfigFn()
 const getActiveDiscountListFn = ()=>{
-    getActiveDiscountList({limit:4}).then((res:any)=>{
+    getActiveDiscountList({}).then((res:any)=>{
         discountList.value = res.data
 		calculateHeight();
 		if(discountList.value&&discountList.value.length){
@@ -218,6 +218,7 @@ const calculateHeight = ()=>{
 </script>
 
 <style lang="scss" scoped>
+@import '@/addon/shop/styles/common.scss';
 .swiper.ns-indicator-dots :deep(.uni-swiper-dots-horizontal) {
 	bottom:40rpx
 }

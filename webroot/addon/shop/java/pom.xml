@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>com.niu</groupId>
         <artifactId>niucloud-addon</artifactId>
+        <groupId>com.niu</groupId>
         <version>1.0</version>
     </parent>
 
+    <modelVersion>4.0.0</modelVersion>
+
     <artifactId>shop</artifactId>
     <version>1.0.0</version>
-    <name>shop</name>
-    <description>shop</description>
-    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,7 +21,18 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>niucloud-core</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>com.niu</groupId>
+            <artifactId>recharge</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -43,11 +52,10 @@
             </resource>
         </resources>
         <plugins>
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -55,31 +63,37 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <artifactSet>
-                                <excludes>
-                                </excludes>
-                            </artifactSet>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.test.shade.test</pattern>
-                                    <shadedPattern>com.test.shade.test.launcher</shadedPattern>
-                                </relocation>
-                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/services/*</exclude>
+                                        <exclude>META-INF/spring/*</exclude>
+                                        <exclude>META-INF/**.factories</exclude>
+                                        <exclude>META-INF/**.xml</exclude>
+                                        <exclude>META-INF/**.properties</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <skip>true</skip>
-                </configuration>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

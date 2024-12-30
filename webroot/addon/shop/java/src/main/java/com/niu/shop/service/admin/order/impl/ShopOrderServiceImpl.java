@@ -20,12 +20,14 @@ import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.shop.entity.delivery.ShopStore;
+import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDelivery;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.ShopOrderLog;
 import com.niu.shop.enums.order.*;
 import com.niu.shop.mapper.delivery.ShopStoreMapper;
+import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderDeliveryMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderLogMapper;
@@ -39,6 +41,7 @@ import com.niu.shop.service.admin.order.vo.EditDeliveryVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderListVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderLogListVo;
+import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.order.ICoreOrderLogService;
 import com.niu.shop.service.core.order.ICoreOrderService;
 import com.niu.shop.service.core.order.param.AddOrderLogParam;
@@ -89,6 +92,12 @@ public class ShopOrderServiceImpl implements IShopOrderService {
 
     @Resource
     ICorePayService corePayService;
+
+    @Resource
+    ShopGoodsMapper shopGoodsMapper;
+
+    @Resource
+    ICoreManjianService coreManjianService;
 
     /**
      * 订单列表
@@ -167,7 +176,16 @@ public class ShopOrderServiceImpl implements IShopOrderService {
 
         // 查询订单项
         List<ShopOrderInfoVo.OrderGoods> orderGoods = CollectUtils.convert(shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", vo.getOrderId())), ShopOrderInfoVo.OrderGoods.class);
+
+        for(ShopOrderInfoVo.OrderGoods orderGoodsVo : orderGoods){
+            ShopGoods goodsInfo = shopGoodsMapper.selectById(orderGoodsVo.getGoodsId());
+            orderGoodsVo.setUnit(goodsInfo.getUnit().equals("") ? "件"  : goodsInfo.getUnit() );
+            coreManjianService.getOrderGoodsGiveInfo(orderGoodsVo, orderGoods, orderGoodsVo.getSiteId(), orderGoodsVo.getMemberId());
+        }
+
         vo.setOrderGoods(orderGoods);
+
+
 
         // 查询订单支付信息
         if (!vo.getOutTradeNo().isEmpty()) {
@@ -194,6 +212,8 @@ public class ShopOrderServiceImpl implements IShopOrderService {
             List<ShopOrderInfoVo.OrderDelivery> orderDelivery = CollectUtils.convert(shopOrderDeliveryMapper.selectList(new QueryWrapper<ShopOrderDelivery>().eq("order_id", vo.getOrderId())), ShopOrderInfoVo.OrderDelivery.class);
             vo.setOrderDelivery(orderDelivery);
         }
+
+
 
         List<ShopOrderLogListVo> orderLog = CollectUtils.convert(shopOrderLogMapper.selectList(new QueryWrapper<ShopOrderLog>().eq("order_id", vo.getOrderId()).orderByDesc("create_time")), ShopOrderLogListVo.class);
         vo.setOrderLog(orderLog);

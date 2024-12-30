@@ -1,6 +1,7 @@
 package com.niu.shop.service.core.delivery.electronic.sheet.engine;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.niu.core.common.component.context.cache.CacheFactory;
@@ -71,7 +72,9 @@ class KdBirdsEngine implements ElectronicSheetEngine {
         if (result.getSuccess()) {
             applyResult.setPrintTemplate(result.getPrintTemplate());
             applyResult.setOrderNo(result.getOrder().getOrderCode());
-            applyResult.setOrderInfo(result.getOrder());
+            applyResult.setOrderInfo(JSONUtil.parseObj(result.getOrder()));
+        } else {
+            throw new RuntimeException(result.getReason());
         }
 
         cacheOperator.tag("electronic_sheet_cache_kdbird").put(cacheKey, applyResult);

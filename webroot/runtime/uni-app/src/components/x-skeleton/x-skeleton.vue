@@ -95,12 +95,12 @@
         // 骨架的背景色
         bgColor: {
             type: String,
-            default: '#EAEDF5'
+            default: '' // #EAEDF5
         },
         // 骨架的动画高亮背景色
         highlightBgColor: {
             type: String,
-            default: '#F9FAFF'
+            default: '' // #F9FAFF
         },
         // 自定义配置
         config: {
@@ -155,7 +155,7 @@
         const rows = []
         for (let i = 0; i < skeletonConfig.value.textRows; i++) {
             const {gridRows, textWidth, textHeight} = skeletonConfig.value;
-            let item = {},
+            let item: any = {},
                 // 需要预防超出数组边界的情况
                 rowWidth = isArray(textWidth) ? (textWidth[i] || (i === gridRows - 1 ? '70%' : '100%')) : i === gridRows - 1 ? '70%' : textWidth,
                 rowHeight = isArray(textHeight) ? (textHeight[i] || '30rpx') : textHeight

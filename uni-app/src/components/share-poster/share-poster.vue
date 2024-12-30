@@ -1,11 +1,11 @@
 <template>
 	<!-- 分享弹窗 -->
 	<view @touchmove.prevent.stop class="share-popup">
-	    <u-popup :show="sharePopupShow" type="bottom" @close="sharePopuClose" overlayOpacity="0.8">
+	    <u-popup :show="sharePopupShow" type="bottom" @close="sharePopupClose" overlayOpacity="0.8">
 	        <view @touchmove.prevent.stop>
 				<view class="poster-img-wrap" :style="{'top': shareTop}">
 					<image v-if="isPosterAnimation" class="poster-animation" :src="img('addon/shop/poster_animation.gif')" mode="aspectFit"></image>
-					<image v-if="isPosterImg" class="poster-img" :src="img(poster)" mode="aspectFit"></image>
+					<image v-if="isPosterImg" class="poster-img" :src="img(poster)" mode="aspectFit" :show-menu-by-longpress="true"></image>
 				</view>
 				<view class="share-content">
 					<!-- #ifdef MP || APP-PLUS  -->
@@ -15,7 +15,7 @@
 							<text>分享给好友</text>
 						</button>
 					</view>
-					
+
 					<view class="share-box">
 						<button class="share-btn" :plain="true" @click="saveGoodsPoster()">
 							<view class="text-[#07c160] iconfont iconpengyouquan"></view>
@@ -23,7 +23,7 @@
 						</button>
 					</view>
 					<!-- #endif -->
-					
+
 					<!-- #ifdef H5 -->
 					<view class="share-box" @click="copyUrl">
 						<button class="share-btn" :plain="true">
@@ -33,7 +33,7 @@
 					</view>
 					<!-- #endif -->
 				</view>
-				<view class="share-footer" @click="sharePopuClose"><text>取消分享</text></view>
+				<view class="share-footer" @click="sharePopupClose"><text>取消分享</text></view>
 	        </view>
 	    </u-popup>
 		<u-popup :show="show" mode="center" :round="10" :closeable="true"  @close="show = false" :safe-area-inset-bottom="false">
@@ -79,16 +79,25 @@ const props = defineProps({
     }
 })
 
-let sharePopupShow = ref(false);
+const emits = defineEmits(['close'])
+
+const sharePopupShow = ref(false);
 
 // 复制
 const copyUrl = () => {
 	let data = ''
-	if(props.copyUrl) {
-        data = location.origin + props.copyUrl + props.copyUrlParam;
-    }else {
-        data = location.origin + location.pathname + props.copyUrlParam;
-    }
+	if (props.copyUrl) {
+		let pathName = location.pathname;
+		let packageArr: any = ['/app/', '/addon/'];
+		for (let i = 0; i < packageArr.length; i++) {
+			if (pathName.indexOf(packageArr[i]) != -1) {
+				pathName = pathName.substr(0, pathName.indexOf(packageArr[i]));
+			}
+		}
+		data = location.origin + pathName + props.copyUrl + props.copyUrlParam;
+	} else {
+		data = location.origin + location.pathname + props.copyUrlParam;
+	}
 	copy(data, () => {
 		sharePopupShow.value = false;
 	});
@@ -97,13 +106,13 @@ const copyUrl = () => {
 const openShare = ()=>{
 	sharePopupShow.value = true
 	goodsPosterShowFn();
-} 
+}
 
 //生成海报
-let isPosterAnimation = ref(false)
-let isPosterImg = ref(false)
+const isPosterAnimation = ref(false)
+const isPosterImg = ref(false)
 // 获取分享海报
-let poster = ref('');
+const poster = ref('');
 const goodsPosterShowFn = () => {
 	isPosterAnimation.value = true;
 	isPosterImg.value = false;
@@ -115,7 +124,7 @@ const goodsPosterShowFn = () => {
 	let startTime = Date.parse(new Date());
 	getPoster(obj).then((res:any) => {
 		poster.value = res.data && img(res.data) || '';
-		
+
 		let endTime = Date.parse(new Date());
 		let time = endTime-startTime;
 		let periodTime = 2200;
@@ -129,10 +138,10 @@ const goodsPosterShowFn = () => {
 			isPosterImg.value = true;
 		}
 	}).catch(() => {
-		sharePopuClose();
+		sharePopupClose();
 	})
 }
-let show = ref(false);
+const show = ref(false);
 
 const closeDialog = ()=> {
 	show.value = false;
@@ -181,10 +190,10 @@ const saveGoodsPoster = () => {
 }
 // #endif
 
-let shareTop = ref(0)
+const shareTop: any = ref(0)
 /************ 获取微信头部-start ****************/
 // 获取系统状态栏的高度
-let menuButtonInfo = {};
+let menuButtonInfo: any = {};
 // 如果是小程序，获取右上角胶囊的尺寸信息，避免导航栏右侧内容与胶囊重叠(支付宝小程序非本API，尚未兼容)
 // #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
 menuButtonInfo = uni.getMenuButtonBoundingClientRect();
@@ -192,11 +201,13 @@ shareTop.value = menuButtonInfo.top + menuButtonInfo.height + 'px';
 // #endif
 /************ 获取微信头部-end ****************/
 
-const sharePopuClose = ()=>{
+const sharePopupClose = ()=>{
 	sharePopupShow.value = false;
 	isPosterAnimation.value = false;
 	isPosterImg.value = false;
-} 
+	console.log('sharePopupClose 取消分享');
+	emits('close');
+}
 
 defineExpose({
     openShare
@@ -232,7 +243,7 @@ defineExpose({
 				line-height: 1;
 				height: auto;
 				background: none;
-				
+
 				text {
 					margin-top: 20rpx;
 					font-size: 24rpx;
@@ -262,7 +273,7 @@ defineExpose({
 		text-align: center;
 		font-size: 26rpx;
 	}
-	
+
 }
 
 .poster-img-wrap{

@@ -73,6 +73,12 @@
       <artifactId>niucloud-core</artifactId>
       <version>1.0</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>yly</artifactId>
+          <groupId>com.yly.print_sdk_library</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -82,9 +88,9 @@
     </dependency>
   </dependencies>
   <properties>
-    <java.version>1.8</java.version>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <java.version>17</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 </project>

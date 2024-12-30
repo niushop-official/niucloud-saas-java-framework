@@ -98,15 +98,12 @@ public class WeappServiceImpl implements IWeappService {
                 return loginService.login(unionidMember);
             }
         }
-        LoginConfigVo config = coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
-        if (config.getIsBindMobile() == 0 && config.getIsAuthRegister() == 1) {
-            Member registerMember = new Member();
-            registerMember.setWxOpenid(openid);
-            registerMember.setWxUnionid(unionid);
-            registerMember.setPid(pid);
-            return registerService.register(registerMember);
-        }
-        return null;
+
+        Member registerMember = new Member();
+        registerMember.setWxOpenid(openid);
+        registerMember.setWxUnionid(unionid);
+        registerMember.setPid(pid);
+        return registerService.register(registerMember);
     }
 
     /**

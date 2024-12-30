@@ -4,6 +4,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.member.Member;
@@ -17,17 +18,16 @@ import com.niu.shop.enums.order.OrderStatusEnum;
 import com.niu.shop.mapper.active.ShopActiveMapper;
 import com.niu.shop.mapper.newconsumer.ShopNewcomerMemberRecordsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
+import com.niu.shop.service.core.marketing.ICoreShopNewcomerMemberRecordsService;
 import com.niu.shop.service.core.marketing.ICoreShopNewcomerService;
 import com.niu.shop.service.core.marketing.model.ShopNewcomerActiveValue;
 import com.niu.shop.service.core.marketing.model.ShopNewcomerBannerList;
+import com.niu.shop.service.core.marketing.param.ShopNewcomerActiveJoinParam;
 import com.niu.shop.service.core.marketing.vo.CoreShopNewcomerConfigVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +40,7 @@ public class CoreShopNewcomerServiceImpl extends ServiceImpl<ShopNewcomerMemberR
     private final ShopOrderMapper shopOrderMapper;
     private final ShopActiveMapper shopActiveMapper;
     private final ShopNewcomerMemberRecordsMapper shopNewcomerMemberRecordsMapper;
+    private final ICoreShopNewcomerMemberRecordsService coreShopNewcomerMemberRecordsService;
 
     @Override
     public CoreShopNewcomerConfigVo getConfig(Integer siteId) {
@@ -184,52 +185,70 @@ public class CoreShopNewcomerServiceImpl extends ServiceImpl<ShopNewcomerMemberR
         updateBatchById(list);
     }
 
-    private long getNewcomerEndTime(CoreShopNewcomerConfigVo config) {
-        switch (config.getValidityType()) {
-            case "day":
-                return System.currentTimeMillis() / 1000 + config.getValidityDay() * 86400;
-            case "date":
-                return DateUtils.StringToTimestamp(config.getValidityTime());
-            default:
-                return 0L;
+    @Override
+    public void activeJoin(ShopNewcomerActiveJoinParam param) {
+        CoreShopNewcomerConfigVo config = getConfig(param.getSiteId());
+        if (param.getIsJoin() == null || !config.getActiveStatus().equals(ActiveStatusEnum.ACTIVE.getStatus())) {
+            return;
         }
+
+        List<ShopNewcomerMemberRecords> records = Collections.emptyList();
+        QueryWrapper<ShopNewcomerMemberRecords> queryWrapper = new QueryWrapper<>();
+        if (param.getIsJoin() == 1) {
+            queryWrapper.eq("site_id", param.getSiteId())
+                    .eq("member_id", param.getMemberId());
+            records = shopNewcomerMemberRecordsMapper.selectList(queryWrapper);
+            for (ShopNewcomerMemberRecords record : records) {
+                record.setIsJoin(param.getIsJoin());
+                record.setOrderId(param.getOrderId());
+                record.setUpdateTime(System.currentTimeMillis() / 1000);
+            }
+        } else {
+            queryWrapper.eq("site_id", param.getSiteId())
+                    .eq("member_id", param.getMemberId())
+                    .eq("order_id", param.getOrderId());
+            records = shopNewcomerMemberRecordsMapper.selectList(queryWrapper);
+            for (ShopNewcomerMemberRecords record : records) {
+                record.setIsJoin(param.getIsJoin());
+                record.setOrderId(0);
+                record.setUpdateTime(System.currentTimeMillis() / 1000);
+            }
+        }
+        coreShopNewcomerMemberRecordsService.updateBatchById(records);
+    }
+
+    private long getNewcomerEndTime(CoreShopNewcomerConfigVo config) {
+        return switch (config.getValidityType()) {
+            case "day" -> System.currentTimeMillis() / 1000 + config.getValidityDay() * 86400;
+            case "date" -> DateUtils.StringToTimestamp(config.getValidityTime());
+            default -> 0L;
+        };
     }
 
     private String getParticipationWayContent(String participationWay) {
-        switch (participationWay) {
-            case NEVER_ORDER:
-                return "从未下过单的会员";
-            case ASSIGN_TIME_ORDER:
-                return "指定时间内未下过单的会员";
-            case ASSIGN_TIME_REGISTER:
-                return "指定时间内注册的会员";
-            default:
-                return "";
-        }
+        return switch (participationWay) {
+            case NEVER_ORDER -> "从未下过单的会员";
+            case ASSIGN_TIME_ORDER -> "指定时间内未下过单的会员";
+            case ASSIGN_TIME_REGISTER -> "指定时间内注册的会员";
+            default -> "";
+        };
     }
 
     private String getParticipationWayText(String participationWay, String appointTime) {
-        switch (participationWay) {
-            case NEVER_ORDER:
-                return "从未下过单的会员";
-            case ASSIGN_TIME_ORDER:
-                return appointTime + "之前未下过单的会员";
-            case ASSIGN_TIME_REGISTER:
-                return appointTime + "之后注册的会员";
-            default:
-                return "";
-        }
+        return switch (participationWay) {
+            case NEVER_ORDER -> "从未下过单的会员";
+            case ASSIGN_TIME_ORDER -> appointTime + "之前未下过单的会员";
+            case ASSIGN_TIME_REGISTER -> appointTime + "之后注册的会员";
+            default -> "";
+        };
     }
 
     private String getValidityTypeText(String validityType, String validityDay, String validityTime) {
-        switch (validityType) {
-            case "day":
-                return "参与活动后" + validityDay + "天内。";
-            case "date":
-                return validityTime + "后截止。";
-            default:
-                return "";
-        }
+        return switch (validityType) {
+            case "day" -> "参与活动后" + validityDay + "天内。";
+            case "date" -> validityTime + "后截止。";
+            default -> "";
+        };
     }
 
     private List<CoreShopNewcomerConfigVo> getConfig() {

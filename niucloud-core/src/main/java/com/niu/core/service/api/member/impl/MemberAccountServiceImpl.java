@@ -254,7 +254,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<MemberAccountLog> queryWrapper = new QueryWrapper();
-        queryWrapper.select("id, member_id, site_ida, account_type, account_data, from_type, related_id, create_time, memo");
+        queryWrapper.select("id, member_id, site_id, account_type, account_data, from_type, related_id, create_time, memo");
         queryWrapper.eq("member_id", param.memberId());
         queryWrapper.eq("site_id", param.siteId());
         if (StrUtil.isNotEmpty(param.getAccountType())) {

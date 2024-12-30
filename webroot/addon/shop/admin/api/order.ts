@@ -137,6 +137,20 @@ export function refundDelivery(params: Record<string, any>) {
 }
 
 /**
+ * 获取可退款金额
+ */
+export function getRefundMoney(params: Record<string, any>) {
+    return request.get(`shop/order/refund/refund_money`, { params })
+}
+
+/**
+ * 商家主动退款
+ */
+export function shopActiveRefund(params: Record<string, any>) {
+    return request.post(`shop/order/refund/active`, params, { showSuccessMessage: true })
+}
+
+/**
  * 获取发票列表
  */
 export function getInvoiceList(params: Record<string, any>) {
@@ -234,4 +248,3 @@ export function getOrderBatchDeliveryState() {
 export function getOrderBatchDeliveryType() {
     return request.get(`shop/order_batch_delivery/get_type`)
 }
-

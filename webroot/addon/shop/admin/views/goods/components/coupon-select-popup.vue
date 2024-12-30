@@ -14,7 +14,7 @@
 
             <el-form :inline="true" :model="couponTable.searchParam" ref="searchFormRef">
                 <el-form-item :label="t('优惠券名称')" prop="keyword" class="form-item-wrap">
-                    <el-input v-model="couponTable.searchParam.title" :placeholder="t('请输入优惠券名称')" maxlength="60" />
+                    <el-input v-model.trim="couponTable.searchParam.title" :placeholder="t('请输入优惠券名称')" maxlength="60" />
                 </el-form-item>
                 <el-form-item class="form-item-wrap">
                     <el-button type="primary" @click="loadCouponList()">{{ t('search') }}</el-button>
@@ -78,7 +78,7 @@ import { t } from '@/lang'
 import { ref, reactive, computed, nextTick } from 'vue'
 import { cloneDeep } from 'lodash-es'
 import { ElMessage } from 'element-plus'
-import { getCouponList } from '@/addon/shop/api/marketing'
+import { getCouponSelectList } from '@/addon/shop/api/marketing'
 
 const prop = defineProps({
     modelValue: {
@@ -124,7 +124,8 @@ const couponTable = reactive({
     data: [],
     searchParam: {
         title: '',
-        status: 1
+        status: 1,
+        verify_coupon_ids:'',
     }
 })
 
@@ -181,18 +182,7 @@ const loadCouponList = (page: number = 1, callback: any = null) => {
     couponTable.page = page
 
     const searchData: any = cloneDeep(couponTable.searchParam);
-
-    if (searchData.select_type == 'selected') {
-        const ids = <any>[]
-        for (let k in selectCoupon) {
-            ids.push(parseInt(k.replace('coupon_', '')))
-        }
-        searchData.ids = ids
-    } else {
-        searchData.ids = '';
-    }
-
-    getCouponList({
+    getCouponSelectList({
         page: couponTable.page,
         limit: couponTable.limit,
         ...searchData
@@ -201,7 +191,7 @@ const loadCouponList = (page: number = 1, callback: any = null) => {
         couponTable.data = res.data.data
         couponTable.total = res.data.total
 
-        if (callback) callback()
+        if (callback) callback(res.data.verify_coupon_ids)
 
         setCouponSelected();
     }).catch(() => {
@@ -231,10 +221,19 @@ const resetForm = (formEl: FormInstance | undefined) => {
 }
 
 const show = () => {
-    // 检测优惠券id集合是否存在，移除不存在的优惠券id，纠正数据准确性
-    loadCouponList(1, () => {
+    // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
+    couponTable.searchParam.verify_coupon_ids = couponIds.value;
+    loadCouponList(1, (verify_coupon_ids:any) => {
         // 第一次打开弹出框时，纠正数据，并且赋值已选优惠券
         if (couponIds.value) {
+            couponIds.value.splice(0, couponIds.value.length, ...verify_coupon_ids)
+            // 先删除 selectCoupon 中已经不再存在于 couponIds 中的优惠券
+            for (let key in selectCoupon) {
+                const couponId = key.replace('coupon_', '');
+                if (!couponIds.value.includes(Number(couponId))) {
+                    delete selectCoupon[key]; // 删除不存在的优惠券
+                }
+            }
             couponIds.value.forEach((item: any) => {
                 if (!selectCoupon['coupon_' + item]) {
                     selectCoupon['coupon_' + item] = {};

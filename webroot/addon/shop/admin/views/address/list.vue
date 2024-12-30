@@ -12,10 +12,10 @@
 			<el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
 				<el-form :inline="true" :model="shopAddressTable.searchParam" ref="searchFormRef">
 					<el-form-item :label="t('mobile')" prop="mobile">
-						<el-input v-model="shopAddressTable.searchParam.mobile" :placeholder="t('mobilePlaceholder')"/>
+						<el-input v-model.trim="shopAddressTable.searchParam.mobile" :placeholder="t('mobilePlaceholder')"/>
 					</el-form-item>
 					<el-form-item :label="t('fullAddress')" prop="full_address">
-						<el-input v-model="shopAddressTable.searchParam.full_address"  :placeholder="t('fullAddressPlaceholder')"/>
+						<el-input v-model.trim="shopAddressTable.searchParam.full_address"  :placeholder="t('fullAddressPlaceholder')"/>
 					</el-form-item>
 
 					<el-form-item>
@@ -69,6 +69,7 @@ import { t } from '@/lang'
 import { getShopAddressList, deleteShopAddress } from '@/addon/shop/api/shop_address'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const route = useRoute()
 const pageName = route.meta.title
@@ -102,11 +103,12 @@ const loadShopAddressList = (page: number = 1) => {
         shopAddressTable.loading = false
         shopAddressTable.data = res.data.data
         shopAddressTable.total = res.data.total
+	    setTablePageStorage(shopAddressTable.page, shopAddressTable.limit, shopAddressTable.searchParam);
     }).catch(() => {
         shopAddressTable.loading = false
     })
 }
-loadShopAddressList()
+loadShopAddressList(getTablePageStorage(shopAddressTable.searchParam).page);
 
 const router = useRouter()
 

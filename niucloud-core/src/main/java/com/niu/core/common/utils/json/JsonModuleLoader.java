@@ -174,7 +174,7 @@ public class JsonModuleLoader {
         log.info("JSON addonModules -> " + addonModules);
         for (String addonModule : addonModules) {
             String jsonString = AddonModuleContext.readResourceAsStreamToText(addonModule, "loader/" + jsonFile);
-            log.info("JSON => " + addonModule + " loader/" + jsonFile + " , result => " + jsonString);
+//            log.info("JSON => " + addonModule + " loader/" + jsonFile + " , result => " + jsonString);
             if (StrUtil.isNotEmpty(jsonString)) {
                 jsonString = jsonString.trim();
                 try {

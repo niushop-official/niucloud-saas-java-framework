@@ -38,8 +38,8 @@ import com.niu.shop.service.admin.marketing.vo.ShopNewcomerConfigVo;
 import com.niu.shop.service.admin.marketing.vo.ShopNewcomerSelectSkuVo;
 import com.niu.shop.service.core.marketing.ICoreActiveService;
 import com.niu.shop.service.core.marketing.ICoreShopNewcomerService;
+import com.niu.shop.service.core.marketing.model.ShopManjianGoodsData;
 import com.niu.shop.service.core.marketing.model.ShopNewcomerActiveValue;
-import com.niu.shop.service.core.marketing.model.ShopNewcomerGoodsData;
 import com.niu.shop.service.core.marketing.vo.CoreShopNewcomerConfigVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -68,7 +68,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
     @Override
     @Transactional
     public void setConfig(ShopNewcomerSetConfigParam param) {
-        List<ShopNewcomerGoodsData> goodsDataList = JSONArray.parseArray(param.getGoodsData(), ShopNewcomerGoodsData.class);
+        List<ShopManjianGoodsData> goodsDataList = JSONArray.parseArray(param.getGoodsData(), ShopManjianGoodsData.class);
         if (ActiveStatusEnum.ACTIVE.equals(ActiveStatusEnum.getEnumByStatus(param.getActiveStatus()))) {
             checkGoods(goodsDataList);
         }
@@ -83,7 +83,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         activeValue.setBannerList(param.getBannerList());
 
         List<ShopActiveGoods> activeGoods = new ArrayList<>(CollectionUtil.size(goodsDataList));
-        for (ShopNewcomerGoodsData goodsData : goodsDataList) {
+        for (ShopManjianGoodsData goodsData : goodsDataList) {
             ShopActiveGoods goods = new ShopActiveGoods();
             goods.setSiteId(RequestUtils.siteId());
             goods.setGoodsId(goodsData.getGoodsId());
@@ -205,12 +205,16 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         Set<Integer> activeSkuIds = CollStreamUtil.toSet(shopActiveGoods, ShopActiveGoods::getSkuId);
 
         LambdaQueryWrapper<ShopGoods> shopGoodsLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        shopGoodsLambdaQueryWrapper.eq(ShopGoods::getGoodsCategory, param.getGoodsCategory())
-                .eq(ShopGoods::getGoodsType, param.getGoodsType())
-                .eq(ShopGoods::getSiteId, RequestUtils.siteId())
+        shopGoodsLambdaQueryWrapper.eq(ShopGoods::getSiteId, RequestUtils.siteId())
                 .orderByDesc(ShopGoods::getSort)
                 .orderByDesc(ShopGoods::getCreateTime);
 
+        if (ObjectUtil.isNotEmpty(param.getGoodsCategory())) {
+            shopGoodsLambdaQueryWrapper.eq(ShopGoods::getGoodsCategory, param.getGoodsCategory());
+        }
+        if (ObjectUtil.isNotEmpty(param.getGoodsType())) {
+            shopGoodsLambdaQueryWrapper.eq(ShopGoods::getGoodsType, param.getGoodsType());
+        }
         if (ObjectUtil.isNotEmpty(param.getKeyword())) {
             shopGoodsLambdaQueryWrapper.and(wrapper ->
                     wrapper.like(ShopGoods::getGoodsName, param.getKeyword()).or().like(ShopGoods::getSubTitle, param.getKeyword()));
@@ -219,8 +223,10 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         switch (param.getSelectType()) {
             case "all":
                 shopGoodsLambdaQueryWrapper.gt(ShopGoods::getStock, 0)
-                        .in(ShopGoods::getGoodsId, activeGoodsIds)
                         .eq(ShopGoods::getStatus, 1);
+                if (ObjectUtil.isNotEmpty(activeGoodsIds)) {
+                    shopGoodsLambdaQueryWrapper.in(ShopGoods::getGoodsId, activeGoodsIds);
+                }
                 break;
             case "selected":
                 shopGoodsLambdaQueryWrapper.in(ShopGoods::getGoodsId, param.getGoodsIds());
@@ -231,9 +237,15 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         Set<Integer> goodsIds = CollStreamUtil.toSet(iPage.getRecords(), ShopGoods::getGoodsId);
 
         LambdaQueryWrapper<ShopGoodsSku> shopGoodsSkuLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        shopGoodsSkuLambdaQueryWrapper.eq(ShopGoodsSku::getIsDefault, 1)
-                .eq(ShopGoodsSku::getSkuId, activeSkuIds)
-                .in(ShopGoodsSku::getGoodsId, goodsIds);
+        shopGoodsSkuLambdaQueryWrapper.eq(ShopGoodsSku::getIsDefault, 1);
+        if (ObjectUtil.isNotEmpty(activeGoodsIds)) {
+            shopGoodsSkuLambdaQueryWrapper.in(ShopGoodsSku::getSkuId, activeSkuIds);
+        }
+
+        if (ObjectUtil.isNotEmpty(goodsIds)) {
+            shopGoodsSkuLambdaQueryWrapper.in(ShopGoodsSku::getGoodsId, goodsIds);
+        }
+
         Map<Integer, List<ShopGoodsSku>> skuMap = shopGoodsSkuMapper.selectList(shopGoodsSkuLambdaQueryWrapper)
                 .stream()
                 .collect(Collectors.groupingBy(ShopGoodsSku::getGoodsId));
@@ -247,10 +259,17 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             ShopNewcomerShopGoodsVo vo = new ShopNewcomerShopGoodsVo();
             BeanUtils.copyProperties(record, vo);
             List<ShopGoodsSku> skus = skuMap.getOrDefault(record.getGoodsId(), new ArrayList<>());
+            if (ObjectUtil.isEmpty(skus)) {
+                continue;
+            }
 
             List<ShopNewcomerShopGoodsVo.GoodsSku> skuList = new ArrayList<>(skus.size());
             for (ShopGoodsSku sku : skus) {
                 ShopActiveGoods activeGoods = activeGoodsMap.get(sku.getSkuId());
+                if (activeGoods == null) {
+                    continue;
+                }
+
                 ShopNewcomerShopGoodsVo.GoodsSku skuVo = new ShopNewcomerShopGoodsVo.GoodsSku();
                 BeanUtils.copyProperties(sku, skuVo);
                 JSONObject activeGoodsValue = JSON.parseObject(activeGoods.getActiveGoodsValue());
@@ -271,11 +290,6 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             voList.add(vo);
         }
 
-        ShopNewComerSelectPageVo<ShopNewcomerShopGoodsVo> vo = new ShopNewComerSelectPageVo<>(iPage, voList);
-        if (ObjectUtil.hasEmpty(param.getVerifySkuIds(), activeSkuIds)) {
-            return vo;
-        }
-
         List<Integer> verifyGoodsId = Collections.emptyList();
         if (ObjectUtil.isAllNotEmpty(param.getVerifyGoodsIds(), activeGoodsIds)) {
             LambdaQueryWrapper<ShopGoods> queryWrapper = new LambdaQueryWrapper<>();
@@ -289,7 +303,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         }
 
         List<Integer> verifySkuIds = Collections.emptyList();
-        if (ObjectUtil.isAllNotEmpty(param.getVerifyGoodsIds(), activeSkuIds)) {
+        if (ObjectUtil.isAllNotEmpty(param.getVerifySkuIds(), activeSkuIds)) {
             LambdaQueryWrapper<ShopGoodsSku> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.in(ShopGoodsSku::getSkuId, param.getVerifySkuIds());
             verifySkuIds = shopGoodsSkuMapper.selectList(queryWrapper)
@@ -299,6 +313,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                     .collect(Collectors.toList());
         }
 
+        ShopNewComerSelectPageVo<ShopNewcomerShopGoodsVo> vo = new ShopNewComerSelectPageVo<>(iPage, voList);
         return vo.setVerifyGoodsIds(verifyGoodsId)
                 .setVerifySkuIds(verifySkuIds);
     }
@@ -432,11 +447,11 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         return list;
     }
 
-    private void checkGoods(List<ShopNewcomerGoodsData> goodsData) {
+    private void checkGoods(List<ShopManjianGoodsData> goodsData) {
         if (ObjectUtil.isEmpty(goodsData)) {
             throw new RuntimeException("请选择参与活动商品");
         }
-        for (ShopNewcomerGoodsData goods : goodsData) {
+        for (ShopManjianGoodsData goods : goodsData) {
             if (ObjectUtil.isEmpty(goods)) {
                 throw new RuntimeException("商品规格不能为空");
             }

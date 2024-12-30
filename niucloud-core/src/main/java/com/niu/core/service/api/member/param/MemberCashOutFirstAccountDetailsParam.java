@@ -8,6 +8,6 @@ public class MemberCashOutFirstAccountDetailsParam implements ApiBaseParam {
 
     private Integer accountId;
 
-    private Integer accountType;
+    private String accountType;
 
 }

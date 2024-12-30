@@ -49,8 +49,6 @@ public class MybatisPlusConfig {
      */
     public PaginationInnerInterceptor paginationInnerInterceptor() {
         PaginationInnerInterceptor paginationInnerInterceptor = new PaginationInnerInterceptor();
-        // 分页合理化
-        paginationInnerInterceptor.setOverflow(true);
         return paginationInnerInterceptor;
     }
 

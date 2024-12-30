@@ -4,9 +4,11 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
+import com.niu.shop.enums.coupon.CouponStatusEnum;
 import com.niu.shop.service.admin.marketing.ICouponService;
 import com.niu.shop.service.admin.marketing.param.ShopCouponParam;
 import com.niu.shop.service.admin.marketing.param.ShopCouponSearchParam;
+import com.niu.shop.service.admin.marketing.param.ShopCouponSelectParam;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponInfoVo;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponListVo;
 import com.niu.shop.service.admin.marketing.vo.ShopCouponMemberListVo;
@@ -108,6 +110,17 @@ public class CouponController {
     }
 
     /**
+     * 选中优惠券
+     * @param pageParam
+     * @param searchParam
+     * @return
+     */
+    @GetMapping("/select")
+    public Result<?> getSelectPage(PageParam pageParam, ShopCouponSelectParam searchParam) {
+        return Result.success(couponService.getSelectPage(pageParam, searchParam));
+    }
+
+    /**
      * 获取选中优惠券
      *
      * @param couponId
@@ -116,6 +129,11 @@ public class CouponController {
     @GetMapping("/selected")
     public Result<?> getSelectedLists(@Validated @RequestParam("coupon_id") String couponId) {
         return Result.success(couponService.getSelectedList(couponId));
+    }
+
+    @GetMapping("/status")
+    public Result<Object> getCouponStatus() {
+        return Result.success(CouponStatusEnum.getMap());
     }
 
     /**

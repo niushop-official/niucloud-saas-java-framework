@@ -2,13 +2,13 @@
     <el-dialog v-model="showDialog" :title="t('adjustMoneyDialogTitle')" width="1000px" class="diy-dialog-wrap" :destroy-on-close="true">
         <div class="max-h-[600px] overflow-y-auto">
 			<h3 class="panel-title ml-[10px]">{{ t('adjustMoneyTips') }}</h3>
-	        <el-form label-width="50px" ref="formRef" class="page-form" v-if="goodsTypeArr.indexOf('real') != -1">
-		        <el-form-item :label="t('adjustMoneyDeliveryMoney')" prop="express_number">
-			        <el-input v-model.trim="deliveryMoney" clearable placeholder="0.00" class="!w-[200px]" maxlength="8" @keyup="deliveryChange($event)">
-			            <template #append>{{ t('adjustMoneyUnit') }}</template>
-			        </el-input>
-		        </el-form-item>
-	        </el-form>
+            <el-form label-width="50px" ref="formRef" class="page-form" v-if="goodsTypeArr.indexOf('real') != -1">
+                <el-form-item :label="t('adjustMoneyDeliveryMoney')" prop="express_number">
+                    <el-input v-model.trim="deliveryMoney" clearable placeholder="0.00" class="!w-[200px]" maxlength="8" @keyup="deliveryChange($event)">
+                        <template #append>{{ t('adjustMoneyUnit') }}</template>
+                     </el-input>
+                </el-form-item>
+            </el-form>
 			<div class="mb-[20px]">
 				<el-table :data="orderData.order_goods" size="large">
 					<el-table-column :label="t('adjustMoneyGoodsInfo')" align="left" width="200">
@@ -41,15 +41,15 @@
 				</el-table>
 			</div>
 
-	        <h3 class="panel-title ml-[10px]">
-		        <span class="text-primary">实际商品金额</span>
-		        <span> = 商品总额 - 优惠金额 + 调价</span>
-	        </h3>
-	        <h3 class="panel-title ml-[10px]">
-		        <span class="text-primary">订单总额</span>
-		        <span v-if="goodsTypeArr.indexOf('real') != -1"> = 实际商品金额 + 运费</span>
+            <h3 class="panel-title ml-[10px]">
+                <span class="text-primary">实际商品金额</span>
+                <span> = 商品总额 - 优惠金额 + 调价</span>
+            </h3>
+            <h3 class="panel-title ml-[10px]">
+             <span class="text-primary">订单总额</span>
+                <span v-if="goodsTypeArr.indexOf('real') != -1"> = 实际商品金额 + 运费</span>
                 <span v-else> = 实际商品金额</span>
-	        </h3>
+             </h3>
 
 		</div>
         <template #footer>
@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref,reactive } from 'vue'
+import { ref, reactive } from 'vue'
 import { t } from '@/lang'
 import { orderEditPrice } from '@/addon/shop/api/order'
 import { filterDigit } from '@/utils/common'
@@ -73,29 +73,31 @@ const loading = ref(false)
 
 const orderData:any = reactive({})
 const deliveryMoney:any = ref(0)
-const goodsTypeArr = ref([]) // 商品类型 
-const deliveryChange=(e:any)=>{
+const goodsTypeArr = ref<any>([]) // 商品类型
+const deliveryChange = (e:any) => {
     filterDigit(e)
     deliveryMoney.value = e.target.value
 }
-const setFormData =  (data: any) => {
-    for (let key in orderData){
+const setFormData = (data: any) => {
+    for (let key in orderData) {
         delete orderData[key]
     }
-    Object.assign(orderData,cloneDeep(data))
-    goodsTypeArr.value = [];
-    orderData.order_goods.forEach((item:any)=> {
-        item.adjust_money = ''; // 调价
-        item.total = (parseFloat(item.goods_money) - parseFloat(item.discount_money)).toFixed(2); // 总计
+    Object.assign(orderData, cloneDeep(data))
+    orderData.order_goods = orderData.order_goods.filter((item:any) => {
+        return item.is_gift != 1
+    })
+    goodsTypeArr.value = []
+    orderData.order_goods.forEach((item:any) => {
+        item.adjust_money = '' // 调价
+        item.total = (parseFloat(item.goods_money) - parseFloat(item.discount_money)).toFixed(2) // 总计
         goodsTypeArr.value.push(item.goods_type)
     })
-    deliveryMoney.value = orderData.delivery_money;
+    deliveryMoney.value = orderData.delivery_money
 }
 
 // 监听调价计算总计
-const adjustChange = (value:any,index:any,item:any)=> {
-
-    let money = parseFloat(item.goods_money) - parseFloat(item.discount_money);
+const adjustChange = (value:any, index:any, item:any) => {
+    let money = parseFloat(item.goods_money) - parseFloat(item.discount_money)
     if (value.length == 0 || isNaN(value)) {
         value = 0
         orderData.order_goods[index].adjust_money = ''
@@ -104,14 +106,14 @@ const adjustChange = (value:any,index:any,item:any)=> {
     }
 
     if (parseFloat(value) + money < 0) {
-        value = money;
-        orderData.order_goods[index].adjust_money = -value;
-        money = 0;
-    }else{
+        value = money
+        orderData.order_goods[index].adjust_money = -value
+        money = 0
+    } else {
         money += value
     }
 
-    money = Math.round(money * 100) / 100;
+    money = Math.round(money * 100) / 100
 
     orderData.order_goods[index].total = money.toFixed(2)
 }
@@ -119,33 +121,32 @@ const adjustChange = (value:any,index:any,item:any)=> {
 const emit = defineEmits(['complete'])
 
 const isRepeat = ref(false)
-const confirm = ()=> {
-
+const confirm = () => {
     loading.value = true
 
     if (isRepeat.value) return
     isRepeat.value = true
 
-	let order_goods_data:any = {};
-    orderData.order_goods.forEach((item:any)=>{
-        if(item.adjust_money) {
+    let order_goods_data:any = {}
+    orderData.order_goods.forEach((item:any) => {
+        if (item.adjust_money) {
             order_goods_data[item.order_goods_id] = {
-                money:item.adjust_money
-            };
+                money: item.adjust_money
+            }
         }
     })
     orderEditPrice({
-        order_id:orderData.order_id,
-        delivery_money:parseFloat(deliveryMoney.value),
+        order_id: orderData.order_id,
+        delivery_money: parseFloat(deliveryMoney.value),
         order_goods_data
     }).then((res: any) => {
         isRepeat.value = false
-        loading.value = false;
+        loading.value = false
         showDialog.value = false
         emit('complete')
     }).catch(() => {
         isRepeat.value = false
-        loading.value = false;
+        loading.value = false
     })
 }
 

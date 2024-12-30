@@ -74,7 +74,9 @@ public class ShopNewcomerCalculateListener extends GoodsMarketCalculateEventDefi
             skuInfo.setPrice(newcomerPrice);
             skuInfo.setGoodsMoney(skuInfo.getPrice().multiply(BigDecimal.valueOf(skuInfo.getNum())));
         } else {
-            skuInfo.setGoodsMoney(newcomerPrice.add(skuInfo.getMemberPrice().multiply(new BigDecimal(skuInfo.getNum() - 1))));
+            BigDecimal memberPrice = skuInfo.getMemberPrice() == null ? skuInfo.getSalePrice() : skuInfo.getMemberPrice();
+            BigDecimal goodsMoney = newcomerPrice.add(memberPrice.multiply(new BigDecimal(skuInfo.getNum() - 1)));
+            skuInfo.setGoodsMoney(goodsMoney);
         }
 
         GoodsMarketCalculateResult result = new GoodsMarketCalculateResult();

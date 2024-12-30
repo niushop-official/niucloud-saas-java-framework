@@ -33,6 +33,7 @@ public class ShopCouponListVo implements Serializable {
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime; // 添加时间
     private BigDecimal price;  // 面值
+    @JsonSerialize(using = BeanJsonSerializer.BigDecimalFormatSerializer.class)
     private BigDecimal minConditionMoney;  // 商品最低多少金额可用优惠券
     private Integer type;  // 优惠券类型 1通用优惠券 2商品品类优惠券 3商品优惠券
     private Integer receiveType;  // 领取方式

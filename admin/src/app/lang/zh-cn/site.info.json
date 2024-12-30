@@ -33,5 +33,6 @@
       "siteDomain": "站点域名",
       "siteDomainPlaceholder": "请输入站点域名",
       "siteDomainTips": "站点域名的配置是针对站点的wap和web端",
-      "siteDomainTipsTwo": "需要将域名配置到您的服务器，同时域名需要解析您的服务器才可生效"
+      "siteDomainTipsTwo": "需要将域名配置到您的服务器，同时域名需要解析您的服务器才可生效",
+      "siteDomainTipsThree": "站点域名不需要加http或者https，末尾不需要加/"
 }

@@ -55,7 +55,7 @@ public class CoreMemberLevelServiceImpl implements ICoreMemberLevelService {
             upgradeQuery.orderByAsc("growth");
             List<MemberLevel> upgrade = memberLevelMapper.selectList(upgradeQuery);
 
-            if (upgrade != null) {
+            if (ObjectUtil.isNotEmpty(upgrade)) {
                 Map<String, Object> vars = new HashMap<String, Object>();
                 vars.put("from_type", "level_upgrade");
                 vars.put("memo", "会员升级奖励");

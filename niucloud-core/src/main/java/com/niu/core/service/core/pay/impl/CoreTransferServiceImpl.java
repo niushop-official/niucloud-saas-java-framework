@@ -97,6 +97,16 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
             throw new CommonException("当前转账未处于待转账状态");
         }
 
+        transfer.setTransferType(transferType);
+        transfer.setTransferRemark((String) data.getOrDefault("transfer_remark", ""));
+        transfer.setTransferVoucher((String) data.getOrDefault("transfer_voucher", ""));
+        transfer.setTransferRealname((String) data.getOrDefault("transfer_realname", ""));
+        transfer.setTransferBank((String) data.getOrDefault("transfer_bank", ""));
+        transfer.setTransferMobile((String) data.getOrDefault("transfer_mobile", ""));
+        transfer.setTransferAccount((String) data.getOrDefault("transfer_account", ""));
+        transfer.setOpenid((String) data.getOrDefault("openid", ""));
+        payTransferMapper.updateById(transfer);
+
         Map transferTypeEnum = TransferTypeEnum.getMap().get(transferType);
         if (transferTypeEnum == null) throw new CommonException("不支持的转账方式");
 

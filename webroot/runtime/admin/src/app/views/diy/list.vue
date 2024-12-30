@@ -10,7 +10,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="diyPageTableData.searchParam" ref="searchFormDiyPageRef">
                     <el-form-item :label="t('title')" prop="title">
-                        <el-input v-model="diyPageTableData.searchParam.title" :placeholder="t('titlePlaceholder')" />
+                        <el-input v-model.trim="diyPageTableData.searchParam.title" :placeholder="t('titlePlaceholder')" />
                     </el-form-item>
                     <el-form-item :label="t('forAddon')" prop="addon_name">
                         <el-select v-model="diyPageTableData.searchParam.addon_name" :placeholder="t('forAddonPlaceholder')" @change="handleSelectAddonChange">
@@ -57,6 +57,7 @@
                         <el-button v-if="row.type == 'DIY_PAGE'" type="primary" link @click="openShare(row)">{{ t('shareSet') }}</el-button>
                         <el-button type="primary" link @click="editEvent(row)">{{ t('edit') }}</el-button>
                         <el-button v-if="row.is_default == 0 || row.type == 'DIY_PAGE'" type="primary" link @click="deleteEvent(row.id)">{{ t('delete') }}</el-button>
+                        <el-button type="primary" link @click="copyEvent(row.id)">{{ t('copy') }}</el-button>
                     </template>
                 </el-table-column>
 
@@ -70,14 +71,14 @@
         </el-card>
 
         <!--添加页面-->
-        <el-dialog v-model="dialogVisible" :title="t('addPageTips')" width="25%">
+        <el-dialog v-model="dialogVisible" :title="t('addPageTips')" width="350px">
 
             <el-form :model="formData" label-width="90px" ref="formRef" :rules="formRules">
                 <el-form-item :label="t('title')" prop="title">
-                    <el-input v-model="formData.title" :placeholder="t('titlePlaceholder')" clearable maxlength="12" show-word-limit class="w-full" />
+                    <el-input v-model.trim="formData.title" :placeholder="t('titlePlaceholder')" clearable maxlength="12" show-word-limit class="w-full" />
                 </el-form-item>
                 <el-form-item :label="t('typeName')" prop="type">
-                    <el-select v-model="formData.type" :placeholder="t('pageTypePlaceholder')" class="w-full">
+                    <el-select v-model="formData.type" :placeholder="t('pageTypePlaceholder')" class="!w-full">
                         <el-option v-for="(item, key) in pageType" :label="item.title" :value="key" :key="key"/>
                     </el-select>
                 </el-form-item>
@@ -102,10 +103,10 @@
                     <span>{{ sharePage }}</span>
                 </el-form-item>
                 <el-form-item :label="t('shareTitle')" prop="title">
-                    <el-input v-model="shareFormData[tabShareType].title" :placeholder="t('shareTitlePlaceholder')" clearable maxlength="30" show-word-limit />
+                    <el-input v-model.trim="shareFormData[tabShareType].title" :placeholder="t('shareTitlePlaceholder')" clearable maxlength="30" show-word-limit />
                 </el-form-item>
                 <el-form-item :label="t('shareDesc')" prop="desc" v-if="tabShareType == 'wechat'">
-                    <el-input v-model="shareFormData[tabShareType].desc" :placeholder="t('shareDescPlaceholder')" type="textarea" rows="4" clearable maxlength="100" show-word-limit />
+                    <el-input v-model.trim="shareFormData[tabShareType].desc" :placeholder="t('shareDescPlaceholder')" type="textarea" rows="4" clearable maxlength="100" show-word-limit />
                 </el-form-item>
                 <el-form-item :label="t('shareImageUrl')" prop="url">
                     <upload-image v-model="shareFormData[tabShareType].url" :limit="1" />
@@ -129,6 +130,7 @@ import { t } from '@/lang'
 import { getApps,getDiyPageList, deleteDiyPage, getDiyTemplate, editDiyPageShare, setUseDiyPage } from '@/app/api/diy'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const route = useRoute()
 const router = useRouter()
@@ -234,12 +236,13 @@ const loadDiyPageList = (page: number = 1) => {
         diyPageTableData.loading = false
         diyPageTableData.data = res.data.data
         diyPageTableData.total = res.data.total
+        setTablePageStorage(diyPageTableData.page, diyPageTableData.limit, diyPageTableData.searchParam);
     }).catch(() => {
         diyPageTableData.loading = false
     })
 }
 
-loadDiyPageList()
+loadDiyPageList(getTablePageStorage(diyPageTableData.searchParam).page);
 
 // 编辑自定义页面
 const editEvent = (data: any) => {
@@ -254,6 +257,30 @@ const editEvent = (data: any) => {
 const setUse = (id: any) => {
     setUseDiyPage({id}).then(() => {
         loadDiyPageList()
+    })
+}
+const repeat = ref(false)
+
+// 复制页面
+const copyEvent = (id: any) => {
+    ElMessageBox.confirm(t('diyPageCopyTips'), t('warning'),
+        {
+            confirmButtonText: t('confirm'),
+            cancelButtonText: t('cancel'),
+            type: 'warning'
+        }
+    ).then(() => {
+        if (repeat.value) return
+        repeat.value = true
+
+        copyDiy({id: id}).then((res: any) => {
+            if (res.code == 1) {
+                loadDiyPageList()
+            }
+            repeat.value = false
+        }).catch(err => {
+            repeat.value = false
+        })
     })
 }
 

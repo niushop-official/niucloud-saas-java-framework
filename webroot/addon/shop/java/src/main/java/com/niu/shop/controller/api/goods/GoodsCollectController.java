@@ -4,6 +4,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.api.goods.IGoodsCollectService;
+import com.niu.shop.service.api.goods.param.CancelGoodsCollectParam;
 import com.niu.shop.service.api.goods.vo.ShopGoodsCollectVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +51,17 @@ public class GoodsCollectController {
     @DeleteMapping("/goods/collect/{goodsId}")
     public Result<Object> cancelGoodsCollect(@PathVariable("goodsId") Integer goodsId) {
         goodsCollectService.cancelGoodsCollect(goodsId);
+        return Result.success();
+    }
+
+    /**
+     * 取消收藏
+     * @param param
+     * @return
+     */
+    @PutMapping("/goods/collect")
+    public Result<Object> cancelGoodsCollect(@RequestBody CancelGoodsCollectParam param) {
+        goodsCollectService.cancelGoodsCollect(param.getGoodsIds());
         return Result.success();
     }
 }

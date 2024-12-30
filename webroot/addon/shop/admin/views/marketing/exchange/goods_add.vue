@@ -2,7 +2,7 @@
     <div class="main-container" v-loading="loading">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <!-- 表单 -->
@@ -121,6 +121,16 @@
                                 </template>
                             </el-table-column>
                             <el-table-column :label="t('limit')" min-width="200">
+                                <template #header>
+                                    <div style="display: inline-flex; align-items: center">
+                                        <span class="mr-[5px]">{{ t('limit') }}</span>
+                                        <el-tooltip class="box-item" effect="light" :content="t('limitRules')" placement="top">
+                                        <el-icon color="#666">
+                                            <QuestionFilled />
+                                        </el-icon>
+                                        </el-tooltip>
+                                    </div>
+                                </template>
                                 <template #default="{ row,$index }">
                                     <el-form-item v-if="row.is_enabled" :prop="'product_list.'+ $index + '.limit_num'" :rules="[{
                                         trigger: 'blur',
@@ -131,6 +141,10 @@
                                                     callback(t('limitTips'))
                                                 } else if (value <=0) {
                                                     callback(t('limitTipsTwo'))
+                                                } else if (value > Number(row.stock)) {
+                                                    callback(t('limitTipsThree'))
+                                                } else if(parseInt(value)>parseInt(row.goods_stock)){
+                                                    callback(t('stockTipsThree'))
                                                 } else {
                                                     callback();
                                                 }
@@ -541,8 +555,9 @@ const enabledEvent =  (row:any)=>{
 }
 const goodsSelectPopupRef = ref()
 const goodsSelect = (value:any)=>{
+    console.log(value)
     const goods_info:any=Object.values(deepClone(value))[0]
-    formData.value.product_list =deepClone(goods_info.sku_list.map((el:any)=>{
+    formData.value.product_list =deepClone(goods_info.skuList.map((el:any)=>{
         el.goods_stock = el.stock + ''
         el.goods_price = el.price + ''
         el.limit_num = ''
@@ -555,7 +570,7 @@ const goodsSelect = (value:any)=>{
     formData.value.goods_info = {
         goods_name:goods_info.goods_name,
         goods_cover:goods_info.goods_cover,
-        goods_price:goods_info.goods_sku.price,
+        goods_price:goods_info.goodsSku.price,
         goods_id:goods_info.goods_id
     }
     formData.value.image = goods_info.goods_image
@@ -753,7 +768,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
     })
 }
 const back = () => {
-    history.back()
+    router.push('/shop/marketing/exchange/goods_list')
 }
 </script>
 

@@ -54,7 +54,7 @@ public class MemberCashOut implements Serializable {
     private String transferStatus;
 
     /** 转账时间 */
-    private Integer transferTime;
+    private Long transferTime;
 
     /** 提现申请金额 */
     private BigDecimal applyMoney;

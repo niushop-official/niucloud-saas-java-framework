@@ -125,8 +125,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
     public JSONObject getGiftContent(Integer siteId, JSONObject gifts, String scene) {
         JSONObject giftEnum = GiftEnum.getType();
 
-        try {
-            for (String key : gifts.keySet()) {
+        for (String key : gifts.keySet()) {
+            try {
                 JSONObject config = gifts.getJSONObject(key);
                 String driver = (String) giftEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
@@ -137,9 +137,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                     Object content = method.invoke(obj, params);
                     gifts.putByPath(key + ".content", content);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return gifts;
@@ -156,8 +156,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
     public JSONObject getBenefitsContent(Integer siteId, JSONObject benefits, String scene) {
         JSONObject benefitsEnum = BenefitsEnum.getType();
 
-        try {
-            for (String key : benefits.keySet()) {
+        for (String key : benefits.keySet()) {
+            try {
                 JSONObject config = benefits.getJSONObject(key);
                 String driver = (String) benefitsEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
@@ -168,9 +168,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                     Object content = method.invoke(obj, params);
                     benefits.putByPath(key + ".content", content);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return benefits;
@@ -187,8 +187,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
     public JSONObject getGrowthRuleContent(Integer siteId, JSONObject rules, String scene) {
         JSONObject growthRuleEnum = GrowthRuleEnum.getType();
 
-        try {
-            for (String key : rules.keySet()) {
+        for (String key : rules.keySet()) {
+            try {
                 JSONObject config = rules.getJSONObject(key);
                 String driver = (String) growthRuleEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
@@ -199,9 +199,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                     Object content = method.invoke(obj, params);
                     rules.putByPath(key + ".content", content);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return rules;
@@ -218,8 +218,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
     public JSONObject getPointGrantRuleContent(Integer siteId, JSONObject rules, String scene) {
         JSONObject pointRuleEnum = PointRuleEnum.getType().getJSONObject("grant");
 
-        try {
-            for (String key : rules.keySet()) {
+        for (String key : rules.keySet()) {
+            try {
                 JSONObject config = rules.getJSONObject(key);
                 String driver = (String) pointRuleEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
@@ -230,9 +230,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                     Object content = method.invoke(obj, params);
                     rules.putByPath(key + ".content", content);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return rules;
@@ -249,8 +249,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
     public JSONObject getPointConsumeRuleContent(Integer siteId, JSONObject rules, String scene) {
         JSONObject pointRuleEnum = PointRuleEnum.getType().getJSONObject("consume");
 
-        try {
-            for (String key : rules.keySet()) {
+        for (String key : rules.keySet()) {
+            try {
                 JSONObject config = rules.getJSONObject(key);
                 String driver = (String) pointRuleEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
@@ -261,9 +261,9 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                     Object content = method.invoke(obj, params);
                     rules.putByPath(key + ".content", content);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
         return rules;
@@ -297,7 +297,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
             Object growth = method.invoke(obj, params);
 
             if (growth instanceof Integer && (Integer) growth > 0) {
-                Double accountData = new Double(growth.toString());
+                Double accountData = Double.parseDouble(growth.toString());
                 coreMemberAccountService.addLog(siteId, memberId, AccountTypeEnum.GROWTH.getType(), accountData, String.valueOf(ObjectUtil.defaultIfNull(data.get("from_type"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("memo"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("related_id"), "")));
             }
         } catch (Exception e) {
@@ -334,7 +334,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
             Object growth = method.invoke(obj, params);
 
             if (growth instanceof Integer && (Integer) growth > 0) {
-                Double accountData = new Double(growth.toString());
+                Double accountData = Double.parseDouble(growth.toString());
                 coreMemberAccountService.addLog(siteId, memberId, AccountTypeEnum.POINT.getType(), accountData, String.valueOf(ObjectUtil.defaultIfNull(data.get("from_type"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("memo"), "")), String.valueOf(ObjectUtil.defaultIfNull(data.get("related_id"), "")));
             }
         } catch (Exception e) {

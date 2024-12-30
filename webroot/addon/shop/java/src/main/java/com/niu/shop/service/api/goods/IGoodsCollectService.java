@@ -26,4 +26,11 @@ public interface IGoodsCollectService {
      * @param goodsId
      */
     void cancelGoodsCollect(Integer goodsId);
+
+    /**
+     * 取消收藏
+     *
+     * @param goodsId
+     */
+    void cancelGoodsCollect(Integer[] goodsId);
 }

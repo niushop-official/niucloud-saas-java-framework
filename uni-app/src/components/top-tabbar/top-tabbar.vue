@@ -17,54 +17,45 @@
 						<view :style="{ color: topStatusBarData.textColor }">{{ data.title }}</view>
 					</view>
 				</view>
-	
+
 				<view v-if="topStatusBarData.style == 'style-3'" :style="navbarInnerStyle" class="content-wrap">
 					<view v-if="isBack && isBackShow" class="back-wrap -ml-[16rpx] text-[27px] nc-iconfont nc-icon-zuoV6xx" :style="{ color: titleTextColor }" @tap="goBack"></view>
 					<view class="title-wrap" @click="diyStore.toRedirect(topStatusBarData.link)">
 						<image :src="img(topStatusBarData.imgUrl)" mode="heightFix"></image>
 					</view>
-					<view class="search" @click="diyStore.toRedirect(topStatusBarData.link)" :style="{ height: menuButtonInfo.height - 2 + 'px', lineHeight: menuButtonInfo.height - 2 + 'px' }">
-						<text class="nc-iconfont nc-icon-sousuoV6xx absolute left-[20rpx]"></text>
-						<text class="text-[28rpx]">{{topStatusBarData.inputPlaceholder}}</text>
+					<view class="search" @click="diyStore.toRedirect(topStatusBarData.link)" :style="{ height: systemStore.menuButtonInfo.height - 2 + 'px', lineHeight: systemStore.menuButtonInfo.height - 2 + 'px' }">
+						<text class="nc-iconfont nc-icon-sousuo-duanV6xx1 text-[24rpx] absolute left-[20rpx]"></text>
+						<text class="text-[24rpx]">{{topStatusBarData.inputPlaceholder}}</text>
 					</view>
 					<view :style="{ 'width': capsuleWidth }"></view>
 				</view>
-	 
+
 				<view v-if="topStatusBarData.style == 'style-4'" :style="navbarInnerStyle" class="content-wrap">
 					<view v-if="isBack && isBackShow" class="back-wrap -ml-[16rpx] text-[27px] nc-iconfont nc-icon-zuoV6xx" :style="{ color: titleTextColor }" @tap="goBack"></view>
 					<text class="nc-iconfont nc-icon-dizhiguanliV6xx text-[28rpx]" :style="{ color: topStatusBarData.textColor }"></text>
-					<view class="title-wrap"  @click="reposition()" :style="{ color: topStatusBarData.textColor }">{{ currentPosition }}</view>
-					<text class="nc-iconfont nc-icon-youV6xx text-[26rpx]" @click="reposition()" :style="{ color: topStatusBarData.textColor }"></text>
+					<view class="title-wrap"  @click.stop="locationVal.reposition()" :style="{ color: topStatusBarData.textColor }" v-if="systemStore.diyAddressInfo">{{ systemStore.diyAddressInfo.community }}</view>
+					<view class="title-wrap"  @click.stop="locationVal.reposition()" :style="{ color: topStatusBarData.textColor }" v-else>{{ systemStore.defaultPositionAddress }}</view>
+					<text class="nc-iconfont nc-icon-youV6xx text-[26rpx]" @click.stop="locationVal.reposition()" :style="{ color: topStatusBarData.textColor }"></text>
 				</view>
 			</view>
 		</view>
-	
+
 		<!-- 解决fixed定位后导航栏塌陷的问题 -->
-		<view class="u-navbar-placeholder" :style="{ width: '100%', paddingTop: placeholderHeight + 'px' }"></view>
-		
-		<!-- #ifdef MP-WEIXIN -->
-		<!-- 小程序隐私协议 -->
-		<wx-privacy-popup ref="wxPrivacyPopupRef"></wx-privacy-popup>
-		<!-- #endif -->
+		<view v-if="isFill" class="u-navbar-placeholder" :style="{ width: '100%', paddingTop: placeholderHeight + 'px' }"></view>
 	</view>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, getCurrentInstance, nextTick } from 'vue';
-import { img, getLocation, locationStorage } from '@/utils/common';
-import { getAddressByLatlng } from '@/app/api/system';
+import { ref, computed, onMounted, getCurrentInstance, nextTick } from 'vue';
+import { redirect, img } from '@/utils/common';
 import useSystemStore from '@/stores/system';
 import useDiyStore from '@/app/stores/diy';
-import manifestJson from '@/manifest.json'
+import {useLocation} from '@/hooks/useLocation'
 
 // 获取系统状态栏的高度
 let systemInfo = uni.getSystemInfoSync();
 let platform = systemInfo.platform;
-let menuButtonInfo = {};
-// 如果是小程序，获取右上角胶囊的尺寸信息，避免导航栏右侧内容与胶囊重叠(支付宝小程序非本API，尚未兼容)
-// #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
-menuButtonInfo = uni.getMenuButtonBoundingClientRect();
-// #endif
+const systemStore = useSystemStore();
 
 const diyStore = useDiyStore();
 
@@ -91,12 +82,28 @@ const props = defineProps({
     isBack: {
     	type: Boolean,
     	default: true
+    },
+	isFill: {
+    	type: Boolean,
+    	default: true
     }
 })
+
+// 控制-定位后是否对导航栏进行填充
+const isFill = computed(() => {
+	let bool = true;
+	if(imageAdsSameScreen.value) {
+		bool = false;
+	}else {
+		bool = props.isFill;
+	}
+	return bool;
+});
 
 const data = computed(() => {
 	return props.data;
 });
+
 const topStatusBarData = computed(() => {
 	if(props.data && props.data.topStatusBar)
 		return props.data.topStatusBar;
@@ -105,7 +112,7 @@ const topStatusBarData = computed(() => {
 // 导航栏内部盒子的样式
 const navbarInnerStyle = computed(() => {
 	let style = '';
-	
+
 	if(props.isBack && isBackShow.value){
 		style += 'padding-left: 30rpx;';//30=>右边留边 44=>箭头宽度 10=>箭头的右maring
 		if(topStatusBarData.value.style == 'style-1') //样式一需要居中需要有右边padding辅助
@@ -117,8 +124,8 @@ const navbarInnerStyle = computed(() => {
 	}
 	// #ifdef MP
 	// 导航栏宽度，如果在小程序下，导航栏宽度为胶囊的左边到屏幕左边的距离
-	style += 'height:' + menuButtonInfo.height + 'px;';
-	style += 'padding-top:' + menuButtonInfo.top + 'px;';
+	style += 'height:' + systemStore.menuButtonInfo.height + 'px;';
+	style += 'padding-top:' + systemStore.menuButtonInfo.top + 'px;';
 	style += 'padding-bottom: 8px;';
 	// #endif
 	return style;
@@ -127,7 +134,7 @@ const navbarInnerStyle = computed(() => {
 // 样式一的字体大小
 const styleOneFontSize = computed(() => {
 	let style = '';
-	
+
 	// #ifdef H5
 	style += 'font-size: 28rpx;';
 	// #endif
@@ -169,7 +176,7 @@ const bgColor  = computed(() => {
 	return color;
 })
 
-/******************************* 存储滚动值-start ***********************/ 
+/******************************* 存储滚动值-start ***********************/
 // 键名和组件名一致即可
 let componentsScrollVal = uni.getStorageSync('componentsScrollValGroup')
 if(componentsScrollVal){
@@ -181,158 +188,94 @@ if(componentsScrollVal){
 	}
 	uni.setStorageSync('componentsScrollValGroup', obj);
 }
-/******************************* 存储滚动值-end ***********************/ 
+/******************************* 存储滚动值-end ***********************/
 
-/******************************* 返回按钮-start ***********************/ 
-let isBackShow = ref(false);
+/******************************* 返回按钮-start ***********************/
+const isBackShow = ref(false);
 let pages = getCurrentPages();
 
 // 返回按钮的函数
 const goBack = () => {
-	// 如果自定义了点击返回按钮的函数，则执行，否则执行返回逻辑
-	if (typeof props.customBack === 'function') {
-		props.customBack();
-	} else {
-		uni.navigateBack();
+	// 兼容小程序，未登录状态下点击某个功能跳转到登录页，不登录无法返回的情况
+	if(pages.length ==  1 && pages[0].route == 'app/pages/auth/index'){
+		uni.getStorage({
+		    key: 'loginBack',
+		    success: (res: any) => {
+		        res ? redirect(
+		            {
+		                ...res.data,
+		                mode: 'redirectTo'
+		            }
+		        ) : redirect({ url: '/app/pages/index/index', mode: 'switchTab' })
+		    },
+		    fail: (res) => {
+		        redirect({ url: '/app/pages/index/index', mode: 'switchTab' })
+		    }
+		})
+	}else{
+		// 如果自定义了点击返回按钮的函数，则执行，否则执行返回逻辑
+		if (typeof props.customBack === 'function') {
+			props.customBack();
+		} else {
+			uni.navigateBack();
+		}
 	}
 }
-/******************************* 返回按钮-end ***********************/ 
+/******************************* 返回按钮-end ***********************/
 
 // 微信胶囊宽度+right
 const capsuleWidth = computed(() => {
-	let width = `calc(100vw - ${menuButtonInfo.right}px + ${menuButtonInfo.width}px + 10px)`;
+	let width = `calc(100vw - ${systemStore.menuButtonInfo.right}px + ${systemStore.menuButtonInfo.width}px + 10px)`;
 	return width;
 })
 
 // 导航栏塌陷的高度
-let placeholderHeight = ref(0);
+const placeholderHeight = ref(0);
 const instance = getCurrentInstance();
+// #ifdef MP
+let statusBarHeight = systemStore.menuButtonInfo.height + systemStore.menuButtonInfo.top + 8;
+placeholderHeight.value = statusBarHeight || 0;
+// #endif
 const navbarPlaceholderHeight = () => {
     nextTick(() => {
-        const query = uni.createSelectorQuery().in(instance);
-        query.select('.ns-navbar-wrap .u-navbar .content-wrap').boundingClientRect(data => {
-            placeholderHeight.value = data ? data.height : 0;
-            diyStore.topTabarHeight = placeholderHeight.value;
-        }).exec();
-    })
-}
-
-/******************************* 定位-start ***********************/ 
-// 获取地图配置
-const systemStore = useSystemStore();
-let currentPosition = ref('定位中...')
-let mapConfig = uni.getStorageSync('mapConfig');
-
-const initPosition = () =>{
-	// #ifdef H5
-	if (getQueryVariable('latng')) {
-		currentPosition.value = "定位中..."
-		let locationInfo = systemStore.location;
-		var tempArr = getQueryVariable('latng').split(',');
-		locationInfo.latitude = tempArr[0];
-		locationInfo.longitude = tempArr[1];
-		systemStore.setLocation(locationInfo);
-	}
-	// #endif
-	currentPosition.value = '定位中...';
-	if(uni.getStorageSync('addressByLatlng')){
-		currentPosition.value = uni.getStorageSync('addressByLatlng').formatted_addresses.recommend;
-	}
-	// 定位信息过期后，重新获取定位
-	if(mapConfig.is_open == 1 && locationStorage() && locationStorage().is_expired) {
-		getLocation({
-			fail: (res) => {
-				// 拒绝定位，进入默认总店
-				currentPosition.value = "定位中..."
-			}
-		});
-	}	
-}
-
-watch(() => systemStore.location, (nval, oval)=> {
-	if (nval.latitude && nval.longitude) {
-		getAddressByLatlngFn()
-	}else{
-		currentPosition.value = "定位中..."
-	}
-},{deep:true})
-
-// 根据经纬度获取位置
-const getAddressByLatlngFn = () => {
-	let data = {
-		latlng: ''
-	};
-	data.latlng = systemStore.location.latitude + ',' + systemStore.location.longitude ;
-	getAddressByLatlng(data).then((res: any) => {
-		if (res.data && Object.keys(res.data).length) {
-			currentPosition.value = res.data.formatted_addresses.recommend; // 结合知名地点形成的描述性地址，更具人性化特点
-			uni.setStorageSync('addressByLatlng', res.data);
-		} else {
-			currentPosition.value = '定位中...';
-		}
+		const query = uni.createSelectorQuery().in(instance);
+		query.select('.ns-navbar-wrap .u-navbar .content-wrap').boundingClientRect(data => {
+			placeholderHeight.value = data ? data.height : 0;
+			diyStore.topTabarHeight = placeholderHeight.value;
+		}).exec();
 	})
 }
 
-// 打开地图重新选择位置
-const reposition = () => {
-	// #ifdef MP
-	uni.chooseLocation({
-		success: (res) => {
-			var urlencode = JSON.parse(JSON.stringify(systemStore.location));
-			urlencode = Object.assign(urlencode,res)
-			systemStore.setLocation(urlencode);
-		},
-	    fail: (res)=>{
-	        // 在隐私协议中没有声明chooseLocation:fail api作用域
-	        if(res.errMsg && res.errno) {
-	            if(res.errno == 104){
-	                let msg = '用户未授权隐私权限，选择位置失败';
-	                uni.showToast({title: msg, icon: 'none'})
-	            }else if(res.errno == 112){
-	                let msg = '隐私协议中未声明，打开地图选择位置失败';
-	                uni.showToast({title: msg, icon: 'none'})
-	            }else {
-	                uni.showToast({title: res.errMsg, icon: 'none'})
-	            }
-	        }
-	    }
-	});
-	// #endif
-	
-	// #ifdef H5
-	let backurl = location.origin +  location.pathname;
-	window.location.href = 'https://apis.map.qq.com/tools/locpicker?search=1&type=0&backurl=' + encodeURIComponent(backurl) + '&key=' + manifestJson.h5.sdkConfigs.maps.qqmap.key + '&referer=myapp';
-	// #endif
-}
-
-const getQueryVariable = (variable:any)=> {
-	var query = window.location.search.substring(1);
-	var vars = query.split('&');
-	for (var i = 0; i < vars.length; i++) {
-		var pair = vars[i].split('=');
-		if (pair[0] == variable) {
-			return pair[1];
-		}
+/************** 定位-start ****************/
+	let isOpenLocation = false;
+	if(topStatusBarData.value && topStatusBarData.value.style == 'style-4') {
+		isOpenLocation = true;
 	}
-	return false;
-}
-/******************************* 定位-end ***********************/ 
 
+	const locationVal = useLocation(isOpenLocation);
+	locationVal.onLoad();
+	locationVal.init();
+/************** 定位-end ****************/
+let imageAdsSameScreen = ref(false);
 onMounted(() => {
 	navbarPlaceholderHeight();
 	if (pages.length > 1) {
 		isBackShow.value = true;
+		// 兼容小程序，未登录状态下点击某个功能跳转到登录页，不登录无法返回的情况
+	}else if(pages.length ==  1 && pages[0].route == 'app/pages/auth/index'){
+		isBackShow.value = true;
 	}
-	if(topStatusBarData.value && topStatusBarData.value.style == 'style-4') {
-        initPosition();
-    }
+	// 刷新定位
+	locationVal.refresh();
+	
+	// 图文导航开启沉浸式且导航栏开启时，导航栏不占位
+	imageAdsSameScreen.value = uni.getStorageSync('imageAdsSameScreen') || false;
 });
 
 // 页面onShow调用时，也会触发改方法
 const refresh = ()=>{
-	if(topStatusBarData.value && topStatusBarData.value.style == 'style-4') {
-        initPosition();
-    }
+	// 刷新定位
+	locationVal.refresh();
 }
 
 defineExpose({
@@ -465,6 +408,7 @@ defineExpose({
 				align-items: center;
 				margin-right: 10rpx;
 				overflow: hidden;
+				box-sizing: border-box;
 				text{
                     overflow: hidden; //超出的文本隐藏
                     text-overflow: ellipsis; //用省略号显示
@@ -494,6 +438,7 @@ defineExpose({
 				margin: 0 10rpx;
 				max-width: 360rpx;
 				font-size: 27rpx;
+				line-height: normal;
 			}
 
 			.nearby-store-name {

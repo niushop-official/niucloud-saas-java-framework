@@ -2,7 +2,7 @@
     <div class="main-container">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <el-card class="box-card mt-[15px] !border-none" shadow="never">
@@ -47,7 +47,7 @@
                 <el-card class="box-card !border-none mb-[10px] table-search-wrap" shadow="never">
                     <el-form :inline="true" :model="tableData.searchParam" ref="searchFormRef">
                         <el-form-item :label="t('memberInfo')" prop="keywords">
-                            <el-input v-model="tableData.searchParam.keywords" class="w-[240px]" :placeholder="t('memberInfoPlaceholder')" />
+                            <el-input v-model.trim="tableData.searchParam.keywords" class="w-[240px]" :placeholder="t('memberInfoPlaceholder')" />
                         </el-form-item>
                         <el-form-item>
                             <el-button type="primary" @click="couponCollection()">{{ t('search') }}</el-button>
@@ -113,6 +113,10 @@ import { ArrowLeft } from '@element-plus/icons-vue'
 const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
+
+const back = () => {
+    router.push('/shop/marketing/coupon/list')
+}
 
 const couponId: number = parseInt(route.query.id)
 const loading = ref(false)

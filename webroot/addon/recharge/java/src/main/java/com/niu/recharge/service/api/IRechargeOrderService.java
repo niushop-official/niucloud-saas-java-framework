@@ -7,7 +7,6 @@ import com.niu.recharge.service.api.vo.RechargeOrderInfoVo;
 import com.niu.recharge.service.api.vo.RechargeOrderListVo;
 import com.niu.recharge.service.core.param.RechargeOrderCreateParam;
 import com.niu.recharge.service.core.vo.RechargeOrderCreateVo;
-import org.springframework.stereotype.Service;
 
 public interface IRechargeOrderService {
 

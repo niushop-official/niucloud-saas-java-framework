@@ -11,8 +11,8 @@
 			<view class="tabs-box z-2 fixed left-0 bg-[#fff] bottom-[50px] top-0" :class="{ '!top-[100rpx]': config.search.control }">
 				<scroll-view :scroll-y="true" class="scroll-height">
 					<view class="bg-[var(--temp-bg)]">
-						<view class="tab-item truncate" :class="{ 'tab-item-active': index == tabActive,'rounded-br-[12rpx]':tabActive-1===index,'rounded-tr-[12rpx]':tabActive+1===index  }" v-for="(item, index) in tabsData" :key="index" @click="firstLevelClick(index, item)">
-							<view class="text-box px-[16rpx] truncate">
+						<view class="tab-item" :class="{ 'tab-item-active': index == tabActive,'rounded-br-[12rpx]':tabActive-1===index,'rounded-tr-[12rpx]':tabActive+1===index  }" v-for="(item, index) in tabsData" :key="index" @click="firstLevelClick(index, item)">
+							<view class="text-box text-left leading-[1.3] break-words px-[16rpx]">
 								{{ item.category_name }}
 							</view>
 						</view>
@@ -197,10 +197,12 @@ const searchNameFn = () => {
 }
 
 .tabs-box .tab-item {
-	height: 96rpx;
+	min-height: 48rpx;
+	padding: 18rpx 0;
 	text-align: center;
-	line-height: 96rpx;
 	background-color:#fff;
+	display: flex;
+	align-items: center;
 }
 
 .tabs-box .tab-item-active {

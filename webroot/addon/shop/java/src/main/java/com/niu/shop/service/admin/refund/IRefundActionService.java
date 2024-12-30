@@ -2,6 +2,7 @@ package com.niu.shop.service.admin.refund;
 
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.shop.service.core.refund.param.ActiveRefundParam;
 import com.niu.shop.service.admin.refund.param.AuditApplyParam;
 import com.niu.shop.service.admin.refund.param.AuditRefundGoodsParam;
 import com.niu.shop.service.admin.refund.param.RefundSearchParam;
@@ -39,4 +40,10 @@ public interface IRefundActionService {
      * @param param
      */
     void auditRefundGoods(AuditRefundGoodsParam param);
+
+    /**
+     * 商家主动退款
+     * @param param
+     */
+    void shopActiveRefund(ActiveRefundParam param);
 }

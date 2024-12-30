@@ -7,7 +7,7 @@
             </div>
         </el-form-item>
         <el-form-item label="" prop="coupon_id" v-show="formData.is_use">
-            <div class="flex-1 max-w-[600px]">
+            <div class="flex-1 max-w-[1000px]">
                 <div>
                     <coupon-select-popup v-model="formData.coupon_id" ref="selectCouponRef">
                         <el-button type="primary" link>选择优惠券</el-button>

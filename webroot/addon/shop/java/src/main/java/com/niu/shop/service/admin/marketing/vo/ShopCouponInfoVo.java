@@ -1,4 +1,5 @@
 package com.niu.shop.service.admin.marketing.vo;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.shop.enums.coupon.CouponReceiveTypeEnum;
@@ -7,7 +8,6 @@ import com.niu.shop.enums.coupon.CouponTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,10 +22,10 @@ public class ShopCouponInfoVo implements Serializable {
     private Integer id;  // 自增ID
     private Integer siteId;  // 站点id
     private String title;  // 名称
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long startTime; // 活动开启时间
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long endTime; // 活动结束时间
+    //    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private String startTime; // 活动开启时间
+    //    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private String endTime; // 活动结束时间
     private Integer remainCount;  // 剩余数量
     private Integer receiveCount;  // 已领取数量
     private String limitCount;  // 单个会员限制领取数量
@@ -53,9 +53,9 @@ public class ShopCouponInfoVo implements Serializable {
     private List<Integer> goodsIds;
 
 
-
     /**
      * 获取券类型
+     *
      * @return
      */
     public String getTypeName() {
@@ -64,6 +64,7 @@ public class ShopCouponInfoVo implements Serializable {
 
     /**
      * 获取券领取类型
+     *
      * @return
      */
     public String getReceiveTypeName() {
@@ -72,6 +73,7 @@ public class ShopCouponInfoVo implements Serializable {
 
     /**
      * 获取状态名称
+     *
      * @return
      */
     public String getStatusName() {

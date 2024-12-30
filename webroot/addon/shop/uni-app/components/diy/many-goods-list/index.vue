@@ -165,12 +165,12 @@
             goodsNameStyle: diyComponent.value.goodsNameStyle,
             priceStyle: diyComponent.value.priceStyle,
             saleStyle: diyComponent.value.saleStyle,
+            btnStyle: diyComponent.value.btnStyle,
+			labelStyle: diyComponent.value.labelStyle,
 
             elementBgColor: diyComponent.value.elementBgColor,
             topElementRounded: diyComponent.value.topElementRounded,
-            bottomElementRounded: diyComponent.value.bottomElementRounded,
-			
-			isShowCart: true // 展示加入购物车按钮
+            bottomElementRounded: diyComponent.value.bottomElementRounded
         };
 
         if (obj.goods_category) {

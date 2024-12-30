@@ -19,7 +19,7 @@
 					<el-form-item>
 						<el-button type="primary" @click="loadOrderList()">{{ t('search') }}</el-button>
 						<el-button @click="resetForm(searchFormRef)">{{ t('reset') }}</el-button>
-						<!-- <el-button type="primary" @click="exportEvent">{{ t('export') }}</el-button> -->
+						<el-button type="primary" @click="exportEvent">{{ t('export') }}</el-button>
 					</el-form-item>
 				</el-form>
 			</el-card>
@@ -64,7 +64,12 @@
 													<img class="w-[50px] h-[50px]" v-else src="" alt="">
 												</div>
 												<div class="flex  flex-col">
-													<p class="multi-hidden">{{ row.goods_name }}</p>
+                                                    <el-tooltip class="box-item" effect="light" placement="top">
+                                                        <template #content>
+                                                            <div class="max-w-[250px]">{{row.goods_name}}</div>
+                                                        </template>
+													    <p class="multi-hidden">{{ row.goods_name }}</p>
+                                                    </el-tooltip>
 													<span class="text-[12px] text-[#999] truncate">{{ row.sku_name }}</span>
 												</div>
 											</div>
@@ -91,7 +96,8 @@
 									</el-table-column>
 									<el-table-column min-width="120">
 										<template #default>
-											<span class="text-[14px]">￥{{ item.apply_money }}</span>
+											<span class="text-[14px]" v-if="item.status == 8">￥{{ item.money }}</span>
+											<span class="text-[14px]" v-else>￥{{ item.apply_money }}</span>
 										</template>
 									</el-table-column>
 									<el-table-column min-width="120">
@@ -131,7 +137,6 @@
 				</div>
 			</div>
 		</el-card>
-		<delivery-action ref="deliveryActionDialog" @complete="loadOrderList"></delivery-action>
 		<order-notes ref="orderNotesDialog" @complete="loadOrderList"></order-notes>
 		<export-sure ref="exportSureDialog" :show="flag" type="shop_order_refund" :searchParam="orderTable.searchParam" @close="handleClose" />
 	</div>
@@ -141,7 +146,7 @@
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
 import { orderRefund } from '@/addon/shop/api/order'
-import { img, filterNumber } from '@/utils/common'
+import { img, filterNumber,setTablePageStorage,getTablePageStorage } from '@/utils/common'
 import type { FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -214,11 +219,12 @@ const loadOrderList = (page: number = 1) => {
 			return el
 		})
 		orderTable.total = res.data.total
+		setTablePageStorage(orderTable.page,orderTable.limit,orderTable.searchParam);
 	}).catch(() => {
 		orderTable.loading = false
 	})
 }
-loadOrderList()
+loadOrderList(getTablePageStorage(orderTable.searchParam).page)
 
 const handleClick = (event: string) => {
 	orderTable.searchParam.status = event

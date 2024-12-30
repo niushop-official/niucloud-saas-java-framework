@@ -1,135 +1,135 @@
 {
-  "SHOP_LINK": {
-    "title": "商城",
-    "child_list": [
-      {
-        "name": "SHOP_INDEX",
-        "title": "商城首页",
-        "url": "/addon/shop/pages/index",
-        "is_share": 1,
-        "action": "decorate",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_GOODS_CATEGORY",
-        "title": "商品分类",
-        "url": "/addon/shop/pages/goods/category",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_GOODS_LIST",
-        "title": "商品列表",
-        "url": "/addon/shop/pages/goods/list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_GOODS_SEARCH",
-        "title": "商品搜索",
-        "url": "/addon/shop/pages/goods/search",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_GOODS_CART",
-        "title": "购物车",
-        "url": "/addon/shop/pages/goods/cart",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_COUPON_LIST",
-        "title": "优惠券列表",
-        "url": "/addon/shop/pages/coupon/list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_MEMBER_INDEX",
-        "title": "商城个人中心",
-        "url": "/addon/shop/pages/member/index",
-        "is_share": 1,
-        "action": "decorate",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_MY_COUPON",
-        "title": "我的优惠券",
-        "url": "/addon/shop/pages/member/my_coupon",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_ORDER_LIST",
-        "title": "订单列表",
-        "url": "/addon/shop/pages/order/list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_REFUND_LIST",
-        "title": "退款列表",
-        "url": "/addon/shop/pages/refund/list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_POINT_INDEX",
-        "title": "积分商城",
-        "url": "/addon/shop/pages/point/index",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_POINT_LIST",
-        "title": "积分商品列表",
-        "url": "/addon/shop/pages/point/list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_POINT_ORDER_LIST",
-        "title": "积分兑换记录",
-        "url": "/addon/shop/pages/point/order_list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_DISCOUNT_LIST",
-        "title": "限时折扣列表",
-        "url": "/addon/shop/pages/discount/list",
-        "is_share": 1,
-        "action": "",
-        "parent": "SHOP_LINK"
-      },
-      {
-        "name": "SHOP_NEWCOMER_LIST",
-        "title": "新人专享",
-        "url": "/addon/shop/pages/newcomer/list",
-        "is_share": "",
-        "action": ""
-      }
-    ],
-    "addon_info": {
-      "title": "商城系统",
-      "icon": "addon/shop/icon.png",
-      "key": "shop",
-      "desc": "实物虚拟商品，订单，物流同城配送，门店自提",
-      "status": 1,
-      "cover": "addon/shop/cover.png"
-    },
-    "name": "SHOP_LINK"
-  }
+	"SHOP_LINK": {
+		"title": "商城",
+		"child_list": [
+			{
+				"name": "SHOP_INDEX",
+				"title": "商城首页",
+				"url": "/addon/shop/pages/index",
+				"is_share": 1,
+				"action": "decorate",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_GOODS_CATEGORY",
+				"title": "商品分类",
+				"url": "/addon/shop/pages/goods/category",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_GOODS_LIST",
+				"title": "商品列表",
+				"url": "/addon/shop/pages/goods/list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_GOODS_SEARCH",
+				"title": "商品搜索",
+				"url": "/addon/shop/pages/goods/search",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_GOODS_CART",
+				"title": "购物车",
+				"url": "/addon/shop/pages/goods/cart",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_COUPON_LIST",
+				"title": "优惠券列表",
+				"url": "/addon/shop/pages/coupon/list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_MEMBER_INDEX",
+				"title": "商城个人中心",
+				"url": "/addon/shop/pages/member/index",
+				"is_share": 1,
+				"action": "decorate",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_MY_COUPON",
+				"title": "我的优惠券",
+				"url": "/addon/shop/pages/member/my_coupon",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_ORDER_LIST",
+				"title": "订单列表",
+				"url": "/addon/shop/pages/order/list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_REFUND_LIST",
+				"title": "退款列表",
+				"url": "/addon/shop/pages/refund/list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_POINT_INDEX",
+				"title": "积分商城",
+				"url": "/addon/shop/pages/point/index",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_POINT_LIST",
+				"title": "积分商品列表",
+				"url": "/addon/shop/pages/point/list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_POINT_ORDER_LIST",
+				"title": "积分兑换记录",
+				"url": "/addon/shop/pages/point/order_list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_DISCOUNT_LIST",
+				"title": "限时折扣列表",
+				"url": "/addon/shop/pages/discount/list",
+				"is_share": 1,
+				"action": "",
+				"parent": "SHOP_LINK"
+			},
+			{
+				"name": "SHOP_NEWCOMER_LIST",
+				"title": "新人专享",
+				"url": "/addon/shop/pages/newcomer/list",
+				"is_share": "",
+				"action": ""
+			}
+		],
+		"addon_info": {
+			"title": "商城系统",
+			"icon": "addon/shop/icon.png",
+			"key": "shop",
+			"desc": "实物虚拟商品，订单，物流同城配送，门店自提",
+			"status": 1,
+			"cover": "addon/shop/cover.png"
+		},
+		"name": "SHOP_LINK"
+	}
 }

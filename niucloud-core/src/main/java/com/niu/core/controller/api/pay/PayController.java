@@ -1,6 +1,7 @@
 package com.niu.core.controller.api.pay;
 
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.service.api.pay.IPayService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api")
@@ -28,7 +30,7 @@ public class PayController {
      */
     @PostMapping("/pay")
     public Result<?> pay(@Validated @RequestBody PayParam param) {
-        return Result.success(payService.pay(param));
+        return Result.success(ObjectUtil.defaultIfNull(payService.pay(param), new ArrayList<>()));
     }
 
     /**

@@ -1,6 +1,6 @@
 import useMemberStore from '@/stores/member'
 import { t } from '@/locale'
-import { getToken, getAppChannel, getSiteId, redirect, currRoute } from './common'
+import { getToken, getAppChannel, getSiteId, redirect, currRoute, isUrl } from './common'
 import qs from 'qs'
 
 interface RequestConfig {
@@ -69,10 +69,9 @@ class Request {
         return this.request('PUT', url, data, config)
     }
 
-    public delete(url: string, config: RequestConfig = {}) {
-        return this.request('DELETE', url, {}, config)
+    public delete(url: string, data: AnyObject = {}, config: RequestConfig = {}) {
+        return this.request('DELETE', url, data, config)
     }
-
     /**
      * 发送上传请求
      */

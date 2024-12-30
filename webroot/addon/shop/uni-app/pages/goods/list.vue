@@ -165,7 +165,7 @@ import MescrollBody from '@/components/mescroll/mescroll-body/mescroll-body.vue'
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue';
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js';
 import { onLoad, onPageScroll, onReachBottom } from '@dcloudio/uni-app';
-import {useGoods} from '@/hooks/useGoods'
+import {useGoods} from '@/addon/shop/hooks/useGoods'
 
 const { mescrollInit, downCallback, getMescroll } = useMescroll(onPageScroll, onReachBottom);
 const diyGoods = useGoods();
@@ -285,6 +285,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/addon/shop/styles/common.scss';
 .scroll-view-wrap {
 	word-break: keep-all;
 }

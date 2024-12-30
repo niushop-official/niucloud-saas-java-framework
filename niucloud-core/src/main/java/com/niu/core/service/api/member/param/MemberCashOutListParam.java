@@ -8,6 +8,6 @@ public class MemberCashOutListParam implements ApiBaseParam {
 
     private String status;
 
-    private String createTime;
+    private String[] createTime;
 
 }

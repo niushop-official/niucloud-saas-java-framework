@@ -9,12 +9,16 @@ import com.niu.core.service.core.pay.param.PayTransferSearchParam;
 import com.niu.core.service.core.pay.vo.PayTransferInfoVo;
 import com.niu.core.service.core.pay.vo.PayTransferListVo;
 
+import java.util.Map;
+
 /**
  * 转账服务接口
  */
 public interface ICoreTransferService {
 
     String create(PayTransfer model);
+
+    void transfer(Integer siteId, String transferNo, String transferType, Map<String, Object> data);
 
     PayTransfer findTransferByTransferNo(Integer siteId, String transferNo);
 

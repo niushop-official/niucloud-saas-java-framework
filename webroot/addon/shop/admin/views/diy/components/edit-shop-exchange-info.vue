@@ -23,7 +23,7 @@ import { t } from '@/lang'
 import useDiyStore from '@/stores/modules/diy'
 
 const diyStore:any = useDiyStore()
-diyStore.editComponent.ignore = [] // 忽略公共属性
+diyStore.editComponent.ignore = ['componentBgColor','componentBgUrl'] // 忽略公共属性
 
 // 组件验证
 diyStore.editComponent.verify = (index: number) => {

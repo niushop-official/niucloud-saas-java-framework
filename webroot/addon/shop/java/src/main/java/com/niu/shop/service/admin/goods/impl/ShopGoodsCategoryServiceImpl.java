@@ -54,6 +54,7 @@ public class ShopGoodsCategoryServiceImpl implements IGoodsCategoryService {
         QueryWrapper<ShopGoodsCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getCategoryName())) queryWrapper.like("category_name", searchParam.getCategoryName());
+        if (ObjectUtil.isNotEmpty(searchParam.getLevel())) queryWrapper.eq("level", searchParam.getLevel());
         queryWrapper.orderByDesc(Arrays.asList("sort", "category_id"));
 
         List<ShopGoodsCategory> records = shopGoodsCategoryMapper.selectList(queryWrapper);

@@ -7,20 +7,19 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.sys.SysExport;
 import com.niu.core.mapper.sys.SysExportMapper;
-import com.niu.core.service.admin.sys.param.SysExportSearchParam;
 import com.niu.core.service.admin.sys.ISysExportService;
-import com.niu.core.service.admin.sys.vo.SysExportInfoVo;
+import com.niu.core.service.admin.sys.param.SysExportSearchParam;
 import com.niu.core.service.admin.sys.vo.SysExportListVo;
 import com.niu.core.service.core.sys.ICoreExportService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
 import javax.annotation.Resource;
 import java.util.Map;
 
@@ -30,7 +29,7 @@ import java.util.Map;
  */
 @Service
 public class SysExportServiceImpl implements ISysExportService {
-        
+
     @Resource
     SysExportMapper sysExportMapper;
 
@@ -39,14 +38,15 @@ public class SysExportServiceImpl implements ISysExportService {
 
     /**
      * 导出报列表
-     * @param pageParam 分页参数
+     *
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<SysExportListVo>
      */
     @Override
     public PageResult<SysExportListVo> list(PageParam pageParam, SysExportSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         MPJQueryWrapper<SysExport> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.orderByDesc("id");
@@ -55,31 +55,32 @@ public class SysExportServiceImpl implements ISysExportService {
 
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
             String[] createTime = searchParam.getCreateTime();
-            Long startTime = (createTime[0] == null) ? 0: DateUtils.StringToTimestamp(createTime[0]);
-            Long endTime = (createTime[1] == null) ? 0: DateUtils.StringToTimestamp(createTime[1]);
-            if(startTime > 0 && endTime > 0){
+            Long startTime = (createTime[0] == null) ? 0 : DateUtils.StringToTimestamp(createTime[0]);
+            Long endTime = (createTime[1] == null) ? 0 : DateUtils.StringToTimestamp(createTime[1]);
+            if (startTime > 0 && endTime > 0) {
                 queryWrapper.between("create_time", startTime, endTime);
-            }else if (startTime > 0 && endTime == 0){
+            } else if (startTime > 0 && endTime == 0) {
                 queryWrapper.ge("create_time", startTime);
-            }else if (startTime == 0 && endTime > 0){
+            } else if (startTime == 0 && endTime > 0) {
                 queryWrapper.le("create_time", startTime);
             }
         }
 
-        IPage<SysExportListVo> iPage = sysExportMapper.selectJoinPage(new Page<>(page, limit), SysExportListVo.class,queryWrapper);
+        IPage<SysExportListVo> iPage = sysExportMapper.selectJoinPage(new Page<>(page, limit), SysExportListVo.class, queryWrapper);
         return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     /**
      * 导出报删除
+     *
      * @param id 主键ID
      */
     @Override
     public void del(Integer id) {
         SysExport model = sysExportMapper.selectOne(
                 new QueryWrapper<SysExport>()
-                    .eq("id", id)
-                    .last("limit 1"));
+                        .eq("id", id)
+                        .last("limit 1"));
 
         Assert.notNull(model, "数据不存在!");
 
@@ -105,8 +106,8 @@ public class SysExportServiceImpl implements ISysExportService {
      */
     @Override
     public Boolean checkExportData(String type, Map<String, Object> whereMap) {
-        Integer siteId= RequestUtils.siteId();
-        JSONObject whereJson=new JSONObject();
+        Integer siteId = RequestUtils.siteId();
+        JSONObject whereJson = new JSONObject();
         whereJson.set("keyword", whereMap.getOrDefault("keyword", ""));
         whereJson.set("register_type", whereMap.getOrDefault("register_type", ""));
         whereJson.set("create_time", whereMap.getOrDefault("create_time", ""));
@@ -115,11 +116,11 @@ public class SysExportServiceImpl implements ISysExportService {
         whereJson.set("register_channel", whereMap.getOrDefault("register_channel", ""));
         whereJson.set("member_level", whereMap.getOrDefault("member_level", ""));
 
-        PageParam pageParam=new PageParam();
+        PageParam pageParam = new PageParam();
         pageParam.setPage(Integer.parseInt(whereMap.getOrDefault("page", 0).toString()));
         pageParam.setLimit(Integer.parseInt(whereMap.getOrDefault("limit", 0).toString()));
-        JSONArray jsonArray=coreExportService.getExportData(siteId, type, whereJson, pageParam);
-        return jsonArray.size()>0;
+        JSONArray jsonArray = coreExportService.getExportData(siteId, type, whereJson, pageParam);
+        return jsonArray.size() > 0;
     }
 
     /**
@@ -130,8 +131,8 @@ public class SysExportServiceImpl implements ISysExportService {
      */
     @Override
     public void exportData(String type, Map<String, Object> whereMap) {
-        Integer siteId= RequestUtils.siteId();
-        JSONObject whereJson=new JSONObject();
+        Integer siteId = RequestUtils.siteId();
+        JSONObject whereJson = new JSONObject();
         whereJson.set("keyword", whereMap.getOrDefault("keyword", ""));
         whereJson.set("register_type", whereMap.getOrDefault("register_type", ""));
         whereJson.set("create_time", whereMap.getOrDefault("create_time", ""));
@@ -140,12 +141,12 @@ public class SysExportServiceImpl implements ISysExportService {
         whereJson.set("register_channel", whereMap.getOrDefault("register_channel", ""));
         whereJson.set("member_level", whereMap.getOrDefault("member_level", ""));
 
-        PageParam pageParam=new PageParam();
+        PageParam pageParam = new PageParam();
         pageParam.setPage((Integer) whereMap.getOrDefault("page", 0));
         pageParam.setLimit((Integer) whereMap.getOrDefault("limit", 0));
 
-        JSONArray dataColumn=coreExportService.getExportDataColumn(type);
-        JSONArray dataArray=coreExportService.getExportData(siteId, type, whereJson, pageParam);
+        JSONArray dataColumn = coreExportService.getExportDataColumn(type);
+        JSONArray dataArray = coreExportService.getExportData(siteId, type, whereJson, pageParam);
         coreExportService.export(siteId, type, dataColumn, dataArray);
     }
 

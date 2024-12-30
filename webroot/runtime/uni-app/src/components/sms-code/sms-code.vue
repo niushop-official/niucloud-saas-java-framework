@@ -4,7 +4,7 @@
     <u-modal :show="show" :title="t('captchaTitle')" :confirm-text="t('confirm')" :cancel-text="t('cancel')" :show-cancel-button="true" @cancel="show = false" @confirm="handleConfirm" confirmColor="var(--primary-color)">
         <view class="flex mt-[20rpx]">
             <u-input :placeholder="t('captchaPlaceholder')" border="surround" v-model="formData.captcha_code"></u-input>
-            <image :src="captcha.image.value" class="h-[76rpx] ml-[20rpx]" mode="heightFix" @click="captcha.refresh()"></image>
+            <image :src="captcha.image.value" class="h-[76rpx] w-[auto] ml-[20rpx]" mode="heightFix" @click="captcha.refresh()"></image>
         </view>
     </u-modal>
 </template>
@@ -18,6 +18,10 @@ import { t } from '@/locale'
 const prop = defineProps({
     mobile: String,
     type: String,
+	isAgree:{
+		type:Boolean,
+		default:true
+	},
     modelValue: {
         type: String,
         default: ''
@@ -34,7 +38,7 @@ const value = computed({
     }
 })
 
-const smsRef = ref(null)
+const smsRef: any = ref(null)
 const sendSms = useSendSms(smsRef)
 const show = ref(false)
 
@@ -50,11 +54,21 @@ const captcha = useCaptcha(formData)
 const handleSend = async()=> {
     if (smsRef.value.canGetCode) {
         formData.mobile = prop.mobile
-        if (uni.$u.test.isEmpty(formData.mobile)) { uni.showToast({ title: t('mobilePlaceholder'), icon:'none' }); return }
-        if (!uni.$u.test.mobile(formData.mobile)) { uni.showToast({ title: t('mobileError'), icon:'none' }); return }
-        
+        if (!prop.isAgree) {
+            uni.showToast({ title: t('isAgreeTips'), icon: 'none' });
+            return
+        }
+        if (uni.$u.test.isEmpty(formData.mobile)) {
+            uni.showToast({ title: t('mobilePlaceholder'), icon: 'none' });
+            return
+        }
+        if (!uni.$u.test.mobile(formData.mobile)) {
+            uni.showToast({ title: t('mobileError'), icon: 'none' });
+            return
+        }
+
         await captcha.refresh()
-        show.value = true        
+        show.value = true
     }
 }
 

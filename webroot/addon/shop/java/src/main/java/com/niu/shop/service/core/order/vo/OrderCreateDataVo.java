@@ -8,8 +8,10 @@ import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.delivery.ShopStore;
+import com.niu.shop.entity.manjian.ShopManjian;
 import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
 import com.niu.shop.service.core.order.param.InvoiceCreateParam;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -37,6 +39,12 @@ public class OrderCreateDataVo implements Serializable {
 
     protected Map<String, Discount> discount = new HashMap<>();
 
+    //计算扩展
+    protected Map<String, Map<Integer, Discount>> discountList = new HashMap<>();
+
+    //限购
+    protected Map<String, LimitBuy> limitBuy;
+
     protected JSONObject extendData;
 
     protected Basic basic = new Basic();
@@ -44,6 +52,8 @@ public class OrderCreateDataVo implements Serializable {
     protected Buyer buyer;
 
     protected Map<Integer, ? extends Sku> goodsData;
+
+    protected Map<Integer, ? extends Sku> giftGoods;
 
     protected Delivery delivery = new Delivery();
 
@@ -55,6 +65,8 @@ public class OrderCreateDataVo implements Serializable {
 
     protected InvoiceCreateParam invoice;
 
+    protected Map<String, Map<String, Object>> gift;
+
     @Data
     public static class Basic {
         protected String body = "";
@@ -62,6 +74,10 @@ public class OrderCreateDataVo implements Serializable {
         protected BigDecimal deliveryMoney = new BigDecimal(0);
 
         protected BigDecimal discountMoney = new BigDecimal(0);
+
+        protected BigDecimal manjianDiscountMoney = new BigDecimal(0);
+
+        protected BigDecimal couponMoney = new BigDecimal(0);
 
         protected BigDecimal goodsMoney = new BigDecimal(0);
 
@@ -82,6 +98,19 @@ public class OrderCreateDataVo implements Serializable {
     }
 
     @Data
+    public static class LimitBuy {
+        protected Integer goodsId;
+        protected Integer siteId;
+        protected String goodsName;
+        protected Integer stock;
+        protected Integer num;
+        protected Integer isLimit;
+        protected Integer limitType;
+        protected Integer maxBuy;
+        protected Integer minBuy;
+    }
+
+    @Data
     public static class Sku {
         protected Integer skuId; // 商品sku_id
         protected Integer num;
@@ -99,6 +128,7 @@ public class OrderCreateDataVo implements Serializable {
         protected BigDecimal volume; // 体积（单位立方米）
         protected BigDecimal memberPrice;
         protected BigDecimal discountMoney = new BigDecimal(0);
+        protected ShopManjian manjianInfo;
         protected BigDecimal goodsMoney;
         protected Goods goods;
         protected Integer notSupportDelivery = 0;
@@ -107,6 +137,7 @@ public class OrderCreateDataVo implements Serializable {
         protected BigDecimal newcomerPrice;
         protected int isNewcomer;
         protected JSONObject extend;
+        protected Integer isGift = 0;
     }
 
     @Data
@@ -149,6 +180,10 @@ public class OrderCreateDataVo implements Serializable {
         protected String attrFormat; // 商品参数内容，json格式
         protected Integer isDiscount; // 是否参与限时折扣
         protected String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
+        private Integer isLimit;
+        private Integer limitType;
+        private Integer maxBuy;
+        private Integer minBuy;
 
         protected ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);
@@ -176,6 +211,10 @@ public class OrderCreateDataVo implements Serializable {
         protected ShopStore takeStore;
 
         protected Object takeAddress;
+
+        private Integer takeAddressId = 0;
+
+        private Integer takeStoreId = 0;
     }
 
     @Data
@@ -188,5 +227,6 @@ public class OrderCreateDataVo implements Serializable {
         protected Integer discountTypeId;
         protected String content;
         protected String title;
+        private Integer couponId;
     }
 }

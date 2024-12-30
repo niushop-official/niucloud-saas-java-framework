@@ -1,5 +1,6 @@
 package com.niu.shop.service.admin.goods.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
@@ -32,6 +33,8 @@ public class ShopGoodsListVo implements Serializable {
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime; // 创建时间
     private String memberDiscount;
+    private Integer isGift;
+    @JsonProperty("goodsSku")
     private GoodsSku goodsSku;
 
     @Data

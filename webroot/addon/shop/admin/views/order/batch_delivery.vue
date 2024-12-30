@@ -102,16 +102,15 @@ import { getOrderBatchDeliveryList, getOrderBatchDeliveryType, getOrderBatchDeli
 import { FormInstance } from 'element-plus'
 import { getAllUserList } from '@/app/api/user'
 import importData from '@/addon/shop/views/order/components/import-data.vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { img } from '@/utils/common'
 
 const route = useRoute()
-const router = useRouter()
 const pageName = route.meta.title
 
 const deliveryType = ref([])
 const deliveryState = ref([])
-const allUserList = ref([])
+const allUserList = ref<any[]>([])
 const setFormData = async () => {
     deliveryType.value = await (await getOrderBatchDeliveryType()).data
     deliveryState.value = await (await getOrderBatchDeliveryState()).data
@@ -137,7 +136,7 @@ const searchFormRef = ref<FormInstance>()
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()
-    importFileTableData.searchParam.main_id = "";
+    importFileTableData.searchParam.main_id = ''
     loadInvoiceList()
 }
 
@@ -162,8 +161,8 @@ const loadInvoiceList = (page: number = 1) => {
 loadInvoiceList()
 
 // 下载
-const examineDownloadFn = (path:any)=>{
-    let url = `${import.meta.env.VITE_IMG_DOMAIN || location.origin}/${path}`;
+const examineDownloadFn = (path:any) => {
+    const url = `${import.meta.env.VITE_IMG_DOMAIN || location.origin}/${path}`
     window.open(url)
 }
 
@@ -173,15 +172,15 @@ const examineDownloadFn = (path:any)=>{
  */
 const importDataDialog: Record<string, any> | null = ref(null)
 const importEvent = (data: any) => {
-    importDataDialog.value.open();
+    importDataDialog.value.open()
 }
 
 const causeFailureDialog = ref(false)
-const causeFailureContent = ref(''); //失败原因内容
+const causeFailureContent = ref('') // 失败原因内容
 // 查看失败原因
-const checkCauseFn = (data)=>{
-    causeFailureContent.value = data.fail_remark;
-    causeFailureDialog.value = true;
+const checkCauseFn = (data: any) => {
+    causeFailureContent.value = data.fail_remark
+    causeFailureDialog.value = true
 }
 </script>
 

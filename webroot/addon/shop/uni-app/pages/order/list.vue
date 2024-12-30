@@ -86,11 +86,11 @@
 								</view>
 							</view>
 						</view>
-						<view class="flex justify-end text-[28rpx] mt-[20rpx] items-center" v-if="(item.status == 1) || (item.status == 3) || (item.status == 5 && evaluateConfig.is_evaluate == 1)">
+						<view class="flex justify-end text-[28rpx] mt-[20rpx] items-center" v-if="(item.status == 1) || (item.status == 3) || (item.status == 5 && item.is_show_evaluate && evaluateConfig.is_evaluate == 1)">
 							<view class="text-[24rpx] font-500 leading-[52rpx] h-[56rpx] min-w-[150rpx] text-center border-[2rpx] border-solid border-[var(--text-color-light9)] rounded-full text-[var(--text-color-light6)] box-border" v-if="item.status == 1" @click.stop="orderBtnFn(item, 'close')">{{ t('orderClose') }}</view>
 							<view class="text-[24rpx] font-500 flex-center h-[56rpx] min-w-[150rpx] text-center border-[0] text-[#fff] primary-btn-bg rounded-full ml-[20rpx] box-border" v-if="item.status == 1" @click.stop="orderBtnFn(item, 'pay')">{{ t('topay') }}</view>
 							<view class="text-[24rpx] font-500 flex-center h-[56rpx] min-w-[150rpx] text-center border-[0] text-[#fff] primary-btn-bg rounded-full ml-[20rpx] box-border" v-if="item.status == 3" @click.stop="orderBtnFn(item, 'finish')">{{ t('orderFinish') }}</view>
-							<view class="text-[24rpx] font-500 leading-[52rpx] h-[56rpx] min-w-[150rpx] text-center border-[2rpx] border-solid border-[var(--text-color-light9)] rounded-full ml-[20rpx]  text-[var(--text-color-light6)] box-border" v-if="item.status == 5 && evaluateConfig.is_evaluate == 1" @click.stop="orderBtnFn(item, 'evaluate')">{{ item.is_evaluate == 1 ? t('selectedEvaluate') : t('evaluate') }}</view>
+							<view class="text-[24rpx] font-500 leading-[52rpx] h-[56rpx] min-w-[150rpx] text-center border-[2rpx] border-solid border-[var(--text-color-light9)] rounded-full ml-[20rpx]  text-[var(--text-color-light6)] box-border" v-if="item.status == 5 && item.is_show_evaluate && evaluateConfig.is_evaluate == 1" @click.stop="orderBtnFn(item, 'evaluate')">{{ item.is_evaluate == 1 ? t('selectedEvaluate') : t('evaluate') }}</view>
 						</view>
 					</view>
 				</template>
@@ -114,7 +114,7 @@ import { getEvaluateConfig } from '@/addon/shop/api/shop';
 import MescrollBody from '@/components/mescroll/mescroll-body/mescroll-body.vue';
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue';
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js';
-import { onLoad, onPageScroll, onReachBottom } from '@dcloudio/uni-app';
+import { onLoad, onPageScroll, onReachBottom, onShow } from '@dcloudio/uni-app';
 import useConfigStore from "@/stores/config";
 
 const { mescrollInit, downCallback, getMescroll } = useMescroll(onPageScroll, onReachBottom);
@@ -140,6 +140,14 @@ onLoad((option: any) => {
 	})
 	// #endif
 });
+	
+
+onShow(() => {
+	nextTick(()=>{
+		// 评价完成之后，会返回到订单列表，需要请求最新数据
+		if(getMescroll()){ getMescroll().resetUpScroll();}
+	})
+})
 
 const evaluateEvent = () => {
 	getEvaluateConfig().then((data: any) => {
@@ -161,9 +169,23 @@ const getShopOrderFn = (mescroll: any) => {
 		if (mescroll.num == 1) {
 			list.value = []; //如果是第一页需手动制空列表
 		}
+
+		newArr.forEach((item:any)=> {
+			item.is_show_evaluate = true;
+			let evaluateCount = 0;
+			for (let i = 0; i < item.order_goods.length; i++) {
+				if (item.order_goods[i].status != 1 || item.order_goods[i].is_enable_refund == 1) {
+					evaluateCount++;
+				}
+			}
+			if (evaluateCount == item.order_goods.length) {
+				item.is_show_evaluate = false;
+			}
+		})
+
 		list.value = list.value.concat(newArr);
 		mescroll.endSuccess(newArr.length);
-		
+
         mch_id.value = res.data.mch_id;
         isTradeManaged.value = res.data.is_trade_managed;
 		loading.value = true;

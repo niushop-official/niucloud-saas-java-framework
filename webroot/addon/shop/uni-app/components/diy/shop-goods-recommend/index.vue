@@ -1,6 +1,6 @@
 <template>
 	<x-skeleton :type="skeleton.type" :loading="skeleton.loading" :config="skeleton.config">
-		<view :style="warpCss">
+		<view :style="warpCss"  v-if="goodsNum">
 			<view class="w-full">
 				<scroll-view :id="'warpStyle-'+diyComponent.id" class="whitespace-nowrap h-[341rpx] w-full" :scroll-x="true">
 					<block v-for="(item,index) in goodsList" :key="index">
@@ -8,15 +8,17 @@
 							<view class="w-full h-[134rpx]" :style="listFrameStyle(item)">
 								<view class="flex pl-[16rpx] pr-[20rpx] justify-between h-[63rpx] items-center">
 									<view class="text-[28rpx] leading-[34rpx] flex-1 mr-[8rpx]" :style="{'color':item.title.textColor}">{{item.title.text}}</view>
-									<view class="w-[68rpx] h-[34rpx] text-[22rpx] text-center text-[28rpx] leading-[34rpx] text-[#fff] rounded-[17rpx]" :style="moreTitleStyle(item)">{{item.moreTitle.text}}</view>
+									<view class="w-[68rpx] h-[34rpx] text-[22rpx] text-center leading-[34rpx] text-[#fff] rounded-[17rpx]" :style="moreTitleStyle(item)">{{item.moreTitle.text}}</view>
 								</view>
 							</view>
-							<view class="mt-[-71rpx] h-[278rpx] w-full px-[20rpx] pt-[18rpx] box-border bg-white rounded-[var(--rounded-mid)]" :style="itemCss">
-								<u--image width="184rpx" height="184rpx" :radius="'var(--goods-rounded-small)'" :src="img(item.info.goods_cover_thumb_mid || '')" model="aspectFill">
-									<template #error>
-										<image class="w-[184rpx] h-[184rpx] rounded-[var(--goods-rounded-small)]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
-									</template>
-								</u--image>
+							<view class="mt-[-71rpx] h-[278rpx] w-full px-[20rpx] pt-[18rpx] box-border bg-white" :style="itemCss">
+								<view class="flex items-center justify-center w-[184rpx] h-[184rpx]">
+									<u--image width="184rpx" height="184rpx" :radius="'var(--goods-rounded-small)'" :src="img(item.info.goods_cover_thumb_mid || '')" model="aspectFill">
+										<template #error>
+											<image class="w-[184rpx] h-[184rpx] rounded-[var(--goods-rounded-small)]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+										</template>
+									</u--image>
+								</view>
 								<view class="pt-[12rpx]">
 									<view class="h-[44rpx] pl-[4rpx] min-w-[168rpx] box-border flex justify-between items-center mx-auto border-[2rpx] border-solid border-[var(--primary-color)] rounded-[20rpx]" :style="{'border-color':item.button.color}">
 										<view class="text-[var(--price-text-color)] font-bold price-font flex items-baseline leading-[40rpx] flex-1 justify-center" >
@@ -35,7 +37,7 @@
 						</view>
 					</block>
 				</scroll-view>
-			
+
 			</view>
 		</view>
 	</x-skeleton>
@@ -47,13 +49,13 @@
 	import { redirect, img, deepClone } from '@/utils/common';
 	import useDiyStore from '@/app/stores/diy';
 	import { getGoodsComponents } from '@/addon/shop/api/goods';
-	import {useGoods} from '@/hooks/useGoods'
-	
+	import {useGoods} from '@/addon/shop/hooks/useGoods'
+
 	const diyGoods = useGoods();
 	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
 	const diyStore = useDiyStore();
 	const emits = defineEmits(['loadingFn']); //商品数据加载完成之后触发
-	
+
 	const goodsNum = ref(0);
 
     const skeleton = reactive({
@@ -79,11 +81,6 @@
         if(diyComponent.value.componentStartBgColor) {
             if (diyComponent.value.componentStartBgColor && diyComponent.value.componentEndBgColor) style += `background:linear-gradient(${diyComponent.value.componentGradientAngle},${diyComponent.value.componentStartBgColor},${diyComponent.value.componentEndBgColor});`;
             else style += 'background-color:' + diyComponent.value.componentStartBgColor + ';';
-        }
-
-        if(diyComponent.value.componentBgUrl) {
-            style += `background-image:url('${ img(diyComponent.value.componentBgUrl) }');`;
-            style += 'background-size: cover;background-repeat: no-repeat;';
         }
 
 		if (diyComponent.value.topRounded) style += 'border-top-left-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
@@ -138,6 +135,8 @@
 		else itemStyle.value = 'width: calc((100vw - 40rpx) / 3 );'
 	}
 
+	setItemStyle();
+
 	watch(
 		() => props.pullDownRefreshCount,
 		(newValue, oldValue) => {
@@ -161,11 +160,6 @@
 			});
 			goodsList.value = deepClone(diyComponent.value.list)
             skeleton.loading = false;
-			nextTick(()=>{
-				setTimeout(()=>{
-					setItemStyle()
-				},500)
-			})
         });
     }
 
@@ -207,7 +201,7 @@
 	const toLink = (data: any) => {
 		redirect({ url: '/addon/shop/pages/goods/detail', param: { goods_id: data.info.goods_id } })
 	}
-	
+
 </script>
 
 <style lang="scss" scoped>

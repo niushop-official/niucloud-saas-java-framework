@@ -7,7 +7,7 @@
             </view>
             <view>
                 <view class="flex justify-between text-[28rpx] mt-[34rpx] leading-[32rpx]" v-if="rechargeInfo.item">
-                    <text class="text-[#333] w-[200rpx]">{{ rechargeInfo.item[0].item_name }}</text>
+                    <text class="text-[#333] w-[200rpx]">{{ rechargeInfo.item.item_name }}</text>
                     <text class="text-[#333]">￥{{ rechargeInfo.order_money }}</text>
                 </view>
                 <view class="flex justify-between text-[28rpx] mt-[34rpx] leading-[32rpx]">

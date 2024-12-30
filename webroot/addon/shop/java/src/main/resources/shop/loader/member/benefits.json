@@ -6,10 +6,10 @@
     "component": "/src/addon/shop/views/member/components/benefits-free-shipping.vue",
     "content": {
       "admin": {
-        "driver": "com.niu.core.service.core.member.driver.BenefitsDriver"
+        "driver": "com.niu.shop.service.core.member.driver.FreeShippingBenefitsDriver"
       },
       "member_level": {
-        "driver": "com.niu.core.service.core.member.driver.BenefitsDriver"
+        "driver": "com.niu.shop.service.core.member.driver.FreeShippingBenefitsDriver"
       }
     }
   }

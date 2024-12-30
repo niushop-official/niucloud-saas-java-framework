@@ -60,71 +60,106 @@
 						</view>
 					</view>
 				</view>
-				<view class="sidebar-margin card-template" :style="detail.delivery_type == 'virtual' ? 'margin-top: -86rpx' : 'margin-top: 20rpx'">
-					<block v-for="(goodsItem, goodsIndex) in detail.order_goods" :key="goodsIndex">
-					<view class="order-goods-item flex justify-between flex-wrap mt-[30rpx]">
-						<view class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" @click="goodsEvent(goodsItem.goods_id)">
-							<u--image class="overflow-hidden" radius="var(--goods-rounded-big)" width="150rpx" height="150rpx"
-								:src="img(goodsItem.goods_image_thumb_small ? goodsItem.goods_image_thumb_small : '')"
-								model="aspectFill">
-								<template #error>
-									<image
-										class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden"
-										:src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill">
-									</image>
-								</template>
-							</u--image>
-						</view>
+				<view class="sidebar-margin card-template p-[0] py-[var(--pad-top-m)] overflow-hidden" :class="{'pb-[var(--pad-top-m)]': detail.gift_goods.length <= 0}" :style="detail.delivery_type == 'virtual' ? 'margin-top: -86rpx' : 'margin-top: 20rpx'">
+					<view v-for="(goodsItem, goodsIndex) in detail.goods" :key="goodsIndex" class="px-[var(--pad-sidebar-m)]">
+						<view class="order-goods-item flex justify-between flex-wrap mb-[20rpx]">
+							<view class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" @click="goodsEvent(goodsItem.goods_id)">
+								<u--image class="overflow-hidden" radius="var(--goods-rounded-big)" width="150rpx" height="150rpx"
+									:src="img(goodsItem.goods_image_thumb_small ? goodsItem.goods_image_thumb_small : '')"
+									model="aspectFill">
+									<template #error>
+										<image
+											class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden"
+											:src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill">
+										</image>
+									</template>
+								</u--image>
+							</view>
 
-						<view class="ml-[20rpx] flex flex-1 flex-col justify-between">
-							<view>
-								<view class="text-[28rpx] max-w-[490rpx] truncate leading-[40rpx] text-[#333]">{{ goodsItem.goods_name }}</view>
-								<view v-if="goodsItem.sku_name">
-									<view class="text-[22rpx] mt-[14rpx] text-[var(--text-color-light9)] truncate max-w-[490rpx] leading-[28rpx]">
+							<view class="ml-[20rpx] flex flex-1 flex-col justify-between">
+								<view>
+									<view class="text-[28rpx] max-w-[490rpx] truncate leading-[40rpx] text-[#333]">{{ goodsItem.goods_name }}</view>
+									<view v-if="goodsItem.sku_name">
+										<view class="text-[22rpx] mt-[14rpx] text-[var(--text-color-light9)] truncate max-w-[490rpx] leading-[28rpx]">
+											{{ goodsItem.sku_name }}
+										</view>
+									</view>
+								</view>
+								<view v-if="goodsItem.manjian_info && Object.keys(goodsItem.manjian_info).length" class="flex items-center mt-[10rpx] mb-[auto]" @click.stop="manjianOpenFn(goodsItem.manjian_info)">
+									<view class="bg-[var(--primary-color-light)] text-[var(--primary-color)] rounded-[6rpx] text-[20rpx] flex items-center justify-center w-[88rpx] h-[36rpx] mr-[6rpx]">满减送</view>
+									<text class="text-[22rpx] text-[#999]">{{goodsItem.manjian_info.manjian_name}}</text>
+								</view>
+								<view class="flex justify-between items-baseline leading-[28rpx] text-[#333]">
+									<view class="price-font">
+										<view class="text-[40rpx] inline-block" v-if="goodsItem.extend && parseFloat(goodsItem.extend.point) > 0">
+											<text class="text-[40rpx] font-200">{{goodsItem.extend.point}}</text>
+											<text class="text-[32rpx] ml-[4rpx]">积分</text>
+										</view>
+										<text class="mx-[4rpx] text-[32rpx]" v-if="parseFloat(goodsItem.price) && goodsItem.extend && parseFloat(goodsItem.extend.point) > 0">+</text>
+										<block v-if="parseFloat(goodsItem.price) && goodsItem.extend && parseFloat(goodsItem.extend.point) > 0">
+											<text class="text-[40rpx] font-200">{{ parseFloat(goodsItem.price).toFixed(2) }}</text>
+											<text class="text-[32rpx] ml-[4rpx]">元</text>
+										</block>
+										<block v-if="goodsItem.extend && goodsItem.extend && goodsItem.extend.is_newcomer">
+											<text class="text-[24rpx]">￥</text>
+											<text class="text-[40rpx] font-500">{{ parseFloat(goodsItem.price).toFixed(2).split('.')[0] }}</text>
+											<text class="text-[24rpx] font-500">.{{ parseFloat(goodsItem.price).toFixed(2).split('.')[1] }}</text>
+										</block>
+										<block v-if="parseFloat(goodsItem.price) && !goodsItem.extend">
+											<text class="text-[24rpx]">￥</text>
+											<text class="text-[40rpx] font-500">{{ parseFloat(goodsItem.price).toFixed(2).split('.')[0] }}</text>
+											<text class="text-[24rpx] font-500">.{{ parseFloat(goodsItem.price).toFixed(2).split('.')[1] }}</text>
+										</block>
+									</view>
+									<text class="text-right text-[26rpx]">x{{ goodsItem.num }}</text>
+								</view>
+							</view>
+						</view>
+						<view class="flex items-center box-border mt-[8rpx]" v-if="goodsItem.extend && goodsItem.extend.is_newcomer && goodsItem.num>1">
+							<image class="h-[24rpx] w-[56rpx]" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
+							<view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]">第1{{goodsItem.unit}}，￥{{parseFloat(goodsItem.extend.newcomer_price).toFixed(2)}}/{{goodsItem.unit}}；第{{goodsItem.num>2?'2~'+goodsItem.num:'2'}}{{goodsItem.unit}}，￥{{parseFloat(goodsItem.price).toFixed(2)}}/{{goodsItem.unit}}</view>
+						</view>
+						<view class="flex justify-end w-[100%] mt-[30rpx]" v-if="(goodsItem.status != '1') || (goodsItem.is_enable_refund == 1)">
+							<view v-if="goodsItem.status != '1'"
+								class="text-[22rpx] text-[#303133] leading-[50rpx] px-[20rpx] border-[2rpx] border-solid border-[#999] rounded-full"
+								@click="redirect({ url: '/addon/shop/pages/refund/detail', param: { order_refund_no : goodsItem.order_refund_no } })">
+								查看退款</view>
+							<view v-else-if="goodsItem.is_enable_refund == 1"
+								class="text-[22rpx] text-[#303133]  leading-[50rpx] px-[20rpx] border-[2rpx] border-solid border-[#999] rounded-full ml-[20rpx]"
+								@click="applyRefund(goodsItem.order_goods_id)">申请退款</view>
+						</view>
+					</view>
+					<view class="pt-[20rpx] bg-[#f9f9f9] mt-[20rpx] mx-[var(--pad-sidebar-m)] rounded-[var(--rounded-big)]" v-if="detail.gift_goods.length">
+						<view class="order-goods-item flex justify-between flex-wrap px-[var(--pad-sidebar-m)] pb-[20rpx]" v-for="(goodsItem, goodsIndex) in detail.gift_goods" :key="goodsIndex">
+							<view class="w-[120rpx] h-[120rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" @click="goodsEvent(goodsItem.goods_id)">
+								<u--image class="overflow-hidden" radius="var(--goods-rounded-big)" width="120rpx" height="120rpx"
+									:src="img(goodsItem.goods_image_thumb_small ? goodsItem.goods_image_thumb_small : '')"
+									model="aspectFill">
+									<template #error>
+										<image
+											class="w-[120rpx] h-[120rpx] rounded-[var(--goods-rounded-big)] overflow-hidden"
+											:src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill">
+										</image>
+									</template>
+								</u--image>
+							</view>
+							<view class="ml-[16rpx] py-[8rpx] flex flex-1 flex-col justify-between">
+								<view class="flex items-center">
+									<view class="bg-[var(--primary-color-light)] whitespace-nowrap text-[var(--primary-color)] rounded-[6rpx] text-[22rpx] flex items-center justify-center w-[64rpx] h-[34rpx] mr-[6rpx]">赠品</view>
+									<view class="text-[26rpx] max-w-[400rpx] truncate leading-[40rpx] text-[#333]">{{ goodsItem.goods_name }}</view>
+								</view>
+								<view class="flex items-center">
+									<view v-if="goodsItem.sku_name" class="text-[22rpx] text-[var(--text-color-light9)] truncate max-w-[400rpx] leading-[28rpx]">
 										{{ goodsItem.sku_name }}
 									</view>
-								</view>
-							</view>
-							<view class="flex justify-between items-baseline leading-[28rpx] text-[#333]">
-								<view class="price-font">
-									<view class="text-[40rpx] inline-block" v-if="goodsItem.extend && parseFloat(goodsItem.extend.point) > 0">
-										<text class="text-[40rpx] font-200">{{goodsItem.extend.point}}</text>
-										<text class="text-[32rpx] ml-[4rpx]">积分</text>
+									<view class="ml-[auto] font-400 text-[26rpx] text-[#303133]">
+										<text>x</text>
+										<text>{{ goodsItem.num }}</text>
 									</view>
-									<text class="mx-[4rpx] text-[32rpx]" v-if="parseFloat(goodsItem.price) && goodsItem.extend && parseFloat(goodsItem.extend.point) > 0">+</text>
-									<block v-if="parseFloat(goodsItem.price) && goodsItem.extend && parseFloat(goodsItem.extend.point) > 0">
-										<text class="text-[40rpx] font-200">{{ parseFloat(goodsItem.price).toFixed(2) }}</text>
-										<text class="text-[32rpx] ml-[4rpx]">元</text>
-									</block>
-									<block v-if="goodsItem.extend && goodsItem.extend && goodsItem.extend.is_newcomer">
-										<text class="text-[24rpx]">￥</text>
-										<text class="text-[40rpx] font-500">{{ parseFloat(goodsItem.price).toFixed(2).split('.')[0] }}</text>
-										<text class="text-[24rpx] font-500">.{{ parseFloat(goodsItem.price).toFixed(2).split('.')[1] }}</text>
-									</block>
-									<block v-if="parseFloat(goodsItem.price) && !goodsItem.extend">
-										<text class="text-[24rpx]">￥</text>
-										<text class="text-[40rpx] font-500">{{ parseFloat(goodsItem.price).toFixed(2).split('.')[0] }}</text>
-										<text class="text-[24rpx] font-500">.{{ parseFloat(goodsItem.price).toFixed(2).split('.')[1] }}</text>
-									</block>
 								</view>
-								<text class="text-right text-[26rpx]">x{{ goodsItem.num }}</text>
 							</view>
 						</view>
 					</view>
-					<view class="flex items-center box-border mt-[8rpx]" v-if="goodsItem.extend && goodsItem.extend.is_newcomer && goodsItem.num>1">
-						<image class="h-[24rpx] w-[56rpx]" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
-						<view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]">第1{{goodsItem.unit}}，￥{{parseFloat(goodsItem.extend.newcomer_price).toFixed(2)}}/{{goodsItem.unit}}；第{{goodsItem.num>2?'2~'+goodsItem.num:'2'}}{{goodsItem.unit}}，￥{{parseFloat(goodsItem.price).toFixed(2)}}/{{goodsItem.unit}}</view>
-					</view>
-					<view class="flex justify-end w-[100%] mt-[30rpx]" v-if="(goodsItem.status != '1') || (goodsItem.is_enable_refund == 1)">
-						<view v-if="goodsItem.status != '1'"
-							class="text-[22rpx] text-[#303133] leading-[50rpx] px-[20rpx] border-[2rpx] border-solid border-[#999] rounded-full"
-							@click="redirect({ url: '/addon/shop/pages/refund/detail', param: { order_refund_no : goodsItem.order_refund_no } })">
-							查看退款</view>
-						<view v-else-if="goodsItem.is_enable_refund == 1"
-							class="text-[22rpx] text-[#303133]  leading-[50rpx] px-[20rpx] border-[2rpx] border-solid border-[#999] rounded-full ml-[20rpx]"
-							@click="applyRefund(goodsItem.order_goods_id)">申请退款</view>
-					</view>
-					</block>
 				</view>
 				<view class="sidebar-margin mt-[var(--top-m)] card-template">
 					<view class="justify-between card-template-item">
@@ -214,16 +249,28 @@
 							</block>
 						</view>
 					</view>
-					<view class=" card-template-item justify-between">
+					<view class=" card-template-item justify-between" v-if="parseFloat(detail.delivery_money)">
+						<view class="text-[28rpx]">{{ t('deliveryMoney') }}</view>
+						<view class="price-font font-500 text-[28rpx]">
+							￥{{ parseFloat(detail.delivery_money).toFixed(2) }}
+						</view>
+					</view>
+					<!-- <view class=" card-template-item justify-between">
 						<view class="text-[28rpx]">{{ t('discountMoney') }}</view>
 						<view class="price-font font-500 text-[28rpx]">
 							-￥{{ parseFloat(detail.discount_money).toFixed(2) }}
 						</view>
-					</view>
-					<view class=" card-template-item justify-between">
-						<view class="text-[28rpx]">{{ t('deliveryMoney') }}</view>
+					</view> -->
+					<view class=" card-template-item justify-between" v-if="parseFloat(detail.coupon_money)">
+						<view class="text-[28rpx]">优惠券优惠</view>
 						<view class="price-font font-500 text-[28rpx]">
-							{{ parseFloat(detail.delivery_money).toFixed(2) }}
+							-￥{{ parseFloat(detail.coupon_money).toFixed(2) }}
+						</view>
+					</view>
+					<view class=" card-template-item justify-between" v-if="parseFloat(detail.manjian_discount_money)">
+						<view class="text-[28rpx]">满减优惠</view>
+						<view class="price-font font-500 text-[28rpx]">
+							-￥{{ parseFloat(detail.manjian_discount_money).toFixed(2) }}
 						</view>
 					</view>
 					<view class=" card-template-item justify-between items-baseline">
@@ -264,12 +311,12 @@
 							 v-if="detail.status == 1" @click="orderBtnFn('close')">{{ t('orderClose') }}</view>
 						<view class="min-w-[180rpx] box-border  text-[26rpx] h-[70rpx] flex-center text-center text-[#fff] primary-btn-bg rounded-full ml-[20rpx]"
 							 v-if="detail.status == 1" @click="orderBtnFn('pay')">{{ t('topay') }}</view>
-						<view v-if="detail.status == 3" 
+						<view v-if="detail.status == 3"
 							class="min-w-[180rpx] box-border  text-[26rpx] h-[70rpx] flex-center text-center  text-[#fff]  primary-btn-bg rounded-full ml-[20rpx]"
 							@click="orderBtnFn('finish')">{{ t('orderFinish') }}</view>
-						<block v-if="detail.status == 5">
+						<block v-if="detail.status == 5 && isShowEvaluate">
 							<view
-								v-if="detail.is_evaluate == 1 || (detail.is_evaluate != 1 && evaluateConfig.is_evaluate == 1)" 
+								v-if="detail.is_evaluate == 1 || (detail.is_evaluate != 1 && evaluateConfig.is_evaluate == 1)"
 								class="min-w-[180rpx] box-border text-[26rpx]  h-[70rpx] flex-center border-[2rpx] border-solid border-[#999] rounded-full ml-[20rpx] !text-[var(--text-color-light6)]"
 								@click="orderBtnFn('evaluate')">
 								{{ detail.is_evaluate == 1 ? t('selectedEvaluate') : t('evaluate') }}
@@ -281,6 +328,8 @@
 			<view class="tab-bar-placeholder"></view>
 			<pay ref="payRef" @close="payClose"></pay>
 			<logistics-tracking ref="materialRef"></logistics-tracking>
+			<!-- 满减 -->
+			<ns-goods-manjian ref="manjianShowRef"></ns-goods-manjian>
 		</view>
 
 		<loading-page :loading="loading"></loading-page>
@@ -302,7 +351,9 @@
 	import { getVerifyCode } from '@/app/api/verify';
 	import logisticsTracking from '@/addon/shop/pages/order/components/logistics-tracking/logistics-tracking.vue'
 	import useConfigStore from "@/stores/config";
-	import { topTabar } from '@/utils/topTabbar'
+	import nsGoodsManjian from '@/addon/shop/components/ns-goods-manjian/ns-goods-manjian.vue';
+	import { topTabar } from '@/utils/topTabbar';
+	import { cloneDeep } from 'lodash-es';
 
 	/********* 自定义头部 - start ***********/
 	const topTabarObj = topTabar()
@@ -315,6 +366,8 @@
 	const orderId = ref('')
 	const orderStepsShow = ref(false)
 	const evaluateConfig = ref<Object>({});
+	const isShowEvaluate = ref(true)
+	const manjianShowRef: any = ref(null); //满减送
 
 	const sendMessageTitle = ref('')
 	const sendMessagePath = ref('')
@@ -353,14 +406,45 @@
 				obj.order_goods_id = res.data.order_goods[0].order_goods_id
 				getVerifyCodeFn(obj);
 			}
+			
+			detail.value.goods = []; //购买商品
+			detail.value.gift_goods = []; //赠品
+			detail.value.order_goods.forEach((item,index)=>{
+				if(item.is_gift){
+					detail.value.gift_goods.push(item);
+				}else{
+					detail.value.goods.push(item);
+				}
+			})
+			
+			
+
+			let evaluateCount = 0;
+			for (let i = 0; i < detail.value.order_goods.length; i++) {
+				if (detail.value.order_goods[i].status != 1 || detail.value.order_goods[i].is_enable_refund == 1) {
+					evaluateCount++;
+				}
+			}
+
+			if (evaluateCount == detail.value.order_goods.length) {
+				isShowEvaluate.value = false;
+			}
 
 			sendMessageTitle.value = detail.value.order_goods[0].goods_name
 			sendMessageImg.value = img(detail.value.order_goods[0].goods_image_thumb_small || '')
-
 			loading.value = false;
 		}).catch(() => {
 			loading.value = false;
 		})
+	}
+	
+	// 满减
+	const manjianOpenFn = (data:any) =>{
+		let obj = {};
+		obj.condition_type = cloneDeep(data).condition_type;
+		obj.rule_json = [cloneDeep(data).rule];
+		obj.name = cloneDeep(data).manjian_name;
+		manjianShowRef.value.open(obj);
 	}
 
 	//关闭订单
@@ -448,7 +532,6 @@
 				}
 			})
 		}
-
 	}
 
 	const payRef = ref(null)
@@ -549,13 +632,13 @@
 		return status
 	}
 
-	/************ 虚拟商品核销-start ***************/ 
+	/************ 虚拟商品核销-start ***************/
 	const verifyGoodsData = ref({}) //虚拟商品
 	const isShowVerify = computed(() => {
 		let bool =  false;
 		if(detail.value.order_goods.length == 1){
 			verifyGoodsData.value = detail.value.order_goods[0]
-			
+
 			let data = detail.value.order_goods[0];
 			bool = data.is_verify == 1 && data.goods_type == 'virtual' && data.delivery_status == 'delivery_finish' && detail.value.status == 3 ? true : false;
 		}
@@ -564,12 +647,12 @@
 	const verifyInfo = ref([])
 	const getVerifyCodeFn = (data:any) => {
 		verifyInfo.value = [];
-		
+
 		getVerifyCode('shopVirtualGoods', data).then((res: any) => {
 			verifyInfo.value = res.data;
 		})
 	}
-	/************ 虚拟商品核销-end ***************/ 
+	/************ 虚拟商品核销-end ***************/
 </script>
 <style lang="scss" scoped>
 	.text-item {

@@ -11,14 +11,14 @@
 					</el-radio-group>
 				</el-form-item>
 				<div class="flex items-center flex-wrap py-[8px] px-[10px] bg-[#f4f3f7] rounded mb-[18px] mx-[18px]" v-show="diyStore.editComponent.noticeType == 'img'">
-					<div :class="['mr-[10px] rounded cursor-pointer', {'border-[1px] border-solid border-[var(--el-color-primary)]': diyStore.editComponent.systemUrl == 'style_1' && diyStore.editComponent.imgType == 'system'}]">
+					<div :class="['mr-[10px] rounded cursor-pointer border-[1px] border-solid', {'border-[var(--el-color-primary)]': diyStore.editComponent.systemUrl == 'style_1' && diyStore.editComponent.imgType == 'system'}]">
 						<img src="@/app/assets/images/diy/notice/style_1.png" :class="['h-[28px] px-[10px] py-[5px]']" @click="changeStyle('style_1')"/>
 					</div>
 
-					<div :class="['mr-[10px] rounded cursor-pointer w-[100px]', {'border-[1px] border-solid border-[var(--el-color-primary)]': diyStore.editComponent.systemUrl == 'style_2' && diyStore.editComponent.imgType == 'system'}]">
+					<div :class="['mr-[10px] rounded cursor-pointer w-[100px] border-[1px] border-solid', {'border-[var(--el-color-primary)]': diyStore.editComponent.systemUrl == 'style_2' && diyStore.editComponent.imgType == 'system'}]">
 						<img src="@/app/assets/images/diy/notice/style_2.png" class="px-[10px] py-[5px]" @click="changeStyle('style_2')"/>
 					</div>
-					<div @click.stop="diyStore.editComponent.imgType = 'diy'" :class="['mr-[10px] rounded cursor-pointer diy-upload-img', {'border-[1px] border-solid border-[var(--el-color-primary)]': (diyStore.editComponent.imageUrl && diyStore.editComponent.imgType == 'diy') }]">
+					<div @click.stop="diyStore.editComponent.imgType = 'diy'" :class="['mr-[10px] rounded cursor-pointer diy-upload-img border-[1px] border-solid', {'border-[var(--el-color-primary)]': (diyStore.editComponent.imageUrl && diyStore.editComponent.imgType == 'diy') }]">
 						<upload-image v-model="diyStore.editComponent.imageUrl" :limit="1"/>
 					</div>
 				</div>
@@ -80,7 +80,7 @@
 			<h3 class="mb-[10px]">{{ t('textSet') }}</h3>
 			<el-form label-width="80px" class="px-[10px]">
 				<el-form-item :label="t('textFontSize')">
-					<el-slider v-model="diyStore.editComponent.fontSize" show-input size="small" class="ml-[10px] article-slider" :min="12" :max="20"/>
+					<el-slider v-model="diyStore.editComponent.fontSize" show-input size="small" class="ml-[10px] diy-nav-slider" :min="12" :max="20"/>
 				</el-form-item>
 				<el-form-item :label="t('textFontWeight')">
 					<el-radio-group v-model="diyStore.editComponent.fontWeight">

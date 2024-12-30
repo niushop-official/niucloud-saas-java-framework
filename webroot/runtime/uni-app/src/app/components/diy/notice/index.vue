@@ -3,13 +3,13 @@
         <view :style="maskLayer"></view>
         <view class="diy-notice relative overflow-hidden">
             <view class="flex items-center pl-[28rpx] p-[22rpx]">
-                <template v-if="diyComponent.noticeType == 'img'">
+                <view v-if="diyComponent.noticeType == 'img'" class="min-w-[60rpx] flex items-center">
                     <template v-if="diyComponent.imgType == 'system'">
-                        <image v-if="diyComponent.systemUrl == 'style_1'" :src="img(`static/resource/images/diy/notice/${diyComponent.systemUrl}.png`)" class="h-[40rpx] max-w-[130rpx] mr-[20rpx] flex-shrink-0" mode="heightFix"/>
+                        <image v-if="diyComponent.systemUrl == 'style_1'" :src="img(`static/resource/images/diy/notice/${diyComponent.systemUrl}.png`)" class="h-[40rpx] w-[auto] mr-[20rpx] flex-shrink-0" mode="heightFix"/>
                         <image v-else-if="diyComponent.systemUrl == 'style_2'" :src="img(`static/resource/images/diy/notice/${diyComponent.systemUrl}.png`)" class="w-[200rpx] mr-[20rpx] h-[30rpx] flex-shrink-0" mode="heightFix" />
                     </template>
                     <image v-else-if="diyComponent.imgType == 'diy'" :src="img(diyComponent.imageUrl || '')" class="w-[200rpx] h-[30rpx] mr-[20rpx] flex-shrink-0" mode="heightFix"/>
-                </template>
+                </view>
                 <view v-if="diyComponent.noticeType == 'text' && diyComponent.noticeTitle" class="max-w-[128rpx] px-[12rpx] text-[26rpx] h-[40rpx] leading-[40rpx] text-[var(--primary-color)] bg-[var(--primary-color-light)] truncate rounded-[8rpx] mr-[20rpx] flex-shrink-0">{{ diyComponent.noticeTitle }}</view>
                 <view class="flex-1 flex overflow-hidden horizontal-body" :id="'horizontal-body-'+diyComponent.id" :class="{'items-center':diyComponent.scrollWay == 'upDown'}">
                     <!-- 横向滚动 -->
@@ -26,7 +26,7 @@
                     <template v-if="diyComponent.scrollWay == 'upDown'">
                         <swiper :vertical="true" :duration="500" autoplay="true" circular="true" class="flex-1">
                             <swiper-item v-for="(item, index) in diyComponent.list" :key="index" @touchmove.prevent.stop>
-                                <text @click="toRedirect(item)" class="beyond-hiding using-hidden" :style="{ color: diyComponent.textColor, fontSize: diyComponent.fontSize * 2 + 'rpx', fontWeight: diyComponent.fontWeight }">
+                                <text @click="toRedirect(item)" class="beyond-hiding truncate" :style="{ color: diyComponent.textColor, fontSize: diyComponent.fontSize * 2 + 'rpx', fontWeight: diyComponent.fontWeight }">
                                     {{ item.text }}
                                 </text>
                             </swiper-item>
@@ -37,18 +37,21 @@
                 </view>
 
             </view>
-
-            <u-popup :show="noticeShow" @close="noticeShow = false"  mode="center" :round="5" :safeAreaInsetBottom="false">
-				<view @touchmove.prevent.stop>
-					<view class="py-[25rpx] text-sm leading-none border-0 border-solid border-b-[2rpx] border-[#eee] flex items-center justify-between">
-						<text class="ml-[30rpx]">公告</text>
-						<text class="mr-[20rpx] nc-iconfont nc-icon-guanbiV6xx text-[35rpx]" @click="noticeShow = false"></text>
+			<view @touchmove.prevent.stop>
+				<u-popup :show="noticeShow" @close="noticeShow = false"  mode="center" round="var(--rounded-big)" :safeAreaInsetBottom="false">
+					<view class="w-[570rpx] px-[32rpx] popup-common center">
+						<view class="title">公告</view>
+						<scroll-view :scroll-y="true" class="px-[30rpx] box-border h-[260rpx]">
+						<block v-for="(item) in noticeContent.split('\n')">
+						    <view class="text-[28rpx] leading-[40rpx] mb-[20rpx]">{{ item }}</view>
+						</block>
+						</scroll-view>
+						<view class="btn-wrap !pt-[40rpx]">
+						    <button class="primary-btn-bg w-[480rpx] h-[70rpx] text-[26rpx] leading-[70rpx] rounded-[35rpx] !text-[#fff] font-500"  @click="noticeShow = false">我知道了</button>
+						</view>
 					</view>
-					<scroll-view scroll-y="true" class="px-6 py-3 w-[480rpx] h-[500rpx] text-sm">{{ noticeContent }}</scroll-view>
-					<button @click="noticeShow = false" class="!mx-[30rpx] !mb-[40rpx] !w-auto !h-[70rpx] text-[24rpx] leading-[70rpx] rounded-full text-white !bg-[#ff4500] !text-[#fff]">我知道了</button>
-				</view>
-            </u-popup>
-
+				</u-popup>
+			</view>
         </view>
     </view>
 </template>

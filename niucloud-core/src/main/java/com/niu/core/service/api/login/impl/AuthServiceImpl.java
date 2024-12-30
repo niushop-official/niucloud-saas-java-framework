@@ -78,17 +78,19 @@ public class AuthServiceImpl implements IAuthService {
     public void checkChannel() {
         String channel=RequestUtils.channel();
         Integer siteId=RequestUtils.siteId();
-        if (channel.equals(ChannelEnum.H5.getCode())){
-            H5ConfigVo h5ConfigVo=coreH5Service.getH5(siteId);
-            Integer isOpen=h5ConfigVo.getIsOpen();
-            if(isOpen==0){
-                throw new AuthException("SITE_CLOSE_NOT_ALLOW", 402);
-            }
-        }else if (channel.equals(ChannelEnum.PC.getCode())){
-            PcConfigVo pcConfigVo=corePcService.getPc(siteId);
-            Integer isOpen=pcConfigVo.getIsOpen();
-            if(isOpen==0){
-                throw new AuthException("SITE_CLOSE_NOT_ALLOW", 402);
+        if (channel != null){
+            if (channel.equals(ChannelEnum.H5.getCode())){
+                H5ConfigVo h5ConfigVo=coreH5Service.getH5(siteId);
+                Integer isOpen=h5ConfigVo.getIsOpen();
+                if(isOpen==0){
+                    throw new AuthException("SITE_CLOSE_NOT_ALLOW", 402);
+                }
+            }else if (channel.equals(ChannelEnum.PC.getCode())){
+                PcConfigVo pcConfigVo=corePcService.getPc(siteId);
+                Integer isOpen=pcConfigVo.getIsOpen();
+                if(isOpen==0){
+                    throw new AuthException("SITE_CLOSE_NOT_ALLOW", 402);
+                }
             }
         }
     }

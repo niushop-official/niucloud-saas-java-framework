@@ -64,6 +64,7 @@ import { t } from '@/lang'
 import { getShippingTemplatePageList, deleteShippingTemplate } from '@/addon/shop/api/delivery'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const route = useRoute()
 const router = useRouter()
@@ -97,11 +98,12 @@ const loadTemplateList = (page: number = 1) => {
         templateTable.loading = false
         templateTable.data = res.data.data
         templateTable.total = res.data.total
+        setTablePageStorage(templateTable.page, templateTable.limit, templateTable.searchParam);
     }).catch(() => {
         templateTable.loading = false
     })
 }
-loadTemplateList()
+loadTemplateList(getTablePageStorage(templateTable.searchParam).page);
 
 /**
  * 添加运费模板

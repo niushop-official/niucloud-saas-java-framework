@@ -134,7 +134,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
     /**
      * 获取开发者key
      *
-     * @param siteId
+     * @param
      * @return
      */
     @Override
@@ -195,7 +195,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
      */
     @Override
     public void setThemeColor(Integer siteId, JSONObject configParam) {
-        JSONObject config = this.getLayout(siteId);
+        JSONObject config = this.getThemeColor(siteId);
         config.set(configParam.getStr("key"), configParam.getStr("value"));
         coreConfigService.setConfig(siteId, "THEMECOLOR_SETTING", config);
     }
@@ -232,13 +232,11 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
      */
     @Override
     public SceneDomainVo getSceneDomain(Integer siteId) {
-        HttpServletRequest request = RequestUtils.handler();
-
-        String wapDomain = ObjectUtil.isNotEmpty(GlobalConfig.wapDomain) ? GlobalConfig.wapDomain.replace("#/$#", "") : request.getScheme() + "://" + RequestUtils.getRequestDomain();
+        String wapDomain = ObjectUtil.isNotEmpty(GlobalConfig.wapDomain) ? GlobalConfig.wapDomain.replace("#/$#", "") : RequestUtils.getRequestSecure() + "://" + RequestUtils.getRequestDomain();
 
         SiteInfoVo siteInfoVo = coreSiteService.getSiteCache(siteId);
         String siteDomain = siteInfoVo.getSiteDomain();
-        if (!siteDomain.isEmpty()) siteDomain = request.getScheme() + "://" + siteDomain;
+        if (!siteDomain.isEmpty()) siteDomain = RequestUtils.getRequestSecure() + "://" + siteDomain;
 
         SceneDomainVo sceneDomainVo = new SceneDomainVo();
         sceneDomainVo.setWapDomain(wapDomain);

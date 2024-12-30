@@ -2,7 +2,7 @@
 	<x-skeleton :type="skeleton.type" :loading="skeleton.loading" :config="skeleton.config">
 		<view class="overflow-hidden" :style="warpCss">
 			<view :style="maskLayer"></view>
-			<view class="diy-shop-exchange-goods-list relative flex flex-wrap justify-between">
+			<view class="diy-shop-exchange-goods-list relative flex flex-wrap justify-between" v-if="goodsList.length">
 				<view class="overflow-hidden bg-[#fff] flex flex-col box-border w-[calc(50%-10rpx)] rounded-[var(--rounded-mid)]" :class="{'mt-[20rpx]': index > 1}" :style="itemCss" v-for="(item,index) in goodsList" :key="item.goods_id" @click="toLink(item)">
 					<u--image :width="style2Width" :height="style2Width" radius="var(--rounded-mid)" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
 						<template #error>
@@ -28,6 +28,10 @@
 					</view>
 				</view>
 			</view>
+            <view v-else-if="!goodsList.length" class="empty-page">
+                <image class="img" :src="img('static/resource/images/system/empty.png')" model="aspectFit" />
+                <view class="desc">暂无商品</view>
+            </view>
 		</view>
 	</x-skeleton>
 </template>
@@ -105,7 +109,7 @@
         if (diyComponent.value.bottomElementRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomElementRounded * 2 + 'rpx;';
         return style;
     })
-	
+
 	const style2Width = computed(() => {
 		var style = '';
 		if(diyComponent.value.margin && diyComponent.value.margin.both) style += 'calc((100vw - ' + (diyComponent.value.margin.both*4) + 'rpx - 20rpx) / 2)'
@@ -230,7 +234,7 @@
 	const toLink = (data: any) => {
 		redirect({ url: '/addon/shop/pages/point/detail', param: { id: data.id } })
 	}
-	
+
 </script>
 
 <style lang="scss" scoped>

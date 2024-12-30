@@ -241,6 +241,14 @@ export function editLabel(params: Record<string, any>) {
 }
 
 /**
+ * 修改商品标签状态
+ * @param params
+ */
+export function modifyLabelStatus(params: Record<string, any>) {
+    return request.put(`shop/goods/label/status`, params, { showSuccessMessage: true })
+}
+
+/**
  * 删除商品标签
  * @param label_id
  * @returns
@@ -255,6 +263,71 @@ export function deleteLabel(label_id: number) {
  */
 export function modifyLabelSort(params: Record<string, any>) {
     return request.put(`shop/goods/label/sort`, params, { showSuccessMessage: true })
+}
+
+/**
+ * 获取商品标签分组分页列表
+ * @param params
+ * @returns
+ */
+export function getLabelGroupPageList(params: Record<string, any>) {
+    return request.get(`shop/goods/label/group`, { params })
+}
+
+/**
+ * 获取商品标签分组列表
+ * @param params
+ * @returns
+ */
+export function getLabelGroupList(params: Record<string, any>) {
+    return request.get(`shop/goods/label/group/list`, { params })
+}
+
+/**
+ * 获取商品标签分组详情
+ * @param label_id 商品标签分组label_id
+ * @returns
+ */
+export function getLabelGroupInfo(label_id: number) {
+    return request.get(`shop/goods/label/group/${ label_id }`);
+}
+
+/**
+ * 添加商品标签分组
+ * @param params
+ * @returns
+ */
+export function addLabelGroup(params: Record<string, any>) {
+    return request.post('shop/goods/label/group', params, { showErrorMessage: true, showSuccessMessage: true })
+}
+
+/**
+ * 编辑商品标签分组
+ * @param params
+ * @returns
+ */
+export function editLabelGroup(params: Record<string, any>) {
+    return request.put(`shop/goods/label/group/${ params.group_id }`, params, {
+        showErrorMessage: true,
+        showSuccessMessage: true
+    })
+}
+
+/**
+ * 删除商品标签分组
+ * @param group_id
+ * @returns
+ */
+export function deleteLabelGroup(group_id: number) {
+    return request.delete(`shop/goods/label/group/${ group_id }`, { showErrorMessage: true, showSuccessMessage: true })
+}
+
+/**
+ * 修改商品标签分组排序号
+ * @param params
+ */
+export function modifyLabelGroupSort(params: Record<string, any>) {
+    return request.put(`shop/goods/label/group/sort`, params, { showSuccessMessage: true })
 }
 
 /**

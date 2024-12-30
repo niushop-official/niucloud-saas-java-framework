@@ -7,5 +7,5 @@
   "type": "app",
   "support_app": "",
   "jar": "cms.jar",
-  "mainClass": "com.niu.cms.WebAppApplication"
+  "mainClass": "com.niu.cms.WebApplication"
 }

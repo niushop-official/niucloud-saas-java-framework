@@ -20,7 +20,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item :label="t('goodsSelectPopupGoodsName')" prop="keyword" class="form-item-wrap">
-                    <el-input v-model="goodsTable.searchParam.keyword" :placeholder="t('goodsSelectPopupGoodsNamePlaceholder')" maxlength="60" />
+                    <el-input v-model.trim="goodsTable.searchParam.keyword" :placeholder="t('goodsSelectPopupGoodsNamePlaceholder')" maxlength="60" />
                 </el-form-item>
                 <el-form-item :label="t('goodsSelectPopupGoodsCategory')" prop="goods_category" class="form-item-wrap">
                     <el-cascader  v-model="goodsTable.searchParam.goods_category"
@@ -53,7 +53,8 @@
                         <!-- 内容 -->
                         <div class="flex items-center border-solid border-[#e5e7eb] py-[8px] border-b-[1px]">
                             <div v-if="prop.mode == 'spu'" class="w-[3%]"></div>
-                            <div v-if="prop.mode == 'sku'" class="w-[3%] cursor-pointer text-center !text-[10px]" @click="secondLevelArrowChange(row)" :class="{'iconfont iconxiangyoujiantou': row.sku_list.length, 'arrow-show': row.isShow}"></div>
+                            <div v-if="prop.mode == 'sku' && row.skuList.length > 1" class="w-[3%] cursor-pointer text-center !text-[10px]" @click="secondLevelArrowChange(row)" :class="{'iconfont iconxiangyoujiantou': row.skuList.length, 'arrow-show': row.isShow}"></div>
+                            <div v-if="prop.mode == 'sku' && row.skuList.length <= 1" class="w-[3%]"></div>
                             <div class="w-[7%]">
                                 <el-checkbox v-model="row.secondLevelCheckAll" :indeterminate="row.isSecondLevelIndeterminate" @change="secondLevelHandleCheckAllChange($event,row)" />
                             </div>
@@ -68,18 +69,19 @@
                                     </el-image>
                                     <img v-else class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
                                 </div>
-                                <div class="ml-2">
+                                <div class="ml-2 flex flex-col items-start">
                                     <span :title="row.goods_name" class="multi-hidden leading-[1.4]">{{ row.goods_name }}</span>
                                     <span class="text-primary text-[12px]">{{ row.goods_type_name }}</span>
+                                    <span class="px-[4px]  text-[12px] text-[#fff] rounded-[4px] bg-primary leading-[18px]" v-if="row.is_gift == 1">赠品</span>
                                 </div>
                             </div>
-                            <div class="w-[20%]">￥{{ row.goods_sku.price }}</div>
+                            <div class="w-[20%]">￥{{ row.goodsSku.price }}</div>
                             <div class="w-[20%]">{{row.stock}}</div>
                         </div>
 
-                        <block v-if="prop.mode == 'sku'">
+                        <div v-show="prop.mode == 'sku' && row.skuList.length > 1">
                             <!-- 子级 -->
-                            <div v-for="(item,index) in row.skuList" :key="index" class="flex items-center py-[8px] border-solid border-transparent border-b-[1px]" :class="{'hidden': !row.isShow, 'border-[#e5e7eb]': index == (row.sku_list.length-1)}">
+                            <div v-for="(item,index) in row.skuList" :key="index" class="flex items-center py-[8px] border-solid border-transparent border-b-[1px]" :class="{'hidden': !row.isShow, 'border-[#e5e7eb]': index == (row.skuList.length-1)}">
                                 <div class="w-[6%]"></div>
                                 <div class="w-[4%]">
                                     <el-checkbox v-model="item.threeLevelCheckAll"  @change="subChildHandleCheckAllChange($event,row,item)" />
@@ -103,7 +105,7 @@
                                 <div class="w-[20%] flex">￥{{ item.price }}</div>
                                 <div class="w-[20%] flex">{{ item.stock }}</div>
                             </div>
-                        </block>
+                        </div>
                     </div>
 
                     <div v-if="!goodsTable.data.length && !goodsTable.loading" class="h-[60px] flex items-center justify-center border-solid border-[#e5e7eb] py-[12px] border-b-[1px]">
@@ -111,7 +113,6 @@
                     </div>
                 </div>
             </div>
-
 
             <div class="mt-[16px] flex">
                 <div class="flex items-center flex-1">
@@ -144,6 +145,7 @@ import { cloneDeep } from 'lodash-es'
 import { img,deepClone } from '@/utils/common'
 import { ElMessage } from 'element-plus'
 import { getGoodsSelectPageList,getGoodsSkuNoPageList, getCategoryTree, getGoodsType } from '@/addon/shop/api/goods'
+
 const prop = defineProps({
     modelValue: {
         type: String,
@@ -165,13 +167,16 @@ const prop = defineProps({
         type: String,
         default: '' // 选择方式，空：代表全部， single：单一
     },
+    isGift: {
+        type: [String,Number],
+        default: 0 // 查询是否赠品，0：不查赠品，1：查询赠品
+    },
 })
 
 const emit = defineEmits(['update:modelValue','goodsSelect'])
 
 // 通过prop.mode来决定 数据前缀是sku_还是goods_
 let replacePrefix = prop.mode == "sku" ? 'sku_' : 'goods_';
-
 
 const isStairIndeterminate = ref(false);
 const staircheckAll = ref(false);
@@ -211,9 +216,12 @@ const goodsTable = reactive({
         goods_ids: '',
         verify_goods_ids: '',
         verify_sku_ids: '',
-        goods_type: ''
+        goods_type: '',
+        is_gift: 0
     }
 })
+
+goodsTable.searchParam.is_gift = prop.isGift ? prop.isGift : 0;
 
 const searchFormRef = ref()
 
@@ -273,7 +281,6 @@ const goodsListTableRef = ref()
 // 选中数据
 const multipleSelection: any = ref([])
 
-
 // 箭头选择事件
 const secondLevelArrowChange = (data)=>{
     data.isShow = !data.isShow;
@@ -284,18 +291,17 @@ const handleCheckAllChange = (isSelect) =>{
     isStairIndeterminate.value = false;
     goodsTable.data.forEach((item,index) => {
         item.secondLevelCheckAll = isSelect;
-        item.sku_list.forEach((subItem, subIndex) => {
+        item.skuList.forEach((subItem, subIndex) => {
             subItem.threeLevelCheckAll = isSelect;
         });
     });
-
-    if (goodsTable.data.length) {
+    if (isSelect) {
         goodsTable.data.forEach((item: any) => {
             if(prop.mode == 'spu') {
                 selectGoods[replacePrefix + item.goods_id] = item
                 selectGoodsId.push(item.goods_id)
             }else{
-                item.sku_list.forEach((skuItem:any)=>{
+                item.skuList.forEach((skuItem:any)=>{
                     selectGoodsId.push(skuItem.sku_id);
                     selectGoods[replacePrefix + skuItem.sku_id] = deepClone(skuItem);
                     selectGoods[replacePrefix + skuItem.sku_id].goods_name = item.goods_name; // 多规格模式，要增加商品名称、商品类型，后续还会增加，满足不同业务场景
@@ -312,9 +318,9 @@ const handleCheckAllChange = (isSelect) =>{
                 selectGoodsId.splice(selectGoodsId.indexOf(item.goods_id), 1)
                 delete selectGoods[replacePrefix + item.goods_id]
             }else{
-                item.sku_list.forEach((skuItem:any)=>{
+                item.skuList.forEach((skuItem:any)=>{
                     selectGoodsId.splice(selectGoodsId.indexOf(skuItem.sku_id), 1)
-                    delete selectGoods[replacePrefix + item.sku_id]
+                    delete selectGoods[replacePrefix + skuItem.sku_id]
                 })
             }
         })
@@ -323,11 +329,11 @@ const handleCheckAllChange = (isSelect) =>{
 
 // 二级复选框
 const secondLevelHandleCheckAllChange = (isSelect,row)=>{
-    row.sku_list.forEach((item,index) => {
+
+    row.skuList.forEach((item,index) => {
         item.threeLevelCheckAll = isSelect;
     });
     detectionAllSelect();
-    
     if(prop.mode == 'spu'){
         if (isSelect) {
             selectGoodsId.push(row.goods_id)
@@ -339,7 +345,7 @@ const secondLevelHandleCheckAllChange = (isSelect,row)=>{
         }
     }else{
         if (isSelect) {
-            row.sku_list.forEach((item,index) => {
+            row.skuList.forEach((item,index) => {
                 selectGoodsId.push(item.sku_id);
                 selectGoods[replacePrefix + item.sku_id] = deepClone(item);
                 selectGoods[replacePrefix + item.sku_id].goods_name = row.goods_name; // 多规格模式，要增加商品名称、商品类型，后续还会增加，满足不同业务场景
@@ -347,7 +353,7 @@ const secondLevelHandleCheckAllChange = (isSelect,row)=>{
                 selectGoods[replacePrefix + item.sku_id].goods_type = row.goods_type;
             });
         } else {
-            row.sku_list.forEach((item,index) => {
+            row.skuList.forEach((item,index) => {
                 selectGoodsId.splice(selectGoodsId.indexOf(item.sku_id),1)
                 // 未选中，删除当前商品
                 delete selectGoods[replacePrefix + item.sku_id]
@@ -359,7 +365,6 @@ const secondLevelHandleCheckAllChange = (isSelect,row)=>{
     // setTimeout(() => {
     //     goodsListTableRef.value.toggleRowExpansion(...Object.values(spreadTableData),true)
     // }, 0);
-
     // 当所选数量超出限制数量【prop.max】时，添加一个就会删除开头的第一个或多个，最终保证所选的数量小于等于prop.max
     if(prop.max && prop.max > 0 && Object.keys(selectGoods).length > 0 && Object.keys(selectGoods).length > prop.max){
         let len = Object.keys(selectGoods).length;
@@ -370,37 +375,36 @@ const secondLevelHandleCheckAllChange = (isSelect,row)=>{
             if(index < len){
                 let indent = selectGoodsId.indexOf(item)
                 delete selectGoods[replacePrefix+selectGoodsId[indent]]
-                selectGoodsId.splice(indent,1) 
+                selectGoodsId.splice(indent,1)
             }
         });
         setGoodsSelected();
     }
 }
 
-
 // 三级复选框
 const subChildHandleCheckAllChange  = (selected: any,parentData: any,data: any)=>{
     let selectNum = 0;
-    parentData.sku_list.forEach((item,index) => {
+    parentData.skuList.forEach((item,index) => {
         if(item.threeLevelCheckAll){
             selectNum++;
         }
     });
-    if(selectNum > 0 && selectNum != parentData.sku_list.length){
+    if(selectNum > 0 && selectNum != parentData.skuList.length){
         parentData.secondLevelCheckAll = false;
         parentData.isSecondLevelIndeterminate = true;
-    }else if(selectNum == parentData.sku_list.length){
+    }else if(selectNum == parentData.skuList.length){
         parentData.isSecondLevelIndeterminate = false;
         parentData.secondLevelCheckAll = true
     }else{
         parentData.isSecondLevelIndeterminate = false;
         parentData.secondLevelCheckAll = false;
     }
-    
+
     detectionAllSelect();
 
     let currSku = deepClone(data)
-    
+
     if(selected){
         selectGoodsId.push(currSku.sku_id);
 
@@ -415,7 +419,6 @@ const subChildHandleCheckAllChange  = (selected: any,parentData: any,data: any)=
     }
 }
 
-
 // 检测是否选中
 const detectionAllSelect = ()=> {
     let selectNum = 0;
@@ -428,7 +431,7 @@ const detectionAllSelect = ()=> {
     if(selectNum > 0 && selectNum != goodsTable.data.length){
         staircheckAll.value = false;
         isStairIndeterminate.value = true;
-    }else if(selectNum == goodsTable.data.length){
+    }else if(selectNum > 0 && selectNum == goodsTable.data.length){
         isStairIndeterminate.value = false;
         staircheckAll.value = true
     }else{
@@ -441,11 +444,10 @@ const detectionAllSelect = ()=> {
  * 获取商品列表
  */
 const loadGoodsList = (page: number = 1, callback: any = null) => {
-
     isStairIndeterminate.value = false;
     staircheckAll.value = false;
-
-    goodsTable.loading = true
+    goodsTable.loading = true;
+    goodsTable.data = [];
     goodsTable.page = page
 
     const searchData = cloneDeep(goodsTable.searchParam);
@@ -465,27 +467,29 @@ const loadGoodsList = (page: number = 1, callback: any = null) => {
         limit: goodsTable.limit,
         ...searchData
     }).then(res => {
-        goodsTable.loading = false
-        goodsTable.data = res.data.data
-        goodsTable.total = res.data.total
-        goodsTable.data.forEach((item: any) => {
+        let goodsTableData = cloneDeep(res.data.data);
+        goodsTableData.forEach((item: any) => {
             item.isShow = false;
             item.isSecondLevelIndeterminate = false;
             item.secondLevelCheckAll = false;
         })
 
         if(prop.mode == "sku") {
-            goodsTable.data.forEach((item: any) => {
-                if (item.sku_list.length) {
-                    item.sku_list.forEach((skuItem: any) => {
+            goodsTableData.forEach((item: any) => {
+                if (item.skuList.length) {
+                    item.skuList.forEach((skuItem: any) => {
                         skuItem.threeLevelCheckAll = false;
                         skuItem.goods_type = item.goods_type;
                     })
                 }
             })
         }
-
+        if (callback) callback(prop.mode == "spu" ? res.data.verify_goods_ids : res.data.verify_sku_ids, res.data.select_goods_list)
         setGoodsSelected();
+
+        goodsTable.data = goodsTableData
+        goodsTable.total = res.data.total
+        goodsTable.loading = false
 
     }).catch(() => {
         goodsTable.loading = false
@@ -497,6 +501,7 @@ const loadGoodsList = (page: number = 1, callback: any = null) => {
 const setGoodsSelected = () => {
     nextTick(() => {
         if(prop.mode == "spu"){
+            console.log(selectGoods)
             for (let i = 0; i < goodsTable.data.length; i++) {
                 goodsTable.data[i].secondLevelCheckAll = false;
                 if (selectGoods[replacePrefix + goodsTable.data[i].goods_id]) {
@@ -507,11 +512,11 @@ const setGoodsSelected = () => {
             let isAllSelectSku = true;
             for (let i = 0; i < goodsTable.data.length; i++) {
                 goodsTable.data[i].secondLevelCheckAll = false;
-                
+
                 isAllSelectSku = true;
-                
+
                 goodsTable.data[i].isSecondLevelIndeterminate = false;
-                goodsTable.data[i].sku_list.forEach((item,index) => {
+                goodsTable.data[i].skuList.forEach((item,index) => {
                     item.threeLevelCheckAll = false;
                     if (selectGoods[replacePrefix + item.sku_id]) {
                         goodsTable.data[i].isSecondLevelIndeterminate = true;
@@ -526,7 +531,6 @@ const setGoodsSelected = () => {
                 }
             }
         }
-        
         detectionAllSelect();
     });
 }
@@ -542,6 +546,7 @@ const show = () => {
     for (let k in selectGoods) {
         delete selectGoods[k];
     }
+
     replacePrefix = prop.mode == "sku" ? 'sku_' : 'goods_';
 
     // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
@@ -552,16 +557,21 @@ const show = () => {
     }
 
     getGoodsSkuNoPageListFn();
-    
+
     loadGoodsList(1, (verify_ids: any) => {
+
         // 第一次打开弹出框时，纠正数据，并且赋值已选商品
-        if (goodsIds.value) {
+        if (goodsIds.value && goodsIds.value.length) {
             goodsIds.value.splice(0, goodsIds.value.length, ...verify_ids)
-            goodsIds.value.forEach((item: any) => {
-                if (!selectGoods[replacePrefix + item]) {
-                    selectGoods[replacePrefix + item] = {};
+            selectGoodsId.splice(0, selectGoodsId.length, ...verify_ids)
+            if(Object.keys(selectGoods).length){
+                for(let key in selectGoods){
+                    let num = Number(key.split(replacePrefix)[1]);
+                    if(goodsIds.value.indexOf(num) == -1){
+                        delete selectGoods[key];
+                    }
                 }
-            })
+            }
         }
     })
 
@@ -575,7 +585,7 @@ const getGoodsSkuNoPageListFn = () =>{
         // 赋值已选择的商品
         if (prop.mode == 'sku') {
             for (let i = 0; i < selectGoodsData.length; i++) {
-                selectGoodsData[i].sku_list.forEach((item: any) => {
+                selectGoodsData[i].skuList.forEach((item: any) => {
                     if (goodsIds.value.indexOf(item.sku_id) != -1) {
                         item.goods_name = selectGoodsData[i].goods_name; // 多规格模式，要增加商品名称、商品类型，后续还会增加，满足不同业务场景
                         item.goods_type_name = selectGoodsData[i].goods_type_name;
@@ -591,6 +601,18 @@ const getGoodsSkuNoPageListFn = () =>{
                 }
             }
         }
+
+        if(Object.keys(selectGoods).length && goodsIds.value.length){
+            for(let key in selectGoods){
+                let num = Number(key.split(replacePrefix)[1]);
+                if(goodsIds.value.indexOf(num) == -1){
+                    delete selectGoods[key];
+                }
+            }
+        }
+
+
+        setGoodsSelected();
     })
 }
 
@@ -618,7 +640,7 @@ const save = () => {
         });
         return;
     }
-    
+
     if(prop.way == 'single'){
         let realTypeNum = 0;
         let virtualTypeNum = 0;
@@ -629,7 +651,7 @@ const save = () => {
                 realTypeNum++;
             }
         }
-        
+
         if (realTypeNum != Object.keys(selectGoods).length && virtualTypeNum != Object.keys(selectGoods).length) {
             ElMessage({
                 type: 'warning',
@@ -679,6 +701,5 @@ defineExpose({
 }
 .arrow-show{
     transform: rotate(90deg);
-    translate: all .3s;
 }
 </style>

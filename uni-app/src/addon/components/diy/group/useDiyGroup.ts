@@ -1,9 +1,8 @@
-import { ref, reactive, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import Sortable from 'sortablejs';
 import { range } from 'lodash-es';
 import { onPageScroll, onHide, onShow } from '@dcloudio/uni-app';
 import useDiyStore from '@/app/stores/diy';
-import { getLocation } from '@/utils/common';
 
 export function useDiyGroup(params: any = {}) {
 
@@ -35,6 +34,9 @@ export function useDiyGroup(params: any = {}) {
         } else {
             obj['draggable-element'] = true;
         }
+		if(component.componentName == 'ImageAds'){
+			obj['overflow-hidden'] = true
+		}
         return obj;
     }
 
@@ -60,13 +62,12 @@ export function useDiyGroup(params: any = {}) {
         return false;
     }
 
-
     // 监听页面加载完成
     const onMountedLifeCycle = () => {
         onMounted(() => {
             // #ifdef H5
             if (diyStore.mode == 'decorate') {
-                var el = document.getElementById('componentList');
+                var el: any = document.getElementById('componentList');
                 const sortable = Sortable.create(el, {
                     draggable: '.draggable-element',
                     animation: 200,
@@ -90,11 +91,7 @@ export function useDiyGroup(params: any = {}) {
 
             nextTick(() => {
                 setTimeout(() => {
-                    if (data.value.global && data.value.global.topStatusBar && data.value.global.topStatusBar.style == 'style-4') {
-                        // 第一次获取经纬度
-                        getLocation()
-                    }
-					
+
 					// 初始化组件滚动值
 					scrollVal = uni.getStorageSync('componentsScrollValGroup');
 					if (scrollVal) {

@@ -1,15 +1,15 @@
 <template>
 	<template v-if="tabbar && Object.keys(tabbar).length">
 		<u-tabbar :value="value" zIndex="9999" :fixed="true" :placeholder="true" :safeAreaInsetBottom="true"
-			:inactive-color="tabbar.value.text_color" :active-color="tabbar.value.text_hover_color">
+			:inactive-color="tabbar.value.textColor" :active-color="tabbar.value.textHoverColor">
 			<block v-for="item in tabbar.value.list">
-				<u-tabbar-item class="py-[5rpx]" :style="{'background-color': tabbar.value.background_color}" :text="item.text"
+				<u-tabbar-item class="py-[5rpx]" :style="{'background-color': tabbar.value.backgroundColor}" :text="item.text"
 					:icon="img(value == item.link.url ? item.iconSelectPath : item.iconPath)" :name="item.link.url"
 					v-if="tabbar.value.type == 1" @click="itemBtn(item.link.url)"></u-tabbar-item>
-				<u-tabbar-item class="py-[5rpx]" :style="{'background-color': tabbar.value.background_color}"
+				<u-tabbar-item class="py-[5rpx]" :style="{'background-color': tabbar.value.backgroundColor}"
 					:icon="img(value == item.link.url ? item.iconSelectPath : item.iconPath)" :name="item.link.url"
 					v-if="tabbar.value.type == 2" @click="itemBtn(item.link.url)"></u-tabbar-item>
-				<u-tabbar-item class="py-[5rpx]" :style="{'background-color': tabbar.value.background_color}" :text="item.text" :name="item.link.url"
+				<u-tabbar-item class="py-[5rpx]" :style="{'background-color': tabbar.value.backgroundColor}" :text="item.text" :name="item.link.url"
 					v-if="tabbar.value.type == 3" @click="itemBtn(item.link.url)"></u-tabbar-item>
 			</block>
 		</u-tabbar>

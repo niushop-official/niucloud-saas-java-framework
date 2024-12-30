@@ -9,22 +9,22 @@
 				<text class="text-[22rpx] iconfont iconxiangyoujiantou"></text>
 			</view>
 		</view>
-		
+
 		<view class="flex justify-between">
 			<!-- 轮播图 -->
 			<view class="relative w-[340rpx] overflow-hidden" :style="carouselCss">
 				<view v-if="diyComponent.list.length == 1" class="leading-0 overflow-hidden">
 					<view @click="diyStore.toRedirect(diyComponent.list[0].link)">
-						<image v-if="diyComponent.list[0].imageUrl" :src="img(diyComponent.list[0].imageUrl)" mode="heightFix" class="h-[496rpx] !w-full" :show-menu-by-longpress="true"/>
-						<image v-else :src="img('static/resource/images/diy/figure.png')" mode="heightFix" class="h-[496rpx] !w-full" :show-menu-by-longpress="true"/>
+						<image v-if="diyComponent.list[0].imageUrl" :src="img(diyComponent.list[0].imageUrl)" mode="heightFix" class="h-[504rpx] !w-full" :show-menu-by-longpress="true"/>
+						<image v-else :src="img('static/resource/images/diy/figure.png')" mode="heightFix" class="h-[504rpx] !w-full" :show-menu-by-longpress="true"/>
 					</view>
 				</view>
 				<block v-else>
-					<swiper class="swiper ns-indicator-dots-three h-[496rpx]" autoplay="true" circular="true" :indicator-dots="isShowDots" @change="swiperChange" 
+					<swiper class="swiper ns-indicator-dots-three h-[504rpx]" autoplay="true" circular="true" :indicator-dots="isShowDots" @change="swiperChange"
 					:indicator-color="diyComponent.indicatorColor" :indicator-active-color="diyComponent.indicatorActiveColor">
 						<swiper-item class="swiper-item" v-for="(item) in diyComponent.list" :key="item.id">
 							<view @click="diyStore.toRedirect(item.link)">
-								<view class="item h-[496rpx]">
+								<view class="item h-[504rpx]">
 									<image v-if="item.imageUrl" :src="img(item.imageUrl)" mode="scaleToFill" class="w-full h-full" :show-menu-by-longpress="true"/>
 									<image v-else :src="img('static/resource/images/diy/figure.png')" mode="scaleToFill" class="w-full h-full" :show-menu-by-longpress="true"/>
 								</view>
@@ -38,8 +38,8 @@
 					<!-- #endif -->
 				</block>
 			</view>
-			
-			<view class="w-[340rpx] flex flex-col bg-[#fff] box-border overflow-hidden" :style="goodsTempCss" @click="toLink(goodsList[0])">
+
+			<view class="w-[340rpx] h-[504rpx] flex flex-col bg-[#fff] box-border overflow-hidden" :style="goodsTempCss" @click="toLink(goodsList[0])">
 				<view :style="goodsImgCss" class="w-[346rpx] h-[350rpx] overflow-hidden">
 					<u--image width="346rpx" height="350rpx" :src="img(goodsList[0].goods_cover_thumb_mid || '')" model="aspectFill">
 						<template #error>
@@ -56,11 +56,11 @@
 							<view class="text-[var(--price-text-color)] price-font truncate max-w-[200rpx]" :style="{ color : diyComponent.priceStyle.mainColor }">
 								<text class="text-[24rpx] font-400">￥</text>
 								<text class="text-[40rpx] font-500">{{ parseFloat(diyGoods.goodsPrice(goodsList[0])).toFixed(2).split('.')[0] }}</text>
-								<text class="text-[24rpx] font-500">.{{ parseFloat(diyGoods.goodsPrice(goodsList[0])).toFixed(2).split('.')[1] }}</text>	
+								<text class="text-[24rpx] font-500">.{{ parseFloat(diyGoods.goodsPrice(goodsList[0])).toFixed(2).split('.')[1] }}</text>
 							</view>
 							<image v-if="diyGoods.priceType(goodsList[0]) == 'member_price'" class="max-w-[50rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 						</view>
-						
+
 						<view class="w-[44rpx] h-[44rpx] bg-[red] flex items-center justify-center rounded-[50%]" :style="{ backgroundColor : diyComponent.saleStyle.color }">
 							<text class="iconfont iconjia  font-500 text-[32rpx] text-[#fff]"></text>
 						</view>
@@ -77,8 +77,8 @@
 	import { redirect, img } from '@/utils/common';
 	import useDiyStore from '@/app/stores/diy';
 	import { getGoodsComponents } from '@/addon/shop/api/goods';
-	import {useGoods} from '@/hooks/useGoods'
-	
+	import {useGoods} from '@/addon/shop/hooks/useGoods'
+
 	const diyGoods = useGoods();
 	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
 	const diyStore = useDiyStore();
@@ -94,13 +94,13 @@
 			return props.component;
 		}
 	})
-	
+
 	// 轮播指示器
 	let isShowDots = ref(true)
 	// #ifdef H5
 	isShowDots.value = true;
 	// #endif
-	
+
 	// #ifdef MP-WEIXIN
 	isShowDots.value = false;
 	// #endif
@@ -111,11 +111,6 @@
         if(diyComponent.value.componentStartBgColor) {
             if (diyComponent.value.componentStartBgColor && diyComponent.value.componentEndBgColor) style += `background:linear-gradient(${diyComponent.value.componentGradientAngle},${diyComponent.value.componentStartBgColor},${diyComponent.value.componentEndBgColor});`;
             else style += 'background-color:' + diyComponent.value.componentStartBgColor + ';';
-        }
-
-        if(diyComponent.value.componentBgUrl) {
-            style += `background-image:url('${ img(diyComponent.value.componentBgUrl) }');`;
-            style += 'background-size: cover;background-repeat: no-repeat;';
         }
 
 		if (diyComponent.value.topRounded) style += 'border-top-left-radius:' + diyComponent.value.topRounded * 2 + 'rpx;';
@@ -132,30 +127,30 @@
         if (diyComponent.value.topElementRounded) style += 'border-top-right-radius:' + diyComponent.value.topElementRounded * 2 + 'rpx;';
         if (diyComponent.value.bottomElementRounded) style += 'border-bottom-left-radius:' + diyComponent.value.bottomElementRounded * 2 + 'rpx;';
         if (diyComponent.value.bottomElementRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomElementRounded * 2 + 'rpx;';
-		
+
 		if(diyComponent.value.margin && diyComponent.value.margin.both) style += 'width: calc((100vw - ' + (diyComponent.value.margin.both*4) + 'rpx - 20rpx) / 2);'
 		else style += 'width: calc((100vw - 20rpx) / 2 );'
         return style;
     })
-	
+
 	const goodsImgCss = computed(() => {
 	    var style = '';
 	    if (diyComponent.value.topElementRounded) style += 'border-radius:' + diyComponent.value.topElementRounded * 2 + 'rpx;';
 	    return style;
 	})
-	
+
 	const carouselCss = computed(() => {
 	    var style = '';
 	    if (diyComponent.value.topCarouselRounded) style += 'border-top-left-radius:' + diyComponent.value.topCarouselRounded * 2 + 'rpx;';
 	    if (diyComponent.value.topCarouselRounded) style += 'border-top-right-radius:' + diyComponent.value.topCarouselRounded * 2 + 'rpx;';
 	    if (diyComponent.value.bottomCarouselRounded) style += 'border-bottom-left-radius:' + diyComponent.value.bottomCarouselRounded * 2 + 'rpx;';
 	    if (diyComponent.value.bottomCarouselRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomCarouselRounded * 2 + 'rpx;';
-		
+
 		if(diyComponent.value.margin && diyComponent.value.margin.both) style += 'width: calc((100vw - ' + (diyComponent.value.margin.both*4) + 'rpx - 20rpx) / 2);'
 		else style += 'width: calc((100vw - 20rpx) / 2 );'
 	    return style;
 	})
-	
+
 	watch(
 		() => props.pullDownRefreshCount,
 		(newValue, oldValue) => {
@@ -206,7 +201,7 @@
 	const toLink = (data: any) => {
 		redirect({ url: '/addon/shop/pages/goods/detail', param: { goods_id: data.goods_id } })
 	}
-	
+
 	const swiperIndex = ref(0);
 	const swiperChange = e => {
 	    swiperIndex.value = e.detail.current;

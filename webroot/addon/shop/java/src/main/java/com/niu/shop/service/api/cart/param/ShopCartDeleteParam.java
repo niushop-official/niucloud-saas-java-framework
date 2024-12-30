@@ -14,7 +14,7 @@ public class ShopCartDeleteParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "goodsId参数缺失")
+    @NotNull(message = "ids参数缺失")
     private Object ids;
 
 }

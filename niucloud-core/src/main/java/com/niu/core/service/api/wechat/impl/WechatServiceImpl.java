@@ -122,17 +122,14 @@ public class WechatServiceImpl implements IWechatService {
                 return loginService.login(unionidMember);
             }
         }
-        LoginConfigVo config = coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
-        if (config.getIsAuthRegister() == 1) {
-            Member registerMember = new Member();
-            registerMember.setWxOpenid(openid);
-            registerMember.setNickname(nickname);
-            registerMember.setHeadimg(avatar);
-            registerMember.setWxUnionid(unionid);
-            registerMember.setPid(pid);
-            return registerService.register(registerMember);
-        }
-        return null;
+
+        Member registerMember = new Member();
+        registerMember.setWxOpenid(openid);
+        registerMember.setNickname(nickname);
+        registerMember.setHeadimg(avatar);
+        registerMember.setWxUnionid(unionid);
+        registerMember.setPid(pid);
+        return registerService.register(registerMember);
     }
 
     /**
@@ -195,7 +192,14 @@ public class WechatServiceImpl implements IWechatService {
     public WxOAuth2UserInfo getWechatUser(WechatAuthParam param) {
         try {
             WxOAuth2AccessToken wxOAuth2AccessToken = WechatUtils.mp(RequestUtils.siteId()).getOAuth2Service().getAccessToken(param.getCode());
-            return WechatUtils.mp(RequestUtils.siteId()).getOAuth2Service().getUserInfo(wxOAuth2AccessToken, null);
+            try {
+                return WechatUtils.mp(RequestUtils.siteId()).getOAuth2Service().getUserInfo(wxOAuth2AccessToken, null);
+            } catch (Exception e) {
+                WxOAuth2UserInfo userInfo = new WxOAuth2UserInfo();
+                userInfo.setOpenid(wxOAuth2AccessToken.getOpenId());
+                userInfo.setUnionId(wxOAuth2AccessToken.getUnionId());
+                return userInfo;
+            }
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }

@@ -20,6 +20,28 @@
       "name": "消费奖励",
       "inc": 1,
       "dec": 0
+    },
+    "manjian_gift_give": {
+      "name": "满减活动赠品发放",
+      "inc": 1,
+      "dec": 0
+    },
+    "manjian_gift_back": {
+      "name": "满减活动赠品退还",
+      "inc": 0,
+      "dec": 1
+    }
+  },
+  "balance": {
+    "manjian_gift_give": {
+      "name": "满减活动赠品发放",
+      "inc": 1,
+      "dec": 0
+    },
+    "manjian_gift_back": {
+      "name": "满减活动赠品退还",
+      "inc": 0,
+      "dec": 1
     }
   },
   "growth": {

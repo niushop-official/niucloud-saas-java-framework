@@ -16,7 +16,11 @@
                     <el-form-item :label="t('title')" prop="title">
                         <el-input v-model.trim="tableData.searchParam.title" :placeholder="t('titlePlaceholder')" />
                     </el-form-item>
-
+                    <el-form-item :label="t('statusName')" prop='status'>
+						<el-select v-model="tableData.searchParam.status" clearable class="input-item">
+							<el-option v-for="(item, index) in statusList" :key="index" :label="item" :value="index"></el-option>
+						</el-select>
+					</el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="loadCouponList()">{{ t('search') }}</el-button>
                         <el-button @click="resetForm(searchFormRef)">{{ t('reset') }}</el-button>
@@ -32,8 +36,8 @@
                     </template>
 
                     <el-table-column prop="title" :label="t('title')" min-width="130" />
-                    <el-table-column prop="type_name" :label="t('type')" min-width="130" />
-                    <el-table-column prop="price" :label="t('price')" min-width="130" >
+                    <el-table-column prop="type_name" :label="t('type')" min-width="98" />
+                    <el-table-column prop="price" :label="t('price')" min-width="100" >
                         <template #default="{ row }">
                             <span >¥{{row.price}}</span>
                         </template>
@@ -63,7 +67,7 @@
                             <span v-else >满{{ row.min_condition_money }}元可用</span>
                         </template>
                     </el-table-column>
-                    <el-table-column  :label="t('validType')" min-width="210">
+                    <el-table-column  :label="t('validType')" min-width="190">
                         <template #default="{ row }">
                             <template v-if="row.receive_type == 1">
                                 <span v-if="row.valid_type == 1">  领取之日起{{ row.length || '' }} 天内有效</span>
@@ -75,7 +79,7 @@
                     <el-table-column  :label="t('receiveTypeTime')" min-width="210">
                         <template #default="{ row }">
                             <div v-if="row.receive_type == 1">
-                                <div v-if="!Test.empty(row.start_time) && !Test.empty(row.end_time)" class="flex flex-col">
+                                <div v-if="parseInt(row.start_time) != 0 && parseInt(row.end_time) !=0" class="flex flex-col">
                                     <span>开始时间：{{row.start_time}}</span>
                                     <span>结束时间：{{row.end_time}}</span>
                                 </div>
@@ -84,11 +88,11 @@
                             <span v-else>--</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="status_name" :label="t('statusName')" min-width="130" />
+                    <el-table-column prop="status_name" :label="t('statusName')" min-width="98" />
                     <el-table-column :label="t('operation')" fixed="right" align="right" min-width="160">
                        <template #default="{ row }">
                         <el-button type="primary" link @click="spreadEvent(row)">{{ t('spreadGoods') }}</el-button>
-                            <el-button type="primary" link @click="editEvent(row)" v-if="row.status == 1">{{ t('edit') }}</el-button>
+                            <el-button type="primary" link @click="editEvent(row)" v-if="row.status == 0 || row.status == 1">{{ t('edit') }}</el-button>
                             <el-button type="primary" link @click="deleteEvent(row)" v-if="row.status != 1">{{ t('delete') }}</el-button>
                             <el-button type="primary" link @click="closeEvent(row)" v-if="row.status == 1">{{ t('close') }}</el-button>
                             <el-button type="primary" link @click="collectionEvent(row)">{{ t('receive') }}</el-button>
@@ -110,16 +114,16 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCouponList, deleteCoupon, closeCoupon } from '@/addon/shop/api/marketing'
+import { getCouponList, deleteCoupon, closeCoupon,getCouponStatusList } from '@/addon/shop/api/marketing'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { t } from '@/lang'
-import Test from '@/utils/test'
 import couponSpreadPopup from '@/addon/shop/views/marketing/coupon/components/coupon-spread-popup.vue'
+import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const router = useRouter()
 const route = useRoute()
 const pageName = route.meta.title
-
+const statusList = ref(null)
 // 表单内容
 const tableData = reactive({
     page: 1,
@@ -128,12 +132,19 @@ const tableData = reactive({
     loading: true,
     data: [],
     searchParam: {
-        title: ''
+        title: '',
+        status:'',
     }
 })
 
 const searchFormRef = ref<FormInstance>()
 
+const getCouponStatusListFn = () =>{
+    getCouponStatusList().then(res=>{
+        statusList.value = res.data
+    })
+}
+getCouponStatusListFn()
 const loadCouponList = (page: number = 1) => {
     tableData.loading = true
     tableData.page = page
@@ -146,11 +157,12 @@ const loadCouponList = (page: number = 1) => {
         tableData.loading = false
         tableData.data = res.data.data
         tableData.total = res.data.total
+        setTablePageStorage(tableData.page, tableData.limit, tableData.searchParam);
     }).catch(() => {
         tableData.loading = false
     })
 }
-loadCouponList()
+loadCouponList(getTablePageStorage(tableData.searchParam).page);
 
 // 商品推广
 const couponSpreadPopupRef: any = ref(null)

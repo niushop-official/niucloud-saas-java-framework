@@ -2,21 +2,21 @@
     <el-dialog v-model="showDialog" :title="t('packageInfo')" width="700px" class="diy-dialog-wrap" :destroy-on-close="true">
         <div v-loading="loading" class="max-h-[600px] overflow-y-auto">
 			<h3 class="panel-title">{{ t('deliveryInfo') }}</h3>
-	        <div class="mb-[20px] text-[14px] flex justify-between">
-		        <div>
-			        <span>{{ t('devliveryTime') }}：</span><span>{{ packageData.create_time }}</span>
-		        </div>
-	        </div>
-	        <div class="mb-[20px] text-[14px] flex">
-		        <div v-if="packageData.company">
-			        <span>{{ t('companyName') }}：</span><span>{{ packageData.company.company_name }}</span>
-		        </div>
-		        <div>
-			        <span class="ml-[60px]">{{ t('logisticNo') }}：</span><span>{{ packageData.express_number }}</span>
-		        </div>
-	        </div>
+			<div class="pl-[20px] mb-[20px] text-[14px] flex justify-between">
+				<div>
+					<span>{{ t('devliveryTime') }}：</span><span >{{ packageData.create_time }}</span>
+				</div>
+			</div>
+			<div class="pl-[20px] mb-[20px] text-[14px] flex">
+				<div v-if="packageData.company">
+					<span>{{ t('companyName') }}：</span><span>{{ packageData.company.company_name }}</span>
+				</div>
+				<div v-if="packageData.express_number">
+					<span class="ml-[60px]">{{ t('logisticNo') }}：</span><span>{{ packageData.express_number }}</span>
+				</div>
+			</div>
 			<h3 class="panel-title">{{ t('goodsInfo') }}</h3>
-			<div class="mb-[20px]">
+			<div class="pl-[20px] mb-[20px]">
 				<el-table :data="packageData.order_goods" size="large">
 					<el-table-column :label="t('goodsName')" align="left" width="300">
 						<template #default="{ row }">
@@ -36,17 +36,20 @@
 				</el-table>
 			</div>
 			<h3 class="panel-title">{{ t('logisticInfo') }}</h3>
-			<div v-if="packageData.traces">
-				<template v-if="packageData.traces.list">
-					<div class="flex justify-between mb-[15px]" v-for="(item, index) in packageData.traces.list" :key="index">
-						<span class="block w-[150px]">{{ item.datetime }}</span><span class="block w-[500px]">{{ item.remark }}</span>
-					</div>
-				</template>
-				<div>{{ packageData.traces.reason}}</div>
-			</div>
-			<div v-else>
-				<div>{{ t('notLogistics') }}</div>
-			</div>
+			<template v-if="packageData.sub_delivery_type != 'none_express'">
+				<div class="pl-[20px]" v-if="packageData.traces">
+					<template v-if="packageData.traces.list">
+						<div class="flex justify-between mb-[15px]" v-for="(item, index) in packageData.traces.list" :key="index">
+							<span class="block w-[150px]">{{ item.datetime }}</span><span class="block w-[500px]">{{ item.remark }}</span>
+						</div>
+					</template>
+					<div>{{ packageData.traces.reason}}</div>
+				</div>
+				<div class="pl-[20px]" v-else>
+					<div>{{ t('notLogistics') }}</div>
+				</div>
+			</template>
+			<span class="pl-[20px]" v-else>{{ t('noLogisticsRequired') }}</span>
 		</div>
         <template #footer>
             <span class="dialog-footer">

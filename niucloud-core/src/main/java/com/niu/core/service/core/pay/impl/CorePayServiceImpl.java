@@ -7,6 +7,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.loader.pay.BasePay;
 import com.niu.core.common.loader.pay.PayLoader;
@@ -50,6 +51,9 @@ public class CorePayServiceImpl implements ICorePayService {
     @Resource
     ICorePrinterService corePrinterService;
 
+    @Resource
+    Cached cached;
+
     /**
      * 支付
      *
@@ -60,6 +64,9 @@ public class CorePayServiceImpl implements ICorePayService {
     @Transactional
     public Object pay(PayParam param) {
         Pay pay = this.checkOrCreate(param.getSiteId(), param.getTradeType(), param.getTradeId());
+        if (pay.getBody().length() > 15) {
+            pay.setBody(pay.getBody().substring(0, 15) + "...");
+        }
         param.setPay(pay);
         param.setNotifyUrl(buildNotifyUrl(param.getSiteId(), param.getChannel(), param.getType(), "pay"));
         return this.driver(param.getSiteId(), param.getChannel(), param.getType()).pay(param);
@@ -96,7 +103,16 @@ public class CorePayServiceImpl implements ICorePayService {
 
     public String buildNotifyUrl(Integer siteId, String channel, String type, String action) {
         String[] param = {siteId.toString(), channel, type, action};
-        return RequestUtils.handler().getScheme() + "://" + RequestUtils.getRequestDomain() + "/api/pay/notify/" + String.join("/", param);
+        String baseUrl = "";
+        if (RequestUtils.handler() != null) {
+            baseUrl = RequestUtils.getDomain(true);
+            cached.put("payBaseurl", baseUrl);
+        } else if (cached.get("payBaseurl") != null) {
+            baseUrl = (String) cached.get("payBaseurl");
+        } else {
+            throw new CommonException("build notify url error");
+        }
+        return baseUrl + "/api/pay/notify/" + String.join("/", param);
     }
 
     /**

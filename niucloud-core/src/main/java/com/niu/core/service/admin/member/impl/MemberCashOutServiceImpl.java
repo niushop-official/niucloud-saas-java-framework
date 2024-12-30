@@ -15,6 +15,7 @@ import com.niu.core.entity.member.MemberCashOut;
 import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.mapper.member.MemberCashOutMapper;
 import com.niu.core.mapper.member.MemberMapper;
+import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
 import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
 import com.niu.core.service.admin.member.IMemberCashOutService;
@@ -60,10 +61,17 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         queryWrapper.setAlias("mco").innerJoin("?_member m ON mco.member_id = m.member_id".replace("?_", GlobalConfig.tablePrefix));
         queryWrapper.select("mco.*,m.member_no,m.username,m.nickname,m.mobile,m.headimg");
         queryWrapper.eq("mco.site_id", siteId);
-        queryWrapper.orderByDesc("mco.sign_id");
+        queryWrapper.orderByDesc("mco.id");
 
-        if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) queryWrapper.like("m.member_no|m.username|m.nickname|m.mobile", searchParam.getKeywords());
-        if (ObjectUtil.isNotEmpty(searchParam.getMemberId())) queryWrapper.eq("mco.member_id", searchParam.getMemberId());
+        if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) {
+            queryWrapper.and(i ->
+                    i.like("m.member_no", searchParam.getKeywords())
+                            .or().like("m.username", searchParam.getKeywords())
+                            .or().like("m.nickname", searchParam.getKeywords())
+                            .or().like("m.mobile", searchParam.getKeywords())
+            );
+        }
+        if (ObjectUtil.isNotEmpty(searchParam.getMemberId()) && searchParam.getMemberId() > 0) queryWrapper.eq("mco.member_id", searchParam.getMemberId());
         if (ObjectUtil.isNotEmpty(searchParam.getStatus())) queryWrapper.eq("mco.status", searchParam.getStatus());
         if (ObjectUtil.isNotEmpty(searchParam.getCashOutNo())) queryWrapper.like("mco.cash_out_no", searchParam.getCashOutNo());
         if (ObjectUtil.isNotEmpty(searchParam.getTransferType())) queryWrapper.like("mco.transfer_type", searchParam.getTransferType());
@@ -154,5 +162,24 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
      */
     public void audit(MemberCashOutAuditParam param) {
         iCoreMemberCashOutService.audit(RequestUtils.siteId(), param.getId(), param.getAction(), param);
+    }
+
+    /**
+     * 转账
+     * @param param
+     */
+    @Override
+    public void transfer(CashOutTransferParam param) {
+        Integer siteId = RequestUtils.siteId();
+
+        MemberCashOut model = memberCashOutMapper.selectOne(
+                new QueryWrapper<MemberCashOut>()
+                        .eq("id", param.getId())
+                        .eq("site_id", siteId)
+                        .last("limit 1"));
+
+        Assert.notNull(model, "数据不存在");
+
+        iCoreMemberCashOutService.transfer(model, param);
     }
 }

@@ -100,7 +100,7 @@ public class WeappServiceImpl implements IWeappService {
         }
 
         Member registerMember = new Member();
-        registerMember.setWxOpenid(openid);
+        registerMember.setWeappOpenid(openid);
         registerMember.setWxUnionid(unionid);
         registerMember.setPid(pid);
         return registerService.register(registerMember);

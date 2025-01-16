@@ -16,6 +16,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import com.niu.core.service.core.diy.param.StartUpPageConfigParam;
+import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -137,14 +138,19 @@ public class DiyController {
         return Result.success(diyPageService.getLink());
     }
 
+    @Data
+    public static class Id {
+        private Integer id;
+    }
+
     /**
      * 设为使用
      *
      * @return Result<Object>
      */
-    @PutMapping("/use/{id}")
-    public Result<Object> setUse(@PathVariable Integer id) {
-        diyPageService.setUse(id);
+    @PutMapping("/use")
+    public Result<Object> setUse(@RequestBody Id id) {
+        diyPageService.setUse(id.getId());
         return Result.success();
     }
 

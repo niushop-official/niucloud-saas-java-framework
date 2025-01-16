@@ -1,0 +1,1 @@
+import{bt as n}from"./index-ee699c39.js";function t(){return n.get("shop/rank")}function o(t){return n.get("shop/rank/goods",t)}function r(){return n.get("shop/rank/getRankConfig")}function e(t){return n.get("shop/rank/components",t)}export{t as a,r as b,o as c,e as g};

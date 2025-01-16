@@ -377,7 +377,7 @@ import { ref, reactive, watch, h } from 'vue'
 import { t } from '@/lang'
 import { getAddonLocal, uninstallAddon, installAddon, preInstallCheck, cloudInstallAddon, getAddonInstalltask, getAddonCloudInstallLog, preUninstallCheck, cancelInstall } from '@/app/api/addon'
 import { deleteAddonDevelop } from '@/app/api/tools'
-import { downloadVersion, getAuthinfo, setAuthinfo } from '@/app/api/module'
+import { downloadVersion, getAuthInfo, setAuthInfo } from '@/app/api/module'
 import { ElMessage, ElMessageBox, ElNotification, FormInstance, FormRules } from 'element-plus'
 import 'vue-web-terminal/lib/theme/dark.css'
 import { Terminal, TerminalFlash } from 'vue-web-terminal'
@@ -436,7 +436,7 @@ const downEvent = (param: Record<string, any>, isDown = false) => {
 }
 
 const authCode = ref('')
-getAuthinfo().then(res => {
+getAuthInfo().then(res => {
     if (res.data.data && res.data.data.auth_code) {
         authCode.value = res.data.data.auth_code
     }
@@ -865,7 +865,7 @@ const saveLoading = ref(false)
 const authLoading = ref(true)
 const checkAppMange = () => {
     authLoading.value = true
-    getAuthinfo()
+    getAuthInfo()
         .then((res) => {
             authLoading.value = false
             if (res.data.data && res.data.data.length != 0) {
@@ -905,7 +905,7 @@ const save = async (formEl: FormInstance | undefined) => {
         if (valid) {
             saveLoading.value = true
 
-            setAuthinfo(formData)
+            setAuthInfo(formData)
                 .then(() => {
                     saveLoading.value = false
                     setTimeout(() => {

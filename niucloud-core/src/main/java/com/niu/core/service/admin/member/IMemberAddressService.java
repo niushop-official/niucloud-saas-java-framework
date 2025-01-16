@@ -7,6 +7,8 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.member.vo.MemberAddressInfoVo;
 import com.niu.core.service.admin.member.vo.MemberAddressListVo;
 
+import java.util.List;
+
 /**
  * 会员收货地址服务接口
  */
@@ -15,11 +17,9 @@ public interface IMemberAddressService {
 
     /**
      * 会员收货地址列表
-     * @param pageParam 分页参数
-     * @param searchParam 搜索参数
-     * @return PageResult<MemberAddressListVo>
+     * @return List<MemberAddressListVo>
      */
-    PageResult<MemberAddressListVo> list(PageParam pageParam, MemberAddressSearchParam searchParam);
+    List<MemberAddressListVo> list(MemberAddressSearchParam searchParam);
 
     /**
      * 会员收货地址详情

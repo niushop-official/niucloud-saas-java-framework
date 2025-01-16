@@ -1,8 +1,10 @@
 package com.niu.core.controller.adminapi.sys;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.enums.poster.PosterTypeEnum;
 import com.niu.core.service.admin.sys.ISysPosterService;
 import com.niu.core.service.admin.sys.param.*;
@@ -10,6 +12,8 @@ import com.niu.core.service.admin.sys.vo.SysPosterInfoVo;
 import com.niu.core.service.admin.sys.vo.SysPosterListVo;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.sys.param.SysPosterTemplateSearchParam;
+import com.niu.core.service.core.poster.ICorePosterService;
+import com.niu.core.service.core.poster.param.GetPosterParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
@@ -23,6 +27,9 @@ import java.util.List;
 @RequestMapping("adminapi/sys/poster")
 @SaCheckLogin
 public class SysPosterController {
+
+    @Resource
+    private ICorePosterService corePosterService;
 
     @Resource
     ISysPosterService sysPosterService;
@@ -145,5 +152,17 @@ public class SysPosterController {
     public Result modifyDefault(@RequestBody SysPosterModifyParam param) {
         sysPosterService.modifyDefault(param.getId());
         return Result.success();
+    }
+
+    /**
+     * 生成海报
+     * @param param
+     * @return
+     */
+    @GetMapping("/generate")
+    public Result<?> poster(GetPosterParam param) {
+        param.setSiteId(RequestUtils.siteId());
+        param.setChannel(ObjectUtil.defaultIfNull(param.getChannel(), "h5"));
+        return Result.success("", corePosterService.get(param));
     }
 }

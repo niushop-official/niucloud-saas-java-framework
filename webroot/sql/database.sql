@@ -368,6 +368,7 @@ CREATE TABLE `nc_pay`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
   `site_id` int(11) NOT NULL DEFAULT 0 COMMENT '站点id',
   `main_id` int(11) NOT NULL DEFAULT 0 COMMENT '支付会员id',
+  `from_main_id` INT(11) NOT NULL DEFAULT 0 COMMENT '发起支付会员id',
   `out_trade_no` varchar(255) NOT NULL DEFAULT '' COMMENT '支付流水号',
   `trade_type` varchar(255) NOT NULL DEFAULT '' COMMENT '业务类型',
   `trade_id` int(11) NOT NULL DEFAULT 0 COMMENT '业务id',

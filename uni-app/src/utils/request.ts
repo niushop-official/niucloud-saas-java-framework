@@ -4,24 +4,24 @@ import { getToken, getAppChannel, getSiteId, redirect, currRoute, isUrl } from '
 import qs from 'qs'
 
 interface RequestConfig {
-    showErrorMessage?: boolean
-    showSuccessMessage?: boolean
+    showErrorMessage ?: boolean
+    showSuccessMessage ?: boolean
 }
 
 interface RequestOptions extends UniNamespace.RequestOptions, RequestOptions {
 }
 
 class Request {
-    private baseUrl: string
+    private baseUrl : string
 
-    private config: RequestOptions = {
+    private config : RequestOptions = {
         url: '',
         header: {}
     }
 
     constructor() {
         // #ifdef H5
-        this.baseUrl = import.meta.env.VITE_APP_BASE_URL || `${ location.origin }/api/`
+        this.baseUrl = import.meta.env.VITE_APP_BASE_URL || `${location.origin}/api/`
         // #endif
         // #ifndef H5
         this.baseUrl = import.meta.env.VITE_APP_BASE_URL
@@ -57,25 +57,25 @@ class Request {
         }
     }
 
-    public get(url: string, data: AnyObject = {}, config: RequestConfig = {}) {
+    public get(url : string, data : AnyObject = {}, config : RequestConfig = {}) {
         return this.request('GET', url, data, config)
     }
 
-    public post(url: string, data: AnyObject = {}, config: RequestConfig = {}) {
+    public post(url : string, data : AnyObject = {}, config : RequestConfig = {}) {
         return this.request('POST', url, data, config)
     }
 
-    public put(url: string, data: AnyObject = {}, config: RequestConfig = {}) {
+    public put(url : string, data : AnyObject = {}, config : RequestConfig = {}) {
         return this.request('PUT', url, data, config)
     }
 
-    public delete(url: string, data: AnyObject = {}, config: RequestConfig = {}) {
+    public delete(url : string, data : AnyObject = {}, config : RequestConfig = {}) {
         return this.request('DELETE', url, data, config)
     }
     /**
      * 发送上传请求
      */
-    public upload(url: string, data: AnyObject = {}, config: RequestConfig = {}) {
+    public upload(url : string, data : AnyObject = {}, config : RequestConfig = {}) {
         this.requestInterceptors()
 
         const params = Object.assign(uni.$u.deepClone(this.config), config, {
@@ -110,7 +110,7 @@ class Request {
     /**
      * 发送请求
      */
-    private request(method: string, url: string, data ?: AnyObject, config: RequestConfig = {}) {
+    private request(method : string, url : string, data ?: AnyObject, config : RequestConfig = {}) {
         this.requestInterceptors()
 
         const params = Object.assign(uni.$u.deepClone(this.config), config, {
@@ -118,8 +118,24 @@ class Request {
             method
         })
 
+        const queryParams = (data) => {
+            const params = new URLSearchParams();
+            for (const [key, value] of Object.entries(data)) {
+                if (Array.isArray(value)) {
+                    value.forEach(item => params.append(key + '[]', item));
+                } else if (value !== null && typeof value === 'object') {
+                    for (const [nestedKey, nestedValue] of Object.entries(value)) {
+                        params.append(`${key}[${nestedKey}]`, nestedValue);
+                    }
+                } else {
+                    params.append(key, value);
+                }
+            }
+            return params.toString();
+        }
+        
         if (params.method.toUpperCase() == 'GET') {
-            params.url += '?' + qs.stringify(data);
+            if (!uni.$u.test.empty(data)) params.url += "?" + queryParams(data)
         } else {
             params.data = data;
         }
@@ -151,7 +167,7 @@ class Request {
         })
     }
 
-    private handleAuthError(code: number) {
+    private handleAuthError(code : number) {
         switch (code) {
             case 401:
                 useMemberStore().logout()

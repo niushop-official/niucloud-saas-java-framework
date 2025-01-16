@@ -1,1 +1,0 @@
-import{aI as a,aJ as e,__tla as n}from"./entry.b5215270.js";let r,h=Promise.all([(()=>{try{return n}catch{}})()]).then(async()=>{r=function(){return{setLoginBack:t=>{a.set({key:"loginBack",data:{path:t.path,query:t.query}})},handleLoginBack:()=>{const t=a.get("loginBack");t?e().push({path:t.path,query:t.query}):e().push({path:"/"})}}}});export{h as __tla,r as u};

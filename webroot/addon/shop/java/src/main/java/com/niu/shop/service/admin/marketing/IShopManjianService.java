@@ -14,7 +14,10 @@ import com.niu.shop.service.core.marketing.param.ShopManjianParam;
 import com.niu.shop.service.core.marketing.param.ShopManjianSearchParam;
 import com.niu.shop.service.core.marketing.vo.ShopManjianInfoVo;
 import com.niu.shop.service.core.marketing.vo.ShopManjianListVo;
+import io.swagger.models.auth.In;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 /**
  * 满减活动服务接口
@@ -45,7 +48,7 @@ public interface IShopManjianService {
      *
      * @param addParam 添加参数
      */
-    void add(ShopManjianParam addParam);
+    Map<String, Object> add(ShopManjianParam addParam);
 
     ShopManjianInitVo getInit(ShopManjianInitParam param);
 
@@ -55,7 +58,7 @@ public interface IShopManjianService {
      * @param id        主键
      * @param editParam 编辑参数
      */
-    void edit(Integer id, ShopManjianParam editParam);
+    Map<String, Object> edit(Integer id, ShopManjianParam editParam);
 
     @Transactional
     void closeManjian(Integer manjianId);

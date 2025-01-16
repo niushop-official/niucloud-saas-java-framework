@@ -1,5 +1,6 @@
 package com.niu.core.common.utils.system;
 
+import com.niu.core.common.config.GlobalConfig;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -37,7 +38,12 @@ public final class ClassPathScanAnnotationManager {
         componentProvider.findCandidateComponents(basePackage).forEach(beanDefinition -> {
             String beanClassName = beanDefinition.getBeanClassName();
             try {
-                Class<?> beanClass = Class.forName(beanClassName);
+                Class<?> beanClass = null;
+                if (GlobalConfig.runActive.equals("dev")) {
+                    beanClass = Class.forName(beanClassName);
+                } else {
+                    beanClass = Thread.currentThread().getContextClassLoader().loadClass(beanClassName);
+                }
                 for (Class scanAnnotationClass : scanAnnotationClassList) {
                     Annotation annotation = beanClass.getAnnotation(scanAnnotationClass);
                     if (annotation != null) {

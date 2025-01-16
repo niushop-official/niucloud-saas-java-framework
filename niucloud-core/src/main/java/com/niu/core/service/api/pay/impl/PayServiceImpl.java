@@ -3,18 +3,24 @@ package com.niu.core.service.api.pay.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.entity.member.Member;
-import com.niu.core.entity.pay.Pay;
-import com.niu.core.enums.common.ChannelEnum;
-import com.niu.core.mapper.member.MemberMapper;
-import com.niu.core.service.api.pay.IPayService;
-import com.niu.core.service.api.pay.vo.PayInfoVo;
-import com.niu.core.service.core.pay.ICorePayChannelService;
-import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.core.common.loader.pay.param.PayAsyncNotifyParam;
 import com.niu.core.common.loader.pay.param.PayParam;
-import com.niu.core.service.core.pay.vo.PayTypeVo;
+import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.entity.member.Member;
+import com.niu.core.entity.pay.Pay;
+import com.niu.core.entity.sys.SysPoster;
+import com.niu.core.enums.common.ChannelEnum;
+import com.niu.core.event.pay.PayTradeInfoDefiner;
+import com.niu.core.mapper.member.MemberMapper;
+import com.niu.core.mapper.pay.PayMapper;
+import com.niu.core.mapper.sys.SysPosterMapper;
+import com.niu.core.service.api.pay.IPayService;
+import com.niu.core.service.api.pay.vo.FriendspayInfoVo;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
+import com.niu.core.service.core.pay.ICorePayChannelService;
+import com.niu.core.service.core.pay.ICorePayService;
+import com.niu.core.service.core.pay.vo.GetInfoByTradeVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +42,15 @@ public class PayServiceImpl implements IPayService {
     @Resource
     ICorePayChannelService corePayChannelService;
 
+    @Resource
+    PayMapper payMapper;
+
+    @Resource
+    SysPosterMapper sysPosterMapper;
+
     /**
      * 支付
+     *
      * @param param
      * @return
      */
@@ -70,20 +83,59 @@ public class PayServiceImpl implements IPayService {
         return corePayService.asyncNotify(param, request, response);
     }
 
-    public PayInfoVo getInfoByTrade(String tradeType, Integer tradeId) {
-        Pay pay = null;
-        pay = corePayService.findPayInfoByTrade(RequestUtils.siteId(), tradeType, tradeId);
+    public GetInfoByTradeVo getInfoByTrade(String tradeType, Integer tradeId, String scene) {
+        return corePayService.getInfoByTrade(RequestUtils.siteId(), tradeType, tradeId, RequestUtils.channel(), scene);
+    }
 
-        if (pay == null) {
-            pay = corePayService.createByTrade(RequestUtils.siteId(), tradeType, tradeId);
+    @Override
+    public FriendspayInfoVo friendspayInfo(String tradeType, Integer tradeId) {
+        QueryWrapper<Pay> payQueryWrapper = new QueryWrapper<>();
+        payQueryWrapper.eq("trade_type", tradeType)
+                .eq("trade_id", tradeId);
+        List<Pay> fromPayInfos = payMapper.selectList(payQueryWrapper);
+        if (ObjectUtil.isEmpty(fromPayInfos) || fromPayInfos.stream().noneMatch(o -> o.getSiteId().equals(RequestUtils.siteId()))) {
+            throw new RuntimeException("支付单据不存在");
         }
 
-        PayInfoVo vo = new PayInfoVo();
-        BeanUtil.copyProperties(pay, vo);
+        GetInfoByTradeVo payInfo = getInfoByTrade(tradeType, tradeId, "friendspay");
+        if (ObjectUtil.isEmpty(payInfo)) {
+            return new FriendspayInfoVo();
+        }
 
-        List<PayTypeVo> payTypeList = corePayChannelService.getAllowPayTypeByChannel(RequestUtils.siteId(), RequestUtils.channel(), tradeType);
-        vo.setPayTypeList(payTypeList);
+        FriendspayInfoVo vo = new FriendspayInfoVo();
+        BeanUtil.copyProperties(payInfo, vo);
+        vo.setConfig(payInfo.getConfig());
+        vo.setPayTypeList(payInfo.getPayTypeList());
+        vo.setCreateTime(DateUtils.timestampToString(payInfo.getCreateTime()));
+        if (payInfo.getPayTime() != 0) {
+            vo.setPayTime(DateUtils.timestampToString(payInfo.getPayTime()));
+        }
 
+        if (payInfo.getCancelTime() != 0) {
+            vo.setCancelTime(DateUtils.timestampToString(payInfo.getCancelTime()));
+        }
+
+        PayTradeInfoDefiner.PayTradeInfoEvent event = new PayTradeInfoDefiner.PayTradeInfoEvent(tradeType, tradeId);
+        List<PayTradeInfoDefiner.PayTradeInfoEventResult> trades = EventAndSubscribeOfPublisher.publishAndCallback(event);
+        if (ObjectUtil.isNotEmpty(trades)) {
+            vo.setTradeInfo(trades.get(0).getJsonObject());
+        }
+
+        vo.setSelf(payInfo.getMainId().equals(RequestUtils.memberId()));
+
+        QueryWrapper<SysPoster> posterQueryWrapper = new QueryWrapper<>();
+        posterQueryWrapper.eq("site_id", RequestUtils.siteId())
+                .eq("type", "friendspay")
+                .eq("status", 1)
+                .eq("is_default", 1);
+        SysPoster sysPoster = sysPosterMapper.selectOne(posterQueryWrapper);
+        if (ObjectUtil.isNotEmpty(sysPoster)) {
+            vo.setPosterId(sysPoster.getId());
+        }
+
+        Member member = memberMapper.selectById(payInfo.getMainId());
+        vo.setMember(member);
         return vo;
     }
+
 }

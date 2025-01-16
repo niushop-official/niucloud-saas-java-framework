@@ -7,13 +7,13 @@ import cn.hutool.json.JSONUtil;
 import com.google.common.io.Files;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.utils.file.AddonUpgradeHelper;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.common.utils.file.PipeNameUtils;
 import com.niu.core.common.utils.json.JsonLoadUtils;
 import com.niu.core.common.utils.system.LocalMavenTools;
 import com.niu.core.common.utils.system.RuntimeTools;
-import com.niu.core.common.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -45,7 +45,7 @@ public class AddonInstallJavaTools {
             // 开发环境
             WebAppEnvs webAppEnvs = WebAppEnvs.get();
             String webRootDownAddon = webAppEnvs.projectNiucloudAddon;
-            String addonPomPath = webRootDownAddon + '/' + addonName + "/pom.xml";
+            String addonPomPath = webRootDownAddon + addonName + "/pom.xml";
             // 存在pom.xml，说明是源码安装
             if (LocalMavenTools.existPomXmlFile(addonPomPath)) {
                 // ==========================================================================================//

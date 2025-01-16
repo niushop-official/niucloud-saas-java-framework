@@ -80,9 +80,9 @@ public class ShopGoodsRankServiceImpl implements IShopGoodsRankService {
             vo.setRuleTypeName(GoodsRuleTypeEnum.getNameByValue(item.getRuleType()));
             vo.setShowGoodsNum(checkRankData(item));
             vo.setGoodsJson(ObjectUtil.isEmpty(item.getGoodsJson()) ? new JSONArray() : JSONUtil.parseArray(item.getGoodsJson()));
-            vo.setBrandIds(ObjectUtil.isEmpty(item.getBrandIds()) ? new JSONArray() : JSONUtil.parseArray(item.getBrandIds()));
-            vo.setCategoryIds(ObjectUtil.isEmpty(item.getCategoryIds()) ? new JSONArray() : JSONUtil.parseArray(item.getCategoryIds()));
-            vo.setLabelIds(ObjectUtil.isEmpty(item.getLabelIds()) ? new JSONArray() : JSONUtil.parseArray(item.getLabelIds()));
+            vo.setBrandIds(ObjectUtil.isEmpty(item.getBrandIds()) || !item.getBrandIds().startsWith("[") ? new JSONArray() : JSONUtil.parseArray(item.getBrandIds()));
+            vo.setCategoryIds(ObjectUtil.isEmpty(item.getCategoryIds())|| !item.getCategoryIds().startsWith("[") ? new JSONArray() : JSONUtil.parseArray(item.getCategoryIds()));
+            vo.setLabelIds(ObjectUtil.isEmpty(item.getLabelIds())|| !item.getLabelIds().startsWith("[") ? new JSONArray() : JSONUtil.parseArray(item.getLabelIds()));
             vo.setCreateTime(DateUtils.timestampToString(item.getCreateTime()));
             list.add(vo);
         }
@@ -143,9 +143,9 @@ public class ShopGoodsRankServiceImpl implements IShopGoodsRankService {
         vo.setUpdateTime(DateUtils.timestampToString(model.getUpdateTime()));
         vo.setGoodsJson(ObjectUtil.isEmpty(model.getGoodsJson()) ? Collections.emptyList() : JSONUtil.toList(JSONUtil.parseArray(model.getGoodsJson()), ShopGoodsRankInfoVo.GoodsJson.class));
         vo.setGoodsList(ObjectUtil.isEmpty(model.getGoodsJson()) ? Collections.emptyList() : JSONUtil.parseArray(model.getGoodsJson()));
-        vo.setCategoryIds(ObjectUtil.isEmpty(model.getCategoryIds()) ? Collections.emptyList() : JSONUtil.parseArray(model.getCategoryIds()));
-        vo.setLabelIds(ObjectUtil.isEmpty(model.getLabelIds()) ? Collections.emptyList() : JSONUtil.parseArray(model.getLabelIds()));
-        vo.setBrandIds(ObjectUtil.isEmpty(model.getBrandIds()) ? Collections.emptyList() : JSONUtil.parseArray(model.getBrandIds()));
+        vo.setCategoryIds(ObjectUtil.isEmpty(model.getCategoryIds())  || !model.getCategoryIds().startsWith("[") ? Collections.emptyList() : JSONUtil.parseArray(model.getCategoryIds()));
+        vo.setLabelIds(ObjectUtil.isEmpty(model.getLabelIds())   || !model.getLabelIds().startsWith("[") ? Collections.emptyList() : JSONUtil.parseArray(model.getLabelIds()));
+        vo.setBrandIds(ObjectUtil.isEmpty(model.getBrandIds()) || !model.getBrandIds().startsWith("[") ? Collections.emptyList() : JSONUtil.parseArray(model.getBrandIds()));
 
         if (ObjectUtil.isEmpty(model.getGoodsSource()) || !GoodsSourceTypeEnum.GOODS.getValue().equals(model.getGoodsSource())) {
             return vo;

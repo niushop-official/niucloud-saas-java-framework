@@ -35,6 +35,7 @@ import com.niu.core.service.core.app.tools.SQLScriptRunnerTools;
 import com.niu.core.service.core.schedule.ICoreScheduleService;
 import com.niu.core.service.core.sys.ICoreMenuService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -492,13 +493,21 @@ public class UpgradeServiceImpl implements IUpgradeService {
                     }
                 }
 
+                IOFileFilter envFile = FileTools.createExclusionFilter(new String[]{
+                    "application-prod.yml",
+                    ".env.development",
+                    ".env.production",
+                    ".env.dev",
+                    ".env.product"
+                });
+
                 // 覆盖变更文件
                 File codeDir = new File(upgradeDir(vo) + "/download/" + versionNo);
                 if (vo.getAddon().equals(GlobalConfig.appKey)) {
                     File[] childFile = codeDir.listFiles();
                     for (File file : childFile) {
                         if (file.isDirectory()) {
-                            if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()));
+                            if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()), envFile);
                         } else {
                             FileUtils.copyFile(file, new File(sourceFile, file.getName()));
                         }
@@ -757,6 +766,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
             // 获取方法对象
             java.lang.reflect.Method method = clazz.getMethod(methodName, extractParameterTypes(args));
             // 调用方法
+            System.out.println("dynamicMethodCall method：" + methodName);
             Object result = method.invoke(this, args);
             if (method.getReturnType() == void.class) {
                 return null;
@@ -764,7 +774,11 @@ public class UpgradeServiceImpl implements IUpgradeService {
                 return result;
             }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            if  (e instanceof InvocationTargetException) {
+                ((InvocationTargetException) e).getCause().printStackTrace();
+            } else {
+                e.printStackTrace();
+            }
             return null;
         }
     }

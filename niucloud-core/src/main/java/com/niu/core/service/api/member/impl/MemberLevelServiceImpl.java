@@ -65,17 +65,33 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
 
         JSONObject levelStyle = MemberLevelStyleEnum.getStyle();
 
+        JSONObject filling = new JSONObject();
+        filling.put("benefits_one", new JSONObject().set("title", "专属客服").set("desc", "专业服务").set("icon", "/static/resource/images/member/benefits/benefits_kefu.png"));
+        filling.put("benefits_two", new JSONObject().set("title", "专属徽章").set("desc", "专属徽章").set("icon", "/static/resource/images/member/benefits/benefits_badge.png"));
+        filling.put("benefits_four", new JSONObject().set("title", "经验累计").set("desc", "经验累计").set("icon", "/static/resource/images/member/benefits/benefits_experience.png"));
+        filling.put("benefits_three", new JSONObject().set("title", "尊享客服").set("desc", "尊享客服").set("icon", "/static/resource/images/member/benefits/benefits_badge.png"));
+
         Integer index = 0;
         List<MemberLevelInfoVo> list = new LinkedList<>();
         for (MemberLevel level : memberLevelList) {
             MemberLevelInfoVo vo = new MemberLevelInfoVo();
             BeanUtils.copyProperties(level, vo);
 
-            if (!level.getLevelBenefits().isEmpty()) {
+            if (ObjectUtil.isNotEmpty(level.getLevelBenefits())) {
                 JSONObject benefits = JSONUtil.parseObj(level.getLevelBenefits());
                 benefits = coreMemberService.getBenefitsContent(param.siteId(), benefits, "member_level");
                 vo.setLevelBenefits(benefits);
+            } else {
+                vo.setLevelBenefits(filling);
             }
+
+            if (vo.getLevelBenefits().size() < 4) {
+                for(String key : filling.keySet()) {
+                    if (vo.getLevelBenefits().size() == 4) break;
+                    vo.getLevelBenefits().set(key, filling.get(key));
+                }
+            }
+
             if (!level.getLevelGifts().isEmpty()) {
                 JSONObject gifts = JSONUtil.parseObj(level.getLevelGifts());
                 gifts = coreMemberService.getGiftContent(param.siteId(), gifts, "member_level");

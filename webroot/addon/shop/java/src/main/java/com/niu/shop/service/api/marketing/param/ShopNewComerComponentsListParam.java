@@ -6,6 +6,6 @@ import java.util.Set;
 
 @Data
 public class ShopNewComerComponentsListParam {
-    private int limit;
+    private Integer limit;
     private Set<Integer> skuIds;
 }

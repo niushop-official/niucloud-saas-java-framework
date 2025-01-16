@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.member.impl;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
@@ -17,9 +18,14 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
+import com.niu.core.entity.member.MemberLevel;
+import com.niu.core.enums.common.ChannelEnum;
+import com.niu.core.enums.common.SexEnum;
 import com.niu.core.enums.member.MemberRegisterChannelEnum;
 import com.niu.core.enums.member.MemberRegisterTypeEnum;
+import com.niu.core.enums.member.StatusEnum;
 import com.niu.core.mapper.member.MemberLabelMapper;
+import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.member.IMemberService;
 import com.niu.core.service.admin.member.param.MemberAddParam;
@@ -36,10 +42,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 会员实现
@@ -52,6 +56,9 @@ public class MemberServiceImpl implements IMemberService {
 
     @Resource
     MemberLabelMapper memberLabelMapper;
+
+    @Resource
+    MemberLevelMapper memberLevelMapper;
 
     @Resource
     ICoreMemberService iCoreMemberService;
@@ -86,13 +93,13 @@ public class MemberServiceImpl implements IMemberService {
         if (ObjectUtil.isNotNull(searchParam.getIsDel()) && ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
             queryWrapper.eq("is_del", searchParam.getIsDel());
         }
-        if (ObjectUtil.isNotEmpty(searchParam.getMemberLevel())) {
+        if (ObjectUtil.isNotEmpty(searchParam.getMemberLevel()) && searchParam.getMemberLevel() != 0) {
             queryWrapper.eq("member_level", searchParam.getMemberLevel());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getRegisterChannel())) {
             queryWrapper.eq("register_channel", searchParam.getRegisterChannel());
         }
-        if (ObjectUtil.isNotEmpty(searchParam.getMemberLabel())) {
+        if (ObjectUtil.isNotEmpty(searchParam.getMemberLabel()) && searchParam.getMemberLabel() != 0) {
             queryWrapper.like("member_label", searchParam.getMemberLabel());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getRegisterType())) {
@@ -110,10 +117,22 @@ public class MemberServiceImpl implements IMemberService {
         } else {
             memberList = memberMapper.selectList(queryWrapper);
         }
+
+        Map<Integer, MemberLevel> levelMap = Collections.emptyMap();
+        Set<Integer> levelIds = CollStreamUtil.toSet(memberList, Member::getMemberLevel);
+        if (ObjectUtil.isNotEmpty(levelIds)) {
+            levelMap = memberLevelMapper.selectBatchIds(levelIds).stream().collect(Collectors.toMap(MemberLevel::getLevelId, e -> e));
+        }
+        
         List<MemberListVo> list = new LinkedList<>();
         for (Member item : memberList) {
             MemberListVo vo = new MemberListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setSexName(SexEnum.getNameBySex(item.getSex()));
+            vo.setStatusName(StatusEnum.getNameByStatus(item.getStatus()));
+            vo.setRegisterChannelName(ChannelEnum.getNameByCode(item.getRegisterChannel()));
+            vo.setMemberLevelName(levelMap.getOrDefault(item.getMemberLevel(), new MemberLevel()).getLevelName());
+
             if (!item.getMemberLabel().isEmpty()) {
                 JSONArray memberLabelArrays = JSONUtil.parseArray(vo.getMemberLabel());
                 if (memberLabelArrays != null && memberLabelArrays.size() > 0) {

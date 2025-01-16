@@ -5,7 +5,6 @@ import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 导出Excel的数据实体类
@@ -14,6 +13,14 @@ import java.util.Map;
 @Accessors(chain = true)
 public class ExportDynamic {
     /**
+     * 表头数据
+     */
+    List<ExportHeads> heads = new ArrayList<>();
+    /**
+     * 表数据
+     */
+    List<List<Object>> datas = new ArrayList<>();
+    /**
      * 文件名称
      */
     private String fileName;
@@ -21,16 +28,9 @@ public class ExportDynamic {
      * 文件全路径
      */
     private String filePath;
+    private String relativePath;
     /**
      * 表格标题
      */
     private String tableTitle;
-    /**
-     * 表头数据
-     */
-    List<ExportHeads> heads =new ArrayList<>();
-    /**
-     * 表数据
-     */
-    List<List<Object>> datas =new ArrayList<>();
 }

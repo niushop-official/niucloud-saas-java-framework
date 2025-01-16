@@ -46,7 +46,7 @@
                             <span class="cursor-pointer text-primary mr-[10px]" v-if="formData.rule_json.length > 1 && index !== 0 &&!disableSubmit" @click="removeSetting(index)">{{ t('delete') }}</span>
                         </div>
                         <!-- 优惠门槛 -->
-                        <div class="level-section flex" >
+                        <div class="level-section flex">
                             <el-form-item class="limit-input" :label="t('discountThreshold')" :prop="`rule_json.${index}.limit`" :rules="[{
                                 required: true,
                                 trigger: 'blur',
@@ -253,20 +253,20 @@
                                                     <el-table-column prop="goods_id" :label="t('goodsSelectPopupGoodsInfo')" min-width="300">
                                                         <template #default="{ row }">
                                                             <div class="flex items-center cursor-pointer">
-                                                            <div class="min-w-[60px] h-[60px] flex items-center justify-center">
-                                                                <el-image v-if="row.sku_image" class="w-[60px] h-[60px]" :src="img(row.sku_image)" fit="contain">
-                                                                <template #error>
-                                                                    <div class="image-slot">
-                                                                    <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
-                                                                    </div>
-                                                                </template>
-                                                                </el-image>
-                                                                <img v-else class="w-[70px] h-[60px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
-                                                            </div>
-                                                            <div class="ml-2">
-                                                                <span :title="row.sku_name" class="multi-hidden">{{row.sku_name ? row.goods_name + " " + row.sku_name: row.goods_name}}</span>
-                                                                <span class="text-primary text-[12px]">{{row.goods_type_name}}</span>
-                                                            </div>
+                                                                <div class="min-w-[60px] h-[60px] flex items-center justify-center">
+                                                                    <el-image v-if="row.sku_image" class="w-[60px] h-[60px]" :src="img(row.sku_image)" fit="contain">
+                                                                    <template #error>
+                                                                        <div class="image-slot">
+                                                                        <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
+                                                                        </div>
+                                                                    </template>
+                                                                    </el-image>
+                                                                    <img v-else class="w-[70px] h-[60px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
+                                                                </div>
+                                                                <div class="ml-2">
+                                                                    <span :title="row.sku_name" class="multi-hidden">{{row.sku_name ? row.goods_name + " " + row.sku_name: row.goods_name}}</span>
+                                                                    <span class="text-primary text-[12px]">{{row.goods_type_name}}</span>
+                                                                </div>
                                                             </div>
                                                         </template>
                                                     </el-table-column>
@@ -359,11 +359,11 @@
                             <div class="flex items-center cursor-pointer">
                                 <div class="min-w-[60px] h-[60px] flex items-center justify-center">
                                     <el-image v-if="row.sku_image" class="w-[60px] h-[60px]" :src="img(row.sku_image)" fit="contain">
-                                    <template #error>
-                                        <div class="image-slot">
-                                        <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
-                                        </div>
-                                    </template>
+                                        <template #error>
+                                            <div class="image-slot">
+                                                <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
+                                            </div>
+                                        </template>
                                     </el-image>
                                     <img v-else class="w-[70px] h-[60px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
                                 </div>
@@ -419,7 +419,7 @@ import { ArrowLeft } from '@element-plus/icons-vue'
 import {getMemberLabelAll,getMemberLevelAll } from '@/app/api/member'
 import goodsSelectPopup from '@/addon/shop/views/goods/components/goods-select-popup.vue'
 import couponSelectPopup from '@/addon/shop/views/goods/components/coupon-select-popup.vue'
-import {deepClone, img ,filterNumber} from '@/utils/common'
+import {deepClone, img} from '@/utils/common'
 
 const router = useRouter()
 const route = useRoute()
@@ -563,7 +563,7 @@ const getInfo = () => {
             manjian_id: id
         }
         getManjianInfo(data).then((res)=>{
-            const data = res.data;
+            const data = res.data.manjian_info;
             formData.goods_data =res.data.manjian_goods;
             formData.goods_ids.splice(0, formData.goods_ids.length);
             formData.goods_data.forEach((item: any) => {
@@ -680,16 +680,16 @@ const goodsSelects = (value: any, levelIndex: number) => {
             goods_name: goods_sku.goods_name,
             sku_name: goods_sku.sku_name,
             stock: goods_sku.stock,
-            num:1
+            num: 1
         };
         if (rule.goods.length) {
             rule.goods.forEach((el: any) => {
-            if (el.sku_id == sku.sku_id) {
-                sku = Object.assign(sku, el)
-            }
-        })
+                if (el.sku_id == sku.sku_id) {
+                    sku = Object.assign(sku, el)
+                }
+            })
 
-    }
+        }
         arr.push(deepClone(sku))
     }
 
@@ -773,7 +773,7 @@ const onSave = async () => {
             if (id) {
                 formData.id = id;
                 editManjian(formData).then((res) => {
-                    if (res.code == 1) {
+                    if (res.data.code == 1) {
                         loading.value = false;
                         back()
                         ElMessage({
@@ -794,7 +794,7 @@ const onSave = async () => {
                 });
             } else {
                 addManjian(formData).then((res) => {
-                    if (res.code == 1) {
+                    if (res.data.code == 1) {
                         loading.value = false;
                         back()
                         ElMessage({

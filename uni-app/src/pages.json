@@ -112,146 +112,6 @@
             }
         },
         {
-            "path": "app/pages/member/apply_cash_out",
-            "style": {
-                "navigationBarTitleText": "%pages.member.apply_cash_out%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/commission",
-            "style": {
-                // #ifndef H5
-                "navigationStyle": "custom",
-                // #endif
-                "navigationBarTitleText": "%pages.member.commission%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/balance",
-            "style": {
-                // #ifndef H5
-                "navigationStyle": "custom",
-                // #endif
-                "navigationBarTitleText": "%pages.member.balance%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/level",
-            "style": {
-                // #ifndef H5
-                "navigationStyle": "custom",
-                // #endif
-                "navigationBarTitleText": "%pages.member.level%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/detailed_account",
-            "style": {
-                "navigationBarTitleText": "%pages.member.detailed_account%"
-            }
-        },
-        {
-            "path": "app/pages/member/cash_out",
-            "style": {
-                "navigationBarTitleText": "%pages.member.cash_out%"
-            }
-        },
-        {
-            "path": "app/pages/member/cash_out_detail",
-            "style": {
-                "navigationBarTitleText": "%pages.member.cash_out_detail%"
-            }
-        },
-        {
-            "path": "app/pages/member/index",
-            "style": {
-                // #ifndef H5
-                "navigationStyle": "custom",
-                // #endif
-                "navigationBarTitleText": "%pages.member.index%",
-                "usingComponents": {
-                    "diy-group": "../../../../addon/components/diy/group/index",
-                    "fixed-group": "../../../../addon/components/fixed/group/index"
-                },
-                "componentPlaceholder": {
-                    "diy-group": "view",
-                    "fixed-group": "view"
-                }
-            }
-        },
-        {
-            "path": "app/pages/member/personal",
-            "style": {
-                "navigationBarTitleText": "%pages.member.personal%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/point",
-            "style": {
-                // #ifndef H5
-                "navigationStyle": "custom",
-                // #endif
-                "navigationBarTitleText": "%pages.member.point%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/point_detail",
-            "style": {
-                "navigationBarTitleText": "%pages.member.point_detail%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/account",
-            "style": {
-                "navigationBarTitleText": "%pages.member.account%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/account_edit",
-            "style": {
-                "navigationBarTitleText": "%pages.member.account_edit%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/address",
-            "style": {
-                "navigationBarTitleText": "%pages.member.address%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/address_edit",
-            "style": {
-                "navigationBarTitleText": "%pages.member.address_edit%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/sign_in",
-            "style": {
-                // #ifndef H5
-                "navigationStyle": "custom",
-                // #endif
-                "navigationBarTitleText": "%pages.member.sign_in%"
-            },
-            "needLogin": true
-        },
-        {
-            "path": "app/pages/member/contact",
-            "style": {
-                "navigationBarTitleText": "%pages.member.contact%"
-            }
-        },
-        {
             "path": "app/pages/pay/browser",
             "style": {
                 "navigationBarTitleText": "%pages.pay.browser%"
@@ -318,18 +178,181 @@
             "style": {
                 "navigationBarTitleText": "%pages.weapp.order_shipping%"
             }
+        },
+        {
+            "path": "app/pages/friendspay/share",
+            "style": {
+                // #ifndef H5
+                "navigationStyle": "custom",
+                // #endif
+                "navigationBarTitleText": "%pages.friendspay.share%"
+            },
+            "needLogin": true
+        },
+        {
+            "path": "app/pages/friendspay/money",
+            "style": {
+                // #ifndef H5
+                "navigationStyle": "custom",
+                // #endif
+                "navigationBarTitleText": "%pages.friendspay.money%"
+            }
         }
     ],
-    "subPackages": [{
-        "root": "addon",
-        "pages": [
-            // {{ PAGE_BEGAIN }}
-// {{ PAGE_END }}}
-            {
-                "path": "end"
-            }
-        ]
-    }],
+    "subPackages": [
+        // {{ PAGE_BEGAIN }}
+        // {{ PAGE_END }}
+        {
+            "root": "app/pages/member",
+            "pages": [
+
+                {
+                    "path": "apply_cash_out",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.apply_cash_out%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "commission",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.commission%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "balance",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.balance%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "level",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.level%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "detailed_account",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.detailed_account%"
+                    }
+                },
+                {
+                    "path": "cash_out",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.cash_out%"
+                    }
+                },
+                {
+                    "path": "cash_out_detail",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.cash_out_detail%"
+                    }
+                },
+                {
+                    "path": "index",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.index%",
+                        "usingComponents": {
+                            "diy-group": "../../../../addon/components/diy/group/index",
+                            "fixed-group": "../../../../addon/components/fixed/group/index"
+                        },
+                        "componentPlaceholder": {
+                            "diy-group": "view",
+                            "fixed-group": "view"
+                        }
+                    }
+                },
+                {
+                    "path": "personal",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.personal%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "point",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.point%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "point_detail",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.point_detail%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "account",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.account%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "account_edit",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.account_edit%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "address",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.address%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "address_edit",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.address_edit%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "sign_in",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.sign_in%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "contact",
+                    "style": {
+                        "navigationBarTitleText": "%pages.member.contact%"
+                    }
+                }
+            ]
+        },
+        {
+            "root": "app/components",
+            "pages": []
+        }
+    ],
     "globalStyle": {
         "navigationBarTextStyle": "black",
         "navigationBarTitleText": "",
@@ -343,7 +366,7 @@
                 "pagePath": "app/pages/index/index"
             },
             {
-                "pagePath": "app/pages/member/index"
+                "pagePath": "app/pages/auth/login"
             }
         ]
     },

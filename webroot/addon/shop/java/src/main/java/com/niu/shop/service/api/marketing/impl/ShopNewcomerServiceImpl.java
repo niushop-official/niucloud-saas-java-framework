@@ -179,9 +179,13 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         var shopGoodsSkuLambdaQueryWrapper = new LambdaQueryWrapper<ShopGoodsSku>()
                 .eq(ShopGoodsSku::getSiteId, RequestUtils.siteId())
                 .in(ShopGoodsSku::getSkuId, skuIds)
-                .last("limit " + param.getLimit())
                 .orderByDesc(ShopGoodsSku::getSaleNum)
                 .orderByDesc(ShopGoodsSku::getStock);
+
+        if (param.getLimit() != null && param.getLimit() > 0) {
+            shopGoodsSkuLambdaQueryWrapper.last("limit " + param.getLimit());
+        }
+
         var shopGoodsSkuList = shopGoodsSkuMapper.selectList(shopGoodsSkuLambdaQueryWrapper);
 
         var skuList = new ArrayList<ShopNewComerComponentsListVo.GoodsSku>(shopGoodsSkuList.size());

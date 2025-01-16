@@ -1,20 +1,19 @@
 package com.niu.shop.controller.adminapi.goods;
 
-import com.niu.core.common.domain.Result;
+import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
-import com.niu.shop.entity.goods.ShopGoodsSku;
+import com.niu.core.common.domain.Result;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
-import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.IShopGoodsService;
+import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsInfoVo;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsListVo;
-import com.niu.core.common.domain.PageParam;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsSkuListVo;
 import com.niu.shop.service.admin.goods.vo.ShopSelectGoodsListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +30,10 @@ public class ShopGoodsController {
 
     /**
      * 商品列表
-     * @param pageParam 分页
+     *
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopGoodsListVo>>
+     * @return Result<PageResult < ShopGoodsListVo>>
      */
     @GetMapping("")
     public Result<PageResult<ShopGoodsListVo>> list(@Validated PageParam pageParam, @Validated ShopGoodsSearchParam searchParam) {
@@ -43,6 +43,7 @@ public class ShopGoodsController {
 
     /**
      * 商品详情
+     *
      * @param id 主键ID
      * @return Result<ShopGoodsInfoVo>
      */
@@ -54,6 +55,7 @@ public class ShopGoodsController {
 
     /**
      * 商品添加
+     *
      * @param addParam 添加参数
      * @return AjaxResult<Object>
      */
@@ -65,6 +67,7 @@ public class ShopGoodsController {
 
     /**
      * 商品编辑
+     *
      * @param editParam 编辑参数
      * @return Result<Object>
      */
@@ -76,6 +79,7 @@ public class ShopGoodsController {
 
     /**
      * 商品删除
+     *
      * @return Result<Object>
      */
     @PutMapping("/delete")
@@ -86,6 +90,7 @@ public class ShopGoodsController {
 
     /**
      * 恢复商品
+     *
      * @return Result<Object>
      */
     @PutMapping("/recycle")
@@ -96,6 +101,7 @@ public class ShopGoodsController {
 
     /**
      * 商品回收站
+     *
      * @return Result<Object>
      */
     @GetMapping("/recycle")
@@ -105,6 +111,7 @@ public class ShopGoodsController {
 
     /**
      * 修改商品上下架状态
+     *
      * @return Result<Object>
      */
     @PutMapping("/status")
@@ -115,6 +122,7 @@ public class ShopGoodsController {
 
     /**
      * 修改商品排序号
+     *
      * @return Result<Object>
      */
     @PutMapping("/sort")
@@ -135,6 +143,7 @@ public class ShopGoodsController {
 
     /**
      * 商品添加/编辑数据
+     *
      * @return
      */
     @GetMapping("/init")
@@ -156,6 +165,7 @@ public class ShopGoodsController {
 
     /**
      * 查询商品参与营销活动的数量
+     *
      * @return
      */
     @GetMapping("/active/count")
@@ -165,9 +175,10 @@ public class ShopGoodsController {
 
     /**
      * 获取商品选择分页列表
-     * @param pageParam 分页
+     *
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopGoodsListVo>>
+     * @return Result<PageResult < ShopGoodsListVo>>
      */
     @GetMapping("/select")
     public Result<ShopSelectGoodsListVo> getSelectPage(
@@ -177,35 +188,36 @@ public class ShopGoodsController {
             @RequestParam(name = "sku_ids[]", required = false) List<Integer> skuIds,
             @RequestParam(name = "verify_goods_ids[]", required = false) List<Integer> verifyGoodsIds,
             @RequestParam(name = "verify_sku_ids[]", required = false) List<Integer> verifySkuIds) {
-            searchParam.setGoodsIds(goodsIds);
-            searchParam.setSkuIds(skuIds);
-            searchParam.setVerifyGoodsIds(verifyGoodsIds);
-            searchParam.setVerifySkuIds(verifySkuIds);
+        searchParam.setGoodsIds(goodsIds);
+        searchParam.setSkuIds(skuIds);
+        searchParam.setVerifyGoodsIds(verifyGoodsIds);
+        searchParam.setVerifySkuIds(verifySkuIds);
         ShopSelectGoodsListVo list = goodsService.getSelectPage(pageParam, searchParam);
         return Result.success(list);
     }
 
     /**
      * 获取商品选择列表带ku
+     *
      * @return
      */
     @GetMapping("/selectgoodssku")
     public Result getSelectGoodsSku(@Validated ShopGoodsSelectSearchParam searchParam,
-            @RequestParam(name = "goods_ids[]", required = false) List<Integer> goodsIds,
-            @RequestParam(name = "sku_ids[]", required = false) List<Integer> skuIds,
-            @RequestParam(name = "verify_goods_ids[]", required = false) List<Integer> verifyGoodsIds,
-            @RequestParam(name = "verify_sku_ids[]", required = false) List<Integer> verifySkuIds) {
-            searchParam.setGoodsIds(goodsIds);
-            searchParam.setSkuIds(skuIds);
-            searchParam.setVerifyGoodsIds(verifyGoodsIds);
-            searchParam.setVerifySkuIds(verifySkuIds);
+                                    @RequestParam(name = "goods_ids[]", required = false) List<Integer> goodsIds,
+                                    @RequestParam(name = "sku_ids[]", required = false) List<Integer> skuIds,
+                                    @RequestParam(name = "verify_goods_ids[]", required = false) List<Integer> verifyGoodsIds,
+                                    @RequestParam(name = "verify_sku_ids[]", required = false) List<Integer> verifySkuIds) {
+        searchParam.setGoodsIds(goodsIds);
+        searchParam.setSkuIds(skuIds);
+        searchParam.setVerifyGoodsIds(verifyGoodsIds);
+        searchParam.setVerifySkuIds(verifySkuIds);
         return Result.success(goodsService.getSelectGoodsSku(searchParam));
     }
 
     /**
      * 查询商品SKU规格列表
      *
-     * @return Result<List<ShopGoodsSku>>
+     * @return Result<List < ShopGoodsSku>>
      */
     @GetMapping("/sku")
     public Result<List<ShopGoodsSkuListVo>> getSkuList(@RequestParam("goods_id") Integer goodsId) {
@@ -243,6 +255,21 @@ public class ShopGoodsController {
     public Result editGoodsListMemberPrice(@Validated @RequestBody EditGoodsListMemberPriceParam param) {
         goodsService.editGoodsListMemberPrice(param);
         return Result.success();
+    }
+
+    @GetMapping("/buy/goods/select")
+    public Result<?> buyGoodsSelect(PageParam pageParam, BuyGoodsSelectParam param) {
+        return Result.success(goodsService.getBuyGoodsSelect(pageParam, param));
+    }
+
+    @GetMapping("/buy/sku/select")
+    public Result<?> buySkuSelect(BuySkuSelectParam param) {
+        return Result.success(goodsService.getBuySkuSelect(param));
+    }
+
+    @PostMapping("/buy/goods/selected")
+    public Result<?> buyGoodsSelected(BuyGoodsSelectedParam param) {
+        return Result.success(goodsService.getBuyGoodsSelected(param));
     }
 
 }

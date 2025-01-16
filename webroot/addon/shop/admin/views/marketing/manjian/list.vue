@@ -28,7 +28,16 @@
                 <el-tab-pane :label="t('all')" name=""></el-tab-pane>
                 <el-tab-pane v-for="(label, value) in statusList" :key="value" :label="label" :name="value"></el-tab-pane>
             </el-tabs>
-            <el-table :data="tableData.data" size="large" v-loading="tableData.loading" ref="goodBankListTableRef">
+            <div class="mb-[10px] flex items-center" v-if="status">
+                <el-checkbox v-model="toggleCheckbox" size="large" class="px-[14px]" @change="toggleChange" :indeterminate="isIndeterminate" />
+                <el-button @click="batchDeleteManjianFn" v-if="status ==0||status ==2 ||status ==-1" size="small">{{t("batchDelete")}}</el-button>
+                <el-button @click="batchCloseManjianFn"  v-if="status==1" size="small">{{t("batchClose")}}</el-button>
+            </div>
+            <el-table :data="tableData.data" size="large" v-loading="tableData.loading" ref="goodBankListTableRef" @selection-change="handleSelectionChange">
+                <template #empty>
+                    <span>{{ !tableData.loading ? t("emptyData") : "" }}</span>
+                </template>
+                <el-table-column type="selection" width="55" />
                 <el-table-column prop="manjian_name" :label="t('name')" min-width="130" />
                 <el-table-column prop="status_name" :label="t('status')" min-width="130" />
                 <el-table-column prop="total_order_num" :label="t('activeOrderNum')" min-width="130" />
@@ -64,14 +73,15 @@
 import { ref, reactive } from "vue";
 import {t} from "@/lang";
 import { useRoute, useRouter } from "vue-router";
-import {closeManjian, deleteManjian,getManjianList,getManjianStatusList} from "@/addon/shop/api/marketing";
-import { FormInstance, ElMessageBox } from "element-plus";
+import {closeManjian, deleteManjian,getManjianList,getManjianStatusList,batchCloseMajian,batchDeleteManjian} from "@/addon/shop/api/marketing";
+import { FormInstance, ElMessageBox,ElMessage } from "element-plus";
 import manjianDetail from '@/addon/shop/views/marketing/manjian/detail.vue'
 import { setTablePageStorage,getTablePageStorage } from "@/utils/common";
 
 const router = useRouter();
 const route = useRoute();
 const pageName = route.meta.title;
+const repeat = ref(false);
 const searchFormRef = ref<FormInstance>();
 // 表单内容
 const tableData = reactive({
@@ -86,10 +96,12 @@ const tableData = reactive({
         status: route.query.status || '',
     },
 });
+const status = ref()
 
 // 当前选中tab页面
 const tabHandleClick = (tab: any, event: Event) => {
     tableData.searchParam.status = tab.props.name
+    status.value = tab.props.name
     loadManjianList()
 }
 
@@ -144,6 +156,41 @@ const detailEvent=(id:number)=>{
     manjianDetailDialog.value.setFormData(data);
     manjianDetailDialog.value.showDialog = true;
 }
+// 批量复选框
+const toggleCheckbox = ref();
+
+// 复选框中间状态
+const isIndeterminate = ref(false);
+
+// 监听批量复选框事件
+const toggleChange = (value: any) => {
+    isIndeterminate.value = false;
+    goodBankListTableRef.value.toggleAllSelection();
+};
+
+const goodBankListTableRef = ref();
+
+// 选中数据
+const multipleSelection: any = ref([]);
+
+// 监听表格单行选中
+const handleSelectionChange = (val: []) => {
+    multipleSelection.value = val;
+
+    toggleCheckbox.value = false;
+    if (
+        multipleSelection.value.length > 0 &&
+        multipleSelection.value.length < tableData.data.length
+    ) {
+        isIndeterminate.value = true;
+    } else {
+        isIndeterminate.value = false;
+    }
+
+    if (multipleSelection.value.length == tableData.data.length) {
+        toggleCheckbox.value = true;
+    }
+};
 
 //关闭
 const closeEvent = (id:number)=>{
@@ -176,6 +223,71 @@ const deleteEvent = (id:number) => {
         })
     })
 }
+
+// 批量删除
+const batchDeleteManjianFn = () => {
+    if (multipleSelection.value.length == 0) {
+        ElMessage({
+            type: "warning",
+            message: `${ t("batchEmptySelectedActiveDeleteTips") }`,
+        });
+        return;
+    }
+
+    ElMessageBox.confirm(t("batchGoodsDeleteTips"), t("warning"), {
+        confirmButtonText: t("confirm"),
+        cancelButtonText: t("cancel"),
+        type: "warning",
+    }).then(() => {
+        if (repeat.value) return;
+        repeat.value = true;
+
+        const manjian_id: any = [];
+        multipleSelection.value.forEach((item: any) => {
+            manjian_id.push(item.manjian_id);
+        });
+
+        batchDeleteManjian({ manjian_id }).then(() => {
+            loadManjianList();
+            repeat.value = false;
+        }).catch(() => {
+            repeat.value = false;
+        });
+    });
+};
+
+// 批量关闭
+const batchCloseManjianFn = () => {
+    if (multipleSelection.value.length == 0) {
+        ElMessage({
+            type: "warning",
+            message: `${ t("batchEmptySelectedActiveCloseTips") }`,
+        });
+        return;
+    }
+
+    ElMessageBox.confirm(t("batchGoodsCloseTips"), t("warning"), {
+        confirmButtonText: t("confirm"),
+        cancelButtonText: t("cancel"),
+        type: "warning",
+    }).then(() => {
+        if (repeat.value) return;
+        repeat.value = true;
+
+        const manjian_id: any = [];
+        multipleSelection.value.forEach((item: any) => {
+            manjian_id.push(item.manjian_id);
+        });
+
+        batchCloseMajian({ manjian_id }).then(() => {
+            loadManjianList();
+        repeat.value = false;
+        }).catch(() => {
+        repeat.value = false;
+        });
+    });
+};
+
 </script>
 
 <style lang="scss" scoped>

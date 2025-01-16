@@ -1,6 +1,7 @@
 package com.niu.core.common.loader.notice;
 
 import cn.hutool.json.JSONObject;
+import cn.hutool.core.util.ClassLoaderUtil;
 
 import java.lang.reflect.Constructor;
 import java.util.Map;
@@ -17,7 +18,7 @@ public abstract class BaseNotice {
     public static BaseNotice forName(String driver) {
         BaseNotice base = null;
         try {
-            Class<?> clazz = Class.forName(driver);
+            Class<?> clazz = ClassLoaderUtil.loadClass(driver);
             base = (BaseNotice) clazz.newInstance();
         } catch (Exception e) {
             e.printStackTrace();

@@ -75,6 +75,7 @@
                     <diy-picture-show :component="component" :global="data.global" :index="index"
                         :pullDownRefreshCount="props.pullDownRefreshCount" />
                 </template>
+
             </view>
         </view>
         <template v-if="diyStore.mode == '' && data.global.bottomTabBarSwitch">
@@ -84,6 +85,7 @@
     </view>
 </template>
 <script lang="ts" setup>
+
     import topTabbar from '@/components/top-tabbar/top-tabbar.vue'
     import { useDiyGroup } from './useDiyGroup'
     import useDiyStore from '@/app/stores/diy';

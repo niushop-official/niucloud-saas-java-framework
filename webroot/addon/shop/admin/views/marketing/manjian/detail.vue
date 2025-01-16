@@ -186,7 +186,7 @@
                     </el-table-column>
                     <el-table-column prop="total_order_money" :label="t('consumptionMoney')" min-width="100" />
                     <el-table-column prop="total_num" :label="t('participationNum')" min-width="100" />
-                    <el-table-column prop="last_consum_time" :label="t('orderTime')" min-width="100" />
+                    <el-table-column prop="finally_order_time" :label="t('orderTime')" min-width="100" />
                 </el-table>
                 <div class="mt-[16px] flex justify-end">
                     <el-pagination v-model:current-page="memberParams.page" v-model:page-size="memberParams.limit"
@@ -228,11 +228,10 @@ const getManjianInfoFn = (id:number)=>{
         manjian_id: id
     }
     getManjianInfo(data).then((res:any)=>{
-        formData.value = Object.assign(formData.value,res.data)
+        formData.value = Object.assign(formData.value,res.data.manjian_info)
         loading.value = false
     })
 }
-
 
 //活动会员
 const memberParams =  reactive({
@@ -282,7 +281,7 @@ defineExpose({
 </script>
 <style lang="scss">
 .member-detail-drawer{
-    width: 1000px !important;
+    width: 1300px !important;
 }
 
 .goods-name {

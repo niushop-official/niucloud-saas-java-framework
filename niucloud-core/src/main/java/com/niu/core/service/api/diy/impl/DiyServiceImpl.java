@@ -58,12 +58,15 @@ public class DiyServiceImpl implements IDiyService {
         Integer id = ObjectUtil.defaultIfNull(param.getId(), 0);
         String name = ObjectUtil.defaultIfNull(param.getName(), "");
 
+        log.info("id: {}, name: {}", id, name);
+
         StartUpPageConfigVo startUpPage = null;
         JSONObject template = null;
 
         if (!StrUtil.isEmpty(name)) {
             // 查询启动页
             startUpPage = coreDiyConfigService.getStartUpPageConfig(param.siteId(), name);
+            log.info("startUpPage: {}", JSONUtil.toJsonStr(startUpPage));
 
             TemplateParam templateParam = new TemplateParam();
             String[] key = { name };
@@ -72,13 +75,16 @@ public class DiyServiceImpl implements IDiyService {
         }
 
         if (id == 0 && startUpPage != null && template != null && !startUpPage.getPage().equals(template.getStr("page"))) {
+            log.info("enter if, template: {}", template.toString());
             return startUpPage;
         } else {
             QueryWrapper<DiyPage> queryWrapper = new QueryWrapper();
             queryWrapper.eq("site_id", param.siteId());
+            log.info("site_id: {}",param.siteId() );
 
             DiyPage info = null;
 
+            log.info("id: {}, name: {}", id, name);
             if (id > 0) {
                 queryWrapper.eq("id", id);
                 info = diyPageMapper.selectOne(queryWrapper);
@@ -87,6 +93,8 @@ public class DiyServiceImpl implements IDiyService {
                 queryWrapper.eq("is_default", 1);
                 info = diyPageMapper.selectOne(queryWrapper);
             }
+
+            log.info("info: {}", JSONUtil.toJsonStr(info));
 
             if (info == null) {
                 if (!name.isEmpty()) {
@@ -98,10 +106,12 @@ public class DiyServiceImpl implements IDiyService {
                 }
             }
 
+            log.info("info: {}", JSONUtil.toJsonStr(info));
             if (info == null)  return null;
 
             DiyInfoVo vo = new DiyInfoVo();
             BeanUtils.copyProperties(info, vo);
+            log.info("vo: {}", JSONUtil.toJsonStr(vo));
             return vo;
         }
     }

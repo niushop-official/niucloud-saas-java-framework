@@ -243,8 +243,10 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
             this.installStep.add("installSql");
             try {
                 String sqlContent = FileUtils.readFileToString(installSql, "UTF-8");
-                sqlContent = sqlContent.replace("{{prefix}}", GlobalConfig.tablePrefix);
-                SQLScriptRunnerTools.execScript(sqlContent);
+                if (!sqlContent.isEmpty()) {
+                    sqlContent = sqlContent.replace("{{prefix}}", GlobalConfig.tablePrefix);
+                    SQLScriptRunnerTools.execScript(sqlContent);
+                }
             } catch (Exception e) {
                 throw new CommonException(e.getMessage());
             }

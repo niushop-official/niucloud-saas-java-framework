@@ -49,7 +49,7 @@ public class GlobalConfig {
     /**
      * 版本
      */
-    public static String version = "0.0.2";
+    public static String version = "0.0.3";
 
     /**
      * 应用key
@@ -61,6 +61,11 @@ public class GlobalConfig {
      * 默认访问路径
      **/
     public static String defaultAccessPath;
+
+    /**
+     * 是否是演示站点
+     */
+    public static Boolean isDemo = false;
 
     @Value("${mybatis-plus.global-config.db-config.table-prefix}")
     public void setTablePrefix(String tablePrefix) {
@@ -115,4 +120,8 @@ public class GlobalConfig {
         GlobalConfig.webDomain = webDomain;
     }
 
+    @Value("${system.is-demo:false}")
+    public void setIsDemo(Boolean isDemo) {
+        GlobalConfig.isDemo = isDemo;
+    }
 }

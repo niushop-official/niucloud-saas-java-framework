@@ -288,7 +288,8 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
                 .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num, goods.create_time create_time,goods.sort as goods_sort");
 
         return shopGoodsMapper.selectJoinMaps(goodsMPJQueryWrapper)
-                .stream().map(JSONUtil::parseObj)
+                .stream()
+                .map(JSONUtil::parseObj)
                 .map(o -> {
                     ShopGoodsRankGoodsListInfo info = o.toBean(ShopGoodsRankGoodsListInfo.class);
                     Integer sort = Optional.ofNullable(sortGoodsJson.get(info.getGoodsId()))
@@ -313,7 +314,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
                         .<ShopGoodsRankGoodsListInfo>comparingInt(o -> JSONUtil.parseObj(o).getInt("stat" + StrUtil.upperFirst(rank.getRuleType()) + "Num")).reversed()
                         .thenComparingInt(ShopGoodsRankGoodsListInfo::getSort).reversed()
                         .thenComparingInt(ShopGoodsRankGoodsListInfo::getGoodsSort).reversed()
-                        .thenComparingLong(o -> DateUtils.StringToTimestamp(o.getCreateTime())))
+                        .thenComparingLong(o -> DateUtils.StringToTimestamp(o.getCreateTime())).reversed())
                 .toList();
     }
 

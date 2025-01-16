@@ -97,7 +97,7 @@ import { reactive, ref } from 'vue'
 import { setWeappVersion, getWeappPreview, getWeappVersionList, getWeappUploadLog, getWeappConfig } from '@/app/api/weapp'
 import { t } from '@/lang'
 import { useRoute, useRouter } from 'vue-router'
-import { getAuthinfo } from '@/app/api/module'
+import { getAuthInfo } from '@/app/api/module'
 import { getAppType } from '@/utils/common'
 import { ElMessageBox } from 'element-plus'
 import { AnyObject } from '@/types/global'
@@ -131,7 +131,7 @@ const form = ref({
 const uploadSuccessShowDialog = ref(false)
 const authCode = ref('')
 
-getAuthinfo().then(res => {
+getAuthInfo().then(res => {
     if (res.data.data && res.data.data.auth_code) {
         authCode.value = res.data.data.auth_code
         getWeappPreviewImage()

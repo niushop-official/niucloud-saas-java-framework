@@ -6,6 +6,7 @@ import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.CommonException;
@@ -16,6 +17,7 @@ import com.niu.core.common.loader.pay.param.PayNotifyParam;
 import com.niu.core.common.loader.pay.param.PayParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.pay.Pay;
+import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.pay.OnliepayStatusEnum;
 import com.niu.core.enums.pay.PayStatusEnum;
 import com.niu.core.event.pay.PayCloseEvent;
@@ -25,6 +27,8 @@ import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.pay.ICorePayChannelService;
 import com.niu.core.service.core.pay.ICorePayService;
+import com.niu.core.service.core.pay.vo.GetInfoByTradeVo;
+import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.service.core.sys.ICorePrinterService;
 import com.niu.core.service.core.sys.param.SysPrinterPrintTicketParam;
 import org.springframework.stereotype.Service;
@@ -148,6 +152,31 @@ public class CorePayServiceImpl implements ICorePayService {
     public BasePay driver(Integer siteId, String channel, String type) {
         JSONObject config = ObjectUtil.defaultIfNull(corePayChannelService.getConfigByChannelAndType(siteId, channel, type), new JSONObject());
         return PayLoader.getDriver(type).init(config);
+    }
+
+    @Override
+    public GetInfoByTradeVo getInfoByTrade(Integer siteId, String tradeType, Integer tradeId, String channel, String scene) {
+        Pay pay = findPayInfoByTrade(siteId, tradeType, tradeId);
+
+        if (pay == null) {
+            pay = createByTrade(siteId, tradeType, tradeId);
+        }
+
+        GetInfoByTradeVo vo = new GetInfoByTradeVo();
+        BeanUtil.copyProperties(pay, vo);
+
+        List<PayTypeVo> payTypeList = corePayChannelService.getAllowPayTypeByChannel(siteId, channel, tradeType);
+        vo.setPayTypeList(payTypeList);
+
+        if (ObjectUtil.isNotEmpty(payTypeList) && ObjectUtil.equals(scene, "friendspay")) {
+            payTypeList.stream()
+                    .filter(pt -> pt.getKey().equals("friendspay"))
+                    .findFirst()
+                    .ifPresent(payTypeVo -> vo.setConfig(JSONUtil.parseObj(payTypeVo.getConfig())));
+            vo.setPayTypeList(payTypeList.stream().filter(pt -> !pt.getKey().equals("friendspay")).toList());
+        }
+
+        return vo;
     }
 
     /**
@@ -274,7 +303,6 @@ public class CorePayServiceImpl implements ICorePayService {
         payMapper.updateById(pay);
     }
 
-
     /**
      * 关闭支付
      *
@@ -331,4 +359,10 @@ public class CorePayServiceImpl implements ICorePayService {
             this.close(siteId, pay);
         }
     }
+
+    @Override
+    public List<PayTypeVo> getPayTypeByTrade(Integer siteId, String tradeType, ChannelEnum channel) {
+        return corePayChannelService.getAllowPayTypeByChannel(siteId, channel.getCode(), tradeType);
+    }
+
 }

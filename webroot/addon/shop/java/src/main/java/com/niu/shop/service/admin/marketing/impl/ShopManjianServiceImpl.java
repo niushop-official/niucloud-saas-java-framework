@@ -220,7 +220,7 @@ public class ShopManjianServiceImpl implements IShopManjianService {
 
     @Override
     @Transactional
-    public void add(ShopManjianParam addParam) {
+    public Map<String, Object>  add(ShopManjianParam addParam) {
         ShopManjian model = new ShopManjian();
         BeanUtils.copyProperties(addParam, model);
         model.setSiteId(RequestUtils.siteId());
@@ -258,6 +258,12 @@ public class ShopManjianServiceImpl implements IShopManjianService {
             List<ShopManjianGoods> goods = goodsData2Goods(model, goodsData);
             coreShopManjianGoodsService.saveBatch(goods);
         }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", 1);
+        map.put("data", model);
+        return map;
+
     }
 
     @Override
@@ -271,7 +277,7 @@ public class ShopManjianServiceImpl implements IShopManjianService {
             return null;
         }
 
-        ShopManjianInitVo vo = new ShopManjianInitVo();
+        ShopManjianInitVo.ShopManjianInfo vo = new ShopManjianInitVo.ShopManjianInfo();
         BeanUtils.copyProperties(manjian, vo);
         vo.setStatusName(ShopManjianStatusEnum.getNameByValue(manjian.getStatus()));
 
@@ -375,13 +381,15 @@ public class ShopManjianServiceImpl implements IShopManjianService {
             }
         }
 
-        vo.setManjianGoods(manjianGoods);
-        return vo;
+        ShopManjianInitVo initVo = new ShopManjianInitVo();
+        initVo.setManjianInfo(vo);
+        initVo.setManjianGoods(manjianGoods);
+        return initVo;
     }
 
     @Override
     @Transactional
-    public void edit(Integer id, ShopManjianParam editParam) {
+    public Map<String, Object> edit(Integer id, ShopManjianParam editParam) {
         editParam.setManjianId(id);
         ShopManjian model = shopManjianMapper.selectById(id);
         BeanUtils.copyProperties(editParam, model);
@@ -436,6 +444,10 @@ public class ShopManjianServiceImpl implements IShopManjianService {
             shopManjianGoodsMapper.delete(new QueryWrapper<ShopManjianGoods>().eq("site_id", RequestUtils.siteId()).eq("manjian_id", id));
             coreShopManjianGoodsService.saveBatch(goodsData2Goods(model, goodsData));
         }
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", 1);
+        map.put("data", model);
+        return map;
     }
 
     @Override

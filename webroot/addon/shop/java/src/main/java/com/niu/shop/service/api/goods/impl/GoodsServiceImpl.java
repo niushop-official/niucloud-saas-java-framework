@@ -237,7 +237,10 @@ public class GoodsServiceImpl implements IGoodsService {
         queryWrapper.eq("g.status", 1);
         queryWrapper.eq("g.is_gift", 0);
         queryWrapper.eq("g.delete_time", 0);
-        queryWrapper.last("limit " + param.getNum());
+        if (ObjectUtil.isNotEmpty(param.getGoodsIds())) queryWrapper.in("g.goods_id", param.getGoodsIds());
+        if (ObjectUtil.isNotEmpty(param.getNum()) && param.getNum() > 0) queryWrapper.last("limit " + param.getNum());
+        if (ObjectUtil.isNotEmpty(param.getGoodsCategory()) && param.getGoodsCategory() > 0)
+            queryWrapper.like("goods_category", "\"" + param.getGoodsCategory() + "\"");
         if (ObjectUtil.isNotEmpty(param.getOrder())) {
             if (param.getOrder().equals("sale_num")) {
                 queryWrapper.orderByDesc("g.sale_num");

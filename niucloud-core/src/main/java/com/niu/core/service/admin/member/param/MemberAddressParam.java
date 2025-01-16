@@ -1,56 +1,49 @@
 package com.niu.core.service.admin.member.param;
+
 import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import javax.validation.constraints.*;
 
 /**
  * 会员收货地址参数
-*/
+ */
 @Data
 public class MemberAddressParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "memberId参数缺失")
+    @NotNull(message = "缺少必须参数member_id")
     private Integer memberId;
 
-    @NotNull(message = "siteId参数缺失")
-    private Integer siteId;
-
-    @NotNull(message = "name参数缺失")
+    @NotNull(message = "缺少必须参数name")
     private String name;
 
-    @NotNull(message = "mobile参数缺失")
+    @NotNull(message = "缺少必须参数mobile")
     private String mobile;
 
-    @NotNull(message = "provinceId参数缺失")
+    @NotNull(message = "缺少必须参数province_id")
     private Integer provinceId;
 
-    @NotNull(message = "cityId参数缺失")
+    @NotNull(message = "缺少必须参数city_id")
     private Integer cityId;
 
-    @NotNull(message = "districtId参数缺失")
+    @NotNull(message = "缺少必须参数district_id")
     private Integer districtId;
 
-    @NotNull(message = "address参数缺失")
+    @NotNull(message = "缺少必须参数address")
     private String address;
 
-    @NotNull(message = "addressName参数缺失")
     private String addressName;
 
-    @NotNull(message = "fullAddress参数缺失")
+    @NotNull(message = "缺少必须参数full_address")
     private String fullAddress;
 
-    @NotNull(message = "lng参数缺失")
-    private String lng;
+    private String lng = "";
 
-    @NotNull(message = "lat参数缺失")
-    private String lat;
+    private String lat = "";
 
-    @NotNull(message = "isDefault参数缺失")
-    private Integer isDefault;
-
-    @NotNull(message = "type参数缺失")
-    private String type;
+    private Integer isDefault = 0;
 
 }

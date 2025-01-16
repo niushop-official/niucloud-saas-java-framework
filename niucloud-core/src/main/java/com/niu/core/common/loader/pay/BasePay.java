@@ -3,6 +3,7 @@ package com.niu.core.common.loader.pay;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.loader.pay.param.RefundParam;
 import com.niu.core.common.loader.pay.param.TransferParam;
+import cn.hutool.core.util.ClassLoaderUtil;
 import com.niu.core.entity.pay.Pay;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.common.loader.pay.param.PayAsyncNotifyParam;
@@ -25,7 +26,7 @@ public abstract class BasePay {
     public static BasePay forName(String driver) {
         BasePay base = null;
         try {
-            Class<?> clazz = Class.forName(driver);
+            Class<?> clazz = ClassLoaderUtil.loadClass(driver);
             base = (BasePay) clazz.newInstance();
         } catch (Exception e) {
             e.printStackTrace();

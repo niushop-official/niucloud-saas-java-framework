@@ -95,8 +95,7 @@ public class ShopManjianController {
      */
     @PostMapping("/manjian")
     public Result<Object> add(@RequestBody ShopManjianParam data) {
-        manjianService.add(data);
-        return Result.success();
+        return Result.success(manjianService.add(data));
     }
 
     /**
@@ -118,8 +117,7 @@ public class ShopManjianController {
     @PutMapping("/manjian/{id}")
     public Result<Object> edit(@PathVariable("id") Integer id, @RequestBody ShopManjianParam data) {
 
-        manjianService.edit(id, data);
-        return Result.success();
+        return Result.success(manjianService.edit(id, data));
     }
 
     /**

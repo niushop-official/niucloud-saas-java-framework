@@ -3,10 +3,10 @@ package com.niu.core.controller.api.pay;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.Result;
-import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.service.api.pay.IPayService;
 import com.niu.core.common.loader.pay.param.PayAsyncNotifyParam;
 import com.niu.core.common.loader.pay.param.PayParam;
+import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.service.api.pay.IPayService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,8 +62,12 @@ public class PayController {
      * @return
      */
     @GetMapping("/pay/info/{trade_type}/{trade_id}")
-    public Result<?> info(@PathVariable("trade_type") String tradeType, @PathVariable("trade_id") Integer tradeId) {
-        return Result.success(payService.getInfoByTrade(tradeType, tradeId));
+    public Result<?> info(@PathVariable("trade_type") String tradeType, @PathVariable("trade_id") Integer tradeId, String scene) {
+        return Result.success(payService.getInfoByTrade(tradeType, tradeId, scene));
     }
 
+    @GetMapping("/pay/friendspay/info/{trade_type}/{trade_id}")
+    public Result<?> friendspayInfo(@PathVariable("trade_type") String tradeType, @PathVariable("trade_id") Integer tradeId) {
+        return Result.success(payService.friendspayInfo(tradeType, tradeId));
+    }
 }

@@ -1,83 +1,60 @@
 package com.niu.shop.controller.adminapi.order;
 
-import com.niu.core.common.domain.Result;
-import com.niu.core.common.domain.PageResult;
-import com.niu.shop.service.admin.order.param.ShopOrderBatchDeliveryParam;
-import com.niu.shop.service.admin.order.param.ShopOrderBatchDeliverySearchParam;
-import com.niu.shop.service.admin.order.IShopOrderBatchDeliveryService;
-import com.niu.shop.service.admin.order.vo.ShopOrderBatchDeliveryInfoVo;
-import com.niu.shop.service.admin.order.vo.ShopOrderBatchDeliveryListVo;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.Result;
+import com.niu.shop.enums.order.OrderBatchDeliveryStatusEnum;
+import com.niu.shop.enums.order.OrderBatchDeliveryTypeEnum;
+import com.niu.shop.service.admin.order.IShopOrderBatchDeliveryService;
+import com.niu.shop.service.admin.order.param.ShopOrderAddBatchDeliveryParam;
+import com.niu.shop.service.admin.order.param.ShopOrderBatchDeliverySearchParam;
+import com.niu.shop.service.admin.order.vo.ShopOrderBatchDeliveryInfoVo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 订单批量发货控制器
  */
-
 @RestController
-@RequestMapping("adminapi/shop/delivery/order")
+@RequiredArgsConstructor
+@RequestMapping("/adminapi/shop/order_batch_delivery")
 public class ShopOrderBatchDeliveryController {
 
-    @Resource
-    IShopOrderBatchDeliveryService iShopOrderBatchDeliveryService;
+    private final IShopOrderBatchDeliveryService iShopOrderBatchDeliveryService;
 
-    /**
-     * 订单批量发货列表
-     * @param pageParam 分页
-     * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopOrderBatchDeliveryListVo>>
-     */
-    @GetMapping("/list")
-    public Result<PageResult<ShopOrderBatchDeliveryListVo>> list(@Validated PageParam pageParam,
-                                                     @Validated ShopOrderBatchDeliverySearchParam searchParam) {
-        PageResult<ShopOrderBatchDeliveryListVo> list = iShopOrderBatchDeliveryService.list(pageParam, searchParam);
-        return Result.success(list);
+    @GetMapping
+    public Result<?> list(@Validated PageParam pageParam,
+                          @Validated ShopOrderBatchDeliverySearchParam searchParam) {
+        return Result.success(iShopOrderBatchDeliveryService.list(pageParam, searchParam));
     }
 
-    /**
-     * 订单批量发货详情
-     * @param id 主键ID
-     * @return Result<ShopOrderBatchDeliveryInfoVo>
-     */
-    @GetMapping("/info")
-    public Result<ShopOrderBatchDeliveryInfoVo> info(@Validated @RequestParam("id") Integer id) {
-        ShopOrderBatchDeliveryInfoVo info = iShopOrderBatchDeliveryService.info(id);
-        return Result.success(info);
+    @GetMapping("/{id}")
+    public Result<ShopOrderBatchDeliveryInfoVo> info(@Validated @PathVariable("id") Integer id) {
+        return Result.success(iShopOrderBatchDeliveryService.info(id));
     }
 
-    /**
-     * 订单批量发货添加
-     * @param addParam 添加参数
-     * @return AjaxResult<Object>
-     */
-    @PostMapping("/add")
-    public Result<Object> add(@Validated @RequestBody ShopOrderBatchDeliveryParam addParam) {
-        iShopOrderBatchDeliveryService.add(addParam);
+    @PutMapping("/add_batch_order_delivery")
+    public Result<?> addBatchOrderDelivery(@Validated @RequestBody ShopOrderAddBatchDeliveryParam addParam) {
+        iShopOrderBatchDeliveryService.addBatchOrderDelivery(addParam);
         return Result.success();
     }
 
-    /**
-     * 订单批量发货编辑
-     * @param editParam 编辑参数
-     * @return Result<Object>
-     */
-    @PostMapping("/edit")
-    public Result<Object> edit(Integer id, @Validated @RequestBody ShopOrderBatchDeliveryParam editParam) {
-        iShopOrderBatchDeliveryService.edit(id, editParam);
-        return Result.success();
+    @GetMapping("/get_type")
+    public Result<?> getBatchType() {
+        Map<String, String> result = Arrays.stream(OrderBatchDeliveryTypeEnum.values())
+                .collect(Collectors.toMap(OrderBatchDeliveryTypeEnum::getValue, OrderBatchDeliveryTypeEnum::getName));
+        return Result.success(result);
     }
 
-    /**
-     * 订单批量发货删除
-     * @param id 参数
-     * @return Result<Object>
-     */
-    @PostMapping("/del")
-    public Result<Object> del(@Validated @RequestBody Integer id) {
-        iShopOrderBatchDeliveryService.del(id);
-        return Result.success();
+    @GetMapping("/get_status")
+    public Result<?> getBatchStatus() {
+        Map<Integer, String> result = Arrays.stream(OrderBatchDeliveryStatusEnum.values())
+                .collect(Collectors.toMap(OrderBatchDeliveryStatusEnum::getValue, OrderBatchDeliveryStatusEnum::getName));
+        return Result.success(result);
     }
 
 }

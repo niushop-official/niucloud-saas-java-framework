@@ -76,8 +76,8 @@ public class PointGoodsPosterDataListener extends GetPosterDataEventDefiner {
 
             // 生成二维码
             String url = QrcodeUtils.qrcodeToFile(
-                    RequestUtils.siteId(),
-                    RequestUtils.channel(),
+                    event.getSiteId(),
+                    event.getChannel(),
                     coreSysConfigService.getSceneDomain(event.getSiteId()).getWapUrl(),
                     "addon/shop/pages/point/detail",
                     urlData,

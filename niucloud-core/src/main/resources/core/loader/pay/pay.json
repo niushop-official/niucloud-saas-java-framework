@@ -19,5 +19,12 @@
     "icon": "static/resource/icon/pay_icon/balancepay.png",
     "setting_component": "",
     "driver": "com.niu.core.service.core.pay.driver.Balancepay"
+  },
+  "friendspay": {
+    "name": "找朋友帮忙付",
+    "key": "friendspay",
+    "icon": "static/resource/icon/pay_icon/friendspay.png",
+    "setting_component": "/src/app/views/setting/components/pay-friendspay.vue",
+    "driver": "com.niu.core.service.core.pay.driver.FriendPay"
   }
 }

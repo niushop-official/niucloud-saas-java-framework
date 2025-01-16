@@ -1,6 +1,7 @@
 package com.niu.core.service.core.generator;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ClassLoaderUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -641,7 +642,7 @@ public class CoreGenerateService {
     public static MapperInfoVo getMapperInfo(String mapper) {
         MapperInfoVo vo = new MapperInfoVo();
         try {
-            Class<?> mapperClass = Class.forName(mapper);
+            Class<?> mapperClass = ClassLoaderUtil.loadClass(mapper);
 
             if (!mapperClass.isInterface() || !mapperClass.isAnnotationPresent(Mapper.class)) {
                 throw new CommonException("提供的类不是有效的MyBatis Mapper接口");

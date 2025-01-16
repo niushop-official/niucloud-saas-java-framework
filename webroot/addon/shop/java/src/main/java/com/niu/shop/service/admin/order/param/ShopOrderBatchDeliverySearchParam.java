@@ -1,5 +1,7 @@
 package com.niu.shop.service.admin.order.param;
+
 import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -31,5 +33,7 @@ public class ShopOrderBatchDeliverySearchParam implements Serializable {
     private String failOutput;
 
     private String failRemark;
+
+    private String[] createTime;
 
 }

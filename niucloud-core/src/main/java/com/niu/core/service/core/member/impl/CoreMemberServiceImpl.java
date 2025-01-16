@@ -3,6 +3,7 @@ package com.niu.core.service.core.member.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.hutool.core.util.ClassLoaderUtil;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.member.Member;
@@ -130,7 +131,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                 JSONObject config = gifts.getJSONObject(key);
                 String driver = (String) giftEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
-                    Class<?> clazz = Class.forName(driver);
+                    Class<?> clazz = ClassLoaderUtil.loadClass(driver);
                     Object obj = clazz.getDeclaredConstructor().newInstance();
                     Method method = clazz.getMethod("content", Integer.class, JSONObject.class, String.class);
                     Object[] params = {siteId, config, scene};
@@ -161,7 +162,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                 JSONObject config = benefits.getJSONObject(key);
                 String driver = (String) benefitsEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
-                    Class<?> clazz = Class.forName(driver);
+                    Class<?> clazz = ClassLoaderUtil.loadClass(driver);
                     Object obj = clazz.getDeclaredConstructor().newInstance();
                     Method method = clazz.getMethod("content", Integer.class, JSONObject.class, String.class);
                     Object[] params = {siteId, config, scene};
@@ -192,7 +193,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                 JSONObject config = rules.getJSONObject(key);
                 String driver = (String) growthRuleEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
-                    Class<?> clazz = Class.forName(driver);
+                    Class<?> clazz = ClassLoaderUtil.loadClass(driver);
                     Object obj = clazz.getDeclaredConstructor().newInstance();
                     Method method = clazz.getMethod("content", Integer.class, JSONObject.class, String.class);
                     Object[] params = {siteId, config, scene};
@@ -223,7 +224,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                 JSONObject config = rules.getJSONObject(key);
                 String driver = (String) pointRuleEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
-                    Class<?> clazz = Class.forName(driver);
+                    Class<?> clazz = ClassLoaderUtil.loadClass(driver);
                     Object obj = clazz.getDeclaredConstructor().newInstance();
                     Method method = clazz.getMethod("content", Integer.class, JSONObject.class, String.class);
                     Object[] params = {siteId, config, scene};
@@ -254,7 +255,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                 JSONObject config = rules.getJSONObject(key);
                 String driver = (String) pointRuleEnum.getByPath(key + ".content." + scene + ".driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
-                    Class<?> clazz = Class.forName(driver);
+                    Class<?> clazz = ClassLoaderUtil.loadClass(driver);
                     Object obj = clazz.getDeclaredConstructor().newInstance();
                     Method method = clazz.getMethod("content", Integer.class, JSONObject.class, String.class);
                     Object[] params = {siteId, config, scene};
@@ -290,7 +291,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
         if (driver.isEmpty()) return;
 
         try {
-            Class<?> clazz = Class.forName(driver);
+            Class<?> clazz = ClassLoaderUtil.loadClass(driver);
             Object obj = clazz.getDeclaredConstructor().newInstance();
             Method method = clazz.getMethod("calculate", Integer.class, String.class, JSONObject.class, Map.class);
             Object[] params = {siteId, key, config, data};
@@ -327,7 +328,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
         if (driver.isEmpty()) return;
 
         try {
-            Class<?> clazz = Class.forName(driver);
+            Class<?> clazz = ClassLoaderUtil.loadClass(driver);
             Object obj = clazz.getDeclaredConstructor().newInstance();
             Method method = clazz.getMethod("calculate", Integer.class, String.class, JSONObject.class, Map.class);
             Object[] params = {siteId, key, config, data};
@@ -360,7 +361,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
                 JSONObject config = gifts.getJSONObject(key);
                 String driver = (String) giftEnum.getByPath(key + ".grant.driver");
                 if (config.getInt("is_use") != null && config.getInt("is_use") > 0 && driver != null && !driver.isEmpty()) {
-                    Class<?> clazz = Class.forName(driver);
+                    Class<?> clazz = ClassLoaderUtil.loadClass(driver);
                     Object obj = clazz.getDeclaredConstructor().newInstance();
                     Method method = clazz.getMethod("grant", Integer.class, Integer.class, JSONObject.class, Map.class);
                     Object[] params = {siteId, memberId, config, vars};

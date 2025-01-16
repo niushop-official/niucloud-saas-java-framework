@@ -47,11 +47,11 @@
 			</u-form>
 			<view v-if="type == 'username'" class="text-right text-[24rpx] text-[var(--text-color-light9)] leading-[34rpx] mt-[20rpx]" @click="redirect({ url: '/app/pages/auth/resetpwd' })">{{t('resetpwd')}}</view>
 			<view :class="{'mt-[160rpx]':type != 'username','mt-[106rpx]':type == 'username'}">
-				<view v-if="configStore.login.agreement_show" class="flex items-center mb-[20rpx] py-[10rpx]" @click.stop="agreeChange">
+				<view v-if="configStore.login.agreement_show" class="flex items-center mb-[20rpx] py-[14rpx]" @click.stop="agreeChange">
 					<u-checkbox-group @change="agreeChange">
-						<u-checkbox activeColor="var(--primary-color)" :checked="isAgree" shape="circle" size="24rpx" :customStyle="{ 'marginTop': '4rpx' }"/>
+						<u-checkbox activeColor="var(--primary-color)" :checked="isAgree" shape="circle" size="30rpx"/>
 					</u-checkbox-group>
-					<view class="text-[24rpx] text-[var(--text-color-light6)] flex items-center flex-wrap">
+					<view class="text-[24rpx] text-[var(--text-color-light6)] flex items-center flex-wrap leading-[30rpx]">
 						<text>{{ t('agreeTips') }}</text>
 						<text @click.stop="redirect({ url: '/app/pages/auth/agreement?key=privacy' })" class="text-primary">《{{t('privacyAgreement')}}》</text>
 						<text>{{ t('and') }}</text>

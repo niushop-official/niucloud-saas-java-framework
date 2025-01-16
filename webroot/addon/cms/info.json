@@ -6,6 +6,7 @@
   "author": "niucloud",
   "type": "app",
   "support_app": "",
+  "support_version": "0.0.3",
   "jar": "cms.jar",
   "mainClass": "com.niu.cms.WebApplication"
 }

@@ -1,5 +1,6 @@
 package com.niu.shop.service.admin.goods.impl;
 
+import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
@@ -16,6 +17,9 @@ import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
+import com.niu.core.service.admin.member.IMemberService;
+import com.niu.core.service.api.member.IMemberLevelService;
+import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.active.ShopActiveGoods;
@@ -24,6 +28,7 @@ import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.entity.goods.ShopGoodsSpec;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.enums.active.ActiveGoodsTypeEnum;
+import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.event.goods.AfterGoodsEditEvent;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
@@ -35,16 +40,18 @@ import com.niu.shop.service.admin.goods.IShopGoodsSkuService;
 import com.niu.shop.service.admin.goods.IShopGoodsSpecService;
 import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.vo.*;
+import com.niu.shop.service.api.goods.IGoodsService;
+import com.niu.shop.service.core.goods.ICoreGoodsLimitBuyService;
+import com.niu.shop.service.core.marketing.ICoreManjianService;
+import com.niu.shop.service.core.marketing.param.GetManjianInfoParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -77,6 +84,21 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
 
     @Resource
     ICoreUploadService coreUploadService;
+
+    @Resource
+    ICoreManjianService coreManjianService;
+
+    @Resource
+    IMemberService memberService;
+
+    @Resource
+    IGoodsService goodsService;
+
+    @Resource
+    IMemberLevelService memberLevelService;
+
+    @Resource
+    ICoreGoodsLimitBuyService coreGoodsLimitBuyService;
 
     /**
      * 商品列表
@@ -539,7 +561,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         }
 
         ShopGoods model = new ShopGoods();
-        model.setDeleteTime(new Long(0));
+        model.setDeleteTime(Long.valueOf(0));
         shopGoodsMapper.update(model, new QueryWrapper<ShopGoods>().eq("site_id", RequestUtils.siteId()).in("goods_id", goodsIds));
     }
 
@@ -914,7 +936,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         }
 
         List<ShopSelectGoodsListVo.ListVo> list = shopGoodsMapper.selectJoinList(ShopSelectGoodsListVo.ListVo.class, queryWrapper);
-        for (ShopSelectGoodsListVo.ListVo vo: list) {
+        for (ShopSelectGoodsListVo.ListVo vo : list) {
             vo.setGoodsImage(vo.getGoodsImage());
 
             List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", vo.getGoodsId()));
@@ -1027,4 +1049,232 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         model.setMemberDiscount(param.getMemberDiscount());
         shopGoodsMapper.updateById(model);
     }
+
+    @Override
+    public PageResult<GetBuyGoodsSelectVo> getBuyGoodsSelect(PageParam pageParam, BuyGoodsSelectParam param) {
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
+
+        QueryWrapper<ShopGoods> goodsQueryWrapper = new QueryWrapper<>();
+        goodsQueryWrapper.eq("site_id", RequestUtils.siteId())
+                .gt("stock", 0)
+                .eq("status", 1)
+                .eq("is_gift", 0)
+                .orderByDesc("sort", "create_time");
+
+        if (ObjectUtil.isNotEmpty(param.getGoodsCategory())) {
+            goodsQueryWrapper.like("goods_category", param.getGoodsCategory());
+        }
+
+        if (ObjectUtil.isNotEmpty(param.getGoodsType())) {
+            goodsQueryWrapper.eq("goods_type", param.getGoodsType());
+        }
+
+        if (ObjectUtil.isNotEmpty(param.getKeyword())) {
+            goodsQueryWrapper.and(wrapper -> wrapper
+                    .like("goods_name", param.getKeyword())
+                    .or()
+                    .like("sub_title", param.getKeyword()));
+        }
+
+        Page<ShopGoods> iPage = shopGoodsMapper.selectPage(new Page<>(page, limit), goodsQueryWrapper);
+
+        Set<Integer> goodsIds = CollStreamUtil.toSet(iPage.getRecords(), ShopGoods::getGoodsId);
+        Map<Integer, List<ShopGoodsSku>> skuMap = new HashMap<>(goodsIds.size(), 1);
+        if (ObjectUtil.isNotEmpty(goodsIds)) {
+            QueryWrapper<ShopGoodsSku> skuQueryWrapper = new QueryWrapper<>();
+            skuQueryWrapper.in("goods_id", goodsIds);
+            skuMap.putAll(shopGoodsSkuMapper.selectList(skuQueryWrapper)
+                    .stream().collect(Collectors.groupingBy(ShopGoodsSku::getGoodsId)));
+        }
+
+        IPage<GetBuyGoodsSelectVo> convert = iPage.convert(o -> {
+            GetBuyGoodsSelectVo vo = new GetBuyGoodsSelectVo();
+            BeanUtils.copyProperties(o, vo);
+            vo.setGoodsTypeName(GoodsTypeEnum.getNameByType(vo.getGoodsType()));
+
+            String mid = coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            vo.setGoodsCoverThumbMid(mid);
+            String small = coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            vo.setGoodsCoverThumbSmall(small);
+
+            List<ShopGoodsSku> skus = skuMap.get(vo.getGoodsId());
+            if (ObjectUtil.isNotEmpty(skus)) {
+                ShopGoodsSku sku = skus.get(0);
+                MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
+                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
+                BigDecimal price = goodsService.calculateMemberPrice(memberLevel, vo.getMemberDiscount(), memberPriceConfig, sku.getPrice());
+                sku.setMemberPrice(price.toString());
+                vo.setGoodsSku(sku);
+
+                GetManjianInfoParam manjianInfoParam = new GetManjianInfoParam();
+                manjianInfoParam.setGoodsId(o.getGoodsId());
+                manjianInfoParam.setSkuId(sku.getSkuId());
+                manjianInfoParam.setMemberId(param.getMemberId());
+                manjianInfoParam.setSiteId(RequestUtils.siteId());
+
+                ShopManjianRuleContentVo manjianInfo = coreManjianService.getManjianInfo(manjianInfoParam);
+                vo.setManjianInfo(manjianInfo);
+            }
+
+            Integer hasBuy = coreGoodsLimitBuyService.getGoodsHasBuyNumber(RequestUtils.siteId(), param.getMemberId(), vo.getGoodsId());
+            vo.setHasBuy(hasBuy);
+
+            return vo;
+        });
+
+        return PageResult.build(convert);
+    }
+
+    @Override
+    public GetBuySkuSelectVo getBuySkuSelect(BuySkuSelectParam param) {
+        QueryWrapper<ShopGoodsSku> goodsSkuQueryWrapper = new QueryWrapper<>();
+        goodsSkuQueryWrapper.eq("site_id", RequestUtils.siteId())
+                .eq("sku_id", param.getSkuId());
+        ShopGoodsSku shopGoodsSku = shopGoodsSkuMapper.selectOne(goodsSkuQueryWrapper);
+        if (shopGoodsSku == null) {
+            return null;
+        }
+
+        GetBuySkuSelectVo vo = new GetBuySkuSelectVo();
+        BeanUtils.copyProperties(shopGoodsSku, vo);
+
+        String small = coreUploadService.thumb(RequestUtils.siteId(), shopGoodsSku.getSkuImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+        String mid = coreUploadService.thumb(RequestUtils.siteId(), shopGoodsSku.getSkuImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+        String big = coreUploadService.thumb(RequestUtils.siteId(), shopGoodsSku.getSkuImage(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+
+        vo.setSkuImageThumbSmall(small);
+        vo.setSkuImageThumbMid(mid);
+        vo.setSkuImageThumbBig(big);
+
+        ShopGoods goods = shopGoodsMapper.selectById(vo.getGoodsId());
+        GetBuySkuSelectVo.GoodsDTO goodsDTO = new GetBuySkuSelectVo.GoodsDTO();
+        vo.setGoods(goodsDTO);
+
+        QueryWrapper<ShopGoodsSku> shopGoodsSkuQueryWrapper = new QueryWrapper<>();
+        shopGoodsSkuQueryWrapper.eq("goods_id", goods.getGoodsId());
+        List<ShopGoodsSku> shopGoodsSkus = shopGoodsSkuMapper.selectList(shopGoodsSkuQueryWrapper);
+        vo.setSkuList(shopGoodsSkus);
+
+        QueryWrapper<ShopGoodsSpec> shopGoodsSpecQueryWrapper = new QueryWrapper<>();
+        shopGoodsSpecQueryWrapper.eq("goods_id", goods.getGoodsId());
+        List<ShopGoodsSpec> shopGoodsSpecs = shopGoodsSpecMapper.selectList(shopGoodsSpecQueryWrapper);
+        vo.setGoodsSpec(shopGoodsSpecs);
+
+        if (ObjectUtil.isNotEmpty(param.getMemberId())) {
+            MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
+            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(shopGoodsSku.getMemberPrice()) ? JSONUtil.parseObj(shopGoodsSku.getMemberPrice()) : new JSONObject();
+            BigDecimal memberPrice = goodsService.calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, shopGoodsSku.getPrice());
+
+            vo.setMemberPrice(memberPrice.toString());
+            vo.setSkuList(getMemberPriceByList(memberLevel, goods.getMemberDiscount(), vo.getSkuList()));
+
+            Integer hasBuy = coreGoodsLimitBuyService.getGoodsHasBuyNumber(RequestUtils.siteId(), param.getMemberId(), vo.getGoodsId());
+            vo.setHasBuy(hasBuy);
+
+            GetManjianInfoParam manjianInfoParam = new GetManjianInfoParam();
+            manjianInfoParam.setGoodsId(vo.getGoodsId());
+            manjianInfoParam.setSkuId(vo.getSkuId());
+            manjianInfoParam.setMemberId(param.getMemberId());
+            manjianInfoParam.setSiteId(RequestUtils.siteId());
+            ShopManjianRuleContentVo manjianInfo = coreManjianService.getManjianInfo(manjianInfoParam);
+            vo.setManjianInfo(manjianInfo);
+        }
+        return vo;
+    }
+
+    @Override
+    public List<GetBuyGoodsSelectedVo> getBuyGoodsSelected(BuyGoodsSelectedParam param) {
+        if (ObjectUtil.isEmpty(param.getSkuIds())) {
+            return Collections.emptyList();
+        }
+        
+        QueryWrapper<ShopGoodsSku> shopGoodsSkuQueryWrapper = new QueryWrapper<>();
+        shopGoodsSkuQueryWrapper.eq("site_id", RequestUtils.siteId())
+                .in("sku_id", param.getSkuIds());
+        List<ShopGoodsSku> shopGoodsSkus = shopGoodsSkuMapper.selectList(shopGoodsSkuQueryWrapper);
+        if (ObjectUtil.isEmpty(shopGoodsSkus)) {
+            return Collections.emptyList();
+        }
+
+        Set<Integer> goodsIds = CollStreamUtil.toSet(shopGoodsSkus, ShopGoodsSku::getGoodsId);
+        Map<Integer, ShopGoods> goodsMap = new HashMap<>(goodsIds.size(), 1);
+        if (ObjectUtil.isNotEmpty(goodsIds)) {
+            goodsMap.putAll(shopGoodsMapper.selectBatchIds(goodsIds).stream().collect(Collectors.toMap(ShopGoods::getGoodsId, o -> o)));
+        }
+
+        List<GetBuyGoodsSelectedVo> skuList = shopGoodsSkus.stream()
+                .map(sku -> {
+                    GetBuyGoodsSelectedVo vo = new GetBuyGoodsSelectedVo();
+                    BeanUtils.copyProperties(sku, vo);
+                    vo.setGoods(goodsMap.get(vo.getGoodsId()));
+
+                    String small = coreUploadService.thumb(RequestUtils.siteId(), sku.getSkuImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+                    vo.setGoodsCoverThumbMid(small);
+                    String mid = coreUploadService.thumb(RequestUtils.siteId(), sku.getSkuImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+                    vo.setGoodsCoverThumbMid(mid);
+                    return vo;
+                })
+                .toList();
+
+        if (ObjectUtil.isNotEmpty(param.getMemberId())) {
+            MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(param.getMemberId());
+
+            for (GetBuyGoodsSelectedVo sku : skuList) {
+                if (ObjectUtil.isNotEmpty(sku.getGoods())) {
+                    JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
+                    BigDecimal memberPrice = goodsService.calculateMemberPrice(memberLevel, sku.getGoods().getMemberDiscount(), memberPriceConfig, sku.getPrice());
+                    sku.setMemberPrice(memberPrice.toString());
+                }
+
+                Integer hasBuy = coreGoodsLimitBuyService.getGoodsHasBuyNumber(RequestUtils.siteId(), param.getMemberId(), sku.getGoodsId());
+                sku.setHasBuy(hasBuy);
+
+                GetManjianInfoParam manjianInfoParam = new GetManjianInfoParam();
+                manjianInfoParam.setGoodsId(sku.getGoodsId());
+                manjianInfoParam.setSkuId(sku.getSkuId());
+                manjianInfoParam.setMemberId(param.getMemberId());
+                manjianInfoParam.setSiteId(RequestUtils.siteId());
+                ShopManjianRuleContentVo manjianInfo = coreManjianService.getManjianInfo(manjianInfoParam);
+                sku.setManjianInfo(manjianInfo);
+            }
+        }
+
+        return skuList;
+    }
+
+    private List<ShopGoodsSku> getMemberPriceByList(MemberLevelInfoVo memberLevelInfoVo, String memberDiscount, List<ShopGoodsSku> skuList) {
+        boolean isDefault = ObjectUtil.hasEmpty(memberDiscount, memberLevelInfoVo);
+        for (ShopGoodsSku sku : skuList) {
+            if (isDefault) {
+                sku.setMemberPrice(sku.getPrice().toString());
+                continue;
+            }
+
+            BigDecimal memberPrice = switch (memberDiscount) {
+                case "discount" -> {
+                    if (ObjectUtil.isEmpty(memberLevelInfoVo.getLevelBenefits()) || ObjectUtil.isEmpty(memberLevelInfoVo.getLevelBenefits().getJSONObject("discount")) ||
+                            ObjectUtil.isEmpty(memberLevelInfoVo.getLevelBenefits().getJSONObject("discount").get("is_use"))) {
+                        yield sku.getPrice();
+                    }
+
+                    yield sku.getPrice().multiply(memberLevelInfoVo.getLevelBenefits().getJSONObject("discount").getBigDecimal("discount").divide(BigDecimal.TEN));
+                }
+                case "fixed_price" -> {
+                    if (ObjectUtil.isEmpty(sku.getMemberPrice())) {
+                        throw new RuntimeException("价格计算失败");
+                    }
+
+                    JSONObject mp = JSONUtil.parseObj(sku.getMemberPrice());
+                    BigDecimal levelPrice = mp.getBigDecimal("level" + memberLevelInfoVo.getLevelName());
+                    yield ObjectUtil.isEmpty(levelPrice) ? sku.getPrice() : levelPrice;
+                }
+                default -> throw new RuntimeException("价格计算失败");
+            };
+
+            sku.setMemberPrice(memberPrice.toString());
+        }
+        return skuList;
+    }
+
 }

@@ -57,7 +57,8 @@ public class SaTokenAdminInterceptor extends SaInterceptor {
         /** 校验用户和当前的路由权限 */
         authService.checkRole(request);
 
-
+        /*** 检测是否是演示环境 */
+        authService.checkIsDemo(request);
        // Integer userId = (Integer)StpUtil.getLoginId();
 
         //adminapi/xxxx

@@ -48,7 +48,7 @@ public class Balancepay extends BasePay {
         // 扣除账户余额
         Pay pay = param.getPay();
         String memo = MemberAccountChangeTypeEnum.getType(AccountTypeEnum.BALANCE.getType()).getByPath("order.name", String.class);
-        coreMemberAccountService().addLog(param.getSiteId(), param.getBuyerId(), AccountTypeEnum.BALANCE.getType(), pay.getMoney().negate().doubleValue(), "order", memo, pay.getOutTradeNo());
+        coreMemberAccountService().addLog(param.getSiteId(), param.getPay().getMainId(), AccountTypeEnum.BALANCE.getType(), pay.getMoney().negate().doubleValue(), "order", memo, pay.getOutTradeNo());
 
         PayNotifyParam notifyParam = new PayNotifyParam();
         notifyParam.setSiteId(param.getSiteId());

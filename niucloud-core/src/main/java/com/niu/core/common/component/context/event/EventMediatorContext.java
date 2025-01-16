@@ -1,6 +1,7 @@
 package com.niu.core.common.component.context.event;
 
 import com.niu.core.common.annotation.EventCallback;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.event.example.CoreSourceEvent;
 import com.niu.core.event.example.DemoEventDefiner;
 import com.niu.core.event.example.ExampleEventDefiner;
@@ -27,7 +28,7 @@ public class EventMediatorContext {
         String basePackage = "com";
         List<Class> eventCallbackClassList = scanAnnotationByComponentProvider(basePackage, EventCallback.class);
         CallbackMediator.getInstance().init(eventCallbackClassList);
-//        log.info("eventCallbackClassList = " + eventCallbackClassList);
+        log.info("eventCallbackClassList = " + eventCallbackClassList);
     }
 
     /**
@@ -79,7 +80,12 @@ public class EventMediatorContext {
         provider.findCandidateComponents(basePackage).forEach(beanDefinition -> {
             String beanClassName = beanDefinition.getBeanClassName();
             try {
-                Class<?> beanClass = Class.forName(beanClassName);
+                Class<?> beanClass = null;
+                if (GlobalConfig.runActive.equals("dev")) {
+                    beanClass = Class.forName(beanClassName);
+                } else {
+                    beanClass = Thread.currentThread().getContextClassLoader().loadClass(beanClassName);
+                }
                 classList.add(beanClass);
             } catch (Exception e) {
                 e.printStackTrace();

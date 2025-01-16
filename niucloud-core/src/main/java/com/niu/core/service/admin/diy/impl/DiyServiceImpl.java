@@ -203,11 +203,10 @@ public class DiyServiceImpl implements IDiyService {
         update.setIsDefault(0);
         diyPageMapper.update(update, new QueryWrapper<DiyPage>().eq("name", model.getName()).eq("site_id", RequestUtils.siteId()));
 
-        DiyPage updateDefault = new DiyPage();
         update.setId(id);
         update.setIsDefault(1);
         update.setUpdateTime(System.currentTimeMillis() / 1000);
-        diyPageMapper.updateById(updateDefault);
+        diyPageMapper.updateById(update);
     }
 
 

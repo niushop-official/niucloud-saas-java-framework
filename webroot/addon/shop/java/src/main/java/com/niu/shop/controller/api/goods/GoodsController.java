@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/shop/goods")
@@ -62,7 +63,8 @@ public class GoodsController {
      * @return
      */
     @GetMapping("/components")
-    public Result components(ShopGoodsComponentsSearchParam param) {
+    public Result components(@RequestParam(value = "goods_ids[]", required = false) Integer[] goodsIds, ShopGoodsComponentsSearchParam param) {
+        param.setGoodsIds(goodsIds);
         return Result.success(goodsService.getGoodsComponents(param));
     }
 }

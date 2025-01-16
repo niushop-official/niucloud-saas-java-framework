@@ -1,13 +1,9 @@
 package com.niu.shop.service.admin.goods;
 
-import com.niu.core.common.domain.PageResult;
-import com.niu.shop.entity.goods.ShopGoods;
-import com.niu.shop.entity.goods.ShopGoodsSku;
-import com.niu.shop.service.admin.goods.param.*;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
+import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.vo.*;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -20,7 +16,7 @@ public interface IShopGoodsService {
     /**
      * 商品列表
      *
-     * @param pageParam 分页参数
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<ShopGoodsListVo>
      */
@@ -44,7 +40,7 @@ public interface IShopGoodsService {
     /**
      * 商品编辑
      *
-     * @param id   主键
+     * @param id        主键
      * @param editParam 编辑参数
      */
     void edit(Integer id, ShopGoodsParam editParam);
@@ -66,7 +62,7 @@ public interface IShopGoodsService {
     /**
      * 商品回收站
      *
-     * @param pageParam 分页参数
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<ShopGoodsListVo>
      */
@@ -128,6 +124,7 @@ public interface IShopGoodsService {
 
     /**
      * 复制商品
+     *
      * @param goodsId
      */
     void copy(Integer goodsId);
@@ -173,4 +170,10 @@ public interface IShopGoodsService {
      * @param param
      */
     void editGoodsListMemberPrice(EditGoodsListMemberPriceParam param);
+
+    PageResult<GetBuyGoodsSelectVo> getBuyGoodsSelect(PageParam pageParam, BuyGoodsSelectParam param);
+
+    GetBuySkuSelectVo getBuySkuSelect(BuySkuSelectParam param);
+
+    List<GetBuyGoodsSelectedVo> getBuyGoodsSelected(BuyGoodsSelectedParam param);
 }

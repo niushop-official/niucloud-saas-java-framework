@@ -66,67 +66,6 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
     private final ICoreShopNewcomerService coreShopNewcomerService;
 
     @Override
-    @Transactional
-    public void setConfig(ShopNewcomerSetConfigParam param) {
-        List<ShopManjianGoodsData> goodsDataList = JSONArray.parseArray(param.getGoodsData(), ShopManjianGoodsData.class);
-        if (ActiveStatusEnum.ACTIVE.equals(ActiveStatusEnum.getEnumByStatus(param.getActiveStatus()))) {
-            checkGoods(goodsDataList);
-        }
-
-        ShopNewcomerActiveValue activeValue = new ShopNewcomerActiveValue();
-        activeValue.setValidityType(param.getValidityType());
-        activeValue.setValidityDay(param.getValidityDay());
-        activeValue.setValidityTime(ObjectUtil.isEmpty(param.getValidityTime()) ? 0 : DateUtils.StringToTimestamp(param.getValidityTime()));
-        activeValue.setParticipationWay(param.getParticipationWay());
-        activeValue.setAppointTime(ObjectUtil.isEmpty(param.getAppointTime()) ? 0 : DateUtils.StringToTimestamp(param.getAppointTime()));
-        activeValue.setLimitNum(param.getLimitNum());
-        activeValue.setBannerList(param.getBannerList());
-
-        List<ShopActiveGoods> activeGoods = new ArrayList<>(CollectionUtil.size(goodsDataList));
-        for (ShopManjianGoodsData goodsData : goodsDataList) {
-            ShopActiveGoods goods = new ShopActiveGoods();
-            goods.setSiteId(RequestUtils.siteId());
-            goods.setGoodsId(goodsData.getGoodsId());
-            goods.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
-            goods.setActiveClass(ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
-            goods.setActiveGoodsValue(JSON.toJSONString(goodsData));
-            goods.setSkuId(goodsData.getSkuId());
-            goods.setActiveGoodsStatus(param.getActiveStatus());
-            goods.setActiveGoodsPrice(NumberUtil.toBigDecimal(goodsData.getNewcomerPrice()));
-            activeGoods.add(goods);
-        }
-
-        LambdaQueryWrapper<ShopActive> activeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        activeLambdaQueryWrapper.eq(ShopActive::getSiteId, RequestUtils.siteId())
-                .eq(ShopActive::getActiveClass, ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
-        ShopActive active = shopActiveMapper.selectOne(activeLambdaQueryWrapper);
-        if (ObjectUtil.isEmpty(active)) {
-            ShopActive shopActive = new ShopActive();
-            shopActive.setActiveDesc(param.getActiveDesc());
-            shopActive.setSiteId(RequestUtils.siteId());
-            shopActive.setActiveGoodsInfo(param.getGoodsData());
-            shopActive.setActiveType(ActiveTypeEnum.GOODS.getType());
-            shopActive.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
-            shopActive.setActiveClass(ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
-            shopActive.setActiveValue(JSON.toJSONString(activeValue));
-            shopActive.setActiveStatus(param.getActiveStatus());
-            coreActiveService.add(shopActive, activeGoods);
-            return;
-        }
-
-        active.setSiteId(RequestUtils.siteId());
-        active.setActiveStatus(param.getActiveStatus());
-        active.setActiveDesc(param.getActiveDesc());
-        active.setActiveGoodsInfo(param.getGoodsData());
-        active.setActiveType(ActiveTypeEnum.GOODS.getType());
-        active.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
-        active.setActiveClass(ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
-        active.setActiveValue(JSON.toJSONString(activeValue));
-        activeGoods.forEach(goods -> goods.setActiveId(active.getActiveId()));
-        coreActiveService.edit(active, activeGoods);
-    }
-
-    @Override
     public ShopNewcomerConfigVo getConfig() {
         CoreShopNewcomerConfigVo config = coreShopNewcomerService.getConfig(RequestUtils.siteId());
         ShopNewcomerConfigVo vo = new ShopNewcomerConfigVo();
@@ -191,14 +130,74 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
     }
 
     @Override
+    @Transactional
+    public void setConfig(ShopNewcomerSetConfigParam param) {
+        List<ShopManjianGoodsData> goodsDataList = JSONArray.parseArray(param.getGoodsData(), ShopManjianGoodsData.class);
+        if (ActiveStatusEnum.ACTIVE.equals(ActiveStatusEnum.getEnumByStatus(param.getActiveStatus()))) {
+            checkGoods(goodsDataList);
+        }
+
+        ShopNewcomerActiveValue activeValue = new ShopNewcomerActiveValue();
+        activeValue.setValidityType(param.getValidityType());
+        activeValue.setValidityDay(param.getValidityDay());
+        activeValue.setValidityTime(ObjectUtil.isEmpty(param.getValidityTime()) ? 0 : DateUtils.StringToTimestamp(param.getValidityTime()));
+        activeValue.setParticipationWay(param.getParticipationWay());
+        activeValue.setAppointTime(ObjectUtil.isEmpty(param.getAppointTime()) ? 0 : DateUtils.StringToTimestamp(param.getAppointTime()));
+        activeValue.setLimitNum(param.getLimitNum());
+        activeValue.setBannerList(param.getBannerList());
+
+        List<ShopActiveGoods> activeGoods = new ArrayList<>(CollectionUtil.size(goodsDataList));
+        for (ShopManjianGoodsData goodsData : goodsDataList) {
+            ShopActiveGoods goods = new ShopActiveGoods();
+            goods.setSiteId(RequestUtils.siteId());
+            goods.setGoodsId(goodsData.getGoodsId());
+            goods.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
+            goods.setActiveClass(ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
+            goods.setActiveGoodsValue(JSON.toJSONString(goodsData));
+            goods.setSkuId(goodsData.getSkuId());
+            goods.setActiveGoodsStatus(param.getActiveStatus());
+            goods.setActiveGoodsPrice(NumberUtil.toBigDecimal(goodsData.getNewcomerPrice()));
+            activeGoods.add(goods);
+        }
+
+        LambdaQueryWrapper<ShopActive> activeLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        activeLambdaQueryWrapper.eq(ShopActive::getSiteId, RequestUtils.siteId())
+                .eq(ShopActive::getActiveClass, ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
+        ShopActive active = shopActiveMapper.selectOne(activeLambdaQueryWrapper);
+        if (ObjectUtil.isEmpty(active)) {
+            ShopActive shopActive = new ShopActive();
+            shopActive.setActiveDesc(param.getActiveDesc());
+            shopActive.setSiteId(RequestUtils.siteId());
+            shopActive.setActiveGoodsInfo(param.getGoodsData());
+            shopActive.setActiveType(ActiveTypeEnum.GOODS.getType());
+            shopActive.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
+            shopActive.setActiveClass(ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
+            shopActive.setActiveValue(JSON.toJSONString(activeValue));
+            shopActive.setActiveStatus(param.getActiveStatus());
+            coreActiveService.add(shopActive, activeGoods);
+            return;
+        }
+
+        active.setSiteId(RequestUtils.siteId());
+        active.setActiveStatus(param.getActiveStatus());
+        active.setActiveDesc(param.getActiveDesc());
+        active.setActiveGoodsInfo(param.getGoodsData());
+        active.setActiveType(ActiveTypeEnum.GOODS.getType());
+        active.setActiveGoodsType(ActiveGoodsTypeEnum.GOODS_SINGLE.getType());
+        active.setActiveClass(ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
+        active.setActiveValue(JSON.toJSONString(activeValue));
+        activeGoods.forEach(goods -> goods.setActiveId(active.getActiveId()));
+        coreActiveService.edit(active, activeGoods);
+    }
+
+    @Override
     public ShopNewComerSelectPageVo<ShopNewcomerShopGoodsVo> getSelectPage(PageParam pageParam, ShopNewcomerSelectPageParam param) {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         LambdaQueryWrapper<ShopActiveGoods> shopActiveGoodsLambdaQueryWrapper = new LambdaQueryWrapper<>();
         shopActiveGoodsLambdaQueryWrapper.eq(ShopActiveGoods::getSiteId, RequestUtils.siteId())
-                .eq(ShopActiveGoods::getActiveClass, ActiveClassEnum.NEWCOMER_DISCOUNT.getType())
-                .eq(ShopActiveGoods::getActiveGoodsStatus, ActiveStatusEnum.ACTIVE.getStatus());
+                .eq(ShopActiveGoods::getActiveClass, ActiveClassEnum.NEWCOMER_DISCOUNT.getType());
         List<ShopActiveGoods> shopActiveGoods = shopActiveGoodsMapper.selectList(shopActiveGoodsLambdaQueryWrapper);
 
         Set<Integer> activeGoodsIds = CollStreamUtil.toSet(shopActiveGoods, ShopActiveGoods::getGoodsId);
@@ -229,7 +228,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                 }
                 break;
             case "selected":
-                shopGoodsLambdaQueryWrapper.in(ShopGoods::getGoodsId, param.getGoodsIds());
+                shopGoodsLambdaQueryWrapper.in(ShopGoods::getGoodsId, ObjectUtil.isEmpty(param.getGoodsIds()) ? List.of(-1) : param.getGoodsIds());
                 break;
         }
 
@@ -287,6 +286,12 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             }
 
             vo.setSkuList(skuList);
+
+            String small = coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            String mid = coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            vo.setGoodsCoverThumbSmall(small);
+            vo.setGoodsCoverThumbMid(mid);
+
             voList.add(vo);
         }
 

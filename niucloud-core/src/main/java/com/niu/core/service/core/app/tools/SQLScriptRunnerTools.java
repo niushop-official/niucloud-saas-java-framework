@@ -1,11 +1,15 @@
 package com.niu.core.service.core.app.tools;
 
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.component.context.SpringContext;
 import org.apache.ibatis.jdbc.ScriptRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.sql.Connection;
 
 public final class SQLScriptRunnerTools {
@@ -38,6 +42,9 @@ public final class SQLScriptRunnerTools {
     public static void execScript(Reader fileReader) {
         JdbcTemplate jdbcTemplate = SpringContext.bean(JdbcTemplate.class);
         String sql = IoUtil.read(fileReader);
+        if (ObjectUtil.hasEmpty(jdbcTemplate, sql)) {
+            return;
+        }
         jdbcTemplate.execute(sql);
     }
 

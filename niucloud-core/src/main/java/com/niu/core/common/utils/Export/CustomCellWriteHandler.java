@@ -15,9 +15,7 @@ import java.util.List;
 
 @Slf4j
 public class CustomCellWriteHandler extends HorizontalCellStyleStrategy implements CellWriteHandler, RowWriteHandler {
-
     private static Integer INDEX;
-
 
     @Override
     public void afterRowDispose(RowWriteHandlerContext context) {
@@ -59,7 +57,7 @@ public class CustomCellWriteHandler extends HorizontalCellStyleStrategy implemen
             headCellStyle.setAlignment(HorizontalAlignment.CENTER); // 水平居中
         } else {
             font.setFontHeightInPoints(ExcelConstant.MIN_HEIGHT_SIZE); // 设置字体大小
-            if (headCell.getRowIndex()>0 && headCell.getRowIndex() <= INDEX) {
+            if (headCell.getRowIndex() > 0 && headCell.getRowIndex() <= INDEX) {
                 // 只有查询条件列一居左 列二居右
                 if (headCell.getColumnIndex() == 0) {
                     headCellStyle.setAlignment(HorizontalAlignment.LEFT); // 居左

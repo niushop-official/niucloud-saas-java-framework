@@ -6,15 +6,14 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.entity.pay.PayChannel;
 import com.niu.core.mapper.pay.PayChannelMapper;
-import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.service.core.pay.ICorePayChannelService;
 import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.core.service.core.pay.param.PayChannelSearchParam;
+import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import com.niu.core.service.core.wechat.ICoreWechatConfigService;
 import com.niu.core.service.core.wechat.vo.WechatConfigVo;
-import org.hibernate.validator.constraints.EAN;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +73,10 @@ public class CorePayChannelServiceImpl implements ICorePayChannelService {
         for (PayChannel item : payChannelList) {
             if (item.getConfig().isEmpty()) continue;
             PayTypeVo type = corePayService.driver(siteId, channel, item.getType()).filterPayTypeByTradeType(tradeType);
-            if (type != null) list.add(type);
+            if (type != null) {
+                type.setConfig(item.getConfig());
+                list.add(type);
+            }
         }
 
         return list;

@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * 导出服务器底层
- *
  */
 public interface ICoreExportService {
 
@@ -27,7 +26,7 @@ public interface ICoreExportService {
      * @param exportId
      * @param sysExportParam
      */
-    void edit(Integer exportId,SysExportParam sysExportParam);
+    void edit(Integer exportId, SysExportParam sysExportParam);
 
     /**
      * 获取导出数据类型列表
@@ -63,7 +62,7 @@ public interface ICoreExportService {
      * @param dataColumn
      * @param data
      */
-    void export(Integer siteId, String dataKey, JSONArray dataColumn, JSONArray data);
+    void export(Integer siteId, Integer exportId, String dataKey, JSONArray dataColumn, JSONArray data);
 
     /**
      * 删除导出报表文件

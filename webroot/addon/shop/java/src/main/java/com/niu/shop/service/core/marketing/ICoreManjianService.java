@@ -4,12 +4,11 @@ import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niu.shop.entity.manjian.ShopManjian;
 import com.niu.shop.entity.order.ShopOrder;
-import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.ShopOrderRefund;
+import com.niu.shop.service.admin.goods.vo.ShopManjianRuleContentVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.api.cart.vo.ShopCartCalculateVo;
-import com.niu.shop.service.core.order.param.OrderCalculateParam;
-import com.niu.shop.service.core.order.param.OrderCreateParam;
+import com.niu.shop.service.core.marketing.param.GetManjianInfoParam;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 
 import java.math.BigDecimal;
@@ -93,12 +92,12 @@ public interface ICoreManjianService extends IService<ShopManjian> {
      * @param siteId         站点ID
      * @param memberId       会员ID
      */
-    void getOrderGoodsGiveInfo(ShopOrderInfoVo.OrderGoods orderGoodsInfo,  List<ShopOrderInfoVo.OrderGoods> orderGoodsList, Integer siteId, Integer memberId);
+    void getOrderGoodsGiveInfo(ShopOrderInfoVo.OrderGoods orderGoodsInfo, List<ShopOrderInfoVo.OrderGoods> orderGoodsList, Integer siteId, Integer memberId);
 
     /**
      * 满减优惠处理
      *
-     * @param data    包含相关数据的对象
+     * @param data     包含相关数据的对象
      * @param siteId   站点ID
      * @param memberId 会员ID
      * @return 处理后的包含商品列表和促销金额等更新后的数据对象（具体类型需根据实际业务定义）
@@ -126,4 +125,5 @@ public interface ICoreManjianService extends IService<ShopManjian> {
      */
     BigDecimal moneyFormat(BigDecimal money);
 
+    ShopManjianRuleContentVo getManjianInfo(GetManjianInfoParam param);
 }

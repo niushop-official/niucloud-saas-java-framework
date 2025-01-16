@@ -3,21 +3,21 @@ import request from '@/utils/request'
 /**
  * 获取授权信息
  */
-export function getAuthinfo() {
+export function getAuthInfo() {
     return request.get('niucloud/authinfo', { showErrorMessage: false })
 }
 
 /**
  * 设置 授权配置
  */
-export function setAuthinfo(params: Record<string, any>) {
+export function setAuthInfo(params: Record<string, any>) {
     return request.post('niucloud/authinfo', params, {showSuccessMessage: true})
 }
 
 /**
  * 获取 授权配置
  */
-export function getAdminAuthinfo() {
+export function getAdminAuthInfo() {
     return request.get('niucloud/admin/authinfo')
 }
 

@@ -2,11 +2,10 @@ package com.niu.boot.process;
 
 import cn.hutool.core.io.FileUtil;
 import com.niu.boot.config.BootConfig;
-import com.niu.boot.utils.BIOUtils;
-import com.niu.boot.utils.BootLogUtils;
-import com.niu.boot.utils.PipeNameUtils;
-import com.niu.boot.utils.ThreadUtils;
+import com.niu.boot.utils.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -252,10 +251,18 @@ public class ProcessManager {
             // 覆盖变更文件
             File codeDir = new File(upgradeDir, "download/" + version);
             if (addon.equals("niucloud-admin")) {
+                IOFileFilter envFile = FileTools.createExclusionFilter(new String[]{
+                        "application-prod.yml",
+                        ".env.development",
+                        ".env.production",
+                        ".env.dev",
+                        ".env.product"
+                });
+
                 File[] childFile = codeDir.listFiles();
                 for (File file : childFile) {
                     if (file.isDirectory()) {
-                        if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()));
+                        if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()), envFile);
                     } else {
                         FileUtils.copyFile(file, new File(sourceFile, file.getName()));
                     }

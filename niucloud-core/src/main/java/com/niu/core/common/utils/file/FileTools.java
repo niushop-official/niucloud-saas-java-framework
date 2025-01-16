@@ -216,19 +216,19 @@ public class FileTools {
     /**
      * 创建 FileUtils.copyDirectory 需要排除的目录
      *
-     * @param dirs
+     * @param names
      * @return
      */
-    public static IOFileFilter createExclusionFilter(String[] dirs) {
+    public static IOFileFilter createExclusionFilter(String[] names) {
         // 定义要排除的目录
-        List<String> excludedDirs = Arrays.asList(dirs);
+        List<String> excluded = Arrays.asList(names);
 
         // 创建一个过滤器来排除特定子目录
         IOFileFilter excludeSubDirsFilter = FileFilterUtils.trueFileFilter(); // 初始化为 false，表示过滤所有文件或目录
 
         // 循环创建过滤器
-        for (String dirName : excludedDirs) {
-            IOFileFilter tempFilter = FileFilterUtils.nameFileFilter(dirName);
+        for (String name : excluded) {
+            IOFileFilter tempFilter = FileFilterUtils.nameFileFilter(name);
             excludeSubDirsFilter = FileFilterUtils.and(excludeSubDirsFilter, FileFilterUtils.notFileFilter(tempFilter));
         }
 

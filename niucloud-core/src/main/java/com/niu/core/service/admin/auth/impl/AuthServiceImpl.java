@@ -6,7 +6,9 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.AuthException;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
@@ -151,6 +153,15 @@ public class AuthServiceImpl implements IAuthService {
             throw new AuthException("NO_PERMISSION");
         }*/
 
+    }
+
+    @Override
+    public void checkIsDemo(HttpServletRequest request) {
+        String method = RequestUtils.getRequestMethod();
+
+        if (!method.equals("get") && GlobalConfig.isDemo) {
+            throw new CommonException("演示环境不允许操作");
+        }
     }
 
     /**

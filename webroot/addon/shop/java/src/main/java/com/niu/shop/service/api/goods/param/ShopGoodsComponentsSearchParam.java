@@ -3,6 +3,7 @@ package com.niu.shop.service.api.goods.param;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 商品参数
@@ -16,7 +17,7 @@ public class ShopGoodsComponentsSearchParam implements Serializable {
 
     private String order;
 
-    private String goodsIds = "";
+    private Integer[] goodsIds;
 
     private Integer num = 0;
 }

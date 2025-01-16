@@ -1,21 +1,27 @@
 {
-                "path": "recharge/pages/recharge",
-                "style": {
-                    "navigationBarTitleText": "%recharge.pages.recharge%"
+            "root": "addon/recharge",
+            "pages": [
+                // *********************************** 充值 ***********************************
+                {
+                    "path": "pages/recharge",
+                    "style": {
+                        "navigationBarTitleText": "%recharge.pages.recharge%"
+                    },
+                    "needLogin": true
                 },
-                "needLogin": true
-            },
-            {
-                "path": "recharge/pages/recharge_record",
-                "style": {
-                    "navigationBarTitleText": "%recharge.pages.recharge_record%"
+                {
+                    "path": "pages/recharge_record",
+                    "style": {
+                        "navigationBarTitleText": "%recharge.pages.recharge_record%"
+                    },
+                    "needLogin": true
                 },
-                "needLogin": true
-            },
-            {
-                "path": "recharge/pages/recharge_record_detail",
-                "style": {
-                    "navigationBarTitleText": "%recharge.pages.recharge_record_detail%"
-                },
-                "needLogin": true
-            },
+                {
+                    "path": "pages/recharge_record_detail",
+                    "style": {
+                        "navigationBarTitleText": "%recharge.pages.recharge_record_detail%"
+                    },
+                    "needLogin": true
+                }
+            ]
+        },

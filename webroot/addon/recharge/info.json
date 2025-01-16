@@ -6,6 +6,7 @@
   "author": "niucloud",
   "type": "addon",
   "support_app": "",
+  "support_version": "0.0.3",
   "jar": "recharge.jar",
   "mainClass": "com.niu.recharge.WebApplication"
 }

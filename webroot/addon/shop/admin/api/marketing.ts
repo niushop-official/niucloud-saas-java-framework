@@ -6,7 +6,7 @@ import request from '@/utils/request'
  * @returns
  */
 export function getMarketingIndex(params: Record<string, any>) {
-    return request.get(`shop/marketing`, { params })
+    return request.get(`shop/marketing`, {params})
 }
 
 /**
@@ -15,7 +15,7 @@ export function getMarketingIndex(params: Record<string, any>) {
  * @returns
  */
 export function getGoodsCategoryList(params: Record<string, any>) {
-    return request.get(`shop/goods/coupon/init`, { params })
+    return request.get(`shop/goods/coupon/init`, {params})
 }
 
 /**
@@ -24,7 +24,7 @@ export function getGoodsCategoryList(params: Record<string, any>) {
  * @returns
  */
 export function addCoupon(params: Record<string, any>) {
-    return request.post(`shop/goods/coupon`, params, { showErrorMessage: true, showSuccessMessage: true })
+    return request.post(`shop/goods/coupon`, params, {showErrorMessage: true, showSuccessMessage: true})
 }
 
 /**
@@ -41,23 +41,25 @@ export function getCouponStatusList() {
  * @returns
  */
 export function getCouponList(params: Record<string, any>) {
-    return request.get(`shop/goods/coupon`, { params })
+    return request.get(`shop/goods/coupon`, {params})
 }
+
 /**
  * 获取优惠券列表
  * @param params
  * @returns
  */
 export function getCouponSelectList(params: Record<string, any>) {
-    return request.get(`shop/goods/coupon/select`, { params })
+    return request.get(`shop/goods/coupon/select`, {params})
 }
+
 /**
  * 获取优惠券领取记录
  * @param params
  * @returns
  */
 export function getCouponRecords(params: Record<string, any>) {
-    return request.get(`shop/goods/coupon/records`, { params });
+    return request.get(`shop/goods/coupon/records`, {params});
 }
 
 /**
@@ -66,7 +68,7 @@ export function getCouponRecords(params: Record<string, any>) {
  * @returns
  */
 export function getCouponInfo(id: number) {
-    return request.get(`shop/goods/coupon/detail/${ id }`);
+    return request.get(`shop/goods/coupon/detail/${id}`);
 }
 
 /**
@@ -75,7 +77,7 @@ export function getCouponInfo(id: number) {
  * @returns
  */
 export function editCouponStatus(params: Record<string, any>) {
-    return request.put(`shop/goods/coupon/setstatus/${ params.status }`, params, { showSuccessMessage: true })
+    return request.put(`shop/goods/coupon/setstatus/${params.status}`, params, {showSuccessMessage: true})
 }
 
 /**
@@ -84,7 +86,7 @@ export function editCouponStatus(params: Record<string, any>) {
  * @returns
  */
 export function editCoupon(params: Record<string, any>) {
-    return request.put(`shop/goods/coupon/edit/${ params.id }`, params, {
+    return request.put(`shop/goods/coupon/edit/${params.id}`, params, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
@@ -96,7 +98,7 @@ export function editCoupon(params: Record<string, any>) {
  * @returns
  */
 export function deleteCoupon(id: number) {
-    return request.delete(`shop/goods/coupon/${ id }`, { showSuccessMessage: true })
+    return request.delete(`shop/goods/coupon/${id}`, {showSuccessMessage: true})
 }
 
 /**
@@ -105,7 +107,7 @@ export function deleteCoupon(id: number) {
  * @returns
  */
 export function closeCoupon(id: number) {
-    return request.put(`shop/goods/coupon/invalid/${ id }`, { showSuccessMessage: true })
+    return request.put(`shop/goods/coupon/invalid/${id}`, {showSuccessMessage: true})
 }
 
 /**
@@ -114,7 +116,7 @@ export function closeCoupon(id: number) {
  * @returns
  */
 export function getSelectedCouponList(params: Record<string, any>) {
-    return request.get(`shop/goods/coupon/selected`, { params })
+    return request.get(`shop/goods/coupon/selected`, {params})
 }
 
 /************ 限时折扣 ****************/
@@ -124,7 +126,7 @@ export function getSelectedCouponList(params: Record<string, any>) {
  * @returns
  */
 export function getActiveDiscountPageList(params: Record<string, any>) {
-    return request.get(`shop/active/discount`, { params })
+    return request.get(`shop/active/discount`, {params})
 }
 
 /**
@@ -141,7 +143,7 @@ export function getActiveDiscountStatusList() {
  * @returns
  */
 export function getActiveDiscountInfo(active_id: number) {
-    return request.get(`shop/active/discount/${ active_id }`);
+    return request.get(`shop/active/discount/${active_id}`);
 }
 
 /**
@@ -150,7 +152,7 @@ export function getActiveDiscountInfo(active_id: number) {
  * @returns
  */
 export function addActiveDiscount(params: Record<string, any>) {
-    return request.post('shop/active/discount', params, { showErrorMessage: true, showSuccessMessage: true })
+    return request.post('shop/active/discount', params, {showErrorMessage: true, showSuccessMessage: true})
 }
 
 /**
@@ -159,7 +161,7 @@ export function addActiveDiscount(params: Record<string, any>) {
  * @returns
  */
 export function editActiveDiscount(params: Record<string, any>) {
-    return request.put(`shop/active/discount/${ params.active_id }`, params, {
+    return request.put(`shop/active/discount/${params.active_id}`, params, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
@@ -171,7 +173,7 @@ export function editActiveDiscount(params: Record<string, any>) {
  * @returns
  */
 export function closeActiveDiscount(active_id: number) {
-    return request.put(`shop/active/discount/close/${ active_id }`, {}, {
+    return request.put(`shop/active/discount/close/${active_id}`, {}, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
@@ -183,7 +185,7 @@ export function closeActiveDiscount(active_id: number) {
  * @returns
  */
 export function deleteActiveDiscount(active_id: number) {
-    return request.delete(`shop/active/discount/${ active_id }`, { showSuccessMessage: true })
+    return request.delete(`shop/active/discount/${active_id}`, {showSuccessMessage: true})
 }
 
 /**
@@ -192,7 +194,7 @@ export function deleteActiveDiscount(active_id: number) {
  * @returns
  */
 export function getActiveDiscountGoodsPageList(params: Record<string, any>) {
-    return request.get(`shop/active/discount/goods/${ params.active_id }`, { params })
+    return request.get(`shop/active/discount/goods/${params.active_id}`, {params})
 }
 
 /**
@@ -201,7 +203,7 @@ export function getActiveDiscountGoodsPageList(params: Record<string, any>) {
  * @returns
  */
 export function getActiveDiscountOrderPageList(params: Record<string, any>) {
-    return request.get(`shop/active/discount/order/${ params.active_id }`, { params })
+    return request.get(`shop/active/discount/order/${params.active_id}`, {params})
 }
 
 /**
@@ -210,7 +212,7 @@ export function getActiveDiscountOrderPageList(params: Record<string, any>) {
  * @returns
  */
 export function getActiveDiscountMemberPageList(params: Record<string, any>) {
-    return request.get(`shop/active/discount/member/${ params.active_id }`, { params })
+    return request.get(`shop/active/discount/member/${params.active_id}`, {params})
 }
 
 /**
@@ -241,7 +243,7 @@ export function editActiveDiscountConfig(params: Record<string, any>) {
  * @returns
  */
 export function getActiveExchangePageList(params: Record<string, any>) {
-    return request.get(`shop/active/exchange`, { params })
+    return request.get(`shop/active/exchange`, {params})
 }
 
 /**
@@ -250,7 +252,7 @@ export function getActiveExchangePageList(params: Record<string, any>) {
  * @returns
  */
 export function getActiveExchangeInfo(id: number) {
-    return request.get(`shop/active/exchange/${ id }`);
+    return request.get(`shop/active/exchange/${id}`);
 }
 
 /**
@@ -259,7 +261,7 @@ export function getActiveExchangeInfo(id: number) {
  * @returns
  */
 export function addActiveExchange(params: Record<string, any>) {
-    return request.post('shop/active/exchange', params, { showErrorMessage: true, showSuccessMessage: true })
+    return request.post('shop/active/exchange', params, {showErrorMessage: true, showSuccessMessage: true})
 }
 
 /**
@@ -268,7 +270,7 @@ export function addActiveExchange(params: Record<string, any>) {
  * @returns
  */
 export function editActiveExchange(params: Record<string, any>) {
-    return request.put(`shop/active/exchange/${ params.id }`, params, {
+    return request.put(`shop/active/exchange/${params.id}`, params, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
@@ -280,7 +282,7 @@ export function editActiveExchange(params: Record<string, any>) {
  * @returns
  */
 export function editActiveExchangeStatus(params: Record<string, any>) {
-    return request.put(`shop/active/exchange/status/${ params.id }`, params, {
+    return request.put(`shop/active/exchange/status/${params.id}`, params, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
@@ -292,7 +294,7 @@ export function editActiveExchangeStatus(params: Record<string, any>) {
  * @returns
  */
 export function deleteActiveExchange(id: number) {
-    return request.delete(`shop/active/exchange/${ id }`, { showSuccessMessage: true })
+    return request.delete(`shop/active/exchange/${id}`, {showSuccessMessage: true})
 }
 
 /**
@@ -331,7 +333,7 @@ export function editActiveNewcomerConfig(params: Record<string, any>) {
  * @returns
  */
 export function getNewcomerGoodsList(params: Record<string, any>) {
-    return request.get('shop/active/newcomer/goods/select', { params })
+    return request.get('shop/active/newcomer/goods/select', {params})
 }
 
 /**
@@ -340,7 +342,7 @@ export function getNewcomerGoodsList(params: Record<string, any>) {
  * @returns
  */
 export function getNewcomerSelectGoodsList(params: Record<string, any>) {
-    return request.get('shop/active/newcomer/goods/selectgoodssku', { params })
+    return request.get('shop/active/newcomer/goods/selectgoodssku', {params})
 }
 
 /************ 商品榜单 ****************/
@@ -351,7 +353,7 @@ export function getNewcomerSelectGoodsList(params: Record<string, any>) {
  * @returns
  */
 export function setRankConfig(params: Record<string, any>) {
-    return request.post('shop/good/rank/config', params, { showErrorMessage: true, showSuccessMessage: true })
+    return request.post('shop/good/rank/config', params, {showErrorMessage: true, showSuccessMessage: true})
 }
 
 /**
@@ -368,7 +370,7 @@ export function getRankConfig() {
  * @returns
  */
 export function getRankPageList(params: Record<string, any>) {
-    return request.get(`shop/good/rank`, { params })
+    return request.get(`shop/good/rank`, {params})
 }
 
 /**
@@ -385,7 +387,7 @@ export function optionData() {
  * @returns
  */
 export function getRankInfo(rank_id: number) {
-    return request.get(`shop/good/rank/${ rank_id }`);
+    return request.get(`shop/good/rank/${rank_id}`);
 }
 
 /**
@@ -394,7 +396,7 @@ export function getRankInfo(rank_id: number) {
  * @returns
  */
 export function addGoodRank(params: Record<string, any>) {
-    return request.post('shop/good/rank', params, { showErrorMessage: true, showSuccessMessage: true })
+    return request.post('shop/good/rank', params, {showErrorMessage: true, showSuccessMessage: true})
 }
 
 /**
@@ -403,7 +405,7 @@ export function addGoodRank(params: Record<string, any>) {
  * @returns
  */
 export function editGoodRank(params: Record<string, any>) {
-    return request.put(`shop/good/rank/${ params.id }`, params, {
+    return request.put(`shop/good/rank/${params.id}`, params, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
@@ -427,7 +429,7 @@ export function editRankStatus(params: Record<string, any>) {
  * @returns
  */
 export function deleteGoodRank(id: number) {
-    return request.delete(`shop/good/rank/${ id }`, { showSuccessMessage: true })
+    return request.delete(`shop/good/rank/${id}`, {showSuccessMessage: true})
 }
 
 /**
@@ -436,7 +438,7 @@ export function deleteGoodRank(id: number) {
  * @returns
  */
 export function batchDelete(params: Record<string, any>) {
-    return request.put(`shop/good/rank/batchDelete`, params, { showSuccessMessage: true })
+    return request.put(`shop/good/rank/batchDelete`, params, {showSuccessMessage: true})
 }
 
 /**
@@ -445,7 +447,7 @@ export function batchDelete(params: Record<string, any>) {
  * @returns
  */
 export function modifyGoodsRankSort(params: Record<string, any>) {
-    return request.put(`shop/good/rank/sort`, params, { showSuccessMessage: true })
+    return request.put(`shop/good/rank/sort`, params, {showSuccessMessage: true})
 }
 
 /**
@@ -454,11 +456,10 @@ export function modifyGoodsRankSort(params: Record<string, any>) {
  * @returns
  */
 export function getSelectRankPageList(params: Record<string, any>) {
-    return request.get(`shop/good/rank/select`, { params })
+    return request.get(`shop/good/rank/select`, {params})
 }
 
 /************ 满减 ****************/
-
 
 /**
  * 获取满减列表
@@ -466,7 +467,7 @@ export function getSelectRankPageList(params: Record<string, any>) {
  * @returns
  */
 export function getManjianList(params: Record<string, any>) {
-    return request.get(`shop/manjian`, { params })
+    return request.get(`shop/manjian`, {params})
 }
 
 /**
@@ -492,7 +493,7 @@ export function addManjian(params: Record<string, any>) {
  * @returns
  */
 export function editManjian(params: Record<string, any>) {
-    return request.put(`shop/manjian/${ params.id }`, params)
+    return request.put(`shop/manjian/${params.id}`, params)
 }
 
 /**
@@ -501,7 +502,7 @@ export function editManjian(params: Record<string, any>) {
  * @returns
  */
 export function getManjianInfo(params: Record<string, any>) {
-    return request.get(`shop/manjian/init`, { params });
+    return request.get(`shop/manjian/init`, {params});
 }
 
 /**
@@ -519,7 +520,7 @@ export function goodsCheck(params: Record<string, any>) {
  * @returns
  */
 export function getManjianMemberPageList(params: Record<string, any>) {
-    return request.get(`shop/manjian/member/${ params.id }`, { params })
+    return request.get(`shop/manjian/member/${params.id}`, {params})
 }
 
 /**
@@ -528,17 +529,62 @@ export function getManjianMemberPageList(params: Record<string, any>) {
  * @returns
  */
 export function closeManjian(manjian_id: number) {
-    return request.put(`shop/manjian/close/${ manjian_id }`, {}, {
+    return request.put(`shop/manjian/close/${manjian_id}`, {}, {
         showErrorMessage: true,
         showSuccessMessage: true
     })
 }
 
 /**
+ * 获取商品选择列表,代客下单使用
+ * @param params
+ * @returns
+ */
+export function getGoodsSelectByReplaceBuy(params: Record<string, any>) {
+    return request.get(`shop/goods/buy/goods/select`, {params})
+}
+
+/**
+ * 获取选中商品选择列表,代客下单使用
+ * @param params
+ * @returns
+ */
+export function getGoodsSelectedByReplaceBuy(params: Record<string, any>) {
+    return request.post(`shop/goods/buy/goods/selected`, params)
+}
+
+/**
+ * 获取商品规格信息
+ * @param params
+ * @returns
+ */
+export function getGoodsSkuInfo(params: Record<string, any>) {
+    return request.get(`shop/goods/buy/sku/select`, {params})
+}
+
+/*
  * 删除满减
  * @param manjian_id
  * @returns
  */
 export function deleteManjian(manjian_id: number) {
-    return request.delete(`shop/manjian/${ manjian_id }`, { showSuccessMessage: true })
+    return request.delete(`shop/manjian/${manjian_id}`, {showSuccessMessage: true})
+}
+
+/**
+ * 批量删除满减
+ * @param params
+ * @returns
+ */
+export function batchDeleteManjian(params: Record<string, any>) {
+    return request.put(`shop/manjian/goods/batchDelete`, params, {showSuccessMessage: true})
+}
+
+/**
+ * 批量关闭满减
+ * @param params
+ * @returns
+ */
+export function batchCloseMajian(params: Record<string, any>) {
+    return request.put(`shop/manjian/goods/batchClose`, params, {showSuccessMessage: true})
 }

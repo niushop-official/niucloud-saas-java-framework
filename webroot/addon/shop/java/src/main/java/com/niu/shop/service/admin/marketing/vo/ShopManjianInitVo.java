@@ -17,48 +17,9 @@ import java.util.List;
 @Data
 public class ShopManjianInitVo implements Serializable {
 
-
-    private String conditionType;
-
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long createTime;
-
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long endTime;
-
-    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
-    private String goodsIds;
-
-    private String goodsType;
-    private String goodsTypeName;
-    private String joinMemberType;
-
-    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
-    private String labelIds;
-
-    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
-    private String levelIds;
-    private Integer manjianId;
-    private String manjianName;
-    private String remark;
-    private List<ShopManjianRule> ruleJson;
-    private String ruleType;
-    private Integer siteId;
-
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long startTime;
-    private Integer status;
-    private String statusName;
-    private BigDecimal totalBalance;
-    private Integer totalCouponNum;
-    private Integer totalGoodsNum;
-    private Integer totalMemberNum;
-    private BigDecimal totalOrderMoney;
-    private Integer totalOrderNum;
-    private Integer totalPoint;
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long updateTime;
     private List<ManjianGoods> manjianGoods;
+
+    private ShopManjianInfo manjianInfo;
 
     @Data
     public static class ManjianGoods {
@@ -103,5 +64,50 @@ public class ShopManjianInitVo implements Serializable {
         private String goodsCoverThumbSmall;
         @JsonProperty("goodsSku")
         private ShopGoodsSku goodsSku;
+    }
+
+    @Data
+    public static class ShopManjianInfo{
+
+        private String conditionType;
+
+        @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+        private Long createTime;
+
+        @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+        private Long endTime;
+
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String goodsIds;
+
+        private String goodsType;
+        private String goodsTypeName;
+        private String joinMemberType;
+
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String labelIds;
+
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String levelIds;
+        private Integer manjianId;
+        private String manjianName;
+        private String remark;
+        private List<ShopManjianRule> ruleJson;
+        private String ruleType;
+        private Integer siteId;
+
+        @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+        private Long startTime;
+        private Integer status;
+        private String statusName;
+        private BigDecimal totalBalance;
+        private Integer totalCouponNum;
+        private Integer totalGoodsNum;
+        private Integer totalMemberNum;
+        private BigDecimal totalOrderMoney;
+        private Integer totalOrderNum;
+        private Integer totalPoint;
+        @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+        private Long updateTime;
     }
 }

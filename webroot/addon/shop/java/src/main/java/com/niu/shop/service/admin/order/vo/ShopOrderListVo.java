@@ -8,10 +8,7 @@ import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
-import com.niu.shop.enums.order.OrderDeliveryStatusEnum;
-import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
-import com.niu.shop.enums.order.OrderGoodsRefundEnum;
-import com.niu.shop.enums.order.OrderStatusEnum;
+import com.niu.shop.enums.order.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -161,7 +158,10 @@ public class ShopOrderListVo implements Serializable {
     }
 
     public String getOrderFromName() {
-        return ChannelEnum.getNameByCode(this.orderFrom);
+        if (!ChannelEnum.getNameByCode(this.orderFrom).isEmpty()) {
+            return ChannelEnum.getNameByCode(this.orderFrom);
+        }
+        return OrderFromTypeEnum.getType().getStr(this.orderFrom, "");
     }
 
     public String getDeliveryTypeName() {

@@ -1,22 +1,26 @@
 package com.niu.core.service.admin.sys.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.sys.SysExport;
+import com.niu.core.enums.sys.ExportEnum;
 import com.niu.core.mapper.sys.SysExportMapper;
 import com.niu.core.service.admin.sys.ISysExportService;
 import com.niu.core.service.admin.sys.param.SysExportSearchParam;
 import com.niu.core.service.admin.sys.vo.SysExportListVo;
 import com.niu.core.service.core.sys.ICoreExportService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -48,15 +52,18 @@ public class SysExportServiceImpl implements ISysExportService {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
-        MPJQueryWrapper<SysExport> queryWrapper = new MPJQueryWrapper<>();
+        QueryWrapper<SysExport> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("id");
         queryWrapper.like("export_key", searchParam.getExportKey());
-        queryWrapper.eq("export_status", searchParam.getExportStatus());
+
+        if (ObjectUtil.isNotEmpty(searchParam.getExportKey())) {
+            queryWrapper.eq("export_status", searchParam.getExportStatus());
+        }
 
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
             String[] createTime = searchParam.getCreateTime();
-            Long startTime = (createTime[0] == null) ? 0 : DateUtils.StringToTimestamp(createTime[0]);
-            Long endTime = (createTime[1] == null) ? 0 : DateUtils.StringToTimestamp(createTime[1]);
+            long startTime = (createTime[0] == null) ? 0 : DateUtils.StringToTimestamp(createTime[0]);
+            long endTime = (createTime[1] == null) ? 0 : DateUtils.StringToTimestamp(createTime[1]);
             if (startTime > 0 && endTime > 0) {
                 queryWrapper.between("create_time", startTime, endTime);
             } else if (startTime > 0 && endTime == 0) {
@@ -66,8 +73,25 @@ public class SysExportServiceImpl implements ISysExportService {
             }
         }
 
-        IPage<SysExportListVo> iPage = sysExportMapper.selectJoinPage(new Page<>(page, limit), SysExportListVo.class, queryWrapper);
-        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
+        JSONArray results = JsonModuleLoader.build().mergeResultSet("export/ExportType.json");
+
+        IPage<SysExport> iPage = sysExportMapper.selectPage(new Page<>(page, limit), queryWrapper);
+        IPage<SysExportListVo> converted = iPage.convert(export -> {
+            SysExportListVo vo = new SysExportListVo();
+            BeanUtils.copyProperties(export, vo);
+            vo.setCreateTime(DateUtils.timestampToString(export.getCreateTime()));
+            vo.setExportStatusName(ExportEnum.getNameByCode(export.getExportStatus()));
+            results.stream()
+                    .map(JSONUtil::parseObj)
+                    .filter(o -> o.containsKey(export.getExportKey()))
+                    .findFirst()
+                    .map(o -> o.getJSONObject(export.getExportKey()))
+                    .ifPresent(o -> vo.setExportKeyName(o.getStr("name")));
+
+            return vo;
+        });
+
+        return PageResult.build(converted);
     }
 
     /**
@@ -89,8 +113,6 @@ public class SysExportServiceImpl implements ISysExportService {
 
     /**
      * 获取导出数据类型列表
-     *
-     * @return
      */
     @Override
     public Map<String, String> getExportDataType() {
@@ -99,14 +121,9 @@ public class SysExportServiceImpl implements ISysExportService {
 
     /**
      * 检查导出数据源是否为空
-     *
-     * @param type
-     * @param whereMap
-     * @return
      */
     @Override
     public Boolean checkExportData(String type, Map<String, Object> whereMap) {
-        Integer siteId = RequestUtils.siteId();
         JSONObject whereJson = new JSONObject();
         whereJson.set("keyword", whereMap.getOrDefault("keyword", ""));
         whereJson.set("register_type", whereMap.getOrDefault("register_type", ""));
@@ -119,15 +136,12 @@ public class SysExportServiceImpl implements ISysExportService {
         PageParam pageParam = new PageParam();
         pageParam.setPage(Integer.parseInt(whereMap.getOrDefault("page", 0).toString()));
         pageParam.setLimit(Integer.parseInt(whereMap.getOrDefault("limit", 0).toString()));
-        JSONArray jsonArray = coreExportService.getExportData(siteId, type, whereJson, pageParam);
-        return jsonArray.size() > 0;
+        JSONArray jsonArray = coreExportService.getExportData(RequestUtils.siteId(), type, whereJson, pageParam);
+        return !jsonArray.isEmpty();
     }
 
     /**
      * 导出数据
-     *
-     * @param type
-     * @param whereMap
      */
     @Override
     public void exportData(String type, Map<String, Object> whereMap) {
@@ -147,7 +161,15 @@ public class SysExportServiceImpl implements ISysExportService {
 
         JSONArray dataColumn = coreExportService.getExportDataColumn(type);
         JSONArray dataArray = coreExportService.getExportData(siteId, type, whereJson, pageParam);
-        coreExportService.export(siteId, type, dataColumn, dataArray);
+
+        SysExport export = new SysExport();
+        export.setSiteId(RequestUtils.siteId());
+        export.setExportKey(type);
+        export.setExportNum(CollectionUtil.size(dataArray));
+        export.setCreateTime(System.currentTimeMillis() / 1000);
+        coreExportService.add(export);
+
+        coreExportService.export(siteId, export.getId(), type, dataColumn, dataArray);
     }
 
 }

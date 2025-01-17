@@ -173,6 +173,7 @@ public class SysUserServiceImpl implements ISysUserService {
         BeanUtils.copyProperties(addParam, sysUser);
         sysUser.setCreateTime(DateUtils.currTime());
         sysUser.setUpdateTime(DateUtils.currTime());
+        sysUser.setPassword(PasswordEncipher.encode(addParam.getPassword()));
         sysUserMapper.insert(sysUser);
         Integer uid=sysUser.getUid();
 

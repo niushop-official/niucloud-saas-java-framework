@@ -232,7 +232,7 @@ public class SiteServiceImpl implements ISiteService {
             siteUserParam.setHeadImg("");
             siteUserParam.setStatus(1);
             siteUserParam.setRealName(addParam.getRealName());
-            siteUserParam.setPassword(PasswordEncipher.encode(addParam.getPassword()));
+            siteUserParam.setPassword(addParam.getPassword());
             siteUserParam.setIsAdmin(1);
             sysUserService.addSiteUser(siteUserParam, siteId);
         } else {

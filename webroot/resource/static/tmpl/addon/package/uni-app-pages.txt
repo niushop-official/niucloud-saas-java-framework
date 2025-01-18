@@ -1,0 +1,15 @@
+    // *********************************** {title} ***********************************
+    {
+        "root": "addon/{key}",
+        "pages": [
+            {
+                "path": "pages/hello_world/index",
+                "style": {
+                    // #ifndef H5
+                    "navigationStyle": "custom",
+                    // #endif
+                    "navigationBarTitleText": "%{key}.pages.hello_world.index%"
+                }
+            },
+        ]
+    },

@@ -15,6 +15,7 @@ import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
@@ -232,7 +233,7 @@ public class MemberServiceImpl implements IMemberService {
         model.setUsername(addParam.getUsername());
         model.setNickname(addParam.getNickname());
         model.setHeadimg(addParam.getHeadimg());
-        model.setPassword(addParam.getPassword());
+        model.setPassword(PasswordEncipher.encode(addParam.getPassword()));
         model.setRegisterType(MemberRegisterTypeEnum.MANUAL.getType());
         model.setRegisterChannel(MemberRegisterChannelEnum.MANUAL.getType());
         model.setCreateTime(System.currentTimeMillis() / 1000);

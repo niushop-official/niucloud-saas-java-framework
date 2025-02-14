@@ -117,25 +117,9 @@ class Request {
             url: this.baseUrl + url,
             method
         })
-
-        const queryParams = (data) => {
-            const params = new URLSearchParams();
-            for (const [key, value] of Object.entries(data)) {
-                if (Array.isArray(value)) {
-                    value.forEach(item => params.append(key + '[]', item));
-                } else if (value !== null && typeof value === 'object') {
-                    for (const [nestedKey, nestedValue] of Object.entries(value)) {
-                        params.append(`${key}[${nestedKey}]`, nestedValue);
-                    }
-                } else {
-                    params.append(key, value);
-                }
-            }
-            return params.toString();
-        }
         
-        if (params.method.toUpperCase() == 'GET') {
-            if (!uni.$u.test.empty(data)) params.url += "?" + queryParams(data)
+        if (params.method.toUpperCase() == 'GET' && !uni.$u.test.empty(data)) {
+            params.url += "?" + qs.stringify(data)
         } else {
             params.data = data;
         }

@@ -5,7 +5,7 @@ import com.niu.shop.service.admin.marketing.param.ShopNewcomerSelectPageParam;
 import com.niu.shop.service.admin.marketing.param.ShopNewcomerSelectSkuParam;
 import com.niu.shop.service.admin.marketing.param.ShopNewcomerSetConfigParam;
 import com.niu.shop.service.admin.marketing.param.ShopNewcomerShopGoodsVo;
-import com.niu.shop.service.admin.marketing.vo.ShopNewComerSelectPageVo;
+import com.niu.shop.service.admin.marketing.vo.ShopNewcomerSelectPageVo;
 import com.niu.shop.service.admin.marketing.vo.ShopNewcomerConfigVo;
 import com.niu.shop.service.admin.marketing.vo.ShopNewcomerSelectSkuVo;
 
@@ -20,7 +20,7 @@ public interface IShopNewcomerService {
 
     ShopNewcomerConfigVo getConfig();
 
-    ShopNewComerSelectPageVo<ShopNewcomerShopGoodsVo> getSelectPage(PageParam pageParam, ShopNewcomerSelectPageParam param);
+    ShopNewcomerSelectPageVo<ShopNewcomerShopGoodsVo> getSelectPage(PageParam pageParam, ShopNewcomerSelectPageParam param);
 
     List<ShopNewcomerSelectSkuVo> getSelectSku(ShopNewcomerSelectSkuParam param);
 }

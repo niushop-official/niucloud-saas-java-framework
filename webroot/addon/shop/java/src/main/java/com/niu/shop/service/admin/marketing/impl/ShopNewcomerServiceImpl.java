@@ -33,7 +33,7 @@ import com.niu.shop.service.admin.marketing.param.ShopNewcomerSelectPageParam;
 import com.niu.shop.service.admin.marketing.param.ShopNewcomerSelectSkuParam;
 import com.niu.shop.service.admin.marketing.param.ShopNewcomerSetConfigParam;
 import com.niu.shop.service.admin.marketing.param.ShopNewcomerShopGoodsVo;
-import com.niu.shop.service.admin.marketing.vo.ShopNewComerSelectPageVo;
+import com.niu.shop.service.admin.marketing.vo.ShopNewcomerSelectPageVo;
 import com.niu.shop.service.admin.marketing.vo.ShopNewcomerConfigVo;
 import com.niu.shop.service.admin.marketing.vo.ShopNewcomerSelectSkuVo;
 import com.niu.shop.service.core.marketing.ICoreActiveService;
@@ -191,7 +191,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
     }
 
     @Override
-    public ShopNewComerSelectPageVo<ShopNewcomerShopGoodsVo> getSelectPage(PageParam pageParam, ShopNewcomerSelectPageParam param) {
+    public ShopNewcomerSelectPageVo<ShopNewcomerShopGoodsVo> getSelectPage(PageParam pageParam, ShopNewcomerSelectPageParam param) {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
@@ -318,7 +318,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                     .collect(Collectors.toList());
         }
 
-        ShopNewComerSelectPageVo<ShopNewcomerShopGoodsVo> vo = new ShopNewComerSelectPageVo<>(iPage, voList);
+        ShopNewcomerSelectPageVo<ShopNewcomerShopGoodsVo> vo = new ShopNewcomerSelectPageVo<>(iPage, voList);
         return vo.setVerifyGoodsIds(verifyGoodsId)
                 .setVerifySkuIds(verifySkuIds);
     }

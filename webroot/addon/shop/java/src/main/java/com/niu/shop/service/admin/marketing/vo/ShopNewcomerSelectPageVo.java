@@ -11,11 +11,11 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
-public class ShopNewComerSelectPageVo<T> extends PageResult<T> {
+public class ShopNewcomerSelectPageVo<T> extends PageResult<T> {
     private List<Integer> verifyGoodsIds;
     private List<Integer> verifySkuIds;
 
-    public ShopNewComerSelectPageVo(Page<?> page, List<T> list) {
+    public ShopNewcomerSelectPageVo(Page<?> page, List<T> list) {
         super(page.getCurrent(), page.getSize(), page.getTotal(), list);
     }
 }

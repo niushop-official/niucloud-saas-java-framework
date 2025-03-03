@@ -9,7 +9,7 @@ import com.niu.core.service.api.wechat.param.WechatAuthParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class WeappController {
      * @return
      */
     @GetMapping("/subscribemsg")
-    public Result<List<String>> subscribeMessage(@RequestParam("keys") String keys) {
+    public Result<List<String>> subscribeMessage(@RequestParam String keys) {
         return Result.success(weappService.subscribeMessage(keys));
     }
 

@@ -16,7 +16,7 @@ import com.niu.shop.service.admin.goods.vo.ShopGoodsAttrListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;

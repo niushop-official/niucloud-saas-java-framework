@@ -30,4 +30,16 @@ public class WeappConfigVo implements Serializable {
     private String uploadUrl;
     private String downloadUrl;
     private String uploadIp;
+
+    private Domain domain = new Domain();
+
+    @Data
+    public static class Domain {
+        private String requestdomain = "";
+        private String wsrequestdomain = "";
+        private String uploaddomain = "";
+        private String downloaddomain = "";
+        private String tcpdomain = "";
+        private String udpdomain = "";
+    }
 }

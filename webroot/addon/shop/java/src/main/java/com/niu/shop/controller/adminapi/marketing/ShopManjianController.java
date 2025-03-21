@@ -18,7 +18,7 @@ import com.niu.shop.service.core.marketing.vo.ShopManjianListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 满减活动表控制器

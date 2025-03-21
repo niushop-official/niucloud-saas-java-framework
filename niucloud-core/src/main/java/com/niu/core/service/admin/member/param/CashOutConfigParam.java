@@ -2,8 +2,9 @@ package com.niu.core.service.admin.member.param;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.LinkedList;
 
 /**
@@ -21,10 +22,10 @@ public class CashOutConfigParam implements Serializable {
     private LinkedList<String> transferType = new LinkedList<String>();  // 提现方式
 
     @NotNull(message = "min参数缺失")
-    private Integer min = 0;  // 最低提现金额
+    private BigDecimal min = BigDecimal.ZERO;  // 最低提现金额
 
     @NotNull(message = "rate参数缺失")
-    private Integer rate = 0;  // 手续费比率
+    private BigDecimal rate = BigDecimal.ZERO;  // 手续费比率
 
     @NotNull(message = "is_auto_verify参数缺失")
     private String isAutoVerify = "0";  // 是否自动审核

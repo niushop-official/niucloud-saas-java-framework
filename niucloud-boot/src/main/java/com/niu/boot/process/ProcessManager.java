@@ -327,10 +327,10 @@ public class ProcessManager {
                 if ("prod".equals(bootConfig.environment())) {
                     String jvmArg1 = "--spring.profiles.active=prod";
                     String jvmArg2 = "--spring.config.location=file:" + bootConfig.getApplicationYml() + "," + bootConfig.getApplicationYmlBoot();
-                    processBuilder = new ProcessBuilder(javaCmd, "-jar", jarPath, jvmArg1, jvmArg2);
+                    processBuilder = new ProcessBuilder(javaCmd, "-Dfile.encoding=UTF-8", "-jar", jarPath, jvmArg1, jvmArg2);
                 } else {
                     String jvmArgs = "--spring.profiles.active=dev";
-                    processBuilder = new ProcessBuilder(javaCmd, "-jar", jarPath, jvmArgs);
+                    processBuilder = new ProcessBuilder(javaCmd, "-Dfile.encoding=UTF-8", "-jar", jarPath, jvmArgs);
                 }
                 processBuilder.redirectErrorStream(true);
                 processBuilder.environment().put("JAVA_OPTS", bootConfig.getJvmOpts(applicationName));

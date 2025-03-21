@@ -18,7 +18,7 @@ import com.niu.shop.service.core.goods.ICoreGoodsStatService;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class IGoodsCollectServiceImpl implements IGoodsCollectService {

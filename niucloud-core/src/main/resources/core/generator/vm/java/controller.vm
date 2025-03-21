@@ -11,7 +11,7 @@ import com.niu.${addonName}.service.admin.${moduleName}.vo.${className}ListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ public class ${className}Controller {
      * @return Result<${className}InfoVo>
      */
     @GetMapping("/{id}")
-    public Result<${className}InfoVo> info(@PathVariable Integer id) {
+    public Result<${className}InfoVo> info(@PathVariable("id") Integer id) {
         ${className}InfoVo info = ${lowerClassName}Service.info(id);
         return Result.success(info);
     }
@@ -69,7 +69,7 @@ public class ${className}Controller {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ${className}Param editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ${className}Param editParam) {
         ${lowerClassName}Service.edit(id, editParam);
         return Result.success();
     }
@@ -81,7 +81,7 @@ public class ${className}Controller {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         ${lowerClassName}Service.del(id);
         return Result.success();
     }

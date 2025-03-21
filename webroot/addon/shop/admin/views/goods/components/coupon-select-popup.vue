@@ -10,7 +10,7 @@
                 </div>
             </slot>
         </div>
-        <el-dialog v-model="showDialog" :title="t('优惠券选择')" width="1000px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+        <el-dialog v-model="showDialog" :title="t('优惠券选择')" width="1000px" :destroy-on-close="true" :close-on-click-modal="false">
 
             <el-form :inline="true" :model="couponTable.searchParam" ref="searchFormRef">
                 <el-form-item :label="t('优惠券名称')" prop="keyword" class="form-item-wrap">

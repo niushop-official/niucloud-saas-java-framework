@@ -14,7 +14,7 @@ import com.niu.shop.service.core.refund.param.RefundFinishParam;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 
 @EventListen("shop")

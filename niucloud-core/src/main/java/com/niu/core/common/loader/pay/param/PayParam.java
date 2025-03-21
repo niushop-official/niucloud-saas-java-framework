@@ -3,7 +3,7 @@ package com.niu.core.common.loader.pay.param;
 import com.niu.core.entity.pay.Pay;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 

@@ -54,11 +54,6 @@ public class Recharge implements Serializable {
     private Integer growth;
 
     /**
-     * 赠送优惠券ID
-     */
-    private String couponId;
-
-    /**
      * 发放数量
      */
     private Integer saleNum;

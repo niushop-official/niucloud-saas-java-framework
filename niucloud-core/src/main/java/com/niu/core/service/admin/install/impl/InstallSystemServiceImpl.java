@@ -19,7 +19,7 @@ import com.niu.core.service.core.sys.ICoreMenuService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +66,6 @@ public class InstallSystemServiceImpl implements IInstallSystemService {
             sysMenu.setDeleteTime(0L);
             sysMenu.setAddon("");
             sysMenu.setSource(MenuSourceEnum.SYSTEM.getCode());
-            sysMenu.setMenuAttr("");
             sysMenuMapper.insert(sysMenu);
         }
         //插件菜单

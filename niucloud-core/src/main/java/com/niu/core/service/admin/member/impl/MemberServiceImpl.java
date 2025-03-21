@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.event.EventPublisher;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
@@ -25,6 +26,7 @@ import com.niu.core.enums.common.SexEnum;
 import com.niu.core.enums.member.MemberRegisterChannelEnum;
 import com.niu.core.enums.member.MemberRegisterTypeEnum;
 import com.niu.core.enums.member.StatusEnum;
+import com.niu.core.event.member.MemberRegisterEvent;
 import com.niu.core.mapper.member.MemberLabelMapper;
 import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
@@ -40,9 +42,10 @@ import com.niu.core.service.admin.member.vo.MemberListVo;
 import com.niu.core.service.core.member.ICoreMemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -239,6 +242,13 @@ public class MemberServiceImpl implements IMemberService {
         model.setCreateTime(System.currentTimeMillis() / 1000);
 
         memberMapper.insert(model);
+        // 会员注册事件
+        MemberRegisterEvent registerEvent = new MemberRegisterEvent();
+        registerEvent.setSiteId(RequestUtils.siteId());
+        registerEvent.addAppSign("shop_fenxiao");
+        registerEvent.setName("MemberRegisterEvent");
+        registerEvent.setMember(model);
+        EventPublisher.publishEvent(registerEvent);
     }
 
     /**

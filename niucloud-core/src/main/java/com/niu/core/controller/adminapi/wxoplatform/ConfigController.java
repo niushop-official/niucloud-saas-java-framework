@@ -11,12 +11,9 @@ import com.niu.core.service.admin.wxoplatform.IOplatformConfigService;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/wxoplatform")
@@ -53,7 +50,7 @@ public class ConfigController {
      * @return
      */
     @PutMapping("/config")
-    public Result setConfig(@Validated OplatformConfigParam oplatformConfigParam){
+    public Result setConfig(@Validated @RequestBody OplatformConfigParam oplatformConfigParam){
         oplatformConfigService.setWxOplatformConfig(oplatformConfigParam);
         return Result.success();
     }

@@ -1,18 +1,19 @@
 package com.niu.core.enums.diy;
 
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 
 public class PagesEnum {
 
     public static JSONObject getPages(){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        return jsonModuleLoader.mergeResultElement("diy/pages.json");
+        return jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/pages.json");
     }
 
     public static JSONObject getPagesByAddon(String type, String addon){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        JSONObject pages = jsonModuleLoader.mergeResultElement("diy/pages.json");
+        JSONObject pages = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/pages.json");
 
         if (type != null && !type.isEmpty() && pages != null) {
             pages = pages.getJSONObject(type);
@@ -23,7 +24,7 @@ public class PagesEnum {
 
     public static JSONObject getPages(String type, String mode){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        JSONObject pages = jsonModuleLoader.mergeResultElement("diy/pages.json");
+        JSONObject pages = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/pages.json");
 
         if (!type.isEmpty() && pages != null) {
             pages = pages.getJSONObject(type);

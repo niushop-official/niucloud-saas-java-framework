@@ -260,13 +260,13 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
     public PageResult records2(PageParam pageParam, SysVerifyRecordsParam param) {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
-        MPJQueryWrapper<Verify> mpjQueryWrapper = new MPJQueryWrapper<>();
+        MPJQueryWrapper<Member> mpjQueryWrapper = new MPJQueryWrapper<>();
         mpjQueryWrapper.select("t.*");
         mpjQueryWrapper.setAlias("t");
         mpjQueryWrapper.innerJoin("?_site_group nsg ON ns.group_id = nsg.group_id");
         mpjQueryWrapper.eq("site_id", param.siteId());
         mpjQueryWrapper.eq("verifier_member_id", param.memberId());
-        IPage<SysVerifyRecordsVo> iPage = memberMapper.selectJoinPage(new Page<>(page, limit), SysVerifyRecordsVo.class, mpjQueryWrapper);
+        IPage<SysVerifyRecordsVo> iPage = memberMapper.selectJoinPage(new Page<>(page, limit), SysVerifyRecordsVo.class, mpjQueryWrapper );
         return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 

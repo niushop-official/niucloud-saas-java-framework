@@ -1,7 +1,7 @@
 package com.niu.shop.service.admin.order.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 订单发货参数

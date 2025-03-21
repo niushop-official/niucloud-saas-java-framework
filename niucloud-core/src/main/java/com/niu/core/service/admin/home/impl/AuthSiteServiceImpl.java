@@ -44,7 +44,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 
 @Service
@@ -115,6 +115,16 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
             queryWrapper.like("site_domain", searchParam.getSiteDomain());
         }
         queryWrapper.ne("app_type", "admin");
+
+        List<Integer> siteIds = getSiteIds();
+        if(!authService.isSuperAdmin()) {
+            if (ObjectUtil.isNotEmpty(siteIds)) {
+                queryWrapper.in("site_id", siteIds);
+            } else {
+                return PageResult.build(page, limit, 0).setData(new ArrayList<>());
+            }
+        }
+
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
 
             String[] createTime = searchParam.getCreateTime();
@@ -159,7 +169,6 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
         for (Site item : iPage.getRecords()) {
             SiteListVo vo = new SiteListVo();
             BeanUtils.copyProperties(item, vo);
-            // vo.setAdmin(sysUserRoleMapper.selectJoinOne(SiteAdminVo.class, userRoleMPJQueryWrapper));
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -445,7 +454,7 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
         if(!authService.isSuperAdmin()){
             UserCreateSiteLimit userCreateSiteLimit=userCreateSiteLimitMapper.selectOne(new QueryWrapper<UserCreateSiteLimit>().eq("uid", RequestUtils.uid()).eq("group_id", homeSiteAddParam.getGroupId()));
             Assert.notNull(userCreateSiteLimit, "NO_PERMISSION_TO_CREATE_SITE_GROUP");
-            Integer userSiteNum=siteGroupService.getUserSiteGroupSiteNum(RequestUtils.uid(), homeSiteAddParam.getGroupId());
+            long userSiteNum=siteGroupService.getUserSiteGroupSiteNum(RequestUtils.uid(), homeSiteAddParam.getGroupId());
             if(userSiteNum>userCreateSiteLimit.getNum()-1){
                 throw new CommonException("SITE_GROUP_CREATE_SITE_EXCEEDS_LIMIT");
             }

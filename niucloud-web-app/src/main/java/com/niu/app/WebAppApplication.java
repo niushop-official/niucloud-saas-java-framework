@@ -16,10 +16,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableAsync
 @EnableScheduling
-@ComponentScan(basePackages = {"com.niu.*"}, nameGenerator = SpringBeanNameGenerator.class)
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+
 @MapperScan(basePackages = {"com.*.**.mapper.*", "com.niu.*.mapper"})
+@ComponentScan(basePackages = {"com.niu.*", "com.anji.captcha"}, nameGenerator = SpringBeanNameGenerator.class)
 @Slf4j
+@SpringBootApplication()
 public class WebAppApplication {
 
     public static void main(String[] args) {

@@ -7,10 +7,12 @@ import com.niu.core.service.admin.addon.param.AddonParam;
 import com.niu.core.service.admin.addon.param.AddonSearchParam;
 import com.niu.core.service.admin.addon.vo.AddonInfoVo;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.service.admin.addon.vo.AddonListVo;
 import com.niu.core.service.admin.addon.vo.LocalAddonListVo;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +32,7 @@ public interface IAddonService {
      * @param addonSearchParam 搜索参数
      * @return PageResult<AddonListedVo>
      */
-    PageResult<Addon> list(PageParam pageParam, AddonSearchParam addonSearchParam);
+    PageResult<AddonListVo> list(PageParam pageParam, AddonSearchParam addonSearchParam);
 
     /**
      * 插件详情
@@ -116,6 +118,15 @@ public interface IAddonService {
      * @return JSONArray 字符串
      */
     String getTitleListByKey(String keys);
+
+    /**
+     * 获取插件列表
+     * @param key
+     * @param appType  //应用类型 插件，应用
+     * @return
+     */
+    List<Addon> getAddonListByKeys(List<String> addonKeys , String appType);
+
 
     /**
      * 下载插件

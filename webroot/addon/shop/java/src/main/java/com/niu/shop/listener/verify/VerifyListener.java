@@ -18,7 +18,7 @@ import com.niu.shop.service.core.order.param.OrderFinishParam;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @EventCallback("shop")
 @Component

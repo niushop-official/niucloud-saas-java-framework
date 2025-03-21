@@ -2,7 +2,7 @@ package com.niu.core.service.admin.site.param;
 import cn.hutool.json.JSONArray;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 店铺分组（分组权限）参数

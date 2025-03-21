@@ -10,13 +10,14 @@ import com.niu.core.service.core.wxoplatform.ICoreOplatformConfigService;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class OplatformConfigServiceImpl implements IOplatformConfigService {
 
     @Resource
     ICoreOplatformConfigService coreOplatformConfigService;
+
     @Resource
     ICoreConfigService coreConfigService;
 

@@ -47,7 +47,7 @@
 									<text v-else>满{{ item.coupon_min_price }}元可用</text>
 								</view>
 								<view class="mt-[10rpx] text-left flex items-center">
-									<text class="w-[80rpx] text-center bg-[#FFEFF0] whitespace-nowrap text-[var(--primary-color)] text-[18rpx] h-[30rpx] leading-[30rpx] rounded-[16rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
+									<text class="w-[80rpx] text-center bg-[var(--primary-color-light)] whitespace-nowrap text-[var(--primary-color)] text-[18rpx] h-[30rpx] leading-[30rpx] rounded-[16rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
 									<text class="text-[24rpx] truncate max-w-[190rpx] leading-[30rpx] text-[var(--text-color-light6)]">{{ item.title }}</text>
 								</view>
 								<view class="w-[100%] mt-[10rpx] text-[20rpx] leading-[30rpx] text-[var(--text-color-light6)]">
@@ -57,7 +57,7 @@
 							</view>
 						</view>
 						<view class="pr-[20rpx] pl-[34rpx]">
-							<button class="flex-center" :style="{width:'150rpx',height:'60rpx',color:'#fff', fontSize:'24rpx', padding:'0',backgroundColor:'#FFB4B1', border:'none' ,opacity :'1',borderRadius:'30rpx'}"  disabled>已领完</button>
+							<button class="flex-center" :style="{width:'150rpx',height:'60rpx',color:'#fff', fontSize:'24rpx', padding:'0',backgroundColor:'var(--primary-color-disabled)', border:'none' ,opacity :'1',borderRadius:'30rpx'}"  disabled>已领完</button>
 						</view>
 						<view class="absolute top-0 right-[190rpx]  h-[10rpx] w-[20rpx] rounded-br-[20rpx] rounded-bl-[20rpx] bg-[var(--page-bg-color)] "></view>
 						<view class="absolute bottom-0 right-[190rpx] h-[10rpx] w-[20rpx] rounded-tr-[20rpx] rounded-tl-[20rpx] bg-[var(--page-bg-color)]"></view>
@@ -76,7 +76,7 @@
 									<text v-else>满{{ item.coupon_min_price }}元可用</text>
 								</view>
 								<view class="mt-[10rpx] text-left flex items-center">
-									<text class="w-[80rpx] bg-[#FFEFF0] whitespace-nowrap text-[var(--primary-color)] text-[18rpx] h-[30rpx] leading-[30rpx] text-center rounded-[16rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
+									<text class="w-[80rpx] bg-[var(--primary-color-light)] whitespace-nowrap text-[var(--primary-color)] text-[18rpx] h-[30rpx] leading-[30rpx] text-center rounded-[16rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
 									<text class="text-[24rpx] truncate max-w-[190rpx] leading-[30rpx] text-[var(--text-color-light9)]">{{ item.title }}</text>
 								</view>
 								<view class="w-[100%] mt-[6rpx] text-[20rpx] leading-[30rpx] text-[var(--text-color-light9)]">
@@ -102,15 +102,14 @@
 				<mescroll-empty v-if="!list.length && !loading" :option="{tip : '暂无优惠券',btnText:'去逛逛'}" @emptyclick="redirect({ url: '/addon/shop/pages/goods/list' })"></mescroll-empty>
 			<!-- </view> -->
 		</mescroll-body>
-		
+
 		<u-popup :show="typePopup" mode="top" @close="typePopup = false"  :customStyle="{top:typePopupTopVal}" :safeAreaInsetBottom="false">
 			<view @touchmove.prevent.stop>
 				<scroll-view :scroll-x="true" scroll-with-animation :scroll-into-view="'id' + (subActive ? subActive - 1 : 0)"  class="px-[var(--sidebar-m)]  box-border bg-white rounded-b-[26rpx]">
 					<view class="items-center flex py-[20rpx]  border-0 border-t-[2rpx] border-solid border-[#F0F2F8]">
-						<text class="flex-shrink-0 w-[120rpx] h-[50rpx] text-[24rpx] leading-[50rpx] text-center text-[#333] bg-[var(--temp-bg)] rounded-[30rpx] border-box mr-[20rpx] border-[2rpx] border-solid border-[#F8F9FD]" :class="{'!text-primary !border-primary !bg-[rgba(239,0,12,0.04)] font-500':item.value == curType}"
-							v-for="(item,index) in typeList" :key="index" :id="'id' + index"
-								@click="typeClick(index,item.value)">{{item.label}}
-							</text>
+						<text class="flex-shrink-0 w-[120rpx] h-[50rpx] text-[24rpx] leading-[50rpx] text-center text-[#333] bg-[var(--temp-bg)] rounded-[30rpx] border-box mr-[20rpx] border-[2rpx] border-solid border-[#F8F9FD]" :class="{'!text-primary !border-primary !bg-[var(--primary-color-light)] font-500':item.value == curType}"
+							v-for="(item,index) in typeList" :key="index" :id="'id' + index" @click="typeClick(index,item.value)">{{item.label}}
+						</text>
 					</view>
 				</scroll-view>
 			</view>
@@ -199,9 +198,11 @@ const getShopCouponListFn = (mescroll: any) => {
 
 	getShopCouponList(data).then((res: any) => {
 		let newArr = (res.data.data as Array<Object>).map((el: any) => {
-			if (el.sum_count != -1 && el.receive_count === el.sum_count) {
+      if (el.receive_type == 2) {
+        el.btnType = 'collected'//已领完
+      } else if (el.sum_count != -1 && el.receive_count === el.sum_count) {
 				el.btnType = 'collected'//已领完
-			}else if (!userInfo.value) {
+			} else if (!userInfo.value) {
 				el.btnType = 'collecting'//领用
 			} else {
 				if (el.is_receive && el.limit_count === el.member_receive_count) {
@@ -305,7 +306,7 @@ const searchTypeFn = (type: any) => {
 		create_time.value = 'asc';
 		price.value = 'asc';
 		typePopup.value = true;
-		
+
 	} else {
 		typePopup.value = false;
 		list.value = [];

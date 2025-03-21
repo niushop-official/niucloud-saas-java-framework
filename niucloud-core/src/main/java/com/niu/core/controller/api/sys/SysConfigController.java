@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("/api")
@@ -95,7 +95,7 @@ public class SysConfigController {
      * @return
      */
     @GetMapping("/init")
-    public Result init(@RequestParam(defaultValue = "") String url) {
+    public Result init(@RequestParam(name = "url", defaultValue = "") String url) {
         var vo = new SysInitVo();
 
         vo.setTabbarList(diyService.tabbarList(new DiyTabbarListParam()));

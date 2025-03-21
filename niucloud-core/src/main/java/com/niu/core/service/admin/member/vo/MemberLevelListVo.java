@@ -8,7 +8,7 @@ import com.niu.core.entity.member.Member;
 import com.niu.core.mapper.member.MemberMapper;
 import lombok.Data;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.Serializable;
 
 /**

@@ -8,7 +8,7 @@ import com.niu.shop.service.core.order.ICoreOrderFinishService;
 import com.niu.shop.service.core.order.param.OrderFinishParam;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class IShopOrderFinishServiceImpl implements IShopOrderFinishService {

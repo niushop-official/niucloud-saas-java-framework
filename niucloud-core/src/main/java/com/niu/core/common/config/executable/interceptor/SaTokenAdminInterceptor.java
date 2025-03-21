@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * https://gitee.com/dromara/sa-token/tree/dev/sa-token-demo/sa-token-demo-jwt
@@ -51,11 +51,13 @@ public class SaTokenAdminInterceptor extends SaInterceptor {
             RequestUtils.setUid(uid);
         }
 
-        /** 校对当前登录的用户是否拥有这个站点的管理权限 */
-        authService.checkSiteAuth(request);
+        if (!RequestUtils.getReqeustURI().contains("/adminapi/home")) {
+            /** 校对当前登录的用户是否拥有这个站点的管理权限 */
+            authService.checkSiteAuth(request);
 
-        /** 校验用户和当前的路由权限 */
-        authService.checkRole(request);
+            /** 校验用户和当前的路由权限 */
+            authService.checkRole(request);
+        }
 
         /*** 检测是否是演示环境 */
         authService.checkIsDemo(request);

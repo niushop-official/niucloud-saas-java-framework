@@ -1,12 +1,13 @@
 package com.niu.core.enums.sys;
 
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 
 public class VerifyTypeEnum {
 
     public static JSONObject getType(){
-        return JsonModuleLoader.build().mergeResultElement("verify_type.json");
+        return JsonModuleLoader.build().mergeResultElement(RequestUtils.siteId(),"verify_type.json");
     }
 
     public static String getTypeByName(String type){

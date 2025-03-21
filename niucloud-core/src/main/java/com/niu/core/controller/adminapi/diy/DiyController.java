@@ -20,7 +20,7 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +68,7 @@ public class DiyController {
      * @return Result<DiyPageInfoVo>
      */
     @GetMapping("/diy/{id}")
-    public Result<DiyPageInfoVo> info(@PathVariable Integer id) {
+    public Result<DiyPageInfoVo> info(@PathVariable("id") Integer id) {
         DiyPageInfoVo info = diyPageService.info(id);
         return Result.success(info);
     }
@@ -92,7 +92,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @PutMapping("/diy/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody DiyPageParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody DiyPageParam editParam) {
         diyPageService.edit(id, editParam);
         return Result.success();
     }
@@ -104,7 +104,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @DeleteMapping("/diy/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         diyPageService.del(id);
         return Result.success();
     }
@@ -202,5 +202,16 @@ public class DiyController {
     @GetMapping("/carousel_search")
     public Result<PageResult<DiyPageListVo>> getPageByCarouselSearch(@Validated PageParam pageParam) {
         return Result.success(diyPageService.getPageByCarouselSearch(pageParam));
+    }
+
+    /**
+     * 复制
+     * @param id
+     * @return
+     */
+    @PostMapping("/copy")
+    public Result<Object> copy(@RequestBody Id id) {
+        diyPageService.copy(id.getId());
+        return Result.success();
     }
 }

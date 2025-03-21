@@ -1,5 +1,6 @@
 package com.niu.shop.service.core.order;
 
+import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDelivery;
 import com.niu.shop.service.core.order.param.OrderDeliveryDataParam;
 import com.niu.shop.service.core.order.param.OrderDeliveryParam;
@@ -55,6 +56,5 @@ public interface ICoreOrderDeliveryService {
      * 微信小程序发货入口
      * @return
      */
-    String orderShippingUploadShippingInfo(Integer siteId, Integer orderId);
-
+    void orderShippingUploadShippingInfo(ShopOrder order);
 }

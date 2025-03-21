@@ -1,7 +1,9 @@
 package com.niu.core.service.admin.diy.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,6 +16,7 @@ import com.niu.core.enums.diy.ComponentEnum;
 import com.niu.core.enums.diy.LinkEnum;
 import com.niu.core.enums.diy.PagesEnum;
 import com.niu.core.enums.diy.TemplateEnum;
+import com.niu.core.enums.diy_form.DiyFormComponentEnum;
 import com.niu.core.mapper.diy.DiyPageMapper;
 import com.niu.core.service.admin.diy.IDiyRouteService;
 import com.niu.core.service.admin.diy.IDiyService;
@@ -30,10 +33,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import jakarta.annotation.Resource;
+
+import java.util.*;
 
 
 /**
@@ -74,11 +76,15 @@ public class DiyServiceImpl implements IDiyService {
         if (ObjectUtil.isNotEmpty(searchParam.getMode())) queryWrapper.eq("mode", searchParam.getMode());
         if (ObjectUtil.isNotEmpty(searchParam.getType())) queryWrapper.eq("type", searchParam.getType());
 
+        JSONObject template = TemplateEnum.getTemplate();
+
         IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
         for (DiyPage item : iPage.getRecords()) {
             DiyPageListVo vo = new DiyPageListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setTypeName(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".title", String.class), ""));
+            vo.setTypePage(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".page", String.class), ""));
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -328,12 +334,65 @@ public class DiyServiceImpl implements IDiyService {
             info.setIsDefault(isDefault);
         }
 
-        info.setComponent(ComponentEnum.getComponent(info.getType()));
+        info.setComponent(getComponentList(info.getType()));
         info.setDomainUrl(coreSysConfigService.getSceneDomain(RequestUtils.siteId()));
 
         return info;
     }
 
+    public JSONObject getComponentList(String type) {
+
+        JSONObject ComponentList = ComponentEnum.getComponent();
+        for (String formComponentObj : ComponentList.keySet()) {
+            JSONObject formComponent = ComponentList.getJSONObject(formComponentObj);;
+            JSONObject list = formComponent.getJSONObject("list");
+            Iterator<Map.Entry<String, Object>> iterator = list.entrySet().iterator();
+            while (iterator.hasNext()) {
+                JSONObject cv = JSONUtil.parseObj(iterator.next());
+                if (cv.containsKey("support")) {
+                    JSONArray support = cv.getJSONArray("support");
+                    if(ObjectUtil.isNotEmpty(type))
+                    {
+                        if (support != null && support.size() > 0 && !support.contains(type)) {
+                            iterator.remove();
+                            continue;
+                        }
+                    }
+
+                }
+                cv.remove("sort");
+                cv.remove("support");
+            }
+            // 根据 sort 排序
+            formComponent.put("list", sortJSONObjectBySortField(list));
+        }
+
+        return ComponentList;
+    }
+
+    private JSONObject sortJSONObjectBySortField(JSONObject originalJsonObject) {
+        // 提取所有内部 JSONObject 到一个 List 中
+        List<Map.Entry<String, Object>> entryList = new ArrayList<>(originalJsonObject.entrySet());
+
+        // 对 List 进行排序
+        Collections.sort(entryList, new Comparator<Map.Entry<String, Object>>() {
+            public int compare(Map.Entry<String, Object> o1, Map.Entry<String, Object> o2) {
+                JSONObject jsonObj1 = (JSONObject) o1.getValue();
+                JSONObject jsonObj2 = (JSONObject) o2.getValue();
+                int sort1 = jsonObj1.getInt("sort");
+                int sort2 = jsonObj2.getInt("sort");
+                return Integer.compare(sort1, sort2);
+            }
+        });
+
+        // 创建一个新的 JSONObject 来存放排序后的结果
+        JSONObject sortedJsonObject = new JSONObject();
+        for (Map.Entry<String, Object> entry : entryList) {
+            sortedJsonObject.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedJsonObject;
+    }
     /**
      * 获取默认页面数据
      *
@@ -542,5 +601,23 @@ public class DiyServiceImpl implements IDiyService {
             startPage.setPage(template.getStr("page"));
             this.changeTemplate(startPage);
         }
+    }
+
+    /**
+     * 复制
+     * @param id
+     */
+    @Override
+    public void copy(Integer id) {
+        DiyPage page = diyPageMapper.selectOne(new QueryWrapper<DiyPage>().eq("id", id).eq("site_id", RequestUtils.siteId()));
+        if (page == null) throw new CommonException("页面不存在");
+
+        page.setId(null);
+        page.setPageTitle(page.getPageTitle() + "_副本");
+        page.setIsChange(0);
+        page.setIsDefault(0);
+        page.setShare("");
+        page.setCreateTime(System.currentTimeMillis() / 1000);
+        diyPageMapper.insert(page);
     }
 }

@@ -58,8 +58,9 @@ public class ShopVirtualGoodsInitVo implements Serializable {
         private String specType = "single";
         private List<SpecInfo> specList;
         private Long activeGoodsCount;
-        private Integer orderGoodsCount = 0;
+        private Long orderGoodsCount = 0L;
         private Integer isGift;
+        private Integer formId = 0;
     }
 
     @Data

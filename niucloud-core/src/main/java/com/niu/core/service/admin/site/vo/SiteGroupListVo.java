@@ -46,6 +46,6 @@ public class SiteGroupListVo implements Serializable {
     private Long updateTime;
 
     /**站点数量 */
-    private Integer siteNum;
+    private Long siteNum;
 
 }

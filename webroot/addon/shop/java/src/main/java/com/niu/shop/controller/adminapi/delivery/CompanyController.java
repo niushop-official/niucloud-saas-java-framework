@@ -10,7 +10,7 @@ import com.niu.shop.service.admin.delivery.vo.ShopDeliveryCompanyListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -53,7 +53,7 @@ public class CompanyController {
      * @return Result<ShopDeliveryCompanyInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ShopDeliveryCompanyInfoVo> info(@PathVariable Integer id) {
+    public Result<ShopDeliveryCompanyInfoVo> info(@PathVariable("id") Integer id) {
         ShopDeliveryCompanyInfoVo info = deliveryCompanyService.info(id);
         return Result.success(info);
     }
@@ -75,7 +75,7 @@ public class CompanyController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopDeliveryCompanyParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopDeliveryCompanyParam editParam) {
         deliveryCompanyService.edit(id, editParam);
         return Result.success();
     }
@@ -86,7 +86,7 @@ public class CompanyController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         deliveryCompanyService.del(id);
         return Result.success();
     }

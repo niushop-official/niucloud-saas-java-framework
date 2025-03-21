@@ -3,7 +3,7 @@
   "createTime": "下单时间",
   "orderNoPlaceholder": "请输入订单编号",
   "memberInfo": "会员信息",
-  "memberInfoPlaceholder": "请输入昵称/手机号",
+  "memberInfoPlaceholder": "请输入会员编号/昵称/账号/手机号搜索",
   "orderStatus": "订单状态",
   "orderStatusPlaceholder": "请选择订单状态",
   "orderFrom": "订单类型",

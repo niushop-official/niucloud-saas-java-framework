@@ -96,7 +96,7 @@
 	import { img,redirect } from '@/utils/common';
 	import {getShopOrderNum} from '@/addon/shop/api/order';
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount']);
+	const props = defineProps(['component', 'index']);
 	const diyStore = useDiyStore();
 	const diyComponent = computed(() => {
 		if (diyStore.mode == 'decorate') {

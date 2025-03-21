@@ -10,7 +10,7 @@ import com.niu.shop.service.admin.shop_address.vo.ShopAddressListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 商家地址库控制器
@@ -41,7 +41,7 @@ public class ShopAddressController {
      * @return Result<ShopAddressInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ShopAddressInfoVo> info(@PathVariable Integer id) {
+    public Result<ShopAddressInfoVo> info(@PathVariable("id") Integer id) {
         ShopAddressInfoVo info = iShopAddressService.info(id);
         return Result.success(info);
     }
@@ -73,7 +73,7 @@ public class ShopAddressController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopAddressParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopAddressParam editParam) {
         iShopAddressService.edit(id, editParam);
         return Result.success();
     }
@@ -84,7 +84,7 @@ public class ShopAddressController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         iShopAddressService.del(id);
         return Result.success();
     }

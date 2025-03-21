@@ -44,5 +44,7 @@ public class OrderConfigParam implements Serializable {
     private String noAllowRefund; // 退款允许
     private Integer refundLength = 30; // 退款时长
 
+    private Integer formId;
+
 
 }

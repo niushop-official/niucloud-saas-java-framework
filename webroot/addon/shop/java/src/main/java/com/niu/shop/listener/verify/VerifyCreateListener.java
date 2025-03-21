@@ -23,7 +23,7 @@ import com.niu.shop.mapper.order.ShopOrderMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Date;
 
 @EventCallback("shop")

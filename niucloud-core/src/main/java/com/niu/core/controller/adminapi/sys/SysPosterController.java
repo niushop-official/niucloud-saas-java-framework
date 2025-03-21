@@ -14,9 +14,10 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.sys.param.SysPosterTemplateSearchParam;
 import com.niu.core.service.core.poster.ICorePosterService;
 import com.niu.core.service.core.poster.param.GetPosterParam;
+import com.niu.core.service.admin.sys.param.PreviewPosterParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -60,7 +61,7 @@ public class SysPosterController {
      * @return Result<SysPosterInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<SysPosterInfoVo> info(@PathVariable Integer id) {
+    public Result<SysPosterInfoVo> info(@PathVariable("id") Integer id) {
         SysPosterInfoVo info = sysPosterService.info(id);
         return Result.success(info);
     }
@@ -82,7 +83,7 @@ public class SysPosterController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody SysPosterParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody SysPosterParam editParam) {
         sysPosterService.edit(id, editParam);
         return Result.success();
     }
@@ -93,7 +94,7 @@ public class SysPosterController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         sysPosterService.del(id);
         return Result.success();
     }
@@ -105,7 +106,7 @@ public class SysPosterController {
      * @return
      */
     @GetMapping("/type")
-    public Result<Object> type(@RequestParam(defaultValue = "") String type) {
+    public Result<Object> type(@RequestParam(name = "type", defaultValue = "") String type) {
         if (type.isEmpty()) {
             return Result.success(PosterTypeEnum.getType());
         }
@@ -164,5 +165,15 @@ public class SysPosterController {
         param.setSiteId(RequestUtils.siteId());
         param.setChannel(ObjectUtil.defaultIfNull(param.getChannel(), "h5"));
         return Result.success("", corePosterService.get(param));
+    }
+
+    /**
+     * 预览海报
+     * @param param
+     * @return
+     */
+    @GetMapping("/preview")
+    public Result<?> preview(PreviewPosterParam param) {
+        return Result.success("", sysPosterService.preview(param));
     }
 }

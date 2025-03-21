@@ -26,7 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +99,14 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public void add(SysRoleParam addParam) {
+        SysRole isExist = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
+            .select("role_id")
+            .eq("role_name", addParam.getRoleName())
+            .eq("site_id", RequestUtils.siteId())
+            .last("limit 1")
+        );
+        if (isExist != null) throw new AdminException("管理员角色已存在");
+
         SysRole model = new SysRole();
         model.setSiteId(RequestUtils.siteId());
         model.setRoleName(addParam.getRoleName());
@@ -116,6 +124,15 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public void edit(Integer roleId, SysRoleParam editParam) {
+        SysRole isExist = sysRoleMapper.selectOne(new QueryWrapper<SysRole>()
+            .select("role_id")
+            .eq("role_name", editParam.getRoleName())
+            .eq("site_id", RequestUtils.siteId())
+            .ne("role_id", roleId)
+            .last("limit 1")
+        );
+        if (isExist != null) throw new AdminException("管理员角色已存在");
+
         SysRole model = sysRoleMapper.selectOne(
                 new QueryWrapper<SysRole>()
                         .eq("role_id", roleId)

@@ -68,9 +68,7 @@
                             </u--image>
                             <view class="flex flex-1 w-0 flex-col justify-between ml-[20rpx] py-[6rpx]">
                                 <view class="line-normal">
-                                    <view class="truncate text-[#303133] text-[28rpx] leading-[32rpx]">
-                                        {{ item.goods.goods_name }}
-                                    </view>
+                                    <view class="truncate text-[#303133] text-[28rpx] leading-[32rpx]">{{ item.goods.goods_name }}</view>
                                     <view v-if="item.sku_name" class="mt-[14rpx] flex">
                                         <text class="truncate text-[24rpx] text-[var(--text-color-light9)] leading-[28rpx]">{{ item.sku_name }}</text>
                                     </view>
@@ -163,7 +161,7 @@
 							<text class="text-[38rpx] text-[var(--price-text-color)] price-font mx-[4rpx]">+</text>
 							<view class="inline-block">
 								<text class="text-[44rpx] text-[var(--price-text-color)] price-font">{{ parseFloat(orderData.basic.order_money).toFixed(2) }}</text>
-								<text class="text-[38rpx] text-[var(--price-text-color)] price-font">元</text> 
+								<text class="text-[38rpx] text-[var(--price-text-color)] price-font">元</text>
 							</view>
 						</block>
                     </view>
@@ -183,9 +181,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { orderCreateCalculate, orderCreate } from '@/addon/shop/api/point'
 import { redirect, img, moneyFormat, mobileHide } from '@/utils/common'
+import { onShow } from '@dcloudio/uni-app'
 import selectStore from './../order/components/select-store/select-store'
 import invoice from './../order/components/invoice/invoice'
 import addressList from './components/address-list/address-list'
@@ -210,6 +209,20 @@ const activeIndex = ref(0)//配送方式激活
 const delivery_type_list = ref([])
 const addressRef = ref()
 uni.getStorageSync('orderCreateData') && Object.assign(createData.value, uni.getStorageSync('orderCreateData'))
+
+onShow(() => {
+	setTimeout(() =>{
+        nextTick(()=>{
+            if(storeRef.value){
+                storeRef.value.getData((data:any)=>{
+                    if(data.length){
+                        createData.value.delivery.take_store_id = ((data[0] && data[0].store_id) ? data[0].store_id: 0)
+                    }
+                });
+            }
+        })
+    },1500)
+})
 
 // 选择地址之后跳转回来
 const selectAddress = uni.getStorageSync('selectAddressCallback')

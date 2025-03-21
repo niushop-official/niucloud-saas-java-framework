@@ -8,8 +8,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.entity.diy_form.DiyForm;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberAddress;
+import com.niu.core.mapper.diy_form.DiyFormMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
@@ -32,10 +34,12 @@ import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.api.goods.IGoodsService;
 import com.niu.shop.service.core.goods.ICoreGoodsLimitBuyService;
+import com.niu.shop.service.core.order.ICoreOrderConfigService;
 import com.niu.shop.service.core.order.ICoreOrderCreateService;
 import com.niu.shop.service.core.order.helper.OrderCreateHelper;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
 import com.niu.shop.service.core.order.param.OrderCreateParam;
+import com.niu.shop.service.core.order.vo.OrderConfigVo;
 import com.niu.shop.service.core.order.vo.OrderCouponListVo;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import com.niu.shop.service.core.order.vo.OrderCreateResultVo;
@@ -43,12 +47,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,6 +85,12 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
     @Resource
     ICoreGoodsLimitBuyService coreGoodsLimitBuyService;
+
+    @Resource
+    ICoreOrderConfigService coreOrderConfigService;
+
+    @Resource
+    DiyFormMapper diyFormMapper;
 
     /**
      * 计算
@@ -142,6 +149,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
         vo.setInvoice(param.getInvoice());
         vo.setMemberRemark(param.getMemberRemark());
+        vo.setFormData(param.getFormData());
 
         // 订单
         ShopOrder order = new ShopOrder();
@@ -253,7 +261,13 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         BeanUtil.copyProperties(member, buyer);
         buyer.setMemberLevel(memberLevelService.findMemberLevel(param.getMemberId()));
         vo.setBuyer(buyer);
-
+        //查询系统表单信息
+        OrderConfigVo orderConfig = coreOrderConfigService.getConfig(param.getSiteId());
+        if(ObjectUtil.isNotEmpty(orderConfig.getFormId()))
+        {
+            DiyForm diyForm = diyFormMapper.selectOne(new QueryWrapper<DiyForm>().select("form_id").eq("form_id", orderConfig.getFormId()).eq("status", 1));
+            if (diyForm != null) vo.setFormId(orderConfig.getFormId());
+        }
         // 查询商品信息
         this.getGoodsData(vo, param);
 
@@ -290,7 +304,6 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                     .eq("member_id", param.getMemberId())), OrderCalculateParam.SkuItem.class);
             param.setSkuData(skuData);
         }
-
         if (ObjectUtil.isNotEmpty(param.getSkuData())) {
             for (OrderCalculateParam.SkuItem item : param.getSkuData()) {
                 // 查询规格数据
@@ -363,7 +376,6 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 basic.setBody(basic.getBody() + sku.getSkuName() + goods.getGoodsName());
             }
         }
-
         if (goodsData.size() == 0) throw new CommonException("购物车数据已过期");
 
         vo.setGoodsData(goodsData);

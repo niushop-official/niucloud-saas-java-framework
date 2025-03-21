@@ -22,20 +22,20 @@
 
                     <view v-if="couponStatus != 1"
 						class="flex items-center relative w-[100%] rounded-[var(--rounded-small)] overflow-hidden bg-[#fff]" :class="{'mt-[var(--top-m)]':index}">
-                        <view class=" w-[186rpx] h-[160rpx] flex  flex-col items-center justify-center rounded-[var(--rounded-small)] relative coupon-item" :class="{'bg-[#ffb4b1]':couponStatus == 2 , 'bg-[#ffe2e4]' :couponStatus == 3}">
+                        <view class=" w-[186rpx] h-[160rpx] flex  flex-col items-center justify-center rounded-[var(--rounded-small)] relative coupon-item" :class="{'bg-[var(--primary-color-disabled)]':couponStatus == 2 , 'bg-[var(--primary-color-light)]' :couponStatus == 3}">
                             <view class="price-font flex items-baseline" :class="{'text-[#fff]' : couponStatus == 2 , 'text-[#FFB4B1]' : couponStatus == 3}">
                                 <text class="text-[30rpx] leading-[34rpx] mr-[2rpx] text-center price-font font-500">￥</text>
                                 <text class="text-[54rpx] font-500 leading-[58rpx] price-font truncate">{{ item.coupon_price }}</text>
                             </view>
-							<text class="truncate max-w-[176rpx] mt-[6rpx] text-[24rpx] h-[32rpx] leading-[32rpx]" :class="{'text-[#fff]': couponStatus == 2 , 'text-[#FFB4B1]': couponStatus == 3}">{{ item.title }}</text>
-                        </view>
+							<text class="truncate max-w-[176rpx] mt-[6rpx] text-[24rpx] h-[32rpx] leading-[32rpx]" :class="{'text-[#fff]': couponStatus == 2 , 'text-[var(--primary-color-disabled)]': couponStatus == 3}">{{ item.title }}</text>
+                        </view>	
                         <view class="ml-[30rpx] flex-1 h-[100%] box-border py-[20rpx]">
                             <view class="text-[26rpx] leading-[40rpx] text-left font-500">
                                 <text v-if="item.min_condition_money === '0.00'">无门槛</text>
                                 <text v-else>满{{ item.coupon_min_price }}元可用</text>
                             </view>
                             <view class="mt-[10rpx] flex items-center">
-                                <text class="w-[80rpx] text-center bg-[#FFEFF0] whitespace-nowrap text-[#EF000C] text-[18rpx] h-[30rpx] leading-[30rpx] rounded-[15rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
+                                <text class="w-[80rpx] text-center bg-[var(--primary-color-light)] whitespace-nowrap text-[var(--primary-color)] text-[18rpx] h-[30rpx] leading-[30rpx] rounded-[15rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
                                 <text class="truncate max-w-[226rpx] text-[24rpx] text-[var(--text-color-light6)] leading-[34rpx]">{{ item.title }}</text>
                             </view>
                             <view class="w-[100%] mt-[6rpx] text-[20rpx] leading-[34rpx] text-[var(--text-color-light6)]">
@@ -43,8 +43,8 @@
                             </view>
                         </view>
 						<view class="px-[20rpx]">
-                            <button class="flex-center rounded-full remove-border" :style="{width:'150rpx',height:'60rpx',color:'#fff', fontSize:'24rpx', padding:'0',border:'none',backgroundColor:'#FFB4B1'}" v-if="couponStatus == 2">已使用</button>
-                            <button class="flex-center rounded-full remove-border" :style="{width:'150rpx',height:'60rpx',color:'#FFB4B1', fontSize:'24rpx', padding:'0',border:'none',backgroundColor:'#FFE2E4'}" v-if="couponStatus == 3">已过期</button>
+                            <button class="flex-center rounded-full remove-border" :style="{width:'150rpx',height:'60rpx',color:'#fff', fontSize:'24rpx', padding:'0',border:'none',backgroundColor:'var(--primary-color-disabled)'}" v-if="couponStatus == 2">已使用</button>
+                            <button class="flex-center rounded-full remove-border" :style="{width:'150rpx',height:'60rpx',color:'var(--primary-color-disabled)', fontSize:'24rpx', padding:'0',border:'none',backgroundColor:'var(--primary-color-light)'}" v-if="couponStatus == 3">已过期</button>
                         </view>
 					</view>
                     <view v-else class="flex items-center relative w-[100%] rounded-[var(--rounded-small)] overflow-hidden bg-[#fff]" :class="{'mt-[var(--top-m)]' : index}">
@@ -61,7 +61,7 @@
                                 <text v-else>满{{ item.coupon_min_price }}元可用</text>
                             </view>
                             <view class="text-[20rpx]  mt-[10rpx] flex items-center">
-                                <text class="w-[80rpx] text-center bg-[#FFEFF0] whitespace-nowrap text-[#EF000C] text-[18rpx] h-[30rpx] leading-[30rpx] rounded-[15rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
+                                <text class="w-[80rpx] text-center bg-[var(--primary-color-light)] whitespace-nowrap text-[var(--primary-color)] text-[18rpx] h-[30rpx] leading-[30rpx] rounded-[15rpx] mr-[10rpx] flex-shrink-0">{{ item.type_name }}</text>
                                 <text class="truncate max-w-[226rpx] text-[24rpx] text-[var(--text-color-light9)] leading-[34rpx]">{{ item.title }}</text>
                             </view>
                             <view class="w-[100%] mt-[6rpx] text-[20rpx] leading-[34rpx] text-[var(--text-color-light9)]">
@@ -185,7 +185,7 @@ const typeClick = (index : number,data:any) =>{
 }
 
 .coupon-bg{
-	background: linear-gradient( 169deg, #FF7C36 0%, #FF2D00 86%);
+	background: linear-gradient( 169deg, var(--primary-color)0%, var(--primary-color) 86%);
 }
 
 .coupon-item{

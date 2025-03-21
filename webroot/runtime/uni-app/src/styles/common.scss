@@ -3,7 +3,6 @@
     --primary-color-dark: #398ade;
     --primary-color-disabled: #9acafc;
     --primary-color-light: #ecf5ff;
-    --primary-color-light: #ecf5ff;
     --page-bg-color: #f6f6f6;
 	--text-color-light6: #666;
 	--text-color-light9: #999;
@@ -67,7 +66,8 @@ button[type='primary'],uni-button[type='primary']{
 
 // 提交按钮背景颜色
 .primary-btn-bg{
-	background: linear-gradient( 94deg, #FB7939 0%, #FE120E 99%), #EF000C;
+	// background: linear-gradient( 94deg, #FB7939 0%, #FE120E 99%), #EF000C;
+	background: linear-gradient( 94deg, var(--primary-help-color) 0%, var(--primary-color) 99%), var(--primary-color);
 }
 // 侧边栏宽度
 .sidebar-margin{
@@ -171,7 +171,38 @@ button[type='primary'],uni-button[type='primary']{
 		border-radius: 100rpx;
 	}
 }
-
+// 空页面
+.empty-page-popup{
+	margin: var(--top-m) auto 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	border-radius: var(--rounded-big);
+	height: 340rpx;
+	background-color: #fff; 
+	box-sizing: border-box;
+	.img{
+		width: 320rpx;
+		height: 240rpx;
+	}
+	.desc{
+		font-size: 26rpx;
+		color: var(--text-color-light9);
+	}
+	.btn{
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 260rpx;
+		height: 66rpx;
+		font-size: 26rpx;
+		margin-top: 40rpx;
+		color: var(--primary-color);
+		border: 2rpx solid var(--primary-color);
+		border-radius: 100rpx;
+	}
+}
 // 搜索input
 .search-input{
 	@apply flex-1 flex items-center;
@@ -184,6 +215,7 @@ button[type='primary'],uni-button[type='primary']{
 		@apply flex-1;
 		font-size: 24rpx;
 		padding-right: 32rpx;
+		height: 100%;
 	}
 	.clear{
 		font-size: 24rpx;
@@ -393,6 +425,11 @@ button[type='primary'],uni-button[type='primary']{
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+.flex-between-center{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;;
 }
 
 /* 单行超出隐藏 */

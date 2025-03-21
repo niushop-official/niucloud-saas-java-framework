@@ -1,8 +1,8 @@
 package com.niu.core.common.config.dataization;
 
 import com.alibaba.druid.spring.boot.autoconfigure.properties.DruidStatProperties;
-import com.alibaba.druid.support.http.StatViewServlet;
-import com.alibaba.druid.support.http.WebStatFilter;
+import com.alibaba.druid.support.jakarta.StatViewServlet;
+import com.alibaba.druid.support.jakarta.WebStatFilter;
 import com.alibaba.druid.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -10,7 +10,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 /**
  * 数据库链接池druid监控平台的配置
@@ -72,6 +72,11 @@ public class DruidServletConfig {
         registrationBean.setFilter(filter);
         registrationBean.addUrlPatterns(commonJsPattern);
         return registrationBean;
+    }
+
+    @Bean
+    public DruidStatProperties druidStatProperties() {
+        return new DruidStatProperties();
     }
 
 }

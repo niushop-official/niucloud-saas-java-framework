@@ -12,7 +12,7 @@ import com.niu.shop.service.core.order.ICoreOrderConfigService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("api/shop/order")
@@ -85,7 +85,7 @@ public class OrderController {
      * @return
      */
     @PutMapping("/close/{id}")
-    public Result orderClose(@PathVariable Integer id) {
+    public Result orderClose(@PathVariable("id") Integer id) {
         orderService.close(id);
         return Result.success();
     }
@@ -97,7 +97,7 @@ public class OrderController {
      * @return
      */
     @PutMapping("/finish/{id}")
-    public Result orderFinish(@PathVariable Integer id) {
+    public Result orderFinish(@PathVariable("id") Integer id) {
         orderService.orderFinish(id);
         return Result.success();
     }

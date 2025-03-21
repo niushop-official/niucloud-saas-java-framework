@@ -8,7 +8,7 @@ import com.niu.core.service.core.member.ICoreMemberCashOutService;
 import com.niu.core.service.core.site.ICoreSiteAccountService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 会员提现转账成功

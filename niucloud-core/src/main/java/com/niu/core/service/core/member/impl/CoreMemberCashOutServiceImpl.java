@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         if (applyMoney.compareTo(BigDecimal.ZERO) <= 0) throw new CommonException("提现金额必须大于0");
         if (param.getAccountType() == AccountTypeEnum.MONEY.getType() && applyMoney.compareTo(member.getMoney()) > 0) throw new CommonException("提现金额不能大于账户余额");
         if (param.getAccountType() == AccountTypeEnum.COMMISSION.getType() && applyMoney.compareTo(member.getCommission()) > 0) throw new CommonException("提现金额不能大于账户可提现金额");
-        if (applyMoney.compareTo(new BigDecimal(config.getMin())) <= 0) throw new CommonException("提现金额不能小于最低提现金额");
+        if (applyMoney.compareTo(config.getMin()) <= 0) throw new CommonException("提现金额不能小于最低提现金额");
         if (!config.getTransferType().contains(param.getTransferType())) throw new CommonException("当前会员提现方式未启用");
 
         MemberCashOutAccount cashoutAccount = null;
@@ -84,7 +84,7 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
             if (ObjectUtil.isEmpty(cashoutAccount)) throw new CommonException("提现账户不存在");
         }
 
-        BigDecimal serviceMoney = applyMoney.multiply(new BigDecimal(config.getRate())).divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal serviceMoney = applyMoney.multiply(config.getRate()).divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
 
         MemberCashOut model = new MemberCashOut();
         model.setMemberId(param.getMemberId());
@@ -99,7 +99,7 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         model.setTransferMobile(member.getMobile());
         model.setTransferBank(cashoutAccount == null ? "" : cashoutAccount.getBankName());
         model.setTransferAccount(cashoutAccount == null ? "" : cashoutAccount.getAccountNo());
-        model.setRate(new BigDecimal(config.getRate()));
+        model.setRate(config.getRate());
 
         this.addCashOutRecord(model, member, config);
     }

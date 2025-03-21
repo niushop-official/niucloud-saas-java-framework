@@ -14,7 +14,6 @@ public class RechargeListInfo {
     private BigDecimal buyPrice;
     private Integer point;
     private Integer growth;
-    private String couponId;
     private Integer saleNum;
     private Integer sort;
     private Integer status;

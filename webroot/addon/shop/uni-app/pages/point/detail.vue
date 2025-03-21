@@ -1,6 +1,5 @@
 <template>
 	<view :style="themeColor()">
-		<scroll-view scroll-y="true" class="h-[100vh] w-full">
 		<view class="bg-[var(--page-bg-color)] min-h-[100vh] relative" v-if="Object.keys(goodsDetail).length">
 			<!-- 自定义头部 -->
 			<view class="flex items-center fixed left-0 right-0 z-10 bg-transparent detail-head" :class="{'!bg-[#fff]' :detailHeadBgChange}" :style="navbarInnerStyle">
@@ -26,11 +25,11 @@
 					</view>
 				</view>
 			</view>
-			
+
 			<view class="bg-[var(--page-bg-color)] overflow-hidden rounded-[40rpx] -mt-[28rpx] relative">
 				<view class="datail-title relative px-[30rpx] pt-[40rpx]">
 					<view class="text-[#333] font-medium text-[30rpx] multi-hidden leading-[40rpx]">
-						<view class="brand-tag middle" v-if="goodsDetail.goods.goods_brand">
+						<view class="brand-tag middle" v-if="goodsDetail.goods.goods_brand" :style="diyGoods.baseTagStyle(goodsDetail.goods.goods_brand)">
 							{{goodsDetail.goods.goods_brand.brand_name}}
 						</view>
 						{{ goodsDetail.goods.goods_name }}
@@ -120,7 +119,7 @@
 						<block v-for="(item,index) in goodsDetail.goods.attr_format" :key="index">
 							<view v-if="index < 4 || isAttrFormatShow" class="card-template-item">
 								<view class="text-[26rpx] leading-[30rpx] w-[160rpx] font-400 shrink-0 text-[var(--text-color-light9)]">{{item.attr_value_name}}</view>
-								<view class="text-[#333] box-border value-wid text-[26rpx] leading-[30rpx] font-400 truncate pl-[20rpx]">{{Array.isArray(item.attr_child_value_name) ? item.attr_child_value_name.join(',') : item.attr_child_value_name }}</view>
+								<view class="text-[#333] box-border value-wid text-[26rpx] leading-[30rpx] font-400 pl-[20rpx]">{{Array.isArray(item.attr_child_value_name) ? item.attr_child_value_name.join(',') : item.attr_child_value_name }}</view>
 							</view>
 						</block>
 						<view v-if="goodsDetail.goods.attr_format.length > 4" class="flex-center" @click="isAttrFormatShow = !isAttrFormatShow">
@@ -219,7 +218,6 @@
 			<goods-sku ref="goodsSkuRef" :goods-detail="goodsDetail" @change="specSelectFn"></goods-sku>
 			<share-poster ref="sharePosterRef" posterType="shop_point_goods" :posterParam="posterParam" :copyUrlParam="copyUrlParam" />
 		</view>
-		</scroll-view>
 		<loading-page :loading="loading"></loading-page>
 
 		<!-- #ifdef MP-WEIXIN -->
@@ -384,7 +382,7 @@ const isShowSingleSku = computed(() => {
 // 判断商品属性模块是否展示
 const isGoodsPropertyTemp = computed(() => {
 	let bool = false;
-	if(goodsDetail.value.service && goodsDetail.value.service.length || 
+	if(goodsDetail.value.service && goodsDetail.value.service.length ||
 	goodsDetail.value.goodsSpec && goodsDetail.value.goodsSpec.length ||
 	goodsDetail.value.goods.goods_type == 'real'&&goodsDetail.value.delivery_type_list&&goodsDetail.value.delivery_type_list.length){
 		bool = true;
@@ -433,7 +431,7 @@ const imgListPreview = (item:any,index:any) => {
 			urls: urlList
 		})
 	}
-	
+
 }
 // 返回上一页
 const backToPrevious=()=> {
@@ -576,7 +574,11 @@ const openShareFn = ()=>{
 // 关闭预览图片
 onUnload(()=>{
     // #ifdef  H5 || APP
-    uni.closePreviewImage()
+	try {
+		uni.closePreviewImage()
+	}catch (e) {
+
+	}
     // #endif
 })
 </script>

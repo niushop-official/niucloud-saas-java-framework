@@ -15,7 +15,7 @@ import com.niu.core.service.core.sys.vo.SceneDomainVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -142,7 +142,7 @@ public class SysConfigController {
      */
     @GetMapping("/config/themecolor")
     public Result<JSONObject> getThemeColor(){
-        return Result.success(sysConfigService.getLayout());
+        return Result.success(sysConfigService.getThemeColor());
     }
 
     /**
@@ -151,7 +151,7 @@ public class SysConfigController {
      */
     @PutMapping("/config/themecolor")
     public Result setThemeColor(@Validated @RequestBody JSONObject configParam){
-        sysConfigService.setLayout(configParam);
+        sysConfigService.setThemeColor(configParam);
         return Result.success();
     }
 

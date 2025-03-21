@@ -2,17 +2,14 @@ package com.niu.shop.controller.adminapi.goods;
 
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
-import com.niu.shop.service.admin.goods.param.EditGoodsBrandSortParam;
-import com.niu.shop.service.admin.goods.param.EditGoodsLabelSortParam;
-import com.niu.shop.service.admin.goods.param.ShopGoodsLabelParam;
-import com.niu.shop.service.admin.goods.param.ShopGoodsLabelSearchParam;
+import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.IShopGoodsLabelService;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsLabelInfoVo;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsLabelListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -58,7 +55,7 @@ public class LabelController {
      * @return Result<ShopGoodsLabelInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ShopGoodsLabelInfoVo> info(@PathVariable Integer id) {
+    public Result<ShopGoodsLabelInfoVo> info(@PathVariable("id") Integer id) {
         ShopGoodsLabelInfoVo info = goodsLabelService.info(id);
         return Result.success(info);
     }
@@ -82,7 +79,7 @@ public class LabelController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopGoodsLabelParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopGoodsLabelParam editParam) {
         goodsLabelService.edit(id, editParam);
         return Result.success();
     }
@@ -94,7 +91,7 @@ public class LabelController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         goodsLabelService.del(id);
         return Result.success();
     }
@@ -107,6 +104,17 @@ public class LabelController {
     @PutMapping("/sort")
     public Result<Object> modifySort(@Validated @RequestBody EditGoodsLabelSortParam editParam) {
         goodsLabelService.modifySort(editParam);
+        return Result.success();
+    }
+
+    /**
+     * 修改状态
+     *
+     * @return
+     */
+    @PutMapping("/status")
+    public Result<Object> modifyStatus(@Validated @RequestBody EditGoodsLabelStatusParam editParam) {
+        goodsLabelService.modifyStatus(editParam);
         return Result.success();
     }
 }

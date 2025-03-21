@@ -1,6 +1,7 @@
 package com.niu.core.enums.sys;
 
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,7 @@ public class AgreementEnum {
      */
     public static JSONObject getType(){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        return jsonModuleLoader.mergeResultElement("sys/agreement.json");
+        return jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "sys/agreement.json");
     }
 
     /**

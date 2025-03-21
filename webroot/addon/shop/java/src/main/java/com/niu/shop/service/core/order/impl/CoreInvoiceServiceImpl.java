@@ -6,7 +6,7 @@ import com.niu.shop.mapper.order.ShopInvoiceMapper;
 import com.niu.shop.service.core.order.ICoreInvoiceService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreInvoiceServiceImpl implements ICoreInvoiceService {

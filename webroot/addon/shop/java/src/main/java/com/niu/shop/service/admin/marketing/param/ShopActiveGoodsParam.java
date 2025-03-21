@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 店铺营销活动参数

@@ -15,7 +15,7 @@ import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Arrays;
 
 @Service
@@ -149,4 +149,10 @@ public class CoreConfigServiceImpl implements ICoreConfigService {
         }
     }
 
+    /**
+     * 清理缓存
+     */
+    public void cacheClear() {
+        cached.tag(cacheTagName).clear();
+    }
 }

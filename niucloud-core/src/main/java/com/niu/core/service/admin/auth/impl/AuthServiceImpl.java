@@ -33,8 +33,8 @@ import com.niu.core.service.admin.sys.vo.SysUserDetailVo;
 import com.niu.core.service.admin.sys.vo.SysUserRoleInfoVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,13 +82,13 @@ public class AuthServiceImpl implements IAuthService {
         SiteInfoVo siteinfo = siteService.info(siteId);
         //站点不存在 抛出异常
         if (siteinfo == null) {
-            throw new AuthException("SITE_NOT_EXIST", 401);
+            throw new AuthException("SITE_NOT_EXIST", 400);
         }
         //没有当前站点的信息
         if (!isSuperAdmin() && ObjectUtil.isNotNull(uid) && uid > 0) {
             SysUserRoleInfoVo sysUserRoleInfoVo = sysUserRoleService.getUserRole(siteId, uid);
             if (sysUserRoleInfoVo == null) {
-                throw new AuthException("NO_SITE_PERMISSION", 401);
+                throw new AuthException("NO_SITE_PERMISSION", 400);
             }
         }
         RequestUtils.setAppType(siteinfo.getAppType());
@@ -105,11 +105,11 @@ public class AuthServiceImpl implements IAuthService {
         Integer uid = RequestUtils.uid();
         Integer superAdminUid = (Integer) cached.tag("adminAuth").get("superAdminUid");
         if (ObjectUtil.isNotNull(superAdminUid) && ObjectUtil.isNotEmpty(superAdminUid) && superAdminUid > 0) {
-            return superAdminUid == uid;
+            return superAdminUid.equals(uid);
         } else {
             SysUserRole sysUserRole = sysUserRoleMapper.selectOne(new QueryWrapper<SysUserRole>().eq("site_id", siteId).eq("is_admin", 1).last(" limit 1"));
             cached.tag("adminAuth").put("superAdminUid", sysUserRole.getUid());
-            return sysUserRole.getUid() == uid;
+            return sysUserRole.getUid().equals(uid);
         }
     }
 
@@ -127,25 +127,25 @@ public class AuthServiceImpl implements IAuthService {
         //缓存站点信息数据
         SiteInfoVo siteinfo = siteService.info(RequestUtils.siteId());
         if (!method.equals("get")) {
-            if (siteinfo.getStatus() == SiteStatusEnum.EXPIRE.getCode()) {
-                throw new AuthException("SITE_EXPIRE_NOT_ALLOW", 401);
+            if (siteinfo.getStatus().equals(SiteStatusEnum.EXPIRE.getCode())) {
+                throw new AuthException("站点已打烊，续费后可继续使用此项功能", 400);
             }
-            if (siteinfo.getStatus() == SiteStatusEnum.EXPIRE.getCode()) {
-                throw new AuthException("SITE_CLOSE_NOT_ALLOW", 401);
+            if (siteinfo.getStatus().equals(SiteStatusEnum.CLOSE.getCode())) {
+                throw new AuthException("站点已停止", 400);
             }
         }
 
         Map<String, List<String>> allMenuList = sysMenuService.getAllApiList(RequestUtils.appType(), 100);
         List<String> menulist = allMenuList.get(method);
-        Integer is_exists = menulist.indexOf(rule);
+        int is_exists = menulist.indexOf(rule);
 
         //判断当前访问的接口是否收到权限的限制
         if (is_exists < 0) {
-            Map<String, List<String>> otherMenuList = sysMenuService.getAllApiList(RequestUtils.appType() == AppTypeEnum.ADMIN.getName() ? AppTypeEnum.SITE.getName() : AppTypeEnum.ADMIN.getName(), 100);
+            Map<String, List<String>> otherMenuList = sysMenuService.getAllApiList(RequestUtils.appType().equals(AppTypeEnum.ADMIN.getName()) ? AppTypeEnum.SITE.getName() : AppTypeEnum.ADMIN.getName(), 100);
             List<String> methodMenuList = otherMenuList.get(method);
-            Integer is_method_exists = methodMenuList.indexOf(rule);
+            int is_method_exists = methodMenuList.indexOf(rule);
             if (is_method_exists > 0) {
-                throw new AuthException("NO_PERMISSION", 401);
+                throw new AuthException("NO_PERMISSION", 400);
             }
         }
         Map<String, List<String>> roleMenuList = this.getAuthApiList();

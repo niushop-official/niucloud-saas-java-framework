@@ -14,7 +14,7 @@ import com.niu.shop.service.admin.order.vo.ShopOrderListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 订单控制器
@@ -48,7 +48,7 @@ public class ShopOrderController {
      * @return Result<ShopOrderInfoVo>
      */
     @GetMapping("/detail/{id}")
-    public Result<ShopOrderInfoVo> info(@PathVariable Integer id) {
+    public Result<ShopOrderInfoVo> info(@PathVariable("id") Integer id) {
         ShopOrderInfoVo info = shopOrderService.detail(id);
         return Result.success(info);
     }
@@ -60,7 +60,7 @@ public class ShopOrderController {
      * @return
      */
     @PutMapping("/close/{id}")
-    public Result orderClose(@PathVariable Integer id) {
+    public Result orderClose(@PathVariable("id") Integer id) {
         shopOrderService.close(id);
         return Result.success();
     }
@@ -72,7 +72,7 @@ public class ShopOrderController {
      * @return
      */
     @PutMapping("/finish/{id}")
-    public Result orderFinish(@PathVariable Integer id) {
+    public Result orderFinish(@PathVariable("id") Integer id) {
         shopOrderFinishService.finish(id);
         return Result.success();
     }

@@ -35,15 +35,10 @@ public class SysNoticeLogListVo implements Serializable {
     private String result;  // 结果
     private String params;  //
     private String noticeTypeName;
-    private System name;
+    private String name;
 
     public String getNoticeTypeName() {
         return NoticeTypeEnum.getNameByType(this.noticeType);
     }
 
-    public String getName() {
-        NoticeEnumListVo notice = NoticeEnum.getNotice().get(this.key);
-        if (notice == null) return "";
-        return notice.getName();
-    }
 }

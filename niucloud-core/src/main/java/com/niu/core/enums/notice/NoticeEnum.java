@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.enums.notice.vo.NoticeEnumListVo;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class NoticeEnum {
      */
     public static Map<String, NoticeEnumListVo> getNotice(){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        JSONObject notice = jsonModuleLoader.mergeResultElement("notice/notice.json");
+        JSONObject notice = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "notice/notice.json");
         Map<String, NoticeEnumListVo> noticeMap = new HashMap<>();
         for (Map.Entry<String, Object> noticeItem : notice.entrySet()) {
             NoticeEnumListVo vo = new NoticeEnumListVo();

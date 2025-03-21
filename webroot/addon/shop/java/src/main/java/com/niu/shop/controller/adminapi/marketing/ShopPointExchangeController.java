@@ -11,7 +11,7 @@ import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 积分兑换控制器
@@ -65,7 +65,7 @@ public class ShopPointExchangeController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopPointExchangeParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeParam editParam) {
         iShopPointExchangeService.edit(id, editParam);
         return Result.success();
     }
@@ -76,7 +76,7 @@ public class ShopPointExchangeController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@Validated @PathVariable Integer id) {
+    public Result<Object> del(@Validated @PathVariable("id") Integer id) {
         iShopPointExchangeService.del(id);
         return Result.success();
     }
@@ -92,14 +92,14 @@ public class ShopPointExchangeController {
     }
 
     @PutMapping("/status/{id}")
-    public Result<?> editStatus(@PathVariable Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
+    public Result<?> editStatus(@PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
         editStatusParam.setId(id);
         iShopPointExchangeService.editStatus(editStatusParam);
         return Result.success();
     }
 
     @PutMapping("/sort/{id}")
-    public Result<?> modifySort(@PathVariable Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
+    public Result<?> modifySort(@PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
         editStatusParam.setId(id);
         iShopPointExchangeService.editStatus(editStatusParam);
         return Result.success();

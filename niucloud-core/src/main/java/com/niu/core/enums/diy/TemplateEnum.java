@@ -2,6 +2,7 @@ package com.niu.core.enums.diy;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.entity.addon.Addon;
@@ -53,7 +54,7 @@ public class TemplateEnum {
      */
     public static JSONObject getTemplate(){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        return jsonModuleLoader.mergeResultElement("diy/template.json");
+        return jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/template.json");
     }
 
     /**
@@ -66,7 +67,7 @@ public class TemplateEnum {
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
         JSONObject diyTemplate = new JSONObject();
         if (param.getAddon().isEmpty()) {
-            diyTemplate = jsonModuleLoader.mergeResultElement("diy/template.json");
+            diyTemplate = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/template.json");
         } else {
             diyTemplate = jsonModuleLoader.getResultElement(param.getAddon(), "diy/template.json");
         }

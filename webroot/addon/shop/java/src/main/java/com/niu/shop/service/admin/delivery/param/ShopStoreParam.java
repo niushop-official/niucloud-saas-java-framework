@@ -1,7 +1,7 @@
 package com.niu.shop.service.admin.delivery.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 自提门店参数

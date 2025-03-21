@@ -16,8 +16,8 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -112,7 +112,7 @@ public class GenerateController {
      * @return
      */
     @GetMapping("/table")
-    public Result<List<Map<String, Object>>> tableList(String name, String content) {
+    public Result<List<Map<String, Object>>> tableList(@RequestParam(name = "name", defaultValue = "") String name, @RequestParam(name = "content", defaultValue = "") String content) {
         List<Map<String, Object>> list = generateService.tableList(name, content);
         return Result.success(list);
     }
@@ -134,7 +134,7 @@ public class GenerateController {
      * @return
      */
     @GetMapping("/check_file")
-    public Result<Integer> checkFile(String id) {
+    public Result<Integer> checkFile(@RequestParam("id") String id) {
 
         return Result.success(1,"操作成功", generateService.checkFile(id));
     }
@@ -145,7 +145,7 @@ public class GenerateController {
      * @return
      */
     @GetMapping("/table_column")
-    public Result<List<TableFiledVo>> getTableColumn(String tableName) {
+    public Result<List<TableFiledVo>> getTableColumn(@RequestParam("table_name") String tableName) {
         List<TableFiledVo> list = generateService.getTableColumn(tableName);
         return Result.success(list);
     }
@@ -156,7 +156,7 @@ public class GenerateController {
      * @return
      */
     @GetMapping("/all_model")
-    public Result<?> getAllMapper(@RequestParam String addon) {
+    public Result<?> getAllMapper(@RequestParam("addon") String addon) {
         if (addon.equals("system")) addon = "core";
         return Result.success(MapperMap.getMappersByModule(addon));
     }
@@ -167,7 +167,7 @@ public class GenerateController {
      * @return
      */
     @GetMapping("/model_table_column")
-    public Result<?> gettableColumn(@RequestParam String model) {
+    public Result<?> gettableColumn(@RequestParam("model") String model) {
         return Result.success(generateService.getTableColumnByMapper(model));
     }
 }

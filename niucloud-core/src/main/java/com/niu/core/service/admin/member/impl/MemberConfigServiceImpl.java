@@ -9,7 +9,7 @@ import com.niu.core.service.admin.member.vo.*;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 
 /**

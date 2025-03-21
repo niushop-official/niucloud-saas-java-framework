@@ -88,6 +88,8 @@ public interface IDiyService {
      */
     DiyPageInfoVo getPageInit(DiyPageInitParam param);
 
+    JSONObject getComponentList(String type);
+
     /**
      * 获取默认页面数据
      *
@@ -126,4 +128,10 @@ public interface IDiyService {
      * @param param
      */
     void setDiyData(SetDiyDataParam param);
+
+    /**
+     * 复制
+     * @param id
+     */
+    void copy(Integer id);
 }

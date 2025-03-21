@@ -7,7 +7,7 @@
 						<view class="bg-[var(--temp-bg)] p-[20rpx] rounded-[var(--rounded-mid)] flex" @click="redirect({ url: '/addon/shop/pages/goods/detail', param: { goods_id: item.goods_id } })">
 							<u--image radius="var(--goods-rounded-mid)" width="150rpx" height="150rpx" :src="img(item.order_goods.goods_image_thumb_mid ? item.order_goods.goods_image_thumb_mid : '')" model="aspectFill">
 								 <template #error>
-									  <u-icon name="photo" color="#999" size="50"></u-icon>
+                                     <u-icon name="photo" color="#999" size="50"></u-icon>
 								 </template>
 							</u--image>
 							<view class="flex-1 flex flex-wrap ml-[20rpx] my-[4rpx]">
@@ -127,7 +127,7 @@ import { onLoad,onUnload,onPageScroll,onReachBottom } from '@dcloudio/uni-app';
 import { img, redirect, goback } from '@/utils/common';
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js';
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue';
- 
+
 const { mescrollInit, downCallback, getMescroll } = useMescroll(onPageScroll, onReachBottom);
 const info = ref<Array<any>>([])
 const loading = ref(true)
@@ -167,7 +167,11 @@ const imgListPreview = (item:any) => {
 // 关闭预览图片
 onUnload(()=>{
     // #ifdef  H5 || APP
-    uni.closePreviewImage()
+    try {
+        uni.closePreviewImage()
+    }catch (e) {
+
+    }
     // #endif
 })
 </script>

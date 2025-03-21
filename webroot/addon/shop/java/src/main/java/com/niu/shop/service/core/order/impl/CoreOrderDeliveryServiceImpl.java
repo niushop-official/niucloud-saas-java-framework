@@ -1,9 +1,21 @@
 package com.niu.shop.service.core.order.impl;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.express.WxMaExpressDelivery;
+import cn.binarywang.wx.miniapp.bean.shop.request.shipping.*;
+import cn.binarywang.wx.miniapp.bean.shop.response.WxMaOrderShippingInfoBaseResponse;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.WechatUtils;
+import com.niu.core.entity.pay.Pay;
+import com.niu.core.enums.pay.PayTypeEnum;
+import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.order.ShopOrder;
@@ -31,10 +43,14 @@ import com.niu.shop.service.core.order.param.OrderFinishParam;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +74,9 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
     @Resource
     ICoreElectronicSheetService coreElectronicSheetService;
+
+    @Resource
+    PayMapper payMapper;
 
     @Resource
     public void setOrderFinishService(@Lazy ICoreOrderFinishService orderFinishService) {
@@ -369,9 +388,92 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
     }
 
+    /**
+     * 微信小程序发货入口
+     * @param order
+     */
     @Override
-    public String orderShippingUploadShippingInfo(Integer siteId, Integer orderId) {
-        return null;
+    public void orderShippingUploadShippingInfo(ShopOrder order) {
+        try {
+            Pay pay = payMapper.selectOne(new QueryWrapper<Pay>().eq("out_trade_no", order.getOutTradeNo()));
+            if (pay == null || !pay.getType().equals("wechatpay")) return;
+
+            WxMaService miniapp = WechatUtils.miniapp(order.getSiteId());
+
+            WxMaOrderShippingInfoUploadRequest request = new WxMaOrderShippingInfoUploadRequest();
+
+            // 需要上传物流信息的订单
+            OrderKeyBean orderKey = new OrderKeyBean();
+            orderKey.setOrderNumberType(1);
+            orderKey.setOutTradeNo(order.getOutTradeNo());
+            request.setOrderKey(orderKey);
+
+            request.setUploadTime(Instant.now().plusMillis(TimeUnit.HOURS.toMillis(8)).toString());
+
+            // 物流模式，发货方式枚举值：1、实体物流配送采用快递公司进行实体物流配送形式 2、同城配送 3、虚拟商品，虚拟商品，例如话费充值，点卡等，无实体配送形式 4、用户自提
+            if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType())) {
+                request.setLogisticsType(1);
+            } else if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.LOCAL_DELIVERY.getType())) {
+                request.setLogisticsType(2);
+            } else if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.STORE.getType())) {
+                request.setLogisticsType(4);
+            } else if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.VIRTUAL.getType())) {
+                request.setLogisticsType(3);
+            }
+
+            // 发货模式，发货模式枚举值：1、UNIFIED_DELIVERY（统一发货）2、SPLIT_DELIVERY（分拆发货）
+            request.setDeliveryMode(1);
+            request.setIsAllDelivered(true);
+
+            // 物流信息列表
+            List<ShopOrderDelivery> packageList = shopOrderDeliveryMapper.selectJoinList(ShopOrderDelivery.class, new MPJQueryWrapper<ShopOrderDelivery>()
+                    .setAlias("d").innerJoin("?_shop_delivery_company c ON d.express_company_id = c.company_id".replace("?_", GlobalConfig.tablePrefix))
+                    .select("express_number,id,express_company_id,c.company_name AS name")
+                   .eq("order_id", order.getOrderId())
+                   .eq("d.site_id", order.getSiteId())
+            );
+
+            List<WxMaExpressDelivery> expressDelivery = miniapp.getExpressService().getAllDelivery();
+
+            if (packageList.size() > 0) {
+                List<ShippingListBean> shippingList = new LinkedList<>();
+
+                for (ShopOrderDelivery shopOrderDelivery : packageList) {
+                    ShippingListBean shippingListBean = new ShippingListBean();
+                    if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType())) {
+                        shippingListBean.setTrackingNo(shopOrderDelivery.getExpressNumber());
+                        shippingListBean.setExpressCompany("");
+                        expressDelivery.forEach(i -> {
+                            if (i.getDeliveryName().equals(shopOrderDelivery.getName())) {
+                                shippingListBean.setExpressCompany(i.getDeliveryId());
+                            }
+                        });
+                    }
+                    ContactBean contact = new ContactBean();
+                    contact.setReceiverContact(order.getTakerMobile().substring(0, 3) + "****" + order.getTakerMobile().substring(7));
+                    ShopOrderGoods orderGoods = shopOrderGoodsMapper.selectOne(new QueryWrapper<ShopOrderGoods>().select("goods_name GROUP_CONCAT(SEPARATOR ';') AS goods_name").eq("delivery_id", shopOrderDelivery.getId()).groupBy("delivery_id"));
+                    shippingListBean.setItemDesc(orderGoods.getGoodsName());
+                    shippingListBean.setContact(contact);
+
+                    shippingList.add(shippingListBean);
+                }
+
+                request.setDeliveryMode(2);
+                request.setShippingList(shippingList);
+            }
+
+            JSONObject json = JSONUtil.parseObj(pay.getJson());
+
+            PayerBean payer = new PayerBean();
+            payer.setOpenid(json.getStr("openid", ""));
+            request.setPayer(payer);
+
+            WxMaOrderShippingInfoBaseResponse response = miniapp.getWxMaOrderShippingService().upload(request);
+            System.out.println("uploadShippingInfo response " + response.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("uploadShippingInfo error");
+        }
     }
 
 }

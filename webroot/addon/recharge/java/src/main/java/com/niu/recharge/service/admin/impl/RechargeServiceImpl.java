@@ -9,13 +9,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.recharge.entity.Recharge;
 import com.niu.recharge.enums.PackageGiftEnum;
-import com.niu.recharge.event.RechargeGiftContentEvent;
 import com.niu.recharge.mapper.RechargeMapper;
 import com.niu.recharge.service.admin.IRechargeService;
 import com.niu.recharge.service.admin.param.RechargeEditSortParam;
@@ -27,11 +27,14 @@ import com.niu.recharge.service.admin.vo.RechargeListVo;
 import com.niu.recharge.service.core.ICoreRechargeConfigService;
 import com.niu.recharge.service.core.param.RechargeSetConfigParam;
 import com.niu.recharge.service.core.vo.RechargeConfigVo;
+import com.niu.recharge.service.core.vo.RechargeGiftContentVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -75,13 +78,22 @@ public class RechargeServiceImpl implements IRechargeService {
             vo.setCreateTime(DateUtils.timestampToString(recharge.getCreateTime()));
 
             JSONObject gift = JSONUtil.parseObj(recharge.getGiftJson());
-            for (Map.Entry<String, Object> entry : gift.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-                RechargeGiftContentEvent event = new RechargeGiftContentEvent();
-                event.setKey(key);
-                event.setValue(JSONUtil.parseObj(value).get("value"));
-                vo.setGiftContent(EventAndSubscribeOfPublisher.publishAndCallback(event));
+            vo.setGiftJson(gift);
+            vo.setGiftContent(new ArrayList<>());
+            for(Map.Entry<String, Object> entry : gift.entrySet()) {
+
+                CommonEventDefiner.CommonEvent event = new CommonEventDefiner.CommonEvent();
+                event.setEventName("RechargeGiftContent");
+                event.setData(entry);
+                event.setSiteId(RequestUtils.siteId());
+                List<CommonEventDefiner.CommonEventResult> giftContent = EventAndSubscribeOfPublisher.publishAndCallback(event);
+                for (CommonEventDefiner.CommonEventResult content : giftContent) {
+                    if(ObjectUtil.isNotEmpty(content.getResult())) {
+                        RechargeGiftContentVo contentVo = new RechargeGiftContentVo();
+                        BeanUtils.copyProperties(content.getResult(), contentVo);
+                        vo.getGiftContent().add(contentVo);
+                    }
+                }
             }
 
             return vo;

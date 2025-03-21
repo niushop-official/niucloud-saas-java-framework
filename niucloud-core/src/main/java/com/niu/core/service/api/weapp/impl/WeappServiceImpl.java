@@ -28,14 +28,18 @@ import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.sys.ICoreScanService;
+import com.niu.core.service.core.weapp.ICoreWeappDeliveryService;
+import com.niu.core.service.core.weapp.vo.IsTradeManagedVo;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +64,9 @@ public class WeappServiceImpl implements IWeappService {
     @Resource
     SysNoticeMapper sysNoticeMapper;
 
+    @Resource
+    ICoreWeappDeliveryService coreWeappDeliveryService;
+
     /**
      * 小程序登录
      * @param param
@@ -69,41 +76,62 @@ public class WeappServiceImpl implements IWeappService {
         try {
             WxMaJscode2SessionResult wxUser = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getSessionInfo(param.getCode());
 
-            return this.login(
-                    ObjectUtil.defaultIfNull(wxUser.getOpenid(), ""),
-                    ObjectUtil.defaultIfNull(wxUser.getUnionid(), ""),
-                    param.getPid()
-            );
+            Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("weapp_openid", wxUser.getOpenid()).eq("site_id", RequestUtils.siteId()));
+            if (ObjectUtil.isNotNull(member)) {
+                return loginService.login(member);
+            }
+            if (ObjectUtil.isNotEmpty(wxUser.getUnionid())) {
+                Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", wxUser.getUnionid()).eq("site_id", RequestUtils.siteId()));
+                if (ObjectUtil.isNotNull(unionidMember)) {
+                    return loginService.login(unionidMember);
+                }
+            }
+
+            LoginVo loginVo = new LoginVo();
+            loginVo.setOpenid(wxUser.getOpenid());
+            loginVo.setUnionid(ObjectUtil.defaultIfNull(wxUser.getUnionid(), ""));
+
+            LoginConfigVo config = coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
+
+            AuthRegisterParam registerParam = new AuthRegisterParam();
+            registerParam.setOpenid(wxUser.getOpenid());
+            registerParam.setUnionid(ObjectUtil.defaultIfNull(wxUser.getUnionid(), ""));
+            registerParam.setPid(param.getPid());
+            registerParam.setHeadimg(param.getHeadimg());
+            registerParam.setNickname(param.getNickname());
+            registerParam.setMobile(param.getMobile());
+            registerParam.setMobileCode(param.getMobileCode());
+
+            // 开启自动注册会员
+            if (config.getIsAuthRegister() == 1) {
+                if (config.getIsBindMobile() == 1 && config.getIsForceAccessUserInfo() == 1) {
+                    if (ObjectUtil.isNotEmpty(param.getMobile()) && ObjectUtil.isNotEmpty(param.getHeadimg()) && ObjectUtil.isNotEmpty(param.getNickname())) {
+                        return this.register(registerParam);
+                    }
+                } else if (config.getIsForceAccessUserInfo() == 1) {
+                    if (ObjectUtil.isNotEmpty(param.getHeadimg()) && ObjectUtil.isNotEmpty(param.getNickname())) {
+                        return this.register(registerParam);
+                    }
+                } else if (config.getIsBindMobile() == 1) {
+                    if (ObjectUtil.isNotEmpty(param.getMobile()) || ObjectUtil.isNotEmpty(param.getMobileCode())) {
+                        return this.register(registerParam);
+                    }
+                } else {
+                    return this.register(registerParam);
+                }
+            } else {
+                // 关闭自动注册，但是开启了强制绑定手机号，必须获取手机号才能进行注册
+                if (config.getIsBindMobile() == 1 || config.getIsMobile() == 1) {
+                    if (ObjectUtil.isNotEmpty(param.getMobile()) || ObjectUtil.isNotEmpty(param.getMobileCode())) {
+                        return this.register(registerParam);
+                    }
+                }
+            }
+
+            return loginVo;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
-    }
-
-    /**
-     * 登录
-     * @param openid
-     * @param unionid
-     * @return
-     */
-    private LoginVo login(String openid, String unionid, Integer pid) {
-        if (openid.isEmpty()) throw new CommonException("openid不能为空");
-
-        Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("weapp_openid", openid).eq("site_id", RequestUtils.siteId()));
-        if (ObjectUtil.isNotNull(member)) {
-            return loginService.login(member);
-        }
-        if (!unionid.isEmpty()) {
-            Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", openid).eq("site_id", RequestUtils.siteId()));
-            if (ObjectUtil.isNotNull(unionidMember)) {
-                return loginService.login(unionidMember);
-            }
-        }
-
-        Member registerMember = new Member();
-        registerMember.setWeappOpenid(openid);
-        registerMember.setWxUnionid(unionid);
-        registerMember.setPid(pid);
-        return registerService.register(registerMember);
     }
 
     /**
@@ -124,21 +152,23 @@ public class WeappServiceImpl implements IWeappService {
 
             LoginConfigVo config = coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
             if (config.getIsBindMobile() == 1) {
-                if (!param.getMobile().isEmpty()) {
-                    registerService.checkMobileCode(param.getMobile(), param.getMobileKey(), param.getMobileCode());
-                } else if (!param.getMobileCode().isEmpty()) {
-                    WxMaPhoneNumberInfo phoneInfo = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getPhoneNoInfo(param.getMobileCode());
-                    param.setMobile(phoneInfo.getPurePhoneNumber());
+                if (!param.getMobile().isEmpty() || !param.getMobileCode().isEmpty()) {
+                    if (!param.getMobileCode().isEmpty()) {
+                        WxMaPhoneNumberInfo phoneInfo = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getPhoneNoInfo(param.getMobileCode());
+                        param.setMobile(phoneInfo.getPurePhoneNumber());
+                    }
                 } else {
                     throw new CommonException("手机号不能为空");
                 }
             }
 
             Member registerMember = new Member();
-            registerMember.setWxOpenid(param.getOpenid());
+            registerMember.setWeappOpenid(param.getOpenid());
             registerMember.setMobile(param.getMobile());
             registerMember.setWxUnionid(param.getUnionid());
             registerMember.setPid(param.getPid());
+            registerMember.setNickname(param.getNickname());
+            registerMember.setHeadimg(param.getHeadimg());
             return registerService.register(registerMember);
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
@@ -184,18 +214,7 @@ public class WeappServiceImpl implements IWeappService {
      * 查询小程序是否已开通发货信息管理服务
      * @return
      */
-    public Map<String, Boolean> getIsTradeManaged() {
-        Boolean isTradeManaged = false;
-
-        try {
-            String appid = WechatUtils.miniapp(RequestUtils.siteId()).getWxMaConfig().getAppid();
-            WxMaOrderShippingIsTradeManagedResponse res = WechatUtils.miniapp(RequestUtils.siteId()).getWxMaOrderShippingService().isTradeManaged(appid);
-            isTradeManaged = res.getTradeManaged();
-        } catch (Exception e) {
-        }
-
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("is_trade_managed", isTradeManaged);
-        return map;
+    public IsTradeManagedVo getIsTradeManaged() {
+        return coreWeappDeliveryService.getIsTradeManaged(RequestUtils.siteId());
     }
 }

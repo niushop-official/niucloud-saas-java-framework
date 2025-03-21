@@ -51,7 +51,7 @@
     import diyGoodsList from '@/addon/shop/components/diy/goods-list/index.vue';
     import { getGoodsCategoryList } from '@/addon/shop/api/goods';
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount']);
+	const props = defineProps(['component', 'index']);
 	const diyStore = useDiyStore();
 
 	const diyComponent = computed(() => {
@@ -74,13 +74,6 @@
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
 		return style;
 	})
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	onMounted(() => {
 		refresh();
@@ -167,6 +160,8 @@
             saleStyle: diyComponent.value.saleStyle,
             btnStyle: diyComponent.value.btnStyle,
 			labelStyle: diyComponent.value.labelStyle,
+			
+			imgElementRounded: diyComponent.value.imgElementRounded,
 
             elementBgColor: diyComponent.value.elementBgColor,
             topElementRounded: diyComponent.value.topElementRounded,
@@ -212,7 +207,7 @@
 			white-space: nowrap;
 			box-sizing: border-box;
 		}
-		
+
 		&.style-4{
 			padding-bottom: 0;
 		}
@@ -228,7 +223,7 @@
 					width: calc(25% - 20rpx);
 					padding-left: 0;
 				}
-				
+
 				&.active {
 					.name{
 						color: var(--primary-color);
@@ -240,17 +235,17 @@
 						background-color: var(--primary-color);
 					}
 				}
-				
+
 				.name {
 					font-size: 30rpx;
 					color: #333;
 					line-height: 1;
 				}
-				
+
 				.cate {
 					display: inline-block;
 				}
-				
+
 				.desc {
 					font-size: 22rpx;
 					color: #999;

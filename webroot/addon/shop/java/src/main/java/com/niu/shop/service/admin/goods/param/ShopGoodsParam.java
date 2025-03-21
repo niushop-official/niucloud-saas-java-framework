@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Map;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 商品参数
@@ -117,6 +117,8 @@ public class ShopGoodsParam implements Serializable {
     private String memberDiscount;
 
     private Integer posterId = 0;
+
+    private Integer formId = 0;
 
     @Data
     public static class SkuData {

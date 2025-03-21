@@ -25,8 +25,8 @@ public class ExternalJarsLoaderPlugin {
     public static String getRuntimePath() {
         String mainExecutePath = ExternalJarsLoaderPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (StrUtil.isNotEmpty(mainExecutePath)) {
-            if (mainExecutePath.contains("!/BOOT-INF/")) {
-                mainExecutePath = mainExecutePath.substring(0, mainExecutePath.indexOf("!/BOOT-INF/"));
+            if (mainExecutePath.contains("/!BOOT-INF/")) {
+                mainExecutePath = mainExecutePath.substring(0, mainExecutePath.indexOf("/!BOOT-INF/"));
                 if (mainExecutePath.contains("/")) {
                     mainExecutePath = mainExecutePath.substring(0, mainExecutePath.lastIndexOf('/'));
                     try {
@@ -36,6 +36,9 @@ public class ExternalJarsLoaderPlugin {
                     }
                 }
             }
+        }
+        if (mainExecutePath.startsWith("nested:/")) {
+            mainExecutePath = mainExecutePath.substring(7);
         }
         return mainExecutePath;
     }

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 
 /**
@@ -125,7 +125,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
                         .eq("menu_key", menuKey)
                         .last("limit 1"));
         Assert.notNull(model, "数据不存在!");
-        BeanUtil.copyProperties(model, editParam);
+        BeanUtil.copyProperties(editParam, model);
         sysMenuMapper.updateById(model);
         /** 清理缓存 */
         cached.tag(cacheTagName).clear();

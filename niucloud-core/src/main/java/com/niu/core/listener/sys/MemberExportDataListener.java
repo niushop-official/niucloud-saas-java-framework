@@ -15,7 +15,7 @@ import com.niu.core.service.admin.member.vo.MemberListVo;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @EventCallback("core")
 @Component

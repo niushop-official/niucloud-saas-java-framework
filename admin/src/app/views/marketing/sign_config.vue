@@ -4,17 +4,17 @@
 
         <el-form class="page-form" :model="formData" label-width="150px" ref="ruleFormRef" :rules="formRules" v-loading="loading">
             <el-card class="box-card !border-none" shadow="never">
-                <h3 class="panel-title !text-sm">{{ t('signRule') }}</h3>
+                <h3 class="text-page-title">{{ t('signRule') }}</h3>
 
                 <el-form-item :label="t('isUse')">
                     <el-switch v-model="formData.is_use" />
                 </el-form-item>
 
-                <el-form-item :label="t('signPeriod')" v-if="formData.is_use">
-                    <el-input-number v-model="formData.sign_period" clearable class="input-width" controls-position="right" /><span class="ml-[10px]">天</span>
+                <el-form-item :label="t('signPeriod')" prop="sign_period" v-if="formData.is_use">
+                    <el-input v-model.trim="formData.sign_period" @keyup="filterNumber($event)" maxlength="3" clearable class="input-width" /><span class="ml-[10px]">天</span>
                 </el-form-item>
 
-                <el-form-item :label="t('daySignAward')" prop="formData.day_award" v-if="formData.is_use">
+                <el-form-item :label="t('daySignAward')" prop="day_award" v-if="formData.is_use">
                     <div v-for="(item, index) in daySignAwardText" :key="index">
                         <span v-if="item.is_use == '1'">{{ item.content }}&nbsp;&nbsp;</span>
                     </div>
@@ -27,7 +27,7 @@
                     <div class="form-tip">{{ t('daySignAwardTip') }}</div>
                 </el-form-item>
 
-                <el-form-item :label="t('continueSignAward')" prop="formData.continue_award" v-if="formData.is_use">
+                <el-form-item :label="t('continueSignAward')" prop="continue_award" v-if="formData.is_use">
                     <div>
                         <div class="form-tip">{{ t('continueSignAwardTipTop') }}</div>
                         <div class="mt-[10px]">
@@ -68,9 +68,9 @@
                     </div>
                 </el-form-item>
 
-                <el-form-item :label="t('ruleExplain')" prop="formData.rule_explain" v-if="formData.is_use">
+                <el-form-item :label="t('ruleExplain')" prop="rule_explain" v-if="formData.is_use">
                     <div class="flex">
-                        <el-input v-model="formData.rule_explain" :placeholder="t('ruleExplainTip')" type="textarea" rows="5" class="textarea-width" clearable />
+                        <el-input v-model.trim="formData.rule_explain" :placeholder="t('ruleExplainTip')" type="textarea" maxlength="500" show-word-limit rows="5" class="textarea-width" clearable />
                         <el-button class="ml-[20px]" type="primary" @click="defaultExplainEvent()" plain>{{ t('useDefaultExplain') }}</el-button>
                     </div>
                 </el-form-item>
@@ -78,7 +78,7 @@
         </el-form>
 
         <!-- 日签奖励 -->
-        <el-dialog v-model="daySignDialog" :title="t('daySignTitle')" width="1200px" :destroy-on-close="true" v-if="formData.is_use">
+        <el-dialog v-model="daySignDialog" :title="t('daySignTitle')" width="1000px" :destroy-on-close="true" v-if="formData.is_use">
             <sign-day ref="benefitsRef" v-model="formData.day_award" />
             <template #footer>
                 <span class="dialog-footer">
@@ -115,7 +115,9 @@ import { getSignConfig, setSignConfig, getMemberGiftsContent } from '@/app/api/m
 import signDay from '@/app/views/marketing/components/sign-day.vue'
 import signContinue from '@/app/views/marketing/components/sign-continue.vue'
 import { FormInstance, FormRules } from 'element-plus'
+import { filterNumber } from '@/utils/common'
 import { useRoute } from 'vue-router'
+import { cloneDeep } from 'lodash-es'
 
 const route = useRoute()
 const pageName = route.meta.title
@@ -129,18 +131,40 @@ const continue_award = ref({})
 let isEdit = false // 是否为编辑状态
 let editIndex = 0 // 连签奖励修改下标
 
+// 正则表达式
+const regExp: any = {
+    required: /[\S]+/,
+    number: /^\d{0,10}$/,
+    digit: /^\d{0,10}(.?\d{0,2})$/,
+    special: /^\d{0,10}(.?\d{0,3})$/
+}
 // 表单验证规则
 const formRules = reactive<FormRules>({
-    sign_period: [
-        { required: true, message: t('signPeriodTip'), trigger: 'blur' }
-    ]
+    day_award: [
+        { required: true, message: t('daySignAwardPlaceholder'), trigger: 'change' }
+    ],
+    sign_period:[{
+        required: true,
+        trigger: 'blur',
+        validator: (rule: any, value: any, callback: any) => {
+            if (value === null || value === '') {
+                callback(t('signPeriodTip'))
+            }else if (isNaN(value) || !regExp.number.test(value)) {
+                callback(t('signPeriodLimitTips'))
+            }else if (value < 2 || value > 365) {
+                callback(t('signPeriodMustZeroTips'))
+            } else {
+                callback()
+            }
+        }
+    }]
 })
 
 /**
  * 签到奖励文本请求参数
  */
 const contentData = reactive<Record<string, any>>({
-    gifts: [],
+    gifts: []
 })
 
 /**
@@ -187,17 +211,16 @@ const setFormData = async () => {
 
     if (formData.continue_award) {
         formData.continue_award.forEach((item: any, index: number) => {
+            continueSignAwardTableData.data.push(cloneDeep(item))
 
-            continueSignAwardTableData.data.push(JSON.parse(JSON.stringify(item)))
+            contentData.gifts = []
 
-            contentData.gifts = [];
+            const val = cloneDeep(item)
 
-            const val = JSON.parse(JSON.stringify(item))
-
-            delete val['continue_sign'];
-            delete val['continue_tag'];
-            delete val['receive_limit'];
-            delete val['receive_num'];
+            delete val['continue_sign']
+            delete val['continue_tag']
+            delete val['receive_limit']
+            delete val['receive_num']
 
             contentData.gifts = val
 
@@ -215,7 +238,7 @@ setFormData()
 const daySignAwardText = ref([])
 const setMemberBenefitsContent = async () => {
     const data = await (await getMemberGiftsContent(contentData)).data
-    daySignAwardText.value = [];
+    daySignAwardText.value = []
     Object.values(data).forEach((el: any) => {
         daySignAwardText.value.push(el)
     })
@@ -230,7 +253,7 @@ const setMemberBenefitsContent = async () => {
  */
 const setMemberBenefitsContents = async (content: any, item: any, index: number = 0, tag = 0) => {
     const data = await (await getMemberGiftsContent(content)).data
-    continueSignAwardText.value = [];
+    continueSignAwardText.value = []
     Object.values(data).forEach((el: any) => {
         continueSignAwardText.value.push(el)
     })
@@ -242,17 +265,16 @@ const setMemberBenefitsContents = async (content: any, item: any, index: number 
 
     if (!isEdit) {
         if (tag == 0) {
-            continueSignAwardTableData.data.splice(index, 1, JSON.parse(JSON.stringify(newArr)))
+            continueSignAwardTableData.data.splice(index, 1, cloneDeep(newArr))
         } else {
-            continueSignAwardTableData.data.push(JSON.parse(JSON.stringify(newArr)))
+            continueSignAwardTableData.data.push(cloneDeep(newArr))
         }
     } else {
-        continueSignAwardTableData.data.splice(editIndex, 1, JSON.parse(JSON.stringify(newArr)))
+        continueSignAwardTableData.data.splice(editIndex, 1, cloneDeep(newArr))
     }
 
     isEdit = false
     editIndex = 0
-
 }
 
 /**
@@ -262,7 +284,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
     if (loading.value || !formEl) return
     await formEl.validate((valid) => {
         if (valid) {
-            const save = JSON.parse(JSON.stringify(formData))
+            const save = cloneDeep(formData)
             setSignConfig(save).then(() => {
                 loading.value = false
             }).catch(() => {
@@ -289,6 +311,9 @@ const setDaySignAward = async () => {
     if (!formData.day_award.hasOwnProperty('balance') && !formData.day_award.hasOwnProperty('point') && formData.day_award.shop_coupon.is_use == 0) {
         formData.day_award = ''
     }
+    if (formData.day_award.hasOwnProperty('balance') && formData.day_award.balance.is_use == 1) {
+        formData.day_award.balance.money = Number(formData.day_award.balance.money)
+    }
     contentData.gifts = formData.day_award
 
     setMemberBenefitsContent()
@@ -314,8 +339,8 @@ const continueSignAwardSet = () => {
  * 修改连签奖励设置页
  */
 const continueSignAwardModify = (flag: boolean, index: any) => {
-    isEdit = flag;
-    editIndex = index;
+    isEdit = flag
+    editIndex = index
 
     continue_award.value = formData.continue_award[index]
     continueSignDialog.value = true
@@ -332,29 +357,30 @@ const setContinueSignAward = async () => {
     if (!continue_award.value.hasOwnProperty('balance') && !continue_award.value.hasOwnProperty('point') && continue_award.value.shop_coupon.is_use == 0) {
         continue_award.value = ''
     }
-
+    if (continue_award.value.hasOwnProperty('balance') && continue_award.value.balance.is_use == 1) {
+        continue_award.value.balance.money = Number(continue_award.value.balance.money)
+    }
     if (Object.keys(continue_award.value).length > 0) {
-        const val = JSON.parse(JSON.stringify(continue_award.value))
+        const val = cloneDeep(continue_award.value)
 
-        delete val['continue_sign'];
-        delete val['continue_tag'];
-        delete val['receive_limit'];
-        delete val['receive_num'];
+        delete val['continue_sign']
+        delete val['continue_tag']
+        delete val['receive_limit']
+        delete val['receive_num']
 
         contentData.gifts = val
 
-        let index = 0;
+        let index = 0
         if (formData.continue_award.length > 0) {
             index = formData.continue_award.length - 1
         }
 
         setMemberBenefitsContents(contentData, continue_award.value, 0, 1)
 
-
         if (!isEdit) {
-            formData.continue_award.push(JSON.parse(JSON.stringify(continue_award.value)))
+            formData.continue_award.push(cloneDeep(continue_award.value))
         } else {
-            formData.continue_award.splice(editIndex, 1, JSON.parse(JSON.stringify(continue_award.value)))
+            formData.continue_award.splice(editIndex, 1, cloneDeep(continue_award.value))
         }
     }
 }
@@ -371,7 +397,7 @@ const deleteContinueSignAwardEvent = (index: number) => {
  * 使用默认说明
  */
 const defaultExplainEvent = () => {
-    formData.rule_explain = t('ruleExplainDefault');
+    formData.rule_explain = t('ruleExplainDefault')
 }
 </script>
 

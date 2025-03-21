@@ -4,6 +4,9 @@ package com.niu.shop.service.core.order.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.entity.diy_form.DiyForm;
+import com.niu.core.mapper.diy_form.DiyFormMapper;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import com.niu.shop.entity.order.config.*;
@@ -13,13 +16,16 @@ import com.niu.shop.service.core.order.vo.OrderConfigVo;
 import com.niu.shop.service.core.order.vo.ShopOrderCloseVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
 
     @Resource
     ICoreConfigService coreConfigService;
+
+    @Resource
+    DiyFormMapper diyFormMapper;
 
     @Override
     public void setConfig(Integer siteId, OrderConfigParam orderConfigParam) {
@@ -67,6 +73,19 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
         shopOrderInvoice.setInvoiceType(orderConfigParam.getInvoiceType());
         shopOrderInvoice.setInvoiceContent(orderConfigParam.getInvoiceContent());
         vo.setInvoice(shopOrderInvoice);
+
+        //万能表单设置
+        //查询万能表单是否存在
+        if(!ObjectUtil.isEmpty(orderConfigParam.getFormId()))
+        {
+            Long count = diyFormMapper.selectCount(new QueryWrapper<DiyForm>().eq("site_id", siteId).eq("form_id", orderConfigParam.getFormId()));
+            if(ObjectUtil.isNotEmpty(count))
+            {
+                vo.setFormId(orderConfigParam.getFormId());
+            }
+
+        }
+
         return vo;
     }
 

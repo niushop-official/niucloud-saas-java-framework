@@ -8,7 +8,7 @@ import com.niu.shop.enums.order.OrderStatusEnum;
 import com.niu.shop.service.core.order.ICoreOrderService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 获取支付数据

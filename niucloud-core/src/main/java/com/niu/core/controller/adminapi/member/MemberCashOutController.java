@@ -16,7 +16,7 @@ import com.niu.core.service.admin.member.vo.MemberCashOutListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -49,7 +49,7 @@ public class MemberCashOutController {
      * @return Result<MemberCashOutInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<MemberCashOutInfoVo> info(@PathVariable Integer id) {
+    public Result<MemberCashOutInfoVo> info(@PathVariable("id") Integer id) {
         MemberCashOutInfoVo info = memberCashOutService.info(id);
         return Result.success(info);
     }
@@ -89,7 +89,7 @@ public class MemberCashOutController {
      * @return
      */
     @PutMapping("/transfer/{id}")
-    public Result transfer(@PathVariable Integer id, @RequestBody CashOutTransferParam param) {
+    public Result transfer(@PathVariable("id") Integer id, @RequestBody CashOutTransferParam param) {
         param.setId(id);
         memberCashOutService.transfer(param);
         return Result.success();

@@ -22,7 +22,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;

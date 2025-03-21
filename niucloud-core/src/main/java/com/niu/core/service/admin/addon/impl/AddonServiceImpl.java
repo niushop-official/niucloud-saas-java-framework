@@ -10,12 +10,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.common.utils.image.ImageUtils;
 import com.niu.core.common.utils.json.JsonLoadUtils;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.service.admin.addon.param.AddonParam;
 import com.niu.core.service.admin.addon.param.AddonSearchParam;
 import com.niu.core.service.admin.addon.IAddonService;
@@ -23,6 +25,7 @@ import com.niu.core.service.admin.addon.vo.AddonInfoVo;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.mapper.addon.AddonMapper;
+import com.niu.core.service.admin.addon.vo.AddonListVo;
 import com.niu.core.service.admin.addon.vo.LocalAddonInfoVo;
 import com.niu.core.service.admin.addon.vo.LocalAddonListVo;
 import com.niu.core.service.admin.niucloud.INiucloudService;
@@ -30,11 +33,12 @@ import com.niu.core.service.admin.niucloud.vo.ModuleListVo;
 import com.niu.core.service.core.addon.ICoreAddonInstallService;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
+import com.niu.core.service.core.site.vo.SiteInfoCacheVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -46,6 +50,19 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AddonServiceImpl implements IAddonService {
+
+    /**
+     * 站点插件tag
+     */
+    public static String cacheTagName = CacheTagEnum.ADDON_CACHE.getTagName();
+
+    /**
+     * 是否使用缓存
+     */
+    public static final boolean useCache = true;
+
+    @Resource
+    private Cached cached;
 
     @Resource
     AddonMapper addonMapper;
@@ -103,7 +120,7 @@ public class AddonServiceImpl implements IAddonService {
                     if (list.get(addon) != null) {
                         LocalAddonInfoVo addonInfoVo = list.get(addon);
                         addonInfoVo.setIsDownload(true);
-                        addonInfoVo.setIsLocal(true);
+                        addonInfoVo.setIsLocal(false);
                         if (installAddonList.get(addon) != null) {
                             addonInfoVo.setInstallInfo(installAddonList.get(addon));
                         }
@@ -137,14 +154,20 @@ public class AddonServiceImpl implements IAddonService {
      * @return PageResult<AddonListVo>
      */
     @Override
-    public PageResult<Addon> list(PageParam pageParam, AddonSearchParam addonSearchParam) {
+    public PageResult<AddonListVo> list(PageParam pageParam, AddonSearchParam addonSearchParam) {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<Addon> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("id");
         IPage<Addon> iPage = addonMapper.selectPage(new Page<Addon>(page, limit), queryWrapper);
-        return PageResult.build(iPage);
+        List<AddonListVo> list = new LinkedList<>();
+        for (Addon item : iPage.getRecords()) {
+            AddonListVo vo = new AddonListVo();
+            BeanUtils.copyProperties(item, vo);
+            list.add(vo);
+        }
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -265,6 +288,7 @@ public class AddonServiceImpl implements IAddonService {
      */
     @Override
     public String getTitleListByKey(String keys) {
+
         JSONArray jsonKey=JSONUtil.parseArray(keys);
         JSONArray jsonArray=new JSONArray();
         if(jsonKey.size()>0){
@@ -275,6 +299,23 @@ public class AddonServiceImpl implements IAddonService {
             }
         }
         return jsonArray.toString();
+    }
+
+    @Override
+    public List<Addon> getAddonListByKeys(List<String> addonKeys, String type) {
+
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getAddonListByKeys", addonKeys, type), uniqueKey -> {
+
+            QueryWrapper<Addon> query = new QueryWrapper<>();
+            if(type.equals(""))
+            {
+                query.in("`key`", addonKeys);
+            }else{
+                query.in("`key`", addonKeys).eq("type", type);
+            }
+            return addonMapper.selectList(query);
+        });
+
     }
 
     /**

@@ -171,7 +171,7 @@
 							<text class="text-[28rpx]">商品总额</text>
 							<text class="text-[28rpx]">￥{{total.goods_money}}</text>
 						</view>
-						<view class="flex justify-between h-[60rpx] px-[var(--pad-sidebar-m)]" v-if="total.promotion_money">
+						<view class="flex justify-between h-[60rpx] px-[var(--pad-sidebar-m)]" v-if="Number(total.promotion_money)">
 							<text class="text-[28rpx]">满减</text>
 							<text class="text-[28rpx] text-[red]">-￥{{total.promotion_money}}</text>
 						</view>
@@ -195,7 +195,7 @@
 						        ￥{{ parseFloat(total.order_money).toFixed(2) }}
 						    </text>
 						</view>
-						<view class="flex items-center justify-end mt-[6rpx]" v-if="total.promotion_money" @click="couponDetailsShow = true">
+						<view class="flex items-center justify-end mt-[6rpx]" v-if="Number(total.promotion_money)" @click="couponDetailsShow = true">
 							<text class="text-[22rpx] text-[#666]">优惠明细</text>
 							<text class="iconfont iconjiantoushang text-[#666] !text-[22rpx] ml-[4rpx] font-bold"></text>
 						</view>
@@ -397,6 +397,7 @@ const cartCalculateFn = () =>{
 	
 	if(!calculateArr.length){
 		total.value.order_money = 0
+		total.value.promotion_money = 0
 		return false;
 	}
 	
@@ -514,7 +515,7 @@ const cartOptions = ref([
     {
         text: t('delete'),
         style: {
-            backgroundColor: '#EF000C', 
+            backgroundColor: 'var(--primary-color)', 
 			width: '100rpx',
 			height:'100%',
 			borderRadius: '10rpx'	   

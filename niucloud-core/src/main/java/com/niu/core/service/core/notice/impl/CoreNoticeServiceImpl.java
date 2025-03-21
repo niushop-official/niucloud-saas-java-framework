@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,15 +64,27 @@ public class CoreNoticeServiceImpl implements ICoreNoticeService {
         queryWrapper.eq("site_id", siteId);
         if (ObjectUtil.isNotEmpty(keys)) queryWrapper.in("`key`", keys);
 
-        Map<String, SysNotice> noticeList = (Map<String, SysNotice>) sysNoticeMapper.selectList(queryWrapper).stream().collect(Collectors.toMap(SysNotice::getKey, SysNotice::getClass));
+        List<SysNotice> noticeList = sysNoticeMapper.selectList(queryWrapper);
+        Map<String, SysNotice> noticeListMap = noticeList.stream()
+            .collect(Collectors.toMap(SysNotice::getKey, sysNotice -> sysNotice));
 
         Map<String, NoticeInfoVo> list = new HashMap<>();
         for (Map.Entry<String, NoticeEnumListVo> noticeMap : NoticeEnum.getNotice().entrySet()) {
             NoticeInfoVo vo = new NoticeInfoVo();
             NoticeEnumListVo notice = noticeMap.getValue();
             BeanUtil.copyProperties(notice, vo);
-            if (noticeList.get(noticeMap.getKey()) != null)
-                BeanUtil.copyProperties(noticeList.get(noticeMap.getKey()), vo);
+            if (noticeListMap.get(noticeMap.getKey()) != null) {
+                SysNotice sysNotice = noticeListMap.get(noticeMap.getKey());
+                vo.setIsSms(sysNotice.getIsSms());
+                vo.setIsWechat(sysNotice.getIsWechat());
+                vo.setIsWeapp(sysNotice.getIsWeapp());
+                vo.setWeappTemplateId(sysNotice.getWeappTemplateId());
+                vo.setWechatTemplateId(sysNotice.getWechatTemplateId());
+                vo.setSmsContent(sysNotice.getSmsContent());
+                vo.setSmsId(sysNotice.getSmsId());
+                vo.setWechatFirst(sysNotice.getWechatFirst());
+                vo.setWechatRemark(sysNotice.getWechatRemark());
+            }
             if (notice.getSupport_type().contains("sms")) vo.setSms(notice.getSupport_type_map().get("sms"));
             if (notice.getSupport_type().contains("wechat")) vo.setWechat(notice.getSupport_type_map().get("wechat"));
             if (notice.getSupport_type().contains("weapp")) vo.setWeapp(notice.getSupport_type_map().get("weapp"));

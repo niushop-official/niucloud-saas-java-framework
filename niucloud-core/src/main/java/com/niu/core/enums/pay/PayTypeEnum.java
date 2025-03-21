@@ -1,5 +1,6 @@
 package com.niu.core.enums.pay;
 
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import cn.hutool.json.JSONObject;
 
@@ -9,6 +10,6 @@ import cn.hutool.json.JSONObject;
 public class PayTypeEnum {
 
     public static JSONObject getType(){
-        return JsonModuleLoader.build().mergeResultElement("pay/pay.json");
+        return JsonModuleLoader.build().mergeResultElement(RequestUtils.siteId(), "pay/pay.json");
     }
 }

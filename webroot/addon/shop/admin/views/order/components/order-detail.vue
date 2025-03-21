@@ -80,7 +80,7 @@
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="openElectronicSheetPrintDialog" v-if="formData.delivery_type == 'express' && formData.status == 3">{{ t('electronicSheetPrintTitle') }}</span>
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="printTicketEvent" v-if="formData.delivery_type == 'virtual' && (formData.status == 2 || formData.status == 3 || formData.status == 5)">{{ t('printTicket') }}</span>
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="orderEditAddressFn" v-if="formData.status == 1 && formData.delivery_type != 'virtual' && formData.activity_type != 'giftcard'">{{ t('editAddress') }}</span>
-                            <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="refundEvent" v-if="formData.is_refund_show && formData.status != 1 && formData.status != -1 && formData.is_enable_refund == 1">{{ t('voluntaryRefund') }}</span>
+                            <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="refundEvent" v-if="formData.is_refund_show && formData.status != 1 && formData.status != -1">{{ t('voluntaryRefund') }}</span>
                             <div class="flex" v-if="formData.order_delivery">
                                 <template v-for="(item, index) in formData.order_delivery" :key="index">
                                     <span v-if="item.delivery_type == 'express' && item.sub_delivery_type == 'express'"
@@ -273,7 +273,7 @@ const getOrderInfoFn = async () => {
             formData.value = data
             let refundOrderNum = 0;
             formData.value.order_goods.forEach((orderItem,orderIndex) => {
-                if(orderItem.status == 1){
+                if(orderItem.is_enable_refund == 1){
                     refundOrderNum++;
                 }
             });
@@ -423,6 +423,6 @@ defineExpose({
 
 <style lang="scss">
 .detail-drawer{
-    width: 1000px !important;
+    width: 1300px !important;
 }
 </style>

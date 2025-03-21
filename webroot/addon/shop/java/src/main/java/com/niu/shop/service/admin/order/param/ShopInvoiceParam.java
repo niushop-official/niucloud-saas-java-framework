@@ -2,7 +2,7 @@ package com.niu.shop.service.admin.order.param;
 import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 发票参数

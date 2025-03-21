@@ -48,5 +48,6 @@ public class ShopOrderGoods implements Serializable {
     private Integer isGift; // 是否是赠品
     private Integer shopActiveRefund; //商家主动退款0：否 1：是
     private BigDecimal shopActiveRefundMoney; //商家主动退款金额
+    private Integer formRecordId;
 
 }

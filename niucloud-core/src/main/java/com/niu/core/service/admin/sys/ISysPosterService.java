@@ -10,6 +10,7 @@ import com.niu.core.service.admin.sys.param.SysPosterTemplateSearchParam;
 import com.niu.core.service.admin.sys.vo.SysPosterInfoVo;
 import com.niu.core.service.admin.sys.vo.SysPosterInitVo;
 import com.niu.core.service.admin.sys.vo.SysPosterListVo;
+import com.niu.core.service.admin.sys.param.PreviewPosterParam;
 
 import java.util.List;
 
@@ -86,4 +87,10 @@ public interface ISysPosterService {
      * @param id
      */
     void modifyDefault(Integer id);
+
+    /**
+     * 预览海报
+     * @param param
+     */
+    String preview(PreviewPosterParam param);
 }

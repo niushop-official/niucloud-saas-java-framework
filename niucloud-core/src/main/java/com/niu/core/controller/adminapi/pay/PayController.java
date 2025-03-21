@@ -13,7 +13,7 @@ import com.niu.core.service.admin.pay.vo.PayListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 支付记录控制器

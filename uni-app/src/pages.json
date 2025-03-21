@@ -100,6 +100,23 @@
             }
         },
         {
+            "path": "app/pages/index/diy_form_result",
+            "style": {
+                // #ifndef H5
+                "navigationStyle": "custom",
+                // #endif
+                "navigationBarTitleText": "%pages.index.diy_form_result%"
+            },
+            "needLogin": true
+        },
+        {
+            "path": "app/pages/index/diy_form_detail",
+            "style": {
+                "navigationBarTitleText": "%pages.index.diy_form_detail%"
+            },
+            "needLogin": true
+        },
+        {
             "path": "app/pages/index/close",
             "style": {
                 "navigationBarTitleText": "%pages.index.close%"
@@ -201,12 +218,10 @@
     ],
     "subPackages": [
         // {{ PAGE_BEGAIN }}
-        // {{ PAGE_END }}
+// {{ PAGE_END }}
         {
             "root": "app/pages/member",
-            "pages": [
-
-                {
+            "pages": [{
                     "path": "apply_cash_out",
                     "style": {
                         "navigationBarTitleText": "%pages.member.apply_cash_out%"

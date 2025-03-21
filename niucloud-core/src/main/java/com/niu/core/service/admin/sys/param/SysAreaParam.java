@@ -1,7 +1,7 @@
 package com.niu.core.service.admin.sys.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 地址参数

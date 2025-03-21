@@ -11,7 +11,7 @@ import com.niu.core.service.admin.sys.vo.SysExportListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -61,7 +61,7 @@ public class SysExportController {
      */
     @GetMapping("/export/check/{type}")
     public Result<Object> check(@Validated @PathVariable("type") String type, @RequestParam Map<String, Object> objectMap) {
-        return Result.success(sysExportService.checkExportData(type, objectMap));
+        return Result.success("", sysExportService.checkExportData(type, objectMap));
     }
 
     /**

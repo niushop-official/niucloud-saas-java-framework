@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -180,7 +180,7 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
                 .or(j-> j.le("start_time", startTime).
                         ge("a.end_time", endTime))
         );
-        int count = shopActiveGoodsMapper.selectJoinCount(wrapper);
+        long count = shopActiveGoodsMapper.selectJoinCount(wrapper);
         if (count > 0) {
             throw new AdminException("同一商品在一个时间段内只能参加一个限时折扣活动");
         }
@@ -280,7 +280,7 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
                 .or(j-> j.le("start_time", startTime).
                         ge("a.end_time", endTime))
         );
-        int count = shopActiveGoodsMapper.selectJoinCount(wrapper);
+        long count = shopActiveGoodsMapper.selectJoinCount(wrapper);
         if (count > 0) {
             throw new AdminException("同一商品在一个时间段内只能参加一个限时折扣活动");
         }
@@ -502,7 +502,7 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
         Map<Integer, ShopOrderGoods> orderGoodsMap = orderGoods.stream().collect(Collectors.toMap(ShopOrderGoods::getGoodsId, i -> i));
 
         for (ShopOrderDiscount item: orderRiscount) {
-            Integer participationNum = this.getMemberActiveParticipationNum(item.getDiscountTypeId(), order.getMemberId());
+            long participationNum = this.getMemberActiveParticipationNum(item.getDiscountTypeId(), order.getMemberId());
             BigDecimal activeOrderMoney = new BigDecimal(0);
             Integer activeSuccessNum = 0;
 
@@ -540,7 +540,7 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
      * @param memberId
      * @return
      */
-    private Integer getMemberActiveParticipationNum(Integer activeId, Integer memberId) {
+    private Long getMemberActiveParticipationNum(Integer activeId, Integer memberId) {
         MPJQueryWrapper<ShopOrderDiscount> wrapper = new MPJQueryWrapper<>();
         wrapper.setAlias("od")
                 .innerJoin("?_shop_order o ON o.order_id = od.order_id".replace("?_", GlobalConfig.tablePrefix));

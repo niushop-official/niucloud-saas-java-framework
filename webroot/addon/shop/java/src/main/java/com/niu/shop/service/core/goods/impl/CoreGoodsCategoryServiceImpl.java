@@ -7,7 +7,7 @@ import com.niu.shop.service.core.goods.ICoreGoodsCategoryService;
 import com.niu.shop.service.core.goods.vo.GoodsCategoryConfigVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 商品分类实现

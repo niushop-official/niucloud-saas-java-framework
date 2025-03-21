@@ -12,8 +12,8 @@ import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class FriendPay extends BasePay {

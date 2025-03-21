@@ -91,6 +91,7 @@ export function getManjian(params: Record<string, any>) {
 export function browse(params: Record<string, any>) {
     return request.post(`shop/goods/browse`, params, { showSuccessMessage: false })
 }
+
 /**
  *  商品足迹列表
  */

@@ -14,7 +14,7 @@ import com.niu.core.service.admin.site.vo.SiteUserVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 店铺分组（分组权限）控制器

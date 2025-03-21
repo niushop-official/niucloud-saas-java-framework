@@ -2,6 +2,7 @@ package com.niu.shop.service.admin.goods;
 
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.goods.param.EditGoodsLabelSortParam;
+import com.niu.shop.service.admin.goods.param.EditGoodsLabelStatusParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsLabelParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsLabelSearchParam;
 import com.niu.core.common.domain.PageParam;
@@ -62,4 +63,10 @@ public interface IShopGoodsLabelService {
      * @param editParam
      */
     void modifySort(EditGoodsLabelSortParam editParam);
+
+    /**
+     *  修改商品标签状态
+     * @param editParam
+     */
+    void modifyStatus(EditGoodsLabelStatusParam editParam);
 }

@@ -6,7 +6,7 @@ import com.niu.shop.service.admin.goods.param.ShopVirtualGoodsParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/goods/virtual")
@@ -32,7 +32,7 @@ public class VirtualGoodsController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopVirtualGoodsParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopVirtualGoodsParam editParam) {
         goodsService.edit(id, editParam);
         return Result.success();
     }

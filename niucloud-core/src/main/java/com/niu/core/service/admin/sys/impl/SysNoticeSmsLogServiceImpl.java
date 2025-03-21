@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.sys.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +10,9 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysNoticeSmsLog;
+import com.niu.core.enums.notice.NoticeEnum;
+import com.niu.core.enums.notice.vo.NoticeEnumListVo;
+import com.niu.core.enums.sys.SmsTypeEnum;
 import com.niu.core.mapper.sys.SysNoticeSmsLogMapper;
 import com.niu.core.service.admin.sys.param.SysNoticeSmsLogParam;
 import com.niu.core.service.admin.sys.param.SysNoticeSmsLogSearchParam;
@@ -18,9 +22,10 @@ import com.niu.core.service.admin.sys.vo.SysNoticeSmsLogListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -51,11 +56,16 @@ public class SysNoticeSmsLogServiceImpl implements ISysNoticeSmsLogService {
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper,"create_time" ,searchParam.getCreateTime());
         queryWrapper.orderByDesc("id");
 
+        JSONObject smsTypeEnum = SmsTypeEnum.getType();
+        Map<String, NoticeEnumListVo> notice = NoticeEnum.getNotice();
+
         IPage<SysNoticeSmsLog> iPage = sysNoticeSmsLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<SysNoticeSmsLogListVo> list = new LinkedList<>();
         for (SysNoticeSmsLog item : iPage.getRecords()) {
             SysNoticeSmsLogListVo vo = new SysNoticeSmsLogListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setSmsTypeName(smsTypeEnum.getByPath(item.getSmsType() + ".name", String.class));
+            vo.setName(ObjectUtil.defaultIfNull(notice.get(item.getKey()).getName(), ""));
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);

@@ -15,21 +15,22 @@ import com.niu.core.entity.sys.SysPoster;
 import com.niu.core.enums.poster.PosterTypeEnum;
 import com.niu.core.mapper.sys.SysPosterMapper;
 import com.niu.core.service.admin.sys.ISysPosterService;
-import com.niu.core.service.admin.sys.param.SysPosterInitParam;
-import com.niu.core.service.admin.sys.param.SysPosterParam;
-import com.niu.core.service.admin.sys.param.SysPosterSearchParam;
-import com.niu.core.service.admin.sys.param.SysPosterTemplateSearchParam;
+import com.niu.core.service.admin.sys.param.*;
 import com.niu.core.service.admin.sys.vo.SysPosterInfoVo;
 import com.niu.core.service.admin.sys.vo.SysPosterInitVo;
 import com.niu.core.service.admin.sys.vo.SysPosterListVo;
 import com.niu.core.service.core.poster.ICorePosterService;
+import com.niu.core.service.core.poster.param.GetPosterParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -271,6 +272,24 @@ public class SysPosterServiceImpl implements ISysPosterService {
         updateModel.setIsDefault(1);
         updateModel.setId(id);
         sysPosterMapper.updateById(updateModel);
+    }
+
+    /**
+     * 预览海报
+     * @param param
+     */
+    @Override
+    public String preview(PreviewPosterParam param) {
+        GetPosterParam getPosterParam = new GetPosterParam();
+        getPosterParam.setId(param.getId());
+        getPosterParam.setType(param.getType());
+        getPosterParam.setSiteId(RequestUtils.siteId());
+        getPosterParam.setChannel(ObjectUtil.defaultIfNull(param.getChannel(), "h5"));
+        Map<String, Object> posterParam = new HashMap<>();
+        posterParam.put("mode", "preview");
+        getPosterParam.setParam(posterParam);
+        getPosterParam.setIsThrowException(true);
+        return corePosterService.get(getPosterParam);
     }
 
 }

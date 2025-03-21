@@ -2,8 +2,8 @@ package com.niu.core.service.api.login.param;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
@@ -23,4 +23,12 @@ public class MobileRegisterParam implements Serializable {
     private String mobileCode = "";
 
     private Integer pid;
+
+    private String avatar = "";
+
+    private String nickname = "";
+
+    private String openid = "";
+
+    private String unionid = "";
 }

@@ -2,7 +2,7 @@ package com.niu.core.service.admin.auth.param;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data

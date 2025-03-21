@@ -8,7 +8,7 @@ import com.niu.shop.service.core.order.ICoreOrderLogService;
 import com.niu.shop.service.core.order.param.AddOrderLogParam;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreOrderLogServiceImpl implements ICoreOrderLogService {

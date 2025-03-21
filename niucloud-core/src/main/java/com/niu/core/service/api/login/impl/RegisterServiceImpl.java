@@ -1,6 +1,8 @@
 package com.niu.core.service.api.login.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.component.context.event.EventPublisher;
@@ -24,8 +26,10 @@ import com.niu.core.service.core.member.ICoreMemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.Set;
 
 /**
  * 注册实现
@@ -103,6 +107,9 @@ public class RegisterServiceImpl implements IRegisterService {
         member.setRegisterType(MemberRegisterTypeEnum.MOBILE.getType());
         member.setLoginType(MemberLoginTypeEnum.MOBILE.getType());
         member.setPid(param.getPid());
+        member.setHeadimg(ObjectUtil.defaultIfNull(param.getAvatar(), ""));
+        member.setNickname(ObjectUtil.defaultIfNull(param.getNickname(), ""));
+        member.setWxOpenid(ObjectUtil.defaultIfNull(param.getOpenid(), ""));
 
         return this.register(member);
     }
@@ -124,6 +131,16 @@ public class RegisterServiceImpl implements IRegisterService {
             if (ObjectUtil.isNotNull(mobile)) throw new CommonException("账号已存在");
         }
 
+        if (ObjectUtil.isEmpty(member.getNickname())) {
+            if (ObjectUtil.isNotEmpty(member.getUsername())) {
+                member.setNickname(member.getUsername());
+            } else if (ObjectUtil.isNotEmpty(member.getMobile())) {
+                member.setNickname(member.getMobile().substring(0, 3) + "****" + member.getMobile().substring(7));
+            } else {
+                member.setNickname(createName());
+            }
+        }
+
         member.setSiteId(RequestUtils.siteId());
         member.setCreateTime(System.currentTimeMillis() / 1000);
         member.setMemberNo(coreMemberService.createMemberNo(RequestUtils.siteId()));
@@ -139,6 +156,11 @@ public class RegisterServiceImpl implements IRegisterService {
         EventPublisher.publishEvent(registerEvent);
 
         return loginService.login(member);
+    }
+
+    private String createName() {
+        Set<String> set = RandomUtil.randomEleSet(CollUtil.newArrayList("0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W"), 10);
+        return String.join("", set);
     }
 
     /**

@@ -3,8 +3,8 @@ package com.niu.shop.service.admin.goods.param;
 import cn.hutool.json.JSONArray;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Map;
@@ -108,6 +108,8 @@ public class ShopVirtualGoodsParam implements Serializable {
     private String memberDiscount;
 
     private Integer posterId = 0;
+
+    private Integer formId = 0;
 
     @Data
     public static class SkuData {

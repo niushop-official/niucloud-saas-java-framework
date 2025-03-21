@@ -38,11 +38,11 @@ import { t } from '@/lang'
 import { setMap, getMap } from '@/app/api/sys'
 import { FormInstance } from 'element-plus'
 
-const loading = ref(false)
+const loading = ref(true)
 const formRef = ref<FormInstance>()
-const formData = reactive<Record<string, string>>({
+const formData = reactive({
     key: '',
-    is_open: 1,
+    is_open: 0,
     valid_time: 0
 })
 
@@ -57,7 +57,7 @@ const formRules = computed(() => {
                         callback(new Error(t('validTimePlaceholder')))
                     } else if (isNaN(value) || !/^\d{0,10}$/.test(value)) {
                         callback(new Error(t('validTimeFormatTips')))
-                    } else if (value < 0) {
+                    } else if (value < 5) {
                         callback(new Error(t('validTimeNotZeroTips')))
                     } else {
                         callback()
@@ -69,8 +69,12 @@ const formRules = computed(() => {
 });
 
 const setFormData = async () => {
+    loading.value = true
     const service_data = await (await getMap()).data
     formData.key = service_data.key
+    formData.is_open = service_data.is_open
+    formData.valid_time = service_data.valid_time
+    loading.value = false
 }
 setFormData()
 

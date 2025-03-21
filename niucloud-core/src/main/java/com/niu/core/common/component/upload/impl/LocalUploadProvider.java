@@ -1,21 +1,26 @@
 package com.niu.core.common.component.upload.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.component.upload.AbstractUploadProvider;
 import com.niu.core.common.component.upload.IUploadProvider;
 import com.niu.core.common.component.upload.annotation.UploadProvider;
 import com.niu.core.common.component.upload.exception.UploadException;
 import com.niu.core.common.component.upload.model.*;
 import com.niu.core.common.utils.file.FileTools;
-import com.niu.core.common.component.upload.AbstractUploadProvider;
-import com.niu.core.common.component.upload.model.*;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 
 @UploadProvider(name = "local", source = "core", describe = "本地存储")
 @Slf4j
@@ -98,4 +103,32 @@ public class LocalUploadProvider extends AbstractUploadProvider implements IUplo
         return thumbModelResult;
     }
 
+    @Override
+    public String base64(Base64Model base64Model) {
+        try {
+            // 不存在时创建目录
+            FileTools.createDirs(this.rootUploadDir + base64Model.getUploadFilePath());
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Model.getContent());
+            String key = base64Model.getUploadFilePath() + base64Model.getUploadFileName();
+            // 将解码后的字节写入文件（请替换为你想保存的文件路径）
+            Files.write(Paths.get(this.rootUploadDir, key), decodedBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        }
+        return base64Model.getUploadFilePath() + base64Model.getUploadFileName();
+    }
+
+    @Override
+    public String fetch(FetchModel fetchModel) {
+        try {
+            // 不存在时创建目录
+            FileTools.createDirs(this.rootUploadDir + fetchModel.getUploadFilePath());
+            HttpUtil.downloadFile(fetchModel.getUrl(), new File(this.rootUploadDir + fetchModel.getUploadFilePath(), fetchModel.getUploadFileName()).getAbsolutePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        }
+        return fetchModel.getUploadFilePath() + fetchModel.getUploadFileName();
+    }
 }

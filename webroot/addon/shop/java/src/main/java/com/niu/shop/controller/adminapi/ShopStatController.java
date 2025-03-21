@@ -5,7 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.stat.IShopStatService;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 【请填写功能名称】控制器

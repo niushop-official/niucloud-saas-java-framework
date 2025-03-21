@@ -19,7 +19,7 @@ import com.niu.core.mapper.sys.SysNoticeLogMapper;
 import com.niu.core.service.core.notice.vo.NoticeInfoVo;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,7 +69,7 @@ public class WeappSendNoticeEventListener extends SendNoticeEventDefiner {
                         WxMaSubscribeMessage.MsgData item = new WxMaSubscribeMessage.MsgData();
                         String varKey = contentItem.getStr(1).replace("{", "").replace("}", "");
                         item.setName(contentItem.getStr(2));
-                        item.setValue((String) ObjectUtil.defaultIfNull(noticeData.getVars().get(varKey), ""));
+                        item.setValue(ObjectUtil.defaultIfNull(noticeData.getVars().get(varKey), "").toString());
                         data.add(item);
                     }
 

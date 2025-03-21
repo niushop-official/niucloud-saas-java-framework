@@ -6,10 +6,11 @@ import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.weapp.IWeappService;
 import com.niu.core.service.api.wechat.param.AuthRegisterParam;
 import com.niu.core.service.api.wechat.param.WechatAuthParam;
+import com.niu.core.service.core.weapp.vo.IsTradeManagedVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class WeappController {
      * @return
      */
     @GetMapping("/subscribemsg")
-    public Result<List<String>> subscribeMessage(@RequestParam String keys) {
+    public Result<List<String>> subscribeMessage(@RequestParam("keys") String keys) {
         return Result.success(weappService.subscribeMessage(keys));
     }
 
@@ -62,7 +63,7 @@ public class WeappController {
      * @return
      */
     @GetMapping("/getIsTradeManaged")
-    public Result<Map<String, Boolean>> getIsTradeManaged() {
+    public Result<IsTradeManagedVo> getIsTradeManaged() {
         return Result.success(weappService.getIsTradeManaged());
     }
 

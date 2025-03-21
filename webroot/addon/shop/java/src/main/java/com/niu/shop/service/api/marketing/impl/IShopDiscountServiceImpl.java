@@ -33,7 +33,7 @@ import com.niu.shop.service.api.marketing.vo.ShopDiscountListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -58,7 +58,9 @@ public class IShopDiscountServiceImpl implements IShopDiscountService {
                 .eq("site_id", RequestUtils.siteId())
                 .eq("active_goods_status", "active")
                 .eq("goods_id", goodsId)
-                .eq("active_class", "discount"));
+                .eq("active_class", "discount")
+                .last("limit 1")
+        );
         ShopDiscountGoodsInfoVo vo = new ShopDiscountGoodsInfoVo();
         if (shopActiveGoods != null) {
             BeanUtils.copyProperties(shopActiveGoods, vo);

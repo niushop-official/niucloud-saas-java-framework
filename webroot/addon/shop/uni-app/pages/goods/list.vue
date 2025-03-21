@@ -49,7 +49,7 @@
 						<image v-else class="w-[190rpx] h-[190rpx] rounded-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
 						<view class="flex-1 flex flex-col ml-[20rpx] py-[6rpx]">
 							<view class="text-[28rpx] text-[#333] leading-[40rpx] multi-hidden mb-[10rpx]">
-								<view class="brand-tag" v-if="item.goods_brand">
+								<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 									{{item.goods_brand.brand_name}}
 								</view>
 								{{ item.goods_name }}
@@ -84,7 +84,7 @@
 								 <image v-else class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
 								<view class="px-[20rpx] flex-1 pt-[16rpx] pb-[24rpx] flex flex-col justify-between">
 									<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden">
-										<view class="brand-tag" v-if="item.goods_brand">
+										<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 											{{item.goods_brand.brand_name}}
 										</view>
 										{{ item.goods_name }}
@@ -119,7 +119,7 @@
 								 <image v-else class="w-[100%] h-[344rpx] rounded-tl-[var(--rounded-mid)] rounded-tr-[var(--rounded-mid)]" :src="img('static/resource/images/diy/shop_default.jpg')" :mode="'aspectFill'"></image>
 								<view class="px-[20rpx] flex-1 pt-[16rpx] pb-[24rpx] flex flex-col justify-between">
 									<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden">
-										<view class="brand-tag" v-if="item.goods_brand">
+										<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 											{{item.goods_brand.brand_name}}
 										</view>
 										{{ item.goods_name }}
@@ -159,7 +159,7 @@
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue'
 import { t } from '@/locale'
-import { redirect, img, getToken } from '@/utils/common';
+import { redirect, img } from '@/utils/common';
 import { getGoodsCategoryTree, getGoodsPages } from '@/addon/shop/api/goods';
 import MescrollBody from '@/components/mescroll/mescroll-body/mescroll-body.vue';
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue';

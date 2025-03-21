@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 优惠券参数

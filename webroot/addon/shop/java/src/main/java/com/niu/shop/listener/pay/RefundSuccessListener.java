@@ -7,7 +7,7 @@ import com.niu.shop.service.core.goods.ICoreGoodsStatService;
 import com.niu.shop.service.core.refund.ICoreRefundService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 退款成功

@@ -21,6 +21,7 @@ server:
     acceptCount: 700
   servlet:
     context-path: /
+  forward-headers-strategy: framework
 
 #management
 management:

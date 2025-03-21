@@ -12,24 +12,6 @@ import java.util.List;
 public interface ICoreSiteService {
 
     /**
-     * @param siteId
-     * @return
-     */
-    public Site findUseCacheById(Integer siteId);
-
-    /**
-     * @param siteId
-     * @return
-     */
-    public Site refreshCacheById(Integer siteId);
-
-    /**
-     * @param siteId
-     * @return
-     */
-    public Site removeCacheById(Integer siteId);
-
-    /**
      * 通过站点id获取支持的应用插件
      *
      * @param siteId
@@ -76,5 +58,5 @@ public interface ICoreSiteService {
     /**
      * 清除站点缓存
      */
-    void clearSiteCache();
+    void clearSiteCache(Integer siteId);
 }

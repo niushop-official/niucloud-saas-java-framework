@@ -3,7 +3,7 @@ package com.niu.core.service.admin.dict.param;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**

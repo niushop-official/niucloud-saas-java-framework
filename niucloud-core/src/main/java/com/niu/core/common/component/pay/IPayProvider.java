@@ -4,8 +4,8 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.component.pay.model.*;
 import com.niu.core.common.component.pay.model.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface IPayProvider {
 

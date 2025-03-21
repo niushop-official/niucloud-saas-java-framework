@@ -1,6 +1,7 @@
 package com.niu.core.controller.adminapi.wxoplatform;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
@@ -13,10 +14,12 @@ import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
+import java.util.LinkedList;
 
 @RestController
-@RequestMapping("adminapi/wxoplatform/")
+@RequestMapping("adminapi/wxoplatform")
 @SaCheckLogin
 public class WeappVersionController {
 
@@ -29,9 +32,9 @@ public class WeappVersionController {
      *
      * @return
      */
-    @GetMapping("weapp/commit/last")
-    public Result<WxOplatfromWeappVersionVo> lastCommitRecord(){
-        return Result.success(weappVersionService.getLastCommitRecord());
+    @GetMapping("/weapp/commit/last")
+    public Result lastCommitRecord(){
+        return Result.success(ObjectUtil.defaultIfNull(weappVersionService.getLastCommitRecord(), new LinkedList<>()));
     }
 
     /**
@@ -40,9 +43,20 @@ public class WeappVersionController {
      * @param pageParam
      * @return
      */
-    @GetMapping("weapp/weapp/commit")
+    @GetMapping("/weapp/commit")
     public Result<PageResult<WxOplatfromWeappVersionVo>> commitRecord(@Validated PageParam pageParam){
         return Result.success(weappVersionService.list(pageParam));
+    }
+
+    /**
+     * 平台提交小程序版本
+     *
+     * @return
+     */
+    @PostMapping("/weapp/version/commit")
+    public Result weappCommit(){
+        weappVersionService.add(null);
+        return Result.success();
     }
 
     /**
@@ -50,9 +64,9 @@ public class WeappVersionController {
      *
      * @return
      */
-    @PostMapping("weapp/version/commit")
-    public Result weappCommit(){
-
+    @PostMapping("/site/weapp/commit")
+    public Result siteWeappCommit(){
+        weappVersionService.siteWeappCommit();
         return Result.success();
     }
 }

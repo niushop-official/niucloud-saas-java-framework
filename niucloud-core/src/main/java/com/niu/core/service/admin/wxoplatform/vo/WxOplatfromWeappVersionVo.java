@@ -1,4 +1,6 @@
 package com.niu.core.service.admin.wxoplatform.vo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.enums.channel.WeappVersionStatusEnum;
 import com.niu.core.enums.member.StatusEnum;
 import lombok.Data;
 
@@ -40,18 +42,20 @@ public class WxOplatfromWeappVersionVo implements Serializable {
     private Integer versionNo;
 
     /** 创建时间 */
+    @JsonSerialize(using = com.niu.core.common.domain.BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;
 
     /** 修改时间 */
+    @JsonSerialize(using = com.niu.core.common.domain.BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long updateTime;
 
     /** 状态名称 */
     private String statusName;
 
     /** 应用名称 */
-    private String groupName;
+    private String siteGroupName;
 
     public String getStatusName() {
-        return StatusEnum.getNameByStatus(this.status);
+        return WeappVersionStatusEnum.getNameByStatus(this.status);
     }
 }

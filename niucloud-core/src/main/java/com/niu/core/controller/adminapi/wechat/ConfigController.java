@@ -16,7 +16,7 @@ import com.niu.core.service.core.wechat.vo.WechatConfigVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 微信粉丝列控制器

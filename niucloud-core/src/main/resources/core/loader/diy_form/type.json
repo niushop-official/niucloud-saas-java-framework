@@ -1,0 +1,8 @@
+{
+  "DIY_FORM": {
+    "title": "自定义表单",
+    "preview": "static/resource/images/diy_form/diy_from_preview.jpg",
+    "sort": 10001,
+    "addon": ""
+  }
+}

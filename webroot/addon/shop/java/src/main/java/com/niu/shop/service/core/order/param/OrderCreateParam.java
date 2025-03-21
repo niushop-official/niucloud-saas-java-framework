@@ -4,8 +4,8 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
@@ -19,5 +19,7 @@ public class OrderCreateParam implements Serializable {
     private String memberRemark = "";
 
     private InvoiceCreateParam invoice;
+
+    private JSONObject formData;
 
 }

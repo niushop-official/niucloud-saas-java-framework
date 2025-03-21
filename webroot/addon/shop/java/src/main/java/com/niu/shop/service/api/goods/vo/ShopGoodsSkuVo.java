@@ -94,6 +94,7 @@ public class ShopGoodsSkuVo implements Serializable {
         private Integer isDiscount; // 是否参与限时折扣
         private String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
         private Integer posterId; // 海报id
+        private Integer formId;
 
         private ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);

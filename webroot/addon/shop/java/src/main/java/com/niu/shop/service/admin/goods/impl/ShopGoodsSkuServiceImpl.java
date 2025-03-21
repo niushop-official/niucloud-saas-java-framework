@@ -23,7 +23,7 @@ import com.niu.shop.service.api.goods.vo.ShopGoodsSkuVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;

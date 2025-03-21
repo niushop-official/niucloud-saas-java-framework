@@ -15,7 +15,7 @@ import com.niu.shop.service.admin.delivery.IShopDeliveryCompanyService;
 import com.niu.shop.service.core.shop.ICoreAddonService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 

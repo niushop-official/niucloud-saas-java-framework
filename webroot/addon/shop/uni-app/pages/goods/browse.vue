@@ -8,12 +8,12 @@
                     <text>条</text>
                 </view>
                 <view class="tab-right !items-center">
-                <view class="flex items-center" @click="handleSelect">
+                    <view class="flex items-center" @click="handleSelect">
                         <view class="tab-right-date">日期</view>
                         <view class="nc-iconfont nc-icon-a-riliV6xx-36 tab-right-icon"></view>
-                </view>
-                <view class="w-[2rpx] h-[28rpx] mx-[20rpx] bg-gradient-to-b from-[#333] to-[#fff]"></view>
-                <view  @click="isEdit = !isEdit" class="text-[#333] text-[28rpx]">{{ isEdit ? '完成' : '管理' }}</view>
+                    </view>
+                    <view class="w-[2rpx] h-[28rpx] mx-[20rpx] bg-gradient-to-b from-[#333] to-[#fff]"></view>
+                    <view @click="isEdit = !isEdit" class="text-[#333] text-[28rpx]">{{ isEdit ? '完成' : '管理' }}</view>
                 </view>
             </view>
         </view>
@@ -23,8 +23,7 @@
                     <view class="flex items-center h-[34rpx]  mb-[20rpx]">
                         <view class="self-center w-[58rpx]  flex items-center" v-if="isEdit" @click.stop="isSelectGroup(item)">
                             <view class="bg-[#fff] w-[34rpx] h-[34rpx] rounded-[17rpx] flex items-center justify-center">
-                                <text class=" iconfont text-primary text-[34rpx] w-[34rpx] h-[34rpx] rounded-[17rpx] overflow-hidden shrink-0" :class="{ 'iconxuanze1':item.checked,'bg-[#F5F5F5]':!item.checked}" >
-                                </text>
+                                <text class=" iconfont text-primary text-[34rpx] w-[34rpx] h-[34rpx] rounded-[17rpx] overflow-hidden shrink-0" :class="{ 'iconxuanze1':item.checked,'bg-[#F5F5F5]':!item.checked}" ></text>
                             </view>
                         </view>
                         <view class="text-[28rpx] font-500 text-[#333] ">{{ item.date }}</view>
@@ -41,9 +40,9 @@
                                     <text class="text-[#fff] text-[28rpx]">已失效</text>
                                 </view>
                                 <view class="absolute top-0 left-0 right-0 bottom-0 p-[10rpx] flex justify-end items-start z-100" v-if="isEdit" @click.stop="changeItem(item,subItem)">
-                                <view class="bg-[#fff] w-[34rpx] h-[34rpx] rounded-[17rpx] flex items-center justify-center">
+                                    <view class="bg-[#fff] w-[34rpx] h-[34rpx] rounded-[17rpx] flex items-center justify-center">
                                         <text class="iconfont text-primary text-[34rpx] w-[34rpx] h-[34rpx] rounded-[17rpx] overflow-hidden shrink-0" :class="{ 'iconxuanze1':subItem.checked,'bg-[#F5F5F5]':!subItem.checked}"></text>
-                                </view>
+                                    </view>
                                 </view>
                             </view>
                             <view class="text-[var(--price-text-color)] price-font">
@@ -74,10 +73,10 @@
                 <button class="w-[180rpx] h-[70rpx] font-500 text-[26rpx] leading-[70rpx] !text-[#fff] m-0 rounded-full primary-btn-bg remove-border" @click="deleteBrowseFn">删除</button>
             </view>
         </view>
-       
+
         <!-- 时间选择 -->
 		<select-date ref="selectDateRef" @confirm="confirmFn"  />
-</view>
+    </view>
 </template>
 
 <script setup lang="ts">
@@ -97,7 +96,6 @@ const optionLoading = ref(false)
 const browseTotal = ref<number>(0);
 let browseList = ref<any>([]);
 const create_time = ref([])
-let dateList = ref<any>([])
 const getBrowseListFn = (mescroll: any) =>{
     loading.value = false;
     let data: object = {
@@ -111,7 +109,7 @@ const getBrowseListFn = (mescroll: any) =>{
         //设置列表数据
 		if (Number(mescroll.num) === 1) {
 			browseList.value = []; //如果是第一页需手动制空列表
-		}  
+		}
         // 按日期分组
         const groupedData = newArr.reduce((acc: any, item: any) => {
             const date = item.browse_time.split(' ')[0]; // 提取日期部分
@@ -152,8 +150,6 @@ const getBrowseListFn = (mescroll: any) =>{
     })
 }
 
-
-
 // 选择数量
 const checkedNum = computed(() => {
 	let num = 0
@@ -171,10 +167,10 @@ const checkedNum = computed(() => {
 //判断是否全选状态
 const isSelectAll = ref(false)
 const isallclick = ()=>{
-    const isActve = browseList.value.every((item: any) => {
+    const isActive = browseList.value.every((item: any) => {
         return item.checked
     })
-    if (isActve) { isSelectAll.value = true } else { isSelectAll.value= false }
+    if (isActive) { isSelectAll.value = true } else { isSelectAll.value= false }
 }
 // 选择每天的
 const isSelectGroup = (data: any) =>{
@@ -197,10 +193,10 @@ const allChange = () =>{
 // 选择单个商品
 const changeItem = (data: any,value: any) =>{
     value.checked = !value.checked
-    const isActve = data.list.every((item: any) => {
+    const isActive = data.list.every((item: any) => {
         return item.checked
     })
-    if (isActve) { data.checked = true } else { data.checked = false }
+    if (isActive) { data.checked = true } else { data.checked = false }
     isallclick()
 }
 
@@ -252,7 +248,6 @@ const confirmFn = (data: any) =>{
     browseList.value = []
     getMescroll().resetUpScroll();
 }
-
 
 const toDetail = (data: any) => {
     redirect({ url: '/addon/shop/pages/goods/detail', param: { goods_id: data.goods_id } })

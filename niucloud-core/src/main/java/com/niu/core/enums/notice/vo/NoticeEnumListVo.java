@@ -22,6 +22,6 @@ public class NoticeEnumListVo implements Serializable {
     private Boolean async;
     private JSONObject variable;
     private List<String> support_type;
-    Map<String, JSONObject> support_type_map;
+    private Map<String, JSONObject> support_type_map;
 
 }

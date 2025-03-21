@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.*;
 
 
@@ -60,6 +60,8 @@ public class PayChannelServiceImpl implements IPayChannelService {
             payChannelList.set(item.getChannel(), payTypeList);
         }
 
+        JSONObject payTypeEnum = PayTypeEnum.getType();
+
         Map<String, PayChanneltemVo> list = new HashMap<String, PayChanneltemVo>();
 
         for (ChannelEnum item: ChannelEnum.values()) {
@@ -68,8 +70,8 @@ public class PayChannelServiceImpl implements IPayChannelService {
             vo.setName(item.getName());
 
             JSONArray payType = new JSONArray();
-            for (String key: PayTypeEnum.getType().keySet()) {
-                JSONObject type = PayTypeEnum.getType().getJSONObject(key);
+            for (String key: payTypeEnum.keySet()) {
+                JSONObject type = JSONUtil.parseObj(payTypeEnum.getJSONObject(key).toString());
                 if (payChannelList.getJSONObject(item.getCode()) == null || payChannelList.getJSONObject(item.getCode()).getJSONObject(key) == null) {
                     type.set("status", 0);
                     type.set("config", new JSONObject().set("name", ""));

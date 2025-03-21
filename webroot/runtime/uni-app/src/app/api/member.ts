@@ -257,3 +257,13 @@ export function getTaskPoint() {
 export function rechargeConfig() {
 	return request.get('recharge/config')
 }
+
+/**
+ * 获取手机号
+ */
+export function getMobile(data: AnyObject) {
+    if (uni.getStorageSync('pid')) {
+        data.pid = uni.getStorageSync('pid');
+    }
+    return request.put('member/getmobile', data, { showErrorMessage: true })
+}

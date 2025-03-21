@@ -90,6 +90,7 @@ public class ShopOrderInfoVo implements Serializable {
     private List<ShopOrderDiscount> orderDiscount;
     private BigDecimal couponMoney = BigDecimal.ZERO;
     private BigDecimal manjianDiscountMoney = BigDecimal.ZERO;
+    private Integer formRecordId;
 
     @Data
     public static class OrderGoods {
@@ -119,6 +120,7 @@ public class ShopOrderInfoVo implements Serializable {
         private BigDecimal discountMoney;
         private String extend;
         private Integer isGift;
+        private Integer formRecordId;
 
         private ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);

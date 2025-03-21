@@ -12,7 +12,7 @@ import com.niu.shop.service.admin.goods.vo.LabelGroupListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -56,7 +56,7 @@ public class LabelGroupController {
      * @return Result<LabelGroupInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<LabelGroupInfoVo> info(@PathVariable Integer id) {
+    public Result<LabelGroupInfoVo> info(@PathVariable("id") Integer id) {
         LabelGroupInfoVo info = labelGroupService.info(id);
         return Result.success(info);
     }
@@ -80,7 +80,7 @@ public class LabelGroupController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody LabelGroupParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody LabelGroupParam editParam) {
         labelGroupService.edit(id, editParam);
         return Result.success();
     }
@@ -92,7 +92,7 @@ public class LabelGroupController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         labelGroupService.del(id);
         return Result.success();
     }

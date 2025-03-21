@@ -1,6 +1,7 @@
 package com.niu.core.controller.api.wechat;
 
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.hutool.json.JSONUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.wechat.IWechatService;
@@ -10,12 +11,15 @@ import com.niu.core.service.api.wechat.param.AuthRegisterParam;
 import com.niu.core.service.api.wechat.param.WechatSyncParam;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
+import com.niu.core.service.api.wechat.vo.WechatUserInfoVo;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,7 +36,7 @@ public class WechatController {
      * @return
      */
     @GetMapping("/codeurl")
-    public Result<WechatCodeUrlVo> getCodeUrl(@RequestParam(name = "url") String url, @RequestParam(defaultValue = "snsapi_base") String scopes) {
+    public Result<WechatCodeUrlVo> getCodeUrl(@RequestParam(name = "url") String url, @RequestParam(name = "scopes", defaultValue = "snsapi_base") String scopes) {
         return Result.success(wechatService.getCodeUrl(url, scopes));
     }
 
@@ -42,8 +46,10 @@ public class WechatController {
      * @return
      */
     @GetMapping("/user")
-    public Result<WxOAuth2UserInfo> getWechatUser(WechatAuthParam param) {
-        return Result.success(wechatService.getWechatUser(param));
+    public Result getWechatUser(WechatAuthParam param) {
+        Map<String, String> result = new HashMap<>();
+        result.put("data", JSONUtil.parseObj(wechatService.getWechatUser(param)).toString());
+        return Result.success(result);
     }
 
     /**
@@ -90,7 +96,7 @@ public class WechatController {
      * @return
      */
     @GetMapping("/jssdkconfig")
-    public Result<Map<String, Object>> jssdkConfig(@RequestParam String url) {
+    public Result<Map<String, Object>> jssdkConfig(@RequestParam("url") String url) {
         return Result.success(wechatService.getJssdkConfig(url));
     }
 

@@ -117,6 +117,8 @@ public class ShopGoods implements Serializable {
     /** 海报id */
     private Integer posterId;
 
+    private Integer formId;
+
     /** 商品是否限购(0:否 1:是) */
     private Integer isLimit;
 

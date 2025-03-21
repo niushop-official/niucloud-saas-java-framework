@@ -1,5 +1,6 @@
 package com.niu.shop.service.api.order.vo;
 
+import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
@@ -23,6 +24,8 @@ import java.util.Map;
 public class ShopOrderListVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public static JSONObject payTypeEnum = PayTypeEnum.getType();
 
     private Integer orderId;  // 
     private Integer siteId;  // 站点id
@@ -122,7 +125,7 @@ public class ShopOrderListVo implements Serializable {
         private Long payTime;
 
         public String getTypeName() {
-            return PayTypeEnum.getType().getByPath(this.type + ".name", String.class);
+            return ShopOrderListVo.payTypeEnum.getByPath(this.type + ".name", String.class);
         }
     }
 

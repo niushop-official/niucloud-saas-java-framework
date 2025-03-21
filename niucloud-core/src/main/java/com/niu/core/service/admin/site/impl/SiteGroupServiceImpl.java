@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.exception.AdminException;
@@ -17,6 +18,7 @@ import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.entity.sys.SysUserRole;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
@@ -34,7 +36,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,7 +48,19 @@ import java.util.Map;
  */
 @Service
 public class SiteGroupServiceImpl implements ISiteGroupService {
-        
+
+    /**
+     * 站点套餐tag
+     */
+    public static String cacheTagName = CacheTagEnum.SITE_GROUP_CACHE.getTagName();
+
+    /**
+     * 是否使用缓存
+     */
+    public static final boolean useCache = true;
+
+    @Resource
+    private Cached cached;
     @Resource
     SiteGroupMapper siteGroupMapper;
 
@@ -197,7 +211,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
         group.setAddon(JSONUtil.toJsonStr(editParam.getAddon()));
         group.setUpdateTime(DateUtils.currTime());
         siteGroupMapper.updateById(group);
-
+        this.cached.remove("site_group_menu_ids" + id);
         if (!model.getApp().equals(group.getApp())) {
             // 修改站点应用
             Site siteModel = new Site();
@@ -210,8 +224,9 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
             if (ObjectUtil.isNotEmpty(siteList)) {
                 for (Site site : siteList) {
                     siteService.siteAddonChange(site, model);
+                    coreSiteService.clearSiteCache(site.getSiteId());
                 }
-                coreSiteService.clearSiteCache();
+
             }
         }
     }
@@ -279,7 +294,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
      * @return
      */
     @Override
-    public Integer getUserSiteGroupSiteNum(Integer uid, Integer groupId) {
+    public Long getUserSiteGroupSiteNum(Integer uid, Integer groupId) {
 
         MPJQueryWrapper<SysUserRole> userRoleMPJQueryWrapper = new MPJQueryWrapper<>();
         userRoleMPJQueryWrapper.setAlias("sur")
@@ -287,7 +302,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
         userRoleMPJQueryWrapper.eq("sur.uid", uid);
         userRoleMPJQueryWrapper.eq("sur.is_admin", 1);
         userRoleMPJQueryWrapper.eq("s.group_id", groupId);
-        Integer count=sysUserRoleMapper.selectJoinCount(userRoleMPJQueryWrapper);
+        Long count=sysUserRoleMapper.selectJoinCount(userRoleMPJQueryWrapper);
         return count;
     }
 

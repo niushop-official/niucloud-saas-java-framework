@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +91,7 @@ public class SysAttachmentController {
      * @return
      */
     @PostMapping("/document/{type}")
-    public Result<AttachmentUploadVo> document(@PathVariable String type, @RequestParam("file") MultipartFile multipartFile, AttachmentUploadParam param) {
+    public Result<AttachmentUploadVo> document(@PathVariable("type") String type, @RequestParam("file") MultipartFile multipartFile, AttachmentUploadParam param) {
         param.setFile(multipartFile);
         param.setDocumentType(type);
         return Result.success(sysAttachmentService.document(param));
@@ -127,7 +127,7 @@ public class SysAttachmentController {
      * @return Result<Object>
      */
     @PutMapping("/attachment/category/{id}")
-    public Result<Object> editCategory(@PathVariable Integer id, @Validated @RequestBody SysAttachmentCategoryParam editParam) {
+    public Result<Object> editCategory(@PathVariable("id") Integer id, @Validated @RequestBody SysAttachmentCategoryParam editParam) {
         sysAttachmentService.editCategory(id, editParam);
         return Result.success();
     }
@@ -138,7 +138,7 @@ public class SysAttachmentController {
      * @return Result<Object>
      */
     @DeleteMapping("/attachment/category/{id}")
-    public Result<Object> delCategory(@PathVariable Integer id) {
+    public Result<Object> delCategory(@PathVariable("id") Integer id) {
         sysAttachmentService.delCategory(id);
         return Result.success();
     }

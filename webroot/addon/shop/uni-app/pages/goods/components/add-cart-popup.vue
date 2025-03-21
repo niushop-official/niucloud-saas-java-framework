@@ -87,7 +87,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, toRaw } from 'vue';
-import { img, redirect, getToken } from '@/utils/common';
+import { img, getToken } from '@/utils/common';
 import { getGoodsSku } from '@/addon/shop/api/goods';
 import useCartStore from '@/addon/shop/stores/cart'
 import { cloneDeep } from 'lodash-es'
@@ -149,7 +149,7 @@ const goodsSkuBlurFn = ()=>{
 		if(buyNum.value >= maxBuy.value){
 			buyNum.value = maxBuy.value;
 		}
-		
+
 		// 起售大于库存，初始值也应该是零
 		if(minBuy.value > buyNum.value){
 			buyNum.value = 0;
@@ -195,7 +195,7 @@ const goodsDetail = computed(() => {
 			})
 		})
 		getSkuId();
-		
+
 		// 当前详情内容
 		if (data.skuList && Object.keys(data.skuList).length) {
 			data.skuList.forEach((item: any) => {
@@ -217,7 +217,7 @@ const goodsDetail = computed(() => {
 				let buyVal = data.goods.max_buy - (data.has_buy||0);
 				max_buy = buyVal > 0 ? buyVal : 0;
 			}
-			
+
 			if(max_buy > detail.value.stock){
 				maxBuy.value = detail.value.stock
 			}else if(max_buy <= detail.value.stock){
@@ -327,7 +327,7 @@ const save = () => {
             stock: detail.value.stock,
             sale_price: price,
             num: buyNum.value
-			
+
         }, 0, () => {
             uni.showToast({
                 title: '加入购物车成功',
@@ -350,7 +350,7 @@ const goodsPrice = (data:any) => {
     return price;
 }
 
-// 价格类型 
+// 价格类型
 const priceType = (data:any) => {
     let type = "";
     if (goodsDetail.value.goods.member_discount && getToken() && data.member_price != data.price) {

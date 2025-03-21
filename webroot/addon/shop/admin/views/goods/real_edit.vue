@@ -75,6 +75,16 @@
 
                         <div class="ml-[120px] mb-[10px] text-[12px] text-[#999] leading-[20px]">{{ t('posterTips') }}</div>
 
+                        <el-form-item :label="t('diyForm')">
+                            <el-select v-model="goodsEdit.formData.form_id" :placeholder="t('diyFormPlaceholder')" clearable>
+                                <el-option v-for="item in goodsEdit.diyFormOptions" :key="item.form_id" :label="item.page_title" :value="item.form_id" />
+                            </el-select>
+                            <div class="ml-[10px]">
+                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshDiyForm(true)">{{ t('refresh') }}</span>
+                                <span class="cursor-pointer text-primary" @click="goodsEdit.toDiyFormEvent">{{ t('addDiyForm') }}</span>
+                            </div>
+                        </el-form-item>
+
                         <el-form-item :label="t('label')">
                             <el-checkbox-group v-model="goodsEdit.formData.label_ids">
                                 <el-checkbox :label="item.label_id" v-for="(item, index) in goodsEdit.labelOptions" :key="index">{{ item.label_name }}</el-checkbox>
@@ -179,7 +189,8 @@
                                 </el-input>
                             </el-form-item>
                             <el-form-item :label="t('goodsStock')" prop="stock">
-                                <el-input v-model.trim="goodsEdit.formData.stock" clearable :placeholder="t('goodsStockPlaceholder')" class="input-width" maxlength="8" @keyup="filterNumber($event)" :disabled="goodsEdit.isDisabledPrice()">
+<!--                                :disabled="goodsEdit.isDisabledPrice()"-->
+                                <el-input v-model.trim="goodsEdit.formData.stock" clearable :placeholder="t('goodsStockPlaceholder')" class="input-width" maxlength="8" @keyup="filterNumber($event)">
                                     <template #append>{{ goodsEdit.formData.unit ? goodsEdit.formData.unit : t('defaultUnit') }}</template>
                                 </el-input>
                             </el-form-item>
@@ -243,7 +254,8 @@
                                     <el-input v-if="!goodsEdit.isDisabledPrice()" v-model.trim="goodsEdit.batchOperation.price" clearable :placeholder="t('price')" class="set-input" maxlength="8" />
                                     <el-input v-model.trim="goodsEdit.batchOperation.market_price" clearable :placeholder="t('marketPrice')" class="set-input" maxlength="8" />
                                     <el-input v-model.trim="goodsEdit.batchOperation.cost_price" clearable :placeholder="t('costPrice')" class="set-input" maxlength="8" />
-                                    <el-input v-if="!goodsEdit.isDisabledPrice()" v-model.trim="goodsEdit.batchOperation.stock" clearable :placeholder="t('stock')" class="set-input" maxlength="8"/>
+<!--                                    v-if="!goodsEdit.isDisabledPrice()"-->
+                                    <el-input v-model.trim="goodsEdit.batchOperation.stock" clearable :placeholder="t('stock')" class="set-input" maxlength="8"/>
                                     <el-input v-model.trim="goodsEdit.batchOperation.weight" clearable :placeholder="t('skuWeight')" class="set-input" maxlength="6" />
                                     <el-input v-model.trim="goodsEdit.batchOperation.volume" clearable :placeholder="t('skuVolume')" class="set-input" maxlength="6" />
                                     <el-input v-model.trim="goodsEdit.batchOperation.sku_no" clearable maxlength="50" :placeholder="t('skuNo')" class="set-input" />
@@ -357,7 +369,8 @@
                                                                                 <td class="el-table__cell">
                                                                                     <div class="cell">
                                                                                         <el-form-item :prop="key + '.stock'" :rules="goodsEdit.skuStockRules()" class="sku-form-item-wrap" >
-                                                                                            <el-input v-model.trim="item.stock" clearable placeholder="0" @input="goodsEdit.specStockSum" maxlength="8" :disabled="goodsEdit.isDisabledPrice()"/>
+<!--                                                                                            :disabled="goodsEdit.isDisabledPrice()"-->
+                                                                                            <el-input v-model.trim="item.stock" clearable placeholder="0" @input="goodsEdit.specStockSum" maxlength="8"/>
                                                                                         </el-form-item>
                                                                                     </div>
                                                                                 </td>

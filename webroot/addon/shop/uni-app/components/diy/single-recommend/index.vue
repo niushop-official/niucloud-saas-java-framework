@@ -80,7 +80,7 @@
 	import {useGoods} from '@/addon/shop/hooks/useGoods'
 
 	const diyGoods = useGoods();
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
+	const props = defineProps(['component', 'index','value']);
 	const diyStore = useDiyStore();
 
 	const goodsList = ref<Array<any>>([]);
@@ -150,13 +150,6 @@
 		else style += 'width: calc((100vw - 20rpx) / 2 );'
 	    return style;
 	})
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	const getGoodsListFn = () => {
         let data = {

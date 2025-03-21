@@ -1,1 +1,0 @@
-import{bt as o}from"./index-ee2e8ab5.js";function n(n){return o.get("shop/newcomer/goods",n)}function e(){return o.get("shop/newcomer/config")}function t(n){return o.get("shop/newcomer/goods/components",n)}export{e as a,n as b,t as g};

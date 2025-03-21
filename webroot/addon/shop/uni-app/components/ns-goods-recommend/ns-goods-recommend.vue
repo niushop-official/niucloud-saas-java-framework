@@ -1,6 +1,6 @@
 <template>
     <view class="goods-recommend">
-        <view class="mt-[60rpx] flex flex-col items-center sidebar-margin pb-[30rpx]">
+        <view class="mt-[60rpx] flex flex-col items-center sidebar-margin pb-[50rpx]">
             <view class="flex items-center mb-[30rpx]" v-if="goodsList && Object.keys(goodsList).length">
                 <image class="w-[38rpx] h-[22rpx]" :src="img('addon/shop_fenxiao/level/title_left.png')" mode="aspectFill"></image>
                 <text class="text-[30rpx] mx-[18rpx] font-500 text-[#EF000C]">猜你喜欢</text>
@@ -15,11 +15,13 @@
 import { img } from '@/utils/common';
 import { ref } from 'vue'
 import diyGoodsList from '@/addon/shop/components/diy/goods-list/index.vue';
+
 // 获取分销商品数据
 const goodsList = ref()
 const getGoodsListFn = (data: any)=>{
     goodsList.value = data || {}
 }
+
 // 商品列表组件
 const goodsData = ref({
     style: 'style-2',
@@ -33,8 +35,8 @@ const goodsData = ref({
         top: 0
     },
     priceStyle: {
-        mainColor: "#ff4142",
-        mainControl: true
+        mainColor: "#FF4142",
+        control: true
     },
     goodsNameStyle:{
         color: "#303133",
@@ -54,8 +56,8 @@ const goodsData = ref({
         padding: 0,
         aroundRadius:25,
         textColor: "#fff",
-        startBgColor: '#ff4142',
-        endBgColor: '#ff4142',
+        startBgColor: '#FF4142',
+        endBgColor: '#FF4142',
         style: 'nc-icon-gouwuche1',
         control: true
     }

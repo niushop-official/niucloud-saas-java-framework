@@ -1,6 +1,7 @@
 package com.niu.core.controller.adminapi.addon;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
@@ -14,12 +15,13 @@ import com.niu.core.service.admin.addon.param.AddonParam;
 import com.niu.core.service.admin.addon.param.AddonSearchParam;
 import com.niu.core.service.admin.addon.vo.AddonInfoVo;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.service.admin.addon.vo.AddonListVo;
 import com.niu.core.service.admin.addon.vo.LocalAddonListVo;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -51,8 +53,8 @@ public class AddonController {
      * @return Result<PageResult < Addon>>
      */
     @GetMapping("/list")
-    public Result<PageResult<Addon>> list(@Validated PageParam pageParam, @Validated AddonSearchParam addonSearchParam) {
-        PageResult<Addon> list = addonService.list(pageParam, addonSearchParam);
+    public Result<PageResult<AddonListVo>> list(@Validated PageParam pageParam, @Validated AddonSearchParam addonSearchParam) {
+        PageResult<AddonListVo> list = addonService.list(pageParam, addonSearchParam);
         System.out.println(RequestUtils.adminSiteId());
         return Result.success(list);
     }
@@ -63,6 +65,7 @@ public class AddonController {
      * @return Result<PageResult < Addon>>
      */
     @GetMapping("/list/install")
+    @SaIgnore
     public Result<Map<String, InstallAddonListVo>> getInstallList() {
         return Result.success(addonService.getInstallList());
     }
@@ -110,7 +113,7 @@ public class AddonController {
      * @return
      */
     @PostMapping("/install/{addon}")
-    public Result<JSONObject> install(@PathVariable String addon) {
+    public Result<JSONObject> install(@PathVariable("addon") String addon) {
         return Result.success(addonService.install(addon, "local"));
     }
 
@@ -121,7 +124,7 @@ public class AddonController {
      * @return
      */
     @PostMapping("/cloudinstall/{addon}")
-    public Result<JSONObject> cloudInstall(@PathVariable String addon) {
+    public Result<JSONObject> cloudInstall(@PathVariable("addon") String addon) {
         return Result.success(addonService.install(addon, "cloud"));
     }
 
@@ -132,7 +135,7 @@ public class AddonController {
      * @return
      */
     @GetMapping("/cloudinstall/{addon}")
-    public Result<JSONObject> cloudInstallLog(@PathVariable String addon) {
+    public Result<JSONObject> cloudInstallLog(@PathVariable("addon") String addon) {
         return Result.success(addonService.cloudInstallLog(addon));
     }
 
@@ -143,7 +146,7 @@ public class AddonController {
      * @return
      */
     @GetMapping("/install/check/{addon}")
-    public Result<JSONObject> installCheck(@PathVariable String addon) {
+    public Result<JSONObject> installCheck(@PathVariable("addon") String addon) {
         return Result.success(addonService.installCheck(addon));
     }
 
@@ -154,7 +157,7 @@ public class AddonController {
      * @return
      */
     @PutMapping("/install/cancel/{addon}")
-    public Result cancleInstall(@PathVariable String addon) {
+    public Result cancleInstall(@PathVariable("addon") String addon) {
         addonService.cancleInstall();
         return Result.success();
     }
@@ -176,7 +179,7 @@ public class AddonController {
      * @return
      */
     @PostMapping("/uninstall/{addon}")
-    public Result<JSONObject> unnstall(@PathVariable String addon) {
+    public Result<JSONObject> unnstall(@PathVariable("addon") String addon) {
         return Result.success(addonService.uninstall(addon));
     }
 
@@ -187,7 +190,7 @@ public class AddonController {
      * @return
      */
     @GetMapping("/uninstall/check/{addon}")
-    public Result<JSONObject> uninstallCheck(@PathVariable String addon) {
+    public Result<JSONObject> uninstallCheck(@PathVariable("addon") String addon) {
         return Result.success(addonService.uninstallCheck(addon));
     }
 
@@ -208,7 +211,7 @@ public class AddonController {
      * @return
      */
     @PostMapping("/download/{addon}")
-    public Result<?> download(@PathVariable String addon, @RequestBody AddonDownloadParam param) {
+    public Result<?> download(@PathVariable("addon") String addon, @RequestBody AddonDownloadParam param) {
         addonService.download(addon, param.getVersion());
         return Result.success();
     }

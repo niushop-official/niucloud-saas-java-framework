@@ -16,7 +16,7 @@ import com.niu.shop.service.core.pointexchange.param.ExchangeDataChangeParam;
 import com.niu.shop.service.core.pointexchange.vo.OrderCreateDataVo;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 @EventListen("shop")

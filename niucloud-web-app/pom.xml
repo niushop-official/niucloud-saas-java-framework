@@ -57,7 +57,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.3.10.RELEASE</version>
+                <version>3.4.1</version>
                 <configuration>
                     <mainClass>com.niu.app.WebAppApplication</mainClass>
                     <classifier>exec</classifier>
@@ -81,10 +81,10 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <copy overwrite="true" file="target/web-app-exec.jar"
                                       tofile="../webroot/jar/web-app-exec.jar"/>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

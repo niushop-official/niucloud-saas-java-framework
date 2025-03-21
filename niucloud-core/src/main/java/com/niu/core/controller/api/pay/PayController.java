@@ -10,9 +10,9 @@ import com.niu.core.service.api.pay.IPayService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 @RestController
@@ -62,7 +62,7 @@ public class PayController {
      * @return
      */
     @GetMapping("/pay/info/{trade_type}/{trade_id}")
-    public Result<?> info(@PathVariable("trade_type") String tradeType, @PathVariable("trade_id") Integer tradeId, String scene) {
+    public Result<?> info(@PathVariable("trade_type") String tradeType, @PathVariable("trade_id") Integer tradeId, @RequestParam(name = "scene", defaultValue = "") String scene) {
         return Result.success(payService.getInfoByTrade(tradeType, tradeId, scene));
     }
 

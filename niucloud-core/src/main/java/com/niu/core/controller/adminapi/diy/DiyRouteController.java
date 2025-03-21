@@ -1,6 +1,7 @@
 package com.niu.core.controller.adminapi.diy;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.diy.IDiyRouteService;
 import com.niu.core.service.admin.diy.param.DiyRouteSearchParam;
@@ -13,7 +14,9 @@ import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +60,8 @@ public class DiyRouteController {
      *
      */
     @GetMapping("/info")
-    public Result<DiyRouteInfoVo> getInfoByName(@RequestParam("name") String name) {
-        return Result.success(diyRouteService.getInfoByName(name));
+    public Result<Object> getInfoByName(@RequestParam("name") String name) {
+        return Result.success(ObjectUtil.defaultIfNull(diyRouteService.getInfoByName(name), new ArrayList<>()));
     }
 
     /**

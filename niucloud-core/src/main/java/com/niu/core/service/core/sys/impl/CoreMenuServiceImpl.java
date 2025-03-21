@@ -18,7 +18,7 @@ import com.niu.core.mapper.sys.SysMenuMapper;
 import com.niu.core.service.core.sys.ICoreMenuService;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.util.List;
 

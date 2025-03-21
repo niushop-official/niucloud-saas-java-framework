@@ -5,7 +5,7 @@
 				<view v-if="config.search.control" class="search-box z-10 bg-[#fff] fixed top-0 left-0 right-0 h-[100rpx] box-border">
 					<view class="flex-1 search-input">
 						<text @click.stop="searchNameFn" class="nc-iconfont nc-icon-sousuo-duanV6xx1 btn"></text>
-						<input class="input" type="text" v-model="searchName" :placeholder="config.search.title" @confirm="searchNameFn" placeholderClass="text-[var(--text-color-light9)]">
+						<input class="input" type="text" v-model.trim="searchName" :placeholder="config.search.title" @confirm="searchNameFn" placeholderClass="text-[var(--text-color-light9)]">
 						<text v-if="searchName" class="nc-iconfont nc-icon-cuohaoV6xx1 clear" @click="searchName=''"></text>
 					</view>
 				</view>
@@ -58,8 +58,7 @@
 										<image class="h-[24rpx] max-w-[46rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 									</view>
 									<block v-if="!item.isMaxBuy">
-										<view
-											v-if="
+										<view v-if="
 											(item.goods_type == 'real' || (item.goods_type == 'virtual' && item.virtual_receive_type != 'verify')) &&
 											item.goodsSku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id] && config.cart.control && config.cart.event === 'cart'"
 											class="flex items-center">
@@ -81,7 +80,7 @@
 												</view>
 												<view
 													v-if="cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id].totalNum"
-													:class="['absolute right-[-16rpx] top-[-16rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[#FF4646] text-[#fff] text-[20rpx] font-500 box-border box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
+													:class="['absolute right-[-16rpx] top-[-16rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[var(--primary-color)]  text-[#fff] text-[20rpx] font-500 box-border box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
 													{{ cartList['goods_' + item.goods_id].totalNum }}
 												</view>
 											</view>
@@ -89,7 +88,7 @@
 												<text :id="'itemCart' + index" class="text-color nc-iconfont nc-icon-tianjiaV6xx text-[44rpx]"></text>
 												<view
 													v-if="cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id].totalNum"
-													:class="['absolute right-[-16rpx] top-[-16rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[#FF4646] text-[#fff] text-[20rpx] font-500 box-border box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
+													:class="['absolute right-[-16rpx] top-[-16rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[var(--primary-color)] text-[#fff] text-[20rpx] font-500 box-border box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
 													{{ cartList['goods_' + item.goods_id].totalNum }}
 												</view>
 											</view>
@@ -98,7 +97,7 @@
 													class="text-color nc-iconfont nc-icon-gouwucheV6xx6 !text-[34rpx]"></text>
 												<view
 													v-if="cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id].totalNum"
-													:class="['absolute right-[-10rpx] top-[-2rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[#FF4646] text-[#fff] text-[20rpx] font-500 box-border box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
+													:class="['absolute right-[-10rpx] top-[-2rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[var(--primary-color)] text-[#fff] text-[20rpx] font-500 box-border box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
 													{{ cartList['goods_' + item.goods_id].totalNum }}
 												</view>
 											</view>
@@ -109,7 +108,7 @@
 												</view>
 												<view
 													v-if="cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id].totalNum"
-													:class="['absolute right-[-10rpx] top-[-10rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[#FF4646] text-[#fff] text-[20rpx] font-500 box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
+													:class="['absolute right-[-10rpx] top-[-10rpx] rounded-[30rpx] h-[30rpx] min-w-[30rpx] text-center leading-[26rpx] bg-[var(--primary-color)] text-[#fff] text-[20rpx] font-500 box-border border-[2rpx] border-solid border-[#fff]', cartList['goods_' + item.goods_id].totalNum > 9 ? 'px-[10rpx]' : '']">
 													{{ cartList['goods_' + item.goods_id].totalNum }}
 												</view>
 											</view>
@@ -134,7 +133,7 @@
 						</view>
 						<view v-if="totalNum"
 							class="border-[1rpx] border-solid border-[#fff]"
-							:class="['absolute left-[40rpx] top-[-10rpx] rounded-[28rpx] h-[28rpx] min-w-[28rpx] text-center leading-[26rpx] bg-[#FF4646] text-[#fff] text-[20rpx] font-500 box-border', totalNum > 9 ? 'px-[10rpx]' : '']">
+							:class="['absolute left-[40rpx] top-[-10rpx] rounded-[28rpx] h-[28rpx] min-w-[28rpx] text-center leading-[26rpx] bg-[var(--primary-color)] text-[#fff] text-[20rpx] font-500 box-border', totalNum > 9 ? 'px-[10rpx]' : '']">
 							{{ totalNum > 99 ? "99+" : totalNum }}
 						</view>
 					</view>
@@ -153,14 +152,12 @@
 				class="bg-[#fff] z-10 flex justify-between items-center fixed left-0 right-0 bottom-[100rpx] box-solid px-[24rpx] py-[17rpx] mb-ios border-[0] border-t-[2rpx] border-solid border-[#f6f6f6]">
 				<view class="flex items-center">
 					<view class="w-[66rpx] h-[66rpx] mr-[27rpx] relative">
-						<view id="animation-end"
-							class="w-[66rpx] h-[66rpx] rounded-[35rpx] bg-[var(--primary-color)] text-center leading-[66rpx]"
+						<view id="animation-end" class="w-[66rpx] h-[66rpx] rounded-[35rpx] bg-[var(--primary-color)] text-center leading-[66rpx]"
 							@click.stop="toCart">
 							<text class="nc-iconfont nc-icon-gouwucheV6mm1 text-[#fff] text-[32rpx]"></text>
 						</view>
-						<view v-if="totalNum"
-							class="border-[1rpx] border-solid border-[#fff]"
-							:class="['absolute left-[40rpx] top-[-10rpx] rounded-[28rpx] h-[28rpx] min-w-[28rpx] text-center leading-[26rpx] bg-[#FF4646] text-[#fff] text-[20rpx] font-500 box-border', totalNum > 9 ? 'px-[10rpx]' : '']">
+						<view v-if="totalNum" class="border-[1rpx] border-solid border-[#fff]"
+							:class="['absolute left-[40rpx] top-[-10rpx] rounded-[28rpx] h-[28rpx] min-w-[28rpx] text-center leading-[26rpx] bg-[var(--primary-color)] text-[#fff] text-[20rpx] font-500 box-border', totalNum > 9 ? 'px-[10rpx]' : '']">
 							{{ totalNum > 99 ? "99+" : totalNum }}
 						</view>
 					</view>
@@ -276,7 +273,6 @@ const getListFn = (mescroll: mescrollStructure) => {
 	})
 }
 
-
 const goodsMaxBuy = ()=>{
 	list.value.forEach((data,index)=>{
 		data.isMaxBuy = false;
@@ -306,7 +302,6 @@ const goodsMaxBuy = ()=>{
 		}
 	})
 }
-
 
 const toLink = (goods_id: string) => {
 	redirect({ url: '/addon/shop/pages/goods/detail', param: { goods_id } })
@@ -435,7 +430,8 @@ const firstLevelClick = (index: number, data: any) => {
 // 搜索名字
 const searchNameFn = () => {
 	// getMescroll().resetUpScroll();
-	if(searchName.value) redirect({ url: '/addon/shop/pages/goods/list', param: { goods_name: encodeURIComponent(searchName.value) } })
+	// if(searchName.value) 
+	redirect({ url: '/addon/shop/pages/goods/list', param: { goods_name: encodeURIComponent(searchName.value) } })
 }
 
 //点击商品购物车按钮
@@ -470,6 +466,7 @@ const itemCart = (row: any, id: any) => {
 		animationAddCart(row, id)
 	}
 }
+
 //点击购物车加号 添加数量
 const addCartBtn = (item: any, row: any, id: string) => {
 	if (parseInt(row.num) >= parseInt(row.stock)) {
@@ -501,7 +498,7 @@ const addCartBtn = (item: any, row: any, id: string) => {
 			maxBuyNum = max_buy;
 		}
 	}
-	
+
 	if(item.is_limit && num >= item.max_buy){
 		let tips = `该商品单次限购${item.max_buy}件`;
 		if(item.limit_type != 1){ //单次限购
@@ -698,6 +695,7 @@ const goodsPrice = (data:any) =>{
 	background-color:#fff;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 }
 
 .tabs-box .tab-item-active {

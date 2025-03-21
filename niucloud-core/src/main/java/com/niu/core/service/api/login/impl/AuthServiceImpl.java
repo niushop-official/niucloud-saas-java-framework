@@ -1,5 +1,6 @@
 package com.niu.core.service.api.login.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.exception.AuthException;
@@ -17,9 +18,10 @@ import com.niu.core.service.core.channel.ICorePcService;
 import com.niu.core.service.core.channel.vo.H5ConfigVo;
 import com.niu.core.service.core.channel.vo.PcConfigVo;
 import com.niu.core.service.core.site.ICoreSiteService;
+import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -44,12 +46,12 @@ public class AuthServiceImpl implements IAuthService {
         Integer siteId= RequestUtils.apiSiteId();
         SiteInfoVo siteInfoVo=coreSiteService.getSiteCache(siteId);
         if(ObjectUtil.isNull(siteInfoVo) || ObjectUtil.isEmpty(siteInfoVo)){
-            throw new AuthException("SITE_NOT_EXIST", 403);
+            throw new AuthException("SITE_NOT_EXIST", 400);
         }
         String rule=RequestUtils.getReqeustURI();
         if(!rule.equals("site")){
             if(siteInfoVo.getStatus()== SiteStatusEnum.CLOSE.getCode()){
-                throw new AuthException("SITE_CLOSE_NOT_ALLOW", 403);
+                throw new AuthException("站点已停止", 400);
             }
         }
         RequestUtils.setSiteId(siteId);
@@ -66,6 +68,8 @@ public class AuthServiceImpl implements IAuthService {
             memberInfoParam.setSiteId(RequestUtils.siteId());
             MemberInfoVo memberInfoVo=memberService.info(memberInfoParam);
             if(ObjectUtil.isNull(memberInfoVo) || ObjectUtil.isEmpty(memberInfoVo)){
+                // 退出登录
+                StpUtil.logout(RequestUtils.apiToken());
                 throw new AuthException("MEMBER_NOT_EXIST", 401);
             }
         }
@@ -83,13 +87,13 @@ public class AuthServiceImpl implements IAuthService {
                 H5ConfigVo h5ConfigVo=coreH5Service.getH5(siteId);
                 Integer isOpen=h5ConfigVo.getIsOpen();
                 if(isOpen==0){
-                    throw new AuthException("SITE_CLOSE_NOT_ALLOW", 402);
+                    throw new AuthException("站点已停止", 402);
                 }
             }else if (channel.equals(ChannelEnum.PC.getCode())){
                 PcConfigVo pcConfigVo=corePcService.getPc(siteId);
                 Integer isOpen=pcConfigVo.getIsOpen();
                 if(isOpen==0){
-                    throw new AuthException("SITE_CLOSE_NOT_ALLOW", 402);
+                    throw new AuthException("站点已停止", 402);
                 }
             }
         }

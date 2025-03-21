@@ -8,7 +8,7 @@ import com.niu.core.mapper.sys.SysAgreementMapper;
 import com.niu.core.service.core.sys.ICoreAgreementService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreAgreementServiceImpl implements ICoreAgreementService {
@@ -40,6 +40,7 @@ public class CoreAgreementServiceImpl implements ICoreAgreementService {
             addModel.setTitle(title);
             addModel.setContent(content);
             addModel.setCreateTime(System.currentTimeMillis() / 1000);
+            addModel.setUpdateTime(System.currentTimeMillis() / 1000);
             sysAgreementMapper.insert(addModel);
         }else{
             model.setUpdateTime(System.currentTimeMillis() / 1000);

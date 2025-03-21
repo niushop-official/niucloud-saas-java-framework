@@ -72,7 +72,7 @@
 
 <script setup lang="ts">
 	import { ref } from 'vue';
-	import { img, deepClone, getToken, redirect } from '@/utils/common'
+	import { img, deepClone, redirect } from '@/utils/common'
 	import { cloneDeep } from 'lodash-es'
 	import { t } from '@/locale'
 
@@ -119,7 +119,7 @@
 		});
 		manjianShow.value = true;
 	}
-	
+
 	const goodsEvent = (id : number) => {
 		redirect({
 			url: '/addon/shop/pages/goods/detail',
@@ -128,7 +128,7 @@
 			}
 		})
 	}
-	
+
 	defineExpose({
 		open
 	})

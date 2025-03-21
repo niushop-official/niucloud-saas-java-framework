@@ -84,8 +84,8 @@ function gcj02towgs84(lng, lat) {
 		var sqrtmagic = Math.sqrt(magic);
 		dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * PI);
 		dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * PI);
-		mglat = lat + dlat;
-		mglng = lng + dlng;
+		var mglat = lat + dlat;
+		var mglng = lng + dlng;
 		return [lng * 2 - mglng, lat * 2 - mglat]
 	}
 }
@@ -119,6 +119,6 @@ function out_of_china(lng, lat) {
 export default {
 	bd09togcj02: bd09togcj02, // 百度坐标系 (BD-09) 与 火星坐标系 (GCJ-02)的转换
 	gcj02tobd09: gcj02tobd09, // 火星坐标系 (GCJ-02) 与百度坐标系 (BD-09) 的转换
-	wgs84togcj02: wgs84togcj02, // 
+	wgs84togcj02: wgs84togcj02, //
 	gcj02towgs84: gcj02towgs84,
 }

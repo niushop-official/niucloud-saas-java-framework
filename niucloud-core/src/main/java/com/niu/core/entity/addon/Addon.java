@@ -46,15 +46,12 @@ public class Addon implements Serializable {
     private String version;
 
     /** 创建时间 */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;
 
     /** 安装时间 */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long installTime;
 
     /** 更新时间 */
-    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long updateTime;
 
     /** 封面 */

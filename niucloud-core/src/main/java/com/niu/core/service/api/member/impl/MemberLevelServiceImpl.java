@@ -1,12 +1,16 @@
 package com.niu.core.service.api.member.impl;
 
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLevel;
 import com.niu.core.enums.member.MemberLevelStyleEnum;
@@ -14,6 +18,7 @@ import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.param.MemberLevelParam;
+import com.niu.core.service.api.member.vo.MemberGetMobileVo;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.api.member.vo.MemberLevelSimpleInfoVo;
 import com.niu.core.service.core.member.ICoreMemberService;
@@ -22,7 +27,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +93,7 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
             if (vo.getLevelBenefits().size() < 4) {
                 for(String key : filling.keySet()) {
                     if (vo.getLevelBenefits().size() == 4) break;
-                    vo.getLevelBenefits().set(key, filling.get(key));
+                    vo.getLevelBenefits().putByPath(key + ".content", filling.get(key));
                 }
             }
 
@@ -134,5 +139,22 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
         if (ObjectUtil.isNotEmpty(level.getLevelGifts()) && JSONUtil.isJson(level.getLevelGifts())) vo.setLevelGifts(JSONUtil.parseObj(level.getLevelGifts()));
 
         return vo;
+    }
+
+    @Override
+    public MemberGetMobileVo getMobile(String mobileCode) {
+        try {
+            WxMaPhoneNumberInfo phoneInfo = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getPhoneNoInfo(mobileCode);
+            String mobile = phoneInfo.getPurePhoneNumber();
+
+            Member member = memberMapper.selectOne(new QueryWrapper<Member>().select("member_id").eq("mobile", mobile).eq("site_id", RequestUtils.siteId()));
+            if (member != null) throw new CommonException("当前手机号已绑定账号");
+
+            MemberGetMobileVo vo = new MemberGetMobileVo();
+            vo.setMobile(mobile);
+            return vo;
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
     }
 }

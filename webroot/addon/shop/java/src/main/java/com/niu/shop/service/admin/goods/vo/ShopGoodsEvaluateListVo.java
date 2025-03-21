@@ -43,6 +43,7 @@ public class ShopGoodsEvaluateListVo implements Serializable {
     private String goodsCover;
     private String goodsCoverThumbSmall;
     private String goodsCoverThumbMid;
+    private Goods goods;
 
     public String getAuditName(){
         if(ObjectUtil.isNotEmpty(this.isAudit))
@@ -53,4 +54,11 @@ public class ShopGoodsEvaluateListVo implements Serializable {
         }
     }
 
+    @Data
+    public static class Goods {
+        private String goodsName;
+        private String goodsCover;
+        private String goodsCoverThumbSmall;
+        private String goodsCoverThumbMid;
+    }
 }

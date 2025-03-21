@@ -36,17 +36,17 @@
                         </view>
 
                         <!-- 自提点 -->
-                        <view class="flex items-center w-full" v-if="createData.delivery.delivery_type == 'store'" @click="storeRef.open()">
+                        <view class="flex items-center w-full" v-if="createData.delivery.delivery_type == 'store'" @click="openSelectStore()">
                             <view v-if="!$u.test.isEmpty(orderData.delivery.take_store)" class="pt-[40rpx] pb-[30rpx] w-full flex items-center">
 								<view class="flex flex-col">
 									<view class="text-[30rpx] font-500 text-[#303133] mb-[20rpx]">{{ orderData.delivery.take_store.store_name }}</view>
 									<view class="text-[24rpx] text-[var(--text-color-light6)] mb-[20rpx] leading-[1.4] flex">
                                         <text class="flex-shrink-0">门店地址：</text>
-                                        <text class="max-w-[490rpx]">{{ orderData.delivery.take_store.full_address }}</text> 
+                                        <text class="max-w-[490rpx]">{{ orderData.delivery.take_store.full_address }}</text>
                                     </view>
 									<view class="text-[24rpx] text-[var(--text-color-light6)] mb-[20rpx]">
                                         <text>联系电话：</text>
-                                        <text>{{ orderData.delivery.take_store.store_mobile }}</text> 
+                                        <text>{{ orderData.delivery.take_store.store_mobile }}</text>
                                     </view>
 									<view class="text-[24rpx] text-[var(--text-color-light6)]">
                                         <text>营业时间：</text>
@@ -68,8 +68,8 @@
                 </view>
 
                 <view class="mb-[var(--top-m)] card-template p-[0] pb-[var(--pad-top-m)]">
-					<view class="py-[var(--pad-top-m)]">
-						<view  class="mb-[20rpx] px-[var(--pad-sidebar-m)]" v-for="(item, index) in orderData.goods" :key="index">
+					<view class="pt-[var(--pad-top-m)] pb-[14rpx]">
+						<view class="px-[var(--pad-sidebar-m)]" :class="{'mb-[20rpx]': (index+1) != orderData.goods.length}" v-for="(item, index) in orderData.goods" :key="index">
 							<view class="flex">
 								<u--image radius="var(--goods-rounded-big)" width="180rpx" height="180rpx" :src="img(item.sku_image)" model="aspectFill">
 									<template #error>
@@ -110,9 +110,12 @@
 								<view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]"
 							>第1{{item.goods.unit}}，￥{{parseFloat(item.newcomer_price).toFixed(2)}}/{{item.goods.unit}}；第{{item.num>2?'2~'+item.num:'2'}}{{item.goods.unit}}，￥{{parseFloat(item.price).toFixed(2)}}/{{item.goods.unit}}</view>
 							</view>
+							<view class="card-template !p-[0]" v-if="item.goods.form_id">
+								<diy-form ref="diyFormGoodsRef" :form_id="item.goods.form_id" :relate_id="item.sku_id" :storage_name="'diyFormStorageByGoodsDetail_' + item.sku_id" form_border="none" />
+							</view>
 						</view>
 						<!-- 赠品 -->
-						<view class="pt-[20rpx] bg-[#f9f9f9] mt-[24rpx] mx-[var(--pad-sidebar-m)] rounded-[30rpx]" v-if="orderData.gift_goods && Object.keys(orderData.gift_goods).length">
+						<view v-if="orderData.gift_goods && Object.keys(orderData.gift_goods).length" class="pt-[20rpx] mb-[10rpx] bg-[#f9f9f9] mt-[24rpx] mx-[var(--pad-sidebar-m)] rounded-[30rpx]">
 							<view v-for="(item, key, index) in orderData.gift_goods" :key="index" class="flex px-[var(--pad-sidebar-m)] pb-[20rpx]">
 								<u--image radius="var(--goods-rounded-big)" width="120rpx" height="120rpx" :src="img(item.sku_image)" model="aspectFill">
 									<template #error>
@@ -169,6 +172,10 @@
                     </view>
                 </view>
 
+				<view class="card-template py-[10rpx] mb-[var(--top-m)]" v-if="orderData.form_id">
+					<diy-form ref="diyFormRef" :form_id="orderData.form_id" :storage_name="'diyFormStorageByOrderPayment'" />
+				</view>
+
                 <view class="card-template">
                     <view class="title">价格明细</view>
                     <view class="card-template-item">
@@ -220,9 +227,9 @@
             <!-- 选择优惠券 -->
             <select-coupon :order-key="createData.order_key" ref="couponRef" @confirm="confirmSelectCoupon" />
         </view>
-		
+
 		<!-- 选择自提点 -->
-		<select-store ref="storeRef" @confirm="confirmSelectStore" />
+		<select-store ref="storeRef" @confirm="confirmSelectStore" v-if="orderData && orderData.basic.has_goods_types.includes('real')" />
 		<!-- 发票 -->
 		<invoice ref="invoiceRef" @confirm="confirmInvoice" />
 		<!-- 地址 -->
@@ -230,7 +237,7 @@
 		<!-- 满减 -->
 		<ns-goods-manjian ref="manjianShowRef"></ns-goods-manjian>
 		<pay ref="payRef" @close="payClose" />
-		
+
     </view>
 </template>
 
@@ -246,16 +253,18 @@ import nsGoodsManjian from '@/addon/shop/components/ns-goods-manjian/ns-goods-ma
 import { useSubscribeMessage } from '@/hooks/useSubscribeMessage'
 import { onShow } from '@dcloudio/uni-app'
 import { cloneDeep } from 'lodash-es'
+import diyForm from '@/addon/components/diy-form/index.vue'
 
 const createData: any = ref({
-    order_key: '',
-    member_remark: '',
-    discount: {},
-    invoice: {},
-    delivery: {
-        delivery_type: ''
-    },
-	extend_data:{} // 扩展数据，目前礼品卡用到
+	order_key: '',
+	member_remark: '',
+	discount: {},
+	invoice: {},
+	delivery: {
+		delivery_type: ''
+	},
+	extend_data: {}, // 扩展数据，目前礼品卡用到
+	form_data: {} // 万能表单数据（商品+待付款订单）
 })
 const manjianShowRef: any = ref(null); //满减送
 
@@ -270,6 +279,9 @@ const activeIndex = ref(0)//配送方式激活
 const delivery_type_list = ref([])
 uni.getStorageSync('orderCreateData') && Object.assign(createData.value, uni.getStorageSync('orderCreateData'))
 
+const diyFormRef: any = ref(null)
+const diyFormGoodsRef: any = ref(null)
+
 onShow(() => {
 	nextTick(()=>{
 		if(storeRef.value){
@@ -281,6 +293,19 @@ onShow(() => {
 		}
 	})
 })
+
+const openSelectStore = () => {
+    if(storeRef.value){
+        if (!createData.value.delivery.take_store_id) {
+            storeRef.value.getData((data:any)=>{
+                if(data.length){
+                    createData.value.delivery.take_store_id = ((data[0] && data[0].store_id) ? data[0].store_id: 0)
+                }
+           }); 
+        }
+    }
+    storeRef.value.open()
+}
 
 // 选择地址之后跳转回来
 const selectAddress = uni.getStorageSync('selectAddressCallback')
@@ -315,29 +340,30 @@ const manjianOpenFn = (data:any) =>{
  * 订单计算
  */
 const calculate = () => {
-    orderCreateCalculate(createData.value).then(({ data }) => {
-        orderData.value = cloneDeep(data);
-		
+	orderCreateCalculate(createData.value).then(({ data }) => {
+		orderData.value = cloneDeep(data);
+
 		orderData.value.goods = []; //购买商品
-		if(orderData.value.goods_data && Object.values(orderData.value.goods_data).length){
-			Object.values(orderData.value.goods_data).forEach((item,index)=>{
+		if (orderData.value.goods_data && Object.values(orderData.value.goods_data).length) {
+			Object.values(orderData.value.goods_data).forEach((item: any, index) => {
 				orderData.value.goods.push(item);
 			})
 		}
 
-        createData.value.order_key = data.order_key
-        if (orderData.value.delivery.delivery_type_list) {
-            delivery_type_list.value = Object.values(orderData.value.delivery.delivery_type_list)
-        }
-		if(orderData.value.discount && orderData.value.discount.manjian){
+		createData.value.order_key = data.order_key
+		if (orderData.value.delivery.delivery_type_list) {
+			delivery_type_list.value = Object.values(orderData.value.delivery.delivery_type_list)
+		}
+		if (orderData.value.discount && orderData.value.discount.manjian) {
 			orderData.value.manjian = orderData.value.discount.manjian
 		}
 
-        if (selectAddress) activeIndex.value = delivery_type_list.value.findIndex(el => el.key === orderData.value.delivery.delivery_type)
-        !createData.value.delivery.delivery_type && data.delivery.delivery_type && (createData.value.delivery.delivery_type = data.delivery.delivery_type)
+		if (selectAddress) activeIndex.value = delivery_type_list.value.findIndex(el => el.key === orderData.value.delivery.delivery_type)
+		!createData.value.delivery.delivery_type && data.delivery.delivery_type && (createData.value.delivery.delivery_type = data.delivery.delivery_type)
 
-    }).catch()
+	}).catch()
 }
+
 calculate()
 
 // 改变配送方式
@@ -361,21 +387,60 @@ let orderId = 0
  * 订单创建
  */
 const create = () => {
-    if (!verify() || createLoading.value) return
-    createLoading.value = true
+	if (!verify() || createLoading.value) return
+	if (diyFormGoodsRef.value) {
+		let pass = true;
+		for (let i = 0; i < diyFormGoodsRef.value.length; i++) {
+			if (!diyFormGoodsRef.value[i].verify()) {
+				pass = false;
+				break;
+			}
+		}
+		if (!pass) return;
+	}
 
-    useSubscribeMessage().request('shop_order_pay,shop_order_delivery')
+	if (diyFormRef.value && !diyFormRef.value.verify()) return;
+	createLoading.value = true
 
-    orderCreate(createData.value).then(({ data }) => {
-        orderId = data.order_id
-        if (orderData.value.basic.order_money == 0) {
-            redirect({ url: '/addon/shop/pages/order/detail', param: { order_id: orderId }, mode: 'redirectTo' })
-        } else {
-            payRef.value?.open(data.trade_type, data.order_id, `/addon/shop/pages/order/detail?order_id=${ data.order_id }`)
-        }
-    }).catch(() => {
-        createLoading.value = false
-    })
+	useSubscribeMessage().request('shop_order_pay,shop_order_delivery')
+
+	createData.value.form_data.order = {};
+	createData.value.form_data.goods = {};
+	if (diyFormRef.value) {
+		createData.value.form_data.form_id = orderData.value.form_id;
+		createData.value.form_data.order = diyFormRef.value.getData();
+	}
+	if (diyFormGoodsRef.value) {
+		orderData.value.goods.forEach((item: any) => {
+			if (item.goods.form_id) {
+				for (let i = 0; i < diyFormGoodsRef.value.length; i++) {
+					let formItem = diyFormGoodsRef.value[i].getData();
+					if (formItem.relate_id == item.sku_id && item.goods.form_id == formItem.form_id) {
+						createData.value.form_data.goods[item.sku_id] = formItem;
+					}
+				}
+			}
+		})
+	}
+
+	orderCreate(createData.value).then(({ data }) => {
+		orderId = data.order_id
+		if (diyFormRef.value) diyFormRef.value.clearStorage();
+		if (diyFormGoodsRef.value) {
+			for (let i = 0; i < diyFormGoodsRef.value.length; i++) {
+				diyFormGoodsRef.value[i].clearStorage()
+			}
+		}
+		createData.value.form_data = {}
+		if (orderData.value.basic.order_money == 0) {
+			redirect({ url: '/addon/shop/pages/order/detail', param: { order_id: orderId }, mode: 'redirectTo' })
+		} else {
+			payRef.value?.open(data.trade_type, data.order_id, `/addon/shop/pages/order/detail?order_id=${ data.order_id }`)
+		}
+	}).catch(() => {
+		createData.value.form_data = {}
+		createLoading.value = false
+	})
 }
 
 /**

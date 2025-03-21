@@ -34,7 +34,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.21</version>
+            <version>8.0.23</version>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
@@ -90,10 +90,10 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <copy overwrite="true" file="target/web-app-boot-exec.jar"
                                       tofile="../webroot/jar/web-app-boot-exec.jar"/>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

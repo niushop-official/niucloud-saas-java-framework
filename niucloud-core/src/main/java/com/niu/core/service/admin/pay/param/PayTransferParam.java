@@ -2,7 +2,7 @@ package com.niu.core.service.admin.pay.param;
 import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 转账参数

@@ -7,7 +7,7 @@ import com.niu.shop.service.core.order.param.OrderConfigParam;
 import com.niu.shop.service.core.order.vo.OrderConfigVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class OrderConfigServiceImpl implements IOrderConfigService {

@@ -24,7 +24,7 @@
 	import { t } from '@/locale'
 	import useDiyStore from '@/app/stores/diy'
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','global']);
+	const props = defineProps(['component', 'index','global']);
 
 	const diyStore = useDiyStore();
 	const loading = ref(true)
@@ -52,12 +52,6 @@
 		return style;
 	})
 
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	onMounted(() => {
 		refresh();

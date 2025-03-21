@@ -11,7 +11,7 @@ import com.niu.shop.service.admin.shop_address.IShopAddressService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/order/refund")
@@ -39,7 +39,7 @@ public class RefundController {
      * @return
      */
     @GetMapping("/{id}")
-    public Result page(@PathVariable Integer id) {
+    public Result page(@PathVariable("id") Integer id) {
         return Result.success(refundActionService.detail(id));
     }
 

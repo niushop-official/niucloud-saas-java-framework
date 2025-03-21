@@ -14,7 +14,7 @@ import com.niu.core.service.core.upload.ICoreStorageService;
 import com.niu.core.service.core.upload.vo.CoreStorAgeConfigVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 

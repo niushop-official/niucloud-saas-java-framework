@@ -1,7 +1,7 @@
 package com.niu.core.service.admin.member.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 会员标签参数

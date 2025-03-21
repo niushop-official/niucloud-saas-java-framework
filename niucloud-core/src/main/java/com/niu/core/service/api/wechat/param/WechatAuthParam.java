@@ -2,8 +2,8 @@ package com.niu.core.service.api.wechat.param;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
@@ -15,4 +15,12 @@ public class WechatAuthParam implements Serializable {
     private String code;
 
     private Integer pid;
+
+    private String nickname = "";
+
+    private String headimg = "";
+
+    private String mobile = "";
+
+    private String mobileCode = "";
 }

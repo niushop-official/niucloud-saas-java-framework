@@ -2,12 +2,14 @@ package com.niu.core.controller.api.sys;
 
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.sys.param.AttachmentUploadParam;
+import com.niu.core.service.api.sys.IBase64Service;
 import com.niu.core.service.api.sys.ITaskService;
 import com.niu.core.service.api.sys.IUploadService;
+import com.niu.core.service.api.sys.param.Base64ImageParam;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/api/file")
@@ -15,6 +17,9 @@ public class UploadController {
 
     @Resource
     IUploadService uploadService;
+
+    @Resource
+    IBase64Service base64Service;
 
     @PostMapping("/image")
     public Result image(@RequestParam("file") MultipartFile file) {
@@ -28,8 +33,12 @@ public class UploadController {
         return Result.success();
     }
 
+    /**
+     * base64图片上传
+     * @return
+     */
     @PostMapping("/image/base64")
-    public Result imageBase64() {
-        return Result.success();
+    public Result imageBase64(@RequestBody Base64ImageParam param) {
+        return Result.success(base64Service.image(param.getContent()));
     }
 }

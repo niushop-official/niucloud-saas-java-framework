@@ -127,7 +127,7 @@
 <script lang="ts" setup>
 import { reactive, ref, computed } from 'vue'
 import { t } from '@/lang'
-import { getApps,getDiyPageList, deleteDiyPage, getDiyTemplate, editDiyPageShare, setUseDiyPage } from '@/app/api/diy'
+import { getApps,getDiyPageList, deleteDiyPage, getDiyTemplate, editDiyPageShare, setUseDiyPage, copyDiy } from '@/app/api/diy'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { setTablePageStorage,getTablePageStorage } from "@/utils/common";

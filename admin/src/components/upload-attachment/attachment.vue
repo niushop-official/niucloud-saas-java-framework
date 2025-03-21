@@ -113,7 +113,7 @@
                         <div class="attachment-item mr-[10px] w-[120px]" v-for="(item, index) in attachment.data" :key="index">
                             <div class="attachment-wrap w-full rounded cursor-pointer overflow-hidden relative flex items-center justify-center h-[120px]">
                                 <el-image :src="img(item.url)" fit="contain" v-if="type == 'image'" :preview-src-list="item.image_list"/>
-                                <video :src="img(item.url)" v-else-if="type == 'video'"></video>
+                                <video :src="img(item.url)" v-else-if="type == 'video'" @click="previewVideo(index)"></video>
                                 <icon :name="item.url" size="24px" v-else-if="type == 'icon'"></icon>
                             </div>
                             <div class="flex items-center">
@@ -126,7 +126,7 @@
                     </div>
                     <div class="flex absolute top-0 left-0 right-0 bottom-0 items-center justify-center" v-else>
                         <div class="flex flex-col items-center" v-if="!attachment.loading">
-                            <img src="@/app/assets/images/no_attachment.png" class="max-w-[130px] max-h-[130px] mb-[15px]">
+                            <img src="@/app/assets/images/no_attachment.png" class="max-w-[160px] max-h-[120px] mb-[15px]">
                             <span class="text-[var(--el-text-color-secondary)] text-[14px]">{{type == 'icon' ? t('upload.iconEmpty') : t('upload.attachmentEmpty')}}</span>
                         </div>
                     </div>
@@ -197,11 +197,14 @@ import {
     getIconList
 } from '@/app/api/sys'
 import { debounce, img, getToken } from '@/utils/common'
-import { ElMessage, UploadFile, UploadFiles, ElMessageBox } from 'element-plus'
+import { ElMessage, UploadFile, UploadFiles, ElMessageBox, MessageParams } from 'element-plus'
 import storage from '@/utils/storage'
 
 const attachmentCategoryName = ref('')
 const operate = ref(false)
+
+const repeat = ref(false)
+
 const prop = defineProps({
     // 选择数量限制
     limit: {
@@ -303,6 +306,7 @@ const getAttachmentList = debounce((page: number = 1) => {
         attachment.loading = false
     })
 })
+
 getAttachmentList()
 
 watch(() => attachmentParam.cate_id, () => {
@@ -313,14 +317,18 @@ watch(() => attachmentParam.cate_id, () => {
  * 添加分组
  */
 const addAttachmentCategory = (name: string) => {
+    if (repeat.value) return
+    repeat.value = true
+
     addCategory({
         type: prop.type,
         name
     }).then(res => {
+        repeat.value = false
         attachmentCategoryName.value = ''
         getAttachmentCategoryList(1)
     }).catch(() => {
-
+        repeat.value = false
     })
 }
 
@@ -330,13 +338,16 @@ const addAttachmentCategory = (name: string) => {
  * @param index
  */
 const updateAttachmentCategory = (name: string, index: number) => {
+    if (repeat.value) return
+    repeat.value = true
     updateCategory({
         id: attachmentCategory.data[index].id,
         name
     }).then(res => {
+        repeat.value = false
         attachmentCategory.data[index].name = name
     }).catch(() => {
-
+        repeat.value = false
     })
 }
 
@@ -344,6 +355,8 @@ const updateAttachmentCategory = (name: string, index: number) => {
  * 删除分组
  */
 const deleteAttachmentCategory = (index: number) => {
+    if (repeat.value) return
+    repeat.value = true
     ElMessageBox.confirm(t('upload.deleteCategoryTips'), t('warning'),
         {
             confirmButtonText: t('confirm'),
@@ -353,13 +366,15 @@ const deleteAttachmentCategory = (index: number) => {
     ).then(() => {
         deleteCategory(attachmentCategory.data[index].id).then(() => {
             attachmentCategory.data.splice(index, 1)
+            repeat.value = false
         }).catch(() => {
+            repeat.value = false
         })
     })
 }
 
 const uploadRef = ref<Record<string, any> | null>(null)
-
+const time = ref<any>(null)
 // 上传文件
 const upload = computed(() => {
     const headers: Record<string, any> = {}
@@ -379,12 +394,34 @@ const upload = computed(() => {
                 getAttachmentList()
                 uploadRef.value?.handleRemove(uploadFile)
             } else {
-                uploadFile.status = 'fail'
-                ElMessage({ message: response.msg, type: 'error' })
+                if(time.value==null) {
+                    time.value = setTimeout(() => {
+                        uploadFile.status = 'fail'
+                        showElMessage({ message: response.msg, type: 'error' })
+                        clearTimeout(time.value)
+                        time.value=null
+                    },500)
+
+                }else{
+                    clearTimeout(time.value)
+                    time.value=null
+                }
             }
         }
     }
 })
+
+const messageCache = new Map()
+
+const showElMessage = (options: MessageParams) => {
+    const cacheKey = options.message
+    const cachedMessage = messageCache.get(cacheKey)
+
+    if (!cachedMessage || Date.now() - cachedMessage.timestamp > 5000) { // 5秒内重复内容不再弹出，可自定义过期时间
+        messageCache.set(cacheKey, { timestamp: Date.now() })
+        ElMessage(options)
+    }
+}
 
 // 全选
 const selectAll = ref(false)
@@ -392,7 +429,10 @@ watch(selectAll, () => {
     if (selectAll.value) {
         const keys = Object.keys(toRaw(selectedFile))
         attachment.data.forEach((item: Record<string, any>) => {
-            if (!keys.includes(item.att_id)) selectedFile[item.att_id] = toRaw(item)
+            if (!keys.includes(item.att_id)) {
+                selectedFile[item.att_id] = toRaw(item)
+                selectedFileIndex.push(item.att_id)
+            }
         })
     } else {
         clearSelected()
@@ -407,6 +447,7 @@ const clearSelected = () => {
     if (keys.length) {
         keys.forEach((key) => {
             delete selectedFile[key]
+            selectedFileIndex.splice(selectedFileIndex.indexOf(key), 1)
         })
         selectAll.value = false
     }
@@ -425,7 +466,7 @@ const selectFile = (data: any) => {
         if (prop.limit == 1 && length == prop.limit) {
             delete selectedFile[keys[0]]
             selectedFileIndex.splice(selectedFileIndex.indexOf(keys[0]),1);
-        } else if (length >= prop.limit) {
+        } else if (prop.limit && length >= prop.limit) {
             ElMessage.info(t('upload.triggerUpperLimit'))
             return
         }

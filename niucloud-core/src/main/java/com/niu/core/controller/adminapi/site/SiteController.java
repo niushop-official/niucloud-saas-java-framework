@@ -12,12 +12,13 @@ import com.niu.core.service.admin.site.param.SiteAddParam;
 import com.niu.core.service.admin.site.param.SiteEditParam;
 import com.niu.core.service.admin.site.param.SiteParam;
 import com.niu.core.service.admin.site.param.SiteSearchParam;
+import com.niu.core.service.admin.site.vo.ShowAppListVo;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.site.vo.SiteListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -99,7 +100,7 @@ public class SiteController {
      * @return
      */
     @PutMapping("/closesite/{id}")
-    public Result<Object> closeSite(@Validated @PathVariable Integer id){
+    public Result<Object> closeSite(@Validated @PathVariable("id") Integer id){
         siteService.closeSite(id);
         return Result.success();
     }
@@ -110,7 +111,7 @@ public class SiteController {
      * @return
      */
     @PutMapping("/opensite/{id}")
-    public Result<Object> openSite(@Validated @PathVariable Integer id){
+    public Result<Object> openSite(@Validated @PathVariable("id") Integer id){
         siteService.openSite(id);
         return Result.success();
     }
@@ -142,5 +143,14 @@ public class SiteController {
     @GetMapping("/addons")
     public Result<List<Addon>> addons() {
         return Result.success(siteService.getSiteAddons());
+    }
+
+    /**
+     * 获取应用工具
+     * @return
+     */
+    @GetMapping("/showApp")
+    public Result<Map<String, ShowAppListVo>> showApp() {
+        return Result.success(siteService.getShowAppTools());
     }
 }

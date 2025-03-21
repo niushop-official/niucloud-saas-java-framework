@@ -23,22 +23,22 @@
         <maven.compiler.target>17</maven.compiler.target>
         <java.version>17</java.version>
         <!-- 集成框架 -->
-        <spring-boot.version>2.7.18</spring-boot.version>
+        <spring-boot.version>3.4.1</spring-boot.version>
         <spring-boot-satoken.version>1.39.0</spring-boot-satoken.version>
         <swagger.version>3.0.0</swagger.version>
         <quartz.version>2.7.2</quartz.version>
         <log4j2.version>3.1.5</log4j2.version>
         <!-- 持久框架 -->
-        <mysql-driver.version>8.0.21</mysql-driver.version>
-        <alibaba-druid.version>1.1.22</alibaba-druid.version>
-        <mybatis-plus.version>3.5.2</mybatis-plus.version>
-        <mybatis-plus-generator.version>3.5.2</mybatis-plus-generator.version>
-        <mybatis-plus-join.version>1.2.4</mybatis-plus-join.version>
+        <mysql-driver.version>8.0.33</mysql-driver.version>
+        <alibaba-druid.version>1.2.18</alibaba-druid.version>
+        <mybatis-plus.version>3.5.9</mybatis-plus.version>
+        <mybatis-plus-generator.version>3.5.9</mybatis-plus-generator.version>
+        <mybatis-plus-join.version>1.4.9</mybatis-plus-join.version>
         <pagehelper.version>1.4.5</pagehelper.version>
         <!-- 工具包类 -->
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-lang3.version>3.7</commons-lang3.version>
-        <hutool.version>5.8.27</hutool.version>
+        <hutool.version>5.8.36</hutool.version>
         <guava.version>33.2.1-jre</guava.version>
         <modelmapper.version>3.2.0</modelmapper.version>
         <!-- 类库框架-->
@@ -52,7 +52,7 @@
         <apache.httpclient5>5.3.1</apache.httpclient5>
         <netty-all.version>4.1.110.Final</netty-all.version>
         <easyexcel.version>3.3.3</easyexcel.version>
-        <weixin.version>4.6.0</weixin.version>
+        <weixin.version>4.7.2.B</weixin.version>
         <!-- 辅助工具 -->
         <lombok.version>1.18.24</lombok.version>
         <alioss.version>3.17.4</alioss.version>
@@ -81,10 +81,16 @@
                 <artifactId>springfox-boot-starter</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>5.0.0</version>
+            </dependency>
             <!-- spring-boot SA Token -->
             <dependency>
                 <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-spring-boot-starter</artifactId>
+                <artifactId>sa-token-spring-boot3-starter</artifactId>
                 <version>${spring-boot-satoken.version}</version>
             </dependency>
             <!-- Sa-Token 整合 jwt -->
@@ -117,6 +123,12 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>2.0.6</version>
             </dependency>
+            <!--alibaba-druid-->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${alibaba-druid.version}</version>
+            </dependency>
             <!-- =============================================================================  -->
             <!-- Mysql-Connector -->
             <dependency>
@@ -124,23 +136,12 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql-driver.version}</version>
             </dependency>
-            <!--alibaba-druid-->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
-                <version>${alibaba-druid.version}</version>
-            </dependency>
-            <!-- MyBatis-Plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
-            </dependency>
-            <!-- MyBatis-Plus添加代码生成器的依赖 -->
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-generator</artifactId>
-                <version>${mybatis-plus-generator.version}</version>
+                <artifactId>mybatis-plus-bom</artifactId>
+                <version>3.5.9</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <!-- MyBatis-Plus-Join -->
             <dependency>
@@ -220,6 +221,11 @@
                 <artifactId>pinyin4j</artifactId>
                 <version>${pinyin4j.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>jakarta.mail</artifactId>
+                <version>2.0.1</version>
+            </dependency>
             <!-- zxing=>二维码 -->
             <dependency>
                 <groupId>com.google.zxing</groupId>
@@ -281,17 +287,17 @@
             </dependency>
             <!-- =============================================================================  -->
             <!-- Apache httpcore5 -->
-            <dependency>
-                <groupId>org.apache.httpcomponents.core5</groupId>
-                <artifactId>httpcore5</artifactId>
-                <version>${apache.httpcore5}</version>
-            </dependency>
-            <!-- Apache httpclient5 -->
-            <dependency>
-                <groupId>org.apache.httpcomponents.client5</groupId>
-                <artifactId>httpclient5</artifactId>
-                <version>${apache.httpclient5}</version>
-            </dependency>
+            <!--          <dependency>
+                          <groupId>org.apache.httpcomponents.core5</groupId>
+                          <artifactId>httpcore5</artifactId>
+                          <version>${apache.httpcore5}</version>
+                      </dependency>
+                      &lt;!&ndash; Apache httpclient5 &ndash;&gt;
+                      <dependency>
+                          <groupId>org.apache.httpcomponents.client5</groupId>
+                          <artifactId>httpclient5</artifactId>
+                          <version>${apache.httpclient5}</version>
+                      </dependency>-->
             <!-- netty -->
             <dependency>
                 <groupId>io.netty</groupId>

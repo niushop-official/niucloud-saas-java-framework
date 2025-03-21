@@ -10,6 +10,7 @@ import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.enums.addon.AddonStatusEnum;
 import com.niu.core.mapper.addon.AddonMapper;
+import jakarta.annotation.Resource;
 import org.apache.commons.io.FileUtils;
 import cn.hutool.core.io.FileUtil;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 @Component
 public class AddonInstallTools extends CoreAddonBaseService {
 
-    @Autowired
+    @Resource
     AddonMapper addonMapper;
 
     private String addon;

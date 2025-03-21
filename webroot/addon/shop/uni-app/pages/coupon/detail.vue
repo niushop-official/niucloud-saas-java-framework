@@ -100,9 +100,11 @@
         loading.value = true
         getShopCouponInfo(id).then((res: any) => {
             detail.value = res.data
-            if (detail.value.sum_count != -1 && detail.value.receive_count === detail.value.sum_count) {
+            if (detail.value.receive_type == 2) {
                 detail.value.btnType = 'collected'//已领完
-            }else if (!userInfo.value) {
+            } else if (detail.value.sum_count != -1 && detail.value.receive_count === detail.value.sum_count) {
+                detail.value.btnType = 'collected'//已领完
+            } else if (!userInfo.value) {
                 detail.value.btnType = 'collecting'//领用
             } else {
                 if (detail.value.is_receive && detail.value.limit_count === detail.value.member_receive_count) {
@@ -140,7 +142,7 @@
 
     const collecting = (coupon_id: any) => {
         if (!userInfo.value) {
-            useLogin().setLoginBack({ url: '/addon/shop/pages/coupon/list' })
+            useLogin().setLoginBack({ url: '/addon/shop/pages/coupon/detail', param: { coupon_id: detail.value.id }})
             return false
         }
         getCoupon({ coupon_id, number: 1 }).then(res => {

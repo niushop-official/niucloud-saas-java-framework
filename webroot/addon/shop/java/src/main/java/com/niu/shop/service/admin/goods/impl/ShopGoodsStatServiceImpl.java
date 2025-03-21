@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
@@ -100,20 +101,20 @@ public class ShopGoodsStatServiceImpl implements IShopGoodsStatService {
             dates.add(end);
         }
 
-        if (dates.size() == 1) {
-            return new ShopGoodsStatBasicVo();
-        }
-
         QueryWrapper<ShopGoods> goodsQueryWrapper = new QueryWrapper<>();
         goodsQueryWrapper.eq("site_id", RequestUtils.siteId());
         List<Integer> goodsIds = shopGoodsMapper.selectList(goodsQueryWrapper).stream().map(ShopGoods::getGoodsId).toList();
 
+        if (dates.size() == 1 || ObjectUtil.isEmpty(goodsIds)) {
+            return new ShopGoodsStatBasicVo();
+        }
+
         QueryWrapper<ShopGoodsStat> statQueryWrapper = new QueryWrapper<>();
         statQueryWrapper.in("goods_id", goodsIds)
-                .eq("site_id", RequestUtils.siteId())
-                .between("date_time", DateUtils.StringToTimestamp(dates.get(0)), DateUtils.StringToTimestamp(dates.get(1)))
-                .select("goods_id,sum(cart_num) as cart_num,sum(sale_num) as sale_num,sum(pay_num) as pay_num,sum(pay_money) as pay_money,sum(refund_num) as refund_num,sum(refund_money) as refund_money,sum(collect_num) as collect_num,sum(evaluate_num) as evaluate_num,sum(access_num) as access_num,sum(goods_visit_member_count) as goods_visit_member_count")
-                .groupBy("goods_id");
+        .eq("site_id", RequestUtils.siteId())
+        .between("date_time", DateUtils.StringToTimestamp(dates.get(0)), DateUtils.StringToTimestamp(dates.get(1)))
+        .select("goods_id,sum(cart_num) as cart_num,sum(sale_num) as sale_num,sum(pay_num) as pay_num,sum(pay_money) as pay_money,sum(refund_num) as refund_num,sum(refund_money) as refund_money,sum(collect_num) as collect_num,sum(evaluate_num) as evaluate_num,sum(access_num) as access_num,sum(goods_visit_member_count) as goods_visit_member_count")
+        .groupBy("goods_id");
         List<ShopGoodsStat> shopGoodsStats = shopGoodsStatMapper.selectList(statQueryWrapper);
 
         ShopGoodsStatBasicVo vo = new ShopGoodsStatBasicVo();
@@ -158,17 +159,18 @@ public class ShopGoodsStatServiceImpl implements IShopGoodsStatService {
             allDates = getMonthsBetween(dateArr.get(0), dateArr.get(1));
         }
 
-        if (ObjectUtil.isEmpty(allDates)) {
+        QueryWrapper<ShopGoods> goodsQueryWrapper = new QueryWrapper<>();
+        goodsQueryWrapper.eq("site_id", RequestUtils.siteId());
+        List<ShopGoods> shopGoods = shopGoodsMapper.selectList(goodsQueryWrapper);
+        List<Integer> goodsIds = CollStreamUtil.toList(shopGoods, ShopGoods::getGoodsId);
+
+        if (ObjectUtil.isEmpty(allDates) || goodsIds.size() == 0) {
             ShopGoodsStatTrendVo vo = new ShopGoodsStatTrendVo();
             vo.setData(Collections.emptyList());
             vo.setXAxis(allDates);
             return vo;
         }
 
-        QueryWrapper<ShopGoods> goodsQueryWrapper = new QueryWrapper<>();
-        goodsQueryWrapper.eq("site_id", RequestUtils.siteId());
-        List<ShopGoods> shopGoods = shopGoodsMapper.selectList(goodsQueryWrapper);
-        List<Integer> goodsIds = CollStreamUtil.toList(shopGoods, ShopGoods::getGoodsId);
         QueryWrapper<ShopGoodsStat> statQueryWrapper = new QueryWrapper<>();
         statQueryWrapper.between("date_time", DateUtils.StringToTimestamp(dateArr.get(0)), DateUtils.StringToTimestamp(dateArr.get(1)))
                 .select("goods_id,date,date_time,sum(cart_num) as cart_num,sum(sale_num) as sale_num,sum(pay_num) as pay_num,sum(pay_money) as pay_money,sum(refund_num) as refund_num,sum(refund_money) as refund_money,sum(collect_num) as collect_num,sum(evaluate_num) as evaluate_num,sum(access_num) as access_num,sum(goods_visit_member_count) as goods_visit_member_count")
@@ -262,7 +264,7 @@ public class ShopGoodsStatServiceImpl implements IShopGoodsStatService {
                 .between("date_time", DateUtils.StringToTimestamp(dateArr[0]), DateUtils.StringToTimestamp(dateArr[1]))
                 .eq("goods.delete_time", 0)
                 .setAlias("stat")
-                .leftJoin("nc_shop_goods goods on stat.goods_id=goods.goods_id")
+                .leftJoin("?_shop_goods goods on stat.goods_id=goods.goods_id".replace("?_", GlobalConfig.tablePrefix))
                 .groupBy("stat.goods_id")
                 .select("stat.site_id,stat.goods_id,sum(stat.cart_num) as cart_num,sum(stat.sale_num) as sale_num,sum(stat.pay_num) as pay_num,sum(stat.pay_money) as pay_money,sum(stat.refund_num) as refund_num,sum(stat.refund_money) as refund_money,sum(stat.collect_num) as collect_num,sum(stat.evaluate_num) as evaluate_num,sum(stat.access_num) as access_num,sum(goods_visit_member_count) as goods_visit_member_count,goods_name,goods_cover,is_gift");
 

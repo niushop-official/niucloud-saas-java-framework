@@ -83,8 +83,8 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                            </tasks>
+                            <target>
+                            </target>
                             <!--                            <copy overwrite="true" file="target/{key}.jar"-->
                             <!--                                  tofile="../../webroot/jar/addon/{key}.jar"/>-->
                         </configuration>

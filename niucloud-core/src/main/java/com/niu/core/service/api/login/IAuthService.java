@@ -9,7 +9,7 @@ import com.niu.core.service.api.login.param.SendMobileCodeParam;
 import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.login.vo.SendMobileCodeVo;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 登录服务层

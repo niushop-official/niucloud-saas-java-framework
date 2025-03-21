@@ -44,19 +44,19 @@ class ShopGoodsRankController {
     }
 
     @PutMapping("/good/rank/{id}")
-    Result<?> edit(@PathVariable Integer id, @Validated @RequestBody ShopGoodsRankParam editParam) {
+    Result<?> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopGoodsRankParam editParam) {
         ShopGoodsRankService.edit(id, editParam);
         return Result.success();
     }
 
     @GetMapping("/good/rank/{id}")
-    Result<?> info(@PathVariable Integer id) {
+    Result<?> info(@PathVariable("id") Integer id) {
         ShopGoodsRankInfoVo info = ShopGoodsRankService.info(id);
         return Result.success(info);
     }
 
     @DeleteMapping("/good/rank/{id}")
-    Result<Object> del(@PathVariable Integer id) {
+    Result<Object> del(@PathVariable("id") Integer id) {
         ShopGoodsRankService.del(id);
         return Result.success();
     }

@@ -3,6 +3,7 @@ package com.niu.core.enums.poster;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 
 import java.util.stream.Collectors;
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 public class PosterTypeEnum {
 
     public static JSONArray getType(){
-        return JsonModuleLoader.build().mergeResultSet("poster/type.json");
+        return JsonModuleLoader.build().mergeResultSet(RequestUtils.siteId(), "poster/type.json");
     }
 
     public static JSONObject getType(String type){

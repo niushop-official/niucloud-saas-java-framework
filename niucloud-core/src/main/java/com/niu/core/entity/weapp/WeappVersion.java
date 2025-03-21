@@ -1,6 +1,7 @@
 package com.niu.core.entity.weapp;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -28,6 +29,7 @@ public class WeappVersion implements Serializable {
     private Integer versionNo;
     
     /**  说明 */
+    @TableField(value = "`desc`")
     private String desc;
 
     /**  创建时间 */

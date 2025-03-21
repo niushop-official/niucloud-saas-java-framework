@@ -10,7 +10,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="memberSignListTableData.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('memberInfo')" prop="keywords">
-                        <el-input v-model="memberSignListTableData.searchParam.keywords" class="w-[240px]" :placeholder="t('memberInfoPlaceholder')" />
+                        <el-input v-model.trim="memberSignListTableData.searchParam.keywords" class="w-[240px]" :placeholder="t('memberInfoPlaceholder')" />
                     </el-form-item>
                     <el-form-item :label="t('createTime')" prop="create_time">
                         <el-date-picker v-model="memberSignListTableData.searchParam.create_time" type="datetimerange" value-format="YYYY-MM-DD HH:mm:ss" :start-placeholder="t('startDate')" :end-placeholder="t('endDate')" />
@@ -37,8 +37,8 @@
                         <template #default="{ row }">
                             <div class="flex items-center cursor-pointer" @click="toMember(row.member_id)">
                                 <img class="w-[50px] h-[50px] mr-[10px]" v-if="row.member.headimg" :src="img(row.member.headimg)" alt="">
-                                <img class="w-[50px] h-[50px] mr-[10px]" v-else src="@/app/assets/images/default_headimg.png" alt="">
-                                <div class="flex flex flex-col">
+                                <img class="w-[50px] h-[50px] mr-[10px] rounded-full" v-else src="@/app/assets/images/member_head.png" alt="">
+                                <div class="flex flex-col">
                                     <span>{{ row.member.nickname || '' }}</span>
                                 </div>
                             </div>

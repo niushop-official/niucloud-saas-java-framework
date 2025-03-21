@@ -1,5 +1,6 @@
 package com.niu.core.controller.api.login;
 
+import cn.dev33.satoken.annotation.SaIgnore;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.utils.system.CaptchaUtils;
 import com.niu.core.enums.member.MemberLoginTypeEnum;
@@ -11,7 +12,7 @@ import com.niu.core.service.api.login.vo.LoginVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("/api")
@@ -77,7 +78,7 @@ public class LoginController {
      * @return
      */
     @PostMapping("/send/mobile/{type}")
-    public Result<?> sendMobileCode(@PathVariable String type, @Validated @RequestBody SendMobileCodeParam param) {
+    public Result<?> sendMobileCode(@PathVariable("type") String type, @Validated @RequestBody SendMobileCodeParam param) {
         param.setType(type);
         CaptchaUtils.check(param.getCaptchaKey(), param.getCaptchaCode());
         return Result.success(loginService.sendMobileCode(param));
@@ -89,8 +90,8 @@ public class LoginController {
      * @return
      */
     @PutMapping("/auth/logout")
+    @SaIgnore
     public Result logout() {
-        loginService.logout();
         return Result.success();
     }
 }

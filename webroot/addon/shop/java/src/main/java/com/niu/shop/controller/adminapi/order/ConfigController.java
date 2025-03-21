@@ -8,7 +8,7 @@ import com.niu.shop.service.core.order.vo.OrderConfigVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 订单配置制器

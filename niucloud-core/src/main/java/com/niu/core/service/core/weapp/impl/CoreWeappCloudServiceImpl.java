@@ -17,12 +17,12 @@ import com.niu.core.service.admin.niucloud.INiucloudService;
 import com.niu.core.service.core.addon.AddonInstallTools;
 import com.niu.core.service.core.weapp.ICoreWeappCloudService;
 import com.niu.core.service.core.weapp.param.WeappUploadParam;
+import jakarta.annotation.Resource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -55,11 +55,17 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         FileTools.createDirs(packageDir);
 
         // 整理编译文件
-        Addon compileAddon = addonMapper.selectOne(new QueryWrapper<Addon>().select("key").like("compile", "weapp").last("limit 1"));
-        if (compileAddon != null) {
-            handleUniapp(packageDir, param);
+        Addon compileAddon = addonMapper.selectOne(new QueryWrapper<Addon>().select("`key`").like("compile", "weapp").last("limit 1"));
+        if (compileAddon == null) {
+            handleUniapp(packageDir + "uni-app/",  param);
         } else {
-            handleCompileWeapp(packageDir, compileAddon.getKey(), param);
+            handleCompileWeapp(packageDir + "uni-app/", compileAddon.getKey(), param);
+        }
+
+        try {
+            FileUtils.copyFile(new File(WebAppEnvs.get().webRootDownResource + param.getUploadPrivateKey()), new File(packageDir + "private.key"));
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
         }
 
         File zipFile = ZipUtil.zip(packageDir, tempDir + "build.zip");
@@ -81,10 +87,10 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         query.put("token", actionToken == null ? "" : actionToken.getStr("token"));
 
         HttpResponse response = new NiucloudUtils.Cloud().build("cloud/weapp").query(query)
-                .func(i -> {
-                    i.form("file", zipFile, "build.zip");
-                })
-                .method(Method.POST).execute();
+            .func(i -> {
+                i.form("file", zipFile, "build.zip");
+            })
+            .method(Method.POST).execute();
 
         JSONObject res =  JSONUtil.parseObj(response.body());
 

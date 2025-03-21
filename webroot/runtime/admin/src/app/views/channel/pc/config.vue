@@ -16,13 +16,13 @@
                     <el-switch v-model="formData.is_open"/>
                 </el-form-item>
 
-                <el-form-item :label="t('PCDomainName')">
+                <el-form-item :label="t('pCDomainName')">
                     <el-input :model-value="formData.request_url" class="input-width" :readonly="true">
                         <template #append>
                             <div class="cursor-pointer" @click="copyEvent(formData.request_url)">{{ t('copy') }}</div>
                         </template>
                     </el-input>
-                    <span class="ml-2 cursor-pointer visit-btn">{{t('clickVisit')}}</span>
+                    <span class="ml-2 cursor-pointer visit-btn" @click="visitFn">{{t('clickVisit')}}</span>
                 </el-form-item>
             </el-form>
         </el-card>

@@ -13,7 +13,7 @@ import com.niu.core.service.admin.member.vo.MemberLabelListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -46,7 +46,7 @@ public class MemberLabelController {
      * @return Result<MemberLabelInfoVo>
      */
     @GetMapping("/label/{id}")
-    public Result<MemberLabelInfoVo> info(@PathVariable Integer id) {
+    public Result<MemberLabelInfoVo> info(@PathVariable("id") Integer id) {
         MemberLabelInfoVo info = memberLabelService.info(id);
         return Result.success(info);
     }
@@ -68,7 +68,7 @@ public class MemberLabelController {
      * @return Result<Object>
      */
     @PutMapping("/label/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody MemberLabelEditParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody MemberLabelEditParam editParam) {
         memberLabelService.edit(id, editParam);
         return Result.success();
     }
@@ -79,7 +79,7 @@ public class MemberLabelController {
      * @return Result<Object>
      */
     @DeleteMapping("/label/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         memberLabelService.del(id);
         return Result.success();
     }

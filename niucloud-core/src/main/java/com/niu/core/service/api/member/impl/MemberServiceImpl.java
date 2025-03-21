@@ -3,6 +3,8 @@ package com.niu.core.service.api.member.impl;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.WechatUtils;
@@ -37,17 +39,14 @@ public class MemberServiceImpl implements IMemberService {
 
     @Override
     public MemberInfoVo info(MemberInfoParam param) {
-        QueryWrapper<Member> queryWrapper = new QueryWrapper();
-        queryWrapper.select("member_id, site_id, username, member_no, mobile, register_channel, nickname, headimg, member_level, member_label, login_ip, login_type, login_time, create_time, last_visit_time, last_consum_time, sex, status, birthday, point, balance, growth, is_member, member_time, is_del, province_id, city_id, district_id, address, location, money, money_get, wx_openid, weapp_openid, commission, commission_get, commission_cash_outing");
+        MPJQueryWrapper<Member> queryWrapper = new MPJQueryWrapper<>();
+        queryWrapper.setAlias("m")
+            .leftJoin("?_member_level ml ON ml.level_id = m.member_level".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("member_id, m.site_id, username, member_no, mobile, register_channel, nickname, headimg, member_level, member_label, login_ip, login_type, login_time, m.create_time, last_visit_time, last_consum_time, sex, m.status, birthday, point, balance, m.growth, is_member, member_time, is_del, province_id, city_id, district_id, address, location, money, money_get, wx_openid, weapp_openid, commission, commission_get, commission_cash_outing, ml.level_name as member_level_name");
         queryWrapper.eq("member_id", param.memberId());
         // SAAS域控制（交给SQL引擎处理）
-        queryWrapper.eq("site_id", param.siteId());
-        Member member = memberMapper.selectOne(queryWrapper);
-        if (member == null) {
-            return null;
-        }
-        MemberInfoVo memberInfoVo = new MemberInfoVo();
-        BeanUtils.copyProperties(member, memberInfoVo);
+        queryWrapper.eq("m.site_id", param.siteId());
+        MemberInfoVo memberInfoVo = memberMapper.selectJoinOne(MemberInfoVo.class, queryWrapper);
         return memberInfoVo;
     }
 
@@ -120,9 +119,9 @@ public class MemberServiceImpl implements IMemberService {
         Member oldMember = this.memberMapper.selectById(param.memberId());
         Assert.notNull(oldMember, "会员不存在");
 
-        if (!param.getMobile().isEmpty()) {
+        if (ObjectUtil.isNotEmpty(param.getMobile())) {
             registerService.checkMobileCode(param.getMobile(), param.getMobileKey(), param.getMobileCode());
-        } else if (!param.getMobileCode().isEmpty()) {
+        } else if (ObjectUtil.isNotEmpty(param.getMobileCode())) {
             try {
                 WxMaPhoneNumberInfo phoneInfo = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getPhoneNoInfo(param.getMobileCode());
                 param.setMobile(phoneInfo.getPurePhoneNumber());

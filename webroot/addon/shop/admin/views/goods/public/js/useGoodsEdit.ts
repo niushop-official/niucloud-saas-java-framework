@@ -17,6 +17,7 @@ import {
     getAttrInfo
 } from '@/addon/shop/api/goods'
 import { getPosterList } from '@/app/api/poster'
+import { getDiyFormList } from '@/app/api/diy_form'
 
 // 商品添加/编辑
 export function useGoodsEdit(params: any = {}) {
@@ -39,6 +40,7 @@ export function useGoodsEdit(params: any = {}) {
         goods_category: '',
         brand_id: '',
         poster_id: '',
+        form_id: '',
         label_ids: [],
         service_ids: [],
         supplier_id: '',
@@ -247,6 +249,38 @@ export function useGoodsEdit(params: any = {}) {
 
     refreshGoodsPoster()
 
+    // 万能表单列表下拉框
+    const diyFormOptions = reactive([])
+
+    // 跳转到万能表单列表，添加表单
+    const toDiyFormEvent = () => {
+        const url = router.resolve({
+            path: '/diy_form/list'
+        })
+        window.open(url.href)
+    }
+
+    // 刷新万能表单
+    const refreshDiyForm = (bool = false) => {
+        getDiyFormList({
+            type: 'DIY_FORM_GOODS_DETAIL',
+            status: 1
+        }).then((res) => {
+            const data = res.data
+            if (data) {
+                diyFormOptions.splice(0, diyFormOptions.length, ...data)
+                if (bool) {
+                    ElMessage({
+                        message: t('refreshSuccess'),
+                        type: 'success'
+                    })
+                }
+            }
+        })
+    }
+
+    refreshDiyForm()
+
     // 标签组列表复选框
     const labelOptions = reactive([])
 
@@ -347,6 +381,7 @@ export function useGoodsEdit(params: any = {}) {
             formData.goods_category = data.goods_info.goods_category
             formData.brand_id = data.goods_info.brand_id
             formData.poster_id = data.goods_info.poster_id
+            formData.form_id = data.goods_info.form_id
             formData.label_ids = data.goods_info.label_ids
             formData.service_ids = data.goods_info.service_ids
             formData.supplier_id = data.goods_info.supplier_id
@@ -1499,6 +1534,10 @@ export function useGoodsEdit(params: any = {}) {
         posterOptions,
         toPosterEvent,
         refreshGoodsPoster,
+
+        diyFormOptions,
+        toDiyFormEvent,
+        refreshDiyForm,
 
         labelOptions,
         toGoodsLabelEvent,

@@ -22,12 +22,13 @@ import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteAddonInitRecordMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
+import com.niu.core.service.admin.addon.IAddonService;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.core.service.core.site.vo.SiteInfoCacheVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +42,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
     /**
      * 站点tag
      */
-    public static String cacheTagName = CacheTagEnum.SITE_CASH.getTagName();
+    public static String cacheTagName = CacheTagEnum.SITE_CACHE.getTagName();
 
     /**
      * 是否使用缓存
@@ -58,55 +59,25 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
     AddonMapper addonMapper;
 
     @Resource
+    IAddonService addonService;
+
+    @Resource
     SiteGroupMapper siteGroupMapper;
 
     @Resource
     SiteAddonInitRecordMapper siteAddonInitRecordMapper;
 
-    @Override
-    public Site findUseCacheById(Integer siteId) {
-        Site site = null;
-        if (useCache) {
-            site = super.findUseCacheById(Site.class, siteId);
-        } else {
-            site = super.getById(siteId);
-        }
-        return site;
-    }
-
-    @Override
-    public Site refreshCacheById(Integer siteId) {
-        Site site = null;
-        if (useCache) {
-            site = super.refreshCacheById(Site.class, siteId);
-        } else {
-            site = super.getById(siteId);
-        }
-        return site;
-    }
-
-    @Override
-    public Site removeCacheById(Integer siteId) {
-        Site site = null;
-        if (useCache) {
-            site = super.removeCacheById(Site.class, siteId);
-        } else {
-            site = super.getById(siteId);
-        }
-        return site;
-    }
-
     /**
      * 通过站点id获取支持的应用插件
      *
-     * @param site_id
+     * @param siteId
      */
     @Override
-    public List<String> getAddonKeysBySiteId(Integer site_id) {
+    public List<String> getAddonKeysBySiteId(Integer siteId) {
 
-        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getAddonKeysBySiteId", site_id), uniqueKey -> {
+        return cached.rememberObject(useCache, cacheTagName + "_" + siteId, Arrays.asList("getAddonKeysBySiteId", siteId), uniqueKey -> {
 
-            Site siteInfo = siteMapper.selectById(site_id);
+            Site siteInfo = siteMapper.selectById(siteId);
             if (ObjectUtil.isNull(siteInfo)) {
                 return new ArrayList<String>();
             }
@@ -148,44 +119,28 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
     @Override
     public SiteInfoVo getSiteCache(Integer siteId) {
 
-        SiteInfoCacheVo cache = cached.rememberObject(useCache, cacheTagName, Arrays.asList("getSiteCache", siteId), uniqueKey -> {
+        SiteInfoCacheVo siteCache = cached.rememberObject(useCache, cacheTagName + "_" + siteId, Arrays.asList("getSiteCache", siteId), uniqueKey -> {
             MPJQueryWrapper<Site> siteMPJQueryWrapper = new MPJQueryWrapper<>();
             siteMPJQueryWrapper.select("ns.site_id, ns.site_name, ns.group_id, ns.keywords, ns.app_type, ns.logo, ns.`desc`, ns.status, ns.latitude, ns.longitude, ns.province_id, ns.city_id, ns.district_id, ns.address, ns.full_address, ns.phone, ns.business_hours, ns.create_time, ns.expire_time, ns.front_end_name, ns.front_end_logo, ns.front_end_icon, ns.icon, ns.member_no, ns.app, ns.addons, ns.initalled_addon, ns.site_domain, nsg.group_name")
                     .setAlias("ns")
                     .leftJoin("?_site_group nsg ON ns.group_id = nsg.group_id".replace("?_", GlobalConfig.tablePrefix));
             siteMPJQueryWrapper.eq("ns.site_id", siteId);
 
-            SiteInfoCacheVo siteCache = siteMapper.selectJoinOne(SiteInfoCacheVo.class, siteMPJQueryWrapper);
-            return siteCache;
+            return siteMapper.selectJoinOne(SiteInfoCacheVo.class, siteMPJQueryWrapper);
+
         });
         SiteInfoVo siteInfoVo = new SiteInfoVo();
-/*        if(ObjectUtil.isNotEmpty(cache))
-        {
-            BeanUtil.copyProperties(cache, siteInfoVo);
-            JSONArray addonKeys = JSONUtil.parseArray(cache.getStr("addonKeys"));
-            siteInfoVo.setAddonKeys(addonKeys.toList(String.class));
-            if (siteInfoVo.getAddonKeys().size() != 0) {
-                JSONArray siteAddons = JSONUtil.parseArray(cache.getStr("siteAddons"));
-                JSONArray apps = JSONUtil.parseArray(cache.getStr("apps"));
-                siteInfoVo.setSiteAddons(siteAddons.toList(Addon.class));
-                siteInfoVo.setApps(apps.toList(Addon.class));
-            } else {
-                siteInfoVo.setSiteAddons(new ArrayList<>());
-                siteInfoVo.setApps(new ArrayList<>());
-            }
-        }*/
-        if (ObjectUtil.isNotEmpty(cache)) {
-            BeanUtil.copyProperties(cache, siteInfoVo);
+        if (ObjectUtil.isNotEmpty(siteCache)) {
+            BeanUtil.copyProperties(siteCache, siteInfoVo);
             siteInfoVo.setAddonKeys(getAddonKeysBySiteId(siteInfoVo.getSiteId()));
             if (siteInfoVo.getAddonKeys().size() != 0) {
-                siteInfoVo.setSiteAddons(addonMapper.selectList(new QueryWrapper<Addon>().in("`key`", siteInfoVo.getAddonKeys()).eq("type", AddonActionEnum.ADDON.getCode())));
-                siteInfoVo.setApps(addonMapper.selectList(new QueryWrapper<Addon>().in("`key`", siteInfoVo.getAddonKeys()).eq("type", AddonActionEnum.APP.getCode())));
-            } else {
+                siteInfoVo.setSiteAddons(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), AddonActionEnum.ADDON.getCode()));
+                siteInfoVo.setApps(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), AddonActionEnum.APP.getCode()));
+            }else{
                 siteInfoVo.setSiteAddons(new ArrayList<>());
                 siteInfoVo.setApps(new ArrayList<>());
             }
         }
-
         return siteInfoVo;
     }
 
@@ -239,7 +194,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
      * 清除站点缓存
      */
     @Override
-    public void clearSiteCache() {
-        cached.tag(cacheTagName).clear();
+    public void clearSiteCache(Integer siteId) {
+        cached.tag(cacheTagName + "_" + siteId).clear();
     }
 }

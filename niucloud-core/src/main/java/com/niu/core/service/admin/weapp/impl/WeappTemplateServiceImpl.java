@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.weapp.impl;
 
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.WechatUtils;
@@ -9,9 +10,10 @@ import com.niu.core.service.admin.weapp.param.WeappTemplateSyncParam;
 import com.niu.core.service.core.notice.ICoreNoticeService;
 import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 import com.niu.core.service.core.notice.vo.NoticeInfoVo;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,12 @@ public class WeappTemplateServiceImpl implements IWeappTemplateService {
     private String addTemplate(String id, List<Integer> keywordIdList, String sceneDesc) {
         try {
             return WechatUtils.miniapp(RequestUtils.siteId()).getSubscribeService().addTemplate(id, keywordIdList, sceneDesc);
+        } catch (WxErrorException e) {
+            if (e.getError().getErrorCode() == 200022) {
+                return JSONUtil.parseObj(e.getError().getJson()).getStr("priTmplId", "");
+            } else {
+                throw new CommonException(e.getMessage());
+            }
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }

@@ -1,5 +1,6 @@
 package com.niu.core.common.component.upload.impl;
 
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import com.aliyun.oss.*;
 import com.aliyun.oss.common.auth.CredentialsProvider;
@@ -7,17 +8,18 @@ import com.aliyun.oss.common.auth.DefaultCredentialProvider;
 import com.aliyun.oss.common.comm.SignVersion;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
+import com.niu.core.common.component.upload.AbstractUploadProvider;
 import com.niu.core.common.component.upload.IUploadProvider;
 import com.niu.core.common.component.upload.annotation.UploadProvider;
 import com.niu.core.common.component.upload.exception.UploadException;
-import com.niu.core.common.component.upload.model.*;
-import com.niu.core.common.component.upload.AbstractUploadProvider;
 import com.niu.core.common.component.upload.model.*;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 @UploadProvider(name = "aliyun", source = "core", describe = "阿里云存储")
 @Slf4j
@@ -133,4 +135,73 @@ public class AliyunUploadProvider extends AbstractUploadProvider implements IUpl
         return thumbModelResult;
     }
 
+    @Override
+    public String base64(Base64Model base64Model) {
+        String key = base64Model.getUploadFilePath() + base64Model.getUploadFileName();
+
+        try {
+            // 初始化
+            CredentialsProvider credentialsProvider = new DefaultCredentialProvider(this.accessKey, this.secretKey);
+            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+            clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+            this.ossClient = OSSClientBuilder.create()
+                .endpoint(this.endpoint)
+                .credentialsProvider(credentialsProvider)
+                .clientConfiguration(clientBuilderConfiguration)
+                .region(region)
+                .build();
+
+            // 上传操作
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Model.getContent());
+            PutObjectRequest putObjectRequest = new PutObjectRequest(this.bucket, key, new ByteArrayInputStream(decodedBytes));
+            PutObjectResult result = ossClient.putObject(putObjectRequest);
+        } catch (OSSException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } finally {
+            if (this.ossClient != null) {
+                this.ossClient.shutdown();
+            }
+        }
+
+        return key;
+    }
+
+    @Override
+    public String fetch(FetchModel fetchModel) {
+        String key = fetchModel.getUploadFilePath() + fetchModel.getUploadFileName();
+
+        try {
+            // 初始化
+            CredentialsProvider credentialsProvider = new DefaultCredentialProvider(this.accessKey, this.secretKey);
+            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+            clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+            this.ossClient = OSSClientBuilder.create()
+                .endpoint(this.endpoint)
+                .credentialsProvider(credentialsProvider)
+                .clientConfiguration(clientBuilderConfiguration)
+                .region(region)
+                .build();
+
+            // 上传操作
+            byte[] bytes = HttpUtil.downloadBytes(fetchModel.getUrl());
+            PutObjectRequest putObjectRequest = new PutObjectRequest(this.bucket, key, new ByteArrayInputStream(bytes));
+            PutObjectResult result = ossClient.putObject(putObjectRequest);
+        } catch (OSSException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } catch (ClientException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } finally {
+            if (this.ossClient != null) {
+                this.ossClient.shutdown();
+            }
+        }
+
+        return key;
+    }
 }

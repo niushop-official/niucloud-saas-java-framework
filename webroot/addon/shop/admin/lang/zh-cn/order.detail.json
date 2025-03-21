@@ -129,5 +129,6 @@
   "refundGoodsPrice": "售价",
   "refundPayPrice": "实付金额",
   "refundGoodsNum": "数量",
-  "refundGoodsPlaceholder": "请选择退款的商品"
+  "refundGoodsPlaceholder": "请选择退款的商品",
+  "formDetail": "表单详情"
 }

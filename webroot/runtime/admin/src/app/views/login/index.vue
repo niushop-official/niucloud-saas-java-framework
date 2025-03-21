@@ -2,7 +2,7 @@
     <el-container :class="['w-full h-screen bg-page flex flex-col', { 'login-wrap': loginType == 'admin' }, { 'site-login-wrap': loginType == 'site' }]">
         <!-- 平台端登录 -->
         <el-main class="login-main items-center justify-center flex-1 h-0" v-if="loginType == 'admin'">
-            <div class="flex rounded-2xl overflow-hidden">
+            <div class="flex rounded-2xl shadow overflow-hidden">
                 <div class="login-main-left w-[450px] flex flex-wrap justify-center">
                     <template v-if="loginConfig">
                         <el-image v-if="loginConfig.bg&&!imgLoading" class="w-[450px] h-[400px]" :src="img(loginConfig.bg)" fit="cover" />
@@ -12,104 +12,73 @@
                 <div class="login flex flex-col w-[400px] h-[400px] p-[40px]">
                     <h3 class="text-center text-lg font-bold mb-[10px]">{{ webSite.site_name || t('siteTitle') }}</h3>
                     <h3 class="text-center text-2xl font-bold mb-[26px]">{{ t('platform') }}</h3>
-                    <el-form :model="form" ref="formRef" :rules="formRules">
+                    <el-form :model="form" ref="formRef" :rules="formRules" class="mt-[30px]">
                         <el-form-item prop="username">
-                            <el-input v-model="form.username" :placeholder="t('userPlaceholder')"
-                                autocomplete="off"
-                                @keyup.enter="handleLogin(formRef)" class="h-[40px] input-with-select">
-                                <template #prepend>
-                                    <icon name="element User" />
-                                </template>
-                            </el-input>
+                            <el-input v-model.trim="form.username" :placeholder="t('userPlaceholder')" autocomplete="off" @keyup.enter="handleLogin(formRef)" class="h-[40px]"></el-input>
                         </el-form-item>
 
-                        <el-form-item prop="password">
-                            <el-input v-model="form.password" :placeholder="t('passwordPlaceholder')" type="password"
-                                autocomplete="new-password"
-                                @keyup.enter="handleLogin(formRef)" :show-password="true"
-                                class="h-[40px] input-with-select">
-                                <template #prepend>
-                                    <icon name="element Lock" />
-                                </template>
-                            </el-input>
+                        <el-form-item prop="password" class="mt-[30px]">
+                            <el-input v-model.trim="form.password" :placeholder="t('passwordPlaceholder')" type="password" autocomplete="new-password" @keyup.enter="handleLogin(formRef)" :show-password="true" class="h-[40px]"></el-input>
                         </el-form-item>
 
                         <el-form-item>
-                            <el-button type="primary" class="mt-[30px] h-[40px] w-full" @click="handleLogin(formRef)" :loading="loading">{{ loading ? t('logging') : t('login') }}</el-button>
+                            <el-button type="primary" class="mt-[30px] !h-[40px] w-full" @click="handleLogin(formRef)" :loading="loading">{{ loading ? t('logging') : t('login') }}</el-button>
                         </el-form-item>
-
                     </el-form>
                 </div>
             </div>
         </el-main>
 
         <!-- 站点端登录 -->
-        <el-main class="login-main w-full login-site-main items-center h-screen justify-evenly bg-[#F8FAFF]" v-else-if="!imgLoading && loginType == 'site'">
-            <div class="flex rounded-2xl overflow-hidden h-screen w-full relative">
-                <template v-if="loginConfig">
-                    <img v-if="loginConfig.site_bg&&!imgLoading" class="hidden h-[100%] lg:block" :src="img(loginConfig.site_bg)" />
-                    <img v-else class="hidden h-[100%] lg:block" src="@/app/assets/images/site_login_bg.png" />
-                </template>
-                <div class="w-[100%] bg-[#F8FAFF] flex flex-col absolute right-0 top-0 h-screen lg:w-[60%]">
-                    <div class="flex justify-center items-center flex-1 h-0">
-                        <div class="site-login-item w-[45%] py-[30px] relative rounded-[13px] max-w-[350px] bg-[#fff]">
-                            <div class="w-[80%] mx-auto">
-                                <h3 class="text-3xl mb-[30px]">{{ t('siteLogin') }}</h3>
-                                <el-form :model="form" ref="formRef" :rules="formRules">
-                                    <el-form-item prop="username">
-                                        <el-input v-model="form.username" @keyup.enter="handleLogin(formRef)" autocomplete="off" class="w-50 m-1 h-[40px]" :placeholder="t('userPlaceholder')">
-                                            <template #prefix>
-                                                <icon name="element User" />
-                                            </template>
-                                        </el-input>
-                                    </el-form-item>
-
-                                    <el-form-item prop="password">
-                                        <el-input type="password" v-model="form.password" @keyup.enter="handleLogin(formRef)"
-                                        autocomplete="new-password" :show-password="true" class="w-50 m-1 h-[40px]" :placeholder="t('passwordPlaceholder')">
-                                            <template #prefix>
-                                                <icon name="element Lock" />
-                                            </template>
-                                        </el-input>
-                                    </el-form-item>
-
-                                    <el-form-item>
-                                        <el-button type="primary" class="mt-[30px] h-[40px] w-full" @click="handleLogin(formRef)" :loading="loading">{{ loading ? t('logging') :
-                                            t('login') }}</el-button>
-                                    </el-form-item>
-                                </el-form>
-                            </div>
-                        </div>
+        <el-main class="login-main w-full mt-[120px] justify-center h-0" v-else-if="!imgLoading && loginType == 'site'">
+            <div>
+                <div class="login-main-left flex flex-col items-center justify-center">
+                    <div class="w-[130px] h-[40px] overflow-hidden" v-if="webSite.icon">
+                        <el-image class="w-full h-full" :src="img(webSite.icon)" fit="contain">
+                            <template #error>
+                                <div class="flex justify-center items-center w-full h-full"><img class="max-w-[130px]" src="@/app/assets/images/logo.default.png" alt=""  object-fit="contain"></div>
+                            </template>
+                        </el-image>
                     </div>
-
-                    <div class="flex items-center justify-center mt-[20px] text-[#999] text-sm pb-8 " v-if="copyright">
-                        <a :href="copyright.gov_url" v-if="copyright.gov_record" class="flex" target="_blank">
-                            <img src="@/app/assets/images/gov_icon.png" alt="" class="h-[20px] mr-1">
-                            <span class="mr-3">公安备案号:{{ copyright.gov_record }}</span>
-                        </a>
-                        <a href="https://beian.miit.gov.cn/" target="_blank" v-if="copyright.icp">
-                            <span class="mr-3">备案号:{{ copyright.icp }}</span>
-                        </a>
-                        <a :href="copyright.copyright_link" target="_blank">
-                            <span class="mr-3" v-if="copyright.company_name">{{ copyright.company_name }}</span>
-                            <span class="mr-3" v-if="copyright.copyright_desc">©{{ copyright.copyright_desc }}</span>
-                        </a>
-                    </div>
+                    <div class="text-[30px] mt-[10px]">{{ webSite.site_name || t('siteTitle') }}</div>
                 </div>
+                <div class="login flex flex-col w-[400px] mt-[60px] h-[350px] rounded-[10px] py-[20px] px-[40px]">
+                    <h3 class="text-center mt-[20px] text-[24px]">{{ t('欢迎登录') }}</h3>
+                    <el-form :model="form" ref="formRef" :rules="formRules" class="mt-[30px] formtwo">
+                        <el-form-item prop="username">
+                            <el-input v-model.trim="form.username" :placeholder="t('userPlaceholder')" autocomplete="off" :input-style="{boxShadow: 'none'}" @keyup.enter="handleLogin(formRef)" class="h-[40px]">
+                                <template #prefix>
+                                    <img class="max-w-[20px]" src="@/app/assets/images/login/username.png" alt="" object-fit="contain">
+                                </template>
+                            </el-input>
+                        </el-form-item>
+
+                        <el-form-item prop="password" class="mt-[30px]">
+                            <el-input v-model.trim="form.password" :placeholder="t('passwordPlaceholder')" type="password" autocomplete="new-password" @keyup.enter="handleLogin(formRef)" :show-password="true" class="h-[40px]">
+                                <template #prefix>
+                                    <img class="max-w-[20px]" src="@/app/assets/images/login/password.png" alt="" object-fit="contain">
+                                </template>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" class="mt-[30px] !h-[40px] w-full" @click="handleLogin(formRef)" :loading="loading">{{ loading ? t('logging') : t('login') }}</el-button>
+                        </el-form-item>
+                    </el-form>
+                </div> 
             </div>
+            
         </el-main>
 
-        <div class="flex items-center justify-center mt-[20px] text-[#999] text-sm pb-8" v-if="copyright && loginType == 'admin'">
-            <a :href="copyright.gov_url" v-if="copyright.gov_record" class="flex" target="_blank">
-                <img src="@/app/assets/images/gov_icon.png" alt="" class="h-[20px] mr-1">
-                <span class="mr-3">公安备案号:{{ copyright.gov_record }}</span>
-            </a>
-            <a href="https://beian.miit.gov.cn/" target="_blank" v-if="copyright.icp">
-                <span class="mr-3">备案号:{{ copyright.icp }}</span>
-            </a>
+        <div class="flex items-center justify-center mt-[20px] pb-[20px] text-sm text-[#666]" v-if="copyright">
             <a :href="copyright.copyright_link" target="_blank">
+                <span class="mr-3" v-if="copyright.copyright_desc">{{ copyright.copyright_desc }}</span>
                 <span class="mr-3" v-if="copyright.company_name">{{ copyright.company_name }}</span>
-                <span class="mr-3" v-if="copyright.copyright_desc">©{{ copyright.copyright_desc }}</span>
+            </a>
+            <a href="https://beian.miit.gov.cn/" v-if="copyright.icp" target="_blank">
+                <span class="mr-3">{{ copyright.icp }}</span>
+            </a>
+            <a :href="copyright.gov_url" v-if="copyright.gov_record" target="_blank">
+                <span class="mr-3">{{ copyright.gov_record }}</span>
             </a>
         </div>
 
@@ -139,14 +108,15 @@ const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
 const copyright = ref(null)
+const systemStore = useSystemStore()
 
 getWebCopyright().then(({ data }) => {
     copyright.value = data
 })
-
 route.redirectedFrom && (route.query.redirect = route.redirectedFrom.path)
-
 const webSite = computed(() => useSystemStore().website)
+
+
 // 判断登录页面[平台或者站点]
 const loginType = ref(getAppType())
 
@@ -164,10 +134,11 @@ const form = reactive({
 
 // 获取登录配置信息
 const loginConfig = ref(null)
-const getLoginConfigFn = async (id: number = 0) => {
+const getLoginConfigFn = async () => {
     imgLoading.value = true
     const data = await (await getLoginConfig()).data
     loginConfig.value = data
+    
     imgLoading.value = false
 }
 getLoginConfigFn()
@@ -211,46 +182,35 @@ const loginFn = (data = {}) => {
 
 <style lang="scss">
 .login-wrap {
-    background-image: url("@/app/assets/images/login/login_index_bg.png");
+    background-image: url("@/app/assets/images/login/login_index_bg.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }
 
-.login-site-main {
-    padding: 0 !important;
-}
-
-.site-warp {
-    background-image: url("@/app/assets/images/login/site_bg.png");
-    background-color: #fff;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-}
-
 .site-login-wrap {
-    // background-image: url('@/app/assets/images/back_login.jpg');
-    // background-repeat: no-repeat;
-    // background-size: cover;
-}
-
-.input-with-select .el-input-group__prepend {
-    background-color: var(--el-fill-color-blank);
-    padding: 0 15px;
+    background-image: url("@/app/assets/images/login/login_bg.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .login-main {
     display: flex !important;
-}
 
-.login {
-    background: var(--el-bg-color);
-}
+    .login {
+        background: var(--el-bg-color);
+    }
 
-.admin_name {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
+    .el-form-item__error {
+        top : 45px;
+    }
+    
+
+}
+.formtwo .el-input__wrapper{
+        // border: none !important;
+        box-shadow: none !important;
+        border-bottom: 1px solid #DCDEE0 !important;
+        padding:10px 0  !important;
 }
 
 @media only screen and (max-width: 750px) {

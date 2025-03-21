@@ -7,7 +7,7 @@ import com.niu.shop.mapper.coupon.ShopCouponMapper;
 import com.niu.shop.service.core.marketing.ICoreCouponService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 @Service

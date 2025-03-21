@@ -1,6 +1,7 @@
 package com.niu.core.service.core.wxoplatform;
 
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
+import com.niu.core.service.admin.wxoplatform.vo.OplatformConfigVo;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
 
 /**
@@ -22,4 +23,9 @@ public interface ICoreOplatformConfigService {
      */
     void setOplatformConfig(OplatformConfigParam oplatformConfigParam);
 
+    /**
+     * 查询微信开放平台配置
+     * @return
+     */
+    OplatformConfigVo getWxOplatformConfig();
 }

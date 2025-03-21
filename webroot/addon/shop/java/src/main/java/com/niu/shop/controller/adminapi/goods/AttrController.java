@@ -10,7 +10,7 @@ import com.niu.shop.service.admin.goods.vo.ShopGoodsAttrListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class AttrController {
      * @return Result<ShopGoodsAttrInfoVo>
      */
     @GetMapping("/{id}")
-    public Result info(@Validated @PathVariable Integer id) {
+    public Result info(@Validated @PathVariable("id") Integer id) {
         ShopGoodsAttrInfoVo info = goodsAttrService.info(id);
         return Result.success(ObjectUtil.defaultIfNull(info, new LinkedList<>()));
     }
@@ -76,7 +76,7 @@ public class AttrController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopGoodsAttrParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopGoodsAttrParam editParam) {
         goodsAttrService.edit(id, editParam);
         return Result.success();
     }
@@ -87,7 +87,7 @@ public class AttrController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         goodsAttrService.del(id);
         return Result.success();
     }

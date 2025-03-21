@@ -29,7 +29,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +54,7 @@ public class CoreSpringContextListener implements ApplicationListener<ContextRef
     @Autowired
     private ApplicationEventPublisher publisher;
 
-    @Resource
+    @Autowired
     private SiteMapper siteMapper;
 
     @Override

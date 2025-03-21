@@ -6,7 +6,6 @@
   "author": "niucloud",
   "type": "app",
   "support_app": "",
-  "support_version": "0.0.3",
   "jar": "shop.jar",
   "mainClass": "com.niu.shop.WebApplication"
 }

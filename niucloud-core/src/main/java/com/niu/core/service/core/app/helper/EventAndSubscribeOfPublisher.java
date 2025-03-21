@@ -35,7 +35,7 @@ public class EventAndSubscribeOfPublisher {
             applicationEventPublisher.publishEvent(businessEvent);
         } else {
             // 进行授权控制
-            Set<String> addonNameSet = CoreSiteServiceFactory.getCoreSiteGroupService().getAddonNamesBySiteId(businessEvent.getSiteId());
+            List<String> addonNameSet = CoreSiteServiceFactory.getCoreSiteService().getAddonKeysBySiteId(businessEvent.getSiteId());
             businessEvent.addAppSign(new ArrayList<>(addonNameSet));
             ApplicationEventPublisher applicationEventPublisher = SpringContext.getApplicationEventPublisher();
             applicationEventPublisher.publishEvent(businessEvent);
@@ -124,7 +124,7 @@ public class EventAndSubscribeOfPublisher {
             return CallbackPublisher.publish(businessEvent);
         } else {
             // 进行授权控制
-            Set<String> addonNameSet = CoreSiteServiceFactory.getCoreSiteGroupService().getAddonNamesBySiteId(businessEvent.getSiteId());
+            List<String> addonNameSet = CoreSiteServiceFactory.getCoreSiteService().getAddonKeysBySiteId(businessEvent.getSiteId());
             businessEvent.addAppSign(new ArrayList<>(addonNameSet));
             return CallbackPublisher.publish(businessEvent);
         }

@@ -1,6 +1,7 @@
 package com.niu.recharge.service.api.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.niu.recharge.service.core.vo.RechargeGiftContentVo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,5 +23,5 @@ public class RechargeListVo {
     @JsonProperty("growth")
     private Integer growth;
     @JsonProperty("gift_content")
-    private List<?> giftContent;
+    private List<RechargeGiftContentVo> giftContent;
 }

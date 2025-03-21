@@ -14,7 +14,7 @@ import com.niu.core.service.admin.home.vo.UserCreateSiteVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -62,7 +62,7 @@ public class SiteController {
      * @return Result<Object>
      */
     @PutMapping("/site/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody SiteParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody SiteParam editParam) {
         authSiteService.edit(id, editParam);
         return Result.success();
     }

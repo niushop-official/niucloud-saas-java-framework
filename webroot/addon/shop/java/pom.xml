@@ -28,12 +28,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>recharge</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -90,8 +84,8 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                            </tasks>
+                            <target>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

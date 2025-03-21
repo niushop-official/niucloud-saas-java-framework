@@ -9,7 +9,7 @@ import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.core.goods.ICoreGoodsService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreGoodsServiceImpl implements ICoreGoodsService {

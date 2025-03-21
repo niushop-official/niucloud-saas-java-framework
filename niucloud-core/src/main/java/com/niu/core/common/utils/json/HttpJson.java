@@ -2,7 +2,7 @@ package com.niu.core.common.utils.json;
 
 import com.alibaba.fastjson2.JSONObject;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class HttpJson {

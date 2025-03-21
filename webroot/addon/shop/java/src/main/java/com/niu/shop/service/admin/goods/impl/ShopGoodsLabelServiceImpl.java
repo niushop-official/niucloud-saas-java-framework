@@ -14,6 +14,7 @@ import com.niu.shop.entity.goods.ShopGoodsBrand;
 import com.niu.shop.entity.goods.ShopGoodsLabel;
 import com.niu.shop.mapper.goods.ShopGoodsLabelMapper;
 import com.niu.shop.service.admin.goods.param.EditGoodsLabelSortParam;
+import com.niu.shop.service.admin.goods.param.EditGoodsLabelStatusParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsLabelParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsLabelSearchParam;
 import com.niu.shop.service.admin.goods.IShopGoodsLabelService;
@@ -22,7 +23,7 @@ import com.niu.shop.service.admin.goods.vo.ShopGoodsLabelListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -177,6 +178,21 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
         Assert.notNull(model, "标签不存在!");
 
         model.setSort(editParam.getSort());
+        model.setUpdateTime(System.currentTimeMillis() / 1000);
+
+        shopGoodsLabelMapper.updateById(model);
+    }
+
+    @Override
+    public void modifyStatus(EditGoodsLabelStatusParam editParam) {
+        ShopGoodsLabel model = shopGoodsLabelMapper.selectOne(
+            new QueryWrapper<ShopGoodsLabel>()
+                .eq("label_id",  editParam.getLabelId())
+                .eq("site_id", RequestUtils.siteId()));
+
+        Assert.notNull(model, "标签不存在!");
+
+        model.setStatus(editParam.getStatus());
         model.setUpdateTime(System.currentTimeMillis() / 1000);
 
         shopGoodsLabelMapper.updateById(model);

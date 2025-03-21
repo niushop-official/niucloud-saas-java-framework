@@ -18,6 +18,7 @@ public enum WeappVersionStatusEnum {
     APPLET_AUDITING("审核中", 2),
     APPLET_UPLOAD_FAIL("上传失败", -1),
     APPLET_AUDIT_FAIL("审核未通过", -2),
+    APPLET_PUBLISHED("已发布", 3)
     ;
     private final String name;
     private final Integer status;

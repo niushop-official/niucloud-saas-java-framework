@@ -20,7 +20,7 @@ import com.niu.core.service.core.diy.vo.StartUpPageConfigVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -35,10 +35,19 @@ public class CoreDiyConfigService implements ICoreDiyConfigService {
     @Resource
     ICoreConfigService coreConfigService;
 
+    private static JSONArray bottomJson;
+
+    private static JSONArray getBottomJson() {
+        if (bottomJson == null) {
+            JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+            bottomJson = jsonModuleLoader.mergeContentToArray("diy/bottom.json");
+        }
+        return bottomJson;
+    }
+
     @Override
     public List<BottomConfigVo> getBottomList() {
-        JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        JSONArray bottomJson = jsonModuleLoader.mergeContentToArray("diy/bottom.json");
+        JSONArray bottomJson = getBottomJson();
 
         List<BottomConfigVo> list = new ArrayList<>();
         for (Object bottomMap : bottomJson) {

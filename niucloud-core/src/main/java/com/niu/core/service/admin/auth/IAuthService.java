@@ -4,7 +4,7 @@ import cn.hutool.json.JSONArray;
 import com.niu.core.service.admin.auth.param.EditAuthUserParam;
 import com.niu.core.service.admin.auth.vo.AuthUserInfoVo;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 

@@ -11,6 +11,7 @@ import com.niu.core.common.exception.AuthException;
 import com.niu.core.service.core.captcha.ICoreCaptchaImgService;
 import com.niu.core.service.core.captcha.param.CoreCaptchaValiDateParam;
 import com.niu.core.service.core.captcha.vo.CoreCaptchaInfoVo;
+import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CoreCaptchaImgServiceImpl implements ICoreCaptchaImgService {
 
-    @Autowired
+    @Resource
     CaptchaService captchaService;
     /**
      * 创建验证码

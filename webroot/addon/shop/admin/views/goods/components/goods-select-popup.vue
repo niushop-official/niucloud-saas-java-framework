@@ -10,7 +10,7 @@
                 </div>
             </slot>
         </div>
-        <el-dialog v-model="showDialog" :title="t('goodsSelectPopupSelectGoodsDialog')" width="1000px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+        <el-dialog v-model="showDialog" :title="t('goodsSelectPopupSelectGoodsDialog')" width="1000px" :destroy-on-close="true" :close-on-click-modal="false">
 
             <el-form :inline="true" :model="goodsTable.searchParam" ref="searchFormRef">
                 <el-form-item prop="select_type" class="form-item-wrap">
@@ -501,7 +501,6 @@ const loadGoodsList = (page: number = 1, callback: any = null) => {
 const setGoodsSelected = () => {
     nextTick(() => {
         if(prop.mode == "spu"){
-            console.log(selectGoods)
             for (let i = 0; i < goodsTable.data.length; i++) {
                 goodsTable.data[i].secondLevelCheckAll = false;
                 if (selectGoods[replacePrefix + goodsTable.data[i].goods_id]) {

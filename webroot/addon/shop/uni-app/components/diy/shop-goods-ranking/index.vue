@@ -10,14 +10,13 @@
 								<text class="text-[30rpx] font-bold" v-if="item.text">{{ item.text }}</text>
 								<text class="text-[30rpx] font-bold" v-else>{{ listGoodsNames[item.rankIds[0]] }}</text>
 							</view>
-
 						</view>
-						<view class="mb-[6rpx] h-[35rpx]" :style="{'color': item.subTitle.textColor}" @click="diyStore.toRedirect(item.subTitle.link)">
-							<text class="text-[24rpx]" v-if="item.subTitle.text">{{item.subTitle.text}}</text>
+						<view class="flex items-center mt-[6rpx]" :style="{'color': item.subTitle.textColor}" @click="diyStore.toRedirect(item.subTitle.link)">
+							<text class="text-[24rpx] font-500" v-if="item.subTitle.text">{{item.subTitle.text}}</text>
 							<text class="iconfont iconyouV6xx !text-[24rpx]" v-if="item.subTitle.text"></text>
 						</view>
-						<view class="mt-[30rpx]">
-							<view class="flex bg-[#fff] p-[10rpx] rounded-[16rpx] mb-[16rpx]"  v-for="(goods, gIndex) in listGoods[item.rankIds[0]]"  :class="{'mb-0': gIndex === listGoods[item.rankIds[0]].length - 1}" @click="toDetail(goods.goods_id)">
+						<view class="mt-[24rpx]">
+							<view class="flex bg-[rgba(255,255,255,0.94)] p-[10rpx] rounded-[16rpx] mb-[16rpx]"  v-for="(goods, gIndex) in listGoods[item.rankIds[0]]"  :class="{'mb-0': gIndex === listGoods[item.rankIds[0]].length - 1}" @click="toDetail(goods.goods_id)">
 								<view class="relative w-[130rpx] h-[130rpx] mr-[16rpx]">
 									<image class="absolute top-[6rpx] left-[8rpx] w-[30rpx] h-[36rpx]" :style="{ zIndex:2 }" :src="getRankBadge(goods.rank_num)" mode="aspectFill"></image>
 									<view class="absolute top-[2rpx] left-[-3rpx] flex items-center justify-center w-[50rpx] h-[50rpx]"  :style="{ zIndex: 3 }">
@@ -40,7 +39,6 @@
 										<view>
 											<text class="iconfont icongouwuche3 text-[var(--primary-color)] border-[2rpx] border-solid border-[var(--primary-color)] rounded-[50%] text-[22rpx] p-[6rpx]"></text>
 										</view>
-
 									</view>
 								</view>
 							</view>
@@ -61,7 +59,7 @@
     import { getRankComponentsGoodsList } from '@/addon/shop/api/rank'
 	import { useGoods } from '@/addon/shop/hooks/useGoods'
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount']);
+	const props = defineProps(['component', 'index']);
 	const diyGoods = useGoods();
 	const diyStore = useDiyStore();
 
@@ -106,13 +104,6 @@
 		if (diyComponent.value.bottomElementRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomElementRounded * 2 + 'rpx;';
 		return style;
 	}
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	watch(
 	    () => diyComponent.value,

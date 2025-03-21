@@ -16,7 +16,7 @@ import com.niu.core.service.core.sms.ICoreSmsService;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreSmsServiceImpl implements ICoreSmsService {
@@ -56,7 +56,7 @@ public class CoreSmsServiceImpl implements ICoreSmsService {
         updateModel.setResult(ObjectUtil.defaultIfNull(result.getFailReason(), ""));
         sysNoticeSmsLogMapper.updateById(updateModel);
 
-        if (result.getStatus().equals(SmsStatusEnum.FAIL.getStatus())) {
+        if (result.getStatus().getStatus().equals(SmsStatusEnum.FAIL.getStatus())) {
             throw new CommonException(updateModel.getResult());
         }
     }

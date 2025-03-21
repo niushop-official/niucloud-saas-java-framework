@@ -261,6 +261,9 @@ public class BootConfig {
         if (webroot.contains("webroot")) {
             webroot = webroot.substring(0, webroot.indexOf("webroot"));
         }
+        if (webroot.startsWith("nested:/")) {
+            webroot = webroot.substring(7);
+        }
         return webroot;
     }
 

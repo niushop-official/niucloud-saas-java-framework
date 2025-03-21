@@ -129,6 +129,16 @@
                         </el-form-item>
                         <div class="mt-[10px] ml-[120px] text-[12px] text-[#999] leading-[20px]">{{ t('stockNumTips') }}</div>
                     </div>
+                    <!-- 万能表单 -->
+                    <el-form-item v-if="activeMenu === 'diy_form'" :label="t('diyForm')">
+                        <el-select v-model="formData.form_id" :placeholder="t('diyFormPlaceholder')" clearable>
+                            <el-option v-for="item in diyFormOptions" :key="item.form_id" :label="item.page_title" :value="item.form_id" />
+                        </el-select>
+                        <div class="ml-[10px]">
+                            <span class="cursor-pointer text-primary mr-[10px]" @click="refreshDiyForm(true)">{{ t('refresh') }}</span>
+                            <span class="cursor-pointer text-primary" @click="toDiyFormEvent">{{ t('addDiyForm') }}</span>
+                        </div>
+                    </el-form-item>
                 </el-col>
             </el-row>
         </el-form>
@@ -157,6 +167,7 @@ import {
     goodsBatchSet
 } from '@/addon/shop/api/goods'
 import { getPosterList } from '@/app/api/poster'
+import { getDiyFormList } from '@/app/api/diy_form'
 import {getShopDeliveryList,getShippingTemplateList} from '@/addon/shop/api/delivery'
 
 const emit = defineEmits(['load'])
@@ -173,6 +184,7 @@ const initialFormData = {
     label_ids: [],
     service_ids: [],
     poster_id: '',
+    form_id: '',
     brand_id: '',
     goods_category: [],
     virtual_sale_num: 0,
@@ -309,6 +321,7 @@ const confirm = async (formEl: FormInstance | undefined) => {
                         label_ids: [],
                         service_ids: [],
                         poster_id: '',
+                        form_id: '',
                         brand_id: '',
                         goods_category: [],
                         virtual_sale_num: '',
@@ -561,6 +574,39 @@ const refreshDeliveryTemplate = (bool = false) => {
 }
 
 refreshDeliveryTemplate()
+
+/** ***************** 万能表单-start *************************/
+// 万能表单列表下拉框
+const diyFormOptions = reactive([])
+// 跳转到万能表单列表，添加表单
+const toDiyFormEvent = () => {
+    const url = router.resolve({
+        path: '/diy_form/list'
+    })
+    window.open(url.href)
+}
+
+// 刷新万能表单
+const refreshDiyForm = (bool = false) => {
+    getDiyFormList({
+        type: 'DIY_FORM_GOODS_DETAIL',
+        status: 1
+    }).then((res) => {
+        const data = res.data
+        if (data) {
+            diyFormOptions.splice(0, diyFormOptions.length, ...data)
+            if (bool) {
+                ElMessage({
+                    message: t('refreshSuccess'),
+                    type: 'success'
+                })
+            }
+        }
+    })
+}
+
+refreshDiyForm()
+/** *****************万能表单-end *************************/
 
 defineExpose({
     showDialog,

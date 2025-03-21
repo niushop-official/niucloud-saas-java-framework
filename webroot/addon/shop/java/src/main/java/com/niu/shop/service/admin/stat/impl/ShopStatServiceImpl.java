@@ -21,7 +21,7 @@ import com.niu.shop.service.core.shop.ICoreStatService;
 import com.niu.shop.service.core.shop.vo.StatDataVo;
 import com.niu.shop.service.core.shop.vo.StatVo;
 import org.springframework.stereotype.Service;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Arrays;
 
 

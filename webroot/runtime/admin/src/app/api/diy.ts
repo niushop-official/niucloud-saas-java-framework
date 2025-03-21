@@ -60,7 +60,7 @@ export function editDiyPage(params: Record<string, any>) {
  * @param params
  */
 export function setUseDiyPage(params: Record<string, any>) {
-	return request.put(`diy/use`, params, {showSuccessMessage: true})
+	return request.put(`diy/use/${params.id}`, params, {showSuccessMessage: true})
 }
 
 /**
@@ -189,4 +189,64 @@ export function changeTemplate(params: Record<string, any>) {
  */
 export function getApps(params: Record<string, any>) {
 	return request.get(`diy/apps`)
+}
+
+/**
+ * 复制模版页面
+ * @param params
+ */
+export function copyDiy(params: Record<string, any>) {
+    return request.post(`diy/copy`, params, { showSuccessMessage: true })
+}
+
+/***************************************************** 主题风格 ****************************************************/
+
+
+/**
+ * 获取默认主题配色
+ * @param params
+ */
+export function getDefaultTheme(params: Record<string, any>) {
+    return request.get(`diy/theme/color`, {params})
+}
+
+
+/**
+ * 获取自定义主题配色
+ * @param params
+ */
+export function getDiyTheme(params: Record<string, any>) {
+    return request.get(`diy/theme`, {params})
+}
+
+/**
+ * 添加配色
+ * @param params
+ */
+export function addTheme(params: Record<string, any>) {
+    return request.post(`diy/theme/add`, params)
+}
+
+/**
+ * 编辑配色
+ * @param params
+ */
+export function editTheme(params: Record<string, any>) {
+    return request.put(`diy/theme/edit/${params.id}`, params, {showSuccessMessage: true})
+}
+
+/**
+ * 删除配色
+ * @param params
+ */
+export function deleteTheme(id: number) {
+    return request.delete(`diy/theme/delete/${id}`, {showSuccessMessage: true})
+}
+
+/**
+ * 设置主题配色 
+ * @param params
+ */
+export function setDiyTheme(params: Record<string, any>) {
+    return request.post(`diy/theme`, params, { showSuccessMessage: true })
 }

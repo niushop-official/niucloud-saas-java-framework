@@ -11,7 +11,7 @@ import com.niu.core.service.admin.member.vo.MemberAddressListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class MemberAddressController {
      * @return Result<MemberAddressInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<MemberAddressInfoVo> info(@PathVariable Integer id) {
+    public Result<MemberAddressInfoVo> info(@PathVariable("id") Integer id) {
         MemberAddressInfoVo info = memberAddressService.info(id);
         return Result.success(info);
     }
@@ -68,7 +68,7 @@ public class MemberAddressController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody MemberAddressParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody MemberAddressParam editParam) {
         memberAddressService.edit(id, editParam);
         return Result.success();
     }
@@ -80,7 +80,7 @@ public class MemberAddressController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         memberAddressService.del(id);
         return Result.success();
     }

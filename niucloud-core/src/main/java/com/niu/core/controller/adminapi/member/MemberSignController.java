@@ -13,7 +13,7 @@ import com.niu.core.service.admin.member.vo.MemberSignListVo;
 import com.niu.core.service.admin.member.vo.SignConfigVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 会员签到控制器

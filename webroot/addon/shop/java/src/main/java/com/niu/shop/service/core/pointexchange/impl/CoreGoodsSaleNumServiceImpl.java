@@ -12,7 +12,7 @@ import com.niu.shop.service.core.pointexchange.ICoreGoodsSaleNumService;
 import com.niu.shop.service.core.pointexchange.param.ExchangeDataChangeParam;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreGoodsSaleNumServiceImpl implements ICoreGoodsSaleNumService {

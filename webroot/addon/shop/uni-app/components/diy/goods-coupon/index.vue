@@ -59,7 +59,7 @@
 					<text v-if="diyComponent.btnText" @click="toLink('/addon/shop/pages/coupon/list')" class="bg-[#fff] text-[#FF4142] text-[22rpx] min-w-[100rpx] px-[24rpx] box-border h-[50rpx] leading-[50rpx] text-center coupon-buy-btn mt-auto">{{diyComponent.btnText}}</text>
 				</view>
 			</view>
-			
+
 			<view v-else-if="diyComponent.style == 'style-3'" class="coupon-wrap style-3 relative" :style="{'background-image':'url(' + img('addon/shop/diy/goods_coupon/style3_bg.jpg') + ')','background-size':'100% 204rpx','background-repeat':'no-repeat'}">
 				<view class="desc flex flex-col">
 					<text class="text-[30rpx] text-[#fff] font-500">{{ diyComponent.couponTitle }}</text>
@@ -124,8 +124,8 @@
 	import { useLogin } from '@/hooks/useLogin';
 	import useMemberStore from '@/stores/member'
     import { getShopCouponComponents,getCoupon } from '@/addon/shop/api/coupon';
-	
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount']);
+
+	const props = defineProps(['component', 'index']);
 	const diyStore = useDiyStore();
 	const memberStore = useMemberStore()
 	const userInfo = computed(() => memberStore.info)
@@ -155,21 +155,13 @@
 		if (diyComponent.value.bottomRounded) style += 'border-bottom-right-radius:' + diyComponent.value.bottomRounded * 2 + 'rpx;';
 		return style;
 	})
-	
-	
+
 	const couponStyle4Css = computed(()=>{
 		var style = '';
 		if (diyComponent.value.componentStartBgColor && diyComponent.value.componentEndBgColor) style += `background:linear-gradient(${diyComponent.value.componentGradientAngle},${diyComponent.value.componentStartBgColor},${diyComponent.value.componentEndBgColor});`;
 		else style += 'background-color:' + (diyComponent.value.componentStartBgColor || diyComponent.value.componentEndBgColor) + ';';
 		return style;
 	})
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
     const toLink = (url: any)=>{
         if (diyStore.mode == 'decorate') return;
@@ -192,7 +184,7 @@
 	        // }
         })
     }
-	
+
 	const couponItemLink = (data:any)=> {
 		// redirect({ url: '/addon/shop/pages/coupon/detail', param: { coupon_id: data.id } })
 		collecting(data.id)
@@ -219,6 +211,7 @@
             getShopCouponListFn();
         }
     }
+
 	const collecting = (coupon_id: any) => {
 		if (diyStore.mode == 'decorate') return;
 	    if (!userInfo.value) {

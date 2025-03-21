@@ -8,7 +8,7 @@ import com.niu.recharge.service.admin.param.RechargeRefundSearchParam;
 import com.niu.recharge.service.admin.vo.RechargeRefundStatVo;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Map;
 
 @RestController

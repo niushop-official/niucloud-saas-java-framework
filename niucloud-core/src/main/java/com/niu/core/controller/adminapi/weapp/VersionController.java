@@ -13,7 +13,7 @@ import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -64,7 +64,7 @@ public class VersionController {
      * @return Result
      */
     @GetMapping("/upload/{key}")
-    public Result uploadLog(@PathVariable String key) {
+    public Result uploadLog(@PathVariable("key") String key) {
         return Result.success(weappVersionService.getWeappCompileLog(key));
     }
 }

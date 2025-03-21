@@ -12,7 +12,7 @@ import com.niu.core.service.admin.member.vo.MemberLevelListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ public class MemberLevelController {
      * @return Result<MemberLevelInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<MemberLevelInfoVo> info(@PathVariable Integer id) {
+    public Result<MemberLevelInfoVo> info(@PathVariable("id") Integer id) {
         MemberLevelInfoVo info = memberLevelService.info(id);
         return Result.success(info);
     }
@@ -67,7 +67,7 @@ public class MemberLevelController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody MemberLevelParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody MemberLevelParam editParam) {
         memberLevelService.edit(id, editParam);
         return Result.success();
     }
@@ -78,7 +78,7 @@ public class MemberLevelController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         memberLevelService.del(id);
         return Result.success();
     }

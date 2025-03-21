@@ -12,7 +12,7 @@ import com.niu.core.service.admin.auth.vo.LoginResultVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/sys/config/")

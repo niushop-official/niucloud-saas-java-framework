@@ -3,6 +3,7 @@ package com.niu.core.service.admin.site.impl;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -16,6 +17,7 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
@@ -36,6 +38,7 @@ import com.niu.core.service.admin.site.param.SiteAddParam;
 import com.niu.core.service.admin.site.param.SiteEditParam;
 import com.niu.core.service.admin.site.param.SiteSearchParam;
 import com.niu.core.service.admin.site.param.SiteUserParam;
+import com.niu.core.service.admin.site.vo.ShowAppListVo;
 import com.niu.core.service.admin.site.vo.SiteAdminVo;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.site.vo.SiteListVo;
@@ -51,11 +54,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import jakarta.annotation.Resource;
+
+import java.util.*;
 
 
 /**
@@ -67,7 +68,7 @@ public class SiteServiceImpl implements ISiteService {
     /**
      * 站点tag
      */
-    public static String cacheTagName = CacheTagEnum.SITE_CASH.getTagName();
+    public static String cacheTagName = CacheTagEnum.SITE_CACHE.getTagName();
 
     /**
      * 是否使用缓存
@@ -295,7 +296,7 @@ public class SiteServiceImpl implements ISiteService {
         model.setStatus(model.getExpireTime() > DateUtils.currTime() ? SiteStatusEnum.ON.getCode() : SiteStatusEnum.EXPIRE.getCode());
         siteMapper.updateById(model);
 
-        coreSiteService.clearSiteCache();
+        coreSiteService.clearSiteCache(id);
 
         SiteEditAfterEvent event = new SiteEditAfterEvent();
         event.setSiteId(model.getSiteId());
@@ -321,6 +322,7 @@ public class SiteServiceImpl implements ISiteService {
 
         Assert.notNull(model, "数据不存在!");
         model.setStatus(SiteStatusEnum.DELETE.getCode());
+        coreSiteService.clearSiteCache(id);
         siteMapper.updateById(model);
     }
 
@@ -330,6 +332,7 @@ public class SiteServiceImpl implements ISiteService {
         model.setSiteId(siteId);
         model.setStatus(SiteStatusEnum.CLOSE.getCode());
         siteMapper.updateById(model);
+        coreSiteService.clearSiteCache(siteId);
     }
 
     @Override
@@ -338,6 +341,7 @@ public class SiteServiceImpl implements ISiteService {
         model.setSiteId(siteId);
         model.setStatus(SiteStatusEnum.ON.getCode());
         siteMapper.updateById(model);
+        coreSiteService.clearSiteCache(siteId);
     }
 
     /**
@@ -442,7 +446,59 @@ public class SiteServiceImpl implements ISiteService {
         event.setName("SiteEditAfterEvent");
         event.setSite(site);
         event.setSiteGroup(siteGroup);
+        coreSiteService.clearSiteCache(site.getSiteId());
         EventAndSubscribeOfPublisher.publishAll(event);
+    }
+
+    @Override
+    public Map<String, ShowAppListVo> getShowAppTools() {
+        Map<String, ShowAppListVo> map = new HashMap<>();
+        ShowAppListVo addonVo = new ShowAppListVo();
+        addonVo.setTitle("运营工具");
+        addonVo.setList(new ArrayList<>());
+        map.put("addon", addonVo);
+        ShowAppListVo toolsVo = new ShowAppListVo();
+        toolsVo.setTitle("系统工具");
+        toolsVo.setList(new ArrayList<>());
+        map.put("tool", toolsVo);
+        JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+        JSONObject appConfig = jsonModuleLoader.mergeResultElement("sys/show_app.json");
+
+        List<String> appKeys = new ArrayList<>();
+        if (ObjectUtil.isNotEmpty(appConfig)) {
+            for (String key : appConfig.keySet()) {
+                JSONArray jsonArray = appConfig.getJSONArray(key);
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    ShowAppListVo.AppInfo appInfo = new ShowAppListVo.AppInfo();
+                    appInfo.setTitle(jsonObject.getStr("title"));
+                    appInfo.setKey(jsonObject.getStr("key"));
+                    appInfo.setDesc(jsonObject.getStr("desc"));
+                    appInfo.setIcon(jsonObject.getStr("icon"));
+                    appInfo.setUrl(jsonObject.getStr("url"));
+                    if (key.equals("addon")) {
+                        addonVo.getList().add(appInfo);
+                    } else if (key.equals("tool")) {
+                        toolsVo.getList().add(appInfo);
+                    }
+                    appKeys.add(appInfo.getKey());
+                }
+
+            }
+        }
+        List<Addon> siteAddons = this.getSiteAddons();
+        for (Addon addon : siteAddons) {
+            if(!appKeys.contains(addon.getKey()))
+            {
+                ShowAppListVo.AppInfo appInfo = new ShowAppListVo.AppInfo();
+                appInfo.setTitle(addon.getTitle());
+                appInfo.setKey(addon.getKey());
+                appInfo.setDesc(addon.getDesc());
+                appInfo.setIcon(addon.getIcon());
+                addonVo.getList().add(appInfo);
+            }
+        }
+        return map;
     }
 
 }

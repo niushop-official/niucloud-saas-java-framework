@@ -45,7 +45,7 @@
 								</view>
 							</view>
 						</view>
-						<view class="flex justify-between items-center mt-[20rpx]">
+						<view class="flex justify-between items-center my-[20rpx]">
 							<view class="text-[28rpx]">购买数量</view>
 							<text v-if="maxBuyShow > 0 && minBuyShow > 1" class="ml-[20rpx] mr-[auto] text-[24rpx] text-[var(--primary-color)]">
 								({{ minBuyShow }}{{ goodsDetail.goods.unit }}起售，限购{{ maxBuyShow }}{{ goodsDetail.goods.unit }})
@@ -68,6 +68,9 @@
 									</view>
 								</template>
 							</u-number-box>
+						</view>
+						<view class="mt-[40rpx]">
+							<diy-form ref="diyFormRef" :form_id="goodsDetail.goods.form_id" :storage_name="'diyFormStorageByGoodsDetail_' + goodsDetail.sku_id" />
 						</view>
 					</scroll-view>
 					<view class="px-[20rpx]">
@@ -102,6 +105,7 @@
 	import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
 	import { cloneDeep } from 'lodash-es'
 	import { t } from '@/locale'
+	import diyForm from '@/addon/components/diy-form/index.vue'
 
 	const props = defineProps(['goodsDetail']);
 	const goodsSkuPop = ref(false);
@@ -182,6 +186,7 @@
 			}
 		},0)
 	}
+
 	const goodsSkuBlurFn = ()=>{
 		setTimeout(() => {
 			if(!buyNum.value || buyNum.value <= minBuy.value ){
@@ -330,8 +335,12 @@
 	const bindMobileRef: any = ref(null)
 	const isBindMobile = ref(uni.getStorageSync('isbindmobile'))
 
+	const diyFormRef: any = ref(null)
+
 	//提交
 	const confirm = ()=> {
+		if(!diyFormRef.value.verify()) return;
+
 		if(buyNum.value < 1) return;
 
         // 检测是否登录

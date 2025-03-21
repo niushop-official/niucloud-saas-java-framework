@@ -7,6 +7,7 @@ import com.niu.core.service.api.wechat.param.WechatAuthParam;
 import com.niu.core.service.api.wechat.param.WechatSyncParam;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
+import com.niu.core.service.core.weapp.vo.IsTradeManagedVo;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +43,6 @@ public interface IWeappService {
      * 查询小程序是否已开通发货信息管理服务
      * @return
      */
-    Map<String, Boolean> getIsTradeManaged();
+    IsTradeManagedVo getIsTradeManaged();
 
 }

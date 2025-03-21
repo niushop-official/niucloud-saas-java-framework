@@ -12,7 +12,7 @@ import com.niu.core.service.core.upload.vo.CoreStorAgeConfigVo;
 import org.springframework.stereotype.Service;
 import springfox.documentation.spring.web.json.Json;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

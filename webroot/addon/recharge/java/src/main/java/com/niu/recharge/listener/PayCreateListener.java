@@ -8,7 +8,7 @@ import com.niu.recharge.enums.OrderStatusEnum;
 import com.niu.recharge.service.core.ICoreRechargeOrderService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 一对多的事件监听，且有返回值

@@ -13,7 +13,7 @@ import com.niu.core.service.admin.wechat.vo.WechatReplyListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 公众号消息回调控制器
@@ -42,7 +42,7 @@ public class ReplyController {
      * 关键字回复详情
      */
     @GetMapping("/keywords/{id}")
-    public Result<WechatReplyInfoVo> keyword(@PathVariable Integer id) {
+    public Result<WechatReplyInfoVo> keyword(@PathVariable("id") Integer id) {
         return Result.success(wechatReplyService.getKeywordInfo(id));
     }
 
@@ -61,7 +61,7 @@ public class ReplyController {
      * @return Result
      */
     @PutMapping("/keywords/{id}")
-    public Result editKeyword(@PathVariable Integer id, @Validated @RequestBody WechatReplyParam editParam) {
+    public Result editKeyword(@PathVariable("id") Integer id, @Validated @RequestBody WechatReplyParam editParam) {
         wechatReplyService.editKeyword(id, editParam);
         return Result.success();
     }
@@ -70,7 +70,7 @@ public class ReplyController {
      * 删除添加关键字回复
      */
     @DeleteMapping("/keywords/{id}")
-    public Result delKeyword(@PathVariable Integer id) {
+    public Result delKeyword(@PathVariable("id") Integer id) {
         wechatReplyService.delKeyword(id);
         return Result.success();
     }

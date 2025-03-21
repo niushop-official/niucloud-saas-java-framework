@@ -1,15 +1,17 @@
 package com.niu.core.common.utils.json;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.config.dataization.AddonModuleContext;
+import com.niu.core.service.core.addon.ICoreAddonService;
+import com.niu.core.service.core.site.ICoreSiteService;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class JsonModuleLoader {
@@ -162,6 +164,35 @@ public class JsonModuleLoader {
     }
 
     /**
+     * 合并结果集
+     * eg:  [{name1:value1}]  [{name2:value2}] 合并后： [{name1:value1},{name2:value2}]
+     *
+     * @param jsonFile
+     * @return
+     */
+    public JSONArray mergeResultSet(Integer siteId, String jsonFile) {
+        final JSONArray jsonArrayResult = new JSONArray();
+        List<String> addonModules = getSiteAddonModules(siteId);
+        for (String addonModule : addonModules) {
+            String jsonString = AddonModuleContext.readResourceAsStreamToText(addonModule, "loader/" + jsonFile);
+            log.info("JSON => " + addonModule + " loader/" + jsonFile + " , result => " + jsonString);
+            if (StrUtil.isNotEmpty(jsonString)) {
+                jsonString = jsonString.trim();
+                try {
+                    if (jsonString.startsWith("[")) {
+                        JSONArray jsonArray = JSONUtil.parseArray(jsonString);
+                        jsonArray.stream().forEach(e -> jsonArrayResult.add(e));
+                    }
+                } catch (Exception e) {
+                    log.error(addonModule + "=>" + jsonFile + " json context error.");
+                    e.printStackTrace();
+                }
+            }
+        }
+        return jsonArrayResult;
+    }
+
+    /**
      * 合并结果元素
      * eg:  {demo1:{name1:value1}}  {demo2:{name2:value2}}  合并后：{demo1:{name1:value1},demo2:{name2:value2}}
      *
@@ -174,7 +205,6 @@ public class JsonModuleLoader {
         log.info("JSON addonModules -> " + addonModules);
         for (String addonModule : addonModules) {
             String jsonString = AddonModuleContext.readResourceAsStreamToText(addonModule, "loader/" + jsonFile);
-//            log.info("JSON => " + addonModule + " loader/" + jsonFile + " , result => " + jsonString);
             if (StrUtil.isNotEmpty(jsonString)) {
                 jsonString = jsonString.trim();
                 try {
@@ -197,6 +227,56 @@ public class JsonModuleLoader {
         return jsonObjectResult;
     }
 
+    /**
+     * 合并结果元素
+     * eg:  {demo1:{name1:value1}}  {demo2:{name2:value2}}  合并后：{demo1:{name1:value1},demo2:{name2:value2}}
+     *
+     * @param jsonFile
+     * @return
+     */
+    public JSONObject mergeResultElement(Integer siteId, String jsonFile) {
+        Set<JSONObject> jsonContentSet = new HashSet<>();
+        List<String> addonModules = getSiteAddonModules(siteId);
+        log.info("JSON addonModules -> " + addonModules);
+        for (String addonModule : addonModules) {
+            String jsonString = AddonModuleContext.readResourceAsStreamToText(addonModule, "loader/" + jsonFile);
+            if (StrUtil.isNotEmpty(jsonString)) {
+                jsonString = jsonString.trim();
+                try {
+                    if (jsonString.startsWith("{")) {
+                        jsonContentSet.add(JSONUtil.parseObj(jsonString));
+                    }
+                } catch (Exception e) {
+                    log.error(addonModule + "=>" + jsonFile + " json context error.");
+                    e.printStackTrace();
+                }
+            }
+        }
+        JSONObject jsonObjectResult = new JSONObject();
+        try {
+            jsonObjectResult = this.mergeJsonForAttribute(jsonContentSet);
+        } catch (Exception e) {
+            log.error("JSON合并异常:" + e.getMessage());
+            e.printStackTrace();
+        }
+        return jsonObjectResult;
+    }
+
+    /**
+     * 获取站点插件
+     * @param siteId
+     * @return
+     */
+    private List<String> getSiteAddonModules(Integer siteId) {
+        List<String> addonModules = new LinkedList<>();
+        addonModules.add("core");
+        if (ObjectUtil.isNull(siteId) || siteId == 0) {
+            addonModules.addAll(SpringContext.bean(ICoreAddonService.class).getInstallAddonList().keySet().stream().toList());
+        } else {
+            addonModules.addAll(SpringContext.bean(ICoreSiteService.class).getAddonKeysBySiteId(siteId));
+        }
+        return addonModules;
+    }
 
     /**
      * 合并结果元素

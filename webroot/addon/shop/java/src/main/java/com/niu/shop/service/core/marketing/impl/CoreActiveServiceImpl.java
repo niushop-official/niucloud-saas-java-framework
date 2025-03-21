@@ -15,7 +15,7 @@ import com.niu.shop.service.core.marketing.ICoreActiveGoodsService;
 import com.niu.shop.service.core.marketing.ICoreActiveService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 @Service

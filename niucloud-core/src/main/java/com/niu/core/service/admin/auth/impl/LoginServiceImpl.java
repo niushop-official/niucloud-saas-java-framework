@@ -28,7 +28,7 @@ import com.niu.core.service.admin.sys.vo.SysUserRoleInfoVo;
 import com.niu.core.service.core.captcha.ICoreCaptchaImgService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 

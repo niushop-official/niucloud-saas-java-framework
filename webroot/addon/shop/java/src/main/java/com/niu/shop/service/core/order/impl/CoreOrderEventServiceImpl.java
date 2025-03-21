@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -338,6 +338,9 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         logParam.setMainId(ObjectUtil.defaultIfNull(orderDeliveryDataParam.getMainId(), 0));
         logParam.setType(OrderLogActionEnum.ORDER_DELIVERY_ACTION.getAction());
         coreOrderLogService.add(logParam);
+
+        // 物流信息上传
+        coreOrderDeliveryService.orderShippingUploadShippingInfo(order);
 
         // 发送消息
         Map<String, Object> noticeParam = new HashMap<String, Object>();

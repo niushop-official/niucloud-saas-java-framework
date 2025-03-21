@@ -28,9 +28,9 @@ public class GetPosterDataListener extends GetPosterDataEventDefiner {
     private ICoreSysConfigService coreSysConfigService;
 
     public GetPosterDataEventDefiner.GetPosterDataResult handleCallback(GetPosterDataEventDefiner.GetPosterDataEvent event) {
-        final Map<String, Object> param = event.getParam();
-        GetPosterDataEventDefiner.GetPosterDataResult result = new GetPosterDataEventDefiner.GetPosterDataResult();
         if (event.getType().equals("friendspay")) {
+            final Map<String, Object> param = event.getParam();
+            GetPosterDataEventDefiner.GetPosterDataResult result = new GetPosterDataEventDefiner.GetPosterDataResult();
             Object tradeId = param.get("id");
             Object tradeType = param.get("type");
             String wapUrl = coreSysConfigService.getSceneDomain(event.getSiteId()).getWapUrl();
@@ -91,22 +91,7 @@ public class GetPosterDataListener extends GetPosterDataEventDefiner {
             result.setData(data);
             return result;
         }
-
-        Member member = memberMapper.selectById(param.getOrDefault("member_id", "").toString());
-        if (member == null) {
-            return new GetPosterDataEventDefiner.GetPosterDataResult();
-        }
-
-        if (member.getNickname().length() > 10) {
-            member.setNickname(member.getNickname().substring(10) + "...");
-        }
-
-        String headimg = Optional.ofNullable(member.getHeadimg()).orElse("static/resource/images/default_headimg.png");
-        member.setHeadimg(headimg);
-
-        Map<String, Object> map = Map.of("nickname", member.getNickname(), "headimg", member.getHeadimg());
-        result.setData(map);
-        return result;
+        return null;
     }
 
     @Autowired

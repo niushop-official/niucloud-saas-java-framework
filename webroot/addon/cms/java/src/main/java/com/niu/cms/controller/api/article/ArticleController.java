@@ -11,7 +11,7 @@ import com.niu.core.common.domain.Result;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 @RestController
@@ -39,7 +39,7 @@ public class ArticleController {
      * @return Result<ArticleInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ArticleInfoVo> info(@PathVariable Integer id) {
+    public Result<ArticleInfoVo> info(@PathVariable("id") Integer id) {
         ArticleInfoVo info = articleService.info(id);
         return Result.success(info);
     }

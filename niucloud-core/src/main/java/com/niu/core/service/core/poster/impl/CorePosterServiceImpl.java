@@ -26,7 +26,7 @@ import com.niu.core.service.core.poster.param.GetPosterParam;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.awt.*;
 import java.io.File;
 import java.util.List;

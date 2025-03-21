@@ -27,7 +27,14 @@
                     <template #empty>
                         <span>{{ !brandTable.loading ? t('emptyData') : '' }}</span>
                     </template>
-                    <el-table-column prop="brand_name" :label="t('brandName')" min-width="120" />
+                    <el-table-column prop="brand_name" :label="t('brandName')" min-width="120">
+                        <template #default="{ row }">
+                            <div v-if="row.color_json"  class="inline-block px-[10px] text-[12px] rounded-[4px] box-border whitespace-nowrap h-[28px] leading-[28px]" :style="{ color : row.color_json.text_color, backgroundColor : row.color_json.bg_color, border : row.color_json.border_color ? '1px solid ' + row.color_json.border_color : 'none' }">
+                                <span>{{ row.brand_name }}</span>
+                            </div>
+                            <div v-else>{{ row.brand_name }}</div>
+                        </template>
+                    </el-table-column>
                     <el-table-column :label="t('logo')" min-width="120">
                         <template #default="{ row }">
                             <div class="h-[30px]">

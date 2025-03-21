@@ -10,7 +10,7 @@ import com.niu.shop.service.admin.delivery.vo.ShopDeliveryDeliverListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 配送员控制器
@@ -41,7 +41,7 @@ public class DeliverController {
      * @return Result<ShopDeliveryDeliverInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ShopDeliveryDeliverInfoVo> info(@PathVariable Integer id) {
+    public Result<ShopDeliveryDeliverInfoVo> info(@PathVariable("id") Integer id) {
         ShopDeliveryDeliverInfoVo info = iShopDeliveryDeliverService.info(id);
         return Result.success(info);
     }
@@ -63,7 +63,7 @@ public class DeliverController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopDeliveryDeliverParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopDeliveryDeliverParam editParam) {
         iShopDeliveryDeliverService.edit(id, editParam);
         return Result.success();
     }
@@ -74,7 +74,7 @@ public class DeliverController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable Integer id) {
+    public Result<Object> del(@PathVariable("id") Integer id) {
         iShopDeliveryDeliverService.del(id);
         return Result.success();
     }

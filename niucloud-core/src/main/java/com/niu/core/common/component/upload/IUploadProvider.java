@@ -2,7 +2,6 @@ package com.niu.core.common.component.upload;
 
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.component.upload.model.*;
-import com.niu.core.common.component.upload.model.*;
 
 public interface IUploadProvider {
 
@@ -41,4 +40,16 @@ public interface IUploadProvider {
      */
     public ThumbModelResult thumb(ThumbModel thumbModel);
 
+    /**
+     * base64上云
+     * @return
+     */
+    public String base64(Base64Model base64Model);
+
+    /**
+     * 拉取文件
+     * @param fetchModel
+     * @return
+     */
+    public String fetch(FetchModel fetchModel);
 }

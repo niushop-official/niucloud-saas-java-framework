@@ -49,7 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -695,7 +695,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
      *
      * @return
      */
-    public Integer getGoodsTransactionCount(Integer goodsId) {
+    public Long getGoodsTransactionCount(Integer goodsId) {
         Integer[] orderStatus = {1, 2, 3};
         MPJQueryWrapper<ShopOrderGoods> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("og")
@@ -710,7 +710,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
      *
      * @return
      */
-    public Integer getSkuTransactionCount(Integer[] skuIds) {
+    public Long getSkuTransactionCount(Integer[] skuIds) {
         Integer[] orderStatus = {1, 2, 3};
         MPJQueryWrapper<ShopOrderGoods> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("og")

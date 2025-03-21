@@ -7,6 +7,7 @@ import com.niu.core.service.api.wechat.param.AuthRegisterParam;
 import com.niu.core.service.api.wechat.param.WechatSyncParam;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
+import com.niu.core.service.api.wechat.vo.WechatUserInfoVo;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 
@@ -53,7 +54,7 @@ public interface IWechatService {
      * @param param
      * @return
      */
-    WxOAuth2UserInfo getWechatUser(WechatAuthParam param);
+    WechatUserInfoVo getWechatUser(WechatAuthParam param);
 
     /**
      * 获取jssdk config

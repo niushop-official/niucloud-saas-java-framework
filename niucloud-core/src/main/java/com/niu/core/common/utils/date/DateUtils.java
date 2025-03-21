@@ -20,9 +20,24 @@ public class DateUtils {
      */
     public static String timestampToString(long timestamp) {
         //转化成毫秒
+        if(timestamp == 0L)
+        {
+            return "";
+        }
         long minTimestamp = timestamp * 1000;
         Date date = DateUtil.date(minTimestamp);
         return DateUtil.format(date, "yyyy-MM-dd HH:mm:ss");
+    }
+
+    public static String timestampToString(long timestamp, String format) {
+        //转化成毫秒
+        if(timestamp == 0L)
+        {
+            return "";
+        }
+        long minTimestamp = timestamp * 1000;
+        Date date = DateUtil.date(minTimestamp);
+        return DateUtil.format(date, format);
     }
 
     /**

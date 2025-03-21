@@ -11,8 +11,8 @@ import com.niu.core.service.core.sys.ICoreSysConfigService;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class SysConfigServiceImpl implements ISysConfigService {

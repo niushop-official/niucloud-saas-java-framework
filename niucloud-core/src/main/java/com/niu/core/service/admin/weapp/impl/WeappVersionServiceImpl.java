@@ -15,6 +15,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.entity.diy.DiyPage;
 import com.niu.core.entity.weapp.WeappVersion;
 import com.niu.core.enums.channel.WeappVersionStatusEnum;
@@ -28,14 +29,15 @@ import com.niu.core.service.core.weapp.ICoreWeappCloudService;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
 import com.niu.core.service.core.weapp.param.WeappUploadParam;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
+import me.chanjar.weixin.open.api.WxOpenMaService;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import jakarta.annotation.Resource;
+
+import java.io.File;
+import java.util.*;
 
 
 /**
@@ -136,7 +138,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
             JSONArray data = ObjectUtil.defaultIfNull(log.getByPath("data.0", JSONArray.class), new JSONArray());
             if (data.size() > 0) {
                 JSONObject last = data.getJSONObject(data.size() - 1);
-                if (last.getInt("code").equals(0)) {
+                if (last.getInt("code", -1).equals(0)) {
                     WeappVersion model = new WeappVersion();
                     model.setStatus(WeappVersionStatusEnum.APPLET_UPLOAD_FAIL.getStatus());
                     model.setFailReason(last.getStr("msg", ""));
@@ -145,7 +147,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
                     weappVersionMapper.update(model, new QueryWrapper<WeappVersion>().eq("task_key", key));
                     return log;
                 }
-                if (last.getInt("percent").equals(100)) {
+                if (last.getInt("percent", 0).equals(100)) {
                     WeappVersion model = new WeappVersion();
                     model.setStatus(WeappVersionStatusEnum.APPLET_UPLOAD_SUCCESS.getStatus());
                     model.setUpdateTime(System.currentTimeMillis() / 1000);
@@ -164,6 +166,28 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
      */
     @Override
     public String getWeappPreviewImage() {
-        return coreWeappCloudService.getWeappPreviewImage();
+        Integer[] status = new Integer[] { WeappVersionStatusEnum.APPLET_AUDITING.getStatus(), WeappVersionStatusEnum.APPLET_UPLOAD_SUCCESS.getStatus() };
+        WeappVersion version = weappVersionMapper.selectOne(new QueryWrapper<WeappVersion>()
+            .eq("site_id", RequestUtils.siteId())
+            .in("status", status)
+            .orderByDesc("id")
+           .last("limit 1")
+        );
+        if (version == null) return "";
+
+        if (version.getFromType().equals("cloud_build")) {
+            return coreWeappCloudService.getWeappPreviewImage();
+        } else {
+            try {
+                WxOpenMaService wxOpenMaService = (WxOpenMaService) WechatUtils.miniapp(RequestUtils.siteId());
+                File qrcode = wxOpenMaService.getTestQrcode("", new HashMap<>());
+                if (qrcode.exists()) {
+                    return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(qrcode));
+                }
+                return "";
+            } catch (Exception e) {
+                return "";
+            }
+        }
     }
 }

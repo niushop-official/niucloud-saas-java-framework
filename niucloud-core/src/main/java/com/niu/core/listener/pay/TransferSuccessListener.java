@@ -7,7 +7,7 @@ import com.niu.core.event.refund.RefundSuccessEvent;
 import com.niu.core.service.core.site.ICoreSiteAccountService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 转账成功

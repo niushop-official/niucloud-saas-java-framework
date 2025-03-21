@@ -79,6 +79,6 @@ public interface ISiteGroupService {
      * @param groupId
      * @return
      */
-    Integer getUserSiteGroupSiteNum(Integer uid, Integer groupId);
+    Long getUserSiteGroupSiteNum(Integer uid, Integer groupId);
 
 }

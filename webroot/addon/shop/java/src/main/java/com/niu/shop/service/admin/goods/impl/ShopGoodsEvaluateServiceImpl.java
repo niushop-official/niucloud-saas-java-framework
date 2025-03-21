@@ -1,5 +1,6 @@
 package com.niu.shop.service.admin.goods.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -28,7 +29,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,6 +92,10 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
                 item.setGoodsCoverThumbSmall(coreUploadService().thumb(item.getSiteId(), item.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
                 item.setGoodsCoverThumbMid(coreUploadService().thumb(item.getSiteId(), item.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
             }
+
+            ShopGoodsEvaluateListVo.Goods goods = new ShopGoodsEvaluateListVo.Goods();
+            BeanUtil.copyProperties(item, goods);
+            item.setGoods(goods);
         }
         return PageResult.build(iPage);
     }

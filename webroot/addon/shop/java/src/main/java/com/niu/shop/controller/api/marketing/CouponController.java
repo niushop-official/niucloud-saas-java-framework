@@ -13,7 +13,7 @@ import com.niu.shop.service.api.marketing.vo.ShopCouponListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -75,7 +75,7 @@ public class CouponController {
      */
     @SaCheckLogin
     @GetMapping("/member/coupon")
-    public Result<Object> memberCouponList(@Validated PageParam pageParam, String type, Integer status) {
+    public Result<Object> memberCouponList(@Validated PageParam pageParam, @RequestParam(name = "type") String type, @RequestParam(name = "status") Integer status) {
         return Result.success(couponService.getMemberPage(pageParam, status, type));
     }
 
@@ -97,7 +97,7 @@ public class CouponController {
      */
     @SaCheckLogin
     @GetMapping("/member/coupon/count")
-    public Result<Long> memberCouponCount(@RequestParam Integer status) {
+    public Result<Long> memberCouponCount(@RequestParam(name = "status") Integer status) {
         return Result.success(couponService.getMemberCount(status));
     }
 
@@ -109,7 +109,7 @@ public class CouponController {
      * @return
      */
     @GetMapping("/coupon/components")
-    public Result<List<ShopCouponListVo>> components(@RequestParam(name = "coupon_ids", defaultValue = "") String couponIds, Integer num) {
+    public Result<List<ShopCouponListVo>> components(@RequestParam(name = "coupon_ids", defaultValue = "") String couponIds, @RequestParam(name = "num", defaultValue = "4") Integer num) {
         return Result.success(couponService.getCouponComponents(couponIds, num));
     }
 

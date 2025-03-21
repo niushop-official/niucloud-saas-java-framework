@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.sys.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +10,8 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysNoticeLog;
+import com.niu.core.enums.notice.NoticeEnum;
+import com.niu.core.enums.notice.vo.NoticeEnumListVo;
 import com.niu.core.mapper.sys.SysNoticeLogMapper;
 import com.niu.core.service.admin.sys.param.SysNoticeLogParam;
 import com.niu.core.service.admin.sys.param.SysNoticeLogSearchParam;
@@ -18,9 +21,10 @@ import com.niu.core.service.admin.sys.vo.SysNoticeLogListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -50,11 +54,14 @@ public class SysNoticeLogServiceImpl implements ISysNoticeLogService {
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "create_time", searchParam.getCreateTime());
         queryWrapper.orderByDesc("id");
 
+        Map<String, NoticeEnumListVo> noticeEnum = NoticeEnum.getNotice();
+
         IPage<SysNoticeLog> iPage = sysNoticeLogMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<SysNoticeLogListVo> list = new LinkedList<>();
         for (SysNoticeLog item : iPage.getRecords()) {
             SysNoticeLogListVo vo = new SysNoticeLogListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setName(noticeEnum.get(item.getKey()) != null ? noticeEnum.get(item.getKey()).getName() : "");
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);

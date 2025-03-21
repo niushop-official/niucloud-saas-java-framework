@@ -18,8 +18,8 @@ import com.niu.core.service.core.wechat.vo.WechatConfigVo;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 

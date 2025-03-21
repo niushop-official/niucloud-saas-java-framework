@@ -4,7 +4,7 @@
 			<view class="head flex justify-between items-center mb-[16rpx]" @click="toListFn()">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
 				<view class="time-wrap flex items-center ml-[auto]" v-show="timeData && Object.keys(timeData).length">
-					<text v-if="!getToken() && diyStore.mode != 'decorate'" class="text-[26rpx]" :style="{color: diyComponent.countDown.otherColor}">活动未开始</text>
+					<text v-if="!getToken() && diyStore.mode != 'decorate'" class="text-[24rpx] font-500" :style="{color: diyComponent.countDown.otherColor}">活动未开始</text>
 					<block v-else-if="activeState()">
 						<text :style="{color: diyComponent.countDown.otherColor}" class="mr-[10rpx] text-[24rpx]">距结束还有</text>
 						<up-count-down class="text-[#fff] text-[28rpx]" :time="newcomerTime" format="HH:mm:ss" @change="onChange">
@@ -33,9 +33,9 @@
 				<view class="flex">
 					<view class="inline-flex bg-[#fff] p-[16rpx] box-border" :style="commonTempCss()" @click="toDetail(list[0])">
 						<view class="w-[150rpx] h-[150rpx] flex items-center justify-center">
-							<u--image radius="var(--goods-rounded-big)" width="150rpx" height="150rpx" :src="img(list[0].sku_image || '')" model="aspectFill">
+							<u--image :radius="imageRounded.val" width="150rpx" height="150rpx" :src="img(list[0].sku_image || '')" model="aspectFill">
 								<template #error>
-									<image class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									<image class="w-[150rpx] h-[150rpx] overflow-hidden" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 								</template>
 							</u--image>
 						</view>
@@ -53,9 +53,9 @@
 					<block v-for="(item,index) in list" :key="index">
 						<view v-if="index > 0" class="ml-[10rpx] inline-flex flex-col items-center p-[16rpx] bg-[#fff] box-border" :style="commonTempCss()" @click="toDetail(item)">
 							<view class="w-[110rpx] h-[110rpx] flex items-center justify-center">
-								<u--image radius="var(--goods-rounded-big)" width="110rpx" height="110rpx" :src="img(item.sku_image || '')" model="aspectFill">
+								<u--image :radius="imageRounded.val" width="110rpx" height="110rpx" :src="img(item.sku_image || '')" model="aspectFill">
 									<template #error>
-										<image class="w-[110rpx] h-[110rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+										<image class="w-[110rpx] h-[110rpx] overflow-hidden" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 									</template>
 								</u--image>
 							</view>
@@ -72,7 +72,7 @@
 			<view class="head flex justify-between items-center mb-[16rpx]" @click="toListFn()">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
 				<view class="time-wrap flex items-center ml-[auto]" v-show="timeData && Object.keys(timeData).length">
-					<text v-if="!getToken() && diyStore.mode != 'decorate'" class="text-[26rpx]" :style="{color: diyComponent.countDown.otherColor}">活动未开始</text>
+					<text v-if="!getToken() && diyStore.mode != 'decorate'" class="text-[24rpx] font-500" :style="{color: diyComponent.countDown.otherColor}">活动未开始</text>
 					<block v-else-if="activeState()">
 						<text :style="{color: diyComponent.countDown.otherColor}" class="mr-[10rpx] text-[24rpx]">倒计时</text>
 						<up-count-down class="text-[#fff] text-[28rpx]" :time="newcomerTime" format="DD:HH:mm" @change="onChange">
@@ -102,9 +102,9 @@
 				<view class="flex">
 					<view v-for="(item,index) in list" :key="index" class="item-bg mr-[10rpx] inline-flex flex-col items-center p-[6rpx] bg-[#fff] box-border" :style="commonTempCss()" @click="toDetail(item)">
 						<view class="flex items-center justify-center w-[146rpx] h-[146rpx]">
-							<u--image radius="var(--goods-rounded-small)" width="146rpx" height="146rpx" :src="img(item.sku_image || '')" model="aspectFill">
+							<u--image :radius="imageRounded.val" width="146rpx" height="146rpx" :src="img(item.sku_image || '')" model="aspectFill">
 								<template #error>
-									<image class="w-[146rpx] h-[146rpx] rounded-[var(--goods-rounded-small)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									<image class="w-[146rpx] h-[146rpx] overflow-hidden" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 								</template>
 							</u--image>
 						</view>
@@ -121,7 +121,7 @@
 			<view class="head flex mx-[10rpx] items-center mb-[12rpx]" @click="toListFn()">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto] mr-[16rpx]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
 				<view class="time-wrap flex items-center" v-show="timeData && Object.keys(timeData).length">
-					<text v-if="!getToken() && diyStore.mode != 'decorate'" :style="{color: diyComponent.countDown.otherColor}" class="text-[26rpx]">活动未开始</text>
+					<text v-if="!getToken() && diyStore.mode != 'decorate'" :style="{color: diyComponent.countDown.otherColor}" class="text-[24rpx] font-500">活动未开始</text>
 					<up-count-down v-else-if="activeState()" class="text-[#fff] text-[28rpx]" :time="newcomerTime" format="HH:mm:ss" @change="onChange">
 						<view class="flex">
 							<view class="text-[24rpx] flex items-center">
@@ -150,10 +150,10 @@
 			<scroll-view scroll-x="true" class="content bg-[#fff] box-border p-[16rpx] rounded-[var(--rounded-small)]">
 				<view class="flex">
 					<view v-for="(item,index) in list" :key="index" class="item-bg inline-flex flex-col items-center box-border" :class="{'mr-[16rpx]': index != (list.length-1)}" :style="commonTempCss()" @click="toDetail(item)">
-						<view class="bg-[#f8f8f8] flex items-center justify-center w-[152rpx] h-[152rpx]">
-							<u--image radius="var(--goods-rounded-small)" width="152rpx" height="152rpx" :src="img(item.sku_image || '')" model="aspectFill">
+						<view class="bg-[#f8f8f8] flex items-center justify-center w-[152rpx] h-[152rpx] overflow-hidden" :style="imageRounded.style">
+							<u--image :radius="imageRounded.val" width="152rpx" height="152rpx" :src="img(item.sku_image || '')" model="aspectFill">
 								<template #error>
-									<image class="w-[152rpx] h-[152rpx] rounded-[var(--goods-rounded-small)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									<image class="w-[152rpx] h-[152rpx] overflow-hidden" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 								</template>
 							</u--image>
 						</view>
@@ -170,7 +170,7 @@
 			<view class="head flex mx-[10rpx] items-center justify-between mb-[24rpx]">
 				<image v-if="diyComponent.textImg" class="h-[34rpx] w-[auto]" :src="img(diyComponent.textImg)" mode="heightFix"></image>
 				<view class="time-wrap ml-[auto] flex items-center -mt-[8rpx]" v-show="timeData && Object.keys(timeData).length">
-					<text v-if="!getToken() && diyStore.mode != 'decorate'" :style="{color: diyComponent.countDown.otherColor}" class="w-[200rpx] text-center text-[26rpx] pb-[4rpx]">活动未开始</text>
+					<text v-if="!getToken() && diyStore.mode != 'decorate'" :style="{color: diyComponent.countDown.otherColor}" class="w-[200rpx] text-center text-[24rpx] font-500 pb-[4rpx]">活动未开始</text>
 					<block v-else-if="activeState()">
 						<text :style="{color: diyComponent.countDown.otherColor}" class="mr-[8rpx] text-[24rpx]">本场仅剩</text>
 						<up-count-down class="text-[#fff] text-[28rpx]" :time="newcomerTime" format="HH:mm:ss" @change="onChange">
@@ -199,9 +199,9 @@
 				<view class="flex">
 					<view v-for="(item,index) in list" :key="index" class="item-bg inline-flex flex-col items-center box-border" :class="{'mr-[20rpx]': index != (list.length-1)}" :style="commonTempCss()" @click="toDetail(item)">
 						<view class="relative flex items-center justify-center w-[100%] h-[130rpx] pt-[40rpx] mb-[10rpx]">
-							<u--image radius="var(--goods-rounded-small)" width="130rpx" height="130rpx" :src="img(item.sku_image || '')" model="aspectFill">
+							<u--image :radius="imageRounded.val" width="130rpx" height="130rpx" :src="img(item.sku_image || '')" model="aspectFill">
 								<template #error>
-									<image class="w-[130rpx] h-[130rpx] rounded-[var(--goods-rounded-small)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+									<image class="w-[130rpx] h-[130rpx] overflow-hidden" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 								</template>
 							</u--image>
 							<view class="content-sign text-[20rpx] text-[#fff]">新人价</view>
@@ -227,7 +227,7 @@
 	import useDiyStore from '@/app/stores/diy';
     import { getNewcomersComponentsList } from '@/addon/shop/api/newcomer'
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
+	const props = defineProps(['component', 'index','value']);
 	const diyStore = useDiyStore();
 
 	const diyComponent = computed(() => {
@@ -290,6 +290,18 @@
 		return style;
 	})
 
+	const imageRounded = computed(() => {
+        var obj = {
+			val: '',
+			style: ''
+		};
+        if (diyComponent.value.imgElementRounded) {
+            obj.val = diyComponent.value.imgElementRounded * 2 + 'rpx';
+			obj.style += 'border-radius:' + diyComponent.value.imgElementRounded * 2 + 'rpx;';
+        }
+        return obj;
+    })
+
 	// 倒计时样式
 	const countDownTextCss = computed(() => {
 		var style = '';
@@ -302,8 +314,8 @@
 		if (diyComponent.value.countDown.numberColor) style += 'color:' + diyComponent.value.countDown.numberColor + ';';
 		return style;
 	})
-	
-	
+
+
 	// 公共模块颜色
 	const commonTempCss = ()=>{
 		var style = '';

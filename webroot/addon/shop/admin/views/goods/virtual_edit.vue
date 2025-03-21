@@ -75,6 +75,16 @@
 
                         <div class="ml-[120px] mb-[10px] text-[12px] text-[#999] leading-[20px]">{{ t('posterTips') }}</div>
 
+                        <el-form-item :label="t('diyForm')">
+                            <el-select v-model="goodsEdit.formData.form_id" :placeholder="t('diyFormPlaceholder')" clearable>
+                                <el-option v-for="item in goodsEdit.diyFormOptions" :key="item.form_id" :label="item.page_title" :value="item.form_id" />
+                            </el-select>
+                            <div class="ml-[10px]">
+                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshDiyForm(true)">{{ t('refresh') }}</span>
+                                <span class="cursor-pointer text-primary" @click="goodsEdit.toDiyFormEvent">{{ t('addDiyForm') }}</span>
+                            </div>
+                        </el-form-item>
+
                         <el-form-item :label="t('label')">
                             <el-checkbox-group v-model="goodsEdit.formData.label_ids">
                                 <el-checkbox :label="item.label_id" v-for="(item, index) in goodsEdit.labelOptions" :key="index" >{{ item.label_name }}</el-checkbox>

@@ -15,7 +15,7 @@ import com.niu.shop.service.admin.marketing.vo.ShopCouponMemberListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 优惠券控制器
@@ -91,7 +91,7 @@ public class CouponController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@Validated @PathVariable Integer id) {
+    public Result<Object> del(@Validated @PathVariable("id") Integer id) {
         couponService.delete(id);
         return Result.success();
     }
@@ -105,7 +105,7 @@ public class CouponController {
      * @return
      */
     @GetMapping("/records")
-    public Result<PageResult<ShopCouponMemberListVo>> getMemberCoupon(@Validated PageParam pageParam, Integer id, String keywords) {
+    public Result<PageResult<ShopCouponMemberListVo>> getMemberCoupon(@Validated PageParam pageParam, @RequestParam("id") Integer id, @RequestParam("keywords") String keywords) {
         return Result.success(couponService.getMemberCoupon(pageParam, id, keywords));
     }
 

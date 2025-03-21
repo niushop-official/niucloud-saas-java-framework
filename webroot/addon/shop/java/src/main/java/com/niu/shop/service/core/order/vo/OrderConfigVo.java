@@ -18,5 +18,7 @@ public class OrderConfigVo implements Serializable {
     private ShopOrderInvoice invoice;  //订单发票配置
     private ShopOrderFinish confirm;  //订单完成配置
 
+    private Integer formId;
+
 
 }

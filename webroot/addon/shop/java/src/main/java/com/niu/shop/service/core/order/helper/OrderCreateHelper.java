@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.niu.core.common.component.context.cache.CacheFactory;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.CommonException;
@@ -15,6 +16,8 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.member.MemberAddress;
 import com.niu.core.mapper.member.MemberAddressMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
+import com.niu.core.service.core.diy_form.ICoreDiyFormRecordsService;
+import com.niu.core.service.core.diy_form.param.DiyFormRecordsParam;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.coupon.ShopCouponMember;
 import com.niu.shop.entity.order.ShopOrder;
@@ -49,7 +52,7 @@ import com.niu.shop.service.core.order.vo.OrderCreateResultVo;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,6 +107,8 @@ public abstract class OrderCreateHelper {
     @Resource
     ICoreManjianService coreManjianService;
 
+    @Resource
+    ICoreDiyFormRecordsService coreDiyFormRecordsService;
     /**
      * @param orderKey
      * @return
@@ -302,6 +307,7 @@ public abstract class OrderCreateHelper {
      * @param param
      */
     protected void calculateCoupon(OrderCreateDataVo vo, OrderCalculateParam param) {
+        vo.getBasic().setCouponMoney(BigDecimal.ZERO);
         if (ObjectUtil.isNotEmpty(param.getDiscount().getCouponId()) && param.getDiscount().getCouponId() > 0) {
             ShopCouponMember memberCoupon = shopCouponMemberMapper.selectOne(new QueryWrapper<ShopCouponMember>()
                     .eq("member_id", vo.getMemberId())
@@ -449,6 +455,56 @@ public abstract class OrderCreateHelper {
         }
     }
 
+    protected void addFormData(OrderCreateDataVo vo)
+    {
+        if(ObjectUtil.isNotEmpty(vo.getFormData()))
+        {
+            if(vo.getFormData().containsKey("order"))
+            {
+                JSONObject orderForm = vo.getFormData().getJSONObject("order");
+                if(ObjectUtil.isNotEmpty(orderForm))
+                {
+                    DiyFormRecordsParam orderParam = new DiyFormRecordsParam();
+                    orderParam.setSiteId(vo.getSiteId());
+                    orderParam.setMemberId(vo.getMemberId());
+                    orderParam.setRelateId(vo.getOrderId());
+                    orderParam.setFormId(orderForm.getInt("form_id"));
+                    orderParam.setValue(orderForm.getJSONArray("value"));
+                    ShopOrder shopOrder = shopOrderMapper.selectById(vo.getOrderId());
+                    shopOrder.setFormRecordId(coreDiyFormRecordsService.add(orderParam));
+                    if (shopOrder.getFormRecordId() != null) shopOrderMapper.updateById(shopOrder);
+                }
+
+            }
+            if(vo.getFormData().containsKey("goods"))
+            {
+                JSONObject goodsForm = vo.getFormData().getJSONObject("goods");
+                List<ShopOrderGoods> orderGoodsList = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", vo.getOrderId()));
+                for (String key : goodsForm.keySet()) {
+                    JSONObject goodsFormItem = goodsForm.getJSONObject(key);
+                    if(ObjectUtil.isNotEmpty(goodsFormItem))
+                    {
+                        for (ShopOrderGoods orderGoods : orderGoodsList) {
+                            if(key.equals(orderGoods.getSkuId().toString()))
+                            {
+                                DiyFormRecordsParam goodsParam = new DiyFormRecordsParam();
+                                goodsParam.setSiteId(vo.getSiteId());
+                                goodsParam.setMemberId(vo.getMemberId());
+                                goodsParam.setRelateId(orderGoods.getOrderGoodsId());
+                                goodsParam.setFormId(goodsFormItem.getInt("form_id"));
+                                goodsParam.setValue(goodsFormItem.getJSONArray("value"));
+                                orderGoods.setFormRecordId(coreDiyFormRecordsService.add(goodsParam));
+                                if (orderGoods.getFormRecordId() != null) shopOrderGoodsMapper.updateById(orderGoods);
+                            }
+                        }
+                    }
+
+
+                }
+            }
+        }
+    }
+
     /**
      * 创建订单
      *
@@ -471,7 +527,7 @@ public abstract class OrderCreateHelper {
 
         // 使用优惠
         this.useDiscount(vo);
-
+        this.addFormData(vo);
         coreOrderEventService.orderCreateAfter(vo);
 
         // 订单创建之后事件

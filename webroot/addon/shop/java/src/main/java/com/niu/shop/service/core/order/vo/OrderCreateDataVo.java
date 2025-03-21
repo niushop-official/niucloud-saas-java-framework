@@ -65,6 +65,10 @@ public class OrderCreateDataVo implements Serializable {
 
     protected InvoiceCreateParam invoice;
 
+    protected JSONObject formData;
+
+    private Integer formId;
+
     protected Map<String, Map<String, Object>> gift;
 
     @Data
@@ -184,6 +188,7 @@ public class OrderCreateDataVo implements Serializable {
         private Integer limitType;
         private Integer maxBuy;
         private Integer minBuy;
+        private Integer formId;
 
         protected ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);

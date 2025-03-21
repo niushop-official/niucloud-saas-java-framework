@@ -1,8 +1,10 @@
 package com.niu.core.controller.adminapi.weapp;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.weapp.IWeappConfigService;
+import com.niu.core.service.admin.weapp.param.SetDomainParam;
 import com.niu.core.service.admin.weapp.vo.WeappStaticInfoVo;
 import com.niu.core.service.admin.wechat.IWechatConfigService;
 import com.niu.core.service.admin.wechat.vo.WechatStaticInfoVo;
@@ -13,7 +15,7 @@ import com.niu.core.service.core.wechat.vo.WechatConfigVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,5 +59,31 @@ public class ConfigController {
         Map<String, Object> data = new HashMap<>();
         data.put("is_trade_managed", false);
         return Result.success(data);
+    }
+
+    /**
+     * 设置微信域名
+     */
+    @PutMapping("/domain")
+    public Result<Object> setDomain(SetDomainParam setDomainParam) {
+        weappConfigService.setDomain(setDomainParam);
+        return Result.success();
+    }
+
+    /**
+     * 设置微信域名
+     */
+    @PutMapping("/privacysetting")
+    public Result<Object> setPrivacySetting(@RequestBody JSONObject data) {
+        weappConfigService.setPrivacySetting(data);
+        return Result.success();
+    }
+
+    /**
+     * 获取微信隐私设置
+     */
+    @GetMapping("/privacysetting")
+    public Result<Object> getPrivacySetting() {
+        return Result.success(weappConfigService.getPrivacySetting());
     }
 }

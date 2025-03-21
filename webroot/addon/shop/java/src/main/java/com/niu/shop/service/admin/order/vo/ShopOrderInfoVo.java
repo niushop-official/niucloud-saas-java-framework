@@ -88,6 +88,8 @@ public class ShopOrderInfoVo implements Serializable {
     private List<OrderDelivery> orderDelivery;
     private MemberBriefInfoVo member;
     private List<ShopOrderLogListVo> orderLog;
+    private Integer formRecordId;
+    private Boolean formRecordShow;
 
     @Data
     public static class OrderGoods {
@@ -124,6 +126,8 @@ public class ShopOrderInfoVo implements Serializable {
         private Integer shopActiveRefund; //商家主动退款0：否 1：是
         private BigDecimal shopActiveRefundMoney; //商家主动退款金额
         private ShopManjian manjianInfo;
+        private Integer formRecordId;
+        private Boolean formRecordShow;
 
         private ICoreUploadService coreUploadService() {
             return SpringContext.bean(ICoreUploadService.class);
@@ -145,6 +149,14 @@ public class ShopOrderInfoVo implements Serializable {
                 return OrderDeliveryStatusEnum.getNameByStatus(this.deliveryStatus);
             }
             return "";
+        }
+
+        public Boolean getFormRecordShow() {
+            if (this.formRecordId != null && this.formRecordId > 0) {
+                return true;
+            }else{
+                return false;
+            }
         }
     }
 
@@ -203,6 +215,14 @@ public class ShopOrderInfoVo implements Serializable {
 
     public Map<String, Object> getStatusName() {
         return OrderStatusEnum.getMapByStatus(Integer.valueOf(this.status));
+    }
+
+    public Boolean getFormRecordShow() {
+        if (this.formRecordId != null && this.formRecordId > 0) {
+            return true;
+        }else{
+            return false;
+        }
     }
 
 }

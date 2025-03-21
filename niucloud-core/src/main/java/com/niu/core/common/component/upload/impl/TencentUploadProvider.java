@@ -1,11 +1,11 @@
 package com.niu.core.common.component.upload.impl;
 
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.component.upload.AbstractUploadProvider;
 import com.niu.core.common.component.upload.IUploadProvider;
 import com.niu.core.common.component.upload.annotation.UploadProvider;
 import com.niu.core.common.component.upload.exception.UploadException;
-import com.niu.core.common.component.upload.model.*;
-import com.niu.core.common.component.upload.AbstractUploadProvider;
 import com.niu.core.common.component.upload.model.*;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.qcloud.cos.COSClient;
@@ -20,7 +20,9 @@ import com.qcloud.cos.region.Region;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 @UploadProvider(name = "tencent", source = "core", describe = "腾讯云存储")
 @Slf4j
@@ -113,4 +115,57 @@ public class TencentUploadProvider extends AbstractUploadProvider implements IUp
         return thumbModelResult;
     }
 
+    @Override
+    public String base64(Base64Model base64Model) {
+        String key = base64Model.getUploadFilePath() + base64Model.getUploadFileName();
+
+        try {
+            // 初始化
+            COSCredentials cred = new BasicCOSCredentials(this.accessKey, this.secretKey);
+            ClientConfig clientConfig = new ClientConfig(new Region(this.region));
+            COSClient cosClient = new COSClient(cred, clientConfig);
+
+            byte[] decodedBytes = Base64.getDecoder().decode(base64Model.getContent());
+
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            PutObjectRequest putObjectRequest = new PutObjectRequest(this.bucket, key, new ByteArrayInputStream(decodedBytes), objectMetadata);
+            cosClient.putObject(putObjectRequest);
+
+        } catch (CosServiceException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } catch (CosClientException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } 
+
+        return key;
+    }
+
+    @Override
+    public String fetch(FetchModel fetchModel) {
+        String key = fetchModel.getUploadFilePath() + fetchModel.getUploadFileName();
+
+        try {
+            // 初始化
+            COSCredentials cred = new BasicCOSCredentials(this.accessKey, this.secretKey);
+            ClientConfig clientConfig = new ClientConfig(new Region(this.region));
+            COSClient cosClient = new COSClient(cred, clientConfig);
+
+            byte[] bytes = HttpUtil.downloadBytes(fetchModel.getUrl());
+
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            PutObjectRequest putObjectRequest = new PutObjectRequest(this.bucket, key, new ByteArrayInputStream(bytes), objectMetadata);
+            cosClient.putObject(putObjectRequest);
+
+        } catch (CosServiceException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        } catch (CosClientException e) {
+            e.printStackTrace();
+            throw new UploadException(e.getMessage());
+        }
+
+        return key;
+    }
 }

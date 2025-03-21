@@ -36,9 +36,5 @@ public class DiyPageListVo implements Serializable {
     private Long updateTime; // 更新时间
     private String typeName;
     private String addonName;
-
-    public String getTypeName() {
-        JSONObject template = TemplateEnum.getTemplate();
-        return ObjectUtil.defaultIfNull(template.getByPath(this.type + ".title", String.class), "");
-    }
+    private String typePage;
 }

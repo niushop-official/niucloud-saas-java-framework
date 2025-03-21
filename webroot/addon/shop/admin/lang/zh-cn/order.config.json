@@ -33,5 +33,9 @@
 	"evaluateIsToExamine": "评价审核",
 	"evaluateIsShow": "评价显示",
 	"isEvaluateOpen": "开启",
-	"isEvaluateClose": "关闭"
+	"isEvaluateClose": "关闭",
+
+    "diyForm": "万能表单",
+    "diyFormPlaceholder": "请选择万能表单",
+    "addDiyForm": "添加表单"
 }

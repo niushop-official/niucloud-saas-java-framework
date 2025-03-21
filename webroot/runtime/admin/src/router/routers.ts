@@ -117,9 +117,11 @@ interface Route {
         type: string
     },
     children?: [],
+    auth?:[],
     is_show: boolean,
     app_type: string,
-    addon: string
+    addon: string,
+    menu_attr ?:  String
 }
 
 /**
@@ -129,7 +131,7 @@ interface Route {
  */
 const createRoute = function (route: Route, parentRoute: RouteRecordRaw | null = null): RouteRecordRaw {
     const record: RouteRecordRaw = {
-        path: `/${route.app_type}/${route.router_path}`,
+        path: `/${ route.app_type }/${ route.router_path }`,
         name: route.menu_key,
         meta: {
             title: route.menu_name,
@@ -140,13 +142,14 @@ const createRoute = function (route: Route, parentRoute: RouteRecordRaw | null =
             app: route.app_type,
             view: route.view_path,
             addon: route.addon,
+            attr: route.menu_attr,
             parent_route: parentRoute ? parentRoute.meta : parentRoute
         }
     }
     if (route.menu_type == 0) {
         record.component = parentRoute ? RouterView : () => Promise.resolve(Default)
     } else {
-        record.component = route.addon ? addonModules[`/src/addon/${route.addon}/views/${route.view_path}.vue`] : modules[`/src/app/views/${route.view_path}.vue`]
+        record.component = route.addon ? addonModules[`/src/addon/${ route.addon }/views/${ route.view_path }.vue`] : modules[`/src/app/views/${ route.view_path }.vue`]
     }
     return record
 }
@@ -183,4 +186,21 @@ export function findFirstValidRoute(routes: RouteRecordRaw[]): string | undefine
             }
         }
     }
+}
+
+/**
+ * 获取按钮权限
+ * @param routes
+ * @param rules
+ */
+export function findRules(routes: Route[], rules :string[] = []) : string[] {
+    for (const route of routes) {
+        if (route.auth && Array.isArray(route.auth)) {
+            rules = rules.concat(route.auth)
+        }
+        if (route.children) {
+            rules = findRules(route.children, rules)
+        }
+    }
+    return rules
 }

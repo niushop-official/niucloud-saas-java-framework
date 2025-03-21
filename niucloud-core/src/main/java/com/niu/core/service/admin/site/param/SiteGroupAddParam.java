@@ -3,7 +3,7 @@ package com.niu.core.service.admin.site.param;
 import cn.hutool.json.JSONArray;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**

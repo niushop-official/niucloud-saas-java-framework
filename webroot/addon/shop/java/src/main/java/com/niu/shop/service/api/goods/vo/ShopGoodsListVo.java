@@ -49,6 +49,7 @@ public class ShopGoodsListVo implements Serializable {
     private String logo;
     private List<GoodsLabelListVo> goodsLabelName;
     private Brand goodsBrand;
+    private Integer formId;
 
     @Data
     public static class GoodsSku {

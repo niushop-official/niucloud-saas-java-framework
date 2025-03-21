@@ -5,14 +5,14 @@
 			<view :class="{'diy-shop-goods-list relative flex flex-wrap justify-between': diyComponent.style != 'style-2', 'biserial-goods-list': diyComponent.style == 'style-2'}">
 				<block v-if="diyComponent.style == 'style-1'">
 					<view class="bg-white w-full flex p-[20rpx] overflow-hidden" :class="{ 'mt-[20rpx]': index > 0 }" :style="itemCss" v-for="(item,index) in goodsList" :key="item.goods_id" @click="toLink(item)">
-						<u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
+						<u--image :radius="imageRounded.val" width="200rpx" height="200rpx" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
 							<template #error>
-								<image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+								<image class="w-[200rpx] h-[200rpx] overflow-hidden" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 							</template>
 						</u--image>
 						<view class="flex-1 flex flex-col ml-[20rpx] py-[6rpx] relative">
 							<view class="text-[28rpx] leading-[40rpx] text-[#303133] multi-hidden mb-[10rpx]" :style="{ color : diyComponent.goodsNameStyle.color, fontWeight : diyComponent.goodsNameStyle.fontWeight }" v-if="diyComponent.goodsNameStyle.control">
-								<view class="brand-tag" v-if="item.goods_brand">
+								<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 									{{item.goods_brand.brand_name}}
 								</view>
 								{{item.goods_name}}
@@ -52,14 +52,14 @@
 					<view>
 						<template v-for="(item,index) in goodsList">
 							<view v-if="(index%2) == 0" class="flex flex-col bg-[#fff] box-border overflow-hidden" :class="{'mt-[24rpx]': index > 1}" :style="itemCss" @click="toLink(item)">
-								<u--image :width="style2Width" :height="style2Width" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
+								<u--image :radius="imageRounded.val" :width="style2Width" :height="style2Width" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
 									<template #error>
-										<image :style="{'width': style2Width,'height': style2Width}" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+										<image :style="{'width': style2Width,'height': style2Width, 'border-radius': imageRounded.val}" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 									</template>
 								</u--image>
 								<view class="relative min-h-[44rpx] px-[16rpx] flex-1 pt-[16rpx] pb-[20rpx] flex flex-col justify-between">
 									<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden" :style="{ color : diyComponent.goodsNameStyle.color, fontWeight : diyComponent.goodsNameStyle.fontWeight }" v-if="diyComponent.goodsNameStyle.control">
-										<view class="brand-tag" v-if="item.goods_brand">
+										<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 											{{item.goods_brand.brand_name}}
 										</view>
 										{{item.goods_name}}
@@ -100,14 +100,14 @@
 					<view>
 						<template v-for="(item,index) in goodsList">
 							<view v-if="(index%2) == 1" class="flex flex-col bg-[#fff] box-border overflow-hidden" :class="{'mt-[24rpx]': index > 1}" :style="itemCss" @click="toLink(item)">
-								<u--image :width="style2Width" :height="style2Width" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
+								<u--image :width="style2Width" :height="style2Width" :radius="imageRounded.val" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
 									<template #error>
-										<image :style="{'width': style2Width,'height': style2Width}" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+										<image :style="{'width': style2Width,'height': style2Width, 'border-radius': imageRounded.val}" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 									</template>
 								</u--image>
 								<view class="relative min-h-[44rpx] px-[16rpx] flex-1 pt-[16rpx] pb-[20rpx] flex flex-col justify-between">
 									<view class="text-[#303133] leading-[40rpx] text-[28rpx] multi-hidden" :style="{ color : diyComponent.goodsNameStyle.color, fontWeight : diyComponent.goodsNameStyle.fontWeight }" v-if="diyComponent.goodsNameStyle.control">
-										<view class="brand-tag" v-if="item.goods_brand">
+										<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 											{{item.goods_brand.brand_name}}
 										</view>
 										{{item.goods_name}}
@@ -150,9 +150,9 @@
 					<view :style="style3Css" v-if="goodsList.length">
 						<scroll-view :id="'warpStyle3-'+diyComponent.id" class="whitespace-nowrap min-h-[290rpx]" :scroll-x="true">
 							<view :id="'item'+index+diyComponent.id" class="w-[214rpx] mb-[6rpx] inline-block bg-[#fff] box-border overflow-hidden" :class="{'!mr-[0rpx]' : index == (goodsList.length-1)}" :style="itemCss+itemStyle3" v-for="(item,index) in goodsList" :key="item.goods_id" @click="toLink(item)">
-								<u--image width="214rpx" height="160rpx" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
+								<u--image width="214rpx" height="160rpx" :radius="imageRounded.val" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
 									<template #error>
-										<image class="w-[214rpx] h-[160rpx]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+										<image class="w-[214rpx] h-[160rpx]" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 									</template>
 								</u--image>
 								<view class="relative min-h-[40rpx] px-[10rpx] pt-[16rpx] pb-[10rpx]">
@@ -170,7 +170,7 @@
 							</view>
 						</scroll-view>
 					</view>
-					
+
 				</block>
 			</view>
 		</view>
@@ -180,13 +180,13 @@
 <script setup lang="ts">
 	// 商品列表
     import { ref,reactive,computed, watch, onMounted, nextTick,getCurrentInstance } from 'vue';
-	import { redirect, img, getToken } from '@/utils/common';
+	import { redirect, img } from '@/utils/common';
 	import useDiyStore from '@/app/stores/diy';
 	import { getGoodsComponents } from '@/addon/shop/api/goods';
 	import {useGoods} from '@/addon/shop/hooks/useGoods'
-	
+
 	const diyGoods = useGoods();
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
+	const props = defineProps(['component', 'index','value']);
 	const diyStore = useDiyStore();
 	const emits = defineEmits(['loadingFn']); //商品数据加载完成之后触发
 
@@ -226,6 +226,18 @@
 		return style;
 	})
 
+	const imageRounded = computed(() => {
+        var obj = {
+			val: '',
+			style: ''
+		};
+        if (diyComponent.value.imgElementRounded) {
+            obj.val = diyComponent.value.imgElementRounded * 2 + 'rpx';
+			obj.style += 'border-radius:' + diyComponent.value.imgElementRounded * 2 + 'rpx;';
+        }
+        return obj;
+    })
+
     // 背景图加遮罩层
     const maskLayer = computed(()=>{
         var style = '';
@@ -256,7 +268,7 @@
 		}
         return style;
     })
-	
+
 	const goodsBtnCss = computed(() => {
         var style = '';
         if (diyComponent.value.btnStyle.style == 'button' && diyComponent.value.btnStyle.aroundRadius) style += 'border-radius:' + diyComponent.value.btnStyle.aroundRadius * 2 + 'rpx;';
@@ -269,14 +281,14 @@
 		if (diyComponent.value.btnStyle.style == 'button' && diyComponent.value.btnStyle.fontWeight) style += 'font-weight: bold;';
         return style;
     })
-	
+
 	const style2Width = computed(() => {
 		var style = '';
 		if(diyComponent.value.margin && diyComponent.value.margin.both) style += 'calc((100vw - ' + (diyComponent.value.margin.both*4) + 'rpx - 20rpx) / 2)'
 		else style += 'calc((100vw - 20rpx) / 2 )'
 		return style;
 	})
-	
+
 	const style3Css = computed(() => {
         var style = '';
         style += 'padding:0 20rpx;';
@@ -299,13 +311,6 @@
 			itemStyle3.value= 'margin-right:14rpx;'
 		// #endif
 	}
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	const getGoodsListFn = () => {
         let data = {

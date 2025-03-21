@@ -18,7 +18,7 @@ public class CoreWeappServiceImpl implements ICoreWeappService {
         try {
             List<String> scene = new LinkedList<>();
             for (String key : data.keySet()) {
-                scene.add(data.get(key) + "-" + data.get(key).toString());
+                scene.add(key + "-" + data.get(key).toString());
             }
 
             return WechatUtils.miniapp(siteId).getQrcodeService().createWxaCodeUnlimitBytes(
@@ -41,7 +41,7 @@ public class CoreWeappServiceImpl implements ICoreWeappService {
         try {
             List<String> scene = new LinkedList<>();
             for (String key : data.keySet()) {
-                scene.add(data.get(key) + "-" + data.get(key).toString());
+                scene.add(key + "-" + data.get(key).toString());
             }
 
             return WechatUtils.miniapp(siteId).getQrcodeService().createWxaCodeUnlimit(

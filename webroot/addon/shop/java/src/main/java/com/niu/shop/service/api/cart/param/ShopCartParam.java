@@ -1,7 +1,7 @@
 package com.niu.shop.service.api.cart.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 购物车参数

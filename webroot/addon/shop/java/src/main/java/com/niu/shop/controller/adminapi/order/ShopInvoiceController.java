@@ -11,7 +11,7 @@ import com.niu.shop.service.admin.order.vo.ShopInvoiceListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 发票控制器
@@ -55,7 +55,7 @@ public class ShopInvoiceController {
      * @return Result<Object>
      */
     @PutMapping("/invoice/{id}")
-    public Result<Object> invoicing(@PathVariable Integer id, @Validated @RequestBody ShopInvoiceParam shopInvoiceParam) {
+    public Result<Object> invoicing(@PathVariable("id") Integer id, @Validated @RequestBody ShopInvoiceParam shopInvoiceParam) {
         shopInvoiceService.invoicing(id, shopInvoiceParam);
         return Result.success();
     }

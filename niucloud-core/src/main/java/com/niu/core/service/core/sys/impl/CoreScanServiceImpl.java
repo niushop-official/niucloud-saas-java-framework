@@ -10,7 +10,7 @@ import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.service.core.sys.ICoreScanService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreScanServiceImpl implements ICoreScanService {

@@ -2,6 +2,7 @@ package com.niu.core.enums.member;
 
 
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 
 /**
@@ -11,6 +12,6 @@ public class GrowthRuleEnum {
 
     public static JSONObject getType(){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        return jsonModuleLoader.mergeResultElement("member/growth_rule.json");
+        return jsonModuleLoader.mergeResultElement(RequestUtils.siteId(),  "member/growth_rule.json");
     }
 }

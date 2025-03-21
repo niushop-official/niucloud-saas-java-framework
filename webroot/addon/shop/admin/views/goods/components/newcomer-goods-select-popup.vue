@@ -10,7 +10,7 @@
                 </div>
             </slot>
         </div>
-        <el-dialog v-model="showDialog" :title="t('goodsSelectPopupSelectGoodsDialog')" width="1000px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+        <el-dialog v-model="showDialog" :title="t('goodsSelectPopupSelectGoodsDialog')" width="1000px" :destroy-on-close="true" :close-on-click-modal="false">
 
             <el-form :inline="true" :model="goodsTable.searchParam" ref="searchFormRef">
                 <el-form-item prop="select_type" class="form-item-wrap">
@@ -330,7 +330,7 @@ const secondLevelHandleCheckAllChange = (isSelect,row)=>{
         item.threeLevelCheckAll = isSelect;
     });
     detectionAllSelect();
-    
+
     if(prop.mode == 'spu'){
         if (isSelect) {
             selectGoodsId.push(row.goods_id)
@@ -373,7 +373,7 @@ const secondLevelHandleCheckAllChange = (isSelect,row)=>{
             if(index < len){
                 let indent = selectGoodsId.indexOf(item)
                 delete selectGoods[replacePrefix+selectGoodsId[indent]]
-                selectGoodsId.splice(indent,1) 
+                selectGoodsId.splice(indent,1)
             }
         });
         setGoodsSelected();
@@ -399,11 +399,11 @@ const subChildHandleCheckAllChange  = (selected: any,parentData: any,data: any)=
         parentData.isSecondLevelIndeterminate = false;
         parentData.secondLevelCheckAll = false;
     }
-    
+
     detectionAllSelect();
 
     let currSku = deepClone(data)
-    
+
     if(selected){
         selectGoodsId.push(currSku.sku_id);
 
@@ -460,7 +460,7 @@ const loadGoodsList = (page: number = 1, callback: any = null) => {
         searchData[replacePrefix+'ids'] = goods_ids
     } else {
         searchData[replacePrefix+'ids'] = '';
-    } 
+    }
 
     getNewcomerGoodsList({
         page: goodsTable.page,
@@ -486,7 +486,7 @@ const loadGoodsList = (page: number = 1, callback: any = null) => {
         }
         if (callback) callback(prop.mode == "spu" ? res.data.verify_goods_ids : res.data.verify_sku_ids, res.data.select_goods_list)
         setGoodsSelected();
-        
+
         goodsTable.data = goodsTableData
         goodsTable.total = res.data.total
         goodsTable.loading = false
@@ -511,9 +511,9 @@ const setGoodsSelected = () => {
             let isAllSelectSku = true;
             for (let i = 0; i < goodsTable.data.length; i++) {
                 goodsTable.data[i].secondLevelCheckAll = false;
-                
+
                 isAllSelectSku = true;
-                
+
                 goodsTable.data[i].isSecondLevelIndeterminate = false;
                 goodsTable.data[i].skuList.forEach((item,index) => {
                     item.threeLevelCheckAll = false;
@@ -545,7 +545,7 @@ const show = () => {
     for (let k in selectGoods) {
         delete selectGoods[k];
     }
-    
+
     replacePrefix = prop.mode == "sku" ? 'sku_' : 'goods_';
 
     // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
@@ -556,7 +556,7 @@ const show = () => {
     }
 
     getGoodsSkuNoPageListFn();
-    
+
     loadGoodsList(1, (verify_ids: any) => {
         // 第一次打开弹出框时，纠正数据，并且赋值已选商品
         if (goodsIds.value && goodsIds.value.length) {
@@ -609,7 +609,7 @@ const getGoodsSkuNoPageListFn = () =>{
             }
         }
 
-        
+
         setGoodsSelected();
     })
 }
@@ -638,7 +638,7 @@ const save = () => {
         });
         return;
     }
-    
+
     if(prop.way == 'single'){
         let realTypeNum = 0;
         let virtualTypeNum = 0;
@@ -649,7 +649,7 @@ const save = () => {
                 realTypeNum++;
             }
         }
-        
+
         if (realTypeNum != Object.keys(selectGoods).length && virtualTypeNum != Object.keys(selectGoods).length) {
             ElMessage({
                 type: 'warning',

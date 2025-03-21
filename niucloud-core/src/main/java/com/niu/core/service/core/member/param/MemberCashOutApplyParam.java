@@ -4,7 +4,7 @@ import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.service.api.base.ApiBaseParam;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Data

@@ -1,9 +1,11 @@
 package com.niu.core.service.core.sys.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.site.Site;
@@ -19,8 +21,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
@@ -63,6 +68,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
         model.setSiteId(siteId);
         BeanUtils.copyProperties(configParam, model);
         siteMapper.updateById(model);
+        coreSiteService.clearSiteCache(siteId);
 
         JSONObject service = new JSONObject();
         service.set("wechat_code", configParam.getWechatCode());
@@ -129,6 +135,28 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
     public void setMap(Integer siteId, SysMapParam configParam) {
         JSONObject json = JSONUtil.parseObj(configParam);
         coreConfigService.setConfig(RequestUtils.siteId(), "MAPKEY", json);
+
+        if (RequestUtils.defaultSiteId().equals(siteId)) {
+            this.mapKeyChange(configParam.getKey());
+        }
+    }
+
+    private void mapKeyChange(String key) {
+        File file = new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/src/manifest.json");
+        if (file.exists()) {
+            JSONObject content = JSONUtil.parseObj(removeComments(FileUtil.readUtf8String(file)));
+            content.putByPath("h5.sdkConfigs.maps.qqmap.key", key);
+            FileUtil.writeUtf8String(content.toStringPretty(), file);
+        }
+    }
+
+    public String removeComments(String json) {
+        // 匹配多行注释的正则表达式
+        Pattern pattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(json);
+        // 将匹配到的注释替换为空字符串
+        String result = matcher.replaceAll("");
+        return result;
     }
 
     /**

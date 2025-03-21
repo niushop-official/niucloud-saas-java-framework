@@ -1,5 +1,6 @@
 package com.niu.core.common.component.upload;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.niu.core.common.component.upload.annotation.UploadProvider;
 
@@ -28,7 +29,7 @@ public abstract class AbstractUploadProvider {
      * @return
      */
     public String getAccessUrl(String location) {
-        if (StrUtil.isNotEmpty(location)) {
+        if (ObjectUtil.isNotEmpty(location) && ObjectUtil.isNotEmpty(domain)) {
             return domain + "/" + location;
         }
         return location;

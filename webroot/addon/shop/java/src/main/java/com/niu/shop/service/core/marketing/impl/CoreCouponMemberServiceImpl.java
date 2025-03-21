@@ -15,7 +15,7 @@ import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 

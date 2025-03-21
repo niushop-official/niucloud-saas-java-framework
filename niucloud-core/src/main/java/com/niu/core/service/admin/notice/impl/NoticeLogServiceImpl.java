@@ -9,7 +9,7 @@ import com.niu.core.service.core.notice.ICoreNoticeLogService;
 import com.niu.core.service.core.notice.param.NoticeLogSearchParam;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class NoticeLogServiceImpl implements INoticeLogService {

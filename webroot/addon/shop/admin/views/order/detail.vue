@@ -19,7 +19,15 @@
 							<div class="input-width">{{ formData.out_trade_no }}</div>
 						</el-form-item>
 						<el-form-item :label="t('payType')" v-if="formData.pay">
-							<div class="input-width">{{ formData.pay.type_name }}</div>
+							<div class="input-width">
+								<span>{{ formData.pay.type_name }}</span>
+							</div>
+						</el-form-item>
+						<el-form-item  v-if="formData.pay">
+							<div class="input-width" v-if="formData.member_id !== formData.pay.main_id && formData.pay.status == 2">
+								<span >{{ formData.pay.pay_type_name }}, 帮付人：</span>
+								<span class="text-primary cursor-pointer" @click="memberEvent(formData.pay.main_id)">{{ formData.pay.pay_member }}</span>
+							</div>
 						</el-form-item>
 					</el-col>
 					<el-col :span="8">
@@ -76,7 +84,7 @@
 						<span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="openElectronicSheetPrintDialog" v-if="formData.delivery_type == 'express' && formData.status == 3">{{ t('electronicSheetPrintTitle') }}</span>
 						<span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="printTicketEvent" v-if="formData.delivery_type == 'virtual' && (formData.status == 2 || formData.status == 3 || formData.status == 5)">{{ t('printTicket') }}</span>
                         <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="orderEditAddressFn" v-if="formData.status == 1 && formData.delivery_type != 'virtual' && formData.activity_type != 'giftcard'">{{ t('editAddress') }}</span>
-                        <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="refundEvent" v-if="formData.is_refund_show && formData.status != 1 && formData.status != -1 && formData.is_enable_refund == 1">{{ t('voluntaryRefund') }}</span>
+                        <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" @click="refundEvent" v-if="formData.is_refund_show && formData.status != 1 && formData.status != -1">{{ t('voluntaryRefund') }}</span>
 						<div class="flex" v-if="formData.order_delivery">
 							<template v-for="(item, index) in formData.order_delivery" :key="index">
 								<span v-if="item.delivery_type == 'express' && item.sub_delivery_type == 'express'"
@@ -99,8 +107,16 @@
 						</div>
 					</div>
 				</div>
+                <h3 class="panel-title" v-if="formData.form_record_show==1">{{ t('formDetail') }}</h3>
+                <div class="row-bg px-[30px] mb-[20px]" v-if="formData.form_record_show==1">
+                    <div class="grid grid-cols-3 gap-[20px]">
+                        <el-form-item v-for="(field, fieldKey) in tableData[0]?.recordsFieldList || []" :key="fieldKey" :label="field.field_name" min-width="200" >
+                            <component :is="tableData[0]?.recordsFieldList[fieldKey].detailComponent" :data="tableData[0]?.recordsFieldList[fieldKey]" />
+                        </el-form-item> 
+                    </div>    
+                </div>
 
-				<h3 class="panel-title">{{ t('goodsDetail') }}</h3>
+				<h3 class="panel-title mt-[30rpx]">{{ t('goodsDetail') }}</h3>
 				<el-table :data="formData.order_goods" size="large">
 					<el-table-column :label="t('goodsName')" align="left" width="300">
 						<template #default="{ row }">
@@ -132,7 +148,12 @@
 						</template>
 					</el-table-column>
 					<el-table-column prop="num" :label="t('num')" min-width="50" align="right" />
-				</el-table>
+                    <el-table-column align="right" min-width="120">
+						<template #default="{ row }">
+							<el-button type="primary" v-if="row.form_record_show==1" link @click="formDetailEvent(row.form_record_id)">{{ t('formDetail') }}</el-button>
+						</template>
+					</el-table-column>
+				</el-table>          
 				<div class="py-[12px] px-[16px] border-b border-color flex justify-end">
 					<div class="w-[310px] flex flex-col text-right">
 						<div class="flex mb-[10px]">
@@ -212,13 +233,15 @@
 		<electronic-sheet-print ref="electronicSheetPrintDialog" @complete="loadOrderList" />
         <order-edit-address ref="orderEditAddressDialog" @complete="loadOrderList"/>
         <shop-active-refund ref="shopActiveRefundDialog" @complete="setFormData(orderId)" />
+        <form-detail ref="formDetailDialog" />
 	</div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref,computed ,defineAsyncComponent} from 'vue'
 import { t } from '@/lang'
 import { getOrderDetail, orderClose, orderFinish } from '@/addon/shop/api/order'
+import { getFormRecordsInfo,getDiyFormFieldsList} from '@/app/api/diy_form'
 import { printTicket } from '@/app/api/printer'
 import DeliveryAction from '@/addon/shop/views/order/components/delivery-action.vue'
 import OrderNotes from '@/addon/shop/views/order/components/order-notes.vue'
@@ -227,6 +250,7 @@ import deliveryPackage from '@/addon/shop/views/order/components/delivery-packag
 import AdjustMoney from '@/addon/shop/views/order/components/adjust-money.vue'
 import electronicSheetPrint from '@/addon/shop/views/order/components/electronic-sheet-print.vue'
 import ShopActiveRefund from '@/addon/shop/views/order/components/shop-active-refund.vue'
+import FormDetail from '@/addon/shop/views/order/components/form-detail.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { img } from '@/utils/common'
 import { ElMessageBox } from 'element-plus'
@@ -239,24 +263,57 @@ const orderId: number = parseInt(route.query.order_id as string)
 const loading = ref(true)
 
 const formData: Record<string, any> | null = ref(null)
+const tableData = ref([]);
+const modules: any = import.meta.glob('@/**/*.vue')
+const formDetailDialog: any = ref(null)
+const formDetailEvent = (data: any) => {
+    formDetailDialog.value.show(data)
+}
 
-const setFormData = async(orderId: number = 0) => {
-    loading.value = true
-    formData.value = null
-    await getOrderDetail(orderId).then(({ data }) => {
-        formData.value = data
+const setFormData = async (orderId: number = 0) => {
+    loading.value = true;
+    formData.value = null;
+
+    try {
+        // 获取订单详情
+        const { data } = await getOrderDetail(orderId);
+        formData.value = data;
+
         let refundOrderNum = 0;
-        formData.value.order_goods.forEach((orderItem,orderIndex) => {
-            if(orderItem.status == 1){
+        formData.value.form_details = null; // 订单表单详情
+        formData.value.order_goods.forEach((orderItem:any) => {
+            if (orderItem.is_enable_refund == 1) {
                 refundOrderNum++;
             }
+            orderItem.form_details = null; // 每个商品的表单详情
         });
-        formData.value.is_refund_show = refundOrderNum > 0 ? true : false;
-        console.log("formData.value",formData.value)
-    }).catch(() => {
-    })
-    loading.value = false
-}
+        formData.value.is_refund_show = refundOrderNum > 0;
+
+        // 获取订单的表单详情
+        if (formData.value.form_record_id) {
+            try {
+                const orderFormResponse = await getFormRecordsInfo(formData.value.form_record_id);
+                formData.value.form_details = orderFormResponse.data;
+                if (formData.value.form_details && formData.value.form_details.recordsFieldList) {
+                    const recordsFieldList = formData.value.form_details.recordsFieldList;
+                    for (const key in recordsFieldList) {
+                        if (modules[recordsFieldList[key].detailComponent]) {
+                            recordsFieldList[key].detailComponent = defineAsyncComponent(modules[recordsFieldList[key].detailComponent]);
+                        } else {
+                            delete recordsFieldList[key];
+                        }
+                    }
+                    tableData.value = [formData.value.form_details];                
+                } else {
+                }
+            } catch (error) {
+            }
+        }
+    } catch (error) {
+    } finally {
+        loading.value = false;
+    }
+};
 
 if (orderId) setFormData(orderId)
 else loading.value = false
@@ -301,10 +358,10 @@ const setNotes = () => {
 // 订单完成
 const finish = () => {
     ElMessageBox.confirm(t('orderFinishTips'), t('warning'), {
-            confirmButtonText: t('confirm'),
-            cancelButtonText: t('cancel'),
-            type: 'warning'
-        }
+        confirmButtonText: t('confirm'),
+        cancelButtonText: t('cancel'),
+        type: 'warning'
+    }
     ).then(() => {
         orderFinish(orderId).then(() => {
             setFormData(orderId)
@@ -373,10 +430,18 @@ const printTicketEvent = () => {
 /**
  * 商家主动退款
  */
- const shopActiveRefundDialog: Record<string, any> | null = ref(null)
+const shopActiveRefundDialog: Record<string, any> | null = ref(null)
 const refundEvent = () => {
     shopActiveRefundDialog.value.setFormData(formData.value)
     shopActiveRefundDialog.value.showDialog = true
+}
+
+const memberEvent = (id: number) => {
+    const routeUrl = router.resolve({
+        path: '/member/detail',
+        query: { id }
+    })
+    window.open(routeUrl.href, '_blank')
 }
 </script>
 

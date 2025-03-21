@@ -12,7 +12,7 @@ import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 
 @EventCallback("shop")

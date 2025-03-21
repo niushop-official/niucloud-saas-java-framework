@@ -21,7 +21,7 @@ import com.niu.shop.service.core.order.ICoreOrderService;
 import com.niu.shop.service.core.order.param.DeliverySearchParam;
 import com.niu.shop.service.core.order.param.OrderDeliveryParam;
 import org.springframework.stereotype.Service;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 

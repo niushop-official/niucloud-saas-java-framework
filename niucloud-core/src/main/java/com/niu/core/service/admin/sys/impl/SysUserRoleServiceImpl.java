@@ -26,7 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 
 /**
@@ -104,7 +104,7 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
         Long userRoleCount=sysUserRoleMapper.selectCount(
                 new QueryWrapper<SysUserRole>()
                         .eq("uid", addParam.getUid())
-                        .eq("site_id", addParam.getUid())
+                        .eq("site_id", addParam.getSiteId())
                 );
         if (userRoleCount>0){
             throw new CommonException("SITE_USER_EXIST");

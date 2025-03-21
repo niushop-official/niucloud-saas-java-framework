@@ -9,6 +9,7 @@ import com.niu.core.service.admin.site.param.SiteEditParam;
 import com.niu.core.service.admin.site.param.SiteParam;
 import com.niu.core.service.admin.site.param.SiteSearchParam;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.service.admin.site.vo.ShowAppListVo;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.site.vo.SiteListVo;
 
@@ -95,4 +96,10 @@ public interface ISiteService {
      * @param siteGroup
      */
     void siteAddonChange(Site site, SiteGroup siteGroup);
+
+    /**
+     * 应用展示工具
+     * @return
+     */
+    Map<String, ShowAppListVo> getShowAppTools();
 }

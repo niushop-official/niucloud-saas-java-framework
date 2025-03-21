@@ -40,16 +40,6 @@ public class SysNoticeSmsLogListVo implements Serializable {
     private String name;
     private String statusName;
 
-    public String getSmsTypeName() {
-        JSONObject smsTypeEnum = SmsTypeEnum.getType();
-        return smsTypeEnum.getByPath(this.smsType + ".name", String.class);
-    }
-
-    public String getName() {
-        Map<String, NoticeEnumListVo> notice = NoticeEnum.getNotice();
-        return ObjectUtil.defaultIfNull(notice.get(this.key).getName(), "");
-    }
-
     public String getStatusName() {
         return SmsStatusEnum.getNameByStatus(this.status);
     }

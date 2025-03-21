@@ -9,7 +9,7 @@
 			<view class="content-box">
 				<!-- 榜单分类按钮 -->
 				<scroll-view scroll-x="true" class="category-slider" scroll-with-animation :scroll-into-view="'id' + activeIndex">
-					<view class="category-con" :style="rankList.length <= 3 ? { display: 'flex', justifyContent: 'center' } : {}">
+					<view class="category-con" :style="{ justifyContent: centered ? 'center' : 'flex-start' }">
 						<view class="category-btn" v-for="(item, index) in rankList" :key="index"  :id="'id' + index" @click="selectCategory(item, index)" :style="{ color: activeIndex === index ? rankConfig.select_color : rankConfig.no_color, background: activeIndex === index ? `linear-gradient(to right, ${rankConfig.select_bg_color_start}, ${rankConfig.select_bg_color_end})`: 'transparent'}">
 							<view>{{ item.name }}</view>
 						</view>
@@ -44,7 +44,7 @@
 					</view>
 					<view class="flex flex-col flex-1 justify-between ml-[20rpx] pt-[4rpx]">
 						<view class="text-[28rpx] text-[#333] leading-[40rpx] multi-hidden mb-[10rpx]">
-							<view class="brand-tag" v-if="item.goods_brand">
+							<view class="brand-tag" v-if="item.goods_brand" :style="diyGoods.baseTagStyle(item.goods_brand)">
 								{{item.goods_brand.brand_name}}
 							</view>
 							{{ item.goods_name }}
@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed,nextTick } from 'vue'
 import { t } from '@/locale'
 import { redirect, img, pxToRpx } from '@/utils/common';
 import { getRankList ,getRankGoodsList,getRankConfig} from '@/addon/shop/api/rank';
@@ -96,7 +96,6 @@ import MescrollBody from '@/components/mescroll/mescroll-body/mescroll-body.vue'
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js';
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue'
 import { onLoad, onPageScroll, onReachBottom } from '@dcloudio/uni-app';
-import useDiyStore from '@/app/stores/diy';
 import { topTabar } from '@/utils/topTabbar'
 import { useGoods } from '@/addon/shop/hooks/useGoods'
 
@@ -104,7 +103,6 @@ const diyGoods = useGoods();
 const { mescrollInit, downCallback, getMescroll } = useMescroll(onPageScroll, onReachBottom);
 const mescrollRef = ref(null);
 const loading = ref<boolean>(false);
-const diyStore = useDiyStore();
 // 获取系统状态栏的高度
 let menuButtonInfo : any = {};
 // 如果是小程序，获取右上角胶囊的尺寸信息，避免导航栏右侧内容与胶囊重叠(支付宝小程序非本API，尚未兼容)
@@ -122,8 +120,8 @@ const topStyle = computed(() => {
 
 // 获取系统信息
 const systemInfo = uni.getSystemInfoSync();
-const topImageHeight = 450; 
-const screenHeight = systemInfo.windowHeight; 
+const topImageHeight = 450;
+const screenHeight = systemInfo.windowHeight;
 // 将屏幕高度转换为 rpx
 const screenHeightInRpx = (screenHeight / systemInfo.screenWidth) * 750;
 // 计算列表高度
@@ -139,20 +137,44 @@ const closeFn = () =>{
 const rankList = ref<Array<any>>([]);
 const rankGoodsList = ref<Array<any>>([]);
 
+const centered = ref(false); // 是否居中
+const calculateCentered = () => {
+	nextTick(() => {
+		const query = uni.createSelectorQuery();
+		query.selectAll('.category-btn').boundingClientRect((rects) => {
+			if (rects && rects.length > 0) {
+				const totalWidth = rects.reduce((sum, rect) => sum + rect.width, 0);
+				const screenWidth = uni.getSystemInfoSync().windowWidth;
+				centered.value = totalWidth <= screenWidth; // 判断是否需要居中
+			} else {
+				console.error('Failed to get .category-btn elements.');
+			}
+		})
+		.exec();
+	});
+};
+
 // 加载分类数据
 const getRankListFn = (isFirstLoad = false) => {
-  getRankList().then((res) => {
-      rankList.value = res.data
-
-      // 仅在首次加载时选择第一个分类
-      if (isFirstLoad && rankList.value && rankList.value.length) {
-        selectCategory(rankList.value[0], 0);
-      } else if (!rankList.value.length) {
-        loading.value = false;
-      }
+    getRankList().then((res) => {
+        rankList.value = res.data
+        // 仅在首次加载时选择第一个分类
+        if (rankId.value) {
+            for(let i=0;i<rankList.value.length;i++){
+                if(rankId.value == rankList.value[i].rank_id){
+                    selectCategory(rankList.value[i], i);
+                    break;
+                }
+            }
+        } else if (isFirstLoad && rankList.value && rankList.value.length) {
+            selectCategory(rankList.value[0], 0);
+        } else if (!rankList.value.length) {
+            loading.value = true;
+        }
+        calculateCentered();
 
     }).catch((error) => {
-      console.error("加载分类数据失败", error);
+        console.error("加载分类数据失败", error);
     })
 };
 
@@ -184,35 +206,35 @@ function selectCategory(rank:any, index:any) {
 
 //获取榜单商品
 const getRankGoodsListFn = (mescroll: any) => {
-	if(rankList.value.length == 0) return;
-	loading.value = false;
-	let data: object = {
-		page: mescroll.num,
-		limit: mescroll.size,
-        rank_id:rankId.value
-	};
+    if (rankList.value.length == 0) return;
+    loading.value = false;
+    let data: object = {
+        page: mescroll.num,
+        limit: mescroll.size,
+        rank_id: rankId.value
+    };
 
-	getRankGoodsList(data).then((res: any) => {
-		let newArr = (res.data.data as Array<Object>).map((el: any) => {return el})
-		let ifPage = true
-		//设置列表数据
-		if (mescroll.num == 1) {
-			rankGoodsList.value = []; //如果是第一页需手动制空列表
-		}
-		rankGoodsList.value = rankGoodsList.value.concat(newArr);
-		if(goodsSource.value=='goods'){
-			ifPage = false
-		}else{
-			ifPage = true
-		}
-		mescroll.endSuccess(newArr.length,ifPage);
-
-		
-		loading.value = true;
-	}).catch(() => {
-		loading.value = true;
-		mescroll.endErr(); // 请求失败, 结束加载
-	})
+    getRankGoodsList(data).then((res: any) => {
+        let newArr = (res.data.data as Array<Object>).map((el: any) => {
+            return el
+        })
+        let ifPage = true
+        //设置列表数据
+        if (mescroll.num == 1) {
+            rankGoodsList.value = []; //如果是第一页需手动制空列表
+        }
+        rankGoodsList.value = rankGoodsList.value.concat(newArr);
+        if (goodsSource.value == 'goods') {
+            ifPage = false
+        } else {
+            ifPage = true
+        }
+        mescroll.endSuccess(newArr.length, ifPage);
+        loading.value = true;
+    }).catch(() => {
+        loading.value = true;
+        mescroll.endErr(); // 请求失败, 结束加载
+    })
 }
 
 // 跳转商品详情
@@ -235,8 +257,9 @@ function getRankBadge(sort:any) {
 }
 
 onLoad(async (option : any) => {
-	getRankConfigFn()
-	getRankListFn(true)
+    rankId.value = option.rank_id || 0;
+    getRankConfigFn()
+    getRankListFn(true)
 })
 
 </script>

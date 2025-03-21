@@ -3,7 +3,7 @@
 		<view @touchmove.prevent.stop class="popup-common">
 			<view class="title">请选择优惠券</view>
 			<view v-if="!type" class="-mt-[20rpx]">
-				<u-tabs :list="tabs" @click="switchTab" :current="current" itemStyle="width:50%;height:88rpx;box-sizing: border-box; font-size: 28rpx;" 
+				<u-tabs :list="tabs" @click="switchTab" :current="current" itemStyle="width:50%;height:88rpx;box-sizing: border-box; font-size: 28rpx;"
 				:activeStyle="{
 					color: 'var(--primary-color)'
 				}" lineColor="var(--primary-color)"></u-tabs>
@@ -12,8 +12,7 @@
 				<view class="px-[var(--popup-sidebar-m)] pb-[30rpx] pt-0 text-sm" v-show="current == 0">
 					<view class="mt-[var(--top-m)] px-[var(--pad-sidebar-m)] py-[var(--pad-top-m)] border-1 border-[#eee] border-solid rounded-[20rpx]"
 						:class="{'!border-[var(--primary-color)] bg-[var(--primary-color-light2)]': coupon && coupon.id == item.id}"
-						v-for="item in couponList"
-						@click="selectCoupon(item)">
+						v-for="item in couponList" @click="selectCoupon(item)">
 						<view class="flex border-0 !border-b border-[#eee] border-dashed pb-[20rpx]" :class="{ '!border-[var(--primary-color)]': coupon && coupon.id == item.id }">
 							<view class="flex-1 w-0">
 								<view class="text-[30rpx] mb-[20rpx] font-500">{{ item.title }}</view>

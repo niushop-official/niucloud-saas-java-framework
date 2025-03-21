@@ -12,7 +12,7 @@ import com.niu.core.mapper.sys.SysScheduleMapper;
 import com.niu.core.service.core.schedule.ICoreScheduleService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

@@ -6,7 +6,7 @@ import com.niu.core.event.pay.PaySuccessEvent;
 import com.niu.core.service.core.site.ICoreSiteAccountService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 支付成功

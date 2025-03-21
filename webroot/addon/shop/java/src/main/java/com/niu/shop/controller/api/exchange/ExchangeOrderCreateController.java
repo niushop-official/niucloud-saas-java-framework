@@ -7,7 +7,7 @@ import com.niu.shop.service.core.order.param.OrderCalculateParam;
 import com.niu.shop.service.core.order.param.OrderCreateParam;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Collections;
 
 /**

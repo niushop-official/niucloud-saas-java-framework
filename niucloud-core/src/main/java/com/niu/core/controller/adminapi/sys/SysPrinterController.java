@@ -11,7 +11,7 @@ import com.niu.core.service.core.sys.vo.SysPrinterPrintTicketVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 小票打印机控制器
@@ -48,7 +48,7 @@ public class SysPrinterController {
      * @return Result<SysPrinterInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<?> info(@PathVariable Integer id) {
+    public Result<?> info(@PathVariable("id") Integer id) {
         return Result.success(sysPrinterService.info(id));
     }
 
@@ -71,7 +71,7 @@ public class SysPrinterController {
      * @return Result<?>
      */
     @PutMapping("/{id}")
-    public Result<?> edit(@PathVariable Integer id, @Validated @RequestBody SysPrinterParam editParam) {
+    public Result<?> edit(@PathVariable("id") Integer id, @Validated @RequestBody SysPrinterParam editParam) {
         sysPrinterService.edit(id, editParam);
         return Result.success();
     }
@@ -89,7 +89,7 @@ public class SysPrinterController {
      * @return Result<?>
      */
     @DeleteMapping("/{id}")
-    public Result<?> del(@PathVariable Integer id) {
+    public Result<?> del(@PathVariable("id") Integer id) {
         sysPrinterService.del(id);
         return Result.success();
     }
@@ -105,12 +105,12 @@ public class SysPrinterController {
     }
 
     @PutMapping("/refreshtoken/{id}")
-    public Result<?> refreshToken(@PathVariable Integer id) {
+    public Result<?> refreshToken(@PathVariable("id") Integer id) {
         return Result.success(sysPrinterService.refreshToken(id));
     }
 
     @PutMapping("/testprint/{id}")
-    public Result<?> testPrint(@PathVariable Integer id) {
+    public Result<?> testPrint(@PathVariable("id") Integer id) {
         sysPrinterService.testPrint(id);
         return Result.success();
     }

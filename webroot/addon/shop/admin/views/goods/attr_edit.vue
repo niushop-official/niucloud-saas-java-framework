@@ -101,13 +101,14 @@
                 <el-form-item :label="t('attrValueName')" prop="attr_value_name">
                     <el-input v-model.trim="formAttrValueData.attr_value_name" clearable :placeholder="t('attrValueNamePlaceholder')" class="input-width" maxlength="20" show-word-limit />
                 </el-form-item>
-
                 <el-form-item :label="t('attrValueType')">
-                    <el-select v-model="formAttrValueData.type" class="!w-[150px]" :disabled="actionAttrValueIndex > -1">
-                        <el-option v-for="item in attrValueTypeOptions" :label="item.label" :value="item.value" />
-                    </el-select>
+                    <div class="flex flex-col">
+                        <el-select v-model="formAttrValueData.type" class="!w-[150px]" :disabled="actionAttrValueId > -1">
+                            <el-option v-for="item in attrValueTypeOptions" :label="item.label" :value="item.value" />
+                        </el-select>
+                        <div class="mt-[10px] text-[12px] text-[#999] leading-[1]">注意：编辑时参数类型不可更改</div>
+                    </div>
                 </el-form-item>
-
                 <el-form-item :label="t('sort')" >
                     <el-input v-model.trim="formAttrValueData.sort" maxlength="8" show-word-limit clearable :placeholder="t('sortPlaceholder')" class="!w-[150px]" @keyup="filterNumber($event)"/>
                 </el-form-item>

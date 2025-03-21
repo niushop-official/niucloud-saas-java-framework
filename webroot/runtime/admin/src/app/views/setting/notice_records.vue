@@ -10,12 +10,11 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="recordsTableData.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('searchReceiver')" prop="receiver">
-                        <el-input v-model="recordsTableData.searchParam.receiver" :placeholder="t('receiverPlaceholder')" />
+                        <el-input v-model.trim="recordsTableData.searchParam.receiver" :placeholder="t('receiverPlaceholder')" />
                     </el-form-item>
 
                     <el-form-item :label="t('noticeKey')" prop="key">
-                        <el-select v-model="recordsTableData.searchParam.key" clearable :placeholder="t('noticeKeyPlaceholder')" class="input-width">
-                            <el-option :label="t('selectPlaceholder')" value="" />
+                        <el-select v-model="recordsTableData.searchParam.key" clearable :placeholder="t('noticeKeyPlaceholder')" class="input-width" popper-class="notice">
                             <el-option-group v-for="(group, gindex) in templateList" :key="gindex" :label="group.label">
                                 <el-option :label="item.name" :value="item.value" :disabled="item.disabled ?? false" v-for="(item, index) in group.list" :key="index" />
                             </el-option-group>
@@ -28,7 +27,7 @@
 
                     <el-form-item>
                         <el-button type="primary" @click="loadNoticeLogList()">{{ t('search') }}</el-button>
-                        <el-button @click="searchFormRef?.resetFields()">{{ t('reset') }}</el-button>
+                        <el-button @click="resetForm(searchFormRef)">{{ t('reset') }}</el-button>
                     </el-form-item>
                 </el-form>
             </el-card>
@@ -76,7 +75,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
-import { getNoticeList, getNoticeLog } from '@/app/api/notice'
+import { getNoticeLog, getNoticeList } from '@/app/api/notice'
 import RecordsInfo from '@/app/views/setting/components/notice-records-info.vue'
 import { FormInstance } from 'element-plus'
 import { useRoute } from 'vue-router'
@@ -159,6 +158,12 @@ const loadNoticeLogList = (page: number = 1) => {
 }
 loadNoticeLogList()
 
+const resetForm = (formEl: FormInstance | undefined) => {
+    if (!formEl) return
+    formEl.resetFields()
+    loadNoticeLogList()
+}
+
 const recordsDialog: Record<string, any> | null = ref(null)
 
 /**
@@ -172,4 +177,9 @@ const infoEvent = (data: any) => {
 
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss">
+.notice .el-select-group__title{
+    font-size: 14px;;
+}
+
+</style>

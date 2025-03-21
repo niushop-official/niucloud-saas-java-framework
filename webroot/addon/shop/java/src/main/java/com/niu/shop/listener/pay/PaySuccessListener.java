@@ -8,7 +8,7 @@ import com.niu.shop.service.core.order.ICoreOrderService;
 import com.niu.shop.service.core.order.param.OrderPayParam;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 支付成功

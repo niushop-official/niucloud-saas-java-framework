@@ -102,9 +102,7 @@
 				return false
 			}
 			res.data.order_goods.forEach((el: any) => {
-				if (el.status != 1 || el.is_enable_refund == 1) {
-					// 排除存在退款的情况
-				}else {
+				if (el.status == 1) {
 					info.value.push(el);
 					form.value.push({
 						order_id: el.order_id,
@@ -115,7 +113,6 @@
 						scores: 5
 					})
 				}
-
 			})
 			loading.value = false
 		}).catch(() => {

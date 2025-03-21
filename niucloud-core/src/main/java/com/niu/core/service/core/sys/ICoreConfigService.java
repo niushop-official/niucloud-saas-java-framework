@@ -44,4 +44,8 @@ public interface ICoreConfigService {
      */
     void setConfig(Integer siteId, String key, JSON valueJson);
 
+    /**
+     * 清除缓存
+     */
+    void cacheClear();
 }

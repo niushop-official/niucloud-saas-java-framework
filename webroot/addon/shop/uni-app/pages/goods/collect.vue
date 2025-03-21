@@ -29,7 +29,7 @@
                                                             <image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
                                                         </template>
                                                     </u--image>
-                                                    <view v-if="item.status == 0 " class="absolute left-0 top-0  w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
+                                                    <view v-if="item.status == 0 " class="absolute left-0 top-0 w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
                                                         <text class="text-[#fff] text-[28rpx]">已失效</text>
                                                     </view>
                                                 </view>
@@ -80,13 +80,13 @@ import MescrollBody from '@/components/mescroll/mescroll-body/mescroll-body.vue'
 import MescrollEmpty from '@/components/mescroll/mescroll-empty/mescroll-empty.vue';
 import useMescroll from '@/components/mescroll/hooks/useMescroll.js';
 import { onPageScroll, onReachBottom } from '@dcloudio/uni-app';
+
 const { mescrollInit, downCallback, getMescroll } = useMescroll(onPageScroll, onReachBottom);
 
 const loading = ref<boolean>(false);
 const optionLoading = ref(false)
 const goodsList = ref<Array<any>>([]);
 const isEdit = ref(false)
-
 
 interface mescrollStructure {
 	num: number,
@@ -141,6 +141,7 @@ const swipeClick = (data: any) => {
         getMescroll().resetUpScroll();
     })
 }
+
 //取消全部收藏
 const  deleteCollectFn = () => {
     if (!checkedNum.value) {
@@ -158,7 +159,6 @@ const  deleteCollectFn = () => {
         getMescroll().resetUpScroll();
     })
 }
-
 
 // 选中数量
 const checkedNum = computed(() => {
@@ -188,7 +188,7 @@ const toDetail = (data: any) => {
 	background-color: #f5f5f5;
 }
 :deep(.u-swipe-action-item__right){
-	padding: 2rpx; 
+	padding: 2rpx;
 }
 :deep(.u-swipe-action-item__right__button__wrapper){
     padding:0 10rpx !important;

@@ -112,7 +112,7 @@ public interface IShopGoodsService {
      * @param skuIds
      * @return
      */
-    Integer getSkuTransactionCount(Integer[] skuIds);
+    Long getSkuTransactionCount(Integer[] skuIds);
 
     /**
      * 查询商品正在交易中的数量
@@ -120,7 +120,7 @@ public interface IShopGoodsService {
      * @param goodsId
      * @return
      */
-    Integer getGoodsTransactionCount(Integer goodsId);
+    Long getGoodsTransactionCount(Integer goodsId);
 
     /**
      * 复制商品

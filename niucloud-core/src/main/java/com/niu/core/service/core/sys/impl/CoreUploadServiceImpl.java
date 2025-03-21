@@ -1,5 +1,6 @@
 package com.niu.core.service.core.sys.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.component.upload.model.*;
 import com.niu.core.common.exception.CommonException;
@@ -14,6 +15,7 @@ import com.niu.core.service.admin.sys.param.AttachmentUploadParam;
 import com.niu.core.service.admin.sys.vo.AttachmentUploadVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.core.service.core.upload.ICoreStorageService;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,9 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
 
     @Autowired
     private SysAttachmentMapper sysAttachmentMapper;
+
+    @Autowired
+    private ICoreStorageService coreStorageService;
 
     private String rootPath = "upload";
 
@@ -42,13 +47,17 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
         this.validate(attachmentUploadParam);
         // 生成新的文件名
         this.generateNewName(attachmentUploadParam);
+
+        JSONObject configObject = null;
         // 获取站点的上传配置
-        ICoreConfigService coreConfigService = SpringContext.bean(ICoreConfigService.class);
-        JSONObject rootJSONObject = coreConfigService.getConfigValue(attachmentUploadParam.getSiteId(), "STORAGE");
-        String defaultValue = rootJSONObject.getStr("default", StorageEnum.LOCAL.getCode());
-        JSONObject configObject = rootJSONObject.getJSONObject(defaultValue);
+        if (ObjectUtil.isNotEmpty(attachmentUploadParam.getStorageType())) {
+            configObject = coreStorageService.getStorageByType(attachmentUploadParam.getSiteId(), attachmentUploadParam.getStorageType());
+        } else {
+            configObject = coreStorageService.getDefaultStorage(attachmentUploadParam.getSiteId());
+        }
+
         // 根据配置初始化
-        IUploadProvider uploadProvider = UploadProviderFactory.createAndInit(defaultValue, configObject);
+        IUploadProvider uploadProvider = UploadProviderFactory.createAndInit(configObject.getStr("storage_type", StorageEnum.LOCAL.getCode()), configObject.getJSONObject("config_params"));
         // 构建上传参数
         UploadModel uploadModel = new UploadModel();
         uploadModel.setUploadFile(attachmentUploadParam.getFile());
@@ -62,11 +71,12 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
         // 是否上传到相册
         if (attachmentUploadParam.getIsAttachment().equals(1)) {
             SysAttachment newSysAttachment = this.buildSysAttachment(attachmentUploadParam, uploadModelResult);
+            newSysAttachment.setUrl(uploadProvider.getAccessUrl(uploadModelResult.getAccessUrl()));
             sysAttachmentMapper.insert(newSysAttachment);
-            attachmentUploadVo.setUrl(newSysAttachment.getUrl());
+            attachmentUploadVo.setUrl(uploadProvider.getAccessUrl(uploadModelResult.getAccessUrl()));
             attachmentUploadVo.setAttId(newSysAttachment.getAttId());
         } else {
-            attachmentUploadVo.setUrl(uploadModelResult.getAccessUrl());
+            attachmentUploadVo.setUrl(uploadProvider.getAccessUrl(uploadModelResult.getAccessUrl()));
         }
         return attachmentUploadVo;
     }

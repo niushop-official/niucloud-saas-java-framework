@@ -199,22 +199,6 @@ public class MemberInfoVo {
     private String memberLevelName;
 
     /**
-     * @param memberLevelName
-     */
-    public void setMemberLevelName(String memberLevelName) {
-        this.memberLevelName = memberLevelName;
-    }
-
-    /**
-     * @param memberLevel
-     */
-    public void setMemberLevelName(MemberLevel memberLevel) {
-        if (memberLevel != null) {
-            this.setMemberLevelName(memberLevel.getLevelName());
-        }
-    }
-
-    /**
      * 性别 0保密 1男 2女
      *
      * @return

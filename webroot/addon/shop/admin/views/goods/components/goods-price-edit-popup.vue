@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-dialog v-model="showDialog" :title="t('editPricePopupTitle')" width="800px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+        <el-dialog v-model="showDialog" :title="t('editPricePopupTitle')" width="800px" :destroy-on-close="true" :close-on-click-modal="false">
 
             <div class="flex items-center mb-[10px]">
                 <div class="min-w-[70px] h-[70px] flex items-center justify-center">

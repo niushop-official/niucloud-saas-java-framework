@@ -3,7 +3,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 【请填写功能名称】参数

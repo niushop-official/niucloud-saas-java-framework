@@ -34,10 +34,13 @@ import com.niu.core.service.core.sys.param.SysPrinterPrintTicketParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -73,7 +76,15 @@ public class CorePayServiceImpl implements ICorePayService {
         }
         param.setPay(pay);
         param.setNotifyUrl(buildNotifyUrl(param.getSiteId(), param.getChannel(), param.getType(), "pay"));
-        return this.driver(param.getSiteId(), param.getChannel(), param.getType()).pay(param);
+
+        BasePay driver = this.driver(param.getSiteId(), param.getChannel(), param.getType());
+
+        Map<String, Object> json = new HashMap<>();
+        json.put("openid", param.getOpenid());
+        pay.setJson(JSONUtil.toJsonStr(json));
+        this.payMapper.updateById(pay);
+
+        return driver.pay(param);
     }
 
     /**

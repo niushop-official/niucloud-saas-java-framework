@@ -20,17 +20,19 @@ import com.niu.core.service.api.wechat.param.AuthRegisterParam;
 import com.niu.core.service.api.wechat.param.WechatSyncParam;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
+import com.niu.core.service.api.wechat.vo.WechatUserInfoVo;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.sys.ICoreScanService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxJsapiSignature;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
+import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,11 +94,13 @@ public class WechatServiceImpl implements IWechatService {
      * @return
      */
     public LoginVo wechatLogin(WechatAuthDataLoginParam param) {
+        JSONObject data = JSONUtil.parseObj(param.getData());
+
         return this.login(
-                param.getOpenid(),
-                param.getUnionId(),
-                param.getNickname(),
-                param.getHeadImgUrl(),
+                data.getStr("openid", ""),
+                data.getStr("unionid", ""),
+                data.getStr("nickname", ""),
+                data.getStr("avatar", ""),
                 param.getPid()
         );
     }
@@ -116,12 +120,20 @@ public class WechatServiceImpl implements IWechatService {
         if (ObjectUtil.isNotNull(member)) {
             return loginService.login(member);
         }
-        if (!unionid.isEmpty()) {
+        if (ObjectUtil.isNotEmpty(unionid)) {
             Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", openid).eq("site_id", RequestUtils.siteId()));
             if (ObjectUtil.isNotNull(unionidMember)) {
                 return loginService.login(unionidMember);
             }
         }
+
+        LoginVo loginVo = new LoginVo();
+        loginVo.setOpenid(openid);
+        loginVo.setUnionid(unionid);
+        loginVo.setNickname(nickname);
+        loginVo.setAvatar(avatar);
+
+        LoginConfigVo config = coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
 
         Member registerMember = new Member();
         registerMember.setWxOpenid(openid);
@@ -129,7 +141,28 @@ public class WechatServiceImpl implements IWechatService {
         registerMember.setHeadimg(avatar);
         registerMember.setWxUnionid(unionid);
         registerMember.setPid(pid);
-        return registerService.register(registerMember);
+
+        // 开启自动注册会员
+        if (config.getIsAuthRegister() == 1) {
+            // 开启强制获取会员信息并且开启强制绑定手机号，必须获取手机号才能进行注册，由于公众号无法主动获取，所以不能注册
+            if (config.getIsBindMobile() == 1 && config.getIsForceAccessUserInfo() == 1) {
+                return loginVo;
+            } else if (config.getIsForceAccessUserInfo() == 1) {
+                // 开启强制获取会员信息时，必须获取到昵称和头像才能进行注册
+                if (ObjectUtil.isNotEmpty(nickname) && ObjectUtil.isNotEmpty(avatar)) {
+                    return registerService.register(registerMember);
+                } else {
+                    return loginVo;
+                }
+            } else if (config.getIsBindMobile() == 1) {
+                // 开启强制绑定手机号，必须获取手机号才能进行注册，由于公众号无法主动获取，所以不能注册
+                return loginVo;
+            } else {
+                return registerService.register(registerMember);
+            }
+        } else {
+            return loginVo;
+        }
     }
 
     /**
@@ -189,17 +222,23 @@ public class WechatServiceImpl implements IWechatService {
      * @param param
      * @return
      */
-    public WxOAuth2UserInfo getWechatUser(WechatAuthParam param) {
+    public WechatUserInfoVo getWechatUser(WechatAuthParam param) {
         try {
-            WxOAuth2AccessToken wxOAuth2AccessToken = WechatUtils.mp(RequestUtils.siteId()).getOAuth2Service().getAccessToken(param.getCode());
-            try {
-                return WechatUtils.mp(RequestUtils.siteId()).getOAuth2Service().getUserInfo(wxOAuth2AccessToken, null);
-            } catch (Exception e) {
-                WxOAuth2UserInfo userInfo = new WxOAuth2UserInfo();
-                userInfo.setOpenid(wxOAuth2AccessToken.getOpenId());
-                userInfo.setUnionId(wxOAuth2AccessToken.getUnionId());
-                return userInfo;
+            WechatUserInfoVo vo = new WechatUserInfoVo();
+
+            WxMpService mp = WechatUtils.mp(RequestUtils.siteId());
+
+            WxOAuth2AccessToken wxOAuth2AccessToken = mp.getOAuth2Service().getAccessToken(param.getCode());
+            if (wxOAuth2AccessToken.getScope().equals("snsapi_base")) {
+                vo.setOpenid(ObjectUtil.defaultIfNull(wxOAuth2AccessToken.getOpenId(), ""));
+            } else {
+                WxOAuth2UserInfo userInfo = mp.getOAuth2Service().getUserInfo(wxOAuth2AccessToken, null);
+                vo.setOpenid(ObjectUtil.defaultIfNull(userInfo.getOpenid(), ""));
+                vo.setUnionid(ObjectUtil.defaultIfNull(userInfo.getUnionId(), ""));
+                vo.setNickname(ObjectUtil.defaultIfNull(userInfo.getNickname(), ""));
+                vo.setAvatar(ObjectUtil.defaultIfNull(userInfo.getHeadImgUrl(), ""));
             }
+            return vo;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }

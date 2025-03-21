@@ -14,7 +14,7 @@ import com.niu.core.service.admin.member.vo.MemberListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class MemberController {
      * @return Result<MemberInfoVo>
      */
     @GetMapping("/member/{id}")
-    public Result<MemberInfoVo> info(@PathVariable Integer id) {
+    public Result<MemberInfoVo> info(@PathVariable("id") Integer id) {
         MemberInfoVo info = memberService.info(id);
         return Result.success(info);
     }
@@ -84,7 +84,7 @@ public class MemberController {
      * @return Result<Object>
      */
     @PutMapping("/member/{member_id}")
-    public Result<Object> edit(@PathVariable Integer memberId, @Validated @RequestBody MemberParam editParam) {
+    public Result<Object> edit(@PathVariable("member_id") Integer memberId, @Validated @RequestBody MemberParam editParam) {
         memberService.edit(memberId, editParam);
         return Result.success();
     }
@@ -108,7 +108,7 @@ public class MemberController {
      * @return Result<Object>
      */
     @DeleteMapping("/member/{member_id}")
-    public Result<Object> del(@PathVariable Integer memberId) {
+    public Result<Object> del(@PathVariable("member_id") Integer memberId) {
         memberService.del(memberId);
         return Result.success();
     }
@@ -154,7 +154,7 @@ public class MemberController {
      * @param status
      */
     @PutMapping("/setstatus/{status}")
-    public Result<Object> setStatus(@PathVariable Integer status, @RequestBody MemberParam param) {
+    public Result<Object> setStatus(@PathVariable("status") Integer status, @RequestBody MemberParam param) {
         memberService.setStatus(status, param);
         return Result.success();
     }

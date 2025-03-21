@@ -18,6 +18,7 @@ import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.goods.*;
@@ -44,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
@@ -411,6 +412,15 @@ public class GoodsServiceImpl implements IGoodsService {
         addStatParam.setSiteId(vo.getSiteId());
         addStatParam.setAccessNum(1);
         coreGoodsStatService.addStat(addStatParam);
+
+/*        SowShowDataEventDefiner.SowShowDataEvent event = new SowShowDataEventDefiner.SowShowDataEvent();
+        event.setRelateId(vo.getGoodsId());
+        event.setRelateType("shop");
+        event.setLimit(3);
+        List<SowShowDataEventDefiner.SowShowDataEventResult> results = EventAndSubscribeOfPublisher.publishAndCallback(event);
+        if (ObjectUtil.isNotEmpty(results)) {
+            vo.setSowShowList(results.get(0));
+        }*/
 
         return vo;
     }

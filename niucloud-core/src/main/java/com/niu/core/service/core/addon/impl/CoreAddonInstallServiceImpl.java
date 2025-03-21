@@ -22,7 +22,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.analysis.function.Add;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +64,6 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
     @Override
     public JSONObject installCheck(String addon) {
         this.installCheck = true;
-
         JSONObject checkResult = new JSONObject();
         String rootPath = "";
         String runtimePath = "";
@@ -355,6 +354,8 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
             this.uninstallSql(addon);
             // 处理uniapp
             addonInstallTools.uninstallUniapp(addon);
+            // 移除定时任务
+            coreScheduleService.uninstallAddonSchedule(addon);
             // 删除addon表插件
             addonMapper.delete(new QueryWrapper<Addon>().eq("`key`", addon));
             // 执行卸载其它

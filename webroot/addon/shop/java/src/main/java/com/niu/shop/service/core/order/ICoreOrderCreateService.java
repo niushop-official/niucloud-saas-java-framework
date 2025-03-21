@@ -6,7 +6,7 @@ import com.niu.shop.service.core.order.vo.OrderCouponListVo;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import com.niu.shop.service.core.order.vo.OrderCreateResultVo;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 public interface ICoreOrderCreateService {

@@ -11,7 +11,7 @@ import com.niu.core.service.admin.sys.param.SysNoticeSmsLogSearchParam;
 import com.niu.core.service.core.notice.ICoreNoticeSmsLogService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreNoticeSmsLogServiceImpl implements ICoreNoticeSmsLogService {

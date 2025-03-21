@@ -4,15 +4,16 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.recharge.entity.Recharge;
-import com.niu.recharge.event.RechargeGiftContentEvent;
 import com.niu.recharge.mapper.RechargeMapper;
 import com.niu.recharge.service.api.IRechargeService;
 import com.niu.recharge.service.api.vo.RechargeListVo;
 import com.niu.recharge.service.core.ICoreRechargeConfigService;
 import com.niu.recharge.service.core.vo.RechargeConfigVo;
+import com.niu.recharge.service.core.vo.RechargeGiftContentVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -55,12 +56,18 @@ public class RechargeServiceImpl implements IRechargeService {
 
                     JSONObject gift = JSONUtil.parseObj(r.getGiftJson());
                     for (Map.Entry<String, Object> entry : gift.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        RechargeGiftContentEvent event = new RechargeGiftContentEvent();
-                        event.setKey(key);
-                        event.setValue(JSONUtil.parseObj(value).get("value"));
-                        vo.setGiftContent(EventAndSubscribeOfPublisher.publishAndCallback(event));
+                        CommonEventDefiner.CommonEvent event = new CommonEventDefiner.CommonEvent();
+                        event.setEventName("RechargeGiftContent");
+                        event.setData(entry);
+                        event.setSiteId(RequestUtils.siteId());
+                        List<CommonEventDefiner.CommonEventResult> giftContent = EventAndSubscribeOfPublisher.publishAndCallback(event);
+                        for (CommonEventDefiner.CommonEventResult content : giftContent) {
+                            if(ObjectUtil.isNotEmpty(content.getResult())) {
+                                RechargeGiftContentVo contentVo = new RechargeGiftContentVo();
+                                BeanUtils.copyProperties(content.getResult(), contentVo);
+                                vo.getGiftContent().add(contentVo);
+                            }
+                        }
                     }
                     return vo;
                 })

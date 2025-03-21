@@ -3,10 +3,10 @@
 		<view class="overflow-hidden" :style="warpCss">
 			<view :style="maskLayer"></view>
 			<view class="diy-shop-exchange-goods-list relative flex flex-wrap justify-between" v-if="goodsList.length">
-				<view class="overflow-hidden bg-[#fff] flex flex-col box-border w-[calc(50%-10rpx)] rounded-[var(--rounded-mid)]" :class="{'mt-[20rpx]': index > 1}" :style="itemCss" v-for="(item,index) in goodsList" :key="item.goods_id" @click="toLink(item)">
-					<u--image :width="style2Width" :height="style2Width" radius="var(--rounded-mid)" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
+				<view class="overflow-hidden bg-[#fff] flex flex-col box-border w-[calc(50%-10rpx)]" :class="{'mt-[20rpx]': index > 1}" :style="itemCss" v-for="(item,index) in goodsList" :key="item.goods_id" @click="toLink(item)">
+					<u--image :width="style2Width" :height="style2Width" :radius="imageRounded.val" :src="img(item.goods_cover_thumb_mid || '')" model="aspectFill">
 						<template #error>
-							<image class="rounded-[var(--rounded-mid)] overflow-hidden" :style="{'width': style2Width,'height': style2Width}" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+							<image class="overflow-hidden" :style="{'width': style2Width,'height': style2Width, 'border-radius': imageRounded.val}" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 						</template>
 					</u--image>
 					<view class="flex-1 pt-[10rpx] pb-[20rpx] px-[16rpx] flex flex-col justify-between">
@@ -43,7 +43,7 @@
 	import useDiyStore from '@/app/stores/diy';
 	import { getExchangeComponentsList } from '@/addon/shop/api/point';
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
+	const props = defineProps(['component', 'index','value']);
 	const diyStore = useDiyStore();
 
     const skeleton = reactive({
@@ -84,6 +84,18 @@
 		return style;
 	})
 
+    const imageRounded = computed(() => {
+        var obj = {
+			val: '',
+			style: ''
+		};
+        if (diyComponent.value.imgElementRounded) {
+            obj.val = diyComponent.value.imgElementRounded * 2 + 'rpx';
+			obj.style += 'border-radius:' + diyComponent.value.imgElementRounded * 2 + 'rpx;';
+        }
+        return obj;
+    })
+
     // 背景图加遮罩层
     const maskLayer = computed(()=>{
         var style = '';
@@ -116,13 +128,6 @@
 		else style += 'calc((100vw - 20rpx) / 2 )'
 		return style;
 	})
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	const getGoodsListFn = () => {
         let data = {

@@ -7,7 +7,7 @@ import com.niu.core.service.admin.diy.param.SetBottomConfigParam;
 import com.niu.core.service.core.diy.vo.BottomConfigVo;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public class ConfigController {
      * @return
      */
     @GetMapping("/bottom/config")
-    public Result<BottomConfigVo> getBottomConfig(String key) {
+    public Result<BottomConfigVo> getBottomConfig(@RequestParam("key") String key) {
         if(key == null|| key.equals("")) key = "app";
         return Result.success(diyConfigService.getBottomConfig(key));
     }

@@ -13,9 +13,9 @@
 							</view>
 							<view class="mt-[-71rpx] h-[278rpx] w-full px-[20rpx] pt-[18rpx] box-border bg-white" :style="itemCss">
 								<view class="flex items-center justify-center w-[184rpx] h-[184rpx]">
-									<u--image width="184rpx" height="184rpx" :radius="'var(--goods-rounded-small)'" :src="img(item.info.goods_cover_thumb_mid || '')" model="aspectFill">
+									<u--image width="184rpx" height="184rpx" :radius="imageRounded.val" :src="img(item.info.goods_cover_thumb_mid || '')" model="aspectFill">
 										<template #error>
-											<image class="w-[184rpx] h-[184rpx] rounded-[var(--goods-rounded-small)]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
+											<image class="w-[184rpx] h-[184rpx]" :style="imageRounded.style" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill"></image>
 										</template>
 									</u--image>
 								</view>
@@ -52,7 +52,7 @@
 	import {useGoods} from '@/addon/shop/hooks/useGoods'
 
 	const diyGoods = useGoods();
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','value']);
+	const props = defineProps(['component', 'index','value']);
 	const diyStore = useDiyStore();
 	const emits = defineEmits(['loadingFn']); //商品数据加载完成之后触发
 
@@ -90,6 +90,18 @@
 		return style;
 	})
 
+	const imageRounded = computed(() => {
+        var obj = {
+			val: '',
+			style: ''
+		};
+        if (diyComponent.value.imgElementRounded) {
+            obj.val = diyComponent.value.imgElementRounded * 2 + 'rpx';
+			obj.style += 'border-radius:' + diyComponent.value.imgElementRounded * 2 + 'rpx;';
+        }
+        return obj;
+    })
+
     const itemCss = computed(() => {
         var style = '';
         if (diyComponent.value.elementBgColor) style += 'background-color:' + diyComponent.value.elementBgColor + ';';
@@ -109,6 +121,7 @@
 		 }
 		 return style
 	}
+
 	//moreTitle样式
 	const moreTitleStyle = (item:any)=>{
 		var style= '';
@@ -118,6 +131,7 @@
 		 }
 		 return style
 	}
+
 	//商品样式
 	const itemStyle = ref('');
 	const setItemStyle = ()=>{
@@ -136,13 +150,6 @@
 	}
 
 	setItemStyle();
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	const getGoodsListFn = () => {
         let data: any = {}

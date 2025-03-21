@@ -1,6 +1,6 @@
-import type {App} from 'vue'
+import type { App } from 'vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-import {useCssVar, useTitle} from '@vueuse/core'
+import { useCssVar, useTitle } from '@vueuse/core'
 import colorFunction from 'css-color-function'
 import storage from './storage'
 
@@ -127,14 +127,12 @@ export function isUrl(str: string): boolean {
  * @returns
  */
 export function img(path: string): string {
-    if (isUrl(path)) {
-        return path
-    } else {
-        let baseURL = import.meta.env.VITE_IMG_DOMAIN || location.origin
-        baseURL = baseURL.substr(-1) == '/' ? baseURL : `${baseURL}/`
-        if (path.substr(0, 1) == '/') path = path.substr(1)
-        return baseURL + path
-    }
+    let imgDomain = import.meta.env.VITE_IMG_DOMAIN || location.origin
+    
+    if (typeof path == 'string' && path.startsWith('/')) path = path.replace(/^\//, '')
+    if (typeof imgDomain == 'string' && imgDomain.endsWith('/')) imgDomain = imgDomain.slice(0, -1)
+    
+    return isUrl(path) ? path : `${imgDomain}/${path}`
 }
 
 /**
@@ -283,6 +281,24 @@ export function timeStampTurnTime(timeStamp: any, type = "") {
 }
 
 /**
+ * 日期格式转时间戳
+ * @param {Object} date
+ */
+export function timeTurnTimeStamp(date: string) {
+    var f = date.split(' ', 2);
+    var d = (f[0] ? f[0] : '').split('-', 3);
+    var t = (f[1] ? f[1] : '').split(':', 3);
+    return (new Date(
+        parseInt(d[0], 10) || null,
+        (parseInt(d[1], 10) || 1) - 1,
+        parseInt(d[2], 10) || null,
+        parseInt(t[0], 10) || null,
+        parseInt(t[1], 10) || null,
+        parseInt(t[2], 10) || null
+    )).getTime() / 1000;
+}
+
+/**
  * 过滤小数点(保留两位)
  * @param event
  */
@@ -315,6 +331,13 @@ export function filterSpecial(event: any) {
     event.target.value = event.target.value.replace(/[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、]/g, '')
 }
 
+/**
+ * 过滤空格
+ * @param event
+ */
+export function filterBlank(event: any) {
+    event.target.value = event.target.value.replace(/\s/g, '');
+}
 export function importIconFontCss() {
     // const modulesFiles = {}; // import.meta.glob('@/styles/icon/official-iconfont.css', { eager: true })
     // const modulesFiles = import.meta.glob('@/addon/**/assets/icon/*.css', { eager: true })

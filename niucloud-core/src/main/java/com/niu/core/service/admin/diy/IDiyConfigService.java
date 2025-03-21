@@ -8,7 +8,7 @@ import com.niu.core.service.core.diy.param.StartUpPageConfigParam;
 import com.niu.core.service.core.diy.vo.BottomConfigVo;
 import com.niu.core.service.core.diy.vo.StartUpPageConfigVo;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**

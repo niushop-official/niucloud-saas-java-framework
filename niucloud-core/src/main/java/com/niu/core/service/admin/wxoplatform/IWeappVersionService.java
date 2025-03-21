@@ -3,6 +3,7 @@ package com.niu.core.service.admin.wxoplatform;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.entity.oplatform.WxOplatfromWeappVersion;
 import com.niu.core.service.admin.wechat.param.WechatFansSearchParam;
 import com.niu.core.service.admin.wechat.vo.WechatFansListVo;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
@@ -28,4 +29,37 @@ public interface IWeappVersionService {
      * @return
      */
     PageResult<WxOplatfromWeappVersionVo> list(PageParam pageParam);
+
+    /**
+     * 添加小程序版本
+     */
+    void add(Integer siteGroupId);
+
+    /**
+     * 获取小程序版本提交结果
+     * @param taskKey
+     */
+    void getVersionUploadResult(String taskKey);
+
+    /**
+     * 上传成功
+     * @param taskKey
+     */
+    void uploadSuccess(String taskKey);
+
+    /**
+     * 站点小程序提交
+     * @param
+     */
+    void weappCommit(Integer siteId, Integer siteGroupId, WxOplatfromWeappVersion version);
+
+    /**
+     * 提交审核
+     * @param siteId
+     * @param versionId
+     * @return
+     */
+    void submitAudit(Integer siteId, Integer versionId);
+
+    void siteWeappCommit();
 }

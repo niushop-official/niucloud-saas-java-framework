@@ -2,7 +2,7 @@ package com.niu.shop.service.admin.goods.param;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 商品标签参数

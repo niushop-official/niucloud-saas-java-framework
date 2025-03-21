@@ -1,6 +1,7 @@
 package com.niu.core.service.core.pay.driver;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.github.binarywang.wxpay.bean.notify.*;
@@ -34,8 +35,8 @@ import com.niu.core.service.core.pay.vo.PayTypeVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -72,6 +73,10 @@ public class Wechatpay extends BasePay {
         payConfig.setApiV3Key(config.getStr("mch_secret_key", ""));
         payConfig.setPrivateCertPath(WebAppEnvs.get().webRootDownResource + config.getStr("mch_public_cert_path", ""));
         payConfig.setPrivateKeyPath(WebAppEnvs.get().webRootDownResource + config.getStr("mch_secret_cert", ""));
+        if (ObjectUtil.isNotEmpty(config.getStr("wechat_public_cert_path", "")) && ObjectUtil.isNotEmpty(config.getStr("wechat_public_cert_id", ""))) {
+            payConfig.setPublicKeyId(config.getStr("wechat_public_cert_id"));
+            payConfig.setPublicKeyPath(WebAppEnvs.get().webRootDownResource + config.getStr("wechat_public_cert_path"));
+        }
         return this;
     }
 

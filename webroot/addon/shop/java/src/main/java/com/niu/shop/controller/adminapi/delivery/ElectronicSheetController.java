@@ -13,7 +13,7 @@ import com.niu.shop.service.core.delivery.vo.ElectronicSheetPrintVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
@@ -57,7 +57,7 @@ public class ElectronicSheetController {
     }
 
     @GetMapping("/{id}")
-    public Result<?> detail(@Validated @PathVariable Integer id) {
+    public Result<?> detail(@Validated @PathVariable("id") Integer id) {
         return Result.success(iShopDeliveryElectronicSheetService.info(id));
     }
 
@@ -93,7 +93,7 @@ public class ElectronicSheetController {
     }
 
     @PutMapping("/{id}")
-    public Result<?> editElectronicSheet(@PathVariable Integer id, @Validated @RequestBody ShopDeliveryElectronicSheetParam editParam) {
+    public Result<?> editElectronicSheet(@PathVariable("id") Integer id, @Validated @RequestBody ShopDeliveryElectronicSheetParam editParam) {
         iShopDeliveryElectronicSheetService.edit(id, editParam);
         return Result.success();
     }
@@ -111,7 +111,7 @@ public class ElectronicSheetController {
     }
 
     @DeleteMapping("/{id}")
-    public Result<?> delElectronicSheet(@PathVariable Integer id) {
+    public Result<?> delElectronicSheet(@PathVariable("id") Integer id) {
         iShopDeliveryElectronicSheetService.del(id);
         return Result.success();
     }
@@ -138,7 +138,7 @@ public class ElectronicSheetController {
     }
 
     @PutMapping("/setDefault/{id}")
-    public Result<?> setDefault(@PathVariable Integer id) {
+    public Result<?> setDefault(@PathVariable("id") Integer id) {
         iShopDeliveryElectronicSheetService.setDefault(id);
         return Result.success();
     }

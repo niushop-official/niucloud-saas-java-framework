@@ -2,7 +2,7 @@ package com.niu.shop.service.admin.delivery.param;
 import cn.hutool.json.JSONArray;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 运费模板参数

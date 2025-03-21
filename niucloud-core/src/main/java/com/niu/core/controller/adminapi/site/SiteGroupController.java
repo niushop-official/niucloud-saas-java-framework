@@ -18,7 +18,7 @@ import com.niu.core.service.admin.sys.vo.SysUserRoleListVo;
 import com.niu.core.service.core.addon.CoreAddonBaseService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +103,7 @@ public class SiteGroupController {
      * @return
      */
     @GetMapping("/user")
-    public Result<List<SiteGroupListVo>> getUserSiteGroupAll(@Validated @RequestParam Integer uid){
+    public Result<List<SiteGroupListVo>> getUserSiteGroupAll(@Validated @RequestParam("uid") Integer uid){
         List<SiteGroupListVo> siteGroupListVoList=new ArrayList<>();
         siteGroupListVoList=siteGroupService.getUserSiteGroupAll(uid);
         return Result.success(siteGroupListVoList);

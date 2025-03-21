@@ -14,7 +14,7 @@ import com.niu.core.service.admin.niucloud.INiucloudService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class AddonDevelopController {
      * @return Result<Object>
      */
     @PostMapping("/build/{key}")
-    public Result build(@PathVariable String key) {
+    public Result build(@PathVariable("key") String key) {
         addonDevelopBuildService.build(key);
         return Result.success();
     }
@@ -58,7 +58,7 @@ public class AddonDevelopController {
      * 查询插件
      */
     @GetMapping("/{key}")
-    public Result<AddonDevelopInfoVo> info(@PathVariable String key) {
+    public Result<AddonDevelopInfoVo> info(@PathVariable("key") String key) {
         return Result.success(addonDevelopService.info(key));
     }
 
@@ -66,7 +66,7 @@ public class AddonDevelopController {
      * 新增插件
      */
     @PostMapping("/{key}")
-    public Result add(@PathVariable String key, @Validated @RequestBody AddonDevelopAddParam param) {
+    public Result add(@PathVariable("key") String key, @Validated @RequestBody AddonDevelopAddParam param) {
         addonDevelopService.add(param);
         return Result.success();
     }
@@ -75,7 +75,7 @@ public class AddonDevelopController {
      * 编辑插件
      */
     @PutMapping("/{key}")
-    public Result edit(@PathVariable String key, @Validated @RequestBody AddonDevelopAddParam param) {
+    public Result edit(@PathVariable("key") String key, @Validated @RequestBody AddonDevelopAddParam param) {
         addonDevelopService.edit(param);
         return Result.success();
     }
@@ -84,7 +84,7 @@ public class AddonDevelopController {
      * 删除插件
      */
     @DeleteMapping("/{key}")
-    public Result del(@PathVariable String key) {
+    public Result del(@PathVariable("key") String key) {
         addonDevelopService.del(key);
         return Result.success();
     }
@@ -93,7 +93,7 @@ public class AddonDevelopController {
      * 查询插件key是否存在
      */
     @GetMapping("/check/{key}")
-    public Result checkKey(@PathVariable String key) {
+    public Result checkKey(@PathVariable("key") String key) {
         return Result.success(niucloudService.checkKey(key));
     }
 
@@ -112,7 +112,7 @@ public class AddonDevelopController {
      * @return
      */
     @PostMapping("/download/{key}")
-    public Result download(@PathVariable String key) {
+    public Result download(@PathVariable("key") String key) {
         return Result.success("", addonDevelopBuildService.download(key));
     }
 }

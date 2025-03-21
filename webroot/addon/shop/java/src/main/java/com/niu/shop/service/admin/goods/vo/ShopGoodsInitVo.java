@@ -51,6 +51,7 @@ public class ShopGoodsInitVo implements Serializable {
         private String attrFormat;  // 商品参数内容，json格式
         private String memberDiscount;  // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
         private Object posterId;  // 海报id
+        private Integer formId;
         private List<SkuInfo> skuList;
         private String specType = "single";
         private List<SpecInfo> specList;

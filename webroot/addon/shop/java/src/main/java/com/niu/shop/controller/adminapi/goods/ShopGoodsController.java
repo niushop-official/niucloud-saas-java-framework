@@ -13,7 +13,7 @@ import com.niu.shop.service.admin.goods.vo.ShopSelectGoodsListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,7 @@ public class ShopGoodsController {
      * @return Result<ShopGoodsInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<ShopGoodsInfoVo> info(@PathVariable Integer id) {
+    public Result<ShopGoodsInfoVo> info(@PathVariable("id") Integer id) {
         ShopGoodsInfoVo info = goodsService.info(id);
         return Result.success(info);
     }
@@ -72,7 +72,7 @@ public class ShopGoodsController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable Integer id, @Validated @RequestBody ShopGoodsParam editParam) {
+    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopGoodsParam editParam) {
         goodsService.edit(id, editParam);
         return Result.success();
     }

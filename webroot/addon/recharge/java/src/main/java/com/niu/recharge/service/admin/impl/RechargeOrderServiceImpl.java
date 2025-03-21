@@ -28,7 +28,7 @@ import com.niu.recharge.service.core.vo.RechargeOrderCreateVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 

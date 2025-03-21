@@ -11,7 +11,7 @@ import com.niu.core.service.core.weapp.ICoreWeappService;
 import com.qcloud.cos.utils.Base64;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.Charset;

@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.pay.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +10,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.pay.PayRefund;
+import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.mapper.pay.PayRefundMapper;
 import com.niu.core.service.admin.pay.param.PayRefundSearchParam;
 import com.niu.core.service.admin.pay.IPayRefundService;
@@ -19,7 +21,7 @@ import com.niu.core.service.core.pay.ICoreRefundService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,11 +56,14 @@ public class PayRefundServiceImpl implements IPayRefundService {
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "create_time", searchParam.getCreateTime());
         queryWrapper.orderByDesc("id");
 
+        JSONObject payTypeEnum = PayTypeEnum.getType();
+
         IPage<PayRefund> iPage = payRefundMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<PayRefundListVo> list = new LinkedList<>();
         for (PayRefund item : iPage.getRecords()) {
             PayRefundListVo vo = new PayRefundListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setTypeName(payTypeEnum.getByPath(vo.getType() + ".name", String.class));
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);

@@ -2,7 +2,7 @@ package com.niu.core.service.admin.member.param;
 import cn.hutool.json.JSONObject;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 会员等级参数

@@ -9,7 +9,7 @@ import com.niu.core.service.core.niucloud.vo.NiucloudConfigVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class ICoreNiucloudConfigServiceImpl implements ICoreNiucloudConfigService {

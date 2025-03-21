@@ -1,7 +1,7 @@
 package com.niu.core.service.admin.wechat.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 微信素材参数

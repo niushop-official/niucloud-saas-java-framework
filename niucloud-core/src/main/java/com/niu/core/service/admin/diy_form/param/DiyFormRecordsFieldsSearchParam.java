@@ -1,0 +1,20 @@
+package com.niu.core.service.admin.diy_form.param;
+
+import lombok.Data;
+import java.io.Serializable;
+
+/**
+ * 万能表单填写字段表参数
+ */
+@Data
+public class DiyFormRecordsFieldsSearchParam implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    /** 所属万能表单id */
+    private Integer formId;
+
+    private String order;
+
+    private String sort = "asc";
+
+}

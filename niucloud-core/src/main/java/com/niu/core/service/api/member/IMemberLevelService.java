@@ -2,6 +2,7 @@ package com.niu.core.service.api.member;
 
 import com.niu.core.entity.member.MemberLevel;
 import com.niu.core.service.api.member.param.MemberLevelParam;
+import com.niu.core.service.api.member.vo.MemberGetMobileVo;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.api.member.vo.MemberLevelSimpleInfoVo;
 
@@ -38,4 +39,6 @@ public interface IMemberLevelService {
      */
     MemberLevelInfoVo findMemberLevel(Integer memberId);
 
+
+    MemberGetMobileVo getMobile(String mobileCode);
 }

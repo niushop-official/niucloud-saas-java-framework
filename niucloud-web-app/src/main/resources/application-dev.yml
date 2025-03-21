@@ -4,7 +4,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   # 自动配置项
-  autoconfigure:
+  autoconfigure: com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration
   # exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
   # Web配置项
   web:
@@ -47,6 +47,7 @@ spring:
         # 登录密码
         login-password: admin
   # redis配置
+spring.data:
   redis:
     # Redis数据库索引（默认为0）
     database: 1
@@ -69,8 +70,8 @@ spring:
         # 连接池中的最小空闲连接
         min-idle: 0
   # 缓存策略
-  cache:
-    type: redis
+cache:
+  type: redis
 
 
 # MyBatis分页插件

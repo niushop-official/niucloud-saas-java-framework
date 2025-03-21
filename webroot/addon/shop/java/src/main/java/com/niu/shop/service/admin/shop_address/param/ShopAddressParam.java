@@ -1,7 +1,7 @@
 package com.niu.shop.service.admin.shop_address.param;
 import lombok.Data;
 import java.io.Serializable;
-import javax.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 /**
  * 商家地址库参数

@@ -70,7 +70,7 @@ public class SysVerifyController {
      * @return
      */
     @GetMapping("/get_verify_by_code")
-    public Result<?> getVerifyByCode(@RequestParam String code) {
+    public Result<?> getVerifyByCode(@RequestParam("code") String code) {
         SysVerifyByCodeParam param = new SysVerifyByCodeParam();
         param.setCode(code);
         return Result.success(sysVerifyService.getInfoByCode(param));

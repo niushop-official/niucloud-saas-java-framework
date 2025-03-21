@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { t } from '@/locale'
 import { redirect, getToken } from '@/utils/common'
-import { addCart, editCart, deleteCart, clearCart, getCartList, getCartSum } from '@/addon/shop/api/cart';
+import { addCart, editCart, deleteCart, getCartList } from '@/addon/shop/api/cart';
 
 interface Cart {
     cartList: AnyObject

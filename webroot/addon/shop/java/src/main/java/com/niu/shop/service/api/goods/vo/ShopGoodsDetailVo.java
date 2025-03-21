@@ -10,6 +10,7 @@ import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.goods.ShopGoodsSpec;
+import com.niu.shop.listener.treasure.SnowShowDataResult;
 import com.niu.shop.service.api.marketing.vo.ShopDiscountGoodsInfoVo;
 import com.niu.shop.service.core.delivery.ICoreDeliveryConfigService;
 import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
@@ -75,6 +76,8 @@ public class ShopGoodsDetailVo implements Serializable {
 
     private String newcomerDesc;
 
+    private SnowShowDataResult sowShowList;
+
     @Data
     public static class Goods {
         private Integer goodsId; // 商品id
@@ -128,6 +131,7 @@ public class ShopGoodsDetailVo implements Serializable {
         private Integer maxBuy = 0;
         private Integer minBuy = 0;
         private Integer isGift = 0;
+        private Integer formId;
         private Map<String, DeliveryConfigVo> deliveryTypeList;
 
         private ICoreUploadService coreUploadService() {

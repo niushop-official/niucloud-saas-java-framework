@@ -11,7 +11,7 @@ import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class CoreH5ServiceImpl implements ICoreH5Service {

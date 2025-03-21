@@ -11,7 +11,7 @@ spring:
     # 可配置：zh_CN、en_US
     language: zh_CN
     # 默认访问路径
-    default-access-path: /admin/index.html
+    default-access-path: /admin
 
   jackson:
     property-naming-strategy: SNAKE_CASE

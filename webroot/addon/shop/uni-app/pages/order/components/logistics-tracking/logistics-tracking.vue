@@ -60,14 +60,14 @@
         showList.value = data.data
     }
 	const current = ref(0)
-	const  subActive = ref(0)
+	const subActive = ref(0)
 
     const open = (params: any) => {
 		current.value= params.id
         loadList(params)
         showpop.value = true
     }
-	
+
     const close = () => {
         showpop.value = false
     }

@@ -92,8 +92,8 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                            </tasks>
+                            <target>
+                            </target>
 <!--                            <copy overwrite="true" file="target/recharge.jar"-->
 <!--                                  tofile="../../webroot/jar/addon/recharge.jar"/>-->
                         </configuration>

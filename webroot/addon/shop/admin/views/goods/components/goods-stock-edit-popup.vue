@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-dialog v-model="showDialog" :title="t('editStockPopupTitle')" width="600px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+        <el-dialog v-model="showDialog" :title="t('editStockPopupTitle')" width="600px" :destroy-on-close="true" :close-on-click-modal="false">
 
             <div class="flex items-center mb-[10px]">
                 <div class="min-w-[70px] h-[70px] flex items-center justify-center">
@@ -130,7 +130,7 @@ const loadGoodsList = () => {
 
 const show = (data: any) => {
     Object.assign(goods, data)
-    getActiveGoodsCountFn();
+    // getActiveGoodsCountFn(); // 暂时不控制
     loadGoodsList()
     showDialog.value = true
 }

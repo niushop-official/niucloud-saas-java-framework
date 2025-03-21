@@ -1,0 +1,11 @@
+{
+  "tool": [
+    {
+      "title": "万能表单",
+      "desc": "适用于各种应用场景，满足多样化的业务需求",
+      "icon": "static/resource/images/diy_form/icon.png",
+      "key": "diy_form",
+      "url": "/diy_form/list"
+    }
+  ]
+}

@@ -44,8 +44,4 @@ public class PayRefundListVo implements Serializable {
     public String getStatusName() {
         return RefundStatusEnum.getNameByStatus(this.status);
     }
-
-    public String getTypeName() {
-        return PayTypeEnum.getType().getByPath(this.type + ".name", String.class);
-    }
 }

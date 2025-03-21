@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
@@ -154,7 +155,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
                 .orderByDesc("goods_sort")
                 .orderByDesc("create_time")
                 .groupBy("goods.goods_id, goods.sort, goods.create_time")
-                .leftJoin("nc_shop_goods_stat stat on goods.goods_id = stat.goods_id and date_time BETWEEN " + dateStart + " AND " + dateEnd)
+                .leftJoin(("?_shop_goods_stat stat on goods.goods_id = stat.goods_id and date_time BETWEEN " + dateStart + " AND " + dateEnd).replace("?_", GlobalConfig.tablePrefix))
                 .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num,goods.create_time,goods.sort as goods_sort");
 
         if (limit > 0) {
@@ -283,7 +284,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
                 .orderByDesc("stat_" + rank.getRuleType() + "_num")
                 .orderByDesc("goods_sort")
                 .orderByDesc("create_time")
-                .leftJoin("nc_shop_goods_stat stat on goods.goods_id = stat.goods_id  AND date_time BETWEEN " + dateStart + " AND " + dateEnd)
+                .leftJoin(("?_shop_goods_stat stat on goods.goods_id = stat.goods_id  AND date_time BETWEEN " + dateStart + " AND " + dateEnd).replace("?_", GlobalConfig.tablePrefix))
                 .groupBy("goods.goods_id, goods_sort, create_time")
                 .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num, goods.create_time create_time,goods.sort as goods_sort");
 

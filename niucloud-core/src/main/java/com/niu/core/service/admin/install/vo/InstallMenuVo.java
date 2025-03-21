@@ -57,6 +57,8 @@ public class InstallMenuVo implements Serializable {
     /** 是否显示 */
     private Integer isShow;
 
+    private String menuAttr;
+
     /**
      * 下级菜单
      */

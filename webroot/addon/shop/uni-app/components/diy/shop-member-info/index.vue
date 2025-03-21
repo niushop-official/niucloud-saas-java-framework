@@ -42,7 +42,7 @@
 						<view @click="redirect({url: '/app/pages/member/balance'})" :style="{ color : diyComponent.textColor }">{{ money }}</view>
 					</view>
 					<view class="text-[22rpx] font-400">
-						<view @click="redirect({url: '/app/pages/member/balance'})" :style="{ color : '#666' }">{{ t('balance') }}</view>
+						<view @click="redirect({url: '/app/pages/member/balance'})" :style="{ color : diyComponent.accountTextColor }">{{ t('balance') }}</view>
 					</view>
 				</view>
 				<view class="text-center w-[33.333%] flex-shrink-0">
@@ -50,7 +50,7 @@
 						<view @click="redirect({url: '/app/pages/member/point'})" :style="{ color : diyComponent.textColor }">{{ parseInt(info?.point) || 0 }}</view>
 					</view>
 					<view class="text-[22rpx] font-400">
-						<view @click="redirect({url: '/app/pages/member/point'})" :style="{ color : '#666' }">{{ t('point') }}</view>
+						<view @click="redirect({url: '/app/pages/member/point'})" :style="{ color : diyComponent.accountTextColor }">{{ t('point') }}</view>
 					</view>
 				</view>
 				<view class="text-center w-[33.333%] flex-shrink-0" @click="redirect({ url: '/addon/shop/pages/member/my_coupon' })">
@@ -58,7 +58,7 @@
 						<view :style="{ color : diyComponent.textColor }">{{ couponCount }}</view>
 					</view>
 					<view class="text-[22rpx] font-400">
-						<view :style="{ color : '#666' }">{{ t('coupon') }}</view>
+						<view :style="{ color : diyComponent.accountTextColor }">{{ t('coupon') }}</view>
 					</view>
 				</view>
 			</view>
@@ -86,7 +86,7 @@
     import useConfigStore from '@/stores/config'
 	import bindMobile from '@/components/bind-mobile/bind-mobile.vue';
 
-	const props = defineProps(['component', 'index', 'pullDownRefreshCount','global']);
+	const props = defineProps(['component', 'index','global']);
 
 	const configStore = useConfigStore()
 	const diyStore = useDiyStore();
@@ -117,13 +117,6 @@
 
 		return style;
 	})
-
-	watch(
-		() => props.pullDownRefreshCount,
-		(newValue, oldValue) => {
-			// 处理下拉刷新业务
-		}
-	)
 
 	const memberStore = useMemberStore()
 
@@ -177,9 +170,12 @@
 				uni.showToast({ title: '商家未开启登录注册', icon: 'none' })
 			} else if (configStore.login.is_username || configStore.login.is_mobile || configStore.login.is_bind_mobile) {
 				useLogin().setLoginBack({ url: '/addon/shop/pages/member/index' })
-			} else if (normalLogin && configStore.login.is_auth_register) {
-				// 判断是否开启第三方自动注册登录
+			} else if (normalLogin && configStore.login.is_auth_register && configStore.login.is_force_access_user_info) {
+				// 判断是否开启第三方自动注册登录，并且开启强制获取用户信息
 				useLogin().getAuthCode({ scopes: 'snsapi_userinfo' })
+			} else if (normalLogin && configStore.login.is_auth_register && !configStore.login.is_force_access_user_info) {
+				// 判断是否开启第三方自动注册登录，并且关闭强制获取用户信息
+				useLogin().getAuthCode({ scopes: 'snsapi_base' })
 			}
 		} else {
 			// 普通浏览器
@@ -196,9 +192,15 @@
 			uni.showToast({ title: '商家未开启登录注册', icon: 'none' })
 		} else if (configStore.login.is_username || configStore.login.is_mobile || configStore.login.is_bind_mobile) {
 			useLogin().setLoginBack({ url: '/addon/shop/pages/member/index' })
-		} else if (normalLogin && configStore.login.is_auth_register) {
+		} else if (normalLogin && configStore.login.is_auth_register && !configStore.login.is_force_access_user_info) {
 			// 判断是否开启第三方自动注册登录
 			useLogin().getAuthCode()
+		} else if (configStore.login.is_auth_register && configStore.login.is_force_access_user_info) {
+			// 开启了第三方自动注册登录，但是需要强制获取昵称
+			useLogin().setLoginBack({ url: '/addon/shop/pages/member/index' })
+		} else if (configStore.login.is_auth_register && configStore.login.is_bind_mobile) {
+			// 开启了第三方自动注册登录，但是需要强制获取手机号
+			useLogin().setLoginBack({ url: '/addon/shop/pages/member/index' })
 		}
 		// #endif
 

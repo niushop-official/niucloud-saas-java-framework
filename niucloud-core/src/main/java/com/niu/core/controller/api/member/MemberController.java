@@ -59,7 +59,7 @@ public class MemberController {
      */
     @SaCheckLogin
     @PutMapping("/modify/{field}")
-    public Result<?> modify(@PathVariable String field, @RequestBody MemberModifyParam param) {
+    public Result<?> modify(@PathVariable("field") String field, @RequestBody MemberModifyParam param) {
         param.setField(field);
         memberService.modify(param);
         return Result.success();
@@ -125,4 +125,8 @@ public class MemberController {
         return Result.success(memberLevelService.list(param));
     }
 
+    @PutMapping("/getmobile")
+    public Result<?> getMobile(@RequestBody MemberGetMobileParam param) {
+        return Result.success(memberLevelService.getMobile(param.getMobileCode()));
+    }
 }

@@ -8,7 +8,7 @@ import com.niu.core.service.admin.sys.param.SysPrinterTemplateSearchParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 小票打印模板控制器
@@ -32,7 +32,7 @@ public class SysPrinterTemplateController {
     }
 
     @GetMapping("/{id}")
-    public Result<?> info(@PathVariable Integer id) {
+    public Result<?> info(@PathVariable("id") Integer id) {
         return Result.success(sysPrinterTemplateService.info(id));
     }
 
@@ -43,13 +43,13 @@ public class SysPrinterTemplateController {
     }
 
     @PutMapping("/{id}")
-    public Result<?> edit(@PathVariable Integer id, @Validated @RequestBody SysPrinterTemplateParam editParam) {
+    public Result<?> edit(@PathVariable("id") Integer id, @Validated @RequestBody SysPrinterTemplateParam editParam) {
         sysPrinterTemplateService.edit(id, editParam);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
-    public Result<?> del(@PathVariable Integer id) {
+    public Result<?> del(@PathVariable("id") Integer id) {
         sysPrinterTemplateService.del(id);
         return Result.success();
     }

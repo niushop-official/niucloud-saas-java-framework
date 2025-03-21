@@ -9,7 +9,7 @@ import com.niu.core.enums.member.StatusEnum;
 import com.niu.core.mapper.sys.SysRoleMapper;
 import lombok.Data;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.io.Serializable;
 import java.util.List;
 

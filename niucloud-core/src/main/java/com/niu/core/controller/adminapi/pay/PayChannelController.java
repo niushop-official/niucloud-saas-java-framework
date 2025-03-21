@@ -15,7 +15,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.pay.vo.PayChanneltemVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -75,7 +75,7 @@ public class PayChannelController {
      * @return
      */
     @GetMapping("/channel/lists/{channel}")
-    public Result<List<PayChannelListVo>> getListByChannel(@PathVariable String channel){
+    public Result<List<PayChannelListVo>> getListByChannel(@PathVariable("channel") String channel){
         return Result.success(payChannelService.getListByChannel(channel));
     }
 

@@ -9,8 +9,8 @@ import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.common.loader.pay.param.PayAsyncNotifyParam;
 import com.niu.core.common.loader.pay.param.PayParam;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 基础上传类
@@ -75,4 +75,8 @@ public abstract class BasePay {
      * @return
      */
     public abstract PayTypeVo filterPayTypeByTradeType(String tradeType);
+
+    public JSONObject getConfig() {
+        return config;
+    }
 }

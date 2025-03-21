@@ -40,7 +40,7 @@ public class RechargeController {
     }
 
     @PutMapping("/package/{id}")
-    Result<?> edit(@PathVariable Integer id, @RequestBody RechargeParam param) {
+    Result<?> edit(@PathVariable("id") Integer id, @RequestBody RechargeParam param) {
         rechargeService.edit(id, param);
         return Result.success();
     }
@@ -51,7 +51,7 @@ public class RechargeController {
     }
 
     @DeleteMapping("/package/{id}")
-    Result<?> del(@PathVariable Integer id) {
+    Result<?> del(@PathVariable("id") Integer id) {
         rechargeService.del(id);
         return Result.success();
     }

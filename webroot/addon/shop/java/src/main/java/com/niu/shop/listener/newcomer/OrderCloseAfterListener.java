@@ -7,7 +7,7 @@ import com.niu.shop.service.core.marketing.ICoreShopNewcomerService;
 import com.niu.shop.service.core.marketing.param.ShopNewcomerActiveJoinParam;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @EventListen("shop")
 @Component

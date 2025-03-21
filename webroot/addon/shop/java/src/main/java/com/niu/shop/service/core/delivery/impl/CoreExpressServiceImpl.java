@@ -13,7 +13,7 @@ import com.niu.shop.service.core.delivery.ICoreExpressService;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 
 @Service

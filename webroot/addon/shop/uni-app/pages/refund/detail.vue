@@ -67,7 +67,7 @@
                         <view>{{t('createExplain')}}</view>
                         <view class="flex-1 ml-[60rpx] text-right leading-[1.5] flex justify-end break-all">{{ detail.remark }}</view>
                     </view>
-                    <view class="justify-between text-[28rpx] card-template-item !items-baseline" v-if="detail.shop_reason">
+                    <view class="justify-between text-[28rpx] card-template-item !items-baseline break-all" v-if="detail.shop_reason">
                         <view>{{t('reasonRefusal')}}</view>
                         <view class="flex-1 ml-[60rpx] leading-[1.5] text-right text-[#333]">{{ detail.shop_reason }}</view>
                     </view>
@@ -163,7 +163,7 @@
                         <view class="w-[460rpx] text-sm text-right" v-if="detail.refund_address">{{ detail.refund_address.full_address || '--' }}</view>
                     </view>
                 </view>
-                <view class="sidebar-margin card-template top-mar py-[var(--top-m)]">
+                <view class="sidebar-margin card-template top-mar py-[var(--top-m)] mb-[var(--top-m)]">
 					<view class="title">物流信息</view>
                     <u--form labelPosition="left" :model="formData" :rules="rules"  errorType='toast' ref="deliveryForm" labelWidth="140rpx" :labelStyle="{'fontSize': '28rpx'}">
                         <u-form-item label="物流公司" prop="express_company" :borderBottom="false">
@@ -181,10 +181,12 @@
 						</view>
                     </u--form>
                 </view>
-                <view class="common-tab-bar-placeholder"></view>
-				<view class="common-tab-bar fixed left-[var(--sidebar-m)] right-[var(--sidebar-m)] bottom-[0]">
-                    <button class="mt-[80rpx] primary-btn-bg text-[#fff] h-[80rpx] leading-[80rpx] rounded-[100rpx] text-[26rpx] font-500"   hover-class="none" @click="deliverySave">提交</button>
-                </view>
+                <u-tabbar :fixed="true" :placeholder="true" :safeAreaInsetBottom="true" zIndex="10">
+                    <view class="flex-1 pl-[var(--sidebar-m)] pr-[var(--sidebar-m)] bg-[var(--page-bg-color)]">
+                        <button class=" primary-btn-bg text-[#fff] h-[80rpx] leading-[80rpx] rounded-[100rpx] text-[26rpx] font-500"   hover-class="none" @click="deliverySave">提交</button>
+                    </view>
+                </u-tabbar>
+				
             </view>
             <logistics-tracking ref="materialRef"></logistics-tracking>
             <u-modal :show="cancelRefundShow" confirmColor="var(--primary-color)" :content="t('cancelRefundContent')" :showCancelButton="true" :closeOnClickOverlay="true" @cancel="refundCancel" @confirm="refundConfirm"></u-modal>

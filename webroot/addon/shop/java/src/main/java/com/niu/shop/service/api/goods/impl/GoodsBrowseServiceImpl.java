@@ -32,7 +32,7 @@ import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.ArrayList;
 
 @Service
@@ -63,7 +63,7 @@ public class GoodsBrowseServiceImpl implements IGoodsBrowseService {
 
         MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
 
-        MPJQueryWrapper<ShopGoodsCollect> queryWrapper = new MPJQueryWrapper<>();
+        MPJQueryWrapper<ShopGoodsBrowse> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("b")
                 .leftJoin("?_shop_goods g ON b.goods_id = g.goods_id".replace("?_", GlobalConfig.tablePrefix))
                 .leftJoin("?_shop_goods_sku gs ON b.sku_id = gs.sku_id".replace("?_", GlobalConfig.tablePrefix));

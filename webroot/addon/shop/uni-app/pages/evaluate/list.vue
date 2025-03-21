@@ -74,7 +74,7 @@
 								</view>
 							</view>
                         </template>
-                        
+
 						<template v-if="item.image_mid.length === 4">
                             <view class="flex flex-wrap mt-[10rpx]">
 								<view class="mr-[15rpx] mb-[15rpx]">
@@ -178,7 +178,7 @@ const getEvaluateListFn = (mescroll:any) => {
             list.value = []; //如果是第一页需手动制空列表
         }
         list.value = list.value.concat(newArr);
-		
+
         mescroll.endSuccess(newArr.length);
         loading.value = true;
     }).catch(() => {
@@ -201,7 +201,11 @@ const imgListPreview = (item:any) => {
 //关闭预览图片
 onUnload(()=>{
 	// #ifdef  H5 || APP
-	uni.closePreviewImage()
+	try {
+		uni.closePreviewImage()
+	}catch (e) {
+
+	}
 	// #endif
 })
 </script>

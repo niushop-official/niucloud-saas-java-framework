@@ -7,7 +7,7 @@ import com.niu.core.service.admin.sys.param.*;
 import com.niu.core.service.admin.sys.vo.*;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 系统设置接口服务层

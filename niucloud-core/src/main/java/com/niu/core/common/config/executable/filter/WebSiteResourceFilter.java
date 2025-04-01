@@ -50,17 +50,16 @@ public class WebSiteResourceFilter implements Filter {
         // =======================================================================================//
         // =========rewrite
         // =======================================================================================//
+        String accessPath = WebAppEnvs.get().webRootDownPublic + requestUri;
+        File accessFile = new File(accessPath);
+        if (accessFile.isFile() && accessFile.exists()) {
+            request.getRequestDispatcher(requestUri).forward(request, response);
+            return;
+        }
+
         if (requestUri.startsWith("/admin") && !requestUri.startsWith("/adminapi")) {
-            log.info("static public -> " + WebAppEnvs.get().webRootDownPublic + requestUri);
-            String accessPath = WebAppEnvs.get().webRootDownPublic + requestUri;
-            File accessFile = new File(accessPath);
-            if (accessFile.isFile() && accessFile.exists()) {
-                request.getRequestDispatcher(requestUri).forward(request, response);
-                return;
-            } else {
-                request.getRequestDispatcher("/admin/index.html").forward(request, response);
-                return;
-            }
+            request.getRequestDispatcher("/admin/index.html").forward(request, response);
+            return;
         }
         if (requestUri.startsWith("/site") || requestUri.startsWith("/home") || requestUri.startsWith("/directory")) {
             request.getRequestDispatcher("/admin/index.html").forward(request, response);
@@ -68,6 +67,10 @@ public class WebSiteResourceFilter implements Filter {
         }
         if (requestUri.startsWith("/wap")) {
             request.getRequestDispatcher("/wap/index.html").forward(request, response);
+            return;
+        }
+        if (requestUri.startsWith("/web")) {
+            request.getRequestDispatcher("/web/index.html").forward(request, response);
             return;
         }
         Matcher matcher = Pattern.compile("^/MP_verify_(\\w+)\\.txt$").matcher(requestUri);

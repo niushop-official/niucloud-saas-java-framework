@@ -3,6 +3,7 @@ package com.niu.core.service.core.addon;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.common.utils.json.JsonLoadUtils;
@@ -47,13 +48,13 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     public void installDir(String addon) {
         this.addon = addon;
-        if (new File(this.devRootPath + "/admin").exists()) this.mergeAdmin(this.devRootPath + "/admin/src/addon/");
-        if (new File(this.webRuntimePath + "/admin").exists()) this.mergeAdmin(this.webRuntimePath + "/admin/src/addon/");
-        if (new File(this.devRootPath + "/uni-app").exists()) this.mergeUniapp(this.devRootPath + "/uni-app/src/addon/");
-        if (new File(this.webRuntimePath + "/uni-app").exists()) this.mergeUniapp(this.webRuntimePath + "/uni-app/src/addon/");
-        if (new File(this.devRootPath + "/web").exists()) this.mergeWeb(this.devRootPath + "/web/addon/");
-        if (new File(this.webRuntimePath + "/web").exists()) this.mergeWeb(this.webRuntimePath + "/web/addon/");
-        if (new File(this.devAddonPath).exists()) this.mergeJava();
+        if (new File(WebAppEnvs.get().projectRoot + "/admin").exists()) this.mergeAdmin(WebAppEnvs.get().projectRoot + "/admin/src/addon/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "admin").exists()) this.mergeAdmin(WebAppEnvs.get().webRootDownRuntime + "admin/src/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app").exists()) this.mergeUniapp(WebAppEnvs.get().projectRoot + "/uni-app/src/addon/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app").exists()) this.mergeUniapp(WebAppEnvs.get().webRootDownRuntime + "uni-app/src/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/web").exists()) this.mergeWeb(WebAppEnvs.get().projectRoot + "/web/addon/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "web").exists()) this.mergeWeb(WebAppEnvs.get().webRootDownRuntime + "web/addon/");
+        if (new File(WebAppEnvs.get().projectNiucloudAddon).exists()) this.mergeJava();
         this.mergeJar();
         this.mergeResource();
     }
@@ -65,12 +66,12 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     public void installVue(String addon) {
         this.addon = addon;
-        if (new File(this.devRootPath + "/admin").exists()) this.mergeAdmin(this.devRootPath + "/admin/src/addon/");
-        if (new File(this.webRuntimePath + "/admin").exists()) this.mergeAdmin(this.webRuntimePath + "/admin/src/addon/");
-        if (new File(this.devRootPath + "/uni-app").exists()) this.mergeUniapp(this.devRootPath + "/uni-app/src/addon/");
-        if (new File(this.webRuntimePath + "/uni-app").exists()) this.mergeUniapp(this.webRuntimePath + "/uni-app/src/addon/");
-        if (new File(this.devRootPath + "/web").exists()) this.mergeWeb(this.devRootPath + "/web/addon/");
-        if (new File(this.webRuntimePath + "/web").exists()) this.mergeWeb(this.webRuntimePath + "/web/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/admin").exists()) this.mergeAdmin(WebAppEnvs.get().projectRoot + "/admin/src/addon/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "admin").exists()) this.mergeAdmin(WebAppEnvs.get().webRootDownRuntime + "admin/src/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app").exists()) this.mergeUniapp(WebAppEnvs.get().projectRoot + "/uni-app/src/addon/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app").exists()) this.mergeUniapp(WebAppEnvs.get().webRootDownRuntime + "uni-app/src/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/web").exists()) this.mergeWeb(WebAppEnvs.get().projectRoot + "/web/addon/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "web").exists()) this.mergeWeb(WebAppEnvs.get().webRootDownRuntime + "web/addon/");
     }
 
     /**
@@ -78,14 +79,14 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     public void uninstallDir(String addon) {
         this.addon = addon;
-        if (new File(this.devRootPath + "/admin/src/addon/" + this.addon + "/").exists()) this.removeAdmin(this.devRootPath + "/admin/");
-        if (new File(this.webRuntimePath + "/admin/src/addon/" + this.addon + "/").exists()) this.removeAdmin(this.webRuntimePath + "/admin/");
-        if (new File(this.devRootPath + "/uni-app/src/addon/" + this.addon + "/").exists()) this.removeUniapp(this.devRootPath + "/uni-app/");
-        if (new File(this.webRuntimePath + "/uni-app/src/addon/" + this.addon + "/").exists()) this.removeUniapp(this.webRuntimePath + "/uni-app/");
-        if (new File(this.devRootPath + "/web/addon/" + this.addon + "/").exists()) this.removeWeb(this.devRootPath + "/web/");
-        if (new File(this.devAddonPath + "/" + this.addon + "/").exists()) this.removeJava();
-        if (new File(this.webJarPath + "/addon/" + this.addon + ".jar").exists()) this.removeJar();
-        if (new File(this.webRootPath + "/resource/addon/" + this.addon + "/").exists()) this.removeResource();
+        if (new File(WebAppEnvs.get().projectRoot + "/admin/src/addon/" + this.addon + "/").exists()) this.removeAdmin(WebAppEnvs.get().projectRoot + "/admin/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "admin/src/addon/" + this.addon + "/").exists()) this.removeAdmin(WebAppEnvs.get().webRootDownRuntime + "admin/");
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app/src/addon/" + this.addon + "/").exists()) this.removeUniapp(WebAppEnvs.get().projectRoot + "/uni-app/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/src/addon/" + this.addon + "/").exists()) this.removeUniapp(WebAppEnvs.get().webRootDownRuntime + "uni-app/");
+        if (new File(WebAppEnvs.get().projectRoot + "/web/addon/" + this.addon + "/").exists()) this.removeWeb(WebAppEnvs.get().projectRoot + "/web/");
+        if (new File(WebAppEnvs.get().projectNiucloudAddon + this.addon + "/").exists()) this.removeJava();
+        if (new File(WebAppEnvs.get().webRootDownJar + "addon/" + this.addon + ".jar").exists()) this.removeJar();
+        if (new File(WebAppEnvs.get().webRoot + "resource/addon/" + this.addon + "/").exists()) this.removeResource();
     }
 
     /**
@@ -94,19 +95,19 @@ public class AddonInstallTools extends CoreAddonBaseService {
     public void installDepend(String addon) {
         this.addon = addon;
         // 合并admin端依赖
-        if (new File(this.addonDownloadPath + "/" + this.addon + "/package/admin-package.json").exists()) {
-            if (new File(this.devRootPath + "/admin/").exists()) this.mergeAdminDepend(this.devRootPath + "/admin/");
-            if (new File(this.webRuntimePath + "/admin/").exists()) this.mergeAdminDepend(this.webRuntimePath + "/admin/");
+        if (new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/package/admin-package.json").exists()) {
+            if (new File(WebAppEnvs.get().projectRoot + "/admin/").exists()) this.mergeAdminDepend(WebAppEnvs.get().projectRoot + "/admin/");
+            if (new File(WebAppEnvs.get().webRootDownRuntime + "admin/").exists()) this.mergeAdminDepend(WebAppEnvs.get().webRootDownRuntime + "admin/");
         }
         // 合并uniapp端依赖
-        if (new File(this.addonDownloadPath + "/" + this.addon + "/package/uni-app-package.json").exists()) {
-            if (new File(this.devRootPath + "/uni-app/").exists()) this.mergeUniappDepend(this.devRootPath + "/uni-app/");
-            if (new File(this.webRuntimePath + "/uni-app/").exists()) this.mergeUniappDepend(this.webRuntimePath + "/uni-app/");
+        if (new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/package/uni-app-package.json").exists()) {
+            if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.mergeUniappDepend(WebAppEnvs.get().projectRoot + "/uni-app/");
+            if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.mergeUniappDepend(WebAppEnvs.get().webRootDownRuntime + "uni-app/");
         }
         // 合并web端依赖
-        if (new File(this.addonDownloadPath + "/" + this.addon + "/package/web-package.json").exists()) {
-            if (new File(this.devRootPath + "/web/").exists()) this.mergeWebDepend(this.devRootPath + "/web/");
-            if (new File(this.webRuntimePath + "/web/").exists()) this.mergeWebDepend(this.webRuntimePath + "/web/");
+        if (new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/package/web-package.json").exists()) {
+            if (new File(WebAppEnvs.get().projectRoot + "/web/").exists()) this.mergeWebDepend(WebAppEnvs.get().projectRoot + "/web/");
+            if (new File(WebAppEnvs.get().webRootDownRuntime + "web/").exists()) this.mergeWebDepend(WebAppEnvs.get().webRootDownRuntime + "web/");
         }
     }
 
@@ -126,18 +127,18 @@ public class AddonInstallTools extends CoreAddonBaseService {
         addons.add(this.addon);
 
         // 处理pages.json
-        if (new File(this.addonDownloadPath + "/" + this.addon + "/package/uni-app-pages.txt").exists()) {
-            if (new File(this.devRootPath + "/uni-app/").exists()) this.handlePagesJson(this.devRootPath + "/uni-app/", addons);
-            if (new File(this.webRuntimePath + "/uni-app/").exists()) this.handlePagesJson(this.webRuntimePath + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/package/uni-app-pages.txt").exists()) {
+            if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.handlePagesJson(WebAppEnvs.get().projectRoot + "/uni-app/", addons);
+            if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.handlePagesJson(WebAppEnvs.get().webRootDownRuntime + "uni-app/", addons);
         }
 
         // 处理组件
-        if (new File(this.devRootPath + "/uni-app/").exists()) this.handleUniappComponent(this.devRootPath + "/uni-app/", addons);
-        if (new File(this.webRuntimePath + "/uni-app/").exists()) this.handleUniappComponent(this.webRuntimePath + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.handleUniappComponent(WebAppEnvs.get().projectRoot + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.handleUniappComponent(WebAppEnvs.get().webRootDownRuntime + "uni-app/", addons);
 
         // 处理语言包
-        if (new File(this.devRootPath + "/uni-app/").exists()) this.mergeUniappLocale(this.devRootPath + "/uni-app/", "install");
-        if (new File(this.webRuntimePath + "/uni-app/").exists()) this.mergeUniappLocale(this.webRuntimePath + "/uni-app/", "install");
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.mergeUniappLocale(WebAppEnvs.get().projectRoot + "/uni-app/", "install");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.mergeUniappLocale(WebAppEnvs.get().webRootDownRuntime + "uni-app/", "install");
     }
 
     /**
@@ -156,16 +157,16 @@ public class AddonInstallTools extends CoreAddonBaseService {
         }
 
         // 处理pages.json
-        if (new File(this.devRootPath + "/uni-app/").exists()) this.handlePagesJson(this.devRootPath + "/uni-app/", addons);
-        if (new File(this.webRuntimePath + "/uni-app/").exists()) this.handlePagesJson(this.webRuntimePath + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.handlePagesJson(WebAppEnvs.get().projectRoot + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.handlePagesJson(WebAppEnvs.get().webRootDownRuntime + "uni-app/", addons);
 
         // 处理组件
-        if (new File(this.devRootPath + "/uni-app/").exists()) this.handleUniappComponent(this.devRootPath + "/uni-app/", addons);
-        if (new File(this.webRuntimePath + "/uni-app/").exists()) this.handleUniappComponent(this.webRuntimePath + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.handleUniappComponent(WebAppEnvs.get().projectRoot + "/uni-app/", addons);
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.handleUniappComponent(WebAppEnvs.get().webRootDownRuntime + "uni-app/", addons);
 
         // 处理语言包
-        if (new File(this.devRootPath + "/uni-app/").exists()) this.mergeUniappLocale(this.devRootPath + "/uni-app/", "uninstall");
-        if (new File(this.webRuntimePath + "/uni-app/").exists()) this.mergeUniappLocale(this.webRuntimePath + "/uni-app/", "uninstall");
+        if (new File(WebAppEnvs.get().projectRoot + "/uni-app/").exists()) this.mergeUniappLocale(WebAppEnvs.get().projectRoot + "/uni-app/", "uninstall");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app/").exists()) this.mergeUniappLocale(WebAppEnvs.get().webRootDownRuntime + "uni-app/", "uninstall");
     }
 
     /**
@@ -177,7 +178,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
             // 判断目的文件是否存在
             FileTools.createDirs(dir + this.addon + "/");
 
-            File source = new File(this.addonDownloadPath + "/" + this.addon + "/admin/");
+            File source = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/admin/");
             if (!source.exists()) return;
 
             FileUtils.copyDirectory(source, new File(dir + this.addon + "/"));
@@ -203,7 +204,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
             // 判断目的文件是否存在
             FileTools.createDirs(dir + this.addon + "/");
 
-            File source = new File(this.addonDownloadPath + "/" + this.addon + "/uni-app/");
+            File source = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/uni-app/");
             if (!source.exists()) return;
 
             FileUtils.cleanDirectory(new File(dir + this.addon + "/"));
@@ -230,7 +231,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
             // 判断目的文件是否存在
             FileTools.createDirs(dir + this.addon + "/");
 
-            String source = this.addonDownloadPath + "/" + this.addon + "/web/";
+            String source = WebAppEnvs.get().webRootDownAddon + this.addon + "/web/";
             if (!new File(source).exists()) return;
 
             File layoutFile = new File(source + "layouts/");
@@ -261,10 +262,10 @@ public class AddonInstallTools extends CoreAddonBaseService {
 
     private void mergeResource() {
         try {
-            File source = new File(this.addonDownloadPath + "/" + this.addon + "/resource/");
+            File source = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/resource/");
             if (!source.exists()) return;
 
-            String dest = this.webRootPath + "/resource/addon/" + this.addon + "/";
+            String dest = WebAppEnvs.get().webRoot + "resource/addon/" + this.addon + "/";
             FileTools.createDirs(dest);
 
             FileUtils.copyDirectory(source, new File(dest));
@@ -278,7 +279,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     private void removeResource() {
         try {
-            FileUtils.deleteDirectory(new File(this.webRootPath + "/resource/addon/" + this.addon + "/"));
+            FileUtils.deleteDirectory(new File(WebAppEnvs.get().webRoot + "resource/addon/" + this.addon + "/"));
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }
@@ -289,16 +290,16 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     private void mergeJar() {
         try {
-            File source = new File(this.addonDownloadPath + "/" + this.addon + "/jar/");
+            File source = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/jar/");
             if (!source.exists()) return;
 
-            String dest = this.webJarPath + "/addon/";
+            String dest = WebAppEnvs.get().webRootDownJar + "addon/";
             FileTools.createDirs(dest);
 
             FileUtils.copyDirectory(source, new File(dest));
 
-            if (!new File(this.addonDownloadPath + "/" + this.addon + "/java/pom.xml").exists() && new File(this.devAddonPath).exists()) {
-                FileUtils.copyDirectory(source, new File(this.devAddonPath));
+            if (!new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/java/pom.xml").exists() && new File(WebAppEnvs.get().projectNiucloudAddon).exists()) {
+                FileUtils.copyDirectory(source, new File(WebAppEnvs.get().projectNiucloudAddon));
             }
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
@@ -310,7 +311,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     private void removeJar() {
         try {
-            new File(this.webJarPath + "/addon/" + this.addon + ".jar").deleteOnExit();
+            new File(WebAppEnvs.get().webRootDownJar + "addon/" + this.addon + ".jar").deleteOnExit();
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
@@ -321,10 +322,10 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     private void mergeJava() {
         try {
-            File source = new File(this.addonDownloadPath + "/" + this.addon + "/java/");
+            File source = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/java/");
             if (!source.exists()) return;
 
-            String dest = this.devAddonPath + "/" + this.addon + "/";
+            String dest = WebAppEnvs.get().projectNiucloudAddon + this.addon + "/";
             FileTools.createDirs(dest);
 
             FileUtils.copyDirectory(source, new File(dest));
@@ -338,7 +339,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     private void removeJava() {
         try {
-            FileUtils.deleteDirectory(new File(this.devAddonPath + "/" + this.addon + "/"));
+            FileUtils.deleteDirectory(new File(WebAppEnvs.get().projectNiucloudAddon + this.addon + "/"));
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }
@@ -349,7 +350,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      * @param dir
      */
     private void mergeAdminDepend(String dir) {
-        String addonPackage = this.addonDownloadPath + "/" + this.addon + "/package/admin-package.json";
+        String addonPackage = WebAppEnvs.get().webRootDownAddon + this.addon + "/package/admin-package.json";
         String mainPackage = dir + "package.json";
 
         JSONObject original = JSONUtil.parseObj(JsonLoadUtils.loadJsonString(new File(mainPackage)));
@@ -363,7 +364,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      * @param dir
      */
     private void mergeUniappDepend(String dir) {
-        String addonPackage = this.addonDownloadPath + "/" + this.addon + "/package/uni-app-package.json";
+        String addonPackage = WebAppEnvs.get().webRootDownAddon + this.addon + "/package/uni-app-package.json";
         String mainPackage = dir + "package.json";
 
         JSONObject original = JSONUtil.parseObj(JsonLoadUtils.loadJsonString(new File(mainPackage)));
@@ -377,7 +378,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
      * @param dir
      */
     private void mergeWebDepend(String dir) {
-        String addonPackage = this.addonDownloadPath + "/" + this.addon + "/package/web-package.json";
+        String addonPackage = WebAppEnvs.get().webRootDownAddon + this.addon + "/package/web-package.json";
         String mainPackage = dir + "package.json";
 
         JSONObject original = JSONUtil.parseObj(JsonLoadUtils.loadJsonString(new File(mainPackage)));
@@ -397,7 +398,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
             String addon = "";
 
             for(String key: addonList) {
-                File addonPages = new File(this.addonDownloadPath + "/" + key + "/package/uni-app-pages.txt");
+                File addonPages = new File(WebAppEnvs.get().webRootDownAddon + key + "/package/uni-app-pages.txt");
 
                 if (addonPages.exists()) {
                     String begin = "                // " + key.toUpperCase() + "_PAGE_BEGIN\n";
@@ -422,8 +423,8 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     public void handleUniappComponent(String dir, List<String> addonList) {
         try {
-            File diyGroup = new File(this.webRootPath + "/resource/static/tmpl/diy-group.tpl");
-            File fixedGroup = new File(this.webRootPath + "/resource/static/tmpl/fixed-group.tpl");
+            File diyGroup = new File(WebAppEnvs.get().webRoot + "resource/static/tmpl/diy-group.tpl");
+            File fixedGroup = new File(WebAppEnvs.get().webRoot + "resource/static/tmpl/fixed-group.tpl");
 
             String diyGroupContent = FileUtils.readFileToString(diyGroup, "UTF-8");
             String fixedGroupContent = FileUtils.readFileToString(fixedGroup, "UTF-8");

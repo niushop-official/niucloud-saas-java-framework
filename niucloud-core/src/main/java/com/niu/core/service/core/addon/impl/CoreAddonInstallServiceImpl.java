@@ -237,7 +237,7 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
      * 安装数据库
      */
     private void installSql(String addon) {
-        File installSql = new File(this.addonDownloadPath + "/" + addon + "/sql/install.sql");
+        File installSql = new File(WebAppEnvs.get().webRootDownAddon + addon + "/sql/install.sql");
         if (installSql.exists()) {
             this.installStep.add("installSql");
             try {
@@ -256,7 +256,7 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
      * 安装数据库
      */
     private void uninstallSql(String addon) {
-        File installSql = new File(this.addonDownloadPath + "/" + addon + "/sql/uninstall.sql");
+        File installSql = new File(WebAppEnvs.get().webRootDownAddon + addon + "/sql/uninstall.sql");
         if (installSql.exists()) {
             try {
                 String sqlContent = FileUtils.readFileToString(installSql, "UTF-8");
@@ -320,11 +320,11 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
 
         if (this.installTask.getStr("mode").equals("local")) {
             tips.add("本地安装成功后会将admin，web，wap端的插件代码进行安装，但是不会进行编译，请手动编译对应admin，web，wap端的代码");
-            if (new File(this.addonDownloadPath + "/" + addon + "/package/admin-package.json").exists())
+            if (new File(WebAppEnvs.get().webRootDownAddon + addon + "/package/admin-package.json").exists())
                 tips.add("该插件admin端引用了新的依赖需在项目根目录下admin目录执行 npm install 更新依赖");
-            if (new File(this.addonDownloadPath + "/" + addon + "/package/uni-app-package.json").exists())
+            if (new File(WebAppEnvs.get().webRootDownAddon + addon + "/package/uni-app-package.json").exists())
                 tips.add("该插件wap端引用了新的依赖需在项目根目录下uni-app目录执行 npm install 更新依赖");
-            if (new File(this.addonDownloadPath + "/" + addon + "/package/web-package.json").exists())
+            if (new File(WebAppEnvs.get().webRootDownAddon + addon + "/package/web-package.json").exists())
                 tips.add("该插件web端引用了新的依赖需在项目根目录下web目录执行 npm install 更新依赖");
         }
         AddonInstallJavaTools.installExec(this, addon, tips);

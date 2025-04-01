@@ -13,51 +13,8 @@ import java.util.Map;
 
 public class CoreAddonBaseService {
 
-    /** 当前运行模式 */
-    protected String runActive;
-
-    /** 开发环境运行根目录 */
-    protected String devRootPath;
-
-    /** 开发环境插件根目录 */
-    protected String devAddonPath;
-
-    /** 插件下载目录 */
-    protected String addonDownloadPath;
-
-    /** 编译运行根目录 */
-    protected String webRootPath;
-
-    /** 前端编译目录 */
-    protected String webPublicPath;
-
-    /** 前端原始代码复制目录 */
-    protected String webRuntimePath;
-
-    /** 运行jar目录 */
-    protected String webJarPath;
-
-    public CoreAddonBaseService(){
-        this.runActive = GlobalConfig.runActive;
-        this.devRootPath = WebAppEnvs.get().projectRoot;
-        this.devAddonPath = this.devRootPath + "/niucloud-addon";
-        this.webRootPath = this.devRootPath + "/webroot";
-        this.addonDownloadPath = this.webRootPath + "/addon";
-        this.webPublicPath = this.webRootPath + "/public";
-        this.webRuntimePath = this.webRootPath + "/runtime";
-        this.webJarPath = this.webRootPath + "/jar";
-    }
-
-    public Map<String, String> getPath(){
-        Map<String, String> map = new HashMap<>();
-        map.put("devRootPath", this.devAddonPath);
-        map.put("devAddonPath", this.devAddonPath);
-        map.put("webRootPath", this.webRootPath);
-        map.put("addonDownloadPath", this.addonDownloadPath);
-        map.put("webPublicPath", this.webPublicPath);
-        map.put("webRuntimePath", this.webRuntimePath);
-        map.put("webJarPath", this.webJarPath);
-        return map;
+    public Object getPath() {
+        return null;
     }
 
     /**

@@ -16,6 +16,7 @@ import com.niu.core.service.core.member.ICoreMemberAccountService;
 import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.core.service.core.pay.ICoreRefundService;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
+import com.niu.core.service.core.pay.vo.TransferQueryVo;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,7 +87,21 @@ public class Balancepay extends BasePay {
     /**
      * 转账
      */
-    public void transfer(TransferParam param) {
+    public Object transfer(TransferParam param) {
+        return null;
+    }
+
+    /**
+     * 转账撤销
+     */
+    @Override
+    public Object transferCancel(String transferNo) {
+        return null;
+    }
+
+    @Override
+    public TransferQueryVo transferQuery(String transferNo) {
+        return null;
     }
 
     /**

@@ -47,6 +47,12 @@ public class MemberCashOut implements Serializable {
     /** 收款账号 */
     private String transferAccount;
 
+    /** 转账收款方(json),主要用于对接在线的打款方式 */
+    private String transferPayee;
+
+    /** 收款码图片 */
+    private String transferPaymentCode;
+
     /** 失败原因 */
     private String transferFailReason;
 

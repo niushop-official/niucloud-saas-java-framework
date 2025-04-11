@@ -23,4 +23,5 @@ public class MemberCashOutFirstAccountDetailsVo {
     // 提现账户
     private String accountNo;
 
+    private String transferPaymentCode;
 }

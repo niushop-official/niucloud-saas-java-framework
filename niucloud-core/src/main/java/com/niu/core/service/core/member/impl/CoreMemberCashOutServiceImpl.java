@@ -1,6 +1,7 @@
 package com.niu.core.service.core.member.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
@@ -59,23 +60,23 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
      * @param param
      */
     @Override
-    public void apply(MemberCashOutApplyParam param) {
+    public Integer apply(MemberCashOutApplyParam param) {
         Member member = memberMapper.selectOne(new QueryWrapper<Member>()
                 .eq("member_id", param.getMemberId())
                 .eq("site_id", param.getSiteId()));
         if (ObjectUtil.isEmpty(member)) throw new CommonException("会员不存在");
 
         CashOutConfigVo config = coreMemberConfigService.getCashOutConfig(param.getSiteId());
-        if (config.getIsOpen().equals(0)) throw new CommonException("会员提现业务未开启");
+        if (config.getIsOpen().equals("0")) throw new CommonException("会员提现业务未开启");
 
         BigDecimal applyMoney = param.getApplyMoney();
         if (applyMoney.compareTo(BigDecimal.ZERO) <= 0) throw new CommonException("提现金额必须大于0");
         if (param.getAccountType() == AccountTypeEnum.MONEY.getType() && applyMoney.compareTo(member.getMoney()) > 0) throw new CommonException("提现金额不能大于账户余额");
         if (param.getAccountType() == AccountTypeEnum.COMMISSION.getType() && applyMoney.compareTo(member.getCommission()) > 0) throw new CommonException("提现金额不能大于账户可提现金额");
-        if (applyMoney.compareTo(config.getMin()) <= 0) throw new CommonException("提现金额不能小于最低提现金额");
+        if (applyMoney.compareTo(config.getMin()) < 0) throw new CommonException("提现金额不能小于最低提现金额");
         if (!config.getTransferType().contains(param.getTransferType())) throw new CommonException("当前会员提现方式未启用");
 
-        MemberCashOutAccount cashoutAccount = null;
+        MemberCashOutAccount cashoutAccount = new MemberCashOutAccount();
         if (!param.getTransferType().equals(TransferTypeEnum.WECHATPAY.getKey())) {
             cashoutAccount = memberCashOutAccountMapper.selectOne(new QueryWrapper<MemberCashOutAccount>()
                     .eq("member_id", param.getMemberId())
@@ -95,13 +96,16 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         model.setServiceMoney(serviceMoney);
         model.setMoney(applyMoney.subtract(serviceMoney));
         model.setTransferType(param.getTransferType());
-        model.setTransferRealname(cashoutAccount == null ? "" : cashoutAccount.getRealname());
+        model.setTransferRealname(ObjectUtil.defaultIfNull(cashoutAccount.getRealname(), ""));
         model.setTransferMobile(member.getMobile());
-        model.setTransferBank(cashoutAccount == null ? "" : cashoutAccount.getBankName());
-        model.setTransferAccount(cashoutAccount == null ? "" : cashoutAccount.getAccountNo());
+        model.setTransferBank(ObjectUtil.defaultIfNull(cashoutAccount.getBankName(), ""));
+        model.setTransferAccount(ObjectUtil.defaultIfNull(cashoutAccount.getAccountNo(), ""));
         model.setRate(config.getRate());
+        model.setTransferPaymentCode(ObjectUtil.defaultIfNull(cashoutAccount.getTransferPaymentCode(), ""));
+        model.setTransferPayee(ObjectUtil.isNull(param.getTransferPayee()) ? "" : JSONUtil.parseObj(param.getTransferPayee()).toString());
 
         this.addCashOutRecord(model, member, config);
+        return model.getId();
     }
 
     @Transactional
@@ -170,11 +174,6 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         cashOut.setAuditTime(System.currentTimeMillis() / 1000);
         cashOut.setStatus(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus());
         memberCashOutMapper.updateById(cashOut);
-
-        CashOutConfigVo config = coreMemberConfigService.getCashOutConfig(cashOut.getSiteId());
-        if (config.getIsAutoTransfer().equals("1")) {
-            this.transfer(cashOut, new CashOutTransferParam());
-        }
     }
 
     /**
@@ -182,9 +181,10 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
      *
      * @param cashOut
      */
-    public void transfer(MemberCashOut cashOut, CashOutTransferParam param) {
+    @Transactional
+    public Object transfer(MemberCashOut cashOut, CashOutTransferParam param) {
         Assert.notNull(cashOut, "提现记录不存在");
-        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus())) throw new CommonException("当前提现申请未处于待转账状态");
+        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus()) && !cashOut.getStatus().equals(MemberCashOutStatusEnum.TRANSFER_ING.getStatus())) throw new CommonException("当前提现申请未处于待转账状态");
 
         if (ObjectUtil.isEmpty(cashOut.getTransferNo())) {
             PayTransfer transfer = new PayTransfer();
@@ -194,7 +194,9 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
             transfer.setMoney(cashOut.getMoney());
             transfer.setTradeType("member_cash_out");
             transfer.setRemark("");
+            transfer.setExtra("");
             cashOut.setTransferNo(coreTransferService.create(transfer));
+            cashOut.setStatus(MemberCashOutStatusEnum.TRANSFER_ING.getStatus());
             memberCashOutMapper.updateById(cashOut);
         }
 
@@ -204,20 +206,25 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
 
         String transferType = ObjectUtil.defaultIfNull(param.getTransferType(), cashOut.getTransferType());
 
-        if (!transferType.equals(TransferTypeEnum.OFFLINE.getKey())) {
+        if (!transferType.equals("offline")) {
             data.put("transfer_type", cashOut.getTransferType());
             data.put("transfer_realname", cashOut.getTransferRealname());
             data.put("transfer_mobile", cashOut.getTransferMobile());
             data.put("transfer_bank", cashOut.getTransferBank());
             data.put("transfer_account", cashOut.getTransferAccount());
+            data.put("transfer_payment_code", cashOut.getTransferPaymentCode());
 
             if (cashOut.getTransferType().equals(TransferTypeEnum.WECHATPAY.getKey())) {
-                Member member = memberMapper.selectOne(new QueryWrapper<Member>().select("wx_openid, weapp_openid").eq("member_id", cashOut.getMemberId()));
-                data.put("openid", ObjectUtil.defaultIfEmpty(member.getWxOpenid(), member.getWeappOpenid()));
+                JSONObject transferPayee = new JSONObject();
+                transferPayee.put("open_id", param.getOpenId());
+                transferPayee.put("channel", param.getChannel());
+                data.put("transfer_payee", transferPayee.toString());
             }
+        } else {
+            transferType = cashOut.getTransferType();
         }
 
-        coreTransferService.transfer(cashOut.getSiteId(), cashOut.getTransferNo(), transferType, data);
+        return coreTransferService.transfer(cashOut.getSiteId(), cashOut.getTransferNo(), transferType, data);
     }
 
     /**
@@ -228,7 +235,7 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
     public void transferFinish(String transferNo) {
         MemberCashOut cashOut = memberCashOutMapper.selectOne(new QueryWrapper<MemberCashOut>().eq("transfer_no", transferNo));
         Assert.notNull(cashOut, "提现记录不存在");
-        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus())) throw new CommonException("当前提现申请未处于待转账状态");
+        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus()) && !cashOut.getStatus().equals(MemberCashOutStatusEnum.TRANSFER_ING.getStatus())) throw new CommonException("当前提现申请未处于待转账状态");
 
         cashOut.setTransferTime(System.currentTimeMillis() / 1000);
         cashOut.setStatus(MemberCashOutStatusEnum.TRANSFERED.getStatus());
@@ -289,5 +296,48 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
             updateMember.setCommissionCashOuting(member.getCommissionCashOuting().subtract(cashOut.getApplyMoney()));
         }
         memberMapper.updateById(updateMember);
+    }
+
+    /**
+     * 撤销提现
+     * @param siteId
+     * @param id
+     */
+    @Override
+    public void cancel(Integer siteId, Integer id) {
+        MemberCashOut cashOut = memberCashOutMapper.selectOne(new QueryWrapper<MemberCashOut>().eq("id", id).eq("site_id", siteId));
+        Assert.notNull(cashOut, "提现记录不存在");
+
+        Integer[] status = new Integer[]{
+            MemberCashOutStatusEnum.WAIT_AUDIT.getStatus(),
+            MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus(),
+            MemberCashOutStatusEnum.TRANSFER_ING.getStatus()
+        };
+        if (!ObjectUtil.contains(status, cashOut.getStatus())) {
+            throw new CommonException("当前提现申请不支持撤销");
+        }
+
+        if (cashOut.getTransferType().equals(TransferTypeEnum.WECHATPAY.getKey()) && cashOut.getStatus().equals(MemberCashOutStatusEnum.TRANSFER_ING.getStatus())) {
+            // 微信提现撤销
+            coreTransferService.cancel(cashOut.getSiteId(), cashOut.getTransferNo());
+        }
+
+        cashOut.setStatus(MemberCashOutStatusEnum.CANCEL.getStatus());
+        memberCashOutMapper.updateById(cashOut);
+
+        giveback(cashOut);
+    }
+
+    /**
+     * 检测转账状态
+     * @param siteId
+     * @param id
+     */
+    @Override
+    public void checkTransferStatus(Integer siteId, Integer id) {
+        MemberCashOut cashOut = memberCashOutMapper.selectOne(new QueryWrapper<MemberCashOut>().eq("id", id).eq("site_id", siteId));
+        Assert.notNull(cashOut, "提现记录不存在");
+
+        coreTransferService.check(cashOut.getSiteId(), cashOut.getTransferNo());
     }
 }

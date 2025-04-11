@@ -12,6 +12,7 @@ import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.mapper.addon.AddonMapper;
+import com.niu.core.service.admin.addon.IAddonDevelopBuildService;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.core.addon.*;
 import com.niu.core.service.core.app.tools.SQLScriptRunnerTools;
@@ -48,6 +49,9 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
 
     @Resource
     ICoreScheduleService coreScheduleService;
+
+    @Resource
+    IAddonDevelopBuildService addonDevelopBuildService;
 
     private Boolean installCheck = false;
 
@@ -347,6 +351,12 @@ public class CoreAddonInstallServiceImpl extends CoreAddonBaseService implements
         if (!ObjectUtil.isNotEmpty(coreAddonService.getInfoByKey(addon))) {
             throw new CommonException("当前插件未安装,不能进行卸载操作");
         }
+
+        // 卸载前先打包
+        if (GlobalConfig.runActive.equalsIgnoreCase("dev")) {
+            addonDevelopBuildService.build(addon);
+        }
+
         try {
             // 卸载菜单
             coreMenuService.deleteMenu(addon, true);

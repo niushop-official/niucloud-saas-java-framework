@@ -24,7 +24,6 @@ import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 import com.niu.core.service.core.notice.vo.NoticeInfoVo;
 import com.niu.core.service.core.site.ICoreSiteService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import jakarta.annotation.Resource;

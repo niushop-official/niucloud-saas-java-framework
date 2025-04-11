@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
@@ -16,6 +18,7 @@ import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferTypeEnum;
 import com.niu.core.mapper.member.MemberCashOutAccountMapper;
 import com.niu.core.mapper.member.MemberCashOutMapper;
+import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.vo.CashOutConfigVo;
 import com.niu.core.service.api.member.IMemberCashOutService;
 import com.niu.core.service.api.member.param.*;
@@ -53,7 +56,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<MemberCashOut> queryWrapper = new QueryWrapper();
-        queryWrapper.select("id,site_id,cash_out_no,member_id,account_type,transfer_type,transfer_realname,transfer_mobile,transfer_bank,transfer_account,transfer_status,transfer_time,apply_money,rate,service_money,money,audit_time,status,remark,create_time,refuse_reason");
+        queryWrapper.select("id,site_id,cash_out_no,member_id,account_type,transfer_type,transfer_realname,transfer_payment_code,transfer_mobile,transfer_bank,transfer_account,transfer_status,transfer_time,apply_money,rate,service_money,money,audit_time,status,remark,create_time,refuse_reason");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
         if (ObjectUtil.isNotEmpty(param.getStatus())) queryWrapper.like("status", param.getStatus());
@@ -63,24 +66,35 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         IPage<MemberCashOut> iPage = this.memberCashOutMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<MemberCashOutListVo> memberCashOutListVoList = CollectUtils.convert(iPage.getRecords(), MemberCashOutListVo.class);
         if (memberCashOutListVoList != null) {
-//            for (MemberCashOutListVo memberCashOutListVo : memberCashOutListVoList) {
-//
-//            }
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(memberCashOutListVoList);
     }
 
     @Override
     public MemberCashOutInfoVo cashOutInfo(MemberCashOutInfoParam param) {
-        QueryWrapper<MemberCashOut> queryWrapper = new QueryWrapper();
-        queryWrapper.select("id,site_id,cash_out_no,member_id,transfer_type,transfer_realname,transfer_mobile,transfer_bank,transfer_account,transfer_fail_reason,transfer_time,apply_money,rate,service_money,money,audit_time,status,remark,create_time,refuse_reason");
-        queryWrapper.eq("id", param.getId());
-        queryWrapper.eq("site_id", param.siteId());
-        queryWrapper.eq("member_id", param.memberId());
-        MemberCashOut memberCashOut = memberCashOutMapper.selectOne(queryWrapper);
-        MemberCashOutInfoVo memberCashOutInfoVo = new MemberCashOutInfoVo();
-        BeanUtils.copyProperties(memberCashOut, memberCashOutInfoVo);
-        return memberCashOutInfoVo;
+        MemberCashOutInfoVo vo = memberCashOutMapper.selectJoinOne(
+            MemberCashOutInfoVo.class,
+            new MPJQueryWrapper<MemberCashOut>()
+                .select("mco.*,m.member_no,m.username,m.nickname,m.mobile,m.headimg,pt.transfer_voucher,pt.transfer_remark,pt.extra,pt.package_info")
+                .eq("mco.id", param.getId())
+                .eq("mco.member_id", param.memberId())
+                .eq("mco.site_id", param.siteId())
+                .setAlias("mco")
+                .leftJoin("?_member m ON mco.member_id = m.member_id".replace("?_", GlobalConfig.tablePrefix))
+                .leftJoin("?_pay_transfer pt ON mco.transfer_no = pt.transfer_no".replace("?_", GlobalConfig.tablePrefix))
+        );
+
+        if (vo != null) {
+            MemberCashOutInfoVo.Transfer transfer = new MemberCashOutInfoVo.Transfer();
+            transfer.setTransferNo(vo.getTransferNo());
+            transfer.setTransferRemark(vo.getTransferRemark());
+            transfer.setTransferVoucher(vo.getTransferVoucher());
+            transfer.setExtra(vo.getExtra());
+            transfer.setPackageInfo(vo.getPackageInfo());
+            vo.setTransfer(transfer);
+        }
+
+        return vo;
     }
 
     @Override
@@ -106,11 +120,10 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
      * @return
      */
     @Override
-    public boolean cashOutApply(MemberCashOutApplyParam param) {
+    public Integer cashOutApply(MemberCashOutApplyParam param) {
         param.setMemberId(RequestUtils.memberId());
         param.setSiteId(RequestUtils.siteId());
-        coreMemberCashOutService.apply(param);
-        return true;
+        return coreMemberCashOutService.apply(param);
     }
 
     /**
@@ -126,14 +139,25 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
                 .eq("site_id", param.siteId())
                 .eq("id", param.getId()));
         if (ObjectUtil.isEmpty(cashOut)) throw new CommonException("提现申请不存在");
-        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_AUDIT.getStatus())) throw new CommonException("当前提现申请未处于待审核状态");
 
-        cashOut.setStatus(MemberCashOutStatusEnum.CANCEL.getStatus());
-        cashOut.setCancelTime(System.currentTimeMillis() / 1000);
-        memberCashOutMapper.updateById(cashOut);
-
-        coreMemberCashOutService.giveback(cashOut);
+        coreMemberCashOutService.cancel(cashOut.getSiteId(), cashOut.getId());
         return true;
+    }
+
+    /**
+     * 开始转账
+     * @param param
+     */
+    @Override
+    public Object transfer(CashOutTransferParam param) {
+        MemberCashOut cashOut = memberCashOutMapper.selectOne(new QueryWrapper<MemberCashOut>()
+            .eq("member_id", RequestUtils.memberId())
+            .eq("site_id", RequestUtils.siteId())
+            .eq("id", param.getId()));
+        if (ObjectUtil.isEmpty(cashOut)) throw new CommonException("提现申请不存在");
+        if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus())) throw new CommonException("当前提现申请未处于待转账状态");
+
+        return coreMemberCashOutService.transfer(cashOut, param);
     }
 
     @Override
@@ -141,7 +165,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
         QueryWrapper<MemberCashOutAccount> queryWrapper = new QueryWrapper();
-        queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no");
+        queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no,transfer_payment_code");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
         if (ObjectUtil.isNotEmpty(param.getAccountType())) queryWrapper.eq("account_type", param.getAccountType());
@@ -154,7 +178,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
     @Override
     public MemberCashOutAccountDetailsVo accountDetails(MemberCashOutAccountDetailsParam param) {
         QueryWrapper<MemberCashOutAccount> queryWrapper = new QueryWrapper();
-        queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no");
+        queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no,transfer_payment_code");
         queryWrapper.eq("account_id", param.getAccountId());
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
@@ -167,7 +191,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
     @Override
     public MemberCashOutFirstAccountDetailsVo accountDetailsOfFirst(MemberCashOutFirstAccountDetailsParam param) {
         QueryWrapper<MemberCashOutAccount> queryWrapper = new QueryWrapper();
-        queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no");
+        queryWrapper.select("account_id,site_id,member_id,account_type,bank_name,realname,account_no,transfer_payment_code");
         queryWrapper.eq("site_id", param.siteId());
         queryWrapper.eq("member_id", param.memberId());
         if (ObjectUtil.isNotEmpty(param.getAccountType())) queryWrapper.eq("account_type", param.getAccountType());

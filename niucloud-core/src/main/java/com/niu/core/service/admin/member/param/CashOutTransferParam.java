@@ -24,4 +24,7 @@ public class CashOutTransferParam implements Serializable {
     @NotNull(message = "transfer_type参数缺失")
     private String transferType;
 
+    private String openId = "";
+
+    private String channel = "";
 }

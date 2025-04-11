@@ -12,9 +12,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 @Configuration
@@ -76,16 +73,6 @@ public class NiuCoreConfig {
         return new ServerEndpointExporter();
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().permitAll()
-                )
-                .csrf().disable();
-
-        return http.build();
-    }
     @Bean("coreMessageSource")
     public MessageSource coreMessageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();

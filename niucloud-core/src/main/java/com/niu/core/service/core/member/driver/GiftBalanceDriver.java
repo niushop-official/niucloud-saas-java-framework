@@ -38,12 +38,12 @@ public class GiftBalanceDriver {
                 JSONObject signContent = new JSONObject();
                 signContent.set("text", config.getStr("money") + "元");
                 signContent.set("icon", "static/resource/images/member/sign/packet.png");
-                return signContent;
+                return (new JSONArray()).put(signContent);
             case "member_sign_continue":
                 JSONObject signContinueContent = new JSONObject();
                 signContinueContent.set("text", config.getStr("money") + "元");
                 signContinueContent.set("icon", "static/resource/images/member/sign/packet01.png");
-                return signContinueContent;
+                return (new JSONArray()).put(signContinueContent);
             default:
                 return "";
         }
@@ -58,7 +58,7 @@ public class GiftBalanceDriver {
                     siteId,
                     memberId,
                     AccountTypeEnum.BALANCE.getType(),
-                    new Double(config.getStr("money")),
+                    Double.valueOf(config.getStr("money")),
                     vars.getOrDefault("from_type", "").toString(),
                     vars.getOrDefault("momo", "").toString(),
                     vars.getOrDefault("related_id", "").toString());

@@ -11,7 +11,7 @@ spring:
     # 可配置：zh_CN、en_US
     language: zh_CN
     # 默认访问路径
-    default-access-path: /admin/index.html
+    default-access-path: /admin
 
   jackson:
     property-naming-strategy: SNAKE_CASE
@@ -24,7 +24,7 @@ spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/***?useUnicode=true&characterEncoding=utf8&useSSL=false&allowMultiQueries=true&serverTimezone=Asia/Shanghai
     username: root
-    password:
+    password: 
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     druid:
@@ -124,15 +124,3 @@ sa-token:
   is-log: true
   # 登录是否往前端注入Cookie
   is-read-cookie: false
-  # 配置 Sa-Token 单独使用的 Redis 连接
-  alone-redis:
-    # Redis数据库索引（默认为0）
-    database: 15
-    # Redis服务器地址
-    host: 127.0.0.1
-    # Redis服务器连接端口
-    port: 6379
-    # Redis服务器连接密码（默认为空）
-    password:
-    # 连接超时时间
-    timeout: 10s

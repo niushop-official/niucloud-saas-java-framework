@@ -24,4 +24,13 @@ public class MemberCashOutApplyParam {
 
     private Integer accountId = 0;
 
+    private TransferPayee transferPayee;
+
+    @Data
+    public static class TransferPayee {
+
+        private String openId;
+
+        private String channel;
+    }
 }

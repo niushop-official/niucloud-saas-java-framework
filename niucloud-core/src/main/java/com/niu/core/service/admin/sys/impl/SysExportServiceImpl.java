@@ -124,19 +124,10 @@ public class SysExportServiceImpl implements ISysExportService {
      */
     @Override
     public Boolean checkExportData(String type, Map<String, Object> whereMap) {
-        JSONObject whereJson = new JSONObject();
-        whereJson.set("keyword", whereMap.getOrDefault("keyword", ""));
-        whereJson.set("register_type", whereMap.getOrDefault("register_type", ""));
-        whereJson.set("create_time", whereMap.getOrDefault("create_time", ""));
-        whereJson.set("is_del", whereMap.getOrDefault("is_del", ""));
-        whereJson.set("member_label", whereMap.getOrDefault("member_label", ""));
-        whereJson.set("register_channel", whereMap.getOrDefault("register_channel", ""));
-        whereJson.set("member_level", whereMap.getOrDefault("member_level", ""));
-
         PageParam pageParam = new PageParam();
         pageParam.setPage(Integer.parseInt(whereMap.getOrDefault("page", 0).toString()));
         pageParam.setLimit(Integer.parseInt(whereMap.getOrDefault("limit", 0).toString()));
-        JSONArray jsonArray = coreExportService.getExportData(RequestUtils.siteId(), type, whereJson, pageParam);
+        JSONArray jsonArray = coreExportService.getExportData(RequestUtils.siteId(), type, JSONUtil.parseObj(whereMap), pageParam);
         return !jsonArray.isEmpty();
     }
 
@@ -146,21 +137,12 @@ public class SysExportServiceImpl implements ISysExportService {
     @Override
     public void exportData(String type, Map<String, Object> whereMap) {
         Integer siteId = RequestUtils.siteId();
-        JSONObject whereJson = new JSONObject();
-        whereJson.set("keyword", whereMap.getOrDefault("keyword", ""));
-        whereJson.set("register_type", whereMap.getOrDefault("register_type", ""));
-        whereJson.set("create_time", whereMap.getOrDefault("create_time", ""));
-        whereJson.set("is_del", whereMap.getOrDefault("is_del", ""));
-        whereJson.set("member_label", whereMap.getOrDefault("member_label", ""));
-        whereJson.set("register_channel", whereMap.getOrDefault("register_channel", ""));
-        whereJson.set("member_level", whereMap.getOrDefault("member_level", ""));
-
         PageParam pageParam = new PageParam();
         pageParam.setPage((Integer) whereMap.getOrDefault("page", 0));
         pageParam.setLimit((Integer) whereMap.getOrDefault("limit", 0));
 
         JSONArray dataColumn = coreExportService.getExportDataColumn(type);
-        JSONArray dataArray = coreExportService.getExportData(siteId, type, whereJson, pageParam);
+        JSONArray dataArray = coreExportService.getExportData(siteId, type, JSONUtil.parseObj(whereMap), pageParam);
 
         SysExport export = new SysExport();
         export.setSiteId(RequestUtils.siteId());

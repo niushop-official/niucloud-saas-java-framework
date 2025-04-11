@@ -42,11 +42,6 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         -->
-        <!-- SpringBoot==>security，其它组件依赖了类库 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -346,6 +341,11 @@
             <groupId>com.anji-plus</groupId>
             <artifactId>captcha-spring-boot-starter</artifactId>
             <version>1.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tencentcloudapi</groupId>
+            <artifactId>tencentcloud-sdk-java-sms</artifactId>
         </dependency>
 
         <!-- 阿里云短信 -->

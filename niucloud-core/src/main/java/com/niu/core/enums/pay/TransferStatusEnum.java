@@ -15,6 +15,9 @@ public enum TransferStatusEnum {
     WAIT("待转账", "wait"),
     DEALING("处理中", "dealing"),
     SUCCESS("转账成功", "success"),
+    WAIT_USER("等待用户确认", "wait_user"),
+    WAIT_USER_ING("用户确认转账中", "wait_user_ing"),
+    FAIL_ING("转账撤销中", "fail_ing"),
     FAIL("转账失败", "fail");
 
     private final String name;

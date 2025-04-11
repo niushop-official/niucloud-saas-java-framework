@@ -11,6 +11,7 @@ import java.util.Map;
 public enum MemberCashOutStatusEnum {
     WAIT_AUDIT("待审核", 1),
     WAIT_TRANSFER("待转账", 2),
+    TRANSFER_ING("转账中", 4),
     TRANSFERED("已转账", 3),
     REFUSE("已拒绝", -1),
     CANCEL("已取消", -2);

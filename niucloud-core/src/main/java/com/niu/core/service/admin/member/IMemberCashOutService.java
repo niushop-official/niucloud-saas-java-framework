@@ -1,10 +1,7 @@
 package com.niu.core.service.admin.member;
 
 import com.niu.core.common.domain.PageResult;
-import com.niu.core.service.admin.member.param.CashOutTransferParam;
-import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
-import com.niu.core.service.admin.member.param.MemberCashOutParam;
-import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
+import com.niu.core.service.admin.member.param.*;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.member.vo.CashOutStatVo;
 import com.niu.core.service.admin.member.vo.MemberCashOutInfoVo;
@@ -45,4 +42,23 @@ public interface IMemberCashOutService {
      * 转账
      */
     void transfer(CashOutTransferParam param);
+
+    /**
+     * 撤销提现
+     * @param id
+     */
+    void cancel(Integer id);
+
+    /**
+     * 备注
+     * @param id
+     * @param param
+     */
+    void remark(Integer id, MemberCashOutRemarkParam param);
+
+    /**
+     * 检测转账状态
+     * @param
+     */
+    void checkTransferStatus(Integer id);
 }

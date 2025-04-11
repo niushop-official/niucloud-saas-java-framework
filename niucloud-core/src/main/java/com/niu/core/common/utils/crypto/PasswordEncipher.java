@@ -1,10 +1,9 @@
 package com.niu.core.common.utils.crypto;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import cn.hutool.crypto.digest.BCrypt;
 
 public class PasswordEncipher {
 
-    private static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * 生成密码
@@ -12,7 +11,7 @@ public class PasswordEncipher {
      * @return
      */
     public static String encode(String text) {
-        return passwordEncoder.encode(text);
+        return BCrypt.hashpw(text);
     }
 
     /**
@@ -22,7 +21,7 @@ public class PasswordEncipher {
      * @return
      */
     public static boolean matche(String text, String passwd) {
-        return passwordEncoder.matches(text, passwd);
+        return BCrypt.checkpw(text, passwd);
     }
 
 }

@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.utils.object.ObjectUtils;
+import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.api.member.IMemberCashOutService;
 import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.core.member.param.MemberCashOutApplyParam;
@@ -75,8 +76,7 @@ public class MemberCashOutController {
      */
     @PostMapping("/cash_out/apply")
     public Result<?> apply(@Validated @RequestBody MemberCashOutApplyParam param) {
-        memberCashOutService.cashOutApply(param);
-        return Result.success();
+        return Result.success("", memberCashOutService.cashOutApply(param));
     }
 
     /**
@@ -90,6 +90,18 @@ public class MemberCashOutController {
         param.setId(id);
         memberCashOutService.cashOutCancel(param);
         return Result.success();
+    }
+
+    /**
+     * 提现转账
+     * @param id
+     * @param param
+     * @return
+     */
+    @PostMapping("/cash_out/transfer/{id}")
+    public Result<?> transfer(@PathVariable("id") Integer id, @RequestBody CashOutTransferParam param) {
+        param.setId(id);
+        return Result.success(memberCashOutService.transfer(param));
     }
 
     /**

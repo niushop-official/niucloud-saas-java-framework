@@ -38,12 +38,12 @@ public class GiftPointDriver {
                 JSONObject signContent = new JSONObject();
                 signContent.set("text", config.getStr("num") + "积分");
                 signContent.set("icon", "static/resource/images/member/sign/point.png");
-                return signContent;
+                return (new JSONArray()).put(signContent);
             case "member_sign_continue":
                 JSONObject signContinueContent = new JSONObject();
                 signContinueContent.set("text", config.getStr("num") + "积分");
                 signContinueContent.set("icon", "static/resource/images/member/sign/point01.png");
-                return signContinueContent;
+                return (new JSONArray()).put(signContinueContent);
             default:
                 return null;
         }

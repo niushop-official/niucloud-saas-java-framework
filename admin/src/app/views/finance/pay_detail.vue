@@ -72,34 +72,26 @@ const formData: Record<string, any> | null = ref(null)
 const setFormData = async () => {
     loading.value = true
     formData.value = null
-    await getPayDetail(id)
-        .then(({ data }) => {
-            formData.value = data
-        })
-        .catch(() => {
-
-        })
+    await getPayDetail(id).then(({ data }) => {
+        formData.value = data
+    })
     loading.value = false
 }
 setFormData()
 
 const passEvent = () => {
     ElMessageBox.confirm(
-        t('passTips'),
-        t('warning'),
-        {
-            confirmButtonText: t('confirm'),
-            cancelButtonText: t('cancel'),
-            type: 'warning'
-        }
+            t('passTips'),
+            t('warning'),
+            {
+                confirmButtonText: t('confirm'),
+                cancelButtonText: t('cancel'),
+                type: 'warning'
+            }
     ).then(({ value }) => {
-        payAuditPass(formData.value.out_trade_no)
-            .then(() => {
-                setFormData()
-            })
-            .catch()
-    }).catch(() => {
-
+        payAuditPass(formData.value.out_trade_no).then(() => {
+            setFormData()
+        })
     })
 }
 
@@ -113,9 +105,7 @@ const refuseEvent = () => {
     }).then(({ value }) => {
         payAuditRefuse({ out_trade_no: formData.value.out_trade_no, reason: value }).then(() => {
             setFormData()
-        }).catch()
-    }).catch(() => {
-
+        })
     })
 }
 

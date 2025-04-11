@@ -1,1 +1,0 @@
-import{u as o}from"./poster-8d3a5f80.js";import{d as r,h as n,c as s,b as _}from"./index-b30947d1.js";const a={class:"content-wrap"},c=r({__name:"edit-giftcard-validity",setup(l,{expose:e}){return o(),e({}),(t,i)=>(n(),s("div",a,[_(t.$slots,"common")]))}}),p=Object.freeze(Object.defineProperty({__proto__:null,default:c},Symbol.toStringTag,{value:"Module"}));export{p as _};

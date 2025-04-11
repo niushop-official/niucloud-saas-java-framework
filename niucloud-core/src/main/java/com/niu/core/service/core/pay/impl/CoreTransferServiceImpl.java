@@ -3,15 +3,18 @@ package com.niu.core.service.core.pay.impl;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.binarywang.wxpay.bean.transfer.TransferBillsResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.loader.pay.param.TransferNotifyParam;
 import com.niu.core.common.loader.pay.param.TransferParam;
 import com.niu.core.entity.pay.PayTransfer;
+import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferStatusEnum;
 import com.niu.core.enums.pay.TransferTypeEnum;
 import com.niu.core.event.pay.PayCloseEvent;
@@ -24,6 +27,7 @@ import com.niu.core.service.core.pay.param.PayTransferParam;
 import com.niu.core.service.core.pay.param.PayTransferSearchParam;
 import com.niu.core.service.core.pay.vo.PayTransferInfoVo;
 import com.niu.core.service.core.pay.vo.PayTransferListVo;
+import com.niu.core.service.core.pay.vo.TransferQueryVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +94,7 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
      * @param data
      */
     @Transactional
-    public void transfer(Integer siteId, String transferNo, String transferType, Map<String, Object> data) {
+    public Object transfer(Integer siteId, String transferNo, String transferType, Map<String, Object> data) {
         PayTransfer transfer = findTransferByTransferNo(siteId, transferNo);
         if (transfer == null) throw new CommonException("无效的转账单据");
         if (!transfer.getTransferStatus().equals(TransferStatusEnum.WAIT.getStatus()) && !transfer.getTransferStatus().equals(TransferStatusEnum.FAIL.getStatus())) {
@@ -105,6 +109,8 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
         transfer.setTransferMobile((String) data.getOrDefault("transfer_mobile", ""));
         transfer.setTransferAccount((String) data.getOrDefault("transfer_account", ""));
         transfer.setOpenid((String) data.getOrDefault("openid", ""));
+        transfer.setTransferPayee((String) data.getOrDefault("transfer_payee", ""));
+        transfer.setTransferPaymentCode((String) data.getOrDefault("transfer_payment_code", ""));
         payTransferMapper.updateById(transfer);
 
         Map transferTypeEnum = TransferTypeEnum.getMap().get(transferType);
@@ -114,10 +120,10 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
             TransferParam param = new TransferParam();
             param.setTransfer(transfer);
             param.setNotifyUrl(corePayService.buildNotifyUrl(siteId, "transfer", transferType, "transfer"));
-            corePayService.driver(siteId, "transfer", transferType).transfer(param);
-            return;
+            return corePayService.driver(siteId, "transfer", transferType).transfer(param);
         }
         this.success(transfer);
+        return null;
     }
 
     @Transactional
@@ -130,12 +136,70 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
 
         if (param.getTransferStatus().getStatus().equals(TransferStatusEnum.SUCCESS.getStatus())) {
             this.success(transfer);
-        }
-
-        if (param.getTransferStatus().getStatus().equals(TransferStatusEnum.FAIL.getStatus())) {
+        } else if (param.getTransferStatus().getStatus().equals(TransferStatusEnum.FAIL.getStatus())) {
             transfer.setTransferFailReason(param.getFailReason());
             this.fail(transfer);
+        } else {
+            transfer.setTransferStatus(param.getTransferStatus().getStatus());
+            this.dealing(transfer);
         }
+    }
+
+    /**
+     * 撤销转账
+     * @param transferNo
+     */
+    @Override
+    public void cancel(Integer siteId, String transferNo) {
+        PayTransfer transfer = findTransferByTransferNo(siteId, transferNo);
+        if (transfer == null) throw new CommonException("无效的转账单据");
+
+        String[] status = new String[]{
+            TransferStatusEnum.WAIT.getStatus(),
+            TransferStatusEnum.DEALING.getStatus(),
+            TransferStatusEnum.FAIL.getStatus(),
+            TransferStatusEnum.WAIT_USER.getStatus(),
+            TransferStatusEnum.WAIT_USER_ING.getStatus(),
+            TransferStatusEnum.FAIL_ING.getStatus()
+        };
+        if (!ObjectUtil.contains(status, transfer.getTransferStatus())) {
+            throw new CommonException("转账状态已发生变化");
+        }
+
+        corePayService.driver(siteId, "transfer", transfer.getTransferType()).transferCancel(transferNo);
+    }
+
+    /**
+     *
+     * @param transferNo
+     */
+    @Override
+    public void check(Integer siteId, String transferNo) {
+        PayTransfer transfer = findTransferByTransferNo(siteId, transferNo);
+        if (transfer == null) throw new CommonException("无效的转账单据");
+
+        String[] status = new String[]{
+            TransferStatusEnum.WAIT.getStatus(),
+            TransferStatusEnum.DEALING.getStatus(),
+            TransferStatusEnum.FAIL.getStatus(),
+            TransferStatusEnum.WAIT_USER.getStatus(),
+            TransferStatusEnum.WAIT_USER_ING.getStatus(),
+            TransferStatusEnum.FAIL_ING.getStatus()
+        };
+        if (!ObjectUtil.contains(status, transfer.getTransferStatus())) {
+            throw new CommonException("只有待转账和转账中的订单可以校验");
+        }
+
+        TransferQueryVo transferResult = corePayService.driver(siteId, "transfer", transfer.getTransferType()).transferQuery(transferNo);
+        if (transferResult == null) throw new CommonException("查询不到转账信息");
+
+        TransferNotifyParam param = new TransferNotifyParam();
+        param.setSiteId(siteId);
+        param.setTransferNo(transferNo);
+        param.setTransferStatus(transferResult.getTransferSatus());
+        param.setFailReason(ObjectUtil.defaultIfNull(transferResult.getFailReason(), ""));
+
+        transferNotify(param);
     }
 
     /**
@@ -163,6 +227,16 @@ public class CoreTransferServiceImpl implements ICoreTransferService {
      */
     private void fail(PayTransfer transfer) {
         transfer.setTransferStatus(TransferStatusEnum.FAIL.getStatus());
+        transfer.setTransferTime(System.currentTimeMillis() / 1000);
+        payTransferMapper.updateById(transfer);
+    }
+
+    /**
+     * 转账处理中
+     *
+     * @param transfer
+     */
+    private void dealing(PayTransfer transfer) {
         payTransferMapper.updateById(transfer);
     }
 }

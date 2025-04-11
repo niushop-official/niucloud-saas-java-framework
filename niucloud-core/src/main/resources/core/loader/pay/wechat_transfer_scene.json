@@ -1,0 +1,11 @@
+{
+	"member_cash_out": {
+		"name": "佣金提现",
+		"scene": "yjbc",
+		"perception": "劳务报酬",
+		"infos": {
+			"岗位类型": "业务顾问",
+			"报酬说明": "佣金提现"
+		}
+	}
+}

@@ -8,7 +8,11 @@
             </div>
 
             <div class="mt-[20px]">
-                <el-alert :title="t('operationTip')" type="warning" show-icon />
+                <el-alert type="warning" show-icon>
+                    <template #title>
+                        <span class="!text-[14px]">{{ t('operationTip') }}</span>
+                    </template>
+                </el-alert>
             </div>
         </el-card>
 
@@ -17,11 +21,11 @@
                 <h3 class="panel-title !text-sm">{{t('wechatpay')}}</h3>
 
                 <el-form-item :label="t('mchId')" prop="wechatpay_config.mch_id">
-                    <el-input v-model="formData.wechatpay_config.mch_id" :placeholder="t('mchIdPlaceholder')" class="input-width" maxlength="32" show-word-limit clearable />
+                    <el-input v-model.trim="formData.wechatpay_config.mch_id" :placeholder="t('mchIdPlaceholder')" class="input-width" maxlength="32" show-word-limit clearable />
                     <div class="form-tip">{{ t('mchIdTips') }}</div>
                 </el-form-item>
                 <el-form-item :label="t('mchSecretKey')" prop="wechatpay_config.mch_secret_key">
-                    <el-input v-model="formData.wechatpay_config.mch_secret_key" :placeholder="t('mchSecretKeyPlaceholder')" class="input-width" maxlength="32" show-word-limit clearable />
+                    <el-input v-model.trim="formData.wechatpay_config.mch_secret_key" :placeholder="t('mchSecretKeyPlaceholder')" class="input-width" maxlength="32" show-word-limit clearable />
                     <div class="form-tip">{{ t('mchSecretKeyTips') }}</div>
                 </el-form-item>
                 <el-form-item :label="t('mchSecretCert')" prop="wechatpay_config.mch_secret_cert">
@@ -36,17 +40,28 @@
                     </div>
                     <div class="form-tip">{{ t('mchPublicCertPathTips') }}</div>
                 </el-form-item>
+                <el-form-item :label="t('wechatpayPublicCert')" prop="wechatpay_config.wechat_public_cert_path">
+                    <div class="input-width">
+                        <upload-file v-model="formData.wechatpay_config.wechat_public_cert_path" api="sys/document/wechat" />
+                    </div>
+                </el-form-item>
+
+                <el-form-item :label="t('wechatpayPublicCertId')" prop="wechatpay_config.wechat_public_cert_id">
+                    <div class="input-width">
+                        <el-input v-model.trim="formData.wechatpay_config.wechat_public_cert_id" placeholder="" class="input-width" show-word-limit clearable />
+                    </div>
+                </el-form-item>
             </el-card>
 
-            <el-card class="box-card mt-[15px] !border-none" shadow="never">
+            <!-- <el-card class="box-card mt-[15px] !border-none" shadow="never">
                 <h3 class="panel-title !text-sm">{{t('alipay')}}</h3>
 
                 <el-form-item :label="t('appId')" prop="alipay_config.app_id">
-                    <el-input v-model="formData.alipay_config.app_id" :placeholder="t('appIdPlaceholder')" class="input-width" maxlength="32" show-word-limit clearable />
+                    <el-input v-model.trim="formData.alipay_config.app_id" :placeholder="t('appIdPlaceholder')" class="input-width" maxlength="32" show-word-limit clearable />
                     <div class="form-tip">{{ t('appIdTips') }}</div>
                 </el-form-item>
                 <el-form-item :label="t('appSecretCert')" prop="alipay_config.app_secret_cert">
-                    <el-input v-model="formData.alipay_config.app_secret_cert" :placeholder="t('appSecretCertPlaceholder')" class="input-width" type="textarea" rows="4" clearable />
+                    <el-input v-model.trim="formData.alipay_config.app_secret_cert" :placeholder="t('appSecretCertPlaceholder')" class="input-width" type="textarea" rows="4" clearable />
                 </el-form-item>
                 <el-form-item :label="t('appPublicCertPath')" prop="alipay_config.app_public_cert_path">
                     <div class="input-width">
@@ -63,7 +78,7 @@
                         <upload-file v-model="formData.alipay_config.alipay_root_cert_path" api="sys/document/aliyun" />
                     </div>
                 </el-form-item>
-            </el-card>
+            </el-card> -->
         </el-form>
 
         <div class="fixed-footer-wrap">
@@ -78,7 +93,6 @@
 import { reactive, ref, computed } from 'vue'
 import { t } from '@/lang'
 import { getTransferInfo, setTransferInfo } from '@/app/api/sys'
-// import { useClipboard } from '@vueuse/core'
 import { FormInstance } from 'element-plus'
 import { useRoute } from 'vue-router'
 
@@ -95,7 +109,9 @@ const initialFormData = {
         mch_id: '',
         mch_secret_key: '',
         mch_secret_cert: '',
-        mch_public_cert_path: ''
+        mch_public_cert_path: '',
+        wechat_public_cert_path: '',
+        wechat_public_cert_id: ''
     },
     alipay_config: {
         app_secret_cert: '',

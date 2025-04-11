@@ -14,10 +14,10 @@ import java.util.Map;
 @AllArgsConstructor
 
 public enum TransferTypeEnum {
-    WECHATPAY("微信", "wechatpay", true),
+    WECHATPAY("微信零钱", "wechatpay", true),
+    WECHAT_CODE("微信", "wechat_code", false),
     ALIPAY("支付宝", "alipay", false),
-    BALANCEPAY("银行卡", "bank", false),
-    OFFLINE("线下转账", "offline", false);
+    BALANCEPAY("银行卡", "bank", false);
 
     //转账方式名称
     String name;

@@ -18,9 +18,13 @@ public interface ICoreTransferService {
 
     String create(PayTransfer model);
 
-    void transfer(Integer siteId, String transferNo, String transferType, Map<String, Object> data);
+    Object transfer(Integer siteId, String transferNo, String transferType, Map<String, Object> data);
 
     PayTransfer findTransferByTransferNo(Integer siteId, String transferNo);
 
     void transferNotify(TransferNotifyParam param);
+
+    void cancel(Integer siteId, String transferNo);
+
+    void check(Integer siteId, String transferNo);
 }

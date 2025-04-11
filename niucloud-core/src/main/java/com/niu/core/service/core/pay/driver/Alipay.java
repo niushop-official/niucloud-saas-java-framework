@@ -26,6 +26,7 @@ import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.core.service.core.pay.ICoreRefundService;
 import com.niu.core.service.core.pay.ICoreTransferService;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
+import com.niu.core.service.core.pay.vo.TransferQueryVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -214,7 +215,7 @@ public class Alipay extends BasePay {
     /**
      * 转账
      */
-    public void transfer(TransferParam param) {
+    public Object transfer(TransferParam param) {
         try {
             PayTransfer transfer = param.getTransfer();
 
@@ -246,6 +247,18 @@ public class Alipay extends BasePay {
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
+        return null;
+    }
+
+
+    @Override
+    public Object transferCancel(String transferNo) {
+        return null;
+    }
+
+    @Override
+    public TransferQueryVo transferQuery(String transferNo) {
+        return null;
     }
 
     private TransferStatusEnum handleTransferStatus(String state) {

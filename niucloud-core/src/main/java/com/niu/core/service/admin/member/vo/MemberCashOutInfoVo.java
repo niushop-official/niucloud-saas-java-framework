@@ -1,4 +1,6 @@
 package com.niu.core.service.admin.member.vo;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferStatusEnum;
@@ -31,23 +33,36 @@ public class MemberCashOutInfoVo implements Serializable {
     private String transferAccount;  // 收款账号
     private String transferFailReason;  // 失败原因
     private String transferStatus;  // 转账状态
-    private Integer transferTime;  // 转账时间
+    private String transferPaymentCode;  // 转账支付码
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long transferTime;  // 转账时间
     private BigDecimal applyMoney;  // 提现申请金额
     private BigDecimal rate;  // 提现手续费比率
     private BigDecimal serviceMoney;  // 提现手续费
     private BigDecimal money;  // 提现到账金额
-    private Integer auditTime;  // 审核时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long auditTime;  // 审核时间
     private Integer status;  // 状态1待审核2.待转账3已转账 -1拒绝 -2 已取消
     private String remark;  // 备注
     private String refuseReason;  // 拒绝理由
     private String transferNo;  // 转账单号
-    private Integer cancelTime;  // 取消时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long cancelTime;  // 取消时间
     private String finalTransferType;  // 转账方式
     private String statusName;
     private String transferTypeName;
     private String transferStatusName;
     private String accountTypeName;
-    private MemberBriefInfoVo memberInfo;
+    private String memberNo;  // 会员编码
+    private String username;  // 会员用户名
+    private String mobile;  // 手机号
+    private String nickname;  // 会员昵称
+    private String headimg;
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long createTime;
+    private Transfer transfer;
+    private String transferVoucher;
+    private String transferRemark;
 
     public String getStatusName() {
         return MemberCashOutStatusEnum.getNameByStatus(this.status);
@@ -66,5 +81,14 @@ public class MemberCashOutInfoVo implements Serializable {
     public String getAccountTypeName() {
         if (this.accountType.isEmpty()) return "";
         return AccountTypeEnum.getNameByType(this.accountType);
+    }
+
+    @Data
+    public static class Transfer {
+        private String transferNo;  // 转账单号
+
+        private String transferVoucher;
+
+        private String transferRemark;
     }
 }

@@ -1,96 +1,27 @@
 {
-            "root": "addon/recharge",
-            "pages": [
-                // *********************************** 充值 ***********************************
-                {
-                    "path": "pages/recharge",
-                    "style": {
-                        "navigationBarTitleText": "%recharge.pages.recharge%"
-                    },
-                    "needLogin": true
-                },
-                {
-                    "path": "pages/recharge_record",
-                    "style": {
-                        "navigationBarTitleText": "%recharge.pages.recharge_record%"
-                    },
-                    "needLogin": true
-                },
-                {
-                    "path": "pages/recharge_record_detail",
-                    "style": {
-                        "navigationBarTitleText": "%recharge.pages.recharge_record_detail%"
-                    },
-                    "needLogin": true
-                }
-            ]
-        },
-        // SOW_COMMUNITY_PAGE_BEGIN
+    "root": "addon/recharge",
+    "pages": [
+        // *********************************** 充值 ***********************************
         {
-            "root": "addon/sow_community",
-            "pages": [{
-                    "path": "pages/index",
-                    "style": {
-                        // #ifndef H5
-                        "navigationStyle": "custom",
-                        // #endif
-                        "navigationBarTitleText": "%sow_community.pages.index%"
-                    }
-                },
-                {
-                    "path": "pages/search",
-                    "style": {
-                        "navigationBarTitleText": "%sow_community.pages.search%"
-                    }
-                },
-                {
-                    "path": "pages/image/detail",
-                    "style": {
-                        "navigationBarTitleText": "%sow_community.pages.image.detail%"
-                    }
-                },
-                {
-                    "path": "pages/video/detail",
-                    "style": {
-                        // #ifndef H5
-                        "navigationStyle": "custom",
-                        // #endif
-                        "navigationBarTitleText": "%sow_community.pages.video.detail%"
-                    }
-                },
-                {
-                    "path": "pages/member",
-                    "style": {
-                        // #ifndef H5
-                        "navigationStyle": "custom",
-                        // #endif
-                        "navigationBarTitleText": "%sow_community.pages.member%"
-                    }
-                },
-                {
-                    "path": "pages/topic_list",
-                    "style": {
-                        "navigationBarTitleText": "%sow_community.pages.topic_list%"
-                    }
-                },
-                {
-                    "path": "pages/create",
-                    "style": {
-                        "navigationBarTitleText": "%sow_community.pages.create%"
-                    }
-                },
-                {
-                    "path": "pages/follow",
-                    "style": {
-                        "navigationBarTitleText": "%sow_community.pages.follow%"
-                    },
-                    "needLogin": true
-                },
-                {
-                    "path": "pages/sow_show",
-                    "style": {
-                        "navigationBarTitleText": "%sow_community.pages.sow_show%"
-                    }
-                }
-            ]
+            "path": "pages/recharge",
+            "style": {
+                "navigationBarTitleText": "%recharge.pages.recharge%"
+            },
+            "needLogin": true
         },
+        {
+            "path": "pages/recharge_record",
+            "style": {
+                "navigationBarTitleText": "%recharge.pages.recharge_record%"
+            },
+            "needLogin": true
+        },
+        {
+            "path": "pages/recharge_record_detail",
+            "style": {
+                "navigationBarTitleText": "%recharge.pages.recharge_record_detail%"
+            },
+            "needLogin": true
+        }
+    ]
+},

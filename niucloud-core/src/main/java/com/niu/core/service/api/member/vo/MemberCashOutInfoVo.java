@@ -3,6 +3,7 @@ package com.niu.core.service.api.member.vo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.enums.member.AccountTypeEnum;
+import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferTypeEnum;
 import lombok.Data;
 
@@ -43,6 +44,8 @@ public class MemberCashOutInfoVo {
     // 转账状态
     private String transferStatus;
 
+    private String transferPaymentCode;
+
     // 申请时间
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;
@@ -78,6 +81,22 @@ public class MemberCashOutInfoVo {
 
     private String accountType;
 
+    private String transferNo;  // 转账单号
+
+    private String transferVoucher;
+
+    private String transferRemark;
+
+    private String extra;
+
+    private Transfer transfer;
+
+    private String nickname;
+
+    private String headimg;
+
+    private String packageInfo;
+
     /**
      * 取消时间
      */
@@ -99,20 +118,7 @@ public class MemberCashOutInfoVo {
     }
 
     public String getStatusName() {
-        // 状态1待审核2.待转账3已转账 -1拒绝 -2 已取消
-        switch (this.getStatus()) {
-            case 1:
-                return "待审核";
-            case 2:
-                return "待转账";
-            case 3:
-                return "已转账";
-            case -1:
-                return "拒绝";
-            case -2:
-                return "已取消";
-        }
-        return "";
+        return MemberCashOutStatusEnum.getNameByStatus(this.status);
     }
 
     /**
@@ -122,4 +128,17 @@ public class MemberCashOutInfoVo {
         return "";
     }
 
+    @Data
+    public static class Transfer {
+        private String transferNo;  // 转账单号
+
+        private String transferVoucher;
+
+        private String transferRemark;
+
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String extra;
+
+        private String packageInfo;
+    }
 }

@@ -16,7 +16,7 @@ public class CashOutConfigParam implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotNull(message = "is_open参数缺失")
-    private Integer isOpen = 0;  // 是否启用提现
+    private String isOpen = "0";  // 是否启用提现
 
     @NotNull(message = "transfer_type参数缺失")
     private LinkedList<String> transferType = new LinkedList<String>();  // 提现方式

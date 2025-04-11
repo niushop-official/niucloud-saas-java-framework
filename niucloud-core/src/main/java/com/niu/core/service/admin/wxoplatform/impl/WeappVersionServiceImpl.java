@@ -16,6 +16,7 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.entity.oplatform.WxOplatfromWeappVersion;
+import com.niu.core.entity.pay.Pay;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.entity.sys.SysConfig;
@@ -27,9 +28,11 @@ import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysConfigMapper;
 import com.niu.core.mapper.weapp.WeappVersionMapper;
+import com.niu.core.service.admin.pay.vo.PayListVo;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.wxoplatform.IWeappVersionService;
 import com.niu.core.service.admin.wxoplatform.vo.OplatformConfigVo;
+import com.niu.core.service.admin.wxoplatform.vo.SiteGroupWeappVersionVo;
 import com.niu.core.service.admin.wxoplatform.vo.WxOplatfromWeappVersionVo;
 import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.core.service.core.weapp.ICoreWeappCloudService;
@@ -55,6 +58,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -127,11 +131,11 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
      * 添加小程序版本
      */
     @Override
-    public void add(Integer siteGroupId) {
+    public void add(Integer siteGroupId, boolean isAll) {
         List<SiteGroup> siteGroupList = siteGroupMapper.selectList(new QueryWrapper<SiteGroup>().gt("group_id", 0).orderByAsc("create_time"));
         if (ObjectUtil.isEmpty(siteGroupList)) throw new CommonException("请先添加站点套餐");
 
-        SiteGroup siteGroup = siteGroupId == null ? siteGroupList.get(0) : siteGroupMapper.selectById(siteGroupId);
+        SiteGroup siteGroup = siteGroupId == null || siteGroupId == 0 ? siteGroupList.get(0) : siteGroupMapper.selectById(siteGroupId);
 
         WxOplatfromWeappVersion uploading = wxOplatfromWeappVersionMapper.selectOne(new QueryWrapper<WxOplatfromWeappVersion>()
             .eq("site_group_id", siteGroup.getGroupId())
@@ -170,7 +174,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
         model.setTaskKey(taskKey);
         wxOplatfromWeappVersionMapper.insert(model);
 
-        weappVersionService.getVersionUploadResult(taskKey);
+        weappVersionService.getVersionUploadResult(taskKey, isAll);
     }
 
     /**
@@ -178,14 +182,14 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
      * @param taskKey
      */
     @Async
-    public void getVersionUploadResult(String taskKey) {
+    public void getVersionUploadResult(String taskKey, boolean isAll) {
         if (scheduler == null || scheduler.isShutdown() || scheduler.isTerminated()) {
             scheduler = Executors.newScheduledThreadPool(1);
         }
-        scheduler.schedule(() -> checkVersionUploadResult(taskKey), 10, TimeUnit.SECONDS);
+        scheduler.schedule(() -> checkVersionUploadResult(taskKey, isAll), 10, TimeUnit.SECONDS);
     }
 
-    private void checkVersionUploadResult(String taskKey) {
+    private void checkVersionUploadResult(String taskKey, boolean isAll) {
         JSONObject log = coreWeappCloudService.getWeappCompileLog(taskKey);
         System.out.println("checkVersionUploadResult ++++++++++ " + log.toString());
 
@@ -200,6 +204,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
                     model.setUpdateTime(System.currentTimeMillis() / 1000);
                     wxOplatfromWeappVersionMapper.update(model, new QueryWrapper<WxOplatfromWeappVersion>().eq("task_key", taskKey));
                     scheduler.shutdown();
+                    weappVersionService.uploadSuccess(taskKey, isAll);
                     return;
                 }
                 if (last.getInt("percent", 0).equals(100)) {
@@ -208,10 +213,10 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
                     model.setUpdateTime(System.currentTimeMillis() / 1000);
                     wxOplatfromWeappVersionMapper.update(model, new QueryWrapper<WxOplatfromWeappVersion>().eq("task_key", taskKey));
                     scheduler.shutdown();
-                    weappVersionService.uploadSuccess(taskKey);
+                    weappVersionService.uploadSuccess(taskKey, isAll);
                     return;
                 }
-                scheduler.schedule(() -> checkVersionUploadResult(taskKey), 10, TimeUnit.SECONDS);
+                scheduler.schedule(() -> checkVersionUploadResult(taskKey, isAll), 10, TimeUnit.SECONDS);
             }
         } else {
             scheduler.shutdown();
@@ -223,7 +228,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
      * @param taskKey
      */
     @Async
-    public void uploadSuccess(String taskKey) {
+    public void uploadSuccess(String taskKey, boolean isAll) {
         WxOplatfromWeappVersion version = wxOplatfromWeappVersionMapper.selectOne(new QueryWrapper<WxOplatfromWeappVersion>().eq("task_key", taskKey));
 
         WxOpenComponentService wxOpenService = WechatUtils.WxOpen().getWxOpenComponentService();
@@ -261,7 +266,12 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
                     }
                 }
             }
+        } catch (Exception e) {
+            System.out.println("小程序模板上传成功获取模板id异常");
+            e.printStackTrace();
+        }
 
+        if (isAll) {
             SiteGroup siteGroup = siteGroupMapper.selectOne(new QueryWrapper<SiteGroup>()
                 .select("group_id")
                 .gt("group_id", version.getSiteGroupId())
@@ -269,11 +279,8 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
                 .last("limit 1")
             );
             if (siteGroup != null) {
-                weappVersionService.add(siteGroup.getGroupId());
+                weappVersionService.add(siteGroup.getGroupId(), true);
             }
-        } catch (Exception e) {
-            System.out.println("小程序模板上传成功获取模板id异常");
-            e.printStackTrace();
         }
     }
 
@@ -404,5 +411,34 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
     public void siteWeappCommit() {
         SiteInfoVo site = coreSiteService.getSiteCache(RequestUtils.siteId());
         this.weappCommit(site.getSiteId(), site.getGroupId(), null);
+    }
+
+    /**
+     * 按站点套餐获取提交记录
+     * @param pageParam
+     * @return
+     */
+    @Override
+    public PageResult<SiteGroupWeappVersionVo> getSiteGroupCommitRecord(PageParam pageParam) {
+        Integer page  = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
+
+        IPage<SiteGroup> iPage = siteGroupMapper.selectPage(new Page<>(page, limit), new QueryWrapper<SiteGroup>().select("group_id,group_name"));
+        List<SiteGroupWeappVersionVo> list = new LinkedList<>();
+
+        for (SiteGroup item : iPage.getRecords()) {
+            SiteGroupWeappVersionVo vo = new SiteGroupWeappVersionVo();
+            BeanUtils.copyProperties(item, vo);
+
+            WxOplatfromWeappVersion lastVersion = wxOplatfromWeappVersionMapper.selectOne(new QueryWrapper<WxOplatfromWeappVersion>().eq("site_group_id", item.getGroupId()).orderByDesc("id").last("limit 1"));
+            if (lastVersion != null) {
+                WxOplatfromWeappVersionVo versionVo = new WxOplatfromWeappVersionVo();
+                BeanUtils.copyProperties(lastVersion, versionVo);
+                vo.setCommitRecord(versionVo);
+            }
+            list.add(vo);
+        }
+
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 }

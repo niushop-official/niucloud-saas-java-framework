@@ -43,6 +43,8 @@ public class MemberCashOutListVo {
     // 转账状态
     private String transferStatus;
 
+    private String transferPaymentCode;
+
     // 申请时间
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;

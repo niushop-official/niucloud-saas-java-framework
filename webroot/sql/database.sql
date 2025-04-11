@@ -282,6 +282,8 @@ CREATE TABLE `nc_member_cash_out`  (
   `transfer_mobile` varchar(11) NOT NULL DEFAULT '' COMMENT '手机号',
   `transfer_bank` varchar(255) NOT NULL DEFAULT '' COMMENT '银行名称',
   `transfer_account` varchar(255) NOT NULL DEFAULT '' COMMENT '收款账号',
+  `transfer_payee` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '转账收款方(json),主要用于对接在线的打款方式',
+  `transfer_payment_code` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '收款码图片',
   `transfer_fail_reason` varchar(255) NOT NULL DEFAULT '' COMMENT '失败原因',
   `transfer_status` varchar(20) NOT NULL DEFAULT '' COMMENT '转账状态',
   `transfer_time` int(11) NOT NULL DEFAULT 0 COMMENT '转账时间',
@@ -313,6 +315,7 @@ CREATE TABLE `nc_member_cash_out_account`  (
   `create_time` int(11) NOT NULL DEFAULT 0 COMMENT '创建时间',
   `update_time` int(11) NOT NULL DEFAULT 0 COMMENT '修改时间',
   `account_no` varchar(255) NOT NULL DEFAULT '' COMMENT '提现账户',
+  `transfer_payment_code` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '收款码',
   PRIMARY KEY (`account_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会员提现账户' ROW_FORMAT = Dynamic;
 
@@ -353,8 +356,8 @@ CREATE TABLE `nc_member_sign` (
   `site_id` int(11) NOT NULL DEFAULT '0' COMMENT '站点id',
   `member_id` int(11) NOT NULL DEFAULT '0' COMMENT '会员id',
   `days` int(11) NOT NULL DEFAULT '0' COMMENT '连续签到天数',
-  `day_award` varchar(255) NOT NULL DEFAULT '' COMMENT '日签奖励',
-  `continue_award` varchar(255) NOT NULL DEFAULT '' COMMENT '连签奖励',
+  `day_award` text NOT NULL COMMENT '日签奖励',
+  `continue_award` text NOT NULL COMMENT '连签奖励',
   `continue_tag` varchar(30) NOT NULL DEFAULT '' COMMENT '连签奖励标识',
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '签到时间',
   `start_time` int(11) NOT NULL DEFAULT '0' COMMENT '签到周期开始时间',
@@ -446,7 +449,8 @@ CREATE TABLE `nc_pay_transfer`  (
   `transfer_account` varchar(255) NOT NULL DEFAULT '' COMMENT '收款账号',
   `transfer_voucher` varchar(255) NOT NULL DEFAULT '' COMMENT '凭证',
   `transfer_remark` varchar(255) NOT NULL DEFAULT '' COMMENT '凭证说明',
-  `transfer_fail_reason` varchar(255) NOT NULL DEFAULT '' COMMENT '失败原因',
+  `transfer_payment_code` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '收款码图片',
+  `transfer_fail_reason` varchar(2000) NOT NULL DEFAULT '' COMMENT '失败原因',
   `transfer_status` varchar(20) NOT NULL DEFAULT '' COMMENT '转账状态',
   `money` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT '转账金额',
   `create_time` int(11) NOT NULL DEFAULT 0 COMMENT '申请时间',
@@ -455,8 +459,24 @@ CREATE TABLE `nc_pay_transfer`  (
   `openid` varchar(50) NOT NULL DEFAULT '',
   `remark` varchar(255) NOT NULL DEFAULT '',
   `batch_id` varchar(500) NOT NULL DEFAULT '' COMMENT '转账批次id',
+  `transfer_payee` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '在线转账数据(json)',
+  `out_batch_no` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '扩展数据,主要用于记录接收到线上打款的业务数据编号',
+  `package_info` VARCHAR(1000) NOT NULL DEFAULT '' COMMENT '跳转领取页面的package信息',
+  `extra` text NOT NULL COMMENT '扩展信息',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '转账表' ROW_FORMAT = Dynamic;
+
+DROP TABLE IF EXISTS `nc_pay_transfer_scene`;
+CREATE TABLE `nc_pay_transfer_scene` (
+  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `site_id` INT(11) NOT NULL DEFAULT 0 COMMENT '站点id',
+  `type` VARCHAR(255) NOT NULL DEFAULT '' COMMENT '业务类型',
+  `scene` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '场景',
+  `infos` VARCHAR(2000) NOT NULL DEFAULT '' COMMENT '转账报备背景',
+  `create_time` INT(11) NOT NULL DEFAULT 0 COMMENT '创建时间',
+  `perception` VARCHAR(500) NOT NULL DEFAULT '' COMMENT '转账收款感知',
+  PRIMARY KEY (`id`)
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '支付转账场景表' ROW_FORMAT = Dynamic;
 
 DROP TABLE IF EXISTS `nc_site`;
 CREATE TABLE `nc_site`  (

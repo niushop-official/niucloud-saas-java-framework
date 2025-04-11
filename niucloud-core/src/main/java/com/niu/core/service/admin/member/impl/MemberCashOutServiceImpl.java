@@ -17,6 +17,7 @@ import com.niu.core.mapper.member.MemberCashOutMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
+import com.niu.core.service.admin.member.param.MemberCashOutRemarkParam;
 import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
 import com.niu.core.service.admin.member.IMemberCashOutService;
 import com.niu.core.service.admin.member.vo.*;
@@ -78,19 +79,13 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "mco.create_time", searchParam.getCreateTime());
         if (ObjectUtil.isNotEmpty(searchParam.getTransferTime())) QueryMapperUtils.buildByTime(queryWrapper, "mco.transfer_time", searchParam.getTransferTime());
 
-        IPage<MemberCashOutVo> iPage = memberCashOutMapper.selectJoinPage(new Page<>(page, limit), MemberCashOutVo.class, queryWrapper);
-        List<MemberCashOutListVo> list = new LinkedList<>();
-        for (MemberCashOutVo item : iPage.getRecords()) {
-            MemberCashOutListVo vo = new MemberCashOutListVo();
-            BeanUtils.copyProperties(item, vo);
-
+        IPage<MemberCashOutListVo> iPage = memberCashOutMapper.selectJoinPage(new Page<>(page, limit), MemberCashOutListVo.class, queryWrapper);
+        for (MemberCashOutListVo item : iPage.getRecords()) {
             MemberBriefInfoVo memberInfoVo = new MemberBriefInfoVo();
             BeanUtils.copyProperties(item, memberInfoVo);
-            vo.setMember(memberInfoVo);
-
-            list.add(vo);
+            item.setMember(memberInfoVo);
         }
-        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+        return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());
     }
 
     /**
@@ -102,24 +97,24 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
     public MemberCashOutInfoVo info(Integer id) {
         Integer siteId = RequestUtils.siteId();
 
-        MemberCashOut model = memberCashOutMapper.selectOne(
-            new QueryWrapper<MemberCashOut>()
-                .eq("id", id)
-                .eq("site_id", siteId)
-                .last("limit 1"));
+        MemberCashOutInfoVo vo = memberCashOutMapper.selectJoinOne(
+            MemberCashOutInfoVo.class,
+            new MPJQueryWrapper<MemberCashOut>()
+                .select("mco.*,m.member_no,m.username,m.nickname,m.mobile,m.headimg,pt.transfer_voucher,pt.transfer_remark")
+                .eq("mco.id", id)
+                .eq("mco.site_id", siteId)
+                .setAlias("mco")
+                .leftJoin("?_member m ON mco.member_id = m.member_id".replace("?_", GlobalConfig.tablePrefix))
+                .leftJoin("?_pay_transfer pt ON mco.transfer_no = pt.transfer_no".replace("?_", GlobalConfig.tablePrefix))
+        );
 
-        Assert.notNull(model, "数据不存在");
-
-        MemberCashOutInfoVo vo = new MemberCashOutInfoVo();
-        BeanUtils.copyProperties(model, vo);
-
-        Member member = memberMapper.selectOne(new QueryWrapper<Member>()
-                .eq("member_id", model.getMemberId())
-                .eq("site_id", siteId));
-
-        MemberBriefInfoVo memberVo = new MemberBriefInfoVo();
-        BeanUtils.copyProperties(member, memberVo);
-        vo.setMemberInfo(memberVo);
+        if (vo != null) {
+            MemberCashOutInfoVo.Transfer transfer = new MemberCashOutInfoVo.Transfer();
+            transfer.setTransferNo(vo.getTransferNo());
+            transfer.setTransferRemark(vo.getTransferRemark());
+            transfer.setTransferVoucher(vo.getTransferVoucher());
+            vo.setTransfer(transfer);
+        }
 
         return vo;
     }
@@ -181,5 +176,41 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         Assert.notNull(model, "数据不存在");
 
         iCoreMemberCashOutService.transfer(model, param);
+    }
+
+    /**
+     * 撤销提现
+     * @param id
+     */
+    @Override
+    public void cancel(Integer id) {
+        iCoreMemberCashOutService.cancel(RequestUtils.siteId(), id);
+    }
+
+    /**
+     * 备注
+     * @param id
+     * @param param
+     */
+    @Override
+    public void remark(Integer id, MemberCashOutRemarkParam param) {
+        MemberCashOut model = memberCashOutMapper.selectOne(
+            new QueryWrapper<MemberCashOut>()
+                .eq("id", id)
+                .eq("site_id", RequestUtils.siteId())
+        );
+        Assert.notNull(model, "数据不存在");
+
+        model.setRemark(param.getRemark());
+        memberCashOutMapper.updateById(model);
+    }
+
+    /**
+     * 检测转账状态
+     * @param id
+     */
+    @Override
+    public void checkTransferStatus(Integer id) {
+        iCoreMemberCashOutService.checkTransferStatus(RequestUtils.siteId(), id);
     }
 }

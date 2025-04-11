@@ -11,15 +11,18 @@
                 <el-card class="box-card !border-none" shadow="never">
 
                     <el-form-item :label="t('isOpen')">
-                        <el-switch v-model="formData.is_open" />
+                        <el-switch v-model="formData.is_open" active-value="1" inactive-value="0" />
                     </el-form-item>
 
                     <el-form-item :label="t('cashWithdrawalAmount')" v-if="formData.is_open" prop="min">
-                        <el-input v-model="formData.min" @keyup="filterDigit($event)" class="input-width" :placeholder="t('cashWithdrawalAmountPlaceholder')" />
+                        <div>
+                            <el-input v-model.trim="formData.min" @keyup="filterDigit($event)" class="input-width" :placeholder="t('cashWithdrawalAmountPlaceholder')" />
+                            <div class="text-[12px] text-[#999] leading-[24px]">{{  t('minTips') }}</div>
+                        </div>
                     </el-form-item>
 
                     <el-form-item :label="t('commissionRatio')" v-if="formData.is_open" prop="rate">
-                        <el-input v-model="formData.rate" @keyup="filterDigit($event)" class="input-width" :placeholder="t('commissionRatioPlaceholder')" />
+                        <el-input v-model.trim="formData.rate" @keyup="filterDigit($event)" class="input-width" :placeholder="t('commissionRatioPlaceholder')" />
                         <span class="ml-2">%</span>
                     </el-form-item>
 
@@ -30,17 +33,22 @@
                         </el-radio-group>
                     </el-form-item>
 
-                    <el-form-item :label="t('transfer')" v-if="formData.is_open" class="items-center">
-                        <el-radio-group v-model="formData.is_auto_transfer">
-                            <el-radio label="0" size="large">{{t('manualTransfer')}}</el-radio>
-                            <el-radio label="1" size="large">{{t('automatedTransit')}}</el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-
-                    <el-form-item :label="t('transferMode')" v-if="formData.is_open" class="items-center">
-                        <el-checkbox-group v-model="formData.transfer_type" size="large">
-                            <el-checkbox :label="item.key"  v-for="(item,index) in Transfertype" :key="'a'+index">{{item.name}}</el-checkbox>
-                        </el-checkbox-group>
+                    <!-- <el-form-item :label="t('transfer')" v-if="formData.is_open" class="items-baseline">
+                        <div>
+                            <el-radio-group v-model="formData.is_auto_transfer">
+                                <el-radio label="0" size="large">{{t('manualTransfer')}}</el-radio>
+                                <el-radio label="1" size="large">{{t('automatedTransit')}}</el-radio>
+                            </el-radio-group>
+                            <div class="text-[12px] text-[#999] leading-[24px]">{{ t('transferTips') }}</div>
+                        </div>
+                    </el-form-item> -->
+                    <el-form-item :label="t('transferMode')" v-if="formData.is_open" class="items-baseline">
+                        <div>
+                            <el-checkbox-group v-model="formData.transfer_type" size="large">
+                                <el-checkbox :label="item.key"  v-for="(item,index) in Transfertype" :key="'a'+index">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                            <div class="text-[12px] text-[#999] leading-[24px]">{{ t('transferModeTips') }}</div>
+                        </div>
                     </el-form-item>
                 </el-card>
             </el-form>
@@ -67,11 +75,11 @@ const pageName = route.meta.title
 
 const loading = ref(true)
 const ruleFormRef = ref<FormInstance>()
-const formData = reactive<Record<string, string | boolean | Array<string> >>({
+const formData = reactive({
     is_auto_transfer: '0',
     is_auto_verify: '0',
     is_open: '0',
-    min: '0.01',
+    min: '0',
     rate: '0',
     transfer_type: []
 })
@@ -84,12 +92,11 @@ const getTransfertypeFn = async () => {
 getTransfertypeFn()
 
 // 获取会员的配置信息
-const setFormData = async (id: number = 0) => {
+const setFormData = async () => {
     const data = await (await getCashOutConfig()).data
     Object.keys(formData).forEach((key: string) => {
         if (data[key] != undefined) formData[key] = data[key]
     })
-    formData.is_open = Boolean(Number(formData.is_open))
     loading.value = false
 }
 setFormData()
@@ -124,7 +131,6 @@ const onSave = async (formEl: FormInstance | undefined) => {
     await formEl.validate((valid) => {
         if (valid) {
             const save = { ...formData }
-            save.is_open = Number(save.is_open).toString()
 
             setCashOutConfig(save).then(() => {
                 loading.value = false

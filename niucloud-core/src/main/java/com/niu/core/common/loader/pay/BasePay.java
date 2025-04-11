@@ -9,6 +9,7 @@ import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.common.loader.pay.param.PayAsyncNotifyParam;
 import com.niu.core.common.loader.pay.param.PayParam;
 
+import com.niu.core.service.core.pay.vo.TransferQueryVo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -62,7 +63,17 @@ public abstract class BasePay {
     /**
      * 转账
      */
-    public abstract void transfer(TransferParam param);
+    public abstract Object transfer(TransferParam param);
+
+    /**
+     * 转账取消
+     */
+    public abstract Object transferCancel(String transferNo);
+
+    /**
+     * 转账查询
+     */
+    public abstract TransferQueryVo transferQuery(String transferNo);
 
     /**
      * 退款

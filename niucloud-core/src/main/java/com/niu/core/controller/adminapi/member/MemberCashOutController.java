@@ -6,10 +6,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.TransferTypeEnum;
 import com.niu.core.service.admin.member.IMemberCashOutService;
-import com.niu.core.service.admin.member.param.CashOutTransferParam;
-import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
-import com.niu.core.service.admin.member.param.MemberCashOutParam;
-import com.niu.core.service.admin.member.param.MemberCashOutSearchParam;
+import com.niu.core.service.admin.member.param.*;
 import com.niu.core.service.admin.member.vo.CashOutStatVo;
 import com.niu.core.service.admin.member.vo.MemberCashOutInfoVo;
 import com.niu.core.service.admin.member.vo.MemberCashOutListVo;
@@ -76,6 +73,28 @@ public class MemberCashOutController {
     }
 
     /**
+     * 会员提现取消
+     * @param id
+     * @return
+     */
+    @PutMapping("/cancel/{id}")
+    public Result cancel(@PathVariable(name = "id") Integer id) {
+        memberCashOutService.cancel(id);
+        return Result.success();
+    }
+
+    /**
+     * 备注
+     * @param id
+     * @return
+     */
+    @PutMapping("/remark/{id}")
+    public Result remark(@PathVariable(name = "id") Integer id, @RequestBody MemberCashOutRemarkParam param) {
+        memberCashOutService.remark(id, param);
+        return Result.success();
+    }
+
+    /**
      * 转账方式
      */
     @GetMapping("/transfertype")
@@ -102,5 +121,16 @@ public class MemberCashOutController {
     public Result<CashOutStatVo> stat() {
         CashOutStatVo data = memberCashOutService.stat();
         return Result.success(data);
+    }
+
+    /**
+     * 检测转账状态
+     * @param id
+     * @return
+     */
+    @PutMapping("/check/{id}")
+    public Result checkTransferStatus(@PathVariable("id") Integer id) {
+        memberCashOutService.checkTransferStatus(id);
+        return Result.success();
     }
 }

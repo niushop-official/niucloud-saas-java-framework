@@ -1,6 +1,8 @@
 package com.niu.core.service.api.member.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -88,7 +90,8 @@ public class MemberSignServiceImpl implements IMemberSignService {
     @Override
     @Transactional
     public MemberSignOperateVo signOperate(MemberSignOperateParam param) {
-        MemberSignConfigVo config = getSystemSignConfig(param.siteId());
+        JSONObject signConfig = coreConfigService.getConfigValue(RequestUtils.siteId(), "SIGN_CONFIG");
+        MemberSignConfigVo config = JSONUtil.toBean(signConfig, MemberSignConfigVo.class);
 
         if (!config.getIsUse()) throw new RuntimeException("签到未开启");
 
@@ -105,8 +108,19 @@ public class MemberSignServiceImpl implements IMemberSignService {
 
         Integer days = 1;
         if (yesterdayMemberSign != null) {
-            if (yesterdayMemberSign.getDays() + 1 < config.getSignPeriod()) {
-                days = yesterdayMemberSign.getDays() + 1;
+            //连签天数大于签到周期，连签天数重置为1
+            days = yesterdayMemberSign.getDays() + 1;
+            if (days > config.getSignPeriod()) {
+                days = 1;
+            }
+            if (ObjectUtil.isNotEmpty(config.getContinueAward())) {
+                JSONArray continueSigns = config.getContinueAward();
+                CollUtil.sort(continueSigns, Comparator.comparing(o -> ((JSONObject) o).getInt("continue_sign")).reversed());
+                // 获取最大的连签天数
+                Integer maxContinueSign = continueSigns.getJSONObject(0).getInt("continue_sign");
+                if (days > maxContinueSign) {
+                    days = 1;
+                }
             }
         }
 
@@ -127,7 +141,7 @@ public class MemberSignServiceImpl implements IMemberSignService {
         dayAwardVar.put("from_type", "day_sign_award");
         dayAwardVar.put("memo", "日签奖励");
         coreMemberService.memberGiftGrant(param.siteId(), param.memberId(), config.getDayAward(), dayAwardVar);
-        vo.setAwards(config.getDayAward());
+        vo.setAwards(coreMemberService.getGiftContent(param.siteId(), config.getDayAward(), "member_sign"));
 
         // 发放连签奖励
         if (config.getContinueAward().size() > 0) {
@@ -137,10 +151,32 @@ public class MemberSignServiceImpl implements IMemberSignService {
                 if (item.getInt("continue_sign").equals(days)) {
                     // 是否限制领取
                     if (item.getInt("receive_limit").equals(2)) {
-
+                        // 周期开始时间
+                        Long periodStartTime = memberSignMapper.selectOne(new QueryWrapper<MemberSign>()
+                            .select("start_time")
+                            .eq("member_id", param.memberId())
+                            .eq("site_id", param.siteId())
+                            .eq("days", 1)
+                            .gt("start_time", 0)
+                            .orderByDesc("sign_id")
+                            .last("limit 1")
+                        ).getStartTime();
+                        // 周期结束时间
+                        Long periodEndTime = periodStartTime + (config.getSignPeriod() * 86400);
+                        // 领取次数
+                        Long receiveNum = memberSignMapper.selectCount(new QueryWrapper<MemberSign>()
+                           .eq("member_id", param.memberId())
+                           .eq("site_id", param.siteId())
+                           .between("create_time", periodStartTime, periodEndTime)
+                           .eq("continue_tag", item.getStr("continue_tag"))
+                        );
+                        if (receiveNum < item.getInt("receive_num")) {
+                            continueAward = item;
+                        }
                     } else {
                         continueAward = item;
                     }
+                    break;
                 }
             }
 
@@ -155,12 +191,12 @@ public class MemberSignServiceImpl implements IMemberSignService {
                 dayAwardVar.put("from_type", "continue_sign_award");
                 dayAwardVar.put("memo", "连签奖励");
                 coreMemberService.memberGiftGrant(param.siteId(), param.memberId(), continueAward, continueAwardVar);
+
                 model.setContinueAward(continueAward.toString());
+                memberSignMapper.updateById(model);
 
                 vo.setInfo("连签" + days.toString() + "天恭喜您获得以下奖励");
-                vo.setAwards(continueAward);
-
-                memberSignMapper.updateById(model);
+                vo.setAwards(coreMemberService.getGiftContent(param.siteId(), continueAward, "member_sign"));
             }
         }
 

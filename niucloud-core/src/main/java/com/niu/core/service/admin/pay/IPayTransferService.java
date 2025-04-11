@@ -4,47 +4,30 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.admin.pay.param.PayTransferParam;
 import com.niu.core.service.admin.pay.param.PayTransferSearchParam;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.service.admin.pay.param.SetSceneIdParam;
 import com.niu.core.service.admin.pay.vo.PayTransferInfoVo;
 import com.niu.core.service.admin.pay.vo.PayTransferListVo;
+import com.niu.core.service.core.pay.param.SetTradeSceneParam;
+import com.niu.core.service.core.pay.vo.WechatTransferSceneListVo;
+
+import java.util.Map;
 
 /**
  * 转账服务接口
  */
 public interface IPayTransferService {
 
+    Map<String, WechatTransferSceneListVo> getWechatTransferScene();
 
     /**
-     * 转账列表
-     * @param pageParam 分页参数
-     * @param searchParam 搜索参数
-     * @return PageResult<PayTransferListVo>
+     * 设置场景id
+     * @param param
      */
-    PageResult<PayTransferListVo> list(PageParam pageParam, PayTransferSearchParam searchParam);
+    void setSceneId(SetSceneIdParam param);
 
     /**
-     * 转账详情
-     * @param id 主键ID
-     * @return PayTransferInfoVo
+     * 设置业务场景配置
+     * @param param
      */
-    PayTransferInfoVo info(Integer id);
-
-    /**
-     * 转账添加
-     * @param addParam 添加参数
-     */
-    void add(PayTransferParam addParam);
-
-    /**
-     * 转账编辑
-     * @param id   主键
-     * @param editParam 编辑参数
-     */
-    void edit(Integer id, PayTransferParam editParam);
-
-    /**
-     * 转账删除
-     * @param id 主键ID
-     */
-    void del(Integer id);
-
+    void setTradeScene(SetTradeSceneParam param);
 }

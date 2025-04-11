@@ -10,6 +10,7 @@ import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.component.context.task.ThreadPoolManager;
+import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.entity.sys.SysExport;
 import com.niu.core.mapper.sys.SysExportMapper;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -33,6 +34,8 @@ public class BusinessExcelUtil {
             List<List<String>> head = new ArrayList<>();
             // 设置文件名称和文件路径
             String filePath = exportDynamic.getFilePath();
+            FileTools.createDirs(filePath);
+
             String fileName = filePath + exportDynamic.getFileName();
             // 设置动态表头
             if (!CollectionUtils.isEmpty(exportDynamic.getHeads())) {

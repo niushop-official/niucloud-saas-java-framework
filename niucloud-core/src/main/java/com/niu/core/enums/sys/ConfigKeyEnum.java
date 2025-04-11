@@ -20,7 +20,8 @@ public enum ConfigKeyEnum {
     H5("h5"),//h5
     WXOPLATFORM("WXOPLATFORM"), // 微信开放平台
     WEAPP_AUTHORIZATION_INFO("weapp_authorization_info"),
-    WECHAT_AUTHORIZATION_INFO("wechat_authorization_info");
+    WECHAT_AUTHORIZATION_INFO("wechat_authorization_info"),
+    WECHAT_TRANSFER_SCENE_CONFIG("WECHAT_TRANSFER_SCENE_CONFIG");
     
     private final String name;
 }

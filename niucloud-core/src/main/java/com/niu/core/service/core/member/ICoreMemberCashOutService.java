@@ -14,7 +14,7 @@ public interface ICoreMemberCashOutService {
      * 申请提现
      * @param param
      */
-    void apply(MemberCashOutApplyParam param);
+    Integer apply(MemberCashOutApplyParam param);
 
     /**
      * 提现审核
@@ -45,7 +45,7 @@ public interface ICoreMemberCashOutService {
      * 转账成功
      * @param cashOut
      */
-    void transfer(MemberCashOut cashOut, CashOutTransferParam param);
+    Object transfer(MemberCashOut cashOut, CashOutTransferParam param);
 
     /**
      * 转账完成
@@ -66,4 +66,18 @@ public interface ICoreMemberCashOutService {
      * @param cashOut
      */
     void giveback(MemberCashOut cashOut);
+
+    /**
+     * 撤销提现
+     * @param siteId
+     * @param id
+     */
+    void cancel(Integer siteId, Integer id);
+
+    /**
+     * 检测转账状态
+     * @param siteId
+     * @param id
+     */
+    void checkTransferStatus(Integer siteId, Integer id);
 }

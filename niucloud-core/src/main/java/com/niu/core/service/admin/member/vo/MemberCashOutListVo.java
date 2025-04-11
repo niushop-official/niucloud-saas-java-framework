@@ -58,6 +58,12 @@ public class MemberCashOutListVo implements Serializable {
     private String transferTypeName;
     private String transferStatusName;
     private String accountTypeName;
+    private String transferPaymentCode;
+    private String memberNo;  // 会员编码
+    private String username;  // 会员用户名
+    private String mobile;  // 手机号
+    private String nickname;  // 会员昵称
+    private String headimg;  // 会员头像
 
     public String getStatusName() {
         return MemberCashOutStatusEnum.getNameByStatus(this.status);

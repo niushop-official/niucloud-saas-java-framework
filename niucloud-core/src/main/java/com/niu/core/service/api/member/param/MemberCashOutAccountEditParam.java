@@ -25,4 +25,6 @@ public class MemberCashOutAccountEditParam implements ApiBaseParam {
     /** 提现账户 */
     private String accountNo;
 
+    /** 收款码 */
+    private String transferPaymentCode;
 }

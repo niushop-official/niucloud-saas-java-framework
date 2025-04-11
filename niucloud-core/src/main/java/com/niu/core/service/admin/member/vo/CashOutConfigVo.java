@@ -13,7 +13,7 @@ public class CashOutConfigVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer isOpen = 0;  // 是否启用提现
+    private String isOpen = "0";  // 是否启用提现
     private LinkedList<String> transferType = new LinkedList<String>();  // 提现方式
     private BigDecimal min = BigDecimal.ZERO;  // 最低提现金额
     private BigDecimal rate = BigDecimal.ZERO;  // 手续费比率

@@ -6,9 +6,11 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.admin.pay.IPayTransferService;
 import com.niu.core.service.admin.pay.param.PayTransferParam;
 import com.niu.core.service.admin.pay.param.PayTransferSearchParam;
+import com.niu.core.service.admin.pay.param.SetSceneIdParam;
 import com.niu.core.service.admin.pay.vo.PayTransferInfoVo;
 import com.niu.core.service.admin.pay.vo.PayTransferListVo;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.service.core.pay.param.SetTradeSceneParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
@@ -18,7 +20,7 @@ import jakarta.annotation.Resource;
  */
 
 @RestController
-@RequestMapping("adminapi/transfer")
+@RequestMapping("adminapi/pay")
 @SaCheckLogin
 public class PayTransferController {
 
@@ -26,60 +28,32 @@ public class PayTransferController {
     IPayTransferService payTransferService;
 
     /**
-     * 转账列表
-     * @param pageParam 分页
-     * @param searchParam 搜索条件
-     * @return Result<PageResult<PayTransferListVo>>
+     * 获取转账场景
+     * @return
      */
-    @GetMapping("/list")
-    public Result<PageResult<PayTransferListVo>> list(@Validated PageParam pageParam,
-                                                     @Validated PayTransferSearchParam searchParam) {
-        PageResult<PayTransferListVo> list = payTransferService.list(pageParam, searchParam);
-        return Result.success(list);
+    @GetMapping("/transfer_scene")
+    public Result<?> transferScene() {
+        return Result.success(payTransferService.getWechatTransferScene());
     }
 
     /**
-     * 转账详情
-     * @param id 主键ID
-     * @return Result<PayTransferInfoVo>
+     * 设置场景id
+     * @return
      */
-    @GetMapping("/info")
-    public Result<PayTransferInfoVo> info(@Validated @RequestParam("id") Integer id) {
-        PayTransferInfoVo info = payTransferService.info(id);
-        return Result.success(info);
-    }
-
-    /**
-     * 转账添加
-     * @param addParam 添加参数
-     * @return Result<Object>
-     */
-    @PostMapping("/add")
-    public Result<Object> add(@Validated @RequestBody PayTransferParam addParam) {
-        payTransferService.add(addParam);
+    @PostMapping("/transfer_scene/set_scene_id/{scene}")
+    public Result<?> setSceneId(@PathVariable("scene") String scene, @Validated @RequestBody SetSceneIdParam param) {
+        param.setScene(scene);
+        payTransferService.setSceneId(param);
         return Result.success();
     }
 
     /**
-     * 转账编辑
-     * @param editParam 编辑参数
-     * @return Result<Object>
+     * 设置业务场景配置
+     * @return
      */
-    @PostMapping("/edit")
-    public Result<Object> edit(Integer id, @Validated @RequestBody PayTransferParam editParam) {
-        payTransferService.edit(id, editParam);
+    @PostMapping("/transfer_scene/set_trade_scene/{type}")
+    public Result<?> setTradeScene(@PathVariable("type") String type, @RequestBody SetTradeSceneParam param) {
+        payTransferService.setTradeScene(param);
         return Result.success();
     }
-
-    /**
-     * 转账删除
-     * @param id 参数
-     * @return Result<Object>
-     */
-    @PostMapping("/del")
-    public Result<Object> del(@Validated @RequestBody Integer id) {
-        payTransferService.del(id);
-        return Result.success();
-    }
-
 }

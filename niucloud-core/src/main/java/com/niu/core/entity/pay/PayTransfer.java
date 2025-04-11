@@ -49,6 +49,12 @@ public class PayTransfer implements Serializable {
     /** 收款账号 */
     private String transferAccount;
 
+    /** 转账收款方(json),主要用于对接在线的打款方式 */
+    private String transferPayee;
+
+    /** 收款码图片 */
+    private String transferPaymentCode;
+
     /** 凭证 */
     private String transferVoucher;
 
@@ -81,4 +87,12 @@ public class PayTransfer implements Serializable {
     /** 转账批次id */
     private String batchId;
 
+    /** 扩展数据,主要用于记录接收到线上打款的业务数据编号 */
+    private String outBatchNo;
+
+    /** 跳转领取页面的package信息 */
+    private String packageInfo;
+
+    /** 扩展信息 */
+    private String extra;
 }

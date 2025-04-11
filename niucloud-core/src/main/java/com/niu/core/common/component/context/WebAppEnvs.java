@@ -68,7 +68,7 @@ public final class WebAppEnvs {
         } else {
             appEnvs = new WebAppEnvs();
             appEnvs.envType = "prod";
-            appEnvs.webRoot = RuntimeTools.getWebRootPath();
+            appEnvs.webRoot = RuntimeTools.getWebRootPath() + "/";
             File webRootFile = new File(appEnvs.webRoot);
             appEnvs.projectRoot = webRootFile.getParent();
             appEnvs.projectNiucloudAddon = appEnvs.projectRoot + "/niucloud-addon/";

@@ -10,6 +10,7 @@ import com.niu.core.common.loader.pay.param.TransferParam;
 import com.niu.core.entity.pay.Pay;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
+import com.niu.core.service.core.pay.vo.TransferQueryVo;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,8 +45,18 @@ public class FriendPay extends BasePay {
     }
 
     @Override
-    public void transfer(TransferParam param) {
+    public Object transfer(TransferParam param) {
+        return null;
+    }
 
+    @Override
+    public Object transferCancel(String transferNo) {
+        return null;
+    }
+
+    @Override
+    public TransferQueryVo transferQuery(String transferNo) {
+        return null;
     }
 
     @Override

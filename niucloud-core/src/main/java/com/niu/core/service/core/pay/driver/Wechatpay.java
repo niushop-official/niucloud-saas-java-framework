@@ -4,14 +4,14 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.notify.*;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundV3Request;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundV3Result;
 import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
 import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
-import com.github.binarywang.wxpay.bean.transfer.TransferBatchesRequest;
-import com.github.binarywang.wxpay.bean.transfer.TransferBatchesResult;
+import com.github.binarywang.wxpay.bean.transfer.*;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
@@ -28,10 +28,14 @@ import com.niu.core.enums.pay.OnliepayStatusEnum;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.pay.RefundTransferStatusEnum;
 import com.niu.core.enums.pay.TransferStatusEnum;
+import com.niu.core.mapper.pay.PayTransferMapper;
 import com.niu.core.service.core.pay.ICorePayService;
 import com.niu.core.service.core.pay.ICoreRefundService;
+import com.niu.core.service.core.pay.ICoreTransferSceneService;
 import com.niu.core.service.core.pay.ICoreTransferService;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
+import com.niu.core.service.core.pay.vo.TransferQueryVo;
+import com.niu.core.service.core.pay.vo.TransferSceneInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -64,6 +68,14 @@ public class Wechatpay extends BasePay {
 
     public ICoreTransferService coreTransferService() {
         return SpringContext.bean(ICoreTransferService.class);
+    }
+
+    public PayTransferMapper payTransferMapper() {
+        return SpringContext.bean(PayTransferMapper.class);
+    }
+
+    public ICoreTransferSceneService coreTransferSceneService() {
+        return SpringContext.bean(ICoreTransferSceneService.class);
     }
 
     public BasePay init(JSONObject config) {
@@ -306,27 +318,25 @@ public class Wechatpay extends BasePay {
     }
 
     private Object transferNotify(PayAsyncNotifyParam param, HttpServletRequest request, HttpServletResponse response) {
-//        try {
-//            WxPayTransferBatchesNotifyV3Result result = app().parseTransferBatchesNotifyV3Result(getRequestBody(request), getRequestHeader(request));
-//            WxPayTransferBatchesNotifyV3Result.DecryptNotifyResult notifyResult = result.getResult();
-//
-//            if (result.getRawData().getEventType().equals("MCHTRANSFER.BATCH.FINISHED")) {
-//                TransferNotifyParam notifyParam = new TransferNotifyParam();
-//                notifyParam.setSiteId(param.getSiteId());
-//                notifyParam.setTransferNo(notifyResult.getOutBatchNo());
-//                notifyParam.setTransferStatus(handleTransferStatus(notifyResult.getBatchStatus()));
-//                coreTransferService.transferNotify(notifyParam);
-//
-//                return WxPayNotifyV3Response.success("SUCCESS");
-//            } else {
-//                log.error("微信转账回调通知失败:{}", result);
-//                return WxPayNotifyV3Response.fail("微信转账回调通知失败");
-//            }
-//        } catch (Exception e) {
-//            log.error("微信转账回调结果异常,异常原因{}", e.getMessage());
-//            return WxPayNotifyV3Response.fail(e.getMessage());
-//        }
-        return null;
+        try {
+            TransferBillsNotifyResult result = app().parseTransferBillsNotifyV3Result(getRequestBody(request), getRequestHeader(request));
+            TransferBillsNotifyResult.DecryptNotifyResult notifyResult = result.getResult();
+
+            if (result.getRawData().getEventType().equals("MCHTRANSFER.BILL.FINISHED")) {
+                TransferNotifyParam notifyParam = new TransferNotifyParam();
+                notifyParam.setSiteId(param.getSiteId());
+                notifyParam.setTransferNo(notifyResult.getOutBillNo());
+                notifyParam.setTransferStatus(handleTransferStatus(notifyResult.getState()));
+                coreTransferService().transferNotify(notifyParam);
+                return WxPayNotifyV3Response.success("SUCCESS");
+            } else {
+                log.error("微信转账回调通知失败:{}", result);
+                return WxPayNotifyV3Response.fail("微信转账回调通知失败");
+            }
+        } catch (Exception e) {
+            log.error("微信转账回调结果异常,异常原因{}", e.getMessage());
+            return WxPayNotifyV3Response.fail(e.getMessage());
+        }
     }
 
     private String getRequestBody(HttpServletRequest request) throws IOException {
@@ -364,36 +374,106 @@ public class Wechatpay extends BasePay {
     /**
      * 转账
      */
-    public void transfer(TransferParam param) {
+    public Object transfer(TransferParam param) {
         try {
             PayTransfer transfer = param.getTransfer();
+            JSONObject transferPayee = JSONUtil.parseObj(transfer.getTransferPayee());
 
-            List<TransferBatchesRequest.TransferDetail> transferDetailList = new LinkedList<>();
-            TransferBatchesRequest.TransferDetail transferDetail = new TransferBatchesRequest.TransferDetail();
-            transferDetail.setOutDetailNo(transfer.getTransferNo());
-            transferDetail.setTransferAmount(transfer.getMoney().multiply(new BigDecimal(100)).intValue());
-            transferDetail.setOpenid(transfer.getOpenid());
-            transferDetail.setTransferRemark(transfer.getRemark());
-            if (transfer.getMoney().multiply(new BigDecimal(100)).intValue() > 200000) {
-                transferDetail.setUserName(transfer.getTransferRealname());
+            TransferSceneInfo transferSceneInfo = coreTransferSceneService().getSceneInfoByType(transfer.getSiteId(), transfer.getTradeType());
+
+            TransferBillsRequest request = new TransferBillsRequest();
+            if (transferPayee.getStr("channel", "").equals(ChannelEnum.WECHAT.getCode())) {
+                request.setAppid(config.getStr("mp_app_id", ""));
+            } else {
+                request.setAppid(config.getStr("mini_app_id", ""));
             }
+            request.setOutBillNo(transfer.getTransferNo());
+            request.setTransferSceneId(transferSceneInfo.getSceneId());
+            request.setOpenid(transferPayee.getStr("open_id", ""));
+            if (transfer.getMoney().multiply(new BigDecimal(100)).intValue() > 200000) {
+                request.setUserName(transfer.getTransferRealname());
+            }
+            request.setTransferAmount(transfer.getMoney().multiply(new BigDecimal(100)).intValue());
+            request.setTransferRemark(ObjectUtil.defaultIfEmpty(transfer.getRemark(), "提现转账"));
+            request.setNotifyUrl(param.getNotifyUrl());
+            request.setUserRecvPerception(transferSceneInfo.getPerception());
 
-            TransferBatchesRequest request = new TransferBatchesRequest();
-            request.setAppid(config.getStr("mp_app_id", ""));
-            request.setOutBatchNo(transfer.getTransferNo());
-            request.setBatchName("");
-            request.setBatchRemark(transfer.getRemark());
-            request.setTotalAmount(transfer.getMoney().multiply(new BigDecimal(100)).intValue());
-            request.setTotalNum(1);
-            request.setTransferDetailList(transferDetailList);
-            app().getConfig().setNotifyUrl(param.getNotifyUrl());
-            TransferBatchesResult result = app().getTransferService().transferBatches(request);
+            List<TransferBillsRequest.TransferSceneReportInfo> transferSceneReportInfos = new LinkedList<>();
+            JSONObject infos = JSONUtil.parseObj(transferSceneInfo.getInfos());
+            for (String type: infos.keySet()) {
+                TransferBillsRequest.TransferSceneReportInfo info = new TransferBillsRequest.TransferSceneReportInfo();
+                info.setInfoType(type);
+                info.setInfoContent(infos.getStr(type, ""));
+                transferSceneReportInfos.add(info);
+            }
+            request.setTransferSceneReportInfos(transferSceneReportInfos);
+            TransferBillsResult transferResult = app().getTransferService().transferBills(request);
 
             TransferNotifyParam notifyParam = new TransferNotifyParam();
             notifyParam.setSiteId(transfer.getSiteId());
             notifyParam.setTransferNo(transfer.getTransferNo());
-            notifyParam.setTransferStatus(handleTransferStatus(result.getBatchStatus()));
+            notifyParam.setTransferStatus(handleTransferStatus(transferResult.getState()));
             coreTransferService().transferNotify(notifyParam);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("mch_id", config.getStr("mch_id", ""));
+            result.put("appid", request.getAppid());
+            result.put("out_bill_no", transferResult.getOutBillNo());
+            result.put("transfer_bill_no", transferResult.getTransferBillNo());
+            result.put("status", transferResult.getState());
+            result.put("reason", transferResult.getFailReason());
+            result.put("package_info", transferResult.getPackageInfo());
+            result.put("extra", JSONUtil.parseObj(result));
+
+            transfer.setOutBatchNo((String) result.get("out_bill_no"));
+            transfer.setPackageInfo((String) result.get("package_info"));
+            transfer.setExtra(((JSONObject) result.get("extra")).toString());
+            payTransferMapper().updateById(transfer);
+            return result;
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    /**
+     * 撤销转账
+     * @param transferNo
+     * @return
+     */
+    @Override
+    public Object transferCancel(String transferNo) {
+        try {
+            PayTransfer transfer = payTransferMapper().selectOne(new QueryWrapper<PayTransfer>().eq("transfer_no", transferNo));
+
+            TransferBillsCancelResult result = app().getTransferService().transformBillsCancel(transferNo);
+
+            TransferNotifyParam notifyParam = new TransferNotifyParam();
+            notifyParam.setSiteId(transfer.getSiteId());
+            notifyParam.setTransferNo(transfer.getTransferNo());
+            notifyParam.setTransferStatus(handleTransferStatus(result.getState()));
+            coreTransferService().transferNotify(notifyParam);
+
+            return null;
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    /**
+     * 查询转账单
+     * @param transferNo
+     * @return
+     */
+    @Override
+    public TransferQueryVo transferQuery(String transferNo) {
+        try {
+            TransferBillsGetResult result = app().getTransferService().getBillsByOutBillNo(transferNo);
+            TransferQueryVo vo = new TransferQueryVo();
+            vo.setTransferNo(transferNo);
+            vo.setTransferSatus(handleTransferStatus(result.getState()));
+            vo.setFailReason(result.getFailReason());
+            vo.setOriginal(result);
+            return vo;
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
@@ -401,9 +481,14 @@ public class Wechatpay extends BasePay {
 
     private TransferStatusEnum handleTransferStatus(String state) {
         Map<String, TransferStatusEnum> map = new HashMap<>();
-        map.put("FINISHED", TransferStatusEnum.SUCCESS);
+        map.put("ACCEPTED", TransferStatusEnum.DEALING);
         map.put("PROCESSING", TransferStatusEnum.DEALING);
-        map.put("CLOSED", TransferStatusEnum.FAIL);
+        map.put("WAIT_USER_CONFIRM", TransferStatusEnum.WAIT_USER);
+        map.put("TRANSFERING", TransferStatusEnum.DEALING);
+        map.put("SUCCESS", TransferStatusEnum.SUCCESS);
+        map.put("FAIL", TransferStatusEnum.FAIL);
+        map.put("CANCELING", TransferStatusEnum.FAIL_ING);
+        map.put("CANCELLED", TransferStatusEnum.FAIL);
         return map.get(state);
     }
 

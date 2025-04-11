@@ -1,1 +1,0 @@
-import{ak as t}from"./index-7e134424.js";function r(r){return t.get("cms/article",r)}function e(r){return t.get("cms/article/all",r)}function c(r){return t.get(`cms/article/${r}`)}function n(){return t.get("cms/category")}export{r as a,c as b,e as c,n as g};

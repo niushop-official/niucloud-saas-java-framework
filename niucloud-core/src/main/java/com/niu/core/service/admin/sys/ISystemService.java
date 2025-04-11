@@ -8,4 +8,6 @@ public interface ISystemService {
      * @return
      */
     StatSystemVo getSystemInfo();
+
+    void clearCache();
 }

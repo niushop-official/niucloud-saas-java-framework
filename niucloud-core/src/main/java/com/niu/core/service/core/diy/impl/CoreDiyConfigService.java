@@ -38,7 +38,7 @@ public class CoreDiyConfigService implements ICoreDiyConfigService {
     private static JSONArray bottomJson;
 
     private static JSONArray getBottomJson() {
-        if (bottomJson == null) {
+        if (bottomJson == null || bottomJson.isEmpty()) {
             JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
             bottomJson = jsonModuleLoader.mergeContentToArray("diy/bottom.json");
         }

@@ -38,4 +38,6 @@ public class MemberCashOutAccount implements Serializable {
     /** 提现账户 */
     private String accountNo;
 
+    /** 收款码 */
+    private String transferPaymentCode;
 }

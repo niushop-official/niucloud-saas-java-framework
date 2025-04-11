@@ -2,6 +2,7 @@ package com.niu.core.service.api.member;
 
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.vo.CashOutConfigVo;
 import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.api.member.vo.*;
@@ -47,7 +48,7 @@ public interface IMemberCashOutService {
      * @param param
      * @return
      */
-    boolean cashOutApply(MemberCashOutApplyParam param);
+    Integer cashOutApply(MemberCashOutApplyParam param);
 
     /**
      * 撤销提现申请
@@ -56,6 +57,12 @@ public interface IMemberCashOutService {
      * @return
      */
     boolean cashOutCancel(MemberCashOutCancelParam param);
+
+    /**
+     * 转账
+     * @param param
+     */
+    Object transfer(CashOutTransferParam param);
 
     /**
      * 提现账号列表

@@ -9,6 +9,7 @@ import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.wxoplatform.IOplatformConfigService;
 import com.niu.core.service.admin.wxoplatform.IWeappVersionService;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
+import com.niu.core.service.admin.wxoplatform.vo.SiteGroupWeappVersionVo;
 import com.niu.core.service.admin.wxoplatform.vo.WxOplatfromWeappVersionVo;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 
 import java.util.LinkedList;
+import java.util.Map;
 
 @RestController
 @RequestMapping("adminapi/wxoplatform")
@@ -54,8 +56,9 @@ public class WeappVersionController {
      * @return
      */
     @PostMapping("/weapp/version/commit")
-    public Result weappCommit(){
-        weappVersionService.add(null);
+    public Result weappCommit(@RequestBody Map<String, Object> params){
+        Integer siteGroupId = ObjectUtil.isEmpty(params.get("site_group_id")) ? 0 : (Integer) params.get("site_group_id");
+        weappVersionService.add(siteGroupId, siteGroupId == 0);
         return Result.success();
     }
 
@@ -68,5 +71,17 @@ public class WeappVersionController {
     public Result siteWeappCommit(){
         weappVersionService.siteWeappCommit();
         return Result.success();
+    }
+
+
+    /**
+     * 按站点套餐获取提交记录
+     *
+     * @param pageParam
+     * @return
+     */
+    @GetMapping("/sitegroup/commit")
+    public Result<PageResult<SiteGroupWeappVersionVo>> getSiteGroupCommitRecord(@Validated PageParam pageParam){
+        return Result.success(weappVersionService.getSiteGroupCommitRecord(pageParam));
     }
 }

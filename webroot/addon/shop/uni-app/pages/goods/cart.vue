@@ -65,7 +65,7 @@
 																	</view>
 																</template>
 															</view>
-															<view v-if="item.manjian_info && Object.keys(item.manjian_info).length && item.manjian_info.is_show" class="flex items-center mt-[8rpx] mb-[auto]" @click.stop="manjianOpenFn(item.manjian_info)">
+															<view v-if="item.manjian_info && Object.keys(item.manjian_info).length && item.manjian_info.is_join" class="flex items-center mt-[8rpx] mb-[auto]" @click.stop="manjianOpenFn(item.manjian_info)">
 																<view class="bg-[var(--primary-color-light)] text-[var(--primary-color)] rounded-[6rpx] text-[20rpx] flex items-center justify-center w-[88rpx] h-[36rpx] mr-[6rpx]">满减送</view>
 																<text class="text-[22rpx] text-[#999]">{{item.manjian_info.manjian_name}}</text>
 															</view>

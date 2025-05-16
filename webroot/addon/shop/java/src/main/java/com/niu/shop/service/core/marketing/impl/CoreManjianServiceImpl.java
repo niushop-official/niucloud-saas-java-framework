@@ -280,11 +280,11 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
                         }
                         if (rule.getBool("is_give_point")) {
                             rule.put("point", rule.getBigDecimal("point", BigDecimal.ZERO).multiply(new BigDecimal(cycleNum)));
-                            gift.put("point", rule.getBigDecimal("point", BigDecimal.ZERO).multiply(new BigDecimal(cycleNum)));
+                            gift.put("point", rule.getBigDecimal("point"));
                         }
                         if (rule.getBool("is_give_balance")) {
                             rule.put("balance", rule.getBigDecimal("balance", BigDecimal.ZERO).multiply(new BigDecimal(cycleNum)));
-                            gift.put("balance", rule.getBigDecimal("balance", BigDecimal.ZERO).multiply(new BigDecimal(cycleNum)));
+                            gift.put("balance", rule.getBigDecimal("balance"));
                         }
                         if (rule.getBool("is_give_coupon")) {
                             JSONArray giftCoupon = rule.getJSONArray("coupon");
@@ -300,9 +300,7 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
                                         } else {
                                             coupon.put("coupon_name", "满" + couponManjian.getMinConditionMoney() + "元减" + couponManjian.getPrice() + "元券");
                                         }
-                                        if (couponManjian.getRemainCount() > 0 && couponManjian.getLimitCount() > couponManjian.getReceiveCount()) {
-                                            updatedGiftCoupon.add(coupon);
-                                        }
+                                        updatedGiftCoupon.add(coupon);
                                     }
                                 }
                                 rule.put("coupon", updatedGiftCoupon);

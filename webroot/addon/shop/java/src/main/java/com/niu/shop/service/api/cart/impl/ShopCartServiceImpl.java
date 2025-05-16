@@ -198,6 +198,9 @@ public class ShopCartServiceImpl implements IShopCartService {
         res.setPromotionMoney(data.getPromotionMoney());
         res.setGoodsMoney(data.getGoodsMoney());
         res.setOrderMoney(data.getGoodsMoney().subtract(data.getPromotionMoney()));
+        if (res.getOrderMoney().compareTo(BigDecimal.ZERO) < 0) {
+            res.setOrderMoney(BigDecimal.ZERO);
+        }
         List<ShopCartCalculateVo.Goods> goodsList = data.getGoodsList();
         List<ShopCartCalculateResVo.Goods> matchList = new ArrayList<>();
         for (ShopCartCalculateVo.Goods goods : goodsList) {

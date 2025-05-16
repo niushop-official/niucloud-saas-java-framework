@@ -352,7 +352,7 @@ public class GoodsServiceImpl implements IGoodsService {
                 JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(item.getMemberPrice()) ? JSONUtil.parseObj(item.getMemberPrice()) : new JSONObject();
                 skuVo.setMemberPrice(calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, item.getPrice()));
             } else {
-                skuVo.setMemberPrice(sku.getPrice());
+                skuVo.setMemberPrice(item.getPrice());
             }
             skuListVo.add(skuVo);
         }

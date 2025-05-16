@@ -1,63 +1,63 @@
 <template>
-	<div class="main-container">
+    <div class="main-container">
         <el-card class="card !border-none mb-[15px]" shadow="never">
             <el-page-header :content="id ? t('updateStore') : t('addStore')" :icon="ArrowLeft" @back="back" />
         </el-card>
-		<el-card class="box-card !border-none" shadow="never" v-loading="loading">
-			<el-form :model="formData" label-width="140px" ref="formRef" :rules="formRules" class="page-form">
-				<el-form-item :label="t('storeName')" prop="store_name">
-				    <el-input v-model.trim="formData.store_name" clearable :placeholder="t('storeNamePlaceholder')"
-				        class="input-width" />
-				</el-form-item>
-				<el-form-item :label="t('storeDesc')">
-				    <el-input v-model.trim="formData.store_desc" type="textarea" rows="4" clearable
-				        :placeholder="t('storeDescPlaceholder')" class="input-width" />
-				</el-form-item>
-				<el-form-item :label="t('storeLogo')">
-				    <upload-image v-model="formData.store_logo" />
-				</el-form-item>
-				<el-form-item :label="t('storeMobile')" prop="store_mobile">
-				    <el-input v-model.trim="formData.store_mobile" clearable :placeholder="t('storeMobilePlaceholder')"
-				        class="input-width" @keyup="filterNumber($event)"
-				        @blur="formData.store_mobile = $event.target.value" />
-				</el-form-item>
-				<el-form-item :label="t('tradeTime')" prop="trade_time">
-				    <div>
-				        <el-input v-model.trim="formData.trade_time" clearable :placeholder="t('tradeTimePlaceholder')"
-				            class="input-width" />
-				        <p class="text-[12px] text-[#999]">{{ t('tradeTimeTips') }}</p>
-				    </div>
-				</el-form-item>
-				<el-form-item :label="t('storeAddress')" prop="address_area">
-					<el-select v-model="formData.province_id" value-key="id" clearable class="w-[200px]"  ref="provinceRef">
-						<el-option :label="t('provincePlaceholder')" :value="0"/>
-						<el-option v-for="(item, index) in areaList.province" :key="index" :label="item.name"  :value="item.id"/>
-					</el-select>
-					<el-select v-model="formData.city_id" value-key="id" clearable class="w-[200px] ml-3" ref="cityRef">
-						<el-option :label="t('cityPlaceholder')" :value="0"/>
-						<el-option v-for="(item, index) in areaList.city " :key="index" :label="item.name"  :value="item.id"/>
-					</el-select>
-					<el-select v-model="formData.district_id" value-key="id" clearable class="w-[200px] ml-3"  ref="districtRef">
-						<el-option :label="t('districtPlaceholder')" :value="0"/>
-						<el-option v-for="(item, index) in areaList.district " :key="index" :label="item.name"  :value="item.id"/>
-					</el-select>
-				</el-form-item>
-				<el-form-item prop="address">
-					<el-input v-model.trim="formData.address" clearable :placeholder="t('addressPlaceholder')"  class="input-width"/>
-				</el-form-item>
+        <el-card class="box-card !border-none" shadow="never" v-loading="loading">
+            <el-form :model="formData" label-width="140px" ref="formRef" :rules="formRules" class="page-form">
+                <el-form-item :label="t('storeName')" prop="store_name">
+                    <el-input v-model.trim="formData.store_name" clearable :placeholder="t('storeNamePlaceholder')"
+                              class="input-width" />
+                </el-form-item>
+                <el-form-item :label="t('storeDesc')">
+                    <el-input v-model.trim="formData.store_desc" type="textarea" rows="4" clearable
+                              :placeholder="t('storeDescPlaceholder')" class="input-width" />
+                </el-form-item>
+                <el-form-item :label="t('storeLogo')">
+                    <upload-image v-model="formData.store_logo" />
+                </el-form-item>
+                <el-form-item :label="t('storeMobile')" prop="store_mobile">
+                    <el-input v-model.trim="formData.store_mobile" clearable :placeholder="t('storeMobilePlaceholder')"
+                              class="input-width" @keyup="filterNumber($event)"
+                              @blur="formData.store_mobile = $event.target.value" />
+                </el-form-item>
+                <el-form-item :label="t('tradeTime')" prop="trade_time">
+                    <div>
+                        <el-input v-model.trim="formData.trade_time" clearable :placeholder="t('tradeTimePlaceholder')"
+                                  class="input-width" />
+                        <p class="text-[12px] text-[#999]">{{ t('tradeTimeTips') }}</p>
+                    </div>
+                </el-form-item>
+                <el-form-item :label="t('storeAddress')" prop="address_area">
+                    <el-select v-model="formData.province_id" value-key="id" clearable class="w-[200px]"  ref="provinceRef">
+                        <el-option :label="t('provincePlaceholder')" :value="0"/>
+                        <el-option v-for="(item, index) in areaList.province" :key="index" :label="item.name"  :value="item.id"/>
+                    </el-select>
+                    <el-select v-model="formData.city_id" value-key="id" clearable class="w-[200px] ml-3" ref="cityRef">
+                        <el-option :label="t('cityPlaceholder')" :value="0"/>
+                        <el-option v-for="(item, index) in areaList.city " :key="index" :label="item.name"  :value="item.id"/>
+                    </el-select>
+                    <el-select v-model="formData.district_id" value-key="id" clearable class="w-[200px] ml-3"  ref="districtRef">
+                        <el-option :label="t('districtPlaceholder')" :value="0"/>
+                        <el-option v-for="(item, index) in areaList.district " :key="index" :label="item.name"  :value="item.id"/>
+                    </el-select>
+                </el-form-item>
+                <el-form-item prop="address">
+                    <el-input v-model.trim="formData.address" clearable :placeholder="t('addressPlaceholder')" @input="areaChange()"  class="input-width"/>
+                </el-form-item>
 
-				<el-form-item>
-					<div id="container" class="w-[800px] h-[520px] relative" v-loading="mapLoading"></div>
-				</el-form-item>
-			</el-form>
-		</el-card>
-		<div class="fixed-footer-wrap">
-			<div class="fixed-footer !z-[9999]">
-				<el-button type="primary" @click="onSave(formRef)">{{ t('save') }}</el-button>
-				<el-button @click="back()">{{ t('cancel') }}</el-button>
-			</div>
-		</div>
-	</div>
+                <el-form-item>
+                    <div id="container" class="w-[800px] h-[520px] relative" v-loading="mapLoading"></div>
+                </el-form-item>
+            </el-form>
+        </el-card>
+        <div class="fixed-footer-wrap">
+            <div class="fixed-footer !z-[9999]">
+                <el-button type="primary" @click="onSave(formRef)">{{ t('save') }}</el-button>
+                <el-button @click="back()">{{ t('cancel') }}</el-button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -112,7 +112,7 @@ onMounted(() => {
 })
 
 /**
-* 初始化地图
+ * 初始化地图
  */
 let map: any
 let marker: any
@@ -172,8 +172,8 @@ const latLngChange = (lat: number, lng: number) => {
 }
 
 /**
-* 表单数据
-*/
+ * 表单数据
+ */
 const initialFormData = {
     store_id: 0,
     store_name: '',
@@ -276,7 +276,7 @@ watch(() => formData.province_id, (nval) => {
 })
 
 /**
-* 获取区
+ * 获取区
  */
 watch(() => formData.city_id, (nval) => {
     if (nval) {
@@ -316,7 +316,8 @@ const areaChange = debounce(() => {
         const address = [
             formData.province_id ? provinceRef.value.states.selectedLabel : '',
             formData.city_id ? cityRef.value.states.selectedLabel : '',
-            formData.district_id ? districtRef.value.states.selectedLabel : ''
+            formData.district_id ? districtRef.value.states.selectedLabel : '',
+            formData.address
         ]
 
         addressToLatLng({ mapKey, address: address.join('') }).then(({ message, result }) => {
@@ -350,7 +351,7 @@ watch(() => storeArea.province_id, (nval) => {
 })
 
 /**
-* 地图点选获取区
+ * 地图点选获取区
  */
 watch(() => storeArea.city_id, (nval) => {
     if (nval) {
@@ -379,8 +380,8 @@ const onSave = async (formEl: FormInstance | undefined) => {
 
             const data = formData
             formData.province_name = formData.province_id ? provinceRef.value.states.selectedLabel : '',
-            formData.city_name = formData.city_id ? cityRef.value.states.selectedLabel : '',
-            formData.district_name = formData.district_id ? districtRef.value.states.selectedLabel : ''
+                formData.city_name = formData.city_id ? cityRef.value.states.selectedLabel : '',
+                formData.district_name = formData.district_id ? districtRef.value.states.selectedLabel : ''
             const address = [
                 data.province_id ? provinceRef.value.states.selectedLabel : '',
                 data.city_id ? cityRef.value.states.selectedLabel : '',

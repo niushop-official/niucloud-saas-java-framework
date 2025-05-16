@@ -47,12 +47,12 @@ public class ShopOrderDeliveryController {
     }
 
     @GetMapping("/delivery/package")
-    public Result<ShopOrderDeliveryInfoVo> getOrderPackage(Integer id, String mobile) {
+    public Result<ShopOrderDeliveryInfoVo> getOrderPackage(@RequestParam(name = "id") Integer id, @RequestParam(name = "mobile") String mobile) {
         return Result.success(shopOrderDeliveryService.getDeliveryPackage(id, mobile));
     }
 
     @GetMapping("'delivery/package/list")
-    public Result<List<ShopOrderDeliveryListVo>> getDeliveryPackageList(Integer orderId) {
+    public Result<List<ShopOrderDeliveryListVo>> getDeliveryPackageList(@RequestParam(name = "order_id")  Integer orderId) {
 
         return Result.success(shopOrderDeliveryService.getDeliveryPackageList(orderId));
     }

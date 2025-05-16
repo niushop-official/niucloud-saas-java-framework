@@ -42,7 +42,7 @@
 				</el-form-item>
 
 				<el-form-item prop="address">
-					<el-input v-model.trim="formData.address" clearable :placeholder="t('addressPlaceholder')"  class="input-width"/>
+					<el-input v-model.trim="formData.address" clearable :placeholder="t('addressPlaceholder')" @input="areaChange()" class="input-width"/>
 				</el-form-item>
 
 				<el-form-item>
@@ -326,7 +326,8 @@ const areaChange = debounce(() => {
         const address = [
             formData.province_id ? provinceRef.value.states.selectedLabel : '',
             formData.city_id ? cityRef.value.states.selectedLabel : '',
-            formData.district_id ? districtRef.value.states.selectedLabel : ''
+            formData.district_id ? districtRef.value.states.selectedLabel : '',
+            formData.address
         ]
 
         addressToLatLng({ mapKey, address: address.join('') }).then(({ message, result }) => {

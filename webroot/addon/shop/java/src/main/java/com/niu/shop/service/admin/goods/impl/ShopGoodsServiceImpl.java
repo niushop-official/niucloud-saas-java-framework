@@ -800,13 +800,6 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
-        // 查询已选的
-        if (ObjectUtil.isNotEmpty(searchParam.getSkuIds())) {
-            List<Integer> goodsIds = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().in("sku_id", searchParam.getSkuIds()).groupBy("goods_id").select("sku_id"))
-                    .stream().map(i -> i.getSkuId()).collect(Collectors.toList());
-            if (goodsIds.size() > 0 && ObjectUtil.isEmpty(searchParam.getGoodsIds())) searchParam.setGoodsIds(goodsIds);
-        }
-
         MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("g")
                 .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));

@@ -243,7 +243,7 @@ public class CoreOrderBatchDeliveryServiceImpl implements ICoreOrderBatchDeliver
 
                 Integer itemExpressCompanyId = 0;
                 OrderDeliveryTypeEnum deliveryType = OrderDeliveryTypeEnum.NONE_EXPRESS;
-                if (row.getCompanyName().equals("无需物流")) {
+                if (!row.getCompanyName().equals("无需物流")) {
                     deliveryType = OrderDeliveryTypeEnum.EXPRESS;
                     if (!companyMap.containsKey(row.getCompanyName())) {
                         throw new RuntimeException("物流公司不存在");

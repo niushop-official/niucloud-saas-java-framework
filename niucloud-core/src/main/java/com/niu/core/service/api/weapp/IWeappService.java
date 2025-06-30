@@ -45,4 +45,10 @@ public interface IWeappService {
      */
     IsTradeManagedVo getIsTradeManaged();
 
+    /**
+     * 通过外部交易号获取消息跳转路径
+     * @param outTradeNo
+     * @return
+     */
+    Object getMsgJumpPath(String outTradeNo);
 }

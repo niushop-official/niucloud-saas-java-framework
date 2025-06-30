@@ -30,4 +30,8 @@ public class SysUserAddParam implements Serializable {
     /**套餐id */
     private List<Integer> groupIds;
 
+    private String headImg;
+
+    private String realName;
+
 }

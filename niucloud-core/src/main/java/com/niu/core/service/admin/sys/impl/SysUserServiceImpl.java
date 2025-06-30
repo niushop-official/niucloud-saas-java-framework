@@ -167,7 +167,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public Integer add(SysUserParam addParam) {
         if(checkUserName(addParam.getUsername())){
-            throw new AdminException("USERNAME_REPEAT");
+            throw new AdminException("该用户名已被占用，请更换");
         }
         SysUser sysUser = new SysUser();
         BeanUtils.copyProperties(addParam, sysUser);
@@ -306,7 +306,7 @@ public class SysUserServiceImpl implements ISysUserService {
             }else{
                 SysUserParam sysUserParam=new SysUserParam();
                 sysUserParam.setHeadImg(siteUserParam.getHeadImg());
-                sysUserParam.setPassword(PasswordEncipher.encode(siteUserParam.getPassword()));
+                sysUserParam.setPassword(siteUserParam.getPassword());
                 sysUserParam.setLastIp("");
                 sysUserParam.setLoginCount(0);
                 sysUserParam.setUsername(siteUserParam.getUsername());

@@ -127,7 +127,7 @@ public class MemberServiceImpl implements IMemberService {
         if (ObjectUtil.isNotEmpty(levelIds)) {
             levelMap = memberLevelMapper.selectBatchIds(levelIds).stream().collect(Collectors.toMap(MemberLevel::getLevelId, e -> e));
         }
-        
+
         List<MemberListVo> list = new LinkedList<>();
         for (Member item : memberList) {
             MemberListVo vo = new MemberListVo();
@@ -240,7 +240,7 @@ public class MemberServiceImpl implements IMemberService {
         model.setRegisterType(MemberRegisterTypeEnum.MANUAL.getType());
         model.setRegisterChannel(MemberRegisterChannelEnum.MANUAL.getType());
         model.setCreateTime(System.currentTimeMillis() / 1000);
-
+        model.setMemberLabel("[]");
         memberMapper.insert(model);
         // 会员注册事件
         MemberRegisterEvent registerEvent = new MemberRegisterEvent();
@@ -292,7 +292,13 @@ public class MemberServiceImpl implements IMemberService {
                 model.setHeadimg(String.valueOf(editParam.getValue()));
                 break;
             case "member_label":
-                model.setMemberLabel(String.valueOf(editParam.getValue()));
+//                model.setMemberLabel(String.valueOf(editParam.getValue()));
+                String value = String.valueOf(editParam.getValue());
+                if ("".equals(value.trim())) {
+                    model.setMemberLabel("[]");
+                } else {
+                    model.setMemberLabel(value);
+                }
                 break;
             case "member_level":
                 model.setMemberLevel(Integer.parseInt(String.valueOf(editParam.getValue())));

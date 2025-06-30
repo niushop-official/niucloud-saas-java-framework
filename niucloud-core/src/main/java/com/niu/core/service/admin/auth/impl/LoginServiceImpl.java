@@ -123,7 +123,7 @@ public class LoginServiceImpl implements ILoginService {
         loginModel.setExtra("headImg", userInfo.getHeadImg());
         loginModel.setExtra("realName", userInfo.getRealName());
         // 执行登录
-        StpUtil.login(userInfo.getUid(), loginModel);
+        StpUtil.login("user-" + userInfo.getUid(), loginModel);
         // 获取返回内容
         SaTokenInfo saTokenInfo = StpUtil.getTokenInfo();
         LoginResultVo resultVo=new LoginResultVo();

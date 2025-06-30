@@ -55,7 +55,10 @@ public class SaTokenApiInterceptor extends SaInterceptor {
 
         /** 设置当前登录会员id */
         if(islogin){
-            Integer memberId=Integer.parseInt(StpUtil.getLoginId().toString());
+            String[] loginId = ObjectUtil.defaultIfEmpty(StpUtil.getLoginId().toString(), "").split("-");
+            if (loginId[1] == null) throw new AuthException("LOGIN_EXPIRE", 401);
+
+            Integer memberId=Integer.parseInt(loginId[1]);
             RequestUtils.setMemberId(memberId);
         }
 

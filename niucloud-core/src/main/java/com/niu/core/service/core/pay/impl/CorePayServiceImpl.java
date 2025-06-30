@@ -269,7 +269,14 @@ public class CorePayServiceImpl implements ICorePayService {
      * @param pay
      * @param param
      */
+    @Transactional
     public void paySuccess(Pay pay, PayNotifyParam param) {
+        BeanUtil.copyProperties(param, pay);
+        pay.setStatus(PayStatusEnum.STATUS_FINISH.getCode());
+        pay.setPayTime(System.currentTimeMillis() / 1000);
+
+        payMapper.updateById(pay);
+
         PaySuccessEvent event = new PaySuccessEvent();
         event.setSiteId(param.getSiteId());
         event.addAppSign("core");
@@ -278,12 +285,6 @@ public class CorePayServiceImpl implements ICorePayService {
         event.setTradeId(pay.getTradeId());
         event.setPay(pay);
         EventAndSubscribeOfPublisher.publishAll(event);
-
-        BeanUtil.copyProperties(param, pay);
-        pay.setStatus(PayStatusEnum.STATUS_FINISH.getCode());
-        pay.setPayTime(System.currentTimeMillis() / 1000);
-
-        payMapper.updateById(pay);
 
         SysPrinterPrintTicketParam printParam = new SysPrinterPrintTicketParam();
         printParam.setSiteId(pay.getSiteId());
@@ -300,7 +301,12 @@ public class CorePayServiceImpl implements ICorePayService {
      *
      * @param pay
      */
+    @Transactional
     public void payClose(Integer siteId, Pay pay) {
+        pay.setStatus(PayStatusEnum.STATUS_CANCLE.getCode());
+        pay.setCancelTime(System.currentTimeMillis() / 1000);
+        payMapper.updateById(pay);
+
         PayCloseEvent event = new PayCloseEvent();
         event.setSiteId(siteId);
         event.addAppSign("core");
@@ -308,10 +314,6 @@ public class CorePayServiceImpl implements ICorePayService {
         event.setTradeType(pay.getTradeType());
         event.setTradeId(pay.getTradeId());
         EventAndSubscribeOfPublisher.publishAll(event);
-
-        pay.setStatus(PayStatusEnum.STATUS_CANCLE.getCode());
-        pay.setCancelTime(System.currentTimeMillis() / 1000);
-        payMapper.updateById(pay);
     }
 
     /**

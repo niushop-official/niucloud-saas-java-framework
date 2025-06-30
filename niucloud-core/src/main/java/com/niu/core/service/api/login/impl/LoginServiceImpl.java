@@ -120,7 +120,7 @@ public class LoginServiceImpl implements ILoginService {
         loginModel.setExtra("username", member.getUsername());
         loginModel.setExtra("siteId", member.getSiteId());
         // 执行登录
-        StpUtil.login(member.getMemberId(), loginModel);
+        StpUtil.login("member-" + member.getMemberId(), loginModel);
         // 获取返回内容
         SaTokenInfo saTokenInfo = StpUtil.getTokenInfo();
 
@@ -134,6 +134,7 @@ public class LoginServiceImpl implements ILoginService {
         loginEvent.setSiteId(RequestUtils.siteId());
         loginEvent.addAppSign("core");
         loginEvent.setName("MemberLoginEvent");
+        loginEvent.setMember(member);
         EventPublisher.publishEvent(loginEvent);
 
         return vo;

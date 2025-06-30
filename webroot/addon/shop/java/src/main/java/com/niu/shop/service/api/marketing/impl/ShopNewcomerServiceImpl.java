@@ -6,6 +6,8 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
@@ -176,26 +178,28 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                 .filter(activeSkuIds::contains)
                 .collect(Collectors.toSet());
 
-        var shopGoodsSkuLambdaQueryWrapper = new LambdaQueryWrapper<ShopGoodsSku>()
-                .eq(ShopGoodsSku::getSiteId, RequestUtils.siteId())
-                .in(ShopGoodsSku::getSkuId, skuIds)
-                .orderByDesc(ShopGoodsSku::getSaleNum)
-                .orderByDesc(ShopGoodsSku::getStock);
+        var goodsSkuQueryWrapper = new MPJQueryWrapper<ShopGoodsSku>()
+            .setAlias("gs")
+            .leftJoin("?_shop_goods g ON gs.goods_id = g.goods_id".replace("?_", GlobalConfig.tablePrefix))
+            .select("gs.*,g.goods_name")
+            .eq("gs.site_id", RequestUtils.siteId())
+            .in("gs.sku_id", skuIds)
+            .orderByDesc("gs.sale_num")
+            .orderByDesc("gs.stock");
 
         if (param.getLimit() != null && param.getLimit() > 0) {
-            shopGoodsSkuLambdaQueryWrapper.last("limit " + param.getLimit());
+            goodsSkuQueryWrapper.last("limit " + param.getLimit());
         }
 
-        var shopGoodsSkuList = shopGoodsSkuMapper.selectList(shopGoodsSkuLambdaQueryWrapper);
+        List<ShopNewComerComponentsListVo.GoodsSku> skuList = shopGoodsSkuMapper.selectJoinList(ShopNewComerComponentsListVo.GoodsSku.class, goodsSkuQueryWrapper);
 
-        var skuList = new ArrayList<ShopNewComerComponentsListVo.GoodsSku>(shopGoodsSkuList.size());
-        for (var sku : shopGoodsSkuList) {
-            var goodsSku = new ShopNewComerComponentsListVo.GoodsSku();
-            BeanUtils.copyProperties(sku, goodsSku);
-            var shopActiveGoods = goodsMap.getOrDefault(sku.getSkuId(), new ShopActiveGoods());
+        for (var goodsSku : skuList) {
+            var shopActiveGoods = goodsMap.getOrDefault(goodsSku.getSkuId(), new ShopActiveGoods());
             var value = JSON.parseObject(shopActiveGoods.getActiveGoodsValue());
             goodsSku.setNewcomerPrice(Optional.ofNullable(value.getBigDecimal("newcomer_price")).orElse(BigDecimal.ZERO));
-            skuList.add(goodsSku);
+            ShopNewComerComponentsListVo.Goods goods = new ShopNewComerComponentsListVo.Goods();
+            goods.setGoodsName(goodsSku.getGoodsName());
+            goodsSku.setGoods(goods);
         }
 
         vo.setGoodsList(skuList);

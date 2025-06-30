@@ -1,5 +1,6 @@
 package com.niu.core.service.api.sys.tools;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.digest.MD5;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -103,11 +104,20 @@ public class TencentGeocoder {
                 String province = addressComponent.getStr("province");
                 String city = addressComponent.getStr("city");
                 String district = addressComponent.getStr("district");
+                String community = "";
+                if (ObjectUtil.isNotEmpty(resultObject.getByPath("landmark_l2.title", String.class))) {
+                    community = resultObject.getByPath("landmark_l2.title", String.class);
+                } else if (ObjectUtil.isNotEmpty(resultObject.getByPath("landmark_l1.title", String.class))) {
+                    community = resultObject.getByPath("landmark_l1.title", String.class);
+                } else if (ObjectUtil.isNotEmpty(resultObject.getByPath("town.title", String.class))) {
+                    community = resultObject.getByPath("town.title", String.class);
+                }
                 jsonObjectResult.putOpt("province", province);
                 jsonObjectResult.putOpt("city", city);
                 jsonObjectResult.putOpt("district", district);
                 jsonObjectResult.putOpt("full_address", fullAddress);
                 jsonObjectResult.putOpt("formatted_addresses", formattedAddresses);
+                jsonObjectResult.putOpt("community", community);
                 return jsonObjectResult;
             } catch (Exception e) {
                 e.printStackTrace();

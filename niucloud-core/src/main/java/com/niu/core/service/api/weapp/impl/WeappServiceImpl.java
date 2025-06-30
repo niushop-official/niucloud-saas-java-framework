@@ -11,8 +11,12 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.entity.member.Member;
+import com.niu.core.entity.pay.Pay;
 import com.niu.core.entity.sys.SysNotice;
+import com.niu.core.event.order.WapOrderDetailPathDefiner;
+import com.niu.core.event.pay.PayTradeInfoDefiner;
 import com.niu.core.mapper.member.MemberMapper;
+import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.mapper.sys.SysNoticeMapper;
 import com.niu.core.service.admin.member.vo.LoginConfigVo;
 import com.niu.core.service.api.login.ILoginService;
@@ -26,6 +30,7 @@ import com.niu.core.service.api.wechat.param.WechatAuthParam;
 import com.niu.core.service.api.wechat.param.WechatSyncParam;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.sys.ICoreScanService;
 import com.niu.core.service.core.weapp.ICoreWeappDeliveryService;
@@ -67,6 +72,9 @@ public class WeappServiceImpl implements IWeappService {
     @Resource
     ICoreWeappDeliveryService coreWeappDeliveryService;
 
+    @Resource
+    PayMapper payMapper;
+
     /**
      * 小程序登录
      * @param param
@@ -78,12 +86,14 @@ public class WeappServiceImpl implements IWeappService {
 
             Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("weapp_openid", wxUser.getOpenid()).eq("site_id", RequestUtils.siteId()));
             if (ObjectUtil.isNotNull(member)) {
-                return loginService.login(member);
+                LoginVo vo = loginService.login(member);
+                return vo;
             }
             if (ObjectUtil.isNotEmpty(wxUser.getUnionid())) {
                 Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", wxUser.getUnionid()).eq("site_id", RequestUtils.siteId()));
                 if (ObjectUtil.isNotNull(unionidMember)) {
-                    return loginService.login(unionidMember);
+                    LoginVo vo = loginService.login(unionidMember);
+                    return vo;
                 }
             }
 
@@ -216,5 +226,24 @@ public class WeappServiceImpl implements IWeappService {
      */
     public IsTradeManagedVo getIsTradeManaged() {
         return coreWeappDeliveryService.getIsTradeManaged(RequestUtils.siteId());
+    }
+
+    /**
+     * 通过外部交易号获取消息跳转路径
+     * @param outTradeNo
+     * @return
+     */
+    @Override
+    public Object getMsgJumpPath(String outTradeNo) {
+        Pay pay = payMapper.selectOne(new QueryWrapper<Pay>().eq("out_trade_no", outTradeNo));
+        if (pay ==  null) return null;
+
+        WapOrderDetailPathDefiner.WapOrderDetailPathEvent event = new WapOrderDetailPathDefiner.WapOrderDetailPathEvent(pay);
+        List<WapOrderDetailPathDefiner.WapOrderDetailPathResult> eventData = EventAndSubscribeOfPublisher.publishAndCallback(event);
+
+        if (ObjectUtil.isNotEmpty(eventData)) {
+            return eventData.get(0);
+        }
+        return null;
     }
 }

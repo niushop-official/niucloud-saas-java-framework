@@ -68,7 +68,10 @@
                     <el-table-column :label="t('operation')" align="right" fixed="right" width="150">
                         <template #default="{ row }">
                             <el-button type="primary" link @click="detailEvent(row.uid)">{{ t('detail') }}</el-button>
-                            <el-button type="primary" link @click="detailEvent(row.uid, 'userCreateSiteLimit')" v-if="!row.is_super_admin">{{ t('userCreateSiteLimit') }}</el-button>
+                            <template v-if="!row.is_super_admin">
+                                <el-button type="primary" link @click="editEvent(row.uid)" >{{ t('edit') }}</el-button>
+                                <el-button type="primary" link @click="detailEvent(row.uid, 'userCreateSiteLimit')">{{ t('userCreateSiteLimit') }}</el-button>
+                            </template> 
                         </template>
                     </el-table-column>
                 </el-table>
@@ -151,6 +154,14 @@ loadUserList()
  */
 const detailEvent = (uid: number, tab: string = '') => {
     router.push({ path: '/admin/site/user_info', query: { uid, tab } })
+}
+
+/**
+ * 编辑用户
+ * @param uid
+ */
+const editEvent = (uid: number) => {
+    userEditRef.value.setFormData(uid)
 }
 </script>
 

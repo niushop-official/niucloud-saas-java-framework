@@ -17,6 +17,8 @@ import com.niu.core.entity.pay.Pay;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
+import com.niu.core.service.core.pay.ICorePayChannelService;
+import com.niu.core.service.core.weapp.ICoreWeappDeliveryService;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDelivery;
@@ -40,12 +42,15 @@ import com.niu.shop.service.core.order.ICoreOrderFinishService;
 import com.niu.shop.service.core.order.param.OrderDeliveryDataParam;
 import com.niu.shop.service.core.order.param.OrderDeliveryParam;
 import com.niu.shop.service.core.order.param.OrderFinishParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -54,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
     @Resource
@@ -77,6 +83,12 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
     @Resource
     PayMapper payMapper;
+
+    @Resource
+    ICoreWeappDeliveryService coreWeappDeliveryService;
+
+    @Resource
+    ICorePayChannelService corePayChannelService;
 
     @Resource
     public void setOrderFinishService(@Lazy ICoreOrderFinishService orderFinishService) {
@@ -396,7 +408,20 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
     public void orderShippingUploadShippingInfo(ShopOrder order) {
         try {
             Pay pay = payMapper.selectOne(new QueryWrapper<Pay>().eq("out_trade_no", order.getOutTradeNo()));
-            if (pay == null || !pay.getType().equals("wechatpay")) return;
+            log.info("shopOrder UploadShippingInfo:{}", JSONUtil.toJsonStr(pay));
+            if (!pay.getType().equals("wechatpay") || !pay.getChannel().equals("weapp")) return;
+
+            // 检测微信小程序是否已开通发货信息管理服务
+            if (!coreWeappDeliveryService.getIsTradeManaged(order.getSiteId()).getIsTradeManaged()) return;
+
+            // 设置消息跳转路径设置接口
+            WxMaOrderShippingInfoBaseResponse setResult = coreWeappDeliveryService.setMsgJumpPath(order.getSiteId(), "shop_order");
+            if (!setResult.getErrCode().equals(0)) {
+                log.info("giftcardOrder UploadShippingInfo setMsgJumpPath", setResult.getErrMsg());
+                return;
+            }
+
+            JSONObject config = ObjectUtil.defaultIfNull(corePayChannelService.getConfigByChannelAndType(pay.getSiteId(), pay.getChannel(), pay.getType()), new JSONObject());
 
             WxMaService miniapp = WechatUtils.miniapp(order.getSiteId());
 
@@ -406,9 +431,10 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
             OrderKeyBean orderKey = new OrderKeyBean();
             orderKey.setOrderNumberType(1);
             orderKey.setOutTradeNo(order.getOutTradeNo());
+            orderKey.setMchId(config.getStr("mch_id", ""));
             request.setOrderKey(orderKey);
 
-            request.setUploadTime(Instant.now().plusMillis(TimeUnit.HOURS.toMillis(8)).toString());
+            request.setUploadTime(OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
             // 物流模式，发货方式枚举值：1、实体物流配送采用快递公司进行实体物流配送形式 2、同城配送 3、虚拟商品，虚拟商品，例如话费充值，点卡等，无实体配送形式 4、用户自提
             if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType())) {
@@ -427,10 +453,10 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
 
             // 物流信息列表
             List<ShopOrderDelivery> packageList = shopOrderDeliveryMapper.selectJoinList(ShopOrderDelivery.class, new MPJQueryWrapper<ShopOrderDelivery>()
-                    .setAlias("d").innerJoin("?_shop_delivery_company c ON d.express_company_id = c.company_id".replace("?_", GlobalConfig.tablePrefix))
-                    .select("express_number,id,express_company_id,c.company_name AS name")
-                   .eq("order_id", order.getOrderId())
-                   .eq("d.site_id", order.getSiteId())
+                .setAlias("d").innerJoin("?_shop_delivery_company c ON d.express_company_id = c.company_id".replace("?_", GlobalConfig.tablePrefix))
+                .select("express_number,id,express_company_id,c.company_name AS name")
+                .eq("order_id", order.getOrderId())
+                .eq("d.site_id", order.getSiteId())
             );
 
             List<WxMaExpressDelivery> expressDelivery = miniapp.getExpressService().getAllDelivery();
@@ -451,7 +477,7 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
                     }
                     ContactBean contact = new ContactBean();
                     contact.setReceiverContact(order.getTakerMobile().substring(0, 3) + "****" + order.getTakerMobile().substring(7));
-                    ShopOrderGoods orderGoods = shopOrderGoodsMapper.selectOne(new QueryWrapper<ShopOrderGoods>().select("goods_name GROUP_CONCAT(SEPARATOR ';') AS goods_name").eq("delivery_id", shopOrderDelivery.getId()).groupBy("delivery_id"));
+                    ShopOrderGoods orderGoods = shopOrderGoodsMapper.selectOne(new QueryWrapper<ShopOrderGoods>().select("GROUP_CONCAT(goods_name SEPARATOR ';') AS goods_name").eq("delivery_id", shopOrderDelivery.getId()).groupBy("delivery_id"));
                     shippingListBean.setItemDesc(orderGoods.getGoodsName());
                     shippingListBean.setContact(contact);
 
@@ -469,10 +495,10 @@ public class CoreOrderDeliveryServiceImpl implements ICoreOrderDeliveryService {
             request.setPayer(payer);
 
             WxMaOrderShippingInfoBaseResponse response = miniapp.getWxMaOrderShippingService().upload(request);
-            System.out.println("uploadShippingInfo response " + response.toString());
+            System.out.println("shopOrder uploadShippingInfo response " + response.toString());
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("uploadShippingInfo error");
+            System.out.println("shopOrder uploadShippingInfo error");
         }
     }
 

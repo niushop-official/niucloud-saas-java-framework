@@ -7,6 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.file.FileTools;
@@ -48,6 +49,8 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
      */
     @Override
     public void build(String addon) {
+        if (!GlobalConfig.runActive.equals("dev")) throw new CommonException("只有在开发环境下才可以进行打包操作");
+
         if (!new File(WebAppEnvs.get().projectNiucloudAddon + addon).exists()) throw new CommonException("插件不存在");
         File infoFile = new File(WebAppEnvs.get().projectNiucloudAddon + addon + "/src/main/resources/info.json");
         if (!infoFile.exists()) throw new CommonException("插件不存在");

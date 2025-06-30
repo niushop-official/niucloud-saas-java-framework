@@ -2,7 +2,7 @@
   "title": "会员充值",
   "desc": "在线充值到会员账户",
   "key": "recharge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "niucloud",
   "type": "addon",
   "support_app": "",

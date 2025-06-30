@@ -542,7 +542,7 @@ public abstract class OrderCreateHelper {
         // 清除订单缓存
         removeOrderVo(vo.getOrderKey());
 
-        if (order.getOrderMoney().equals(BigDecimal.ZERO)) {
+        if (order.getOrderMoney().compareTo(BigDecimal.ZERO) == 0) {
             OrderPayParam orderPayParam = new OrderPayParam();
             orderPayParam.setTradeId(order.getOrderId());
             orderPayParam.setMainType(OrderLogMainTypeEnum.MEMBER.getType());

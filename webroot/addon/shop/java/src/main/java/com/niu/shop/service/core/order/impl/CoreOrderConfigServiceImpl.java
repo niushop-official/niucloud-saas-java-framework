@@ -139,8 +139,6 @@ class CoreOrderConfigServiceImpl implements ICoreOrderConfigService {
         if (ObjectUtil.isEmpty(data)) {
             return new ShopOrderCloseVo(true, 20);
         }
-
-        JSONObject orderClose = JSONUtil.parseObj(data.get("order_close"));
-        return new ShopOrderCloseVo(orderClose.getBool("is_close"), orderClose.getInt("close_length"));
+        return JSONUtil.toBean(data, ShopOrderCloseVo.class);
     }
 }

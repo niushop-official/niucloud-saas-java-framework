@@ -1,6 +1,7 @@
 package com.niu.core.controller.adminapi.user;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.core.bean.BeanUtil;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
@@ -65,18 +66,21 @@ public class UserController {
      */
     @PostMapping("/user")
     public Result<Object> add(@Validated @RequestBody SysUserAddParam addParam) {
-        SysUserParam sysUserParam=new SysUserParam();
-        sysUserParam.setUsername(addParam.getUsername());
-        sysUserParam.setStatus(UserEnum.ON.getCode());
-        sysUserParam.setRealName("");
-        sysUserParam.setPassword(addParam.getPassword());
-        sysUserParam.setIsDel(0);
-        sysUserParam.setHeadImg("");
-        sysUserParam.setCreateSiteLimitParamList(addParam.getCreateSiteLimit());
+        SysUserParam sysUserParam = new SysUserParam();
+        BeanUtil.copyProperties(addParam, sysUserParam);
         sysUserService.add(sysUserParam);
         return Result.success();
     }
 
+    @PutMapping("/user/{uid}")
+    public Result<Object> edit(@PathVariable("uid") Integer uid, @Validated @RequestBody SysUserAddParam editParam) {
+        SysUserParam sysUserParam = new SysUserParam();
+        sysUserParam.setHeadImg(editParam.getHeadImg());
+        sysUserParam.setRealName(editParam.getRealName());
+        sysUserParam.setPassword(editParam.getPassword());
+        sysUserService.edit(uid, sysUserParam);
+        return Result.success();
+    }
 
     /**
      * 查询账号是否存在

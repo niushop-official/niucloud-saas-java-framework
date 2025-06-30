@@ -1,17 +1,16 @@
 package com.niu.shop.controller.adminapi.marketing;
 
 import cn.hutool.json.JSONArray;
-import com.niu.core.common.domain.Result;
+import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.domain.Result;
 import com.niu.shop.enums.active.ActiveStatusEnum;
 import com.niu.shop.service.admin.marketing.IShopDiscountService;
 import com.niu.shop.service.admin.marketing.param.*;
-import com.niu.shop.service.admin.marketing.IShopActiveService;
 import com.niu.shop.service.admin.marketing.vo.*;
-import com.niu.core.common.domain.PageParam;
+import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import jakarta.annotation.Resource;
 
 /**
  * 限时折扣控制器

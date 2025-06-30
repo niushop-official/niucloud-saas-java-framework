@@ -25,6 +25,7 @@ import com.niu.shop.entity.order.ShopOrderDelivery;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.enums.order.InvoiceStatusEnum;
 import com.niu.shop.enums.order.InvoiceTypeEnum;
+import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderStatusEnum;
 import com.niu.shop.mapper.delivery.ShopDeliveryCompanyMapper;
 import com.niu.shop.mapper.delivery.ShopStoreMapper;
@@ -56,10 +57,9 @@ public class ShopOrderExportDataListener extends ExportDataEventDefiner {
     @Override
     public ExportDataEventResult handleCallback(ExportDataEvent event) {
         ExportDataEventResult result = new ExportDataEventResult();
-        if (!event.getType().equals("shop_order")) {
+        if (!"shop_order".equals(event.getType())) {
             return result;
         }
-
         QueryWrapper<ShopOrder> orderQueryWrapper = new QueryWrapper<>();
         orderQueryWrapper.eq("site_id", event.getSiteId())
                 .orderByDesc("create_time");
@@ -156,7 +156,8 @@ public class ShopOrderExportDataListener extends ExportDataEventDefiner {
             ret.set("taker_name", isFirst ? order.getTakerName() : "");
             ret.set("taker_mobile", isFirst ? order.getTakerMobile() + "\t" : "");
             ret.set("taker_full_address", isFirst ? order.getTakerFullAddress() : "");
-            ret.set("delivery_type_name", isFirst ? order.getDeliveryType() : "");
+            ret.set("delivery_type_name", isFirst ?
+                    OrderDeliveryTypeEnum.getNameByType(order.getDeliveryType()) : "");
             ret.set("status_name", isFirst ? OrderStatusEnum.getNameByStatus(Integer.parseInt(order.getStatus())) : "");
             ret.set("create_time", isFirst ? DateUtils.timestampToString(order.getCreateTime()) : "");
             ret.set("pay_time", isFirst && order.getPayTime() != null ? DateUtils.timestampToString(order.getPayTime()) : "");

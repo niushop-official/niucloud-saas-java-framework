@@ -37,7 +37,7 @@ public class ExternalJarsLoaderPlugin {
                 }
             }
         }
-        if (mainExecutePath.startsWith("nested:/")) {
+        if (mainExecutePath.startsWith("nested:/") || mainExecutePath.startsWith("nested:\\")) {
             mainExecutePath = mainExecutePath.substring(7);
         }
         return mainExecutePath;

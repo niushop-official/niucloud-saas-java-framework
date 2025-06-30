@@ -179,7 +179,7 @@ public class EnvironmentValidator {
      * @return
      */
     public boolean checkRedisUsable() {
-        Map<String, Object> redisMap = this.springMap.get("redis");
+        Map<String, Object> redisMap = (Map<String, Object>) this.springMap.get("data").get("redis");
         String redisHost = (String) redisMap.get("host");
         if (StrUtil.isEmpty(redisHost)) {
             System.err.println("spring.redis.host未配置.");

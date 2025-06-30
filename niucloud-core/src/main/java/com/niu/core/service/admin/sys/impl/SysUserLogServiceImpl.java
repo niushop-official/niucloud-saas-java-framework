@@ -60,7 +60,6 @@ public class SysUserLogServiceImpl extends ServiceImpl<SysUserLogMapper, SysUser
         if(ObjectUtil.isNotNull(searchParam.getUrl()) && ObjectUtil.isNotEmpty(searchParam.getUrl())){
             queryWrapper.like("url", searchParam.getUrl());
         }
-
         IPage<SysUserLog> iPage = sysUserLogMapper.selectPage(new Page<SysUserLog>(page, limit), queryWrapper);
 
         List<SysUserLogListVo> list = new LinkedList<>();

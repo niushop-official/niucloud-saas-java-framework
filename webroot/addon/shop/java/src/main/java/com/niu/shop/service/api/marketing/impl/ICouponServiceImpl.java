@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.ApiException;
+import com.niu.core.common.utils.QrcodeUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.shop.entity.coupon.ShopCoupon;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.Assert;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -345,14 +348,14 @@ public class ICouponServiceImpl implements ICouponService {
     }
 
     @Override
-    public List<ShopCouponListVo> getCouponComponents(String couponIds, Integer num) {
+    public List<ShopCouponListVo> getCouponComponents(Integer[] couponIds, Integer num) {
 
         QueryWrapper<ShopCoupon> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.eq("status", CouponStatusEnum.NORMAL.getStatus());
         queryWrapper.eq("receive_type", CouponReceiveTypeEnum.USER.getType());
-        if (!couponIds.equals("")) {
-            queryWrapper.in("coupon_id", Arrays.asList(couponIds.split(",")));
+        if (ObjectUtil.isNotEmpty(couponIds)) {
+            queryWrapper.in("id", couponIds);
         }
 
         //根据时间查询
@@ -373,7 +376,14 @@ public class ICouponServiceImpl implements ICouponService {
 
     @Override
     public String getQrcode(Integer couponId) {
-        return null;
+        ShopCoupon coupon = shopCouponMapper.selectById(couponId);
+        Assert.notNull(coupon, "优惠券不存在");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("mid", RequestUtils.memberId());
+        data.put("coupon_id", couponId);
+
+        return QrcodeUtils.qrcodeToFile(RequestUtils.siteId(), RequestUtils.channel(), "", "addon/shop/pages/coupon/detail", data, "");
     }
 
 

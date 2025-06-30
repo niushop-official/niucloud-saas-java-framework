@@ -24,7 +24,9 @@ import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
+import com.niu.core.service.core.pay.ICorePayChannelService;
 import com.niu.core.service.core.pay.ICorePayService;
+import com.niu.core.service.core.weapp.ICoreWeappDeliveryService;
 import com.niu.recharge.entity.Recharge;
 import com.niu.recharge.entity.RechargeOrder;
 import com.niu.recharge.entity.RechargeOrderItem;
@@ -43,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +74,12 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
 
     @Resource
     PayMapper payMapper;
+
+    @Resource
+    ICoreWeappDeliveryService coreWeappDeliveryService;
+
+    @Resource
+    ICorePayChannelService corePayChannelService;
 
     /**
      * @param param
@@ -184,39 +194,43 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
             }
 
             Recharge recharge = rechargeMapper.selectById(items.get(0).getItemId());
-            if (ObjectUtil.isEmpty(recharge)) {
-                return;
-            }
+            if (ObjectUtil.isNotEmpty(recharge)) {
+                recharge.setSaleNum(recharge.getSaleNum() + 1);
+                rechargeMapper.updateById(recharge);
 
-            recharge.setSaleNum(recharge.getSaleNum() + 1);
-            rechargeMapper.updateById(recharge);
+                // 增加会员余额
+                if (recharge.getFaceValue().compareTo(BigDecimal.ZERO) > 0) {
+                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), recharge.getFaceValue().doubleValue(), "recharge", "会员充值到账", order.getOrderId().toString());
+                }
 
-            // 增加会员余额
-            if (recharge.getFaceValue().compareTo(BigDecimal.ZERO) > 0) {
-                coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), recharge.getFaceValue().doubleValue(), "recharge", "会员充值", order.getOrderId().toString());
-            }
+                // 会员充值发放积分开始
+                if (recharge.getPoint() > 0) {
+                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.POINT.getType(), recharge.getPoint().doubleValue(), "recharge", "会员充值赠送", order.getOrderId().toString());
+                }
 
-            // 会员充值发放积分开始
-            if (recharge.getPoint() > 0) {
-                coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.POINT.getType(), recharge.getPoint().doubleValue(), "recharge", "会员充值", order.getOrderId().toString());
-            }
+                // 会员充值发放成长值开始
+                if (recharge.getGrowth() > 0) {
+                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.GROWTH.getType(), recharge.getGrowth().doubleValue(), "recharge", "会员充值赠送", order.getOrderId().toString());
+                }
 
-            // 会员充值发放成长值开始
-            if (recharge.getGrowth() > 0) {
-                coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.GROWTH.getType(), recharge.getGrowth().doubleValue(), "recharge", "会员充值", order.getOrderId().toString());
-            }
-
-            if (ObjectUtil.isNotEmpty(recharge.getGiftJson())) {
-                CommonEvent event = new CommonEvent();
-                event.setEventName("RechargeAfterListener");
-                event.setData(recharge);
-                event.setMemberId(order.getMemberId());
-                event.setSiteId(RequestUtils.siteId());
-                EventAndSubscribeOfPublisher.publishAll(event);
+                if (ObjectUtil.isNotEmpty(recharge.getGiftJson())) {
+                    CommonEvent event = new CommonEvent();
+                    event.setEventName("RechargeAfterListener");
+                    event.setData(recharge);
+                    event.setMemberId(order.getMemberId());
+                    event.setSiteId(RequestUtils.siteId());
+                    EventAndSubscribeOfPublisher.publishAll(event);
+                }
+            } else {
+                if (order.getOrderItemMoney().compareTo(BigDecimal.ZERO) > 0) {
+                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), order.getOrderItemMoney().doubleValue(), "recharge", "会员充值到账", order.getOrderId().toString());
+                }
             }
 
             // 发送消息
             sendRechargeSuccessNotice(order);
+
+            orderShippingUploadShippingInfo(order, pay);
             log.info("pay success");
         } catch (Exception e) {
             log.info("pay fail: {}", e.getMessage());
@@ -237,10 +251,22 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
         NoticeUtils.send(order.getSiteId(), "recharge_success", param);
     }
 
-    public void orderShippingUploadShippingInfo(RechargeOrder order) {
+    public void orderShippingUploadShippingInfo(RechargeOrder order, Pay pay) {
         try {
-            Pay pay = payMapper.selectOne(new QueryWrapper<Pay>().eq("out_trade_no", order.getOutTradeNo()));
-            if (pay == null || !pay.getType().equals("wechatpay")) return;
+            log.info("rechargeOrder UploadShippingInfo:{}", JSONUtil.toJsonStr(pay));
+            if (!pay.getType().equals("wechatpay") || !pay.getChannel().equals("weapp")) return;
+
+            // 检测微信小程序是否已开通发货信息管理服务
+            if (!coreWeappDeliveryService.getIsTradeManaged(order.getSiteId()).getIsTradeManaged()) return;
+
+            // 设置消息跳转路径设置接口
+            WxMaOrderShippingInfoBaseResponse setResult = coreWeappDeliveryService.setMsgJumpPath(order.getSiteId(), "recharge_order");
+            if (!setResult.getErrCode().equals(0)) {
+                log.info("rechargeOrder UploadShippingInfo setMsgJumpPath", setResult.getErrMsg());
+                return;
+            }
+
+            JSONObject config = ObjectUtil.defaultIfNull(corePayChannelService.getConfigByChannelAndType(pay.getSiteId(), pay.getChannel(), pay.getType()), new JSONObject());
 
             WxMaService miniapp = WechatUtils.miniapp(order.getSiteId());
 
@@ -250,10 +276,11 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
             OrderKeyBean orderKey = new OrderKeyBean();
             orderKey.setOrderNumberType(1);
             orderKey.setOutTradeNo(order.getOutTradeNo());
+            orderKey.setMchId(config.getStr("mch_id", ""));
             request.setOrderKey(orderKey);
             request.setLogisticsType(3);
 
-            request.setUploadTime(Instant.now().plusMillis(TimeUnit.HOURS.toMillis(8)).toString());
+            request.setUploadTime(OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
 
             // 发货模式，发货模式枚举值：1、UNIFIED_DELIVERY（统一发货）2、SPLIT_DELIVERY（分拆发货）
             request.setDeliveryMode(1);

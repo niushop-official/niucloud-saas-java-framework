@@ -759,3 +759,10 @@ export function getWxoplatform() {
 export function checkIsRestart() {
     return request.get('sys/web/restart', { showErrorMessage: false })
 }
+
+/**
+ * 清理缓存
+ */
+export function clearCache(params: Record<string, any>) {
+    return request.post(`sys/cache/clear`, {}, { showSuccessMessage: true })
+}

@@ -109,7 +109,7 @@ public class CouponController {
      * @return
      */
     @GetMapping("/coupon/components")
-    public Result<List<ShopCouponListVo>> components(@RequestParam(name = "coupon_ids", defaultValue = "") String couponIds, @RequestParam(name = "num", defaultValue = "4") Integer num) {
+    public Result<List<ShopCouponListVo>> components(@RequestParam(name = "coupon_ids", defaultValue = "") Integer[] couponIds, @RequestParam(name = "num", defaultValue = "4") Integer num) {
         return Result.success(couponService.getCouponComponents(couponIds, num));
     }
 
@@ -121,7 +121,7 @@ public class CouponController {
      */
     @GetMapping("/coupon/qrcode/{id}")
     public Result<Object> qrcode(@PathVariable("id") Integer id) {
-        return null;
+        return Result.success("", couponService.getQrcode(id));
     }
 
     /**

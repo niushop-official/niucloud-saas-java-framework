@@ -13,6 +13,8 @@
 	"isPayEdition": "快递鸟套餐",
 	"free": "免费",
 	"pay": "付费",
+	"PayPerUse": "按次付费",
+	"PayPerOrder": "按单付费",
 	"kd100AppKeyPlaceholder": "请输入快递100AppKey",
 	"kd100AppKeyTips": "快递100应用密钥",
 	"kd100CustomerPlaceholder": "请输入快递100Customer",

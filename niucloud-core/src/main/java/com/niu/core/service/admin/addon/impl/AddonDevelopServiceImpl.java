@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.addon.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.WebAppEnvs;
@@ -19,6 +20,7 @@ import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
+import org.apache.commons.lang.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -69,6 +71,10 @@ public class AddonDevelopServiceImpl implements IAddonDevelopService {
                     addonDevelopListVo.setCover(ImageUtils.imageToBase64(file + "/resource/cover.png"));
                     list.add(addonDevelopListVo);
                 }
+            }
+
+            if (ObjectUtil.isNotEmpty(searchParam.getSearch()) && list.size() > 0) {
+                list = list.stream().filter(addonDevelopListVo -> addonDevelopListVo.getTitle().contains(searchParam.getSearch())).toList();
             }
         } catch (IOException e) {
             e.printStackTrace();

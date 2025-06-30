@@ -188,8 +188,8 @@ public class MemberSignServiceImpl implements IMemberSignService {
                 continueAward.remove("receive_num");
 
                 Map<String, Object> continueAwardVar = new HashMap<>();
-                dayAwardVar.put("from_type", "continue_sign_award");
-                dayAwardVar.put("memo", "连签奖励");
+                continueAwardVar.put("from_type", "continue_sign_award");
+                continueAwardVar.put("memo", "连签奖励");
                 coreMemberService.memberGiftGrant(param.siteId(), param.memberId(), continueAward, continueAwardVar);
 
                 model.setContinueAward(continueAward.toString());

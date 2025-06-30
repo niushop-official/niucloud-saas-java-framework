@@ -1,5 +1,6 @@
 package com.niu.core.service.core.weapp;
 
+import cn.binarywang.wx.miniapp.bean.shop.response.WxMaOrderShippingInfoBaseResponse;
 import com.niu.core.service.core.weapp.vo.IsTradeManagedVo;
 
 public interface ICoreWeappDeliveryService {
@@ -10,4 +11,6 @@ public interface ICoreWeappDeliveryService {
      * @return
      */
     IsTradeManagedVo getIsTradeManaged(Integer siteId);
+
+    WxMaOrderShippingInfoBaseResponse setMsgJumpPath(Integer siteId, String type);
 }

@@ -12,7 +12,7 @@
 <!--							<el-radio :label="2" size="large">{{ t('kd100') }}</el-radio>-->
 						</el-radio-group>
 						<p class="text-[12px] text-[#b2b2b2]" v-if="formData.interface_type == 1">
-							{{ t('promptTips1-1') }}<el-button class="button-size" type="primary" link @click="openEvent('https://www.kdniao.com')">https://www.kdniao.com</el-button>
+							{{ t('promptTips1-1') }}<el-button class="button-size" type="primary" link @click="openEvent('https://www.kdniao.com/reg?from=niucloud')">https://www.kdniao.com</el-button>
 						</p>
 						<p class="text-[12px] text-[#b2b2b2]" v-if="formData.interface_type == 1">
 							{{ t('promptTips1-2') }}
@@ -25,8 +25,10 @@
 				<div v-if="formData.interface_type == 1">
 					<el-form-item :label="t('isPayEdition')" prop="kdn_is_pay" class="items-center">
 						<el-radio-group v-model="formData.kdniao_is_pay">
-							<el-radio :label="1" size="large">{{ t('free') }}</el-radio>
-							<el-radio :label="2" size="large">{{ t('pay') }}</el-radio>
+<!--							<el-radio :label="1" size="large">{{ t('free') }}</el-radio>-->
+<!--							<el-radio :label="2" size="large">{{ t('pay') }}</el-radio>-->
+              <el-radio :label="1" size="large">{{ t('PayPerOrder') }}</el-radio>
+              <el-radio :label="2" size="large">{{ t('PayPerUse') }}</el-radio>
 						</el-radio-group>
 					</el-form-item>
 

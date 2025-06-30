@@ -116,13 +116,13 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="active_goods_order_money" :label="t('paymentAmount')" min-width="100" />
-                    
+
                     <el-table-column prop="active_goods_order_num" :label="t('orderCount')" min-width="100" />
                     <el-table-column prop="active_goods_member_num" :label="t('activeMemberNum')" min-width="100" />
                     <el-table-column prop="active_goods_success_num" :label="t('activeSuccessNum')" min-width="100" />
                 </el-table>
                 <div class="mt-[16px] flex justify-end">
-                    <el-pagination v-model:current-page="goodsParams.page" v-model:page-size="goodsParams.limit" :page-sizes="[6,10,20,30,50,100]" 
+                    <el-pagination v-model:current-page="goodsParams.page" v-model:page-size="goodsParams.limit" :page-sizes="[6,10,20,30,50,100]"
                         layout="total, sizes, prev, pager, next, jumper" :total="goodsParams.total"
                         @size-change="getActiveDiscountGoodsPageListFn()" @current-change="getActiveDiscountGoodsPageListFn" />
                 </div>
@@ -133,7 +133,7 @@
                     <el-form-item :label="t('orderInfo')" prop='search_name'>
                         <el-input class="input-item" v-model.trim="orderParams.searchParam.search_name" />
                     </el-form-item>
-                    <el-form-item :label="t('payType')" prop='status'>
+                    <el-form-item :label="t('status')" prop='status'>
                         <el-select v-model="orderParams.searchParam.status" clearable class="input-item">
                             <el-option :label="t('toBePaid')" value="1"></el-option>
                             <el-option :label="t('toBeShipped')" value="2"></el-option>
@@ -142,6 +142,11 @@
                             <el-option :label="t('closed')" value="-1"></el-option>
                         </el-select>
                     </el-form-item>
+                  <el-form-item :label="t('payType')" prop='pay_type'>
+                    <el-select v-model="orderParams.searchParam.pay_type" clearable class="input-item">
+                      <el-option v-for="(item, index) in payTypeData" :key="index" :label="item.name" :value="item.key"></el-option>
+                    </el-select>
+                  </el-form-item>
                     <el-form-item :label="t('createTime')" prop="create_time">
                         <el-date-picker v-model="orderParams.searchParam.create_time" type="datetimerange"
                             value-format="YYYY-MM-DD HH:mm:ss" :start-placeholder="t('startDate')"
@@ -190,7 +195,7 @@
                     <el-table-column prop="create_time" :label="t('createTime')" min-width="100" />
                 </el-table>
                 <div class="mt-[16px] flex justify-end">
-                    <el-pagination v-model:current-page="orderParams.page" v-model:page-size="orderParams.limit"  :page-sizes="[4,10,20,30,50,100]" 
+                    <el-pagination v-model:current-page="orderParams.page" v-model:page-size="orderParams.limit"  :page-sizes="[4,10,20,30,50,100]"
                         layout="total, sizes, prev, pager, next, jumper" :total="orderParams.total"
                         @size-change="getActiveDiscountOrderPageListFn()" @current-change="getActiveDiscountOrderPageListFn" />
                 </div>
@@ -241,6 +246,7 @@ import {getActiveDiscountInfo, getActiveDiscountGoodsPageList, getActiveDiscount
 import { FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
 import { img } from '@/utils/common'
+import { getOrderPayType } from '@/addon/shop/api/order'
 
 const route = useRoute()
 const router = useRouter()
@@ -306,6 +312,13 @@ const previewEvent = (data: any) => {
     window.open(url.href)
 }
 // 活动订单
+
+const payTypeData = ref<any[]>([])
+const setFormDataGoods = async () => {
+    payTypeData.value = await (await getOrderPayType()).data
+}
+setFormDataGoods()
+
 const orderSearchFormRef = ref()
 const orderParams = reactive({
     page: 1,
@@ -316,6 +329,7 @@ const orderParams = reactive({
     searchParam: {
         search_name: '',
         status: '',
+        pay_type: '',
         create_time: [],
         pay_time: [],
         active_id: ''
@@ -378,7 +392,7 @@ const detailEvent = (member_id:number)=> {
 
 const setFormData = async (row: any = null) => {
     id = row.id;
-    
+
     memberParams.searchParam.active_id = row.id;
     orderParams.searchParam.active_id = row.id;
     goodsParams.searchParam.active_id = row.id;
@@ -401,7 +415,8 @@ const toGoodsCategoryEvent = (order_id:any) => {
 
 defineExpose({
     showDialog,
-    setFormData
+    setFormData,
+    setFormDataGoods
 })
 </script>
 <style lang="scss">

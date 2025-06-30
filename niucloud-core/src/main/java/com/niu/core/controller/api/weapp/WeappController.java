@@ -67,4 +67,13 @@ public class WeappController {
         return Result.success(weappService.getIsTradeManaged());
     }
 
+    /**
+     * 通过外部交易号获取消息跳转路径
+     * @param outTradeNo
+     * @return
+     */
+    @GetMapping("/getMsgJumpPath")
+    public Result<?> getMsgJumpPath(@RequestParam("out_trade_no") String outTradeNo) {
+        return Result.success(weappService.getMsgJumpPath(outTradeNo));
+    }
 }

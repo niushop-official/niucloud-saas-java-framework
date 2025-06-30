@@ -47,7 +47,10 @@ public class SaTokenAdminInterceptor extends SaInterceptor {
 
         if(islogin){
             //设置当前登录用户id
-            Integer uid = Integer.parseInt(StpUtil.getLoginId().toString());
+            String[] loginId = ObjectUtil.defaultIfEmpty(StpUtil.getLoginId().toString(), "").split("-");
+            if (loginId[1] == null) throw new AuthException("LOGIN_EXPIRE", 401);
+
+            Integer uid = Integer.parseInt(loginId[1]);
             RequestUtils.setUid(uid);
         }
 

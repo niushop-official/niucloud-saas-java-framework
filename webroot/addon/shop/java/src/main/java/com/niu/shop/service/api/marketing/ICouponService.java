@@ -92,7 +92,7 @@ public interface ICouponService {
      * @param num
      * @return
      */
-    List<ShopCouponListVo> getCouponComponents(String couponIds, Integer num);
+    List<ShopCouponListVo> getCouponComponents(Integer[] couponIds, Integer num);
 
     /**
      * 获取优惠券二维码

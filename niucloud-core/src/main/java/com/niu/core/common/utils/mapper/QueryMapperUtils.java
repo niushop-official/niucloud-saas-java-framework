@@ -1,5 +1,7 @@
 package com.niu.core.common.utils.mapper;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.utils.date.DateUtils;
@@ -92,5 +94,27 @@ public class QueryMapperUtils {
             queryWrapper.le(fieldName, start);
         }
         return queryWrapper;
+    }
+
+
+    /**
+     *  多字典模糊查询
+     * @param wrapper
+     * @param keyword
+     * @param columns
+     * @param <T>
+     */
+    public static <T> void addMultiLike(MPJQueryWrapper<T> wrapper, String keyword, String... columns) {
+        if (StrUtil.isBlank(keyword) || ArrayUtil.isEmpty(columns)) {
+            return;
+        }
+        wrapper.and(inner -> {
+            for (int i = 0; i < columns.length; i++) {
+                if (i > 0) {
+                    inner.or();
+                }
+                inner.like(columns[i], keyword);
+            }
+        });
     }
 }

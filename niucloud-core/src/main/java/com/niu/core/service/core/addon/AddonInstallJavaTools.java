@@ -255,7 +255,7 @@ public class AddonInstallJavaTools {
         if (runAddonJsonArray == null || runAddonJsonArray.size() <= 0) {
             return runAddonJsonArray;
         }
-        int index = 0;
+        int index = -1;
         for (int i = 0; i < runAddonJsonArray.size(); i++) {
             JSONObject jsonObject = runAddonJsonArray.getJSONObject(i);
             String name = jsonObject.getStr("name");
@@ -263,7 +263,7 @@ public class AddonInstallJavaTools {
                 index = i;
             }
         }
-        runAddonJsonArray.remove(index);
+        if (index != -1) runAddonJsonArray.remove(index);
         return runAddonJsonArray;
     }
 

@@ -32,5 +32,12 @@ public class ShopNewComerComponentsListVo {
         private Integer isDefault; // 是否默认
         private String memberPrice; // 会员价，json格式，指定会员价，数据结构为：{"level_1":"10.00","level_2":"10.00"}
         private BigDecimal newcomerPrice;
+        private String goodsName;
+        private Goods goods;
+    }
+
+    @Data
+    public static class Goods {
+        private String goodsName;
     }
 }

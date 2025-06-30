@@ -17,6 +17,8 @@ public class MemberLabelListVo implements Serializable {
     private Integer labelId;  // 标签id
     private Integer siteId;  // 站点id
     private String labelName;  // 标签名称
+    //会员数量
+    private Integer memberNum;
     private String memo;  // 备注
     private Integer sort;  // 排序
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)

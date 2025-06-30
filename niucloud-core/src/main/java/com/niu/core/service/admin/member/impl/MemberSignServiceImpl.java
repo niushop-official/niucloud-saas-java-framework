@@ -6,23 +6,25 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.member.MemberSign;
 import com.niu.core.mapper.member.MemberSignMapper;
-import com.niu.core.service.admin.member.param.MemberSignSearchParam;
 import com.niu.core.service.admin.member.IMemberSignService;
+import com.niu.core.service.admin.member.param.MemberSignSearchParam;
 import com.niu.core.service.admin.member.param.SignConfigParam;
-import com.niu.core.service.admin.member.vo.*;
+import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
+import com.niu.core.service.admin.member.vo.MemberSignListVo;
+import com.niu.core.service.admin.member.vo.SignConfigVo;
 import com.niu.core.service.core.member.ICoreMemberService;
 import com.niu.core.service.core.sys.ICoreConfigService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ import java.util.List;
  */
 @Service
 public class MemberSignServiceImpl implements IMemberSignService {
-        
+
     @Resource
     MemberSignMapper memberSignMapper;
 
@@ -60,8 +62,14 @@ public class MemberSignServiceImpl implements IMemberSignService {
         queryWrapper.eq("ms.site_id", siteId);
         queryWrapper.orderByDesc("ms.sign_id");
 
-        if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) queryWrapper.like("m.member_no|m.username|m.nickname|m.mobile", searchParam.getKeywords());
-        if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "ms.create_time", searchParam.getCreateTime());
+        if (ObjectUtil.isNotEmpty(searchParam.getKeywords())){
+//            queryWrapper.like("m.member_no|m.username|m.nickname|m.mobile", searchParam.getKeywords());
+            QueryMapperUtils.addMultiLike(queryWrapper, searchParam.getKeywords(),
+                    "m.member_no", "m.username", "m.nickname", "m.mobile");
+        }
+        if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
+            QueryMapperUtils.buildByTime(queryWrapper, "ms.create_time", searchParam.getCreateTime());
+        }
 
         IPage<MemberSign> iPage = memberSignMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<MemberSignListVo> list = new LinkedList<>();
@@ -69,9 +77,12 @@ public class MemberSignServiceImpl implements IMemberSignService {
             MemberSignListVo vo = new MemberSignListVo();
             BeanUtils.copyProperties(item, vo);
 
-            if (!item.getDayAward().isEmpty()) vo.setDayAward(coreMemberService.getGiftContent(item.getSiteId(), JSONUtil.parseObj(item.getDayAward()), "admin"));
-            if (!item.getContinueAward().isEmpty()) vo.setContinueAward(coreMemberService.getGiftContent(item.getSiteId(), JSONUtil.parseObj(item.getContinueAward()), "admin"));
-
+            if (!item.getDayAward().isEmpty()) {
+                vo.setDayAward(coreMemberService.getGiftContent(item.getSiteId(), JSONUtil.parseObj(item.getDayAward()), "admin"));
+            }
+            if (!item.getContinueAward().isEmpty()) {
+                vo.setContinueAward(coreMemberService.getGiftContent(item.getSiteId(), JSONUtil.parseObj(item.getContinueAward()), "admin"));
+            }
             MemberBriefInfoVo memberInfoVo = new MemberBriefInfoVo();
             BeanUtils.copyProperties(item, memberInfoVo);
 

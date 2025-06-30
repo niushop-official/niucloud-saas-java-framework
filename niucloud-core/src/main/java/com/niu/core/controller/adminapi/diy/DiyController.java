@@ -148,9 +148,9 @@ public class DiyController {
      *
      * @return Result<Object>
      */
-    @PutMapping("/use")
-    public Result<Object> setUse(@RequestBody Id id) {
-        diyPageService.setUse(id.getId());
+    @PutMapping("/use/{id}")
+    public Result<Object> setUse(@PathVariable("id") Integer id) {
+        diyPageService.setUse(id);
         return Result.success();
     }
 

@@ -6,22 +6,24 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
-import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
 import com.niu.core.mapper.member.MemberLabelMapper;
-import com.niu.core.service.admin.member.param.MemberLabelEditParam;
-import com.niu.core.service.admin.member.param.MemberLabelParam;
-import com.niu.core.service.admin.member.param.MemberLabelSearchParam;
+import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.member.IMemberLabelService;
+import com.niu.core.service.admin.member.param.MemberLabelEditParam;
+import com.niu.core.service.admin.member.param.MemberLabelSearchParam;
 import com.niu.core.service.admin.member.vo.MemberLabelAllListVo;
 import com.niu.core.service.admin.member.vo.MemberLabelInfoVo;
 import com.niu.core.service.admin.member.vo.MemberLabelListVo;
+import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import jakarta.annotation.Resource;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,9 +33,13 @@ import java.util.List;
  */
 @Service
 public class MemberLabelServiceImpl implements IMemberLabelService {
-        
+
     @Resource
     MemberLabelMapper memberLabelMapper;
+
+
+    @Resource
+    MemberMapper memberMapper;
 
     /**
      * 会员标签列表
@@ -51,13 +57,20 @@ public class MemberLabelServiceImpl implements IMemberLabelService {
         QueryWrapper<MemberLabel> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", siteId);
         queryWrapper.orderByDesc("label_id");
-        if (ObjectUtil.isNotEmpty(searchParam.getLabelName())) queryWrapper.like("label_name", searchParam.getLabelName());
-
+        if (ObjectUtil.isNotEmpty(searchParam.getLabelName())){
+            queryWrapper.like("label_name", searchParam.getLabelName());
+        }
         IPage<MemberLabel> iPage = memberLabelMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<MemberLabelListVo> list = new LinkedList<>();
         for (MemberLabel item : iPage.getRecords()) {
             MemberLabelListVo vo = new MemberLabelListVo();
+            Integer labelId = item.getLabelId();
+            QueryWrapper<Member> wrapper = new QueryWrapper<>();
+            wrapper.eq("site_id",siteId);
+            wrapper.apply("JSON_CONTAINS(member_label, {0})", String.valueOf(labelId));
+            List<Member> members = memberMapper.selectList(wrapper);
             BeanUtils.copyProperties(item, vo);
+            vo.setMemberNum(members.size());
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);

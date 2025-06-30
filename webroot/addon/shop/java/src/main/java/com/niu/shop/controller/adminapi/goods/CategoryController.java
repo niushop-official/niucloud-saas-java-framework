@@ -103,7 +103,7 @@ public class CategoryController {
      * @param editParam 编辑参数
      * @return Result<Object>
      */
-    @PutMapping("/category/update")
+    @PostMapping("/category/update")
     public Result<Object> update(@Validated @RequestBody EditGoodsCategorySortParam editParam) {
         categoryService.editGoodsCategorySort(editParam);
         return Result.success();

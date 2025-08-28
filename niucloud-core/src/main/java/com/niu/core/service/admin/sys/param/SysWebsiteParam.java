@@ -26,4 +26,21 @@ public class SysWebsiteParam {
     private String wechatCode;
     private String enterpriseWechat;
     private String tel;
+
+    /**
+     * Meta 描述
+     */
+    private String metaDesc;
+    /**
+     * Meta 关键字
+     */
+    private String metaKeyword;
+    /**
+     * Meta 标题
+     */
+    private String metaTitle;
+
+    private String siteLoginLogo;
+
+    private String siteLoginBgImg;
 }

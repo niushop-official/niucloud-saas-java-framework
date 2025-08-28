@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.annotation.EventCallback;
 import com.niu.core.common.component.context.listener.CallbackListener;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.event.pay.PayTradeInfoDefiner;
@@ -45,7 +46,8 @@ public class ShopOrderTradeInfoListener extends CallbackListener<PayTradeInfoDef
         }
 
         List<JSONObject> item = goods.stream().map(o -> {
-            String mid = coreUploadService.thumb(RequestUtils.siteId(), o.getSkuImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+
+            String mid = CommonUtils.thumbImageMiddle(RequestUtils.siteId(), o.getSkuImage());
             JSONObject entries = new JSONObject();
             entries.set("item_image", Optional.ofNullable(mid).orElse(o.getSkuImage()))
                     .set("item_name", o.getGoodsName())

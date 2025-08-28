@@ -833,7 +833,7 @@
             for (i = 0; i < this.imageList.length; i++) {
                 data = this.imageList[i];
                 list.push({
-                    src: prefix + data.url,
+                    src: (data.url.indexOf('http://') == -1 && data.url.indexOf('https://') == -1) ? prefix + data.url : data.url,
                     _src: prefix + data.url,
                     alt: data.original,
                     floatStyle: align

@@ -12,6 +12,8 @@ import com.niu.core.service.admin.member.vo.MemberLevelListVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jdk.jfr.Description;
+
 import jakarta.annotation.Resource;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("adminapi/member/level")
 @SaCheckLogin
+@Description("会员等级管理")
 public class MemberLevelController {
 
     @Resource
@@ -34,6 +37,7 @@ public class MemberLevelController {
      * @return Result<PageResult<MemberLevelListVo>>
      */
     @GetMapping("")
+    @Description("会员等级列表")
     public Result<PageResult<MemberLevelListVo>> pages(@Validated PageParam pageParam, @Validated MemberLevelSearchParam searchParam) {
         PageResult<MemberLevelListVo> list = memberLevelService.list(pageParam, searchParam);
         return Result.success(list);
@@ -45,7 +49,8 @@ public class MemberLevelController {
      * @return Result<MemberLevelInfoVo>
      */
     @GetMapping("/{id}")
-    public Result<MemberLevelInfoVo> info(@PathVariable("id") Integer id) {
+    @Description("会员等级详情")
+    public Result<MemberLevelInfoVo> info(@Validated @PathVariable("id") Integer id) {
         MemberLevelInfoVo info = memberLevelService.info(id);
         return Result.success(info);
     }
@@ -56,6 +61,7 @@ public class MemberLevelController {
      * @return Result<Object>
      */
     @PostMapping("")
+    @Description("会员等级添加")
     public Result<Object> add(@Validated @RequestBody MemberLevelParam addParam) {
         memberLevelService.add(addParam);
         return Result.success();
@@ -67,7 +73,8 @@ public class MemberLevelController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody MemberLevelParam editParam) {
+    @Description("会员等级编辑")
+    public Result<Object> edit(@Validated @PathVariable("id") Integer id, @Validated @RequestBody MemberLevelParam editParam) {
         memberLevelService.edit(id, editParam);
         return Result.success();
     }
@@ -78,7 +85,8 @@ public class MemberLevelController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
-    public Result<Object> del(@PathVariable("id") Integer id) {
+    @Description("会员等级删除")
+    public Result<Object> del(@Validated @PathVariable("id") Integer id) {
         memberLevelService.del(id);
         return Result.success();
     }
@@ -88,6 +96,7 @@ public class MemberLevelController {
      * @return
      */
     @GetMapping("/all")
+    @Description("全部会员等级")
     public Result<List<MemberLevelAllListVo>> all() {
         List<MemberLevelAllListVo> list = memberLevelService.all();
         return Result.success(list);

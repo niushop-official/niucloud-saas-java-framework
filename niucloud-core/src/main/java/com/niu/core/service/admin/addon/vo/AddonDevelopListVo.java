@@ -5,6 +5,7 @@ import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * AddonLogVo
@@ -40,5 +41,9 @@ public class AddonDevelopListVo implements Serializable {
 
     public String getTypeName() {
         return AddonTypeEnum.getNameByType(this.type);
+    }
+
+    public Object getInstallInfo() {
+        return this.installInfo != null ? this.installInfo : new ArrayList<>();
     }
 }

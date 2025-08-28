@@ -21,4 +21,7 @@ public interface ICorePosterService {
     JSONArray template(String addon, String type);
 
     void add(AddPosterParam param);
+
+
+    Integer  getDefaultPosterIdByType(Integer siteId, String type, String addon);
 }

@@ -41,6 +41,8 @@ public class SysRoleListVo implements Serializable {
     /**状态名称 */
     private String statusName;
 
+    private Boolean disabled = false;
+
     public String getStatusName() {
         return StatusEnum.getNameByStatus(this.status);
     }

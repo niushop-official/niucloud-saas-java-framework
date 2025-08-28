@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import lombok.Data;
@@ -31,14 +32,15 @@ public class ShopGoodsCollectVo implements Serializable {
     private String goodsCover;
     private String skuName;
     private BigDecimal price;
+    private BigDecimal showPrice;
+    private String showType;
     private Integer status;
-
-    private ICoreUploadService coreUploadService() {
-        return SpringContext.bean(ICoreUploadService.class);
-    }
+    private String memberPrice;
+    private String memberDiscount;
+    private Integer skuId;
 
     public String getGoodsCoverThumbMid() {
-        return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+        return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover());
     }
 
 }

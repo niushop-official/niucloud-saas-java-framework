@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
+import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import com.niu.shop.service.api.goods.param.ShopGoodsComponentsSearchParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsDetailParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsSearchParam;
@@ -66,4 +67,10 @@ public interface IGoodsService {
      * @return
      */
     List<GoodsLabelListVo> getGoodsLabelName(String labelIds);
+
+    /**
+     *
+     * @return
+     */
+    CoreSysConfigVo searchConfig();
 }

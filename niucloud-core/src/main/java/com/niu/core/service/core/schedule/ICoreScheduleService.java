@@ -26,4 +26,10 @@ public interface ICoreScheduleService {
      * @param addon
      */
     void uninstallAddonSchedule(String addon);
+
+    /**
+     * 重置计划任务
+     * @return
+     */
+    void resetSchedule();
 }

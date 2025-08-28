@@ -24,7 +24,7 @@ public class CoreAddonBaseService {
      */
     public JSONObject getAddonConfig(String addon) {
         File infoFile = new File(WebAppEnvs.get().webRootDownAddon + "/" + addon + "/info.json");
-        if (!infoFile.exists()) throw new CommonException("插件info.json文件不存在");
+        if (!infoFile.exists()) throw new CommonException(addon + "插件info.json文件不存在");
 
         return JSONUtil.parseObj(JsonLoadUtils.loadJsonString(infoFile));
     }

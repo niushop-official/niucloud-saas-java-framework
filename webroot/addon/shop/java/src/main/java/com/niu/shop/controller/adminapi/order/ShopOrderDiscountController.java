@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.order;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.order.param.ShopOrderDiscountParam;
@@ -18,6 +19,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/order/discount")
+@Description("订单优惠管理")
 public class ShopOrderDiscountController {
 
     @Resource
@@ -30,6 +32,7 @@ public class ShopOrderDiscountController {
      * @return Result<PageResult<ShopOrderDiscountListVo>>
      */
     @GetMapping("/list")
+    @Description("获取订单优惠分页列表")
     public Result<PageResult<ShopOrderDiscountListVo>> list(@Validated PageParam pageParam,
                                                      @Validated ShopOrderDiscountSearchParam searchParam) {
         PageResult<ShopOrderDiscountListVo> list = iShopOrderDiscountService.list(pageParam, searchParam);
@@ -42,6 +45,7 @@ public class ShopOrderDiscountController {
      * @return Result<ShopOrderDiscountInfoVo>
      */
     @GetMapping("/info")
+    @Description("获取订单优惠详情")
     public Result<ShopOrderDiscountInfoVo> info(@Validated @RequestParam("id") Integer id) {
         ShopOrderDiscountInfoVo info = iShopOrderDiscountService.info(id);
         return Result.success(info);
@@ -53,6 +57,7 @@ public class ShopOrderDiscountController {
      * @return AjaxResult<Object>
      */
     @PostMapping("/add")
+    @Description("添加订单优惠")
     public Result<Object> add(@Validated @RequestBody ShopOrderDiscountParam addParam) {
         iShopOrderDiscountService.add(addParam);
         return Result.success();
@@ -64,7 +69,8 @@ public class ShopOrderDiscountController {
      * @return Result<Object>
      */
     @PostMapping("/edit")
-    public Result<Object> edit(Integer id, @Validated @RequestBody ShopOrderDiscountParam editParam) {
+    @Description("编辑订单优惠")
+    public Result<Object> edit(@Validated Integer id, @Validated @RequestBody ShopOrderDiscountParam editParam) {
         iShopOrderDiscountService.edit(id, editParam);
         return Result.success();
     }
@@ -75,6 +81,7 @@ public class ShopOrderDiscountController {
      * @return Result<Object>
      */
     @PostMapping("/del")
+    @Description("删除订单优惠")
     public Result<Object> del(@Validated @RequestBody Integer id) {
         iShopOrderDiscountService.del(id);
         return Result.success();

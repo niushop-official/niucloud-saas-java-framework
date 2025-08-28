@@ -1,0 +1,122 @@
+[
+  {
+    "real_name": "超值爆款",
+    "path": "addon/shop/attachment/head_01.png",
+    "url": "addon/shop/attachment/head_01.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 3958,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "head_01.png"
+  },
+  {
+    "real_name": "限时折扣",
+    "path": "addon/shop/attachment/head_02.png",
+    "url": "addon/shop/attachment/head_02.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 2408,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "head_02.png"
+  },
+  {
+    "real_name": "商品榜单",
+    "path": "addon/shop/attachment/head_03.png",
+    "url": "addon/shop/attachment/head_03.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 2621,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "head_03.png"
+  },
+  {
+    "real_name": "商品低至五折",
+    "path": "addon/shop/attachment/image_ads_01.png",
+    "url": "addon/shop/attachment/image_ads_01.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 44566,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "image_ads_01.png"
+  },
+  {
+    "real_name": "魔方素材01",
+    "path": "addon/shop/attachment/active_cube_01.png",
+    "url": "addon/shop/attachment/active_cube_01.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 36850,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_01.png"
+  },
+  {
+    "real_name": "魔方素材02",
+    "path": "addon/shop/attachment/active_cube_02.png",
+    "url": "addon/shop/attachment/active_cube_02.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 26463,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_02.png"
+  },
+  {
+    "real_name": "魔方素材03",
+    "path": "addon/shop/attachment/active_cube_03.png",
+    "url": "addon/shop/attachment/active_cube_03.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 29142,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_03.png"
+  },
+  {
+    "real_name": "魔方素材04",
+    "path": "addon/shop/attachment/active_cube_04.png",
+    "url": "addon/shop/attachment/active_cube_04.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 26068,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_04.png"
+  },
+  {
+    "real_name": "魔方素材05",
+    "path": "addon/shop/attachment/active_cube_05.png",
+    "url": "addon/shop/attachment/active_cube_05.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 107422,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_05.png"
+  },
+  {
+    "real_name": "魔方素材06",
+    "path": "addon/shop/attachment/active_cube_06.png",
+    "url": "addon/shop/attachment/active_cube_06.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 130868,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_06.png"
+  },
+  {
+    "real_name": "魔方素材07",
+    "path": "addon/shop/attachment/active_cube_07.png",
+    "url": "addon/shop/attachment/active_cube_07.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 129386,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_07.png"
+  },
+  {
+    "real_name": "魔方素材08",
+    "path": "addon/shop/attachment/active_cube_08.png",
+    "url": "addon/shop/attachment/active_cube_08.png",
+    "dir": "addon/shop/attachment",
+    "att_size": 81778,
+    "att_type": "image",
+    "storage_type": "local",
+    "name": "active_cube_08.png"
+  }
+]

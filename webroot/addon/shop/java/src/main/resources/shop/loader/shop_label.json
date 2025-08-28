@@ -1,0 +1,74 @@
+[
+  {
+    "label_name": "热卖",
+    "style_type": "diy",
+    "color_json": {
+      "text_color": "rgba(255, 255, 255, 1)",
+      "bg_color": "rgba(250, 35, 28, 1)",
+      "border_color": ""
+    },
+    "icon": "",
+    "status": 1,
+    "sort": 0
+  },
+  {
+    "label_name": "新品推荐",
+    "style_type": "diy",
+    "color_json": {
+      "text_color": "rgba(255, 255, 255, 1)",
+      "bg_color": "rgba(250, 35, 28, 1)",
+      "border_color": ""
+    },
+    "icon": "",
+    "status": 1,
+    "sort": 1
+  },
+  {
+    "label_name": "甄选优品",
+    "style_type": "diy",
+    "color_json": {
+      "text_color": "rgba(255, 255, 255, 1)",
+      "bg_color": "rgba(250, 35, 28, 1)",
+      "border_color": ""
+    },
+    "icon": "",
+    "status": 1,
+    "sort": 2
+  },
+  {
+    "label_name": "百亿补贴",
+    "style_type": "icon",
+    "color_json": {
+      "text_color": "rgba(255, 255, 255, 1)",
+      "bg_color": "rgba(250, 35, 28, 1)",
+      "border_color": ""
+    },
+    "icon": "addon/shop/goods/label/icon1.png",
+    "status": 1,
+    "sort": 3
+  },
+  {
+    "label_name": "双11",
+    "style_type": "icon",
+    "color_json": {
+      "text_color": "rgba(255, 255, 255, 1)",
+      "bg_color": "rgba(250, 35, 28, 1)",
+      "border_color": ""
+    },
+    "icon": "addon/shop/goods/label/icon2.png",
+    "status": 1,
+    "sort": 4
+  },
+  {
+    "label_name": "双12",
+    "style_type": "icon",
+    "color_json": {
+      "text_color": "rgba(255, 255, 255, 1)",
+      "bg_color": "rgba(250, 35, 28, 1)",
+      "border_color": ""
+    },
+    "icon": "addon/shop/goods/label/icon3.png",
+    "status": 1,
+    "sort": 5
+  }
+]

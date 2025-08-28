@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.niu.core.common.component.context.cache.CacheFactory;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.member.MemberAddress;
 import com.niu.core.mapper.member.MemberAddressMapper;
@@ -20,11 +21,14 @@ import com.niu.core.service.core.diy_form.ICoreDiyFormRecordsService;
 import com.niu.core.service.core.diy_form.param.DiyFormRecordsParam;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.coupon.ShopCouponMember;
+import com.niu.shop.entity.delivery.ShopStore;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDiscount;
 import com.niu.shop.entity.order.ShopOrderGoods;
+import com.niu.shop.enums.active.ActiveClassEnum;
 import com.niu.shop.enums.coupon.CouponMemberStatusEnum;
 import com.niu.shop.enums.coupon.CouponTypeEnum;
+import com.niu.shop.enums.goods.GoodsPriceTypeEnum;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderLogMainTypeEnum;
@@ -33,13 +37,17 @@ import com.niu.shop.event.order.ShopOrderDiscountCreateEventDefiner;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.coupon.ShopCouponMemberMapper;
 import com.niu.shop.mapper.delivery.ShopStoreMapper;
+import com.niu.shop.mapper.order.ShopOrderDiscountMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
+import com.niu.shop.service.admin.delivery.param.TradeTimeItemParam;
+import com.niu.shop.service.admin.delivery.vo.ShopStoreInfoVo;
 import com.niu.shop.service.core.delivery.ICoreDeliveryConfigService;
 import com.niu.shop.service.core.delivery.ICoreExpressService;
 import com.niu.shop.service.core.delivery.ICoreLocalDeliveryService;
 import com.niu.shop.service.core.delivery.ICoreStoreService;
 import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
+import com.niu.shop.service.core.delivery.vo.StoreListVo;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.order.ICoreOrderDiscountService;
@@ -109,6 +117,11 @@ public abstract class OrderCreateHelper {
 
     @Resource
     ICoreDiyFormRecordsService coreDiyFormRecordsService;
+
+    @Resource
+    ShopOrderDiscountMapper shopOrderDiscountMapper;
+
+    private static OrderCreateDataVo.Delivery delivery = new OrderCreateDataVo.Delivery();
     /**
      * @param orderKey
      * @return
@@ -233,7 +246,7 @@ public abstract class OrderCreateHelper {
      * @param vo
      * @param param
      */
-    protected void selectTakeAddress(OrderCreateDataVo vo, OrderCalculateParam param) {
+    protected synchronized  void selectTakeAddress(OrderCreateDataVo vo, OrderCalculateParam param) {
         OrderCreateDataVo.Basic basic = vo.getBasic();
         OrderCreateDataVo.Delivery delivery = vo.getDelivery();
         String deliveryType = delivery.getDeliveryType();
@@ -241,7 +254,12 @@ public abstract class OrderCreateHelper {
         if (basic.getHasGoodsTypes().contains(GoodsTypeEnum.REAL.getType())) {
             if (deliveryType.equals(OrderDeliveryTypeEnum.STORE.getType())) {
                 if (param.getDelivery().getTakeStoreId() > 0) {
-                    delivery.setTakeStore(shopStoreMapper.selectById(param.getDelivery().getTakeStoreId()));
+                    ShopStore shopStore = shopStoreMapper.selectById(param.getDelivery().getTakeStoreId());
+                    ShopStoreInfoVo shopStoreInfoVo = new ShopStoreInfoVo();
+                    shopStoreInfoVo = CollectUtils.build(shopStore, ShopStoreInfoVo.class);
+                    shopStoreInfoVo.setTimeWeek(JSONUtil.parseArray(shopStore.getTimeWeek()).toList(String.class));
+                    shopStoreInfoVo.setTradeTimeJson(JSONUtil.parseArray(shopStore.getTradeTimeJson()).toList(TradeTimeItemParam.class));
+                    delivery.setTakeStore(shopStoreInfoVo);
                 }
             } else {
                 MemberAddress address = null;
@@ -253,8 +271,7 @@ public abstract class OrderCreateHelper {
                     //如果没有默认地址，将第一个地址设置作为订单地址
                     if(ObjectUtil.isEmpty(address))
                     {
-                        address = memberAddressMapper.selectOne(new QueryWrapper<MemberAddress>().eq("member_id", param.getMemberId()).last("LIMIT 1"));
-
+                        address = memberAddressMapper.selectOne(new QueryWrapper<MemberAddress>().eq("member_id", param.getMemberId()).orderByDesc("id").last("LIMIT 1"));
                     }
                 }
 
@@ -263,12 +280,13 @@ public abstract class OrderCreateHelper {
                 }
 
                 if (address == null) {
-                    delivery.setTakeAddress(new String[]{});
+                    delivery.setTakeAddress(List.of());
                 } else {
                     delivery.setTakeAddress(address);
                 }
             }
         }
+        this.delivery = delivery;
     }
 
     /**
@@ -455,6 +473,31 @@ public abstract class OrderCreateHelper {
         }
     }
 
+    /**
+     * 处理限时折扣
+     * @param vo
+     */
+    private void useDiscountActive(OrderCreateDataVo vo) {
+        vo.getGoodsData().forEach((skuId, sku) -> {
+            if (sku.getShowType() != null && sku.getShowType().equals(GoodsPriceTypeEnum.DISCOUNT_PRICE.getType())) {
+                ShopOrderDiscount model = new ShopOrderDiscount();
+                model.setSiteId(vo.getSiteId());
+                model.setOrderId(vo.getOrderId());
+                model.setMemberId(vo.getMemberId());
+                model.setGoodsId(sku.getGoodsId());
+                model.setSkuId(sku.getSkuId());
+                model.setType("discount");
+                model.setNum(sku.getNum());
+                model.setMoney(sku.getGoodsMoney());
+                model.setDiscountType(ActiveClassEnum.DISCOUNT.getType());
+                model.setDiscountTypeId(sku.getActiveId());
+                model.setContent("");
+                model.setCreateTime(System.currentTimeMillis() / 1000);
+                shopOrderDiscountMapper.insert(model);
+            }
+        });
+    }
+
     protected void addFormData(OrderCreateDataVo vo)
     {
         if(ObjectUtil.isNotEmpty(vo.getFormData()))
@@ -527,7 +570,11 @@ public abstract class OrderCreateHelper {
 
         // 使用优惠
         this.useDiscount(vo);
+
         this.addFormData(vo);
+
+        this.useDiscountActive(vo);
+
         coreOrderEventService.orderCreateAfter(vo);
 
         // 订单创建之后事件

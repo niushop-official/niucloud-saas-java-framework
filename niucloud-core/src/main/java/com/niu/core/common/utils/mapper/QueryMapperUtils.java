@@ -2,11 +2,14 @@ package com.niu.core.common.utils.mapper;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.utils.date.DateUtils;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.function.Function;
 
 public class QueryMapperUtils {
 
@@ -31,6 +34,40 @@ public class QueryMapperUtils {
             queryWrapper.le(fieldName, startTime);
         }
         return queryWrapper;
+    }
+
+    public static LambdaQueryWrapper buildByTime(LambdaQueryWrapper queryWrapper, String fieldName, String[] stringTimes) {
+        Long startTime = (stringTimes[0] == null) ? 0 : DateUtils.StringToTimestamp(stringTimes[0]);
+        Long endTime = (stringTimes.length == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes[1]);
+        if (startTime == 0 && endTime == 0) {
+            return queryWrapper;
+        }
+        if (startTime > 0 && endTime > 0) {
+            queryWrapper.between(getField(fieldName), startTime, endTime);
+        } else if (startTime > 0 && endTime == 0) {
+            queryWrapper.ge(getField(fieldName), startTime);
+        } else if (startTime == 0 && endTime > 0) {
+            queryWrapper.le(getField(fieldName), endTime);
+        }
+        return queryWrapper;
+    }
+
+    private static <T> Function<T, Object> getField(String fieldName) {
+        return t -> {
+            try {
+                Method method = t.getClass().getMethod("get" + capitalize(fieldName));
+                return method.invoke(t);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid field name: " + fieldName, e);
+            }
+        };
+    }
+
+    private static String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return s;
+        }
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
     /**

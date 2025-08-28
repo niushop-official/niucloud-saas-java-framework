@@ -105,6 +105,7 @@ public interface ISysMenuService {
      */
     List<SysMenu> getMenuListByCondition(String appType, Integer siteId, Integer status, Integer isButton, List<String> menuKeys, String addon);
 
+    List<SysMenu> getMenuListByKeys(String appType, Integer siteId, Integer isTree, Integer isButton, List<String> menuKeys, String addon);
 
     /**
      * 获取所有接口菜单
@@ -114,6 +115,8 @@ public interface ISysMenuService {
      * @return
      */
     JSONArray getAllMenuList(String appType, Integer status);
+
+    List<SysMenu> getAllMenuList(String appType, String status, Integer isTree, Integer isButton);
 
     /**
      * 查询菜单
@@ -126,4 +129,13 @@ public interface ISysMenuService {
 
     JSONArray getMenuByTypeDir(String addon);
 
+    /**
+     *
+     * @param appKey
+     * @param status
+     * @param isTree
+     * @param isButton
+     * @return
+     */
+    JSONArray getAddonMenu(String appKey, String status, Integer isTree, Integer isButton);
 }

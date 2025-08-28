@@ -17,7 +17,8 @@ public enum OrderRefundStatusEnum {
     STORE_AGREE_REFUND_WAIT_TRANSFER("同意售后申请", 6),
     STORE_REFUND_TRANSFERING("转账中", 7),
     FINISH("退款成功", 8),
-    CLOSE("退款关闭", -1);
+    CLOSE("退款关闭", -1),
+    SHOP_ACTIVE_CLOSE_REFUND("商家主动关闭售后", -3);
 
     private final String name;
 

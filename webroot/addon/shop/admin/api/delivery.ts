@@ -58,7 +58,6 @@ export function deleteCompany(company_id: number) {
     return request.delete(`shop/delivery/company/${ company_id }`, { showErrorMessage: true, showSuccessMessage: true })
 }
 
-
 /*********************************  运费模版  ***************************************/
 /**
  * 获取运费模版分页列表
@@ -120,7 +119,6 @@ export function deleteShippingTemplate(template_id: number) {
     })
 }
 
-
 /*********************************  自提门店  ***************************************/
 /**
  * 获取自提门店列表
@@ -138,6 +136,14 @@ export function getStoreList(params: Record<string, any>) {
  */
 export function getStoreInfo(store_id: number) {
     return request.get(`shop/delivery/store/${ store_id }`);
+}
+
+/**
+ * 获取初始化页面信息
+ * @returns
+ */
+export function getStoreInit() {
+    return request.get(`shop/delivery/store/init`)
 }
 
 /**
@@ -202,7 +208,7 @@ export function getShopDeliveryList() {
  * @returns
  */
 export function setShopDeliveryConfig(params: Record<string, any>) {
-    return request.put(`shop/delivery/setConfig`, params)
+    return request.put(`shop/delivery/setConfig`, params, { showSuccessMessage: true })
 }
 
 /**
@@ -265,4 +271,12 @@ export function getLocal() {
  */
 export function setLocal(params: Record<string, any>) {
     return request.put('shop/local', params, { showSuccessMessage: true })
+}
+
+/**
+ * 三方配送
+ * @returns
+ */
+export function getThird() {
+    return request.get('shop/third/init')
 }

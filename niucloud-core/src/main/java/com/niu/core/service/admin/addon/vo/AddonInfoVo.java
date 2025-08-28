@@ -27,5 +27,6 @@ public class AddonInfoVo implements Serializable {
     private String supportApp;  // 插件支持的应用空表示通用插件
     private Integer isStar;  // 是否加星
     private String compile;  // 编译端口
+    private String statusName;
 
 }

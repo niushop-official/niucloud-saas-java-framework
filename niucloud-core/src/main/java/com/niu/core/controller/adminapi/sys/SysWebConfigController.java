@@ -9,6 +9,7 @@ import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.sys.ISysConfigService;
 import com.niu.core.service.admin.sys.param.SysCopyRightParam;
 import com.niu.core.service.admin.sys.vo.SysCopyRightVo;
+import com.niu.core.service.admin.sys.vo.SysWebsiteVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,16 +23,13 @@ public class SysWebConfigController {
     @Resource
     ISysConfigService sysConfigService;
 
-    @Resource
-    ISiteService siteService;
-
     /**
      * 获取站点信息
      * @return
      */
     @GetMapping("website")
-    public Result<SiteInfoVo> getWebSite(){
-        return Result.success(siteService.info(RequestUtils.siteId()));
+    public Result<SysWebsiteVo> getWebSite(){
+        return Result.success(sysConfigService.getWebSite());
     }
     /**
      * 获取版权信息

@@ -3,11 +3,14 @@ package com.niu.core.service.api.login.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.AuthException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.entity.site.Site;
 import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.site.SiteStatusEnum;
+import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.api.login.IAuthService;
 import com.niu.core.service.api.member.IMemberService;
@@ -37,6 +40,10 @@ public class AuthServiceImpl implements IAuthService {
 
     @Resource
     ICorePcService corePcService;
+
+    @Resource
+    SiteMapper siteMapper;
+
     /**
      * 登录 检测站点的合法性
      *
@@ -44,14 +51,21 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void checkSite() {
         Integer siteId= RequestUtils.apiSiteId();
-        SiteInfoVo siteInfoVo=coreSiteService.getSiteCache(siteId);
-        if(ObjectUtil.isNull(siteInfoVo) || ObjectUtil.isEmpty(siteInfoVo)){
-            throw new AuthException("SITE_NOT_EXIST", 400);
+
+        if (siteId == 0) {
+            Site site = siteMapper.selectOne(new QueryWrapper<Site>().select("site_id").eq("site_domain", RequestUtils.getRequestDomain()));
+            if (site == null) throw new AuthException("站点不存在", 403);
+            siteId = site.getSiteId();
+        }
+
+        SiteInfoVo siteInfoVo = coreSiteService.getSiteCache(siteId);
+        if(ObjectUtil.isEmpty(siteInfoVo)){
+            throw new AuthException("站点不存在", 403);
         }
         String rule=RequestUtils.getReqeustURI();
         if(!rule.equals("site")){
-            if(siteInfoVo.getStatus()== SiteStatusEnum.CLOSE.getCode()){
-                throw new AuthException("站点已停止", 400);
+            if(siteInfoVo.getStatus() == SiteStatusEnum.CLOSE.getCode() || siteInfoVo.getExpireTime() < DateUtils.currTime()){
+                throw new AuthException("站点已停止", 402);
             }
         }
         RequestUtils.setSiteId(siteId);

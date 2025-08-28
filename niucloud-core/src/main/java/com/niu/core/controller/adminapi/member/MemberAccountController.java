@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
  * 会员账单控制器
@@ -23,6 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("adminapi/member/account")
 @SaCheckLogin
+@Description("会员账户管理")
 public class MemberAccountController {
 
     @Resource
@@ -33,6 +35,7 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/type")
+    @Description("获取账户类型")
     public Result<Map> accountType() {
         return Result.success(AccountTypeEnum.getMap());
     }
@@ -44,6 +47,7 @@ public class MemberAccountController {
      * @return Result<PageResult<MemberAccountLogListVo>>
      */
     @GetMapping("/point")
+    @Description("会员积分流水")
     public Result<PageResult<MemberAccountLogListVo>> point(@Validated PageParam pageParam, @Validated MemberAccountLogSearchParam searchParam) {
         searchParam.setAccountType(AccountTypeEnum.POINT.getType());
         PageResult<MemberAccountLogListVo> list = memberAccountService.list(pageParam, searchParam);
@@ -57,6 +61,7 @@ public class MemberAccountController {
      * @return Result<PageResult<MemberAccountLogListVo>>
      */
     @GetMapping("/balance")
+    @Description("会员余额流水")
     public Result<PageResult<MemberAccountLogListVo>> balance(@Validated PageParam pageParam, @Validated MemberAccountLogSearchParam searchParam) {
         searchParam.setAccountType(AccountTypeEnum.BALANCE.getType());
         PageResult<MemberAccountLogListVo> list = memberAccountService.list(pageParam, searchParam);
@@ -70,6 +75,7 @@ public class MemberAccountController {
      * @return Result<PageResult<MemberAccountLogListVo>>
      */
     @GetMapping("/money")
+    @Description("会员可提现余额流水")
     public Result<PageResult<MemberAccountLogListVo>> money(@Validated PageParam pageParam, @Validated MemberAccountLogSearchParam searchParam) {
         searchParam.setAccountType(AccountTypeEnum.MONEY.getType());
         PageResult<MemberAccountLogListVo> list = memberAccountService.list(pageParam, searchParam);
@@ -83,6 +89,7 @@ public class MemberAccountController {
      * @return Result<PageResult<MemberAccountLogListVo>>
      */
     @GetMapping("/growth")
+    @Description("会员成长值流水")
     public Result<PageResult<MemberAccountLogListVo>> growth(@Validated PageParam pageParam, @Validated MemberAccountLogSearchParam searchParam) {
         searchParam.setAccountType(AccountTypeEnum.GROWTH.getType());
         PageResult<MemberAccountLogListVo> list = memberAccountService.list(pageParam, searchParam);
@@ -96,6 +103,7 @@ public class MemberAccountController {
      * @return Result<PageResult<MemberAccountLogListVo>>
      */
     @GetMapping("/commission")
+    @Description("会员佣金流水")
     public Result<PageResult<MemberAccountLogListVo>> commission(@Validated PageParam pageParam, @Validated MemberAccountLogSearchParam searchParam) {
         searchParam.setAccountType(AccountTypeEnum.COMMISSION.getType());
         PageResult<MemberAccountLogListVo> list = memberAccountService.list(pageParam, searchParam);
@@ -106,6 +114,7 @@ public class MemberAccountController {
      * 调整积分
      */
     @PostMapping("/point")
+    @Description("调整积分")
     public Result<Object> adjustPoint(@Validated @RequestBody AdjustAccountParam param) {
         memberAccountService.adjustPoint(param);
         return Result.success();
@@ -115,6 +124,7 @@ public class MemberAccountController {
      * 调整余额
      */
     @PostMapping("/balance")
+    @Description("调整余额")
     public Result<Object> adjustBalance(@Validated @RequestBody AdjustAccountParam param) {
         memberAccountService.adjustBalance(param);
         return Result.success();
@@ -124,6 +134,7 @@ public class MemberAccountController {
      * 会员佣金统计
      */
     @GetMapping("/sum_commission")
+    @Description("会员佣金统计")
     public Result<SumCommissionVo> sumCommission(@Validated MemberAccountLogSearchParam searchParam) {
         SumCommissionVo data = memberAccountService.sumCommission(searchParam);
         return Result.success(data);
@@ -133,15 +144,17 @@ public class MemberAccountController {
      * 会员积分统计
      */
     @GetMapping("/sum_point")
+    @Description("会员积分统计")
     public Result<SumPointVo> sumPoint(@Validated MemberAccountLogSearchParam searchParam) {
         SumPointVo data = memberAccountService.sumPoint(searchParam);
         return Result.success(data);
     }
 
     /**
-     * 会员积分统计
+     * 会员余额统计
      */
     @GetMapping("/sum_balance")
+    @Description("会员余额统计")
     public Result<SumBalanceVo> sumBalance(@Validated MemberAccountLogSearchParam searchParam) {
         SumBalanceVo data = memberAccountService.sumBalance(searchParam);
         return Result.success(data);
@@ -153,7 +166,8 @@ public class MemberAccountController {
      * @return
      */
     @GetMapping("/change_type/{account_type}")
-    public Result<JSONObject> changeType(@PathVariable("account_type") String accountType) {
+    @Description("获取账户类型的变动方式")
+    public Result<JSONObject> changeType(@Validated @PathVariable("account_type") String accountType) {
         return Result.success(MemberAccountChangeTypeEnum.getType(accountType));
     }
 

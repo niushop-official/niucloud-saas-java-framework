@@ -33,7 +33,7 @@
                         <div v-else-if="row.menu_type == 2">{{ t('menuTypeButton') }}</div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="api_url" :label="t('authId')" min-width="150" align="center" />
+                <el-table-column prop="api_url" :label="t('authId')" min-width="150" align="left" />
                 <el-table-column :label="t('status')" min-width="120" align="center">
                     <template #default="{ row }">
                         <el-tag class="ml-2" type="success" v-if="row.status == 1">{{ t('statusNormal') }}</el-tag>
@@ -78,15 +78,14 @@ const getMenuList = () => {
         menusTableData.loading = false
         menusTableData.data = res.data
     }).catch(() => {
-
     })
 }
 getMenuList()
 // 重置菜单
 const refreshMenu = () => {
     ElMessageBox.confirm(h('div', null, [
-        h('p', null, t('initializeMenuTipsOne')),
-        h('p', null, t('initializeMenuTipsTwo')),
+            h('p', null, t('initializeMenuTipsOne')),
+            h('p', null, t('initializeMenuTipsTwo')),
         ]), t('warning'),
         {
             confirmButtonText: t('confirm'),
@@ -98,8 +97,8 @@ const refreshMenu = () => {
             location.reload()
         }).catch(() => {
         })
-    }).catch(()=>{})
-    
+    }).catch(() => {
+    })
 }
 
 /**

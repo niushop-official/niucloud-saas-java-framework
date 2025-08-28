@@ -1,6 +1,7 @@
 package com.niu.core.controller.adminapi.member;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
@@ -18,11 +19,12 @@ import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
  * 会员控制器
  */
-
+@Description("会员控制器")
 @RestController
 @RequestMapping("/adminapi/member")
 @SaCheckLogin
@@ -37,6 +39,7 @@ public class MemberController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<MemberListVo>>
      */
+    @Description("会员列表")
     @GetMapping("/member")
     public Result<PageResult<MemberListVo>> list(@Validated PageParam pageParam,
                                                      @Validated MemberSearchParam searchParam) {
@@ -50,6 +53,7 @@ public class MemberController {
      * @param searchParam
      * @return
      */
+    @Description("查询全部会员")
     @GetMapping("/member/list")
     public Result<List<MemberAllListVo>> list(@Validated MemberSearchParam searchParam) {
         List<MemberAllListVo> list = memberService.all(searchParam);
@@ -61,6 +65,7 @@ public class MemberController {
      * @param id 主键ID
      * @return Result<MemberInfoVo>
      */
+    @Description("会员详情")
     @GetMapping("/member/{id}")
     public Result<MemberInfoVo> info(@PathVariable("id") Integer id) {
         MemberInfoVo info = memberService.info(id);
@@ -72,6 +77,7 @@ public class MemberController {
      * @param addParam 添加参数
      * @return Result<Object>
      */
+    @Description("会员添加")
     @PostMapping("/member")
     public Result<Object> add(@Validated @RequestBody MemberAddParam addParam) {
         memberService.add(addParam);
@@ -83,6 +89,7 @@ public class MemberController {
      * @param editParam 编辑参数
      * @return Result<Object>
      */
+    @Description("会员编辑")
     @PutMapping("/member/{member_id}")
     public Result<Object> edit(@PathVariable("member_id") Integer memberId, @Validated @RequestBody MemberParam editParam) {
         memberService.edit(memberId, editParam);
@@ -90,10 +97,11 @@ public class MemberController {
     }
 
     /**
-     * 会员编辑
+     * 会员单字段编辑
      * @param editParam 编辑参数
      * @return Result<Object>
      */
+    @Description("会员单字段编辑")
     @PutMapping("/member/modify/{member_id}/{field}")
     public Result<Object> modify(@PathVariable("member_id") Integer memberId, @PathVariable("field") String field, @Validated @RequestBody MemberModifyParam editParam) {
         editParam.setMemberId(memberId);
@@ -107,6 +115,7 @@ public class MemberController {
      * @param memberId 参数
      * @return Result<Object>
      */
+    @Description("会员删除")
     @DeleteMapping("/member/{member_id}")
     public Result<Object> del(@PathVariable("member_id") Integer memberId) {
         memberService.del(memberId);
@@ -117,15 +126,17 @@ public class MemberController {
      * 获取会员码
      * @return
      */
+    @Description("获取会员码")
     @GetMapping("/memberno")
     public Result<String> getMemberNo() {
-        return Result.success(memberService.getMemberNo());
+        return Result.success(1,"操作成功",memberService.getMemberNo());
     }
 
     /**
      * 获取所有注册方式
      * @return
      */
+    @Description("获取所有注册方式")
     @GetMapping("/registertype")
     public Result<Map> getRegisterType() {
         return Result.success(MemberRegisterTypeEnum.getMap());
@@ -135,6 +146,7 @@ public class MemberController {
      * 获取所有注册渠道
      * @return
      */
+    @Description("获取所有注册渠道")
     @GetMapping("/register/channel")
     public Result<Map> getRegisterChannel() {
         return Result.success(MemberRegisterChannelEnum.getMap());
@@ -144,15 +156,17 @@ public class MemberController {
      * 获取所有会员状态
      * @return
      */
+    @Description("获取所有会员状态")
     @GetMapping("/status/list")
     public Result<Map> getStatusList() {
         return Result.success(StatusEnum.getMap());
     }
 
     /**
-     * 设置状态
+     * 设置会员状态
      * @param status
      */
+    @Description("设置会员状态")
     @PutMapping("/setstatus/{status}")
     public Result<Object> setStatus(@PathVariable("status") Integer status, @RequestBody MemberParam param) {
         memberService.setStatus(status, param);
@@ -163,6 +177,7 @@ public class MemberController {
      * 获取会员权益字典
      * @return
      */
+    @Description("获取会员权益字典")
     @GetMapping("/dict/benefits")
     public Result<JSONObject> getMemberBenefitsDict() {
         return Result.success(BenefitsEnum.getType());
@@ -172,6 +187,7 @@ public class MemberController {
      * 获取会员礼包字典
      * @return
      */
+    @Description("获取会员礼包字典")
     @GetMapping("/dict/gift")
     public Result<JSONObject> getMemberGiftDict() {
         return Result.success(GiftEnum.getType());
@@ -181,6 +197,7 @@ public class MemberController {
      * 获取成长值规则字典
      * @return
      */
+    @Description("获取成长值规则字典")
     @GetMapping("/dict/growth_rule")
     public Result<JSONObject> getGrowthRuleDict() {
         return Result.success(GrowthRuleEnum.getType());
@@ -190,6 +207,7 @@ public class MemberController {
      * 获取积分规则字典
      * @return
      */
+    @Description("获取积分规则字典")
     @GetMapping("/dict/point_rule")
     public Result<JSONObject> getPointRuleDict() {
         return Result.success(PointRuleEnum.getType());
@@ -211,5 +229,16 @@ public class MemberController {
     @PostMapping("/benefits/content")
     public Result<JSONObject> getMemberBenefitsContent(@RequestBody JSONObject param) {
         return Result.success(memberService.getMemberBenefitsContent(param));
+    }
+
+    /**
+     * 批量修改
+     * @param param
+     * @return
+     */
+    @PostMapping("/member/batch_modify")
+    public Result<Object> batchModify(@Validated @RequestBody BatchModifyParam param) {
+        memberService.batchModify(param);
+        return Result.success();
     }
 }

@@ -4,9 +4,7 @@
 
             <div class="flex justify-between items-center">
                 <span class="text-lg">{{pageName}}</span>
-                <el-button type="primary" @click="addEvent">
-                    {{ t('addShopGoodsAttr') }}
-                </el-button>
+                <el-button type="primary" @click="addEvent">{{ t('addShopGoodsAttr') }}</el-button>
             </div>
 
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
@@ -53,7 +51,7 @@
 
         </el-card>
 
-        <el-dialog v-model="showDialog" :title="titleDialog" width="500px" :destroy-on-close="true">
+        <el-dialog v-model="showDialog" :title="titleDialog" width="500px" :close-on-click-modal="false" :destroy-on-close="true">
             <el-form :model="formData" label-width="120px" ref="formRef" :rules="formRules" class="page-form" v-loading="loading">
                 <el-form-item :label="t('attrName')" prop="attr_name">
                     <el-input v-model.trim="formData.attr_name" clearable :placeholder="t('attrNamePlaceholder')" class="input-width"  maxlength="20" />
@@ -77,16 +75,16 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref,computed } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { t } from '@/lang'
-import { ElMessage,ElMessageBox,FormInstance } from 'element-plus'
+import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
-import { debounce,filterNumber } from '@/utils/common'
-import { getAttrPageList, addAttr, deleteAttr,modifyAttrSort,editAttr} from '@/addon/shop/api/goods'
+import { debounce, filterNumber, setTablePageStorage, getTablePageStorage } from '@/utils/common'
+import { getAttrPageList, addAttr, deleteAttr, modifyAttrSort, editAttr } from '@/addon/shop/api/goods'
 
 const route = useRoute()
 const router = useRouter()
-const pageName = route.meta.title;
+const pageName = route.meta.title
 
 const goodsAttrTable = reactive({
     page: 1,
@@ -149,35 +147,36 @@ const loadShopGoodsAttrList = (page: number = 1) => {
     getAttrPageList({
         page: goodsAttrTable.page,
         limit: goodsAttrTable.limit,
-         ...goodsAttrTable.searchParam
+        ...goodsAttrTable.searchParam
     }).then(res => {
         goodsAttrTable.loading = false
         goodsAttrTable.data = res.data.data
         goodsAttrTable.total = res.data.total
+        setTablePageStorage(goodsAttrTable.page, goodsAttrTable.limit, goodsAttrTable.searchParam)
     }).catch(() => {
         goodsAttrTable.loading = false
     })
 }
 
-loadShopGoodsAttrList()
+loadShopGoodsAttrList(getTablePageStorage(goodsAttrTable.searchParam).page)
 
 /**
  * 添加商品参数
  */
 const addEvent = () => {
-    formData.attr_id = 0;
-    formData.attr_name = '';
-    formData.sort = 0;
-    titleDialog.value = t('addShopGoodsAttr');
+    formData.attr_id = 0
+    formData.attr_name = ''
+    formData.sort = 0
+    titleDialog.value = t('addShopGoodsAttr')
     showDialog.value = true
 }
 
 // 编辑商品参数
-const editEvent = (data:any)=>{
-    formData.attr_id = data.attr_id;
-    formData.attr_name = data.attr_name;
-    formData.sort = data.sort;
-    titleDialog.value = t('updateShopGoodsAttr');
+const editEvent = (data:any) => {
+    formData.attr_id = data.attr_id
+    formData.attr_name = data.attr_name
+    formData.sort = data.sort
+    titleDialog.value = t('updateShopGoodsAttr')
     showDialog.value = true
 }
 
@@ -219,7 +218,7 @@ const deleteEvent = (id: number) => {
         {
             confirmButtonText: t('confirm'),
             cancelButtonText: t('cancel'),
-            type: 'warning',
+            type: 'warning'
         }
     ).then(() => {
         deleteAttr(id).then(() => {
@@ -234,7 +233,7 @@ const sortInputListener = debounce((sort, row) => {
     if (isNaN(sort) || !/^\d{0,8}$/.test(sort)) {
         ElMessage({
             type: 'warning',
-            message: `${ t('sortTips') }`
+            message: `${t('sortTips')}`
         })
         return
     }

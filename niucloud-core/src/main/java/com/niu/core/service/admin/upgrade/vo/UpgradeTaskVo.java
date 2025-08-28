@@ -24,23 +24,24 @@ public class UpgradeTaskVo implements Serializable {
 
     private String step;
 
-    private List<String> executed = new LinkedList<>();
+    private LinkedList<String> executed = new LinkedList<>();
 
-    private List<String> log = new LinkedList<>();
+    private LinkedList<String> log = new LinkedList<>();
 
     private Map<String, Object> params;
 
-    private JSONObject upgradeContent;
+    private UpgradeContentVo upgradeContent;
 
     private String status;
 
-    private List<String> error = new LinkedList<>();
+    private LinkedList<String> error = new LinkedList<>();
 
     private String version;
 
     private String upgradeVersion;
 
-    private Map<String, Step> steps = new LinkedHashMap<>();
+    private LinkedHashMap<String, Step> steps = new LinkedHashMap<>();
+
 
     public UpgradeTaskVo() {
         this.steps = new LinkedHashMap<>();
@@ -53,6 +54,8 @@ public class UpgradeTaskVo implements Serializable {
         steps.put("handleVue", new Step("handleUniapp", "处理前端源码"));
         steps.put("refreshMenu", new Step("refreshMenu", "刷新菜单"));
         steps.put("installSchedule", new Step("installSchedule", "安装计划任务"));
+        steps.put("cloudBuild", new Step("cloudBuild", "开始云编译"));
+        steps.put("gteCloudBuildLog", new Step("gteCloudBuildLog", ""));
         steps.put("upgradeComplete", new Step("upgradeComplete", "升级完成"));
     }
 
@@ -62,5 +65,9 @@ public class UpgradeTaskVo implements Serializable {
         private String step;
 
         private String title;
+    }
+
+    public List<String> getUpgradeApps() {
+        return upgradeContent == null ? new LinkedList<>() : upgradeContent.getUpgradeApps();
     }
 }

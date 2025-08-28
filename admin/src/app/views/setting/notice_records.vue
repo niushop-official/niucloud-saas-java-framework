@@ -10,7 +10,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="recordsTableData.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('searchReceiver')" prop="receiver">
-                        <el-input v-model.trim="recordsTableData.searchParam.receiver" :placeholder="t('receiverPlaceholder')" />
+                        <el-input class="!w-[200px]" v-model.trim="recordsTableData.searchParam.receiver" :placeholder="t('receiverPlaceholder')" />
                     </el-form-item>
 
                     <el-form-item :label="t('noticeKey')" prop="key">
@@ -113,7 +113,7 @@ const setTemplateList = async () => {
         templateList.seller.list = []
         res.data.forEach(item => {
             if (item.notice.length) {
-                const buyer = [], seller = []
+                const buyer = []; const seller = []
                 Object.keys(item.notice).forEach((key, index) => {
                     const notice = item.notice[key]
                     notice.addon_name = item.title
@@ -157,7 +157,6 @@ const loadNoticeLogList = (page: number = 1) => {
     })
 }
 loadNoticeLogList()
-
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()

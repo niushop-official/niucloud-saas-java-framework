@@ -43,6 +43,6 @@ public class SysUserParam implements Serializable {
     @NotNull(message = "isDel参数缺失")
     private Integer isDel;
 
-    private List<SysCreateSiteLimitParam> createSiteLimitParamList;
+    private List<SysCreateSiteLimitParam> createSiteLimit;
 
 }

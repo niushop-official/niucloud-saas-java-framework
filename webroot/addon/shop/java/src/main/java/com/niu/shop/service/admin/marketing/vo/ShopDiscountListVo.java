@@ -44,6 +44,17 @@ public class ShopDiscountListVo implements Serializable {
     private Integer activeMemberNum;  // 活动参与会员数
     private Integer activeSuccessNum;  // 活动成功参与会员数
 
+    //新表
+    private Integer discountId;
+    private String name;
+    private String remark;
+    private String status;
+    private String statusName;
+    private BigDecimal orderMoney;
+    private Integer orderNum;
+    private Integer memberNum;
+    private Integer successNum;
+
     /**
      * 获取活动类型
      * @return
@@ -69,4 +80,7 @@ public class ShopDiscountListVo implements Serializable {
     }
 
 
+    public String getStatusName() {
+        return ActiveStatusEnum.getNameByStatus(this.status);
+    }
 }

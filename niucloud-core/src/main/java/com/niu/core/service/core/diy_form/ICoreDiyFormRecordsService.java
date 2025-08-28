@@ -38,4 +38,9 @@ public interface ICoreDiyFormRecordsService {
      */
     void del(Integer siteId, Integer id);
 
+    /**
+     * 万能表单填写记录编辑
+     * @param param
+     */
+    void edit(DiyFormRecordsParam param);
 }

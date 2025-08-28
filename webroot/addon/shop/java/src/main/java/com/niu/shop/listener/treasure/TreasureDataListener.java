@@ -2,6 +2,7 @@ package com.niu.shop.listener.treasure;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,32 +19,84 @@ import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
+import com.niu.shop.service.admin.goods.IShopGoodsService;
+import com.niu.shop.service.admin.goods.param.ShopGoodsSelectSearchParam;
+import com.niu.shop.service.admin.goods.vo.ShopSelectGoodsListVo;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @EventCallback("shop")
 @Component
 public class TreasureDataListener extends CommonEventDefiner {
+    @Resource
     private ShopGoodsMapper shopGoodsMapper;
+    @Resource
+    private IShopGoodsService iShopGoodsService;
+
     private ICoreUploadService coreUploadService;
     private ShopGoodsSkuMapper shopGoodsSkuMapper;
 
     @Override
-    public CommonEventDefiner.CommonEventResult handleCallback(CommonEventDefiner.CommonEvent event) {
-
-        if(event.getEventName().equals("RechargeGiftContent"))
-        {
+    public CommonEventResult handleCallback(CommonEvent commonEvent) {
+        if(commonEvent.getEventName().equals("TreasureDataNewList")){
+//            List<ShopGoods> shopGoodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().eq("site_id", commonEvent.getSiteId()).last("limit 10"));
             CommonEventDefiner.CommonEventResult commonResult = new CommonEventDefiner.CommonEventResult();
-            JSONObject data = JSONUtil.parseObj(event.getData());
+            //获取传过来的条件数据data
+            JSONObject data = JSONUtil.parseObj(commonEvent.getData());
+            //获取page和limit数据
+            PageParam  pageParam = data.getBean("pageParam", PageParam.class);
+            if(ObjectUtil.isNull(pageParam)){
+                pageParam = new PageParam();
+                pageParam.setPage(1);
+                pageParam.setLimit(10);
+            }
+            JSONArray joinIds = data.getJSONArray("joinIds");
+            ShopGoodsSelectSearchParam searchParam = new ShopGoodsSelectSearchParam();
+            searchParam.setGoodsIds(JSONUtil.toList(joinIds, Integer.class));
+            searchParam.setKeyword(data.getStr("keyword"));
+            ShopSelectGoodsListVo shopSelectGoodsListVo = iShopGoodsService.getZhongcaoSelectPage(pageParam, searchParam);
+            commonResult.setResult(shopSelectGoodsListVo);
+            return commonResult;
+        }else if(commonEvent.getEventName().equals("TreasureDataList")){
+            CommonEventDefiner.CommonEventResult commonResult = new CommonEventDefiner.CommonEventResult();
+            //获取传过来的条件数据data
+            JSONObject data = JSONUtil.parseObj(commonEvent.getData());
+            //获取page和limit数据
+            PageParam  pageParam = data.getBean("pageParam", PageParam.class);
+            if(ObjectUtil.isNull(pageParam)){
+                pageParam = new PageParam();
+                pageParam.setPage(1);
+                pageParam.setLimit(10000);
+            }
+            JSONArray relateIds = data.getJSONArray("relateIds");
+            ShopGoodsSelectSearchParam searchParam = new ShopGoodsSelectSearchParam();
+            searchParam.setGoodsIds(JSONUtil.toList(relateIds, Integer.class));
+            searchParam.setSelectType(data.getStr("selectType"));
+            searchParam.setKeyword(data.getStr("keyword"));
+            ShopSelectGoodsListVo shopSelectGoodsListVo = iShopGoodsService.getZhongcaoSelectPage(pageParam, searchParam);
+            commonResult.setResult(shopSelectGoodsListVo);
+            return commonResult;
         }
         return null;
     }
+
+//    @Override
+//    public CommonEventDefiner.CommonEventResult handleCallback(CommonEventDefiner.CommonEvent event) {
+//
+//        if(event.getEventName().equals("RechargeGiftContent"))
+//        {
+//            CommonEventDefiner.CommonEventResult commonResult = new CommonEventDefiner.CommonEventResult();
+//            JSONObject data = JSONUtil.parseObj(event.getData());
+//        }
+//        return null;
+//    }
+//public TreasureDataEventResult handleCallback(TreasureDataEvent event) {
+//
+//}
    /* @Override
     public TreasureDataEventResult handleCallback(TreasureDataEvent event) {
         GetTreasureSearchParam param = event.getParam();

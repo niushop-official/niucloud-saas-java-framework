@@ -2,6 +2,7 @@ package com.niu.core.service.admin.home.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,6 +10,7 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.ImageToBase64ConverterUtil;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.config.GlobalConfig;
@@ -18,6 +20,7 @@ import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.entity.user.UserCreateSiteLimit;
 import com.niu.core.enums.addon.AddonActionEnum;
+import com.niu.core.enums.addon.AddonStatusEnum;
 import com.niu.core.enums.site.SiteStatusEnum;
 import com.niu.core.enums.sys.AppTypeEnum;
 import com.niu.core.mapper.addon.AddonMapper;
@@ -26,6 +29,7 @@ import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
 import com.niu.core.mapper.user.UserCreateSiteLimitMapper;
 import com.niu.core.service.admin.addon.IAddonService;
+import com.niu.core.service.admin.addon.vo.AddonInfoVo;
 import com.niu.core.service.admin.auth.IAuthService;
 import com.niu.core.service.admin.home.IAuthSiteService;
 import com.niu.core.service.admin.home.param.HomeSiteAddParam;
@@ -45,7 +49,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.CollectionUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthSiteServiceImpl implements IAuthSiteService {
@@ -96,7 +107,7 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
         QueryWrapper<Site> queryWrapper = new QueryWrapper<>();
         //查询条件判断组装
         if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) {
-            queryWrapper.like("site_name", searchParam.getKeywords()).or().like("keywords", searchParam.getKeywords());
+            queryWrapper.like("site_name", searchParam.getKeywords()).or().like("site_id", searchParam.getKeywords());
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getStatus())) {
@@ -161,8 +172,11 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
             }
         }
 
-
-        queryWrapper.orderByDesc("create_time");
+        if(ObjectUtil.isEmpty(searchParam.getSort())){
+            queryWrapper.orderByDesc("create_time");
+        }else{
+            queryWrapper.orderByDesc(searchParam.getSort());
+        }
 
         IPage<Site> iPage = siteMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<SiteListVo> list = new LinkedList<>();
@@ -466,5 +480,60 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
         siteAddParam.setGroupId(homeSiteAddParam.getGroupId());
         siteAddParam.setExpireTime(DateUtils.getDateAddMonth(month));
         siteService.add(siteAddParam);
+    }
+
+    @Override
+    public List<AddonInfoVo> getSiteGroupAppList() {
+        List<String> siteGroupAppList = getSiteGroupApps();
+        if (CollectionUtils.isEmpty(siteGroupAppList)){
+            return List.of();
+        }
+        List<Addon> addonList = addonMapper.selectList(new LambdaQueryWrapper<Addon>()
+                .eq(Addon::getStatus, AddonStatusEnum.ON.getCode())
+                .eq(Addon::getType, AddonActionEnum.APP.getCode())
+                .in(Addon::getKey, siteGroupAppList));
+
+        return processAddonList(addonList);
+    }
+
+    private List<AddonInfoVo> processAddonList(List<Addon> addonList){
+        List<AddonInfoVo> result = new ArrayList<>();
+        if (CollectionUtils.isEmpty(addonList)){
+            return result;
+        }
+        for (Addon addon : addonList) {
+            AddonInfoVo addonInfoVo = new AddonInfoVo();
+            BeanUtils.copyProperties(addon, addonInfoVo);
+            addonInfoVo.setStatusName(AddonStatusEnum.getName(addon.getStatus()));
+            try {
+                addonInfoVo.setIcon(ImageToBase64ConverterUtil.convertToBase64(addon.getIcon()));
+            } catch (IOException e) {
+                addonInfoVo.setIcon("");
+            }
+            result.add(addonInfoVo);
+        }
+        return result;
+    }
+
+    private List<String> getSiteGroupApps() {
+        List<SiteGroup> siteGroups;
+        if(authService.isSuperAdmin()){
+            siteGroups = siteGroupMapper.selectList(new QueryWrapper<SiteGroup>().select("app"));
+        }else {
+            MPJQueryWrapper<UserCreateSiteLimit> mpjqw = new MPJQueryWrapper<>();
+            mpjqw.setAlias("ucsl").leftJoin("?_site_group sg on ucsl.group_id = sg.group_id".replace("?_", GlobalConfig.tablePrefix));
+            mpjqw.select("sg.group_id, sg.app");
+            mpjqw.eq("ucsl.uid", RequestUtils.uid());
+            siteGroups = userCreateSiteLimitMapper.selectJoinList(SiteGroup.class,mpjqw);
+        }
+        if (CollectionUtils.isEmpty(siteGroups)){
+            return List.of();
+        }
+        return siteGroups.stream()
+                .flatMap(group -> Arrays.stream(group.getApp().split(",")))
+                .map(s -> s.replaceAll("[\\[\\]\"]", ""))
+                .map(String::trim)
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

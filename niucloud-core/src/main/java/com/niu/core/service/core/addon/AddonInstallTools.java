@@ -450,7 +450,7 @@ public class AddonInstallTools extends CoreAddonBaseService {
                         }).collect(Collectors.joining(""));
 
                         String component = "            <template v-if=\"component.componentName == '" + componentName + "'\">\n";
-                        component += "                <"+ fileName +" :component=\"component\" :global=\"data.global\" :index=\"index\" :pullDownRefreshCount=\"props.pullDownRefreshCount\" />\n";
+                        component += "                <"+ fileName +" :component=\"component\" :global=\"data.global\" :index=\"index\" :scrollBool=\"diyGroup.componentsScrollBool."+ componentName +"\" @update:componentIsShow=\"component.componentIsShow = $event\" />\n";
                         component += "            </template>";
 
                         diyGroupComponent.add(component);

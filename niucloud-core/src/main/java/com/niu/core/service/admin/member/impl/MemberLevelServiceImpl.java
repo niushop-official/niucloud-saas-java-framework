@@ -60,7 +60,7 @@ public class MemberLevelServiceImpl implements IMemberLevelService {
 
         QueryWrapper<MemberLevel> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", siteId);
-        queryWrapper.orderByDesc("level_id");
+        queryWrapper.orderByAsc("growth");
         if (ObjectUtil.isNotEmpty(searchParam.getLevelName())) queryWrapper.like("level_name", searchParam.getLevelName());
 
         IPage<MemberLevel> iPage = memberLevelMapper.selectPage(new Page<>(page, limit), queryWrapper);

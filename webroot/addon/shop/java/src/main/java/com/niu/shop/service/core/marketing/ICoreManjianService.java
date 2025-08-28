@@ -9,6 +9,7 @@ import com.niu.shop.service.admin.goods.vo.ShopManjianRuleContentVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.api.cart.vo.ShopCartCalculateVo;
 import com.niu.shop.service.core.marketing.param.GetManjianInfoParam;
+import com.niu.shop.service.core.marketing.vo.ShopManjianInfoVo;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 
 import java.math.BigDecimal;
@@ -39,7 +40,7 @@ public interface ICoreManjianService extends IService<ShopManjian> {
      * @param matchOrderGoodsMoney    匹配的订单商品总金额
      * @param manjianOneDiscountMoney 单个满减活动的优惠金额
      */
-    BigDecimal manjianGoodsCalculate(final OrderCreateDataVo order, ShopManjian manjianInfo, boolean isFreeShipping, int level, BigDecimal discountMoney, List<Integer> matchSkuIds, BigDecimal matchOrderGoodsMoney, final BigDecimal manjianOneDiscountMoney);
+    BigDecimal manjianGoodsCalculate(final OrderCreateDataVo order, ShopManjianInfoVo manjianInfo, boolean isFreeShipping, int level, BigDecimal discountMoney, List<Integer> matchSkuIds, BigDecimal matchOrderGoodsMoney, final BigDecimal manjianOneDiscountMoney);
 
     /**
      * 满减活动商品赠品内容处理

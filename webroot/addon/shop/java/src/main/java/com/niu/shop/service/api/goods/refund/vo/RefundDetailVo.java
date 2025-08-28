@@ -4,12 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.sys.SysUser;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.mapper.sys.SysUserMapper;
-import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.enums.order.OrderLogMainTypeEnum;
 import com.niu.shop.enums.order.OrderRefundActionTypeEnum;
 import com.niu.shop.enums.order.OrderRefundStatusEnum;
@@ -91,12 +90,9 @@ public class RefundDetailVo implements Serializable {
         private String deliveryStatus; // 配送状态
         private BigDecimal discountMoney;
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsImageThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsImage());
         }
     }
 

@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `{{prefix}}recharge`;
 
 DROP TABLE IF EXISTS `{{prefix}}recharge_order`;
 

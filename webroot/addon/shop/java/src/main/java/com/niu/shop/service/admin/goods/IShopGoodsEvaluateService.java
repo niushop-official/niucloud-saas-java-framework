@@ -1,6 +1,7 @@
 package com.niu.shop.service.admin.goods;
 
 import com.niu.core.common.domain.PageResult;
+import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateBatchParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateParam;
 import com.niu.core.common.domain.PageParam;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsEvaluateInfoVo;
@@ -77,4 +78,18 @@ public interface IShopGoodsEvaluateService {
      */
     void cancelTopping(Integer id);
 
+    /**
+     * 批量通过
+     */
+    void batchAdopt(ShopGoodsEvaluateBatchParam shopGoodsEvaluateBatchParam);
+
+    /**
+     * 批量拒绝
+     */
+    void batchRefuse(ShopGoodsEvaluateBatchParam shopGoodsEvaluateBatchParam);
+
+    /**
+     * 批量删除
+     */
+    void batchDel(ShopGoodsEvaluateBatchParam shopGoodsEvaluateBatchParam);
 }

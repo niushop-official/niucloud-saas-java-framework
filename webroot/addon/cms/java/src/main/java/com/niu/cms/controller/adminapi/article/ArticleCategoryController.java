@@ -1,5 +1,6 @@
 package com.niu.cms.controller.adminapi.article;
 
+import jdk.jfr.Description;
 import com.niu.cms.service.admin.article.IArticleCategoryService;
 import com.niu.cms.service.admin.article.param.CategoryParam;
 import com.niu.cms.service.admin.article.param.CategorySearchParam;
@@ -22,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("adminapi/cms/category")
+@Description("文章分类管理")
 public class ArticleCategoryController {
     
     @Resource
@@ -34,6 +36,7 @@ public class ArticleCategoryController {
      * @return Result<PageResult<CategoryListVo>>
      */
     @GetMapping("")
+    @Description("文章分类列表")
     public Result<PageResult<CategoryListVo>> list(@Validated PageParam pageParam, @Validated CategorySearchParam searchParam) {
         PageResult<CategoryListVo> list = articleCategoryService.list(pageParam, searchParam);
         return Result.success(list);
@@ -45,6 +48,7 @@ public class ArticleCategoryController {
      * @return Result<CategoryInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("文章分类详情")
     public Result<CategoryInfoVo> info(@PathVariable("id") Integer id) {
         CategoryInfoVo info = articleCategoryService.info(id);
         return Result.success(info);
@@ -56,6 +60,7 @@ public class ArticleCategoryController {
      * @return Result<Object>
      */
     @PostMapping("")
+    @Description("文章分类添加")
     public Result<Object> add(@Validated @RequestBody CategoryParam addParam) {
         articleCategoryService.add(addParam);
         return Result.success();
@@ -67,6 +72,7 @@ public class ArticleCategoryController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("文章分类编辑")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody CategoryParam editParam) {
         articleCategoryService.edit(id, editParam);
         return Result.success();
@@ -78,6 +84,7 @@ public class ArticleCategoryController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("文章分类删除")
     public Result<Object> del(@PathVariable("id") Integer id) {
         articleCategoryService.del(id);
         return Result.success();
@@ -88,6 +95,7 @@ public class ArticleCategoryController {
      * @return
      */
     @GetMapping("/all")
+    @Description("全部文章分类")
     public Result<List<CategoryAllListVo>> all() {
         List<CategoryAllListVo> list = articleCategoryService.all();
         return Result.success(list);

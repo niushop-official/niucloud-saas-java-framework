@@ -37,14 +37,25 @@
                             <el-input v-model.trim="goodsEdit.formData.goods_name" clearable :placeholder="t('goodsNamePlaceholder')" class="input-width" maxlength="60" show-word-limit />
                         </el-form-item>
                         <el-form-item :label="t('subTitle')" prop="sub_title">
-                            <el-input v-model.trim="goodsEdit.formData.sub_title" clearable :placeholder="t('subTitlePlaceholder')" class="input-width" maxlength="80" show-word-limit />
+                            <el-input v-model.trim="goodsEdit.formData.sub_title" clearable :placeholder="t('subTitlePlaceholder')" class="input-width" maxlength="100" show-word-limit />
                         </el-form-item>
                         <el-form-item :label="t('goodsImage')" prop="goods_image">
                             <upload-image v-model="goodsEdit.formData.goods_image" :limit="10" />
                         </el-form-item>
-<!--                        <el-form-item :label="t('goodsVideo')">-->
-<!--                            <upload-video v-model="goodsEdit.formData.goods_video" :limit="1" />-->
-<!--                        </el-form-item>-->
+                        <el-form-item :label="t('goodsVideo')">
+                                <div class="flex flex-col">
+                                    <upload-video v-model="goodsEdit.formData.goods_video" :limit="1" />
+                                    <el-input v-model="goodsEdit.formData.goods_video" clearable :placeholder="t('在此输入外链视频地址')" class="input-width mt-[10px]" />
+                                    
+                                    <div class="flex flex-col mt-[10px]">
+                                        <div class="text-[12px] text-[#999] leading-[20px]">{{ t('goodsVideoTipTile') }}</div>
+                                        <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipOne') }}</div>
+                                        <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipThree') }}</div>
+                                        <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipFour') }}</div>
+                                        <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipFive') }}</div>
+                                    </div>
+                                </div>
+                        </el-form-item>
                         <el-form-item :label="t('goodsCategory')" prop="goods_category">
                             <el-cascader v-model="goodsEdit.formData.goods_category" :options="goodsEdit.goodsCategoryOptions" :props="goodsEdit.goodsCategoryProps" clearable filterable @change="goodsEdit.categoryHandleChange" popper-class="choice" />
                             <div class="ml-[10px]">
@@ -54,34 +65,12 @@
                         </el-form-item>
 
                         <el-form-item :label="t('brand')">
-                            <el-select v-model="goodsEdit.formData.brand_id" :placeholder="t('brandPlaceholder')" clearable>
+                            <el-select v-model="goodsEdit.formData.brand_id" :placeholder="t('brandPlaceholder')" clearable filterable remote reserve-keyword :remote-method="goodsEdit.refreshGoodsBrand">
                                 <el-option v-for="item in goodsEdit.brandOptions" :key="item.brand_id" :label="item.brand_name" :value="item.brand_id" />
                             </el-select>
                             <div class="ml-[10px]">
                                 <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshGoodsBrand(true)">{{ t('refresh') }}</span>
                                 <span class="cursor-pointer text-primary" @click="goodsEdit.toGoodsBrandEvent">{{ t('addGoodsBrand') }}</span>
-                            </div>
-                        </el-form-item>
-
-                        <el-form-item :label="t('poster')">
-                            <el-select v-model="goodsEdit.formData.poster_id" :placeholder="t('posterPlaceholder')" clearable>
-                                <el-option v-for="item in goodsEdit.posterOptions" :key="item.id" :label="item.name" :value="item.id" />
-                            </el-select>
-                            <div class="ml-[10px]">
-                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshGoodsPoster(true)">{{ t('refresh') }}</span>
-                                <span class="cursor-pointer text-primary" @click="goodsEdit.toPosterEvent">{{ t('addGoodsPoster') }}</span>
-                            </div>
-                        </el-form-item>
-
-                        <div class="ml-[120px] mb-[10px] text-[12px] text-[#999] leading-[20px]">{{ t('posterTips') }}</div>
-
-                        <el-form-item :label="t('diyForm')">
-                            <el-select v-model="goodsEdit.formData.form_id" :placeholder="t('diyFormPlaceholder')" clearable>
-                                <el-option v-for="item in goodsEdit.diyFormOptions" :key="item.form_id" :label="item.page_title" :value="item.form_id" />
-                            </el-select>
-                            <div class="ml-[10px]">
-                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshDiyForm(true)">{{ t('refresh') }}</span>
-                                <span class="cursor-pointer text-primary" @click="goodsEdit.toDiyFormEvent">{{ t('addDiyForm') }}</span>
                             </div>
                         </el-form-item>
 
@@ -195,7 +184,7 @@
                                 </el-input>
                             </el-form-item>
                             <el-form-item :label="t('skuNo')">
-                                <el-input v-model.trim="goodsEdit.formData.sku_no" clearable :placeholder="t('skuNoPlaceholder')" class="input-width" maxlength="50" @keyup="goodsEdit.filterSpecial($event)"  />
+                                <el-input v-model.trim="goodsEdit.formData.sku_no" clearable :placeholder="t('skuNoPlaceholder')" class="input-width" maxlength="50" @keyup="goodsEdit.filterSpecial($event)" @blur="goodsEdit.goodsVerifyFn($event)" />
                             </el-form-item>
                         </template>
                     </el-form>
@@ -209,7 +198,7 @@
                                 <div class="spec-edit-list">
                                     <div class="spec-item" v-for="(item, index) in goodsEdit.goodsSpecFormat" :key="item.id">
                                         <div class="spec-name-wrap">
-                                            <el-input v-model.trim="item.spec_name" clearable :placeholder="t('specNamePlaceholder')" class="input-width" maxlength="20" />
+                                            <el-input v-model.trim="item.spec_name" clearable :placeholder="t('specNamePlaceholder')" class="input-width" maxlength="30" />
                                         </div>
                                         <div class="spec-value-wrap">
                                             <ul ref="specValueRef">
@@ -217,7 +206,7 @@
 
                                                     <el-input v-model.trim="specValue.spec_value_name" clearable
                                                         :placeholder="t('specValueNamePlaceholder')" class="input-width"
-                                                        :suffix-icon="Rank" maxlength="20"
+                                                        :suffix-icon="Rank" maxlength="30"
                                                         @input="goodsEdit.specValueNameInputListener">
                                                     </el-input>
                                                     <el-icon class="icon" :size="20" color="#7b7b7b" @click="goodsEdit.deleteSpecValue(index, specIndex)">
@@ -258,7 +247,7 @@
                                     <el-input v-model.trim="goodsEdit.batchOperation.stock" clearable :placeholder="t('stock')" class="set-input" maxlength="8"/>
                                     <el-input v-model.trim="goodsEdit.batchOperation.weight" clearable :placeholder="t('skuWeight')" class="set-input" maxlength="6" />
                                     <el-input v-model.trim="goodsEdit.batchOperation.volume" clearable :placeholder="t('skuVolume')" class="set-input" maxlength="6" />
-                                    <el-input v-model.trim="goodsEdit.batchOperation.sku_no" clearable maxlength="50" :placeholder="t('skuNo')" class="set-input" />
+                                    <el-input v-model.trim="goodsEdit.batchOperation.sku_no" clearable maxlength="50" :placeholder="t('skuNo')" class="set-input"   @blur="goodsEdit.goodsVerifyFn($event)" />
                                     <el-button type="primary" @click="goodsEdit.saveBatch">{{ t('confirm') }}</el-button>
                                 </div>
 
@@ -390,7 +379,7 @@
                                                                                 </td>
                                                                                 <td class="el-table__cell">
                                                                                     <div class="cell">
-                                                                                        <el-input v-model.trim="item.sku_no" clearable maxlength="50" />
+                                                                                        <el-input v-model.trim="item.sku_no" clearable maxlength="50" @blur="goodsEdit.goodsVerifyFn($event)" />
                                                                                     </div>
                                                                                 </td>
                                                                                 <td class="el-table__cell">
@@ -505,7 +494,7 @@
 
                         <el-form-item :label="t('goodsArgumentsTemp')">
                             <div>
-                                <el-select v-model="goodsEdit.formData.attr_id" :placeholder="t('goodsArgumentsTempPlaceholder')" clearable @change="goodsEdit.attrChange" @clear="goodsEdit.attrChange(-1)">
+                                <el-select v-model="goodsEdit.formData.attr_ids" :placeholder="t('goodsArgumentsTempPlaceholder')" clearable multiple @change="goodsEdit.attrChange" @clear="goodsEdit.attrChange">
                                     <el-option v-for="item in goodsEdit.attrOptions" :key="item.attr_id" :label="item.attr_name" :value="item.attr_id" />
                                 </el-select>
                                 <div class="mt-[10px] text-[12px] text-[#999] leading-[20px]">{{t('goodsArgumentsTempHint')}}</div>
@@ -536,10 +525,10 @@
                                             <tr class="goods-attr-tr goods-new-attr-tr" v-for="(item,index) in goodsEdit.attrTableData" :key="index">
                                                 <td v-if="item.attr_value_id > 0">{{item.attr_value_name}}</td>
                                                 <td v-else>
-                                                    <el-input v-model.trim="item.attr_value_name" maxlength="20" show-word-limit clearable/>
+                                                    <el-input v-model.trim="item.attr_value_name" maxlength="30" show-word-limit clearable/>
                                                 </td>
                                                 <td>
-                                                    <el-input v-if="item.type == 'text'" maxlength="20" show-word-limit v-model.trim="item.select_child_val" clearable/>
+                                                    <el-input v-if="item.type == 'text'" maxlength="30" show-word-limit v-model.trim="item.select_child_val" clearable/>
                                                     <div v-else-if="item.type == 'radio'">
                                                         <el-radio-group v-model="item.select_child_name" @change="goodsEdit.attrRadioChange(index,$event)">
                                                             <el-radio v-for="(childItem,childIndex) in item.child" :key="childIndex" :label="childItem.id">{{ childItem.name }}</el-radio>
@@ -577,6 +566,39 @@
                         </el-form-item>
                     </el-form>
                 </el-tab-pane>
+                <el-tab-pane :label="t('advancedSetup')" name="diy">
+                    <el-form :model="goodsEdit.formData" label-width="120px" class="page-form">
+                        <el-form-item :label="t('diyDetailTemplate')">
+                            <el-select v-model="goodsEdit.formData.diy_detail_id" :placeholder="t('diyDetailTemplatePlaceholder')" clearable>
+                                <el-option v-for="item in goodsEdit.detailTemplateOptions" :key="item.id" :label="item.page_title" :value="item.id" />
+                            </el-select>
+                            <div class="ml-[10px]">
+                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshDetailTemplate(true)">{{ t('refresh') }}</span>
+                                <span class="cursor-pointer text-primary" @click="goodsEdit.toDetailTemplateEvent">{{t('addDetailTemp')}}</span>
+                            </div>
+                        </el-form-item>
+                        <div class="ml-[120px] mb-[10px] text-[12px] -mt-[10px] text-[#999] leading-[20px]">{{t('detailTempTip')}}</div>
+                        <el-form-item :label="t('poster')">
+                            <el-select v-model="goodsEdit.formData.poster_id" :placeholder="t('posterPlaceholder')" clearable>
+                                <el-option v-for="item in goodsEdit.posterOptions" :key="item.id" :label="item.name" :value="item.id" />
+                            </el-select>
+                            <div class="ml-[10px]">
+                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshGoodsPoster(true)">{{ t('refresh') }}</span>
+                                <span class="cursor-pointer text-primary" @click="goodsEdit.toPosterEvent">{{ t('addGoodsPoster') }}</span>
+                            </div>
+                        </el-form-item>
+                        <div class="-mt-[10px] ml-[120px] mb-[10px] text-[12px] text-[#999] leading-[20px]">{{ t('posterTips') }}</div>
+                        <el-form-item :label="t('diyForm')">
+                            <el-select v-model="goodsEdit.formData.form_id" :placeholder="t('diyFormPlaceholder')" clearable>
+                                <el-option v-for="item in goodsEdit.diyFormOptions" :key="item.form_id" :label="item.page_title" :value="item.form_id" />
+                            </el-select>
+                            <div class="ml-[10px]">
+                                <span class="cursor-pointer text-primary mr-[10px]" @click="goodsEdit.refreshDiyForm(true)">{{ t('refresh') }}</span>
+                                <span class="cursor-pointer text-primary" @click="goodsEdit.toDiyFormEvent">{{ t('addDiyForm') }}</span>
+                            </div>
+                        </el-form-item>
+                    </el-form>
+                </el-tab-pane>
             </el-tabs>
         </el-card>
 
@@ -590,26 +612,20 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref ,onMounted,nextTick} from 'vue'
 import { t } from '@/lang'
 import { FormInstance } from 'element-plus'
 import { Rank, ArrowLeft } from '@element-plus/icons-vue'
 import { filterNumber } from '@/utils/common'
-import { useRoute, useRouter } from 'vue-router'
-import {
-    addGoods,
-    editGoods,
-    getGoodsInit
-} from '@/addon/shop/api/goods'
+import { useRouter } from 'vue-router'
+import { addGoods, editGoods, getGoodsInit } from '@/addon/shop/api/goods'
 import {
     getShopDeliveryList,
     getShippingTemplateList
 } from '@/addon/shop/api/delivery'
 import { useGoodsEdit } from './public/js/useGoodsEdit'
 
-const route = useRoute()
 const router = useRouter()
-const pageName = route.meta.title
 
 const basicFormRef = ref<FormInstance>()
 const priceStockFormRef = ref<FormInstance>()
@@ -864,10 +880,26 @@ const skuVolumeRules = () => {
 const save = () => {
     goodsEdit.save()
 }
+
+onMounted(() => {
+    nextTick(() => {
+        document.addEventListener("click", (event) => {
+            // 检查点击的是否是 Cascader 选项文本
+            const labelNode = event.target.closest(".el-cascader-node__label");
+            if (labelNode) {
+                // 找到最近的 checkbox 并触发点击
+                const checkbox = labelNode.parentNode.querySelector(".el-checkbox");
+                if (checkbox) {
+                    checkbox.click();
+                }
+            }
+        });
+    });
+});
 </script>
 
 <style lang="scss" scoped>
-	@import 'public/css/goods_edit.scss';
+@import 'public/css/goods_edit.scss';
 </style>
 <style lang="scss">
     .edui-default .edui-editor{
@@ -876,4 +908,12 @@ const save = () => {
     .el-cascader__tags.is-validate{
         right: 30px !important;
     }
+    // .choice .el-cascader-node {
+    //     pointer-events: none; /* 让默认点击无效 */
+    // }
+
+    // .choice .el-cascader-node__label,
+    // .choice .el-checkbox {
+    //     pointer-events: auto; /* 让文字和复选框可点击 */
+    // }
 </style>

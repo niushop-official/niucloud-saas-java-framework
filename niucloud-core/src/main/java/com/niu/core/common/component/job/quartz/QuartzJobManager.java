@@ -9,7 +9,10 @@ import com.niu.core.entity.sys.SysSchedule;
 import com.niu.core.service.admin.sys.ISysScheduleService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.LinkedMap;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -96,58 +99,48 @@ public class QuartzJobManager {
      * @return
      */
     public static String toCronStr(Map<String, String> timeMap) {
-        String crontab = "";
-        String sec = "*";
-        if (timeMap.get("sec") != null) {
-            sec = timeMap.get("sec");
+        String sec = timeMap.getOrDefault("sec", "1");
+        String min = timeMap.getOrDefault("min", "0");
+        String hour = timeMap.getOrDefault("hour", "0");
+        String day = timeMap.getOrDefault("day", "1");
+        String week = timeMap.getOrDefault("week", "*");
+        String type = timeMap.getOrDefault("type", "");
+
+        // 确保 day 是合法数字
+        if (!day.matches("\\d+") || day.equals("0")) {
+            day = "1"; // 默认每1天执行一次
         }
-        String min = "*";
-        if (timeMap.get("min") != null) {
-            min = timeMap.get("min");
-        }
-        String hour = "*";
-        if (timeMap.get("hour") != null) {
-            hour = timeMap.get("hour");
-        }
-        String day = "*";
-        if (timeMap.get("day") != null) {
-            day = timeMap.get("day");
-        }
-        String week = "*";
-        if (timeMap.get("week") != null) {
-            week = timeMap.get("week");
-        }
-        String type = "";
-        if (timeMap.get("type") != null) {
-            type = timeMap.get("type");
-        }
+
         switch (type) {
             case "sec":
-                // 每隔几秒执行
-                crontab = "*/" + sec + " * * * * ?";
-                break;
+                return "*/" + sec + " * * * * ?";
             case "min":
-                // 每隔几分执行
-                crontab = "0 */" + min + " * * * ?";
-                break;
+                return "0 */" + min + " * * * ?";
             case "hour":
-                // 每隔几小时
-                crontab = "0 " + min + " */" + hour + " * * ?";
-                break;
+                return "0 " + min + " */" + hour + " * * ?";
             case "day":
-                // 每隔几日第几小时第几分钟执行
-                crontab = "0 " + min + " " + hour + " */" + day + " * ?";
-                break;
+                // 修正：使用 "0 min hour */day * ?"
+                return "0 " + min + " " + hour + " */" + day + " * ?";
             case "week":
-                // 每周一次,周几具体时间执行
-                crontab = "0 " + min + " " + hour + " ? * " + week;
-                break;
+                // week 应为 MON, TUE 等，或数字（需映射）
+                String dayOfWeek = week;
+                if (week.equals("*")) {
+                    dayOfWeek = "MON"; // 默认周一
+                } else if (week.matches("\\d")) {
+                    String[] days = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+                    int idx = Integer.parseInt(week) % 7;
+                    dayOfWeek = days[idx];
+                }
+                return "0 " + min + " " + hour + " ? * " + dayOfWeek;
             case "month":
-                // 每月一次,某日具体时间执行
-                crontab = "0 " + min + " " + hour + " " + day + " * ?";
-                break;
+                // day 必须是 1-31 的数字
+                if (!day.matches("\\d+") || Integer.parseInt(day) < 1 || Integer.parseInt(day) > 31) {
+                    day = "1";
+                }
+                return "0 " + min + " " + hour + " " + day + " * ?";
+            default:
+                return null; // 或抛出异常
         }
-        return crontab;
     }
 
     /**
@@ -155,59 +148,100 @@ public class QuartzJobManager {
      * @return
      */
     public static String toCronContent(Map<String, String> timeMap) {
-        String cronContent = "";
-        String sec = "*";
-        if (timeMap.get("sec") != null) {
-            sec = timeMap.get("sec");
-        }
-        String min = "*";
-        if (timeMap.get("min") != null) {
-            min = timeMap.get("min");
-        }
-        String hour = "*";
-        if (timeMap.get("hour") != null) {
-            hour = timeMap.get("hour");
-        }
-        String day = "*";
-        if (timeMap.get("day") != null) {
-            day = timeMap.get("day");
-        }
-        String week = "*";
-        if (timeMap.get("week") != null) {
-            week = timeMap.get("week");
-        }
-        String type = "";
-        if (timeMap.get("type") != null) {
-            type = timeMap.get("type");
-        }
+        String sec = timeMap.getOrDefault("sec", "*");
+        String min = timeMap.getOrDefault("min", "*");
+        String hour = timeMap.getOrDefault("hour", "*");
+        String day = timeMap.getOrDefault("day", "*");
+        String week = timeMap.getOrDefault("week", "*");
+        String type = timeMap.getOrDefault("type", "");
+
         switch (type) {
             case "sec":
-                // 每隔几秒执行
-                cronContent = "每隔" + sec + "秒执行一次";
-                break;
+                return String.format("每%s秒执行一次", sec.equals("*") ? "1" : sec);
             case "min":
-                // 每隔几分执行
-                cronContent = "每隔" + min + "分执行一次";
-                break;
+                if (min.equals("*")) {
+                    return "每分钟执行一次";
+                }
+                return String.format("每%s分钟执行一次", min);
             case "hour":
-                // 每隔几小时
-                cronContent = "每隔" + min + "分" + hour + "小时执行一次";
-                break;
+                if (hour.equals("*")) {
+                    return String.format("每小时的第%s分钟执行", min.equals("*") ? "0" : min);
+                }
+                return String.format("每%s小时的第%s分钟执行", hour, min.equals("*") ? "0" : min);
             case "day":
-                // 每隔几日第几小时第几分钟执行
-                cronContent = "每隔" + min + "分" + hour + "小时" + day + "天执行一次";
-                break;
+                if (day.equals("*")) {
+                    return String.format("每天%s点%s分执行", hour.equals("*") ? "0" : hour, min.equals("*") ? "0" : min);
+                }
+                return String.format("每%s天的%s点%s分执行", day, hour.equals("*") ? "0" : hour, min.equals("*") ? "0" : min);
             case "week":
-                // 每周一次,周几具体时间执行
-                cronContent = "每周" + week + " " + min + "分" + hour + "小时执行";
-                break;
+                String[] weekDays = {"日", "一", "二", "三", "四", "五", "六"};
+                String dayOfWeek;
+                if (week.equals("*")) {
+                    dayOfWeek = "日";
+                } else {
+                    try {
+                        int weekNum = Integer.parseInt(week);
+                        dayOfWeek = weekDays[weekNum % 7];
+                    } catch (NumberFormatException e) {
+                        dayOfWeek = week;
+                    }
+                }
+                return String.format("每周%s的%s点%s分执行", dayOfWeek, hour.equals("*") ? "0" : hour, min.equals("*") ? "0" : min);
             case "month":
-                // 每月一次,某日具体时间执行
-                cronContent = "每月" + day + "日 " + min + "分" + hour + "小时执行";
-                break;
+                if (day.equals("*")) {
+                    return String.format("每月1日的%s点%s分执行", hour.equals("*") ? "0" : hour, min.equals("*") ? "0" : min);
+                }
+                return String.format("每月%s日的%s点%s分执行", day, hour.equals("*") ? "0" : hour, min.equals("*") ? "0" : min);
+            default:
+                return "未配置执行时间";
         }
-        return cronContent;
     }
 
+    public static String getClassPath(String basePackage, String className) {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        try {
+            // 构建搜索模式
+            String pattern = "classpath*:" +
+                    basePackage.replace('.', '/') + "/**/" +
+                    className + ".class";
+
+            // 查找资源
+            Resource[] resources = resolver.getResources(pattern);
+            if (resources.length == 0) {
+                return null;
+            }
+
+            String rawPath = resources[0].getURL().toString();
+
+            // 处理生产环境(JAR包)
+            if (rawPath.startsWith("jar:")) {
+                String jarPath = rawPath.substring("jar:file:".length());
+                jarPath = jarPath.substring(0, jarPath.indexOf("!"));
+                String classEntry = rawPath.substring(rawPath.indexOf("!") + 2)
+                        .replace(".class", "")
+                        .replace('/', '.');
+                return jarPath + " | " + classEntry;
+            }
+            // 处理开发环境
+            else if (rawPath.startsWith("file:")) {
+                String devPath = rawPath.substring("file:".length());
+                // 移除项目路径前缀，保留从classes开始的路径
+                int classesIndex = devPath.indexOf("/target/classes/");
+                if (classesIndex > 0) {
+                    return devPath.substring(classesIndex + "/target/classes/".length())
+                            .replace(".class", "").replace("/", ".");
+                }
+                return devPath.replace(".class", "").replace("/", ".");
+            }
+            // 其他情况
+            return rawPath.replace(".class", "").replace("/", ".");
+
+        } catch (IOException e) {
+            log.error("查找类路径失败 - package: {}, class: {}, error: {}",
+                    basePackage, className, e.getMessage());
+            return null;
+        }
+    }
 
 }

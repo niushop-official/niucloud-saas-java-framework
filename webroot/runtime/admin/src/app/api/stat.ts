@@ -14,4 +14,3 @@ export function getStatInfo() {
 export function getSiteStatInfo() {
     return request.get(`stat/siteindex`)
 }
-

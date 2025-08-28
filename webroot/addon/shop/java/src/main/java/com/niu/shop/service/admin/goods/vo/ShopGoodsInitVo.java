@@ -1,4 +1,5 @@
 package com.niu.shop.service.admin.goods.vo;
+import cn.hutool.json.JSONArray;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import lombok.Data;
@@ -47,16 +48,18 @@ public class ShopGoodsInitVo implements Serializable {
         private BigDecimal deliveryMoney;  // 固定运费
         private Integer deliveryTemplateId;  // 运费模板
         private Object supplierId;  // 供应商id
-        private Object attrId;  // 商品参数id
+        private Integer[] attrIds;  // 商品参数id
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String attrFormat;  // 商品参数内容，json格式
         private String memberDiscount;  // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
         private Object posterId;  // 海报id
-        private Integer formId;
+        private Object formId;
         private List<SkuInfo> skuList;
         private String specType = "single";
         private List<SpecInfo> specList;
         private Long activeGoodsCount;
         private Integer isGift;
+        private Object diyDetailId;
     }
 
     @Data

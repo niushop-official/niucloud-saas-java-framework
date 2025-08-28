@@ -2,8 +2,11 @@ package com.niu.shop.entity.delivery;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.niu.shop.service.admin.delivery.param.ShopStoreParam;
+import com.niu.shop.service.admin.delivery.param.TradeTimeItemParam;
 import lombok.Data;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 自提门店实体
@@ -28,6 +31,9 @@ public class ShopStore implements Serializable {
     private String longitude; // 经度
     private String latitude; // 纬度
     private String tradeTime; // 营业时间
+    private String timeWeek; //自定义的营业时间["0","1","2","3","4","5","6"]周日-周六
+    private String tradeTimeJson; //营业时间JSON
+    private Integer timeInterval; //时段设置（分钟）
     private Long createTime; // 添加时间
     private Long updateTime; // 更新时间
 

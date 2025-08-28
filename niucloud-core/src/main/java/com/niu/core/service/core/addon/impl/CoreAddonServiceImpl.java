@@ -81,7 +81,7 @@ public class CoreAddonServiceImpl extends CoreAddonBaseService implements ICoreA
 
     @Override
     public Map<String,InstallAddonListVo> getInstallAddonList() {
-        List<Addon> addonList = addonMapper.selectList(new MPJQueryWrapper<Addon>().select("title, icon, `key`, `desc`, `status`, author, version, install_time, update_time, cover, type").eq("status", AddonStatusEnum.ON.getCode()));
+        List<Addon> addonList = addonMapper.selectList(new MPJQueryWrapper<Addon>().select("title, icon, `key`, `desc`, `status`, author, version, install_time, update_time, cover, type, support_app").eq("status", AddonStatusEnum.ON.getCode()));
         Map<String,InstallAddonListVo> map = new HashMap<>();
         if (ObjectUtil.isNotEmpty(addonList)) {
             for(Addon item: addonList)
@@ -90,6 +90,7 @@ public class CoreAddonServiceImpl extends CoreAddonBaseService implements ICoreA
                 BeanUtils.copyProperties(item, installAddonListVo);
                 installAddonListVo.setIcon(ImageUtils.imageToBase64(new File(WebAppEnvs.get().webRootDownResource, item.getIcon()).getPath()));
                 installAddonListVo.setCover(ImageUtils.imageToBase64(new File(WebAppEnvs.get().webRootDownResource, item.getCover()).getPath()));
+                installAddonListVo.setSupportApp(item.getSupportApp());
                 map.put(item.getKey(), installAddonListVo);
             }
         }

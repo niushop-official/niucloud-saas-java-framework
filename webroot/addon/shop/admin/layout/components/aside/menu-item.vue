@@ -9,12 +9,7 @@
         <template v-else>
             <el-menu-item :index="String(routes.name)" @click="router.push({ name: routes.name })" v-if="meta.addon && meta.parent_route && meta.parent_route.addon == ''">
                 <template #title>
-                    <el-tooltip placement="right" effect="light">
-                        <template #content>
-                            该功能仅限{{ addons[meta.addon].title }}使用
-                        </template>
-                        <span :class="[{'text-[15px]': routes.meta.class == 1}, {'text-[14px]': routes.meta.class != 1}, {'ml-[10px]': routes.meta.class == 2, 'ml-[15px]': routes.meta.class == 3}]">{{ meta.title }}</span>
-                    </el-tooltip>
+                    <span :class="[{'text-[15px]': routes.meta.class == 1}, {'text-[14px]': routes.meta.class != 1}, {'ml-[10px]': routes.meta.class == 2, 'ml-[15px]': routes.meta.class == 3}]">{{ meta.title }}</span>
                 </template>
             </el-menu-item>
             <el-menu-item :index="String(routes.name)" @click="router.push({ name: routes.name })" v-else>
@@ -31,9 +26,7 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
-import { img } from '@/utils/common'
 import menuItem from './menu-item.vue'
-import useUserStore from '@/stores/modules/user'
 
 const router = useRouter()
 const props = defineProps({
@@ -42,16 +35,7 @@ const props = defineProps({
         required: true
     }
 })
-const userStore = useUserStore()
-const siteInfo = userStore.siteInfo
 const meta = computed(() => props.routes.meta)
-
-const addons = computed(() => {
-    const addons:Record<string, any> = {}
-    siteInfo?.apps.forEach((item: any) => { addons[item.key] = item })
-    siteInfo?.site_addons.forEach((item: any) => { addons[item.key] = item })
-    return addons
-})
 
 </script>
 

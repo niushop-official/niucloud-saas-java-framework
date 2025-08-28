@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
@@ -286,9 +287,8 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             }
 
             vo.setSkuList(skuList);
-
-            String small = coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
-            String mid = coreUploadService.thumb(RequestUtils.siteId(), vo.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            String small = CommonUtils.thumbImageSmall(RequestUtils.siteId(), vo.getGoodsCover());
+            String mid = CommonUtils.thumbImageMiddle(RequestUtils.siteId(), vo.getGoodsCover());
             vo.setGoodsCoverThumbSmall(small);
             vo.setGoodsCoverThumbMid(mid);
 
@@ -364,8 +364,8 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                 ShopNewcomerSelectSkuVo vo = new ShopNewcomerSelectSkuVo();
                 BeanUtils.copyProperties(shopGood, vo);
                 vo.setGoodsTypeName(GoodsTypeEnum.getNameByType(shopGood.getGoodsType()));
-                vo.setGoodsCoverThumbSmall(coreUploadService.thumb(RequestUtils.siteId(), shopGood.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
-                vo.setGoodsCoverThumbMid(coreUploadService.thumb(RequestUtils.siteId(), shopGood.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
+                vo.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), shopGood.getGoodsCover()));
+                vo.setGoodsCoverThumbMid(CommonUtils.thumbImageSmall(RequestUtils.siteId(), shopGood.getGoodsCover()));
                 List<ShopGoodsSku> shopGoodsSkuList = skuMap.getOrDefault(shopGood.getGoodsId(), new ArrayList<>());
 
                 List<ShopNewcomerSelectSkuVo.Sku> skuList = new ArrayList<>(shopGoodsSkuList.size());

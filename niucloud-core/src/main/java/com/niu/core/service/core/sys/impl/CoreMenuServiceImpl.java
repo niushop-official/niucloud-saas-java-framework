@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.common.utils.json.JsonLoadUtils;
@@ -15,6 +16,7 @@ import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.sys.SysMenuMapper;
+import com.niu.core.service.admin.sys.impl.SysMenuServiceImpl;
 import com.niu.core.service.core.sys.ICoreMenuService;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,9 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
 
     @Resource
     SqlSessionFactory sqlSessionFactory;
+
+    @Resource
+    private Cached cached;
 
     @Override
     public void refreshAddonMenu(String addon) {
@@ -53,6 +58,8 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
             }
         }
 
+        //清理缓存
+        cached.tag(SysMenuServiceImpl.cacheTagName).clear();
     }
 
     /**
@@ -79,6 +86,9 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
             List<SysMenu> siteMenuBeanList = this.menuTreeToList(menuList, addon, "site");
             super.saveBatch(siteMenuBeanList);
         }
+
+        //清理缓存
+        cached.tag(SysMenuServiceImpl.cacheTagName).clear();
     }
 
     private List<SysMenu> menuTreeToList(List<JSONObject> menuList, String addon, String appType) {

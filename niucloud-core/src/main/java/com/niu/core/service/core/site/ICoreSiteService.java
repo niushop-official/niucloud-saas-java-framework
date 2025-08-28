@@ -59,4 +59,12 @@ public interface ICoreSiteService {
      * 清除站点缓存
      */
     void clearSiteCache(Integer siteId);
+
+    /**
+     * 站点初始化
+     * @param siteId
+     * @param tables
+     * @return
+     */
+    Boolean siteInitBySiteId(Integer siteId, List<String> tables);
 }

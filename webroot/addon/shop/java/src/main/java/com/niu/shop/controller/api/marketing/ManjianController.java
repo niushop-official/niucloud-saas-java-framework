@@ -1,5 +1,6 @@
 package com.niu.shop.controller.api.marketing;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.api.marketing.IShopManjianService;
 import com.niu.shop.service.api.marketing.param.ShopManjianInfoParam;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.Resource;
+
+import java.util.ArrayList;
 
 /**
  * 满减控制器
@@ -27,8 +30,8 @@ public class ManjianController {
      * @return
      */
     @GetMapping("/manjian/info")
-    public Result<ShopManjianInfoVo> getManjianInfo(ShopManjianInfoParam shopManjianInfoParam)  {
-        return Result.success(shopManjianService.getManjianInfo(shopManjianInfoParam));
+    public Result getManjianInfo(ShopManjianInfoParam shopManjianInfoParam)  {
+        return Result.success(ObjectUtil.defaultIfNull(shopManjianService.getManjianInfo(shopManjianInfoParam), new ArrayList<>()));
     }
 
 }

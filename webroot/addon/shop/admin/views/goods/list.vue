@@ -13,7 +13,8 @@
                         <el-input v-model.trim="goodsTable.searchParam.goods_name" :placeholder="t('goodsNamePlaceholder')" maxlength="60" />
                     </el-form-item>
                     <el-form-item :label="t('goodsCategory')" prop="goods_category">
-                        <el-cascader v-model="goodsTable.searchParam.goods_category" :options="goodsCategoryOptions" :placeholder="t('goodsCategoryPlaceholder')" clearable :props="{ value: 'value', label: 'label', emitPath:false }"/>
+                        <!-- <el-cascader v-model="goodsTable.searchParam.goods_category" :options="goodsCategoryOptions" :placeholder="t('goodsCategoryPlaceholder')" clearable :props="{ value: 'value', label: 'label', emitPath:false }"/> -->
+                        <el-cascader v-model="goodsTable.searchParam.goods_category" ref="cascader" :options="goodsCategoryOptions"  :placeholder="t('goodsCategoryPlaceholder')" clearable :props="goodsCategoryProps"/>
                     </el-form-item>
                     <el-form-item :label="t('goodsType')" prop="goods_type">
                         <el-select v-model="goodsTable.searchParam.goods_type" :placeholder="t('goodsTypePlaceholder')" clearable>
@@ -22,7 +23,7 @@
                     </el-form-item>
 
                     <el-form-item :label="t('brand')" prop="brand_id">
-                        <el-select v-model="goodsTable.searchParam.brand_id" :placeholder="t('brandPlaceholder')" clearable>
+                        <el-select v-model="goodsTable.searchParam.brand_id" :placeholder="t('brandPlaceholder')" clearable filterable remote reserve-keyword :remote-method="getBrandListFn">
                             <el-option v-for="item in brandOptions" :key="item.brand_id" :label="item.brand_name" :value="item.brand_id" />
                         </el-select>
                     </el-form-item>
@@ -62,13 +63,33 @@
                 </el-tabs>
 
                 <div class="mb-[10px] flex items-center">
-                    <el-checkbox v-model="toggleCheckbox" size="large" class="px-[14px]" @change="toggleChange" :indeterminate="isIndeterminate" />
+                    <el-dropdown class="mr-[20px] !text-primary w-[125px]">
+                        <span class="el-dropdown-link">
+                            <span>{{ currentSelectMode === 'all' ? t('全选所有页') : t('全选当前页')}}</span>(<span class="text-center inline-block">{{ selectedCount }}</span>)
+                            <el-icon> 
+                                <arrow-down />
+                            </el-icon>
+                        </span>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item class="select-wrap" :class="{ active: currentSelectMode === 'all' }" @click="selectAllPages">
+                                    全选所有页
+                                </el-dropdown-item>
+                                <el-dropdown-item class="select-wrap"  :class="{ active: currentSelectMode === 'page' }" @click="toggleChange">
+                                    全选当前页
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+                    <!-- <el-checkbox v-model="toggleCheckbox" size="large" class="px-[14px]" @change="toggleChange" :indeterminate="isIndeterminate" /> -->
                     <el-button @click="batchGoodsStatus(1)" size="small" v-if="goodsTable.searchParam.status != '1'">{{ t('batchOnGoods') }}</el-button>
                     <el-button @click="batchGoodsStatus(0)" size="small" v-if="goodsTable.searchParam.status != '0'">{{ t('batchOffGoods') }}</el-button>
                     <el-button @click="batchDeleteGoods" size="small">{{ t('batchDeleteGoods') }}</el-button>
+                    <el-button @click="batchSetGoods" size="small">{{ t('batchSetting') }}</el-button>
                 </div>
 
-                <el-table :data="goodsTable.data" size="large" v-loading="goodsTable.loading" ref="goodsListTableRef" @sort-change="sortChange" @selection-change="handleSelectionChange">
+                <el-table :data="goodsTable.data" size="large" v-loading="goodsTable.loading" ref="goodsListTableRef" @sort-change="sortChange" :row-key="row => row.goods_id" :default-selection="defaultSelection" @selection-change="handleSelectionChange">
                     <template #empty>
                         <span>{{ !goodsTable.loading ? t('emptyData') : '' }}</span>
                     </template>
@@ -91,6 +112,18 @@
                                     <span :title="row.goods_name" class="multi-hidden">{{ row.goods_name }}</span>
                                     <span class="text-primary text-[12px]">{{ row.goods_type_name }}</span>
                                     <span class="px-[4px]  text-[12px] text-[#fff] rounded-[4px] bg-primary leading-[18px]" v-if="row.is_gift == 1">赠品</span>
+                                    <div class="flex flex-wrap mt-[4px] gap-[4px]">
+                                        <el-tooltip v-for="(item, index) in row.active" :key="index" placement="top">
+                                            <template #content>
+                                                <div style="white-space: pre-wrap">
+                                                    {{item.name.trim() || item.short?.active_name }}
+                                                </div>
+                                            </template>
+                                            <span class="text-[12px] text-white rounded-[4px] px-[4px] leading-[18px]"  @click.stop="activeclick(item)" :style="{ backgroundColor: item.short?.bg_color || '#333' }">
+                                                {{ item.short?.name }}
+                                            </span>
+                                        </el-tooltip>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -173,26 +206,30 @@
         <goods-price-edit-popup ref="goodsPriceEditPopupRef" @load="loadGoodsList" />
 
         <!-- 商品推广弹出框 -->
-        <goods-spread-popup ref="goodsSpreadPopupRef" />
+        <spread-popup ref="spreadPopupRef" />
 
         <!-- 会员价弹出框 -->
         <goods-member-price-popup ref="memberPricePopupRef" @load="loadGoodsList" />
+
+        <!-- 批量设置弹出框 -->
+        <goods-batch-settings-popup ref="goodsBatchSettingPopupRef" @load="loadGoodsListReset" />
     </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, nextTick, computed } from 'vue'
 import { t } from '@/lang'
-import { debounce, img, filterDigit,setTablePageStorage,getTablePageStorage } from '@/utils/common'
+import { debounce, img, filterDigit, setTablePageStorage, getTablePageStorage } from '@/utils/common'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { cloneDeep } from 'lodash-es'
 import goodsMemberPricePopup from '@/addon/shop/views/goods/components/goods-member-price-popup.vue'
 import goodsStockEditPopup from '@/addon/shop/views/goods/components/goods-stock-edit-popup.vue'
 import goodsPriceEditPopup from '@/addon/shop/views/goods/components/goods-price-edit-popup.vue'
-import goodsSpreadPopup from '@/addon/shop/views/goods/components/goods-spread-popup.vue'
-import { getGoodsPageList, getCategoryTree, getGoodsType, getBrandList, getLabelList, editGoodsSort, editGoodsStatus, copyGoods, deleteGoods } from '@/addon/shop/api/goods'
+import goodsBatchSettingsPopup from '@/addon/shop/views/goods/components/goods-batch-settings-popup.vue'
+import { getGoodsPageList, getCategoryTree, getGoodsType, getBrandList, getLabelList, editGoodsSort, editGoodsStatus, copyGoods, deleteGoods,editGoodssingleStatus } from '@/addon/shop/api/goods'
 import { getMemberLevelAll } from '@/app/api/member'
+import spreadPopup from '@/components/spread-popup/index.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -231,12 +268,15 @@ const regExp = {
 
 // 商品分类
 const goodsCategoryOptions: any = reactive([])
-
+const goodsCategoryProps = {
+    checkStrictly: true,
+    emitPath: false
+}
 // 商品类型
 const goodsType: any = reactive([])
 
 // 品牌列表下拉框
-const brandOptions: any = reactive([])
+const brandOptions: any = ref([])
 
 // 标签组列表下拉框
 const labelOptions: any = reactive([])
@@ -288,14 +328,6 @@ const initData = () => {
         }
     })
 
-    // 商品品牌
-    getBrandList({}).then((res) => {
-        const data = res.data
-        if (data) {
-            brandOptions.push(...data)
-        }
-    })
-
     // 商品标签
     getLabelList({}).then((res) => {
         const data = res.data
@@ -306,43 +338,132 @@ const initData = () => {
 }
 
 initData()
+// 商品品牌
+const getBrandListFn = (query = '') => {
+    getBrandList({brand_name: query}).then((res) => {
+        brandOptions.value = res.data
+    })
+}
 
 // 当前选中tab页面
 const tabHandleClick = (tab: any, event: Event) => {
     goodsTable.searchParam.status = tab.props.name
+    isReset.value = true
     loadGoodsList()
 }
 
+// 全选所有页时排除的 ID
+const excludedIds = ref<number[]>([])
+// 是否全选所有页
+const isSelectAllPages = ref(false)
+
 // 批量复选框
 const toggleCheckbox = ref()
+const currentSelectMode = ref<'all' | 'page' | null>(null)
 
 // 复选框中间状态
 const isIndeterminate = ref(false)
 
-// 监听批量复选框事件
-const toggleChange = (value: any) => {
-    isIndeterminate.value = false
-    goodsListTableRef.value.toggleAllSelection()
+// 全选当前页
+const toggleChange = () => {
+    restoringSelection.value = true // 加锁
+    if (currentSelectMode.value === 'page') {
+        isSelectAllPages.value = false
+        currentSelectMode.value = null
+        excludedIds.value = []
+        multipleSelection.value = []
+        goodsListTableRef.value.clearSelection()
+    } else {
+        isSelectAllPages.value = false
+        currentSelectMode.value = 'page'
+        excludedIds.value = []
+        multipleSelection.value = []
+        goodsTable.data.forEach(row => {
+            goodsListTableRef.value.toggleRowSelection(row, true)
+        })
+        multipleSelection.value = [...goodsTable.data]
+    }
+    nextTick(() => {
+        restoringSelection.value = false // 解锁
+    })
 }
+
+// 全选所有页
+const selectAllPages = () => {
+    restoringSelection.value = true // 加锁
+    if (currentSelectMode.value === 'all') {
+        isSelectAllPages.value = false
+        currentSelectMode.value = null
+        excludedIds.value = []
+        multipleSelection.value = []
+        goodsListTableRef.value.clearSelection()
+    } else {
+        // goodsListTableRef.value.clearSelection()
+        excludedIds.value = []
+        multipleSelection.value = []
+        isSelectAllPages.value = true
+        currentSelectMode.value = 'all'
+        goodsTable.data.forEach(row => {
+            goodsListTableRef.value.toggleRowSelection(row, true)
+        })
+    }
+    nextTick(() => {
+        restoringSelection.value = false // 解锁
+    })
+}
+const defaultSelection = computed(() => {
+    if (isSelectAllPages.value) {
+        return goodsTable.data.filter(item => !excludedIds.value.includes(item.goods_id))
+    } else {
+        return multipleSelection.value
+    }
+})
 
 const goodsListTableRef = ref()
 
 // 选中数据
 const multipleSelection: any = ref([])
+const restoringSelection = ref(false)
 
-// 监听表格单行选中
-const handleSelectionChange = (val: []) => {
-    multipleSelection.value = val
+const handleSelectionChange = (val: any[]) => {
+    if (restoringSelection.value) return // 阻止自动恢复触发逻辑
 
-    toggleCheckbox.value = false
-    if (multipleSelection.value.length > 0 && multipleSelection.value.length < goodsTable.data.length) {
-        isIndeterminate.value = true
+    if (isSelectAllPages.value) {
+        const currentPageIds = goodsTable.data.map(item => item.goods_id)
+        const selectedIds = val.map(item => item.goods_id)
+        const unselected = currentPageIds.filter(id => !selectedIds.includes(id))
+
+        excludedIds.value = Array.from(new Set([...excludedIds.value, ...unselected]))
+        excludedIds.value = excludedIds.value.filter(id => !selectedIds.includes(id))
     } else {
-        isIndeterminate.value = false
+        multipleSelection.value = val
     }
+}
+const selectedCount = computed(() => {
+    if (isSelectAllPages.value) {
+        return goodsTable.total - excludedIds.value.length
+    } else {
+        return multipleSelection.value.length
+    }
+})
 
-    if (multipleSelection.value.length == goodsTable.data.length) {
-        toggleCheckbox.value = true
+const getBatchPayload = () => {
+    if (isSelectAllPages.value) {
+        return {
+            is_all: 1,
+            ids: excludedIds.value,
+            where: {
+                ...goodsTable.searchParam
+            }
+        }
+    } else {
+        return {
+            is_all: 0,
+            ids: multipleSelection.value.map(item => item.goods_id),
+            where: {
+                ...goodsTable.searchParam
+            }
+        }
     }
 }
 
@@ -355,6 +476,58 @@ const previewEvent = (data: any) => {
         }
     })
     window.open(url.href)
+}
+
+const activeclick = (data: any) => {
+    if (data.list[0].join_type == 'impulse_buy') {
+        const routeUrl = router.resolve({
+            path: '/shop_impulse_buy/list',
+            query: {
+                active_id: data.list[0].join_id
+            }
+        })
+        window.open(routeUrl.href, '_blank')
+    } else if (data.list[0].join_type == 'discount') {
+        const routeUrl = router.resolve({
+            path: '/shop/marketing/discount/list',
+            query: {
+                active_id: data.list[0].join_id
+            }
+        })
+        window.open(routeUrl.href, '_blank')
+    } else if (data.list[0].join_type == 'gift_card') {
+        const routeUrl = router.resolve({
+            path: '/shop_giftcard/giftcard/list',
+            query: {
+                active_id: data.list[0].join_id
+            }
+        })
+        window.open(routeUrl.href, '_blank')
+    } else if (data.list[0].join_type == 'active_exchange') {
+        const routeUrl = router.resolve({
+            path: '/shop/marketing/exchange/goods_list',
+            query: {
+                active_id: data.list[0].join_id
+            }
+        })
+        window.open(routeUrl.href, '_blank')
+    } else if (data.list[0].join_type == 'active_newcomer_discount') {
+        const routeUrl = router.resolve({
+            path: '/shop/marketing/newcomer/config'
+            // query: {
+            //     active_id: data.list[0].join_id
+            // }
+        })
+        window.open(routeUrl.href, '_blank')
+    } else if (data.list[0].join_type == 'manjian') {
+        const routeUrl = router.resolve({
+            path: '/shop/marketing/manjian/list',
+            query: {
+                active_id: data.list[0].join_id
+            }
+        })
+        window.open(routeUrl.href, '_blank')
+    }
 }
 
 // 监听排序
@@ -375,8 +548,8 @@ const sortChange = (event: any) => {
 // 修改商品上下架状态
 const statusChange = (row: any, value: any) => {
     if (value) {
-        editGoodsStatus({
-            goods_ids: row.goods_id,
+        editGoodssingleStatus({
+            goods_id: row.goods_id,
             status: value
         }).then((res) => {
             loadGoodsList()
@@ -389,8 +562,8 @@ const statusChange = (row: any, value: any) => {
                 type: 'warning'
             }
         ).then(() => {
-            editGoodsStatus({
-                goods_ids: row.goods_id,
+            editGoodssingleStatus({
+                goods_id: row.goods_id,
                 status: value
             }).then((res) => {
                 loadGoodsList()
@@ -401,36 +574,61 @@ const statusChange = (row: any, value: any) => {
 
 // 批量设置上下架
 const batchGoodsStatus = (status: any) => {
-    if (multipleSelection.value.length == 0) {
+    const isNoneSelected =
+        (!isSelectAllPages.value && multipleSelection.value.length === 0) ||
+        (isSelectAllPages.value && excludedIds.value.length === goodsTable.total)
+
+    if (isNoneSelected) {
         ElMessage({
             type: 'warning',
             message: `${t('batchEmptySelectedGoodsTips')}`
         })
         return
     }
-
-    const goodsIds: any = []
-    multipleSelection.value.forEach((item: any) => {
-        goodsIds.push(item.goods_id)
-    })
-
+    const info = getBatchPayload()
     editGoodsStatus({
-        goods_ids: goodsIds,
+        is_all: info.is_all,
+        goods_ids: info.ids,
+        where: info.where,
         status
     }).then((res) => {
+        isReset.value = true
         loadGoodsList()
     })
 }
 
-const batchDeleteGoods = () => {
-    if (multipleSelection.value.length == 0) {
+/** ***************** 批量设置-start *************************/
+const goodsBatchSettingPopupRef = ref()
+const batchSetGoods = () => {
+    const isNoneSelected =
+    (!isSelectAllPages.value && multipleSelection.value.length === 0) ||
+    (isSelectAllPages.value && excludedIds.value.length === goodsTable.total)
+
+    if (isNoneSelected) {
         ElMessage({
             type: 'warning',
             message: `${t('batchEmptySelectedGoodsTips')}`
         })
         return
     }
+    const info = getBatchPayload()
+    goodsBatchSettingPopupRef.value.show(info)
+}
 
+/** ***************** 批量设置-end *************************/
+
+const batchDeleteGoods = () => {
+    const isNoneSelected =
+    (!isSelectAllPages.value && multipleSelection.value.length === 0) ||
+    (isSelectAllPages.value && excludedIds.value.length === goodsTable.total)
+
+    if (isNoneSelected) {
+        ElMessage({
+            type: 'warning',
+            message: `${t('batchEmptySelectedGoodsTips')}`
+        })
+        return
+    }
     ElMessageBox.confirm(t('batchGoodsDeleteTips'), t('warning'),
         {
             confirmButtonText: t('confirm'),
@@ -440,15 +638,13 @@ const batchDeleteGoods = () => {
     ).then(() => {
         if (repeat.value) return
         repeat.value = true
-
-        const goodsIds: any = []
-        multipleSelection.value.forEach((item: any) => {
-            goodsIds.push(item.goods_id)
-        })
-
+        const info = getBatchPayload()
         deleteGoods({
-            goods_ids: goodsIds
+            is_all: info.is_all,
+            goods_ids: info.ids,
+            where: info.where
         }).then(() => {
+            isReset.value = true
             loadGoodsList()
             repeat.value = false
         }).catch(() => {
@@ -466,7 +662,7 @@ const sortInputListener = debounce((sort, row) => {
         })
         return
     }
-    if(sort>99999999){
+    if (sort > 99999999) {
         row.sort = 99999999
     }
     editGoodsSort({
@@ -477,6 +673,7 @@ const sortInputListener = debounce((sort, row) => {
     })
 })
 
+const isReset = ref(false)
 /**
  * 获取商品列表
  */
@@ -536,10 +733,30 @@ const loadGoodsList = (page: number = 1) => {
         goodsTable.loading = false
         goodsTable.data = res.data.data
         goodsTable.total = res.data.total
-        multipleSelection.value = [];
-        toggleCheckbox.value = false;
-        setTablePageStorage(goodsTable.page,goodsTable.limit,searchData);
+        setTablePageStorage(goodsTable.page, goodsTable.limit, searchData)
+        if (isReset.value) {
+            isSelectAllPages.value = false
+            excludedIds.value = []
+            currentSelectMode.value = null
+            multipleSelection.value = []
+        }
+        if (isSelectAllPages.value && !isReset.value) {
+            restoringSelection.value = true
+            nextTick(() => {
+                goodsTable.data.forEach(item => {
+                    if (!excludedIds.value.includes(item.goods_id)) {
+                        goodsListTableRef.value?.toggleRowSelection(item, true)
+                    } else {
+                        goodsListTableRef.value?.toggleRowSelection(item, false)
+                    }
+                })
+
+                restoringSelection.value = false
+            })
+        }
+        isReset.value = false
     }).catch(() => {
+        isReset.value = false
         goodsTable.loading = false
     })
 }
@@ -585,10 +802,16 @@ const editStockEvent = (data: any) => {
 }
 
 // 商品推广
-const goodsSpreadPopupRef: any = ref(null)
+const spreadPopupRef = ref(null)
 
 const spreadEvent = (data: any) => {
-    goodsSpreadPopupRef.value.show(data)
+    const pagePath = '/addon/shop/pages/goods/detail'
+    const columnName = 'goods_id'
+    const columnValue = data.goods_id
+    const title = '商品推广'
+    const folder = 'goods'
+
+    spreadPopupRef.value?.show(pagePath, columnName, columnValue, title, folder)
 }
 
 /** ***************** 会员价-start *************************/
@@ -626,7 +849,7 @@ const copyEvent = (data: any) => {
                 loadGoodsList()
             }
             repeat.value = false
-        }).catch(err => {
+        }).catch(() => {
             repeat.value = false
         })
     })
@@ -654,6 +877,14 @@ const deleteEvent = (id: number) => {
     })
 }
 
+// 批量重置全选状态
+const loadGoodsListReset = () => {
+    console.log('loadGoodsListReset')
+    isReset.value = true
+    goodsBatchSettingPopupRef.value.showDialog = false
+    loadGoodsList()
+}
+
 const resetForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return
     formEl.resetFields()
@@ -661,11 +892,26 @@ const resetForm = (formEl: FormInstance | undefined) => {
     goodsTable.searchParam.end_price = ''
     goodsTable.searchParam.start_sale_num = ''
     goodsTable.searchParam.end_sale_num = ''
-
+    isReset.value = true
     loadGoodsList()
 }
 </script>
-
+<style lang="scss">
+    .el-cascader-panel .el-radio{
+        position:absolute;
+        z-index:10;
+        padding:0 10px;
+        width:132px;
+        height:34px;
+        line-height:34px;
+    }
+    .el-cascader-panel .el-radio__input{
+        visibility:hidden;
+    }
+    .el-cascader-panel .el-input-node__postfix{
+        top:10px;
+    }
+</style>
 <style lang="scss" scoped>
     .price-wrap, .stock-wrap {
         &:hover {
@@ -675,4 +921,9 @@ const resetForm = (formEl: FormInstance | undefined) => {
             }
         }
     }
+    .select-wrap .active {
+        font-weight: bold;
+        background-color: #f5f7fa;
+    }
+
 </style>

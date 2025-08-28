@@ -1,5 +1,6 @@
 package com.niu.shop.service.api.order;
 
+import com.niu.shop.service.admin.delivery.vo.ShopDeliveryLocalDeliveryInfoVo;
 import com.niu.shop.service.core.delivery.param.LatlngParam;
 import com.niu.shop.service.core.delivery.vo.StoreListVo;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
@@ -41,4 +42,10 @@ public interface IOrderCreateService {
      * @return
      */
     List<StoreListVo> getStore(LatlngParam latlng);
+
+    /**
+     * 获取本地配送数据
+     * @return
+     */
+    ShopDeliveryLocalDeliveryInfoVo getLocal();
 }

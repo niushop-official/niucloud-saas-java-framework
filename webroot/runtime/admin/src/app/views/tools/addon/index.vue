@@ -7,7 +7,7 @@
                 <span class="text-page-title">{{ pageName }}</span>
             </div>
 
-            <el-tabs v-model="activeName" class="mt-[20px]">
+            <!-- <el-tabs v-model="activeName" class="mt-[20px]">
                 <el-tab-pane :label="t('developmentProcess')" name="developmentProcess">
                     <el-steps :active="5" direction="vertical">
                         <el-step>
@@ -88,7 +88,7 @@
                         <div class="flex justify-between">
                             <el-form :inline="true" :model="params" ref="searchFormRef">
                                 <el-form-item :label="t('title')" prop="search">
-                                    <el-input v-model="params.search" :placeholder="t('titlePlaceholder')" />
+                                    <el-input v-model.trim="params.search" :placeholder="t('titlePlaceholder')" />
                                 </el-form-item>
                                 <el-form-item>
                                     <el-button type="primary" @click="getAddonDevelopFn">{{ t('search') }}</el-button>
@@ -124,20 +124,89 @@
                         <el-table-column prop="version" :label="t('version')" align="center" min-width="200" />
                         <el-table-column :label="t('status')" align="center" min-width="200">
                             <template #default="{ row }">
-                                {{ row.install_info && Object.keys(row.install_info).length ? '已安装' : '未安装' }}
+                                {{ Object.keys(row.install_info).length ? '已安装' : '未安装' }}
                             </template>
                         </el-table-column>
                         <el-table-column :label="t('operation')" fixed="right" align="right" width="180" :show-overflow-tooltip="true">
                             <template #default="{ row }">
                                 <el-button type="primary" link @click="editEvent(row.key)">{{ t('edit') }}</el-button>
-                                <el-button v-if="row.install_info && Object.keys(row.install_info).length" type="primary" link @click="addonDevelopBuildFn(row)">{{ t('step4') }}</el-button>
-                                <el-button v-if="!row.install_info || !Object.keys(row.install_info).length" type="primary" link @click="deleteEvent(row.key)">{{ t('delete') }}</el-button>
+                                <el-button v-if="Object.keys(row.install_info).length" type="primary" link @click="addonDevelopBuildFn(row)">{{ t('step4') }}</el-button>
+                                <el-button v-if="!Object.keys(row.install_info).length" type="primary" link @click="deleteEvent(row.key)">{{ t('delete') }}</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
                 </el-tab-pane>
-            </el-tabs>
+            </el-tabs> -->
+            <el-steps :active="5" direction="vertical" class="mt-[20px]">
+                <el-step>
+                    <template #title>
+                        <p class="text-[14px] font-[700]">
+                            {{ t("step1") }}
+                        </p>
+                    </template>
+                    <template #description>
+                        <span class="text-[#999]">{{ t("describe1") }}</span>
+                        <div class="mt-[20px] mb-[40px] h-[32px]">
+                            <el-button type="primary" @click="router.push({ path: '/tools/addon_edit' })">{{t("btn1") }}</el-button>
+                        </div>
+                    </template>
+                </el-step>
 
+                <el-step>
+                    <template #title>
+                        <p class="text-[14px] font-[700]">
+                            {{ t("step2") }}
+                        </p>
+                    </template>
+                    <template #description>
+                        <span class="text-[#999]">{{ t("describe2") }}</span>
+                        <div class="mt-[20px] mb-[40px] h-[32px]">
+                            <el-button type="primary" plain @click="router.push({ path: '/tools/addon/list' })">{{t("btn2") }}</el-button>
+                        </div>
+                    </template>
+                </el-step>
+
+                <el-step>
+                    <template #title>
+                        <p class="text-[14px] font-[700]">
+                            {{ t("step3") }}
+                        </p>
+                    </template>
+                    <template #description>
+                        <span class="text-[#999]">{{ t("describe3") }}</span>
+                        <div class="mt-[20px] mb-[40px] h-[32px]">
+                            <el-button type="primary" plain @click="linkEvent('https://www.kancloud.cn/niucloud/niucloud-admin-develop/3225439')">{{t("btn3") }}</el-button>
+                        </div>
+                    </template>
+                </el-step>
+
+                <el-step>
+                    <template #title>
+                        <p class="text-[14px] font-[700]">
+                            {{ t("step4") }}
+                        </p>
+                    </template>
+                    <template #description>
+                        <span class="text-[#999]">{{ t("describe4") }}</span>
+                        <div class="mt-[20px] mb-[40px] h-[32px]">
+                            <el-button type="primary" plain @click="router.push({ path: '/tools/addon/list' })">{{t("btn4") }}</el-button>
+                        </div>
+                    </template>
+                </el-step>
+                <el-step>
+                    <template #title>
+                        <p class="text-[14px] font-[700]">
+                            {{ t("step5") }}
+                        </p>
+                    </template>
+                    <template #description>
+                        <span class="text-[#999]">{{ t("describe5") }}</span>
+                        <div class="mt-[20px] mb-[40px] h-[32px]">
+                            <el-button type="primary" plain @click="linkEvent('https://www.niucloud.com/app')">{{t("btn5") }}</el-button>
+                        </div>
+                    </template>
+                </el-step>
+            </el-steps>
         </el-card>
     </div>
 </template>

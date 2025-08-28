@@ -1,9 +1,16 @@
 package com.niu.core.service.admin.sys.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.job.AbstractJobProvider;
+import com.niu.core.common.component.job.IJobProvider;
+import com.niu.core.common.component.job.annotation.JobProvider;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.domain.PageParam;
@@ -11,22 +18,38 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.component.job.factory.JobProviderFactory;
 import com.niu.core.common.component.job.model.JobInfo;
 import com.niu.core.common.component.job.quartz.QuartzJobManager;
+import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysSchedule;
+import com.niu.core.entity.sys.SysScheduleLog;
+import com.niu.core.mapper.sys.SysScheduleLogMapper;
 import com.niu.core.mapper.sys.SysScheduleMapper;
 import com.niu.core.service.admin.sys.ISysScheduleService;
+import com.niu.core.service.admin.sys.param.SysScheduleLogSearchParam;
 import com.niu.core.service.admin.sys.param.SysScheduleParam;
 import com.niu.core.service.admin.sys.param.SysScheduleSearchParam;
 import com.niu.core.service.admin.sys.param.SysScheduleStatusParam;
 import com.niu.core.service.admin.sys.vo.SysScheduleInfoVo;
 import com.niu.core.service.admin.sys.vo.SysScheduleListVo;
+import com.niu.core.service.admin.sys.vo.SysScheduleLogListVo;
 import com.niu.core.service.admin.sys.vo.SysScheduleTemplateVo;
+import com.niu.core.service.core.schedule.ICoreScheduleService;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobExecutionContext;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.CollectionUtils;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 系统任务实现
@@ -37,6 +60,38 @@ public class SysScheduleServiceImpl implements ISysScheduleService {
 
     @Resource
     private SysScheduleMapper sysScheduleMapper;
+
+    @Resource
+    private SysScheduleLogMapper sysScheduleLogMapper;
+
+    @Resource
+    private ICoreScheduleService coreScheduleService;
+
+    private final Map<String, IJobProvider> jobProviderMap = new ConcurrentHashMap<>();
+
+    @Resource
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    public void JobInvokeService(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    @PostConstruct
+    public void init() {
+        // 通过 ApplicationContext 获取所有 IJobProvider 实现
+        Map<String, IJobProvider> providers = applicationContext.getBeansOfType(IJobProvider.class);
+        log.info("Loaded job provider count: {}", providers.size());
+        for (IJobProvider provider : providers.values()) {
+            log.info("Loaded job provider: {}", provider.getClass().getName());
+            JobProvider annotation = provider.getClass().getAnnotation(JobProvider.class);
+            if (annotation != null) {
+                // 使用注解的 key 作为 map 的键
+                jobProviderMap.put(annotation.key(), provider);
+            }
+        }
+    }
+
 
     @Override
     public List<SysSchedule> getSysEnableList() {
@@ -59,19 +114,21 @@ public class SysScheduleServiceImpl implements ISysScheduleService {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
         // 构造查询条件执行查询
-        QueryWrapper<SysSchedule> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc(Arrays.asList("sort", "id"));
+        LambdaQueryWrapper<SysSchedule> queryWrapper = new LambdaQueryWrapper<>();
+        if (ObjectUtil.isNotEmpty(searchParam.getStatus()) && !"all".equals(searchParam.getStatus())){
+            if ("0".equals(searchParam.getStatus())){
+                searchParam.setStatus("2");
+            }
+            queryWrapper.eq( SysSchedule::getStatus, searchParam.getStatus());
+        }
+        queryWrapper.eq(ObjectUtil.isNotEmpty(searchParam.getKey()), SysSchedule::getKey, searchParam.getKey());
+        queryWrapper.orderByDesc(SysSchedule::getSort, SysSchedule::getId);
         IPage<SysSchedule> sysSchedulePage = sysScheduleMapper.selectPage(new Page<>(page, limit), queryWrapper);
         // 返回结果集
         List<SysScheduleListVo> sysScheduleListVoList = new LinkedList<>();
         for (SysSchedule sysSchedule : sysSchedulePage.getRecords()) {
             SysScheduleListVo sysScheduleListVo = new SysScheduleListVo();
             BeanUtils.copyProperties(sysSchedule, sysScheduleListVo);
-            String jobKey = sysScheduleListVo.getKey();
-            JobInfo jobInfo = JobProviderFactory.getJobInfo(jobKey);
-            if (jobInfo != null) {
-                sysScheduleListVo.setName(jobInfo.getName());
-            }
             sysScheduleListVo.setTimeObject(sysSchedule.getTime());
             sysScheduleListVo.setCrontabContent(QuartzJobManager.convertCronContent(sysSchedule.getTime()));
             sysScheduleListVoList.add(sysScheduleListVo);
@@ -232,6 +289,119 @@ public class SysScheduleServiceImpl implements ISysScheduleService {
         dateTypeData.put("week", "每周");
         dateTypeData.put("month", "每月");
         return dateTypeData;
+    }
+
+    @Override
+    public void deleteScheduleLog(long successThreshold, String status) {
+        List<SysScheduleLog> sysScheduleLogs = sysScheduleLogMapper.selectList(new QueryWrapper<SysScheduleLog>().eq("status", status).lt("execute_time", successThreshold));
+        if (CollectionUtils.isEmpty(sysScheduleLogs)) {
+            return;
+        }
+        Set<Integer> delIds = sysScheduleLogs.stream().map(SysScheduleLog::getId).collect(Collectors.toSet());
+        sysScheduleLogMapper.deleteBatchIds(delIds);
+    }
+
+    @Override
+    public void resetSchedule() {
+        coreScheduleService.resetSchedule();
+
+    }
+
+    @Override
+    public PageResult<SysScheduleLogListVo> logList(PageParam pageParam, SysScheduleLogSearchParam searchParam) {
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
+        LambdaQueryWrapper<SysScheduleLog> qw = new LambdaQueryWrapper<>();
+        qw.eq(ObjectUtil.isNotEmpty(searchParam.getScheduleId()), SysScheduleLog::getScheduleId, searchParam.getScheduleId());
+        qw.eq(ObjectUtil.isNotEmpty(searchParam.getKey()), SysScheduleLog::getKey, searchParam.getKey());
+        if (ObjectUtil.isNotEmpty(searchParam.getStatus()) && !"all".equals(searchParam.getStatus())){
+            qw.eq(SysScheduleLog::getStatus, searchParam.getStatus());
+        }
+        if (ObjectUtil.isNotEmpty(searchParam.getExecuteTime())) {
+            QueryMapperUtils.buildByTime(qw, "execute_time", searchParam.getExecuteTime());
+        }
+        Page<SysScheduleLog> sysScheduleLogPage = sysScheduleLogMapper.selectPage(new Page<>(page, limit), qw);
+        List<SysScheduleLogListVo> result = new ArrayList<>();
+        sysScheduleLogPage.getRecords().forEach(sysScheduleLog -> {
+            SysScheduleLogListVo sysScheduleLogListVo = new SysScheduleLogListVo();
+            BeanUtils.copyProperties(sysScheduleLog, sysScheduleLogListVo);
+            result.add(sysScheduleLogListVo);
+        });
+        return PageResult.build(page, limit, sysScheduleLogPage.getTotal()).setData(result);
+    }
+
+    @Override
+    public void addLog(SysScheduleLog log) {
+        SysSchedule sysSchedule = sysScheduleMapper.selectOne(new LambdaQueryWrapper<SysSchedule>()
+                .eq(SysSchedule::getKey, log.getKey()).eq(SysSchedule::getAddon, log.getAddon()));
+        if (sysSchedule == null) return;
+        log.setScheduleId(sysSchedule.getId());
+        log.setExecuteTime(DateUtils.currTime());
+        sysScheduleLogMapper.insert(log);
+    }
+
+    @Override
+    public void doSchedule(Integer id) {
+        SysSchedule sysSchedule = sysScheduleMapper.selectById(id);
+        if (sysSchedule == null) {
+            throw new CommonException("计划任务不存在");
+        }
+        String basePackage = String.format("com.niu.%s.job", sysSchedule.getAddon());
+        String classPath = QuartzJobManager.getClassPath(basePackage, sysSchedule.getKey());
+        String jobKey = sysSchedule.getKey();
+        try {
+            // 动态加载任务类
+            Class<?> jobClass = Class.forName(classPath);
+
+            // 验证是否为有效的任务类
+            if (!IJobProvider.class.isAssignableFrom(jobClass)) {
+                throw new CommonException("无效的任务类: " + classPath);
+            }
+
+            // 实例化任务
+            IJobProvider job = (IJobProvider) jobClass.getDeclaredConstructor().newInstance();
+
+            // 执行任务
+            job.exec(null);
+
+            // 构建日志信息
+            String result = "计划任务：" + sysSchedule.getName() + "执行成功";
+            addLog(SysScheduleLog.builder()
+                    .key(jobKey)
+                    .name(sysSchedule.getName())
+                    .addon(sysSchedule.getAddon())
+                    .className(classPath)
+                    .status("success")
+                    .executeResult(result)
+                    .job(classPath)
+                    .build());
+
+        } catch (Exception e) {
+            // 获取任务名称（即使在异常情况下也尝试获取）
+            String errorMsg = "计划任务：" + sysSchedule.getName() + "发生错误, 错误原因：" + e.getMessage() +
+                    " at " + e.getStackTrace()[0].toString();
+            addLog(SysScheduleLog.builder()
+                    .key(jobKey)
+                    .name(sysSchedule.getName())
+                    .addon(sysSchedule.getAddon())
+                    .className(classPath)
+                    .status("error")
+                    .executeResult(errorMsg)
+                    .job(classPath)
+                    .build());
+
+            throw new CommonException("执行计划任务失败", e);
+        }
+    }
+
+    @Override
+    public void delLog(Integer[] ids) {
+        sysScheduleLogMapper.deleteByIds(Arrays.asList(ids));
+    }
+
+    @Override
+    public void clearLog(Integer scheduleId) {
+        sysScheduleLogMapper.delete(new QueryWrapper<SysScheduleLog>().eq("schedule_id", scheduleId));
     }
 
 }

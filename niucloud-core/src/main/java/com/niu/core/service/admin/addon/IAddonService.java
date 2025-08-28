@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.addon;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.entity.addon.Addon;
@@ -8,6 +9,7 @@ import com.niu.core.service.admin.addon.param.AddonSearchParam;
 import com.niu.core.service.admin.addon.vo.AddonInfoVo;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.addon.vo.AddonListVo;
+import com.niu.core.service.admin.addon.vo.IndexAddonListParam;
 import com.niu.core.service.admin.addon.vo.LocalAddonListVo;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 
@@ -135,4 +137,11 @@ public interface IAddonService {
      * @param version
      */
     void download(String addon, String version);
+
+    /**
+     * 获取首页应用
+     * @param param
+     * @return
+     */
+    JSONArray getIndexAddonList(IndexAddonListParam param);
 }

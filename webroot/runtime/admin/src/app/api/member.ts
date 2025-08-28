@@ -125,6 +125,14 @@ export function editMemberDetail(params: Record<string, any>) {
     return request.put(`member/member/modify/${params.member_id}/${params.field}`, params, { showSuccessMessage: true })
 }
 
+/**
+ * 会员批量操作
+ * @param params
+ */
+export function memberBatchModify(params: Record<string, any>) {
+    return request.post(`member/member/batch_modify`, params, { showSuccessMessage: true })
+}
+
 /***************************************************** 会员零钱 ****************************************************/
 
 
@@ -385,7 +393,7 @@ export function memberRemark(params: Record<string, any>) {
 }
 /**
  * 检查打款进度
- * @param params
+ * @param id
  */
 export function memberCheck(id: number) {
     return request.put(`member/cash_out/check/${id}`, {}, { showSuccessMessage: true })
@@ -504,14 +512,14 @@ export function getMemberLevelAll() {
  * 获取会员权益内容
  */
 export function getMemberBenefitsContent() {
-    return request.get(`member/benefits/content`);
+    return request.post(`member/benefits/content`);
 }
 
 /**
  * 获取会员礼包内容
  */
 export function getMemberGiftsContent(params: Record<string, any>) {
-    return request.post(`member/gifts/content`, params );
+    return request.post(`member/gifts/content`, { params });
 }
 
 /**

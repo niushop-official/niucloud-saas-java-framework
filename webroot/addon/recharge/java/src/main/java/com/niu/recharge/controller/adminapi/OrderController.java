@@ -1,5 +1,6 @@
 package com.niu.recharge.controller.adminapi;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.Result;
 import com.niu.recharge.enums.OrderStatusEnum;
@@ -15,12 +16,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("adminapi/recharge/order")
+@Description("充值订单管理")
 public class OrderController {
 
     @Resource
     IRechargeOrderService rechargeOrderService;
 
     @GetMapping("")
+    @Description("充值订单列表")
     public Result lists(PageParam pageParam, RechargeOrderSearchParam searchParam) {
         return Result.success(rechargeOrderService.list(pageParam, searchParam));
     }
@@ -31,6 +34,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{order_id}")
+    @Description("订单详情")
     public Result detail(@PathVariable("order_id") Integer orderId) {
         return Result.success(rechargeOrderService.detail(orderId));
     }
@@ -41,6 +45,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/status")
+    @Description("订单状态")
     public Result<Map<Integer, Map<String, Object>>> status() {
         return Result.success(OrderStatusEnum.getMap());
     }
@@ -51,6 +56,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/stat")
+    @Description("订单统计")
     public Result stat(RechargeOrderSearchParam searchParam) {
         return Result.success(rechargeOrderService.stat(searchParam));
     }

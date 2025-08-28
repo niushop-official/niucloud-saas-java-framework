@@ -14,6 +14,8 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +51,10 @@ public class WeappTemplateServiceImpl implements IWeappTemplateService {
      */
     public void sync(WeappTemplateSyncParam param) {
         Map<String, NoticeInfoVo> list = coreNoticeService.getList(RequestUtils.siteId(), param.getKeys());
+        List<String> keys = Arrays.asList(param.getKeys());
 
         for (NoticeInfoVo item : list.values()) {
-            if (item.getWeapp() != null) {
+            if (item.getWeapp() != null && (keys.size() == 0 || keys.contains(item.getKey()))) {
                 if (item.getWeappTemplateId().length() > 0) {
                     deleteTemplate(item.getWeappTemplateId());
                 }

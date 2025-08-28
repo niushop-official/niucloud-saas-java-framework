@@ -1,5 +1,6 @@
 package com.niu.recharge.controller.adminapi;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.Result;
 import com.niu.recharge.enums.RefundStatusEnum;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("adminapi/recharge/refund")
+@Description("退款管理")
 public class RefundController {
 
     @Resource
@@ -26,6 +28,7 @@ public class RefundController {
      * @return
      */
     @GetMapping("")
+    @Description("退款列表")
     public Result lists(PageParam pageParam, RechargeRefundSearchParam searchParam) {
         return Result.success(rechargeRefundService.list(pageParam, searchParam));
     }
@@ -37,6 +40,7 @@ public class RefundController {
      * @return
      */
     @PutMapping("/{order_id}")
+    @Description("发起退款")
     public Result refund(@PathVariable("order_id") Integer orderId) {
         rechargeRefundService.refund(orderId);
         return Result.success();
@@ -48,6 +52,7 @@ public class RefundController {
      * @return
      */
     @GetMapping("/{refund_id}")
+    @Description("退款详情")
     public Result detail(@PathVariable("refund_id") Integer refundId) {
         return Result.success(rechargeRefundService.detail(refundId));
     }
@@ -58,6 +63,7 @@ public class RefundController {
      * @return
      */
     @GetMapping("/status")
+    @Description("退款状态")
     public Result<Map<Integer, Map<String, Object>>> status() {
         return Result.success(RefundStatusEnum.getMap());
     }
@@ -68,6 +74,7 @@ public class RefundController {
      * @return
      */
     @GetMapping("/stat")
+    @Description("退款统计")
     public Result<RechargeRefundStatVo> stat(RechargeRefundSearchParam searchParam) {
         return Result.success(rechargeRefundService.stat(searchParam));
     }

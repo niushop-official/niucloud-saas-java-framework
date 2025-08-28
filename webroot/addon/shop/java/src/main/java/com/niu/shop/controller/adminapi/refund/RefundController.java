@@ -89,4 +89,15 @@ public class RefundController {
         refundActionService.shopActiveRefund(param);
         return Result.success();
     }
+
+    /**
+     * 关闭售后
+     * @param orderRefundNo
+     * @return
+     */
+    @PutMapping("/close/{orderRefundNo}")
+    public Result close(@PathVariable(name = "orderRefundNo") String orderRefundNo) {
+        refundActionService.close(orderRefundNo);
+        return Result.success();
+    }
 }

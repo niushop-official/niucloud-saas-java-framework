@@ -16,7 +16,7 @@ public class SysScheduleSearchParam implements Serializable {
 
     private String key;
 
-    private Integer status;
+    private String status;
 
     private String time;
 

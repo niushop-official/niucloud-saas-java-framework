@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.order;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
@@ -19,6 +20,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop")
+@Description("发票管理")
 public class ShopInvoiceController {
 
     @Resource
@@ -32,6 +34,7 @@ public class ShopInvoiceController {
      * @return Result<PageResult < ShopInvoiceListVo>>
      */
     @GetMapping("/invoice")
+    @Description("获取发票分页列表")
     public Result<PageResult<ShopInvoiceListVo>> lists(@Validated PageParam pageParam, ShopInvoiceSearchParam searchParam) {
         PageResult<ShopInvoiceListVo> list = shopInvoiceService.getPage(pageParam, searchParam);
         return Result.success(list);
@@ -43,6 +46,7 @@ public class ShopInvoiceController {
      * @return
      */
     @GetMapping("/invoice/{id}")
+    @Description("获取发票详情")
     public Result<ShopInvoiceInfoVo> info(@Validated @PathVariable("id") Integer id) {
         ShopInvoiceInfoVo info = shopInvoiceService.getInfo(id);
         return Result.success(info);
@@ -55,6 +59,7 @@ public class ShopInvoiceController {
      * @return Result<Object>
      */
     @PutMapping("/invoice/{id}")
+    @Description("编辑发票")
     public Result<Object> invoicing(@PathVariable("id") Integer id, @Validated @RequestBody ShopInvoiceParam shopInvoiceParam) {
         shopInvoiceService.invoicing(id, shopInvoiceParam);
         return Result.success();

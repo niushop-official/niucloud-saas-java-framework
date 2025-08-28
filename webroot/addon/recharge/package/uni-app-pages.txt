@@ -1,8 +1,6 @@
 {
             "root": "addon/recharge",
-            "pages": [
-                // *********************************** 充值 ***********************************
-                {
+            "pages": [{
                     "path": "pages/recharge",
                     "style": {
                         "navigationBarTitleText": "%recharge.pages.recharge%"

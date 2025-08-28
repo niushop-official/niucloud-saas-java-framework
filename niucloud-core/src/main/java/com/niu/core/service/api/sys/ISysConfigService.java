@@ -11,6 +11,8 @@ import com.niu.core.service.api.sys.param.SysConfigSceneDomainParam;
 import com.niu.core.service.api.sys.param.SysConfigSiteParam;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 
+import java.util.Map;
+
 public interface ISysConfigService {
 
     /**
@@ -45,4 +47,11 @@ public interface ISysConfigService {
      */
     SysMapVo map(SysConfigMapParam param);
 
+    /**
+     * 获取公众号用户是否绑定手机
+     * @param openid
+     * @param channel
+     * @return
+     */
+    Map<String, Integer> getMemberMobileExist(String openid, String channel);
 }

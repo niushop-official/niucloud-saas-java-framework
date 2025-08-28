@@ -2,6 +2,7 @@ package com.niu.shop.service.api.goods.vo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import lombok.Data;
@@ -69,12 +70,9 @@ public class ShopGoodsEvaluateDetailVo implements Serializable {
         private Integer verifyExpireTime; // 过期时间 0 为永久
         private Integer isVerify; // 是否需要核销
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsImageThumbMid() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsImage());
         }
     }
 }

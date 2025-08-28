@@ -1,12 +1,16 @@
 package com.niu.core.service.admin.member.impl;
 
 import cn.hutool.core.collection.CollStreamUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.PhoneUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,6 +19,8 @@ import com.niu.core.common.component.context.event.EventPublisher;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.exception.AdminException;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
@@ -31,10 +37,7 @@ import com.niu.core.mapper.member.MemberLabelMapper;
 import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.member.IMemberService;
-import com.niu.core.service.admin.member.param.MemberAddParam;
-import com.niu.core.service.admin.member.param.MemberModifyParam;
-import com.niu.core.service.admin.member.param.MemberParam;
-import com.niu.core.service.admin.member.param.MemberSearchParam;
+import com.niu.core.service.admin.member.param.*;
 import com.niu.core.service.admin.member.vo.MemberAllListVo;
 import com.niu.core.service.admin.member.vo.MemberInfoVo;
 import com.niu.core.service.admin.member.vo.MemberLabelAllListVo;
@@ -178,12 +181,15 @@ public class MemberServiceImpl implements IMemberService {
 
         MemberInfoVo vo = new MemberInfoVo();
         BeanUtils.copyProperties(model, vo);
+        if ("0".equals(model.getMemberLevel())){
+            vo.setMemberLevel("");
+        }
 
         if (StrUtil.isNotEmpty(model.getMemberLabel()) && !Arrays.asList(model.getMemberLabel()).isEmpty()) {
             JSONArray memberLabelArrays = JSONUtil.parseArray(vo.getMemberLabel());
             if (memberLabelArrays != null && memberLabelArrays.size() > 0) {
                 List<MemberLabelAllListVo> memberLabelArray = new LinkedList<>();
-                List<MemberLabel> labelList = memberLabelMapper.selectList(new QueryWrapper<MemberLabel>().select("label_name").in("label_id", memberLabelArrays));
+                List<MemberLabel> labelList = memberLabelMapper.selectList(new QueryWrapper<MemberLabel>().select("label_name,label_id").in("label_id", memberLabelArrays));
                 for (MemberLabel item : labelList) {
                     MemberLabelAllListVo labelVo = new MemberLabelAllListVo();
                     BeanUtils.copyProperties(item, labelVo);
@@ -280,41 +286,56 @@ public class MemberServiceImpl implements IMemberService {
      * @param editParam
      */
     public void modify(MemberModifyParam editParam) {
-        Integer siteId = RequestUtils.siteId();
+        if (editParam == null || editParam.getField() == null || editParam.getValue() == null) {
+            if(editParam.getField().equals("member_label")){
+                throw new AdminException("修改参数不能为空");
+            }
+        }
 
-        Member model = new Member();
+        Integer siteId = RequestUtils.siteId();
+        String value = String.valueOf(editParam.getValue()).trim();
+
+        LambdaUpdateWrapper<Member> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Member::getSiteId, siteId)
+                .eq(Member::getMemberId, editParam.getMemberId());
 
         switch (editParam.getField()) {
             case "nickname":
-                model.setNickname(String.valueOf(editParam.getValue()));
+                updateWrapper.set(Member::getNickname, value.equals("") || value.equals("null") ? "" : value);
                 break;
             case "headimg":
-                model.setHeadimg(String.valueOf(editParam.getValue()));
+                updateWrapper.set(Member::getHeadimg, value.equals("") || value.equals("null") ? "" : value);
                 break;
             case "member_label":
-//                model.setMemberLabel(String.valueOf(editParam.getValue()));
-                String value = String.valueOf(editParam.getValue());
-                if ("".equals(value.trim())) {
-                    model.setMemberLabel("[]");
-                } else {
-                    model.setMemberLabel(value);
-                }
+                updateWrapper.set(Member::getMemberLabel, value.isEmpty() ? "[]" : value);
                 break;
             case "member_level":
-                model.setMemberLevel(Integer.parseInt(String.valueOf(editParam.getValue())));
+                updateWrapper.set(Member::getMemberLevel, value.equals("") || value.equals("null") ? 0 : Integer.parseInt(value));
                 break;
             case "birthday":
-                model.setBirthday(String.valueOf(editParam.getValue()));
+                updateWrapper.set(Member::getBirthday, value.equals("") || value.equals("null") ? "" : value);
                 break;
             case "sex":
-                model.setSex(Integer.parseInt(String.valueOf(editParam.getValue())));
+                updateWrapper.set(Member::getSex, value.equals("") || value.equals("null") ? 0 : Integer.parseInt(value));
+                break;
+            case "id_card":
+//                if (!IdcardUtil.isValidCard(value) && !value.isEmpty()){
+//                    throw new AdminException("请输入正确的身份证号");
+//                }
+                updateWrapper.set(Member::getIdCard, value.equals("") || value.equals("null") ? "" : value);
+                break;
+            case "remark":
+                updateWrapper.set(Member::getRemark, value.equals("") || value.equals("null") ? "" : value);
+                break;
+            case "mobile":
+                if (!PhoneUtil.isPhone(value) && !value.isEmpty()){
+                    throw new AdminException("请输入正确的手机号");
+                }
+                updateWrapper.set(Member::getMobile, value.equals("") || value.equals("null") ? "" : value);
                 break;
         }
 
-        UpdateWrapper<Member> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("site_id", siteId)
-                .eq("member_id", editParam.getMemberId());
-        memberMapper.update(model, updateWrapper);
+        memberMapper.update(updateWrapper);
     }
 
     /**
@@ -406,5 +427,39 @@ public class MemberServiceImpl implements IMemberService {
      */
     public JSONObject getMemberBenefitsContent(JSONObject param) {
         return iCoreMemberService.getBenefitsContent(RequestUtils.siteId(), param.getJSONObject("benefits"), "admin");
+    }
+
+    /**
+     * 批量修改
+     * @param param
+     */
+    @Override
+    public void batchModify(BatchModifyParam param) {
+        if (ObjectUtil.isEmpty(param.getValue().toString())){
+            return;
+        }
+        String field = param.getField();
+        List<Integer> memberIds = param.getMemberIds();
+        Integer isAll = param.getIsAll();
+        if (!"member_label".equals(field) && !"member_level".equals(field)){
+            throw new CommonException("不支持的字段:" + field);
+        }
+        UpdateWrapper<Member> uw = new UpdateWrapper<>();
+        if (isAll == 0){
+            if (!CollectionUtil.isEmpty(memberIds)){
+                uw.in("member_id", memberIds);
+            }
+        }else {
+            if (!CollectionUtil.isEmpty(memberIds)) {
+                uw.notIn("member_id", memberIds);
+            }
+        }
+        if ("member_label".equals(field)){
+            JSONArray value = JSONUtil.parseArray(param.getValue());
+            uw.set("member_label", JSONUtil.toJsonStr(value));
+        }else if ("member_level".equals(field)){
+            uw.set("member_level", Integer.parseInt(param.getValue().toString()));
+        }
+        memberMapper.update(uw);
     }
 }

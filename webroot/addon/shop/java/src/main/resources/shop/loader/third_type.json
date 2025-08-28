@@ -1,0 +1,19 @@
+[
+  {
+    "dada": {
+      "name": "达达配送",
+      "column": [
+        "app_secret",
+        "app_key",
+        "shop_id",
+        "shop_store_no"
+      ],
+      "encrypt_params": [
+        "app_secret",
+        "app_key",
+        "shop_id",
+        "shop_store_no"
+      ]
+    }
+  }
+]

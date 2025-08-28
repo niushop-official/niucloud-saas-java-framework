@@ -19,10 +19,12 @@ import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
  * 自定义路由管理
  */
+@Description("自定义路由管理")
 @RestController
 @RequestMapping("/adminapi/diy/route")
 @SaCheckLogin
@@ -40,6 +42,7 @@ public class DiyRouteController {
      * @param searchParam 搜索参数
      * @return Result<Object>
      */
+    @Description("自定义路由列表")
     @GetMapping("")
     public Result<List<DiyRouteListVo>> list(@Validated DiyRouteSearchParam searchParam) {
         return Result.success(diyRouteService.list(searchParam));
@@ -50,6 +53,7 @@ public class DiyRouteController {
      *
      * @return
      */
+    @Description("存在的应用插件列表")
     @GetMapping("/apps")
     public Result<Map<String, InstallAddonListVo>> info() {
         return Result.success(coreAddonService.getInstallAddonList());
@@ -59,6 +63,7 @@ public class DiyRouteController {
      * 获取自定义路由分享内容
      *
      */
+    @Description("获取自定义路由分享内容")
     @GetMapping("/info")
     public Result<Object> getInfoByName(@RequestParam("name") String name) {
         return Result.success(ObjectUtil.defaultIfNull(diyRouteService.getInfoByName(name), new ArrayList<>()));
@@ -70,6 +75,7 @@ public class DiyRouteController {
      * @param editParam 参数
      * @return Result<Object>
      */
+    @Description("自定义路由编辑")
     @PutMapping("/share")
     public Result<Object> modifyShare(@Validated @RequestBody DiyRouteShareParam editParam) {
         diyRouteService.modifyShare(editParam);

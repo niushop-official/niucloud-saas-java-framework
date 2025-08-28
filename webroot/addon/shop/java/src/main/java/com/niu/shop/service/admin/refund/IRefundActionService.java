@@ -46,4 +46,10 @@ public interface IRefundActionService {
      * @param param
      */
     void shopActiveRefund(ActiveRefundParam param);
+
+    /**
+     * 关闭售后
+     * @param orderRefundNo
+     */
+    void close(String orderRefundNo);
 }

@@ -89,7 +89,7 @@
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
 import { getArticleList, deleteArticle, getArticleCategoryAll } from '@/addon/cms/api/article'
-import { img } from '@/utils/common'
+import { img ,setTablePageStorage, getTablePageStorage } from '@/utils/common'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -131,11 +131,12 @@ const loadArticleList = (page: number = 1) => {
         articleTableData.loading = false
         articleTableData.data = res.data.data
         articleTableData.total = res.data.total
+        setTablePageStorage(articleTableData.page, articleTableData.limit, articleTableData.searchParam)
     }).catch(() => {
         articleTableData.loading = false
     })
 }
-loadArticleList()
+loadArticleList(getTablePageStorage(articleTableData.searchParam).page)
 
 const router = useRouter()
 

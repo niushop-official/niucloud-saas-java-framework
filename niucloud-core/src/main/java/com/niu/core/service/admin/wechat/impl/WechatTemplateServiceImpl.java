@@ -27,10 +27,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 
 /**
@@ -63,9 +61,10 @@ public class WechatTemplateServiceImpl implements IWechatTemplateService {
      */
     public void sync(WechatTemplateSyncParam param) {
         Map<String, NoticeInfoVo> list = coreNoticeService.getList(RequestUtils.siteId(), param.getKeys());
+        List<String> keys = Arrays.asList(param.getKeys());
 
         for (NoticeInfoVo item : list.values()) {
-            if (item.getWechat() != null) {
+            if (item.getWechat() != null && (keys.size() == 0 || keys.contains(item.getKey()))) {
                 if (item.getWeappTemplateId().length() > 0) {
                     deleteTemplate(item.getWeappTemplateId());
                 }

@@ -100,7 +100,7 @@ public class LoginServiceImpl implements ILoginService {
             roleInfoVo=sysUserRoleService.getUserRole(defaultSiteId, userInfo.getUid());
             if(ObjectUtil.isNotNull(roleInfoVo)){
                 if(userInfo.getStatus()<=0){
-                    throw new AuthException("USER_LOCK");
+                    throw new AuthException("账号被锁定");
                 }
             }else{
                 appType=AppTypeEnum.SITE.getName();

@@ -10,27 +10,16 @@ import cn.hutool.core.util.RandomUtil;
 import com.niu.core.common.utils.RequestUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Data;
 
 public class CaptchaUtils {
 
     private static Cache<String, String> cache = CacheUtil.newTimedCache(300000);
-
+    @Data
     public static class Captcha {
         private String captchaKey;
         private String img;
-
-        public void setCaptchaKey(String key) {
-            this.captchaKey = key;
-        }
-        public void setImg(String img) {
-            this.img = img;
-        }
-        public String getCaptchaKey() {
-            return this.captchaKey;
-        }
-        public String getImg() {
-            return this.img;
-        }
+        private String captchaCode;
     }
 
     /**

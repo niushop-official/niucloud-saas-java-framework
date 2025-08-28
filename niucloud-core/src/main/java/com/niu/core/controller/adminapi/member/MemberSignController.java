@@ -14,11 +14,12 @@ import com.niu.core.service.admin.member.vo.SignConfigVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 会员签到控制器
  */
-
+@Description("会员签到控制器")
 @RestController
 @RequestMapping("adminapi/member/sign")
 @SaCheckLogin
@@ -28,9 +29,10 @@ public class MemberSignController {
     IMemberSignService memberSignService;
 
     /**
-     * 签到设置
+     * 签到记录列表
      * @return
      */
+    @Description("签到记录列表")
     @GetMapping("")
     public Result<PageResult<MemberSignListVo>> pages(@Validated PageParam pageParam, @Validated MemberSignSearchParam searchParam) {
         PageResult<MemberSignListVo> list = memberSignService.pages(pageParam, searchParam);
@@ -38,9 +40,10 @@ public class MemberSignController {
     }
 
     /**
-     * 签到设置
+     * 获取签到设置
      * @return
      */
+    @Description("获取签到设置")
     @GetMapping("/config")
     public Result<SignConfigVo> getSignConfig() {
         SignConfigVo config = memberSignService.getSignConfig();
@@ -48,10 +51,11 @@ public class MemberSignController {
     }
 
     /**
-     * 签到设置
+     * 设置签到配置
      * @param configParam
      * @return
      */
+    @Description("设置签到配置")
     @PutMapping("/config")
     public Result setSignConfig(@Validated @RequestBody SignConfigParam configParam) {
         memberSignService.setSignConfig(configParam);

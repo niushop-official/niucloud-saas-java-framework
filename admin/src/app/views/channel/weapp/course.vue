@@ -1,12 +1,12 @@
 <template>
     <!--配置教程-->
-	<div class="main-container">
+    <div class="main-container">
 
-		<el-card class="card !border-none" shadow="never">
-		    <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
-		</el-card>
+        <el-card class="card !border-none" shadow="never">
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
+        </el-card>
 
-		<el-card class="box-card mt-[15px] !border-none" shadow="never">
+        <el-card class="box-card mt-[15px] !border-none" shadow="never">
             <div class="flex">
                 <div class="min-w-[60px]">
                     <span class="flex justify-center items-center block w-[40px] h-[40px] border-[1px] border-primary rounded-[999px] text-primary">1</span>
@@ -51,8 +51,8 @@
                     </div>
                 </div>
             </div>
-		</el-card>
-	</div>
+        </el-card>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -63,7 +63,9 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
-
+const back = () => {
+    router.push('/channel/weapp')
+}
 const linkEvent = () => {
     window.open('https://mp.weixin.qq.com/', '_blank')
 }

@@ -1,9 +1,8 @@
 <template>
     <div class="main-container" v-loading="loading">
-
-		<el-card class="card !border-none" shadow="never">
-		    <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
-		</el-card>
+        <el-card class="card !border-none" shadow="never">
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
+        </el-card>
 
         <!-- 表单 -->
         <el-form class="page-form mt-[15px]" :model="formData" label-width="120px" ref="formRef" :rules="formRules">
@@ -135,7 +134,7 @@
                                                     callback(t('limitTipsThree'))
                                                 } else if(parseInt(value)>parseInt(row.goods_stock)){
                                                     callback(t('stockTipsThree'))
-                                                } else { 
+                                                } else {
                                                     callback();
                                                 }
                                         }
@@ -452,10 +451,10 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { t } from '@/lang'
-import { img,deepClone } from '@/utils/common'
-import { FormInstance,ElMessage } from 'element-plus'
+import { img, deepClone } from '@/utils/common'
+import { FormInstance, ElMessage } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
-import { getActiveExchangeInfo,editActiveExchange } from "@/addon/shop/api/marketing";
+import { getActiveExchangeInfo, editActiveExchange } from '@/addon/shop/api/marketing'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -465,25 +464,25 @@ const pageName = route.meta.title
 const loading = ref(true)
 // 商品类型
 const goodsType = reactive([
-    {name:'商品',type:'goods'},
+    { name: '商品', type: 'goods' }
     // {name:'优惠券',type:'coupon'},
     // {name:'余额',type:'balance'},
 ])
 const initialFormData = {
     type: 'goods', // 名称
     names: '', // 标题
-    title:'',
-    image:'',
-    goods_info:{},
-    coupon_ids:[],
-    product_list:[],
-    stock:'',
-    limit_num:'',
-    point:'',
-    price:'',
-    balance:'',
-    isBalance:1,
-    content:''
+    title: '',
+    image: '',
+    goods_info: {},
+    coupon_ids: [],
+    product_list: [],
+    stock: '',
+    limit_num: '',
+    point: '',
+    price: '',
+    balance: '',
+    isBalance: 1,
+    content: ''
 }
 const formData: Record<string, any> = ref({ ...initialFormData })
 const formRef = ref<FormInstance>()
@@ -508,48 +507,47 @@ const formRules = computed(() => {
         ],
         product_list: [
             { required: true, message: t('goodsSkuPlaceholder'), trigger: 'change' }
-        ],
+        ]
     }
 })
-//获取详情
-const getActiveExchangeInfoFn=(id:number)=>{
+// 获取详情
+const getActiveExchangeInfoFn = (id:number) => {
     loading.value = true
-    getActiveExchangeInfo(id).then((res:any)=>{
-        formData.value = Object.assign(formData.value,res.data)
-        if(formData.value.type=='goods'){
+    getActiveExchangeInfo(id).then((res: any) => {
+        formData.value = Object.assign(formData.value, res.data)
+        if (formData.value.type == 'goods') {
             formData.value.product_list = res.data.goods_list
-        }else if(formData.value.type=='coupon'){
-            formData.value.product_list =[]
+        } else if (formData.value.type == 'coupon') {
+            formData.value.product_list = []
             formData.value.product_list.push(deepClone(formData.value.coupon_info))
-        }else{
-            formData.value.balance = formData.value.product_detail[0].balance?formData.value.product_detail[0].balance: formData.value.product_detail[0].money
-            formData.value.isBalance = formData.value.product_detail[0].balance?1: 0
+        } else {
+            formData.value.balance = formData.value.product_detail[0].balance ? formData.value.product_detail[0].balance : formData.value.product_detail[0].money
+            formData.value.isBalance = formData.value.product_detail[0].balance ? 1 : 0
         }
         loading.value = false
-    }).catch(()=>{
+    }).catch(() => {
         loading.value = false
     })
 }
 onMounted(() => {
-    if(route.query.id) getActiveExchangeInfoFn(Number(route.query.id))
+    if (route.query.id) getActiveExchangeInfoFn(Number(route.query.id))
 })
-/********* 商品 **********/
-const goodsSkuSelectRef = ref()
-//设置商品sku是否参与
-const enabledEvent =  (row:any)=>{
+/** ******* 商品 **********/
+// 设置商品sku是否参与
+const enabledEvent = (row:any) => {
     row.is_enabled = row.is_enabled ? 0 : 1
-    if(formData.value.product_list.every((el:any)=>el.is_enabled===0)){
+    if (formData.value.product_list.every((el: any) => el.is_enabled === 0)) {
         row.is_enabled = 1
         ElMessage({
-             type: 'warning',
+            type: 'warning',
             message: `${t('noEnabledTip')}`
         })
         return
     }
-    row.stock = '';
-    row.limit_num = '';
-    row.point = '';
-    row.price = '';
+    row.stock = ''
+    row.limit_num = ''
+    row.point = ''
+    row.price = ''
 }
 interface batchOperationInterface {
     stock:any,
@@ -558,10 +556,10 @@ interface batchOperationInterface {
     price:any,
 }
 const batchOperation = ref<batchOperationInterface>({
-    stock:'',
-    limit_num:'',
-    point:'',
-    price:'',
+    stock: '',
+    limit_num: '',
+    point: '',
+    price: ''
 })
 // 批量复选框
 const toggleCheckbox = ref()
@@ -594,8 +592,8 @@ const handleSelectionChange = (val: []) => {
         toggleCheckbox.value = true
     }
 }
-//批量设置确认按钮
-const saveBatch = ()=> {
+// 批量设置确认按钮
+const saveBatch = () => {
     if (!multipleSelection.value.length) {
         ElMessage({
             type: 'warning',
@@ -666,10 +664,10 @@ const saveBatch = ()=> {
     formData.value.product_list.forEach((el: any, index: number) => {
         multipleSelection.value.forEach((v: any) => {
             if (v.sku_id === el.sku_id) {
-                if(batchOperation.value.stock) el.stock = batchOperation.value.stock+''
-                if(batchOperation.value.limit_num) el.limit_num = batchOperation.value.limit_num+''
-                if(batchOperation.value.point) el.point = batchOperation.value.point+''
-                if(batchOperation.value.price) el.price = batchOperation.value.price+''
+                if (batchOperation.value.stock) el.stock = batchOperation.value.stock + ''
+                if (batchOperation.value.limit_num) el.limit_num = batchOperation.value.limit_num + ''
+                if (batchOperation.value.point) el.point = batchOperation.value.point + ''
+                if (batchOperation.value.price) el.price = batchOperation.value.price + ''
                 if (formRef.value) {
                     formRef.value.validateField('product_list.' + index + '.stock')
                     formRef.value.validateField('product_list.' + index + '.limit_num')
@@ -678,7 +676,6 @@ const saveBatch = ()=> {
                 }
             }
         })
-
     })
     isIndeterminate.value = false
     toggleCheckbox.value = false
@@ -690,36 +687,36 @@ const saveBatch = ()=> {
     }
     productListTableRef.value.clearSelection()
 }
-/********** 优惠券 ***********/
-/**** 提交 ****/
+/** ******** 优惠券 ***********/
+/** ** 提交 ****/
 const onSave = async (formEl: FormInstance | undefined) => {
     if (loading.value || !formEl) return
     await formEl.validate(async (valid) => {
         if (valid) {
             loading.value = true
-            if(formData.value.type == 'goods'){
-                formData.value.product_detail = JSON.stringify(formData.value.product_list.map((el:any)=>{
+            if (formData.value.type == 'goods') {
+                formData.value.product_detail = JSON.stringify(formData.value.product_list.map((el: any) => {
                     return {
-                        goods_id:el.goods_id,
-                        sku_id:el.sku_id,
-                        point:el.point,
-                        price:el.price,
-                        limit_num:el.limit_num,
-                        stock:el.stock,
-                        is_enabled:el.is_enabled
+                        goods_id: el.goods_id,
+                        sku_id: el.sku_id,
+                        point: el.point,
+                        price: el.price,
+                        limit_num: el.limit_num,
+                        stock: el.stock,
+                        is_enabled: el.is_enabled
                     }
-                }).filter((el:any)=>el.is_enabled===1))
-            } else if(formData.value.type == 'coupon'){
-                formData.value.product_detail = JSON.stringify(formData.value.product_list.map((el:any)=>{
+                }).filter((el: any) => el.is_enabled === 1))
+            } else if (formData.value.type == 'coupon') {
+                formData.value.product_detail = JSON.stringify(formData.value.product_list.map((el: any) => {
                     return {
-                        coupon_id:el.id,
+                        coupon_id: el.id
                     }
                 }))
-            }else{
-                if(formData.value.isBalance){
-                    formData.value.product_detail=JSON.stringify([{balance:formData.value.balance}])
-                }else{
-                    formData.value.product_detail=JSON.stringify([{money:formData.value.balance}])
+            } else {
+                if (formData.value.isBalance) {
+                    formData.value.product_detail = JSON.stringify([{ balance: formData.value.balance }])
+                } else {
+                    formData.value.product_detail = JSON.stringify([{ money: formData.value.balance }])
                 }
             }
             // formData.value.goods_data = JSON.stringify(formData.value.product_list)
@@ -732,6 +729,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
         }
     })
 }
+
 const back = () => {
     router.push('/shop/marketing/exchange/goods_list')
 }

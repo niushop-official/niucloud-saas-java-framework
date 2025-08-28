@@ -8,22 +8,26 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.pay.ICorePayService;
+import com.niu.shop.entity.delivery.ShopDeliveryCompany;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.ShopOrderRefund;
 import com.niu.shop.enums.order.*;
 import com.niu.shop.event.order.OrderCloseAfterEvent;
 import com.niu.shop.event.order.OrderPayAfterEvent;
+import com.niu.shop.mapper.delivery.ShopDeliveryCompanyMapper;
 import com.niu.shop.mapper.order.ShopOrderDiscountMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.mapper.order.ShopOrderRefundMapper;
+import com.niu.shop.service.api.order.vo.DeliveryPackageVo;
 import com.niu.shop.service.core.delivery.ICoreDeliveryConfigService;
 import com.niu.shop.service.core.delivery.vo.DeliverySearchConfigVo;
 import com.niu.shop.service.core.goods.ICoreGoodsService;
@@ -33,6 +37,10 @@ import com.niu.shop.service.core.order.param.*;
 import com.niu.shop.service.core.order.vo.DeliveryTraceVo;
 import com.niu.shop.service.core.shop.ICoreStatService;
 import com.niu.shop.service.core.shop.param.AddStatParam;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,10 +48,9 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import jakarta.annotation.Resource;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class CoreOrderServiceImpl implements ICoreOrderService {
@@ -71,6 +78,9 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
 
     @Resource
     MemberMapper memberMapper;
+
+    @Resource
+    ShopDeliveryCompanyMapper shopDeliveryCompanyMapper;
 
     @Override
     public ShopOrder orderInfo(Integer orderId) {
@@ -216,7 +226,26 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
     public DeliveryTraceVo deliverySearch(Integer siteId, DeliverySearchParam param) {
         DeliverySearchConfigVo config = coreDeliveryConfigService.getDeliverySearchConfig(siteId);
 
-        // TODO:: 暂时先固定查询快递鸟接口 后期考虑扩展
+        // 判断调用的是哪个快递，暂时现在有快递鸟和快递100俩种类型（快递鸟==1，快递100==2）
+        if(config.getInterfaceType()==1){
+            // 快递鸟调用
+            return this.orderTracesKuaidiniao(config,param);
+        } else if (config.getInterfaceType() == 2) {
+            // 快递100调用
+            return this.orderTraces100(config, param);
+        } else {
+            //没有其他的配置返回空值
+            return new DeliveryTraceVo();
+        }
+    }
+
+    /**
+     * 快递鸟查询物流信息
+     * @param config
+     * @param param
+     * @return
+     */
+    public DeliveryTraceVo orderTracesKuaidiniao(DeliverySearchConfigVo config, DeliverySearchParam param) {
         Map<String, String> RequestData = new HashMap<>();
         RequestData.put("ShipperCode", param.getExpressNo());
         RequestData.put("LogisticCode", param.getLogisticNo());
@@ -230,7 +259,7 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
         data.put("DataSign", Base64.encode(SecureUtil.md5((String) data.get("RequestData") + config.getKdniaoAppKey()).getBytes()));
 
         String result = HttpRequest
-                .post("https://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx")
+                .post("https://api.kdniao.com/api/dist")
                 .formStr(data)
                 .execute()
                 .body();
@@ -258,4 +287,91 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
 
         return vo;
     }
+
+
+    /**
+     * 快递100查询物流信息
+     * @param config
+     * @param deliverySearchParam
+     * @return
+     */
+    public DeliveryTraceVo orderTraces100(DeliverySearchConfigVo config, DeliverySearchParam deliverySearchParam) {
+
+        if(ObjectUtil.isNotEmpty(deliverySearchParam.getCompanyId()) && ObjectUtil.isNotNull(deliverySearchParam.getExpressNo())){
+            QueryWrapper queryWrapper = new QueryWrapper();
+            queryWrapper.eq("company_id", deliverySearchParam.getCompanyId());
+            queryWrapper.select("kd100_express_no");
+            ShopDeliveryCompany shopDeliveryCompany = shopDeliveryCompanyMapper.selectOne(queryWrapper);
+            deliverySearchParam.setExpressNo(shopDeliveryCompany.getKd100ExpressNo());
+        }
+
+        // 构建请求参数
+        Map<String, Object> param = new HashMap<>();
+        param.put("com", deliverySearchParam.getExpressNo());  // 快递公司编码
+        param.put("num", deliverySearchParam.getLogisticNo()); // 快递单号
+
+        if (deliverySearchParam.getMobile() != null && !deliverySearchParam.getMobile().isEmpty()) {
+            param.put("phone", deliverySearchParam.getMobile()); // 手机号
+        }
+
+        // 构建POST数据
+        Map<String, String> postData = new HashMap<>();
+        postData.put("customer", config.getKd100Customer().toString());
+        try {
+            // 将参数转换为JSON字符串
+            String paramJson = JSONUtil.toJsonStr(param);
+            postData.put("param", paramJson);
+
+            // 生成签名
+            String sign = SecureUtil.md5(paramJson+config.getKd100AppKey()+config.getKd100Customer().toString());
+            postData.put("sign", sign.toUpperCase());
+
+            // 发送POST请求
+            String result = HttpRequest
+                    .post("https://poll.kuaidi100.com/poll/query.do")
+                    .body(JSONUtil.toJsonStr(postData))
+                    .execute().body();
+
+            DeliveryTraceVo vo = new DeliveryTraceVo();
+            // 解析返回结果 处理返回结果
+            if (result != null) {
+                JSONObject resultData = JSONUtil.parseObj(result);
+                if (Boolean.FALSE.equals(resultData.get("result"))) {
+                    vo.setSuccess(false);
+                    vo.setReason((String) resultData.get("message"));
+                }
+
+                if (resultData.containsKey("status")) {
+                    int status = (Integer) resultData.get("status");
+                    if (status != 200) {
+                        vo.setSuccess(false);
+                        vo.setReason((String) resultData.get("message"));
+                    } else if (status == 200) {
+                        List<DeliveryTraceVo.Trace> list = new ArrayList<>();
+                        if (resultData.containsKey("data")) {
+                            List<Map<String, String>> data = (List<Map<String, String>>) resultData.get("data");
+                            for (Map<String, String> trace : data) {
+                                DeliveryTraceVo.Trace item = new DeliveryTraceVo.Trace();
+                                item.setDatetime(trace.get("time"));
+                                item.setRemark(trace.get("context"));
+                                list.add(item);
+                            }
+                            Collections.reverse(list); // 反转列表，最新的物流信息在前
+                        }
+
+                        vo.setSuccess(true);
+                        vo.setStatus(status);
+                        vo.setList(list);
+                    }
+                }
+            }else{
+                vo.setSuccess(false);
+                vo.setReason("物流查询失败，请检查快递100配置");
+            }
+            return vo;
+        } catch (Exception e) {
+            throw new AdminException("物流查询失败，请检查快递100配置");
+        }
+    }
+
 }

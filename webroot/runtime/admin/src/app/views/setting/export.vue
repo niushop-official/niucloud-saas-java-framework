@@ -83,7 +83,7 @@ import { t } from '@/lang'
 import { img } from '@/utils/common'
 import { getExportStatusList, getExportKeyList, getExportList, deleteExport } from '@/app/api/sys'
 import { ElMessageBox, FormInstance } from 'element-plus'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const pageName = route.meta.title
@@ -141,14 +141,12 @@ const loadExportList = (page: number = 1) => {
 }
 loadExportList()
 
-const router = useRouter()
-
 /**
  * 下载导出报表
  */
 const downloadEvent = (data: any) => {
-    var url = img(data.file_path);
-    var suffix = url.substring(url.lastIndexOf("."), url.length);
+    const url = img(data.file_path);
+    const suffix = url.substring(url.lastIndexOf("."), url.length);
     const a = document.createElement('a')
     a.setAttribute('download', url)
     a.setAttribute('target', '_blank')
@@ -168,7 +166,6 @@ const deleteEvent = (id: number) => {
     ).then(() => {
         deleteExport(id).then(() => {
             loadExportList()
-        }).catch(() => {
         })
     })
 }

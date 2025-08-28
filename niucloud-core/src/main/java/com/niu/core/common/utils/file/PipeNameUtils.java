@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.utils.system.RuntimeTools;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.service.admin.sys.ISysBackupRecordsService;
+import com.niu.core.service.admin.sys.vo.BackupTaskVo;
 import com.niu.core.service.admin.upgrade.IUpgradeService;
 import com.niu.core.service.admin.upgrade.vo.UpgradeTaskVo;
 import lombok.extern.slf4j.Slf4j;
@@ -34,15 +36,15 @@ public class PipeNameUtils {
     /**
      *
      * @param applicationName
-     * @param addonName
+     * @param upgradeKey
      */
-    public static void noticeBootRestartByUpgrade(String applicationName, String addonName, String dir, String version) {
-        noticeBootCommand(applicationName, "upgrade," + addonName + "," + dir + "," + version);
+    public static void noticeBootRestartByUpgrade(String applicationName, String upgradeKey, String backupKey) {
+        noticeBootCommand(applicationName, "upgrade," + upgradeKey + "," + backupKey);
     }
 
 
-    public static void noticeBootRestartByUpgradeRollback(String applicationName, String addonName, String dir) {
-        noticeBootCommand(applicationName, "upgraderollback," + addonName + "," + dir);
+    public static void noticeBootRestartByUpgradeRollback(String applicationName, String backupKey) {
+        noticeBootCommand(applicationName, "restorebackup," + backupKey);
     }
 
     /**
@@ -148,23 +150,40 @@ public class PipeNameUtils {
                 task.setStatus("restarted");
                 upgradeService.setUpgradeTaskCache(task);
             }
-        } else if (command.startsWith("upgraderollbackfail,")) {
+        } else if (command.startsWith("restorebackupfail,")) {
+            String msg = command.replaceAll("restorebackupfail,", "");
             PipeNameUtils.noticeBootCommand(applicationName, "");
+            // 升级错误恢复
             IUpgradeService upgradeService = SpringContext.bean(IUpgradeService.class);
             UpgradeTaskVo task = upgradeService.getUpgradeTask();
             if (ObjectUtil.isNotEmpty(task) && ObjectUtil.isNotEmpty(task.getStatus()) && task.getStatus().equals("restarting")) {
-                String msg = command.replaceAll("upgraderollbackfail,", "");
                 task.setStatus("restarted");
                 task.getError().add(msg);
                 upgradeService.setUpgradeTaskCache(task);
             }
-        } else if (command.startsWith("upgraderollbacksuccess,")) {
+            // 手动恢复
+            ISysBackupRecordsService backupService = SpringContext.bean(ISysBackupRecordsService.class);
+            BackupTaskVo restoreTask = backupService.getRestoreTask();
+            if (ObjectUtil.isNotEmpty(restoreTask)) {
+                restoreTask.setTask("fail");
+                restoreTask.setContent("备份恢复失败，稍后请手动恢复，备份文件路径：webroot/runtime/upgrade/"+ restoreTask.getBackupRecord().getBackupKey() +"/backup，失败原因：" + msg);
+                backupService.setBackupRestoreTaskCache(restoreTask);
+            }
+        } else if (command.startsWith("restorebackupsuccess,")) {
             PipeNameUtils.noticeBootCommand(applicationName, "");
+            // 升级错误恢复
             IUpgradeService upgradeService = SpringContext.bean(IUpgradeService.class);
             UpgradeTaskVo task = upgradeService.getUpgradeTask();
             if (ObjectUtil.isNotEmpty(task) && ObjectUtil.isNotEmpty(task.getStatus()) && task.getStatus().equals("restarting")) {
                 task.setStatus("restarted");
                 upgradeService.setUpgradeTaskCache(task);
+            }
+            // 手动恢复
+            ISysBackupRecordsService backupService = SpringContext.bean(ISysBackupRecordsService.class);
+            BackupTaskVo restoreTask = backupService.getRestoreTask();
+            if (ObjectUtil.isNotEmpty(restoreTask)) {
+                restoreTask.setTask("");
+                backupService.setBackupRestoreTaskCache(restoreTask);
             }
         } else {
             addonResult.setResult(0);

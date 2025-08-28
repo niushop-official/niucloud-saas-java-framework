@@ -27,3 +27,10 @@ export function getArticleDetail(id: number) {
 export function getArticleCategory() {
     return request.get('cms/category')
 }
+
+/**
+ * 文章浏览
+ */
+export function visit(id: number) {
+    return request.put(`cms/article/visit/${id}`)
+}

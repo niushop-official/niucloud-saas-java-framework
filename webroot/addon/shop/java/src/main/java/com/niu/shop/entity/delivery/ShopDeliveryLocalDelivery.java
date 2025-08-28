@@ -3,6 +3,7 @@ package com.niu.shop.entity.delivery;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ public class ShopDeliveryLocalDelivery implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value="local_id", type= IdType.AUTO)
+    @TableId(value = "local_id", type = IdType.AUTO)
     private Integer localId; // 
     private Integer siteId; // 站点id
     private String feeType; // 费用类型
@@ -34,5 +35,22 @@ public class ShopDeliveryLocalDelivery implements Serializable {
     private String deliveryType; // 配送类型
     private String area; // 配送区域
     private String center; // 发货地址中心点
+    private Integer timeIsOpen;
+
+    private Integer timeType;
+
+    private String timeWeek;
+
+    private Integer timeInterval;
+
+    private Integer advanceDay;
+
+    private Integer mostDay;
+
+    private Long startTime;
+
+    private Long endTime;
+
+    private String deliveryTime;
 
 }

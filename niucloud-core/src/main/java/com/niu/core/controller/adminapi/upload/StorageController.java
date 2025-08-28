@@ -13,6 +13,7 @@ import com.niu.core.service.admin.sys.vo.SysUserLogInfoVo;
 import com.niu.core.service.admin.sys.vo.SysUserLogListVo;
 import com.niu.core.service.admin.upload.IStorageConfigService;
 import com.niu.core.service.core.upload.vo.CoreStorAgeConfigVo;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/adminapi/sys/")
 @SaCheckLogin
+@Description("存储设置")
 public class StorageController {
 
     @Resource
@@ -39,6 +41,7 @@ public class StorageController {
      * @return Result<Object>
      */
     @GetMapping("/storage")
+    @Description("系统存储方式列表")
     public Result<List<CoreStorAgeConfigVo>> storAgeList() {
         return Result.success(storageConfigService.getStorageList());
     }
@@ -49,6 +52,7 @@ public class StorageController {
      * @return
      */
     @GetMapping("/storage/{storageType}")
+    @Description("查询配置详情")
     public Result<CoreStorAgeConfigVo> storageConfig(@Validated @PathVariable("storageType") String storageType){
         return Result.success(storageConfigService.getStorageConfig(storageType));
     }
@@ -60,12 +64,14 @@ public class StorageController {
      * @return
      */
     @PutMapping("/storage/{storageType}")
+    @Description("编辑配置信息")
     public Result editStorage(@Validated @PathVariable("storageType") String storageType, @RequestBody JSONObject jsonObject) {
         storageConfigService.setStorageConfig(storageType, jsonObject);
         return Result.success();
     }
 
     @GetMapping("/log/{id}")
+    @Description("操作日志详情")
     public Result<SysUserLogInfoVo> info(@Validated @PathVariable("id") Integer id) {
         SysUserLogInfoVo info = sysUserLogService.info(id);
         return Result.success(info);

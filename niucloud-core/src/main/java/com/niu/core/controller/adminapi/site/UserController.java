@@ -15,11 +15,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 店铺分组（分组权限）控制器
  */
-
+@Description("管理员")
 @RestController
 @RequestMapping("adminapi/site/")
 @SaCheckLogin
@@ -34,6 +35,7 @@ public class UserController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<SiteGroupListVo>>
      */
+    @Description("管理员列表")
     @GetMapping("user")
     public Result<PageResult<SiteUserVo>> lists(@Validated PageParam pageParam, @Validated SiteUserSearchParam searchParam) {
         PageResult<SiteUserVo> list = siteUserService.list(pageParam, searchParam);
@@ -45,6 +47,7 @@ public class UserController {
      * @param addParam 添加参数
      * @return Result<Object>
      */
+    @Description("添加管理员")
     @PostMapping("user")
     public Result add(@Validated @RequestBody SiteUserParam addParam) {
         siteUserService.add(addParam);
@@ -56,6 +59,7 @@ public class UserController {
      * @param uid
      * @return
      */
+    @Description("查询管理详细信息")
     @GetMapping("user/{uid}")
     public Result<SiteUserVo> getinfo(@Validated @PathVariable("uid") Integer uid){
         SiteUserVo siteUserVo=siteUserService.getInfo(uid);
@@ -68,6 +72,7 @@ public class UserController {
      * @param uid
      * @return
      */
+    @Description("编辑会员信息")
     @PutMapping("user/{uid}")
     public Result edit(@Validated @RequestBody SiteUserParam siteUserParam, @Validated @PathVariable("uid") Integer uid){
         siteUserService.edit(uid, siteUserParam);
@@ -79,6 +84,7 @@ public class UserController {
      * @param uid
      * @return
      */
+    @Description("锁定会员")
     @PutMapping("user/lock/{uid}")
     public Result lock(@Validated @PathVariable("uid") Integer uid){
         siteUserService.lock(uid);
@@ -90,9 +96,22 @@ public class UserController {
      * @param uid
      * @return
      */
+    @Description("解锁会员")
     @PutMapping("user/unlock/{uid}")
     public Result unlock(@Validated @PathVariable("uid") Integer uid){
         siteUserService.unlock(uid);
+        return Result.success();
+    }
+
+    /**
+     * 删除会员信息
+     * @param uid
+     * @return
+     */
+    @Description("删除会员信息")
+    @DeleteMapping("user/{uid}")
+    public Result delete(@Validated @PathVariable("uid") Integer uid){
+        siteUserService.delete(uid);
         return Result.success();
     }
 

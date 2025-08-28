@@ -1,5 +1,6 @@
 package com.niu.core.service.api.sys.vo;
 
+import cn.hutool.json.JSONObject;
 import com.niu.core.service.admin.sys.vo.SysMapVo;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.diy.vo.BottomConfigVo;
@@ -17,4 +18,5 @@ public class SysInitVo {
     private SiteInfoVo siteInfo;
     private List<MemberLevelInfoVo> memberLevel;
     private LoginConfigVo loginConfig;
+    private JSONObject themeList;
 }

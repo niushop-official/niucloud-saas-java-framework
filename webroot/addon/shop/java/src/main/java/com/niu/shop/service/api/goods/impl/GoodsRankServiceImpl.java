@@ -13,12 +13,11 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
-import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsRank;
 import com.niu.shop.entity.goods.ShopGoodsSku;
@@ -35,9 +34,14 @@ import com.niu.shop.service.api.goods.param.ShopGoodsRankGoodsPageParam;
 import com.niu.shop.service.api.goods.vo.GoodsRankComponentVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsRankGoodsListInfo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsRankGoodsPageVo;
+import com.niu.shop.service.api.goods.vo.ShopGoodsSkuPaihangVo;
+import com.niu.shop.service.core.goods.ICoreGoodsActivePriceService;
 import com.niu.shop.service.core.goods.ICoreGoodsRankService;
+import com.niu.shop.service.core.goods.param.GetShowPriceParam;
 import com.niu.shop.service.core.goods.vo.ShopGoodsRankConfigVo;
+import com.niu.shop.service.core.goods.vo.ShowPriceVo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -50,11 +54,11 @@ import java.util.stream.Collectors;
 public class GoodsRankServiceImpl implements IGoodsRankService {
     private final IGoodsService goodsService;
     private final ShopGoodsMapper shopGoodsMapper;
-    private final ICoreUploadService coreUploadService;
     private final ShopGoodsSkuMapper shopGoodsSkuMapper;
     private final IMemberLevelService memberLevelService;
     private final ShopGoodsRankMapper shopGoodsRankMapper;
     private final ICoreGoodsRankService coreGoodsRankService;
+    private final ICoreGoodsActivePriceService coreGoodsActivePriceService;
 
     @Override
     public ShopGoodsRankConfigVo getGoodsRankConfig() {
@@ -65,9 +69,9 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
     public List<ShopGoodsRank> page(ShopGoodsRankSearchParam searchParam) {
         QueryWrapper<ShopGoodsRank> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId())
-                .eq("status", 1)
-                .orderByDesc("sort")
-                .orderByDesc("create_time");
+            .eq("status", 1)
+            .orderByDesc("sort")
+            .orderByDesc("create_time");
 
         if (ObjectUtil.isNotEmpty(searchParam.getName())) {
             queryWrapper.like("name", searchParam.getName());
@@ -80,7 +84,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
     public ShopGoodsRankGoodsPageVo getGoodsPage(PageParam pageParam, ShopGoodsRankGoodsPageParam param) {
         QueryWrapper<ShopGoodsRank> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId())
-                .eq("rank_id", param.getRankId());
+            .eq("rank_id", param.getRankId());
         List<ShopGoodsRank> ranks = shopGoodsRankMapper.selectList(queryWrapper);
 
         if (ObjectUtil.isEmpty(ranks)) {
@@ -95,11 +99,11 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
     public GoodsRankComponentVo getRankComponents(PageParam pageParam, GoodsRankComponentParam param) {
         QueryWrapper<ShopGoodsRank> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId())
-                .eq("status", 1);
+            .eq("status", 1);
         if (param.getRankId() > 0) {
             queryWrapper.eq("rank_id", param.getRankId())
-                    .orderByDesc("sort")
-                    .orderByDesc("create_time");
+                .orderByDesc("sort")
+                .orderByDesc("create_time");
         }
 
         List<ShopGoodsRank> ranks = shopGoodsRankMapper.selectList(queryWrapper);
@@ -148,15 +152,15 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
         String order = "stat_" + rank.getRuleType() + "_num";
         MPJQueryWrapper<ShopGoods> goodsMPJQueryWrapper = new MPJQueryWrapper<>();
         goodsMPJQueryWrapper.setAlias("goods")
-                .eq("goods.site_id", RequestUtils.siteId())
-                .eq("goods.status", 1)
-                .eq("goods.delete_time", 0)
-                .orderByDesc(order)
-                .orderByDesc("goods_sort")
-                .orderByDesc("create_time")
-                .groupBy("goods.goods_id, goods.sort, goods.create_time")
-                .leftJoin(("?_shop_goods_stat stat on goods.goods_id = stat.goods_id and date_time BETWEEN " + dateStart + " AND " + dateEnd).replace("?_", GlobalConfig.tablePrefix))
-                .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num,goods.create_time,goods.sort as goods_sort");
+            .eq("goods.site_id", RequestUtils.siteId())
+            .eq("goods.status", 1)
+            .eq("goods.delete_time", 0)
+            .orderByDesc(order)
+            .orderByDesc("goods_sort")
+            .orderByDesc("create_time")
+            .groupBy("goods.goods_id, goods.sort, goods.create_time")
+            .leftJoin(("?_shop_goods_stat stat on goods.goods_id = stat.goods_id and date_time BETWEEN " + dateStart + " AND " + dateEnd).replace("?_", GlobalConfig.tablePrefix))
+            .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num,goods.create_time,goods.sort as goods_sort");
 
         if (limit > 0) {
             goodsMPJQueryWrapper.last("limit " + limit);
@@ -164,10 +168,10 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
 
         MPJQueryWrapper<ShopGoods> queryWrapper = switch (source) {
             case CATEGORY ->
-                    goodsMPJQueryWrapper.and(wrapper -> JSONUtil.parseArray(rank.getCategoryIds()).forEach(id -> wrapper.or().like("goods_category", id)));
+                goodsMPJQueryWrapper.and(wrapper -> JSONUtil.parseArray(rank.getCategoryIds()).forEach(id -> wrapper.or().like("goods_category", id)));
             case BRAND -> goodsMPJQueryWrapper.in("goods.brand_id", JSONUtil.parseArray(rank.getBrandIds()));
             case LABEL ->
-                    goodsMPJQueryWrapper.and(wrapper -> JSONUtil.parseArray(rank.getLabelIds()).forEach(id -> wrapper.or().like("label_ids", id)));
+                goodsMPJQueryWrapper.and(wrapper -> JSONUtil.parseArray(rank.getLabelIds()).forEach(id -> wrapper.or().like("label_ids", id)));
             default -> goodsMPJQueryWrapper;
         };
 
@@ -196,10 +200,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
 
                     field.set(info, v);
                 });
-
-                String thumb = coreUploadService.thumb(info.getSiteId(), info.getGoodsCover(),
-                        UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
-                info.setGoodsCoverThumbMid(thumb);
+                info.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(info.getSiteId(), info.getGoodsCover()));
                 return info;
             });
 
@@ -216,23 +217,25 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
             return list;
         }
 
-        MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
         for (int i = 0; i < list.size(); i++) {
             ShopGoodsRankGoodsListInfo info = list.get(i);
             info.setRankNum(i + 1);
             ShopGoodsSku sku = getGoodsSku(info.getGoodsId());
-            info.setGoodsSku(sku);
+            ShopGoodsSkuPaihangVo skuVo = new ShopGoodsSkuPaihangVo();
+            BeanUtils.copyProperties(sku, skuVo);
 
-            String thumb = coreUploadService.thumb(RequestUtils.siteId(), info.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
-            info.setGoodsCoverThumbMid(thumb);
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                .skuId(sku.getSkuId())
+                .price(sku.getPrice())
+                .memberDiscount(info.getMemberDiscount())
+                .memberPrice(sku.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
+            skuVo.setShowPrice(skuShowPrice.getShowPrice());
+            skuVo.setShowType(skuShowPrice.getShowType());
 
-            if (sku == null) {
-                continue;
-            }
-
-            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
-            BigDecimal memberPrice = goodsService.calculateMemberPrice(memberLevel, info.getMemberDiscount(), memberPriceConfig, sku.getPrice());
-            info.getGoodsSku().setMemberPrice(memberPrice.toString());
+            info.setGoodsSku(skuVo);
+            info.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), info.getGoodsCover()));
         }
 
         return list;
@@ -243,20 +246,23 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
             return pageResult;
         }
 
-        MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
         for (int i = 0; i < pageResult.getData().size(); i++) {
             ShopGoodsRankGoodsListInfo info = pageResult.getData().get(i);
             info.setRankNum(i + 1);
             ShopGoodsSku sku = getGoodsSku(info.getGoodsId());
-            info.setGoodsSku(sku);
+            ShopGoodsSkuPaihangVo skuVo = new ShopGoodsSkuPaihangVo();
+            BeanUtils.copyProperties(sku, skuVo);
 
-            if (sku == null) {
-                continue;
-            }
-
-            JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
-            BigDecimal memberPrice = goodsService.calculateMemberPrice(memberLevel, info.getMemberDiscount(), memberPriceConfig, sku.getPrice());
-            sku.setMemberPrice(memberPrice.toString());
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                .skuId(sku.getSkuId())
+                .price(sku.getPrice())
+                .memberDiscount(info.getMemberDiscount())
+                .memberPrice(sku.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
+            skuVo.setShowPrice(skuShowPrice.getShowPrice());
+            skuVo.setShowType(skuShowPrice.getShowType());
+            info.setGoodsSku(skuVo);
         }
 
         return pageResult;
@@ -264,65 +270,63 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
 
     private List<ShopGoodsRankGoodsListInfo> getGoodsListGoodsSource(ShopGoodsRank rank, long dateStart, long dateEnd) {
         List<Integer> configGoodsIds = JSONUtil.parseArray(rank.getGoodsJson())
-                .stream()
-                .map(JSONUtil::parseObj)
-                .map(o -> o.getInt("goodsId"))
-                .toList();
+            .stream()
+            .map(JSONUtil::parseObj)
+            .map(o -> o.getInt("goodsId"))
+            .toList();
 
         Map<Integer, JSONObject> sortGoodsJson = JSONUtil.parseArray(rank.getGoodsJson())
-                .stream()
-                .map(JSONUtil::parseObj)
-                .collect(Collectors.toMap(o -> o.getInt("goodsId"), o -> o));
+            .stream()
+            .map(JSONUtil::parseObj)
+            .collect(Collectors.toMap(o -> o.getInt("goodsId"), o -> o));
 
         MPJQueryWrapper<ShopGoods> goodsMPJQueryWrapper = new MPJQueryWrapper<>();
         goodsMPJQueryWrapper.setAlias("goods")
-                .eq("goods.site_id", RequestUtils.siteId())
-                .in("goods.goods_id", configGoodsIds)
-                .eq("goods.is_gift", 0)
-                .eq("goods.status", 1)
-                .eq("goods.delete_time", 0)
-                .orderByDesc("stat_" + rank.getRuleType() + "_num")
-                .orderByDesc("goods_sort")
-                .orderByDesc("create_time")
-                .leftJoin(("?_shop_goods_stat stat on goods.goods_id = stat.goods_id  AND date_time BETWEEN " + dateStart + " AND " + dateEnd).replace("?_", GlobalConfig.tablePrefix))
-                .groupBy("goods.goods_id, goods_sort, create_time")
-                .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num, goods.create_time create_time,goods.sort as goods_sort");
+            .eq("goods.site_id", RequestUtils.siteId())
+            .in("goods.goods_id", configGoodsIds)
+            .eq("goods.is_gift", 0)
+            .eq("goods.status", 1)
+            .eq("goods.delete_time", 0)
+            .orderByDesc("stat_" + rank.getRuleType() + "_num")
+            .orderByDesc("goods_sort")
+            .orderByDesc("create_time")
+            .leftJoin(("?_shop_goods_stat stat on goods.goods_id = stat.goods_id  AND date_time BETWEEN " + dateStart + " AND " + dateEnd).replace("?_", GlobalConfig.tablePrefix))
+            .groupBy("goods.goods_id, goods_sort, create_time")
+            .select("goods.site_id,goods.goods_id,goods_name,goods_cover,unit,goods.sale_num + goods.virtual_sale_num as sale_num,member_discount,sum(stat.sale_num)+ goods.virtual_sale_num as stat_sale_num,sum(stat.collect_num) as stat_collect_num,sum(stat.evaluate_num) as stat_evaluate_num,sum(stat.access_num) as stat_access_num, goods.create_time create_time,goods.sort as goods_sort");
 
         return shopGoodsMapper.selectJoinMaps(goodsMPJQueryWrapper)
-                .stream()
-                .map(JSONUtil::parseObj)
-                .map(o -> {
-                    ShopGoodsRankGoodsListInfo info = o.toBean(ShopGoodsRankGoodsListInfo.class);
-                    Integer sort = Optional.ofNullable(sortGoodsJson.get(info.getGoodsId()))
-                            .map(obj -> obj.getInt("sort"))
-                            .orElse(0);
-                    info.setSort(sort);
-                    info.setCreateTime(DateUtils.timestampToString(o.getLong("create_time")));
-
-                    String cover = coreUploadService.thumb(RequestUtils.siteId(), info.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
-                    info.setGoodsCoverThumbMid(cover);
-                    return info;
-                })
-                .peek(o -> {
-                    o.setStatSaleNum(Optional.ofNullable(o.getStatSaleNum()).orElse(0));
-                    o.setStatCollectNum(Optional.ofNullable(o.getStatCollectNum()).orElse(0));
-                    o.setStatEvaluateNum(Optional.ofNullable(o.getStatEvaluateNum()).orElse(0));
-                    o.setStatAccessNum(Optional.ofNullable(o.getStatAccessNum()).orElse(0));
-                    o.setSort(Optional.ofNullable(o.getSort()).orElse(0));
-                    o.setGoodsSort(Optional.ofNullable(o.getGoodsSort()).orElse(0));
-                })
-                .sorted(Comparator
-                        .<ShopGoodsRankGoodsListInfo>comparingInt(o -> JSONUtil.parseObj(o).getInt("stat" + StrUtil.upperFirst(rank.getRuleType()) + "Num")).reversed()
-                        .thenComparingInt(ShopGoodsRankGoodsListInfo::getSort).reversed()
-                        .thenComparingInt(ShopGoodsRankGoodsListInfo::getGoodsSort).reversed()
-                        .thenComparingLong(o -> DateUtils.StringToTimestamp(o.getCreateTime())).reversed())
-                .toList();
+            .stream()
+            .map(JSONUtil::parseObj)
+            .map(o -> {
+                ShopGoodsRankGoodsListInfo info = o.toBean(ShopGoodsRankGoodsListInfo.class);
+                Integer sort = Optional.ofNullable(sortGoodsJson.get(info.getGoodsId()))
+                    .map(obj -> obj.getInt("sort"))
+                    .orElse(0);
+                info.setSort(sort);
+                info.setCreateTime(DateUtils.timestampToString(o.getLong("create_time")));
+                info.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), info.getGoodsCover()));
+                return info;
+            })
+            .peek(o -> {
+                o.setStatSaleNum(Optional.ofNullable(o.getStatSaleNum()).orElse(0));
+                o.setStatCollectNum(Optional.ofNullable(o.getStatCollectNum()).orElse(0));
+                o.setStatEvaluateNum(Optional.ofNullable(o.getStatEvaluateNum()).orElse(0));
+                o.setStatAccessNum(Optional.ofNullable(o.getStatAccessNum()).orElse(0));
+                o.setSort(Optional.ofNullable(o.getSort()).orElse(0));
+                o.setGoodsSort(Optional.ofNullable(o.getGoodsSort()).orElse(0));
+            })
+            .sorted(Comparator
+                .<ShopGoodsRankGoodsListInfo>comparingInt(o -> JSONUtil.parseObj(o).getInt("stat" + StrUtil.upperFirst(rank.getRuleType()) + "Num")).reversed()
+                .thenComparingInt(ShopGoodsRankGoodsListInfo::getSort).reversed()
+                .thenComparingInt(ShopGoodsRankGoodsListInfo::getGoodsSort).reversed()
+                .thenComparingLong(o -> DateUtils.StringToTimestamp(o.getCreateTime())).reversed())
+            .toList();
     }
 
     private ShopGoodsSku getGoodsSku(Integer goodsId) {
         QueryWrapper<ShopGoodsSku> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId())
-                .eq("goods_id", goodsId);
+            .eq("goods_id", goodsId);
         List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(queryWrapper);
         return ObjectUtil.isEmpty(skuList) ? null : skuList.get(0);
     }

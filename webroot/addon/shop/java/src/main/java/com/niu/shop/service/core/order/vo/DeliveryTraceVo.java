@@ -17,6 +17,8 @@ public class DeliveryTraceVo implements Serializable {
 
     private List<Trace> list = new LinkedList<>();
 
+    private Integer status = 0;
+
     @Data
     public static class Trace {
         private String datetime;

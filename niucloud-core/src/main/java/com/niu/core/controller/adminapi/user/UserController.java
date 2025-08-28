@@ -17,6 +17,7 @@ import com.niu.core.service.admin.sys.vo.SysUserInfoVo;
 import com.niu.core.service.admin.sys.vo.SysUserListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jdk.jfr.Description;
 
 import jakarta.annotation.Resource;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/adminapi/user")
 @SaCheckLogin
+@Description("后台管理员管理")
 public class UserController {
 
     @Resource
@@ -40,6 +42,7 @@ public class UserController {
      * @return Result<Object>
      */
     @GetMapping("/user")
+    @Description("获取后台管理员列表")
     public Result<PageResult<SysUserListVo>> list(@Validated PageParam pageParam,
                                                   @Validated SysUserSearchParam searchParam) {
         PageResult<SysUserListVo> list = sysUserService.list(pageParam, searchParam);
@@ -53,6 +56,7 @@ public class UserController {
      * @return Result<SysUserInfoVo>
      */
     @GetMapping("/user/{id}")
+    @Description("获取后台管理员详情")
     public Result<SysUserDetailVo> info(@Validated @PathVariable("id") Integer id) {
         SysUserDetailVo detail = sysUserService.info(id);
         return Result.success(detail);
@@ -65,6 +69,7 @@ public class UserController {
      * @return Result<Object>
      */
     @PostMapping("/user")
+    @Description("添加后台管理员")
     public Result<Object> add(@Validated @RequestBody SysUserAddParam addParam) {
         SysUserParam sysUserParam = new SysUserParam();
         BeanUtil.copyProperties(addParam, sysUserParam);
@@ -73,6 +78,7 @@ public class UserController {
     }
 
     @PutMapping("/user/{uid}")
+    @Description("编辑后台管理员")
     public Result<Object> edit(@PathVariable("uid") Integer uid, @Validated @RequestBody SysUserAddParam editParam) {
         SysUserParam sysUserParam = new SysUserParam();
         sysUserParam.setHeadImg(editParam.getHeadImg());
@@ -89,6 +95,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/isexist")
+    @Description("查询账号是否存在")
     public Result<Object> checkUserIsExist(@Validated String username){
         return Result.success(sysUserService.checkUserName(username));
     }
@@ -100,6 +107,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/user/create_site_limit/{uid}")
+    @Description("获取用户站点创建限制列表")
     public Result<List<SysUserCreateSiteLimitVo>> getUserCreateSiteLimit(@Validated @PathVariable("uid") Integer uid){
         return Result.success(sysUserService.getUserCreateSiteLimit(uid));
     }
@@ -112,6 +120,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/user/create_site_limit/info/{id}")
+    @Description("获取用户站点创建限制详情")
     public Result<SysUserCreateSiteLimitVo> getUserCreateSiteLimitInfo(@Validated @PathVariable("id") Integer id){
         return Result.success(sysUserService.getUserCreateSiteLimitInfo(id));
     }
@@ -123,6 +132,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/user/create_site_limit")
+    @Description("添加用户站点创建限制")
     public Result<Object> addUserCreateSiteLimit(@Validated @RequestBody SysUserCreateSiteLimitAddParam sysUserCreateSiteLimitAddParam){
         sysUserService.addUserCreateSiteLimit(sysUserCreateSiteLimitAddParam);
         return Result.success();
@@ -136,6 +146,7 @@ public class UserController {
      * @return
      */
     @PutMapping("/user/create_site_limit/{id}")
+    @Description("编辑用户站点创建限制")
     public Result<Object> editUserCreateSiteLimit(@Validated @PathVariable("id") Integer id, @Validated @RequestBody SysUserCreateSiteLimitEditParam userCreateSiteLimitEditParam){
         userCreateSiteLimitEditParam.setId(id);
         sysUserService.editUserCreateSiteLimit(userCreateSiteLimitEditParam);
@@ -149,6 +160,7 @@ public class UserController {
      * @return
      */
     @DeleteMapping("/user/create_site_limit/{id}")
+    @Description("删除用户站点创建限制")
     public Result<Object> delUserCreateSiteLimit(@Validated @PathVariable("id") Integer id){
         sysUserService.delUserCreateSiteLimit(id);
         return Result.success();
@@ -159,10 +171,29 @@ public class UserController {
      *
      */
     @GetMapping("/user_all")
+    @Description("获取所有后台管理员")
     public Result<List<SysUser>> userAll() {
 
         return Result.success(sysUserService.getUserAll());
     }
 
 
+    /**
+     * 获取用户下拉框
+     */
+    @GetMapping("user_select")
+    @Description("获取用户下拉框")
+    public Result<List<SysUserInfoVo>> userSelect(SysUserParam param) {
+        return Result.success(sysUserService.getUserSelect(param.getUsername()));
+    }
+
+    /**
+     * 删除用户
+     */
+    @DeleteMapping("/user/{id}")
+    @Description("删除用户")
+    public Result<Object> del(@Validated @PathVariable("id") Integer id) {
+        sysUserService.del(id);
+        return Result.success();
+    }
 }

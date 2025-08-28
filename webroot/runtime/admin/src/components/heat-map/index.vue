@@ -6,7 +6,7 @@
                 <div v-else class="cursor-pointer">{{ t('addHotArea') }}</div>
             </slot>
         </div>
-        <el-dialog v-model="showDialog" :title="t('hotAreaSet')" width="810px" :close-on-press-escape="false" :destroy-on-close="true" :close-on-click-modal="false">
+        <el-dialog v-model="showDialog" :title="t('hotAreaSet')" width="810px" :destroy-on-close="true" :close-on-click-modal="false">
 
             <div class="flex">
 
@@ -80,7 +80,6 @@ const value: any = computed({
     }
 })
 
-
 /**
  * 公式：
  * 宽度：400
@@ -96,7 +95,7 @@ const dragBoxArr: any = reactive([])
 const imgRatio = ref(1); // 图片比例
 
 // 热区尺寸
-const areaRadio = ref(0.25) // 占位她比例
+const areaRadio = ref(0.25) // 占位图比例
 const areaWidth = ref(100)
 const areaHeight = ref(100)
 const areaNum = ref(4); // 每行显示的数量

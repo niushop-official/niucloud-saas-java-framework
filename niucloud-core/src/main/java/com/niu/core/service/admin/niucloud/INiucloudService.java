@@ -1,11 +1,10 @@
 package com.niu.core.service.admin.niucloud;
 
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import com.niu.core.service.admin.niucloud.param.GetAppVersionListParam;
+import com.niu.core.service.admin.niucloud.vo.*;
 import com.niu.core.service.core.niucloud.param.SetAuthorizeParam;
-import com.niu.core.service.admin.niucloud.vo.AuthInfoVo;
-import com.niu.core.service.admin.niucloud.vo.FrameWorkVersion;
-import com.niu.core.service.admin.niucloud.vo.FrameworkVersionListVo;
-import com.niu.core.service.admin.niucloud.vo.ModuleListVo;
 
 import java.util.List;
 import java.util.Map;
@@ -60,4 +59,10 @@ public interface INiucloudService {
      * @return
      */
     Boolean checkKey(String key);
+
+    /**
+     * 获取应用/插件的版本更新记录
+     * @return
+     */
+    List<AppVersionListVo> getAppVersionList(GetAppVersionListParam param);
 }

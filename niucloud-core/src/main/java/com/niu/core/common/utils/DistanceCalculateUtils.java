@@ -1,0 +1,84 @@
+package com.niu.core.common.utils;
+
+import java.util.List;
+
+public class DistanceCalculateUtils {
+    /**
+     * Vincenty 公式计算两点距离（单位：米）
+     * @param lat1 点1纬度
+     * @param lon1 点1经度
+     * @param lat2 点2纬度
+     * @param lon2 点2经度
+     * @return 距离（米）
+     */
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final double a = 6378137.0; // WGS84 椭球长半轴（米）
+        final double b = 6356752.314245; // WGS84 椭球短半轴（米）
+        final double f = 1 / 298.257223563; // 扁率
+
+        double L = Math.toRadians(lon2 - lon1);
+        double U1 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat1)));
+        double U2 = Math.atan((1 - f) * Math.tan(Math.toRadians(lat2)));
+        double sinU1 = Math.sin(U1), cosU1 = Math.cos(U1);
+        double sinU2 = Math.sin(U2), cosU2 = Math.cos(U2);
+
+        double lambda = L, lambdaP, iterLimit = 100;
+        double cosSqAlpha, sinSigma, cosSigma, cos2SigmaM, sigma, sinLambda, cosLambda;
+
+        do {
+            sinLambda = Math.sin(lambda);
+            cosLambda = Math.cos(lambda);
+            sinSigma = Math.sqrt(
+                    (cosU2 * sinLambda) * (cosU2 * sinLambda) +
+                            (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda)
+            );
+            if (sinSigma == 0) return 0; // 重合点
+
+            cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+            sigma = Math.atan2(sinSigma, cosSigma);
+            double sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+            cosSqAlpha = 1 - sinAlpha * sinAlpha;
+            cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
+            if (Double.isNaN(cos2SigmaM)) cos2SigmaM = 0; // 赤道线情况
+            double C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
+            lambdaP = lambda;
+            lambda = L + (1 - C) * f * sinAlpha *
+                    (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+        } while (Math.abs(lambda - lambdaP) > 1e-12 && --iterLimit > 0);
+
+        if (iterLimit == 0) return Double.NaN; // 未收敛
+
+        double uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+        double A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+        double B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+        double deltaSigma = B * sinSigma * (
+                cos2SigmaM + B / 4 * (
+                        cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
+                                B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)
+                )
+        );
+        double distance = b * A * (sigma - deltaSigma);
+
+        return distance;
+    }
+
+    /**
+     * 多边形区域判断
+     * @param lat
+     * @param lng
+     * @param polyLats
+     * @param polyLngs
+     * @return
+     */
+    public static boolean isPointInPolygon(double lat, double lng, double[] polyLats, double[] polyLngs) {
+        int i, j;
+        boolean result = false;
+        for (i = 0, j = polyLats.length - 1; i < polyLats.length; j = i++) {
+            if ((polyLngs[i] > lng) != (polyLngs[j] > lng) &&
+                    (lat < (polyLats[j] - polyLats[i]) * (lng - polyLngs[i]) / (polyLngs[j] - polyLngs[i]) + polyLats[i])) {
+                result = !result;
+            }
+        }
+        return result;
+    }
+}

@@ -1,16 +1,30 @@
 package com.niu.core.service.admin.wxoplatform.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
+import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.WechatUtils;
+import com.niu.core.entity.member.Member;
+import com.niu.core.entity.pay.Pay;
+import com.niu.core.entity.site.Site;
 import com.niu.core.entity.sys.SysConfig;
 import com.niu.core.enums.sys.ConfigKeyEnum;
 import com.niu.core.mapper.sys.SysConfigMapper;
+import com.niu.core.service.admin.pay.vo.PayListVo;
 import com.niu.core.service.admin.wxoplatform.IOplatformService;
 import com.niu.core.service.admin.wxoplatform.param.AuthorizationParam;
+import com.niu.core.service.admin.wxoplatform.param.IOplatformAuthRecordParam;
+import com.niu.core.service.admin.wxoplatform.vo.OplatformRecordVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
+import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import com.niu.core.service.core.upload.ICoreFetchService;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
 import com.niu.core.service.core.weapp.param.WeappConfigParam;
@@ -21,11 +35,11 @@ import me.chanjar.weixin.open.bean.auth.WxOpenAuthorizationInfo;
 import me.chanjar.weixin.open.bean.auth.WxOpenAuthorizerInfo;
 import me.chanjar.weixin.open.bean.result.WxOpenAuthorizerInfoResult;
 import me.chanjar.weixin.open.bean.result.WxOpenQueryAuthResult;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -188,5 +202,31 @@ public class OplatformServiceImpl implements IOplatformService {
         String[] configKey = new String[]{ ConfigKeyEnum.WECHAT.getName(), ConfigKeyEnum.WEAPP.getName(), ConfigKeyEnum.WEAPP_AUTHORIZATION_INFO.getName(), ConfigKeyEnum.WECHAT_AUTHORIZATION_INFO.getName()};
         sysConfigMapper.delete(new QueryWrapper<SysConfig>().like("value", appid).in("config_key", configKey));
         coreConfigService.cacheClear();
+    }
+
+    @Override
+    public PageResult<OplatformRecordVo> getAuthRecord(PageParam pageParam, IOplatformAuthRecordParam searchParam) {
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
+
+        MPJLambdaWrapper<SysConfig> wrapper = new MPJLambdaWrapper<SysConfig>();
+        wrapper.select(SysConfig::getCreateTime,SysConfig::getAddon,SysConfig::getStatus,SysConfig::getConfigKey, SysConfig::getValue, SysConfig::getSiteId, SysConfig::getUpdateTime);
+        wrapper.leftJoin(Site.class, "siteinfo",Site::getSiteId, SysConfig::getSiteId).select("site_name");
+        wrapper.in(SysConfig::getConfigKey, ConfigKeyEnum.WECHAT_AUTHORIZATION_INFO.getName(), ConfigKeyEnum.WEAPP_AUTHORIZATION_INFO.getName());
+        wrapper.eq(SysConfig::getSiteId, RequestUtils.siteId());
+        wrapper.orderByDesc(SysConfig::getUpdateTime);
+        Page<SysConfig> pageObj = new Page<>(page, limit);
+        IPage<SysConfig> iPage = sysConfigMapper.selectPage(pageObj, wrapper);
+        List<OplatformRecordVo> listInfo = new LinkedList<>();
+        for (SysConfig item : iPage.getRecords()) {
+            OplatformRecordVo vo = new OplatformRecordVo();
+            BeanUtils.copyProperties(item, vo);
+            vo.setValue(JSONUtil.parseObj(item.getValue()));
+            Site siteInfo = new Site();
+            siteInfo.setSiteName(item.getSiteName());
+            vo.setSite(siteInfo);
+            listInfo.add(vo);
+        }
+        return  PageResult.build(page, limit, iPage.getTotal()).setData(listInfo);
     }
 }

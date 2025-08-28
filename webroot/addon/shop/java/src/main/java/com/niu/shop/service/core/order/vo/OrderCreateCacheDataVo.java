@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
@@ -145,20 +146,17 @@ public class OrderCreateCacheDataVo implements Serializable {
         private Integer isDiscount; // 是否参与限时折扣
         private String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsCoverThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsCover());
         }
 
         public String getGoodsCoverThumbMid() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover());
         }
 
         public String getGoodsCoverThumbBig() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+            return CommonUtils.thumbImageBig(this.siteId, this.getGoodsCover());
         }
     }
 

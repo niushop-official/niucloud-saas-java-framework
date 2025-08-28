@@ -1,5 +1,7 @@
 package com.niu.shop.service.core.marketing.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.shop.enums.marketing.ShopManjianGoodsTypeEnum;
 import com.niu.shop.enums.marketing.ShopManjianStatusEnum;
 import lombok.Data;
@@ -86,6 +88,9 @@ public class ShopManjianInfoVo implements Serializable {
      * 优惠规则json
      */
     private String ruleJson;
+
+    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+    private String rule;
 
 
     /**

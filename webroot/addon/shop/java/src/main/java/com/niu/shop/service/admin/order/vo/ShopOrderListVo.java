@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
@@ -121,12 +122,9 @@ public class ShopOrderListVo implements Serializable {
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String extend;
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsImageThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsImage());
         }
 
         public String getStatusName() {
@@ -172,6 +170,12 @@ public class ShopOrderListVo implements Serializable {
     }
 
     public Map<String, Object> getStatusName() {
-        return OrderStatusEnum.getMapByStatus(Integer.valueOf(this.status));
+        Map<String, Object> res = OrderStatusEnum.getMapByStatus(Integer.valueOf(this.status));
+        if (status.equals(OrderStatusEnum.WAIT_DELIVERY.getStatus().toString()) && this.deliveryType.equals("store")){
+            res.put("name", "待提货");
+            return res;
+        } else {
+            return res;
+        }
     }
 }

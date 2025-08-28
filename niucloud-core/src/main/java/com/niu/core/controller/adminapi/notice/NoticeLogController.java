@@ -9,6 +9,7 @@ import com.niu.core.service.admin.sys.param.SysNoticeLogSearchParam;
 import com.niu.core.service.admin.sys.vo.SysNoticeLogInfoVo;
 import com.niu.core.service.admin.sys.vo.SysNoticeLogListVo;
 import com.niu.core.common.domain.PageParam;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
@@ -17,6 +18,7 @@ import jakarta.annotation.Resource;
  * 通知记录控制器
  */
 
+@Description("通知记录管理")
 @RestController
 @RequestMapping("adminapi/notice/log")
 @SaCheckLogin
@@ -31,6 +33,7 @@ public class NoticeLogController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<SysNoticeLogListVo>>
      */
+    @Description("通知记录列表")
     @GetMapping("")
     public Result<PageResult<SysNoticeLogListVo>> list(@Validated PageParam pageParam,
                                                      @Validated SysNoticeLogSearchParam searchParam) {
@@ -43,6 +46,7 @@ public class NoticeLogController {
      * @param id 主键ID
      * @return Result<SysNoticeLogInfoVo>
      */
+    @Description("通知记录详情")
     @GetMapping("/{id}")
     public Result<SysNoticeLogInfoVo> info(@Validated @RequestParam("id") Integer id) {
         SysNoticeLogInfoVo info = sysNoticeLogService.info(id);

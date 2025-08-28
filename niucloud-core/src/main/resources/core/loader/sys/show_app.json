@@ -6,6 +6,13 @@
       "icon": "static/resource/images/diy_form/icon.png",
       "key": "diy_form",
       "url": "/diy_form/list"
+    },
+    {
+      "title": "核销管理",
+      "desc": "管理核销员及核销记录",
+      "icon": "static/resource/images/marketing/verifier.png",
+      "key": "verify",
+      "url": "/marketing/verifier"
     }
   ]
 }

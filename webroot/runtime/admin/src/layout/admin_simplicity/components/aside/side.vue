@@ -12,12 +12,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed ,onMounted} from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import useSystemStore from '@/stores/modules/system'
 import useUserStore from '@/stores/modules/user'
 import menuItem from './menu-item.vue'
-import { img, isUrl } from '@/utils/common'
 import { findFirstValidRoute } from '@/router/routers'
 
 const systemStore = useSystemStore()
@@ -121,13 +120,14 @@ defaultOpeneds.value = menuData.value.map(item => item.name)
             justify-content: center;
             align-items: center;
         }
+
         &.el-menu--collapse {
             .el-menu-item, .el-sub-menu__title {
                 --el-menu-item-height: 60px;
+                justify-content: center;
             }
         }
     }
-
 
 }
 </style>

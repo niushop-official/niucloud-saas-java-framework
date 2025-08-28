@@ -5,33 +5,45 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.component.context.cache.CachedServiceImpl;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteAddonInitRecord;
 import com.niu.core.entity.site.SiteGroup;
+import com.niu.core.entity.sys.SysUser;
+import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.addon.AddonActionEnum;
 import com.niu.core.enums.site.SiteStatusEnum;
 import com.niu.core.enums.sys.CacheTagEnum;
+import com.niu.core.event.site.SiteAddAfterEvent;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteAddonInitRecordMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
+import com.niu.core.mapper.sys.SysUserMapper;
+import com.niu.core.mapper.sys.SysUserRoleMapper;
 import com.niu.core.service.admin.addon.IAddonService;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.core.service.core.site.vo.SiteInfoCacheVo;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 站点服务层
@@ -66,6 +78,15 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
 
     @Resource
     SiteAddonInitRecordMapper siteAddonInitRecordMapper;
+
+    @Resource
+    private SysUserRoleMapper sysUserRoleMapper;
+
+    @Resource
+    private SysUserMapper sysUserMapper;
+
+    @Resource
+    private JdbcTemplate jdbcTemplate;
 
     /**
      * 通过站点id获取支持的应用插件
@@ -134,7 +155,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
             BeanUtil.copyProperties(siteCache, siteInfoVo);
             siteInfoVo.setAddonKeys(getAddonKeysBySiteId(siteInfoVo.getSiteId()));
             if (siteInfoVo.getAddonKeys().size() != 0) {
-                siteInfoVo.setSiteAddons(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), AddonActionEnum.ADDON.getCode()));
+                siteInfoVo.setSiteAddons(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), ""));
                 siteInfoVo.setApps(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), AddonActionEnum.APP.getCode()));
             }else{
                 siteInfoVo.setSiteAddons(new ArrayList<>());
@@ -196,5 +217,70 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
     @Override
     public void clearSiteCache(Integer siteId) {
         cached.tag(cacheTagName + "_" + siteId).clear();
+    }
+
+    @Override
+    public Boolean siteInitBySiteId(Integer siteId, List<String> tables) {
+        List<Integer> userIds = new ArrayList<>();
+        try {
+            for (String table : tables) {
+                if (!isTableExists(table)) {
+                    continue;
+                }
+
+                if ("nc_sys_user_role".equals(table)) {
+                    LambdaQueryWrapper<SysUserRole> queryWrapper = new LambdaQueryWrapper<SysUserRole>()
+                            .eq(SysUserRole::getSiteId, siteId)
+                            .eq(SysUserRole::getIsAdmin, 0)
+                            .select(SysUserRole::getUid);
+
+                    userIds = sysUserRoleMapper.selectList(queryWrapper).stream()
+                            .map(SysUserRole::getUid)
+                            .collect(Collectors.toList());
+
+                    if (!userIds.isEmpty()) {
+                        sysUserRoleMapper.delete(queryWrapper);
+                    }
+                }
+                else if ("nc_sys_user".equals(table)) {
+                    if (!userIds.isEmpty()) {
+                        sysUserMapper.deleteByIds(userIds);
+                    }
+                }
+                else {
+                    jdbcTemplate.update("DELETE FROM " + table + " WHERE site_id = ?", siteId);
+                }
+            }
+
+            Site site = siteMapper.selectById(siteId);
+            SiteGroup siteGroup = siteGroupMapper.selectById(site.getGroupId());
+
+            SiteAddAfterEvent event = new SiteAddAfterEvent();
+            event.setSiteId(siteId);
+            event.addAppSign("core");
+            event.setName("SiteAddAfterEvent");
+            event.setSite(site);
+            event.setSiteGroup(siteGroup);
+            EventAndSubscribeOfPublisher.publishAll(event);
+
+            // 清除缓存
+            cached.getAllKeys().stream().forEach(key -> cached.remove(key));
+            return true;
+        } catch (Exception e) {
+            throw new CommonException("站点初始化失败: " + e.getMessage());
+        }
+    }
+
+    private boolean isTableExists(String tableName) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM information_schema.TABLES " +
+                            "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?",
+                    Integer.class,
+                    tableName
+            ) > 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

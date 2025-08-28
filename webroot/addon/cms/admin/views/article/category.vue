@@ -9,7 +9,7 @@
             <el-card class="box-card !border-none my-[10px] table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="categoryTableData.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('name')" prop="name">
-                        <el-input v-model="categoryTableData.searchParam.name" :placeholder="t('namePlaceholder')" class="w-[190px]" prefix-icon="Search" clearable />
+                        <el-input v-model.trim="categoryTableData.searchParam.name" :placeholder="t('namePlaceholder')" class="w-[190px]" prefix-icon="Search" clearable />
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="loadCategoryList()">{{ t('search') }}</el-button>
@@ -57,7 +57,7 @@ import { t } from '@/lang'
 import { getArticleCategoryList, deleteArticleCategory } from '@/addon/cms/api/article'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import EditCategory from '@/addon/cms/views/article/components/edit-category.vue'
-import { debounce } from '@/utils/common'
+import { debounce, setTablePageStorage,getTablePageStorage} from '@/utils/common'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -97,12 +97,12 @@ const loadCategoryList = debounce((page: number = 1) => {
         categoryTableData.loading = false
         categoryTableData.data = res.data.data
         categoryTableData.total = res.data.total
+        setTablePageStorage(categoryTableData.page, categoryTableData.limit, categoryTableData.searchParam)
     }).catch(() => {
         categoryTableData.loading = false
     })
 })
-loadCategoryList()
-
+loadCategoryList(getTablePageStorage(categoryTableData.searchParam).page)
 const editCategoryDialog: Record<string, any> | null = ref(null)
 
 /**

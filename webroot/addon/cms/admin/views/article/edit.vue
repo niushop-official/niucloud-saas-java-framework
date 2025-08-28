@@ -7,7 +7,7 @@
         <el-card class="box-card !border-none" shadow="never">
             <el-form :model="formData" label-width="90px" ref="formRef" :rules="formRules" class="page-form" v-loading="loading">
                 <el-form-item :label="t('title')" prop="title">
-                    <el-input v-model="formData.title" clearable :placeholder="t('titlePlaceholder')" class="input-width" maxlength="20" />
+                    <el-input v-model.trim="formData.title" clearable :placeholder="t('titlePlaceholder')" class="input-width" maxlength="20" />
                 </el-form-item>
 
                 <el-form-item :label="t('categoryName')" prop="category_id">
@@ -17,23 +17,23 @@
                 </el-form-item>
 
                 <el-form-item :label="t('intro')" prop="intro">
-                    <el-input v-model="formData.intro" type="textarea" rows="4" clearable :placeholder="t('introPlaceholder')" class="input-width" maxlength="50" />
+                    <el-input v-model.trim="formData.intro" type="textarea" rows="4" clearable :placeholder="t('introPlaceholder')" class="input-width" maxlength="50" />
                 </el-form-item>
                 <el-form-item :label="t('summary')" prop="summary">
-                    <el-input v-model="formData.summary" type="textarea" rows="4" clearable :placeholder="t('summaryPlaceholder')" class="input-width" maxlength="50" />
+                    <el-input v-model.trim="formData.summary" type="textarea" rows="4" clearable :placeholder="t('summaryPlaceholder')" class="input-width" maxlength="50" />
                 </el-form-item>
                 <el-form-item :label="t('image')">
                     <upload-image v-model="formData.image" />
                 </el-form-item>
                 <el-form-item :label="t('author')" prop="author">
-                    <el-input v-model="formData.author" clearable :placeholder="t('authorPlaceholder')" class="input-width" maxlength="20" />
+                    <el-input v-model.trim="formData.author" clearable :placeholder="t('authorPlaceholder')" class="input-width" maxlength="20" />
                 </el-form-item>
                 <el-form-item :label="t('content')" prop="content">
                     <editor v-model="formData.content" />
                 </el-form-item>
 
                 <el-form-item :label="t('visitVirtual')">
-                    <el-input v-model="formData.visit_virtual" clearable :placeholder="t('visitVirtualPlaceholder')" class="input-width" />
+                    <el-input v-model.trim="formData.visit_virtual" clearable :placeholder="t('visitVirtualPlaceholder')" class="input-width" />
                 </el-form-item>
                 <el-form-item :label="t('isShow')">
                     <el-radio-group v-model="formData.is_show" :placeholder="t('isShowPlaceholder')">
@@ -60,6 +60,7 @@
 import { ref, reactive, computed } from 'vue'
 import { t } from '@/lang'
 import type { FormInstance } from 'element-plus'
+import { ArrowLeft } from "@element-plus/icons-vue"
 import { getArticleInfo, getArticleCategoryAll, addArticle, editArticle } from '@/addon/cms/api/article'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'

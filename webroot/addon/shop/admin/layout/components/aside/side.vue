@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch,computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import useSystemStore from '@/stores/modules/system'
 import useUserStore from '@/stores/modules/user'

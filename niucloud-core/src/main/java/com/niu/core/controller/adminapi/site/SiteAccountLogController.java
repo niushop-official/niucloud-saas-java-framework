@@ -16,6 +16,7 @@ import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
  * 站点账单记录控制器
@@ -24,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/adminapi/site/account")
 @SaCheckLogin
+@Description("站点账单记录")
 public class SiteAccountLogController {
 
     @Resource
@@ -36,6 +38,7 @@ public class SiteAccountLogController {
      * @return Result<PageResult<SiteAccountLogListVo>>
      */
     @GetMapping("")
+    @Description("站点账单记录列表")
     public Result<PageResult<SiteAccountLogListVo>> list(@Validated PageParam pageParam,
                                                          @Validated SiteAccountLogSearchParam searchParam) {
         PageResult<SiteAccountLogListVo> list = siteAccountLogService.list(pageParam, searchParam);
@@ -48,11 +51,13 @@ public class SiteAccountLogController {
      * @return Result<SiteAccountLogInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("站点账单记录详情")
     public Result<SiteAccountLogInfoVo> info(@Validated @PathVariable("id") Integer id) {
         SiteAccountLogInfoVo info = siteAccountLogService.info(id);
         return Result.success(info);
     }
     @GetMapping("/stat")
+    @Description("账单统计")
     public Result<Map<String, Object>> stat(){
         return Result.success(siteAccountLogService.stat());
     }
@@ -62,6 +67,7 @@ public class SiteAccountLogController {
      * @return
      */
     @GetMapping("/type")
+    @Description("账户类型")
     public Result<Map<String, String>> accountType(){
         return Result.success(SiteAccountLogEnum.getMap());
     }

@@ -4,5 +4,29 @@
 		"name": "站点到期自动关闭",
 		"desc": "",
 		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
+		"key": "AutoClearPosterAndQrcode",
+		"name": "定时清理海报及二维码数据",
+		"desc": "",
+		"time": "{\"type\":\"day\",\"week\":\"\",\"day\":\"\",\"hour\":\"1\",\"min\":\"1\"}"
+	},
+	{
+		"key": "AutoClearScheduleLog",
+		"name": "定时清理计划任务日志表",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
+		"key": "AutoClearUserLog",
+		"name": "定时清理用户操作日志",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
+		"key": "AutoClearUpgradeRecords",
+		"name": "定时清理升级/备份记录表",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
 	}
 ]

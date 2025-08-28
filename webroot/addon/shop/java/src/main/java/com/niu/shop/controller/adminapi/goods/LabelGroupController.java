@@ -1,6 +1,7 @@
 package com.niu.shop.controller.adminapi.goods;
 
 import com.niu.core.common.domain.PageParam;
+import jdk.jfr.Description;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.goods.ILabelGroupService;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("adminapi/shop/goods/label/group")
+@Description("商品标签分组管理")
 public class LabelGroupController {
 
     @Resource
@@ -34,6 +36,7 @@ public class LabelGroupController {
      * @return Result<PageResult<LabelGroupListVo>>
      */
     @GetMapping("")
+    @Description("获取商品标签分组分页列表")
     public Result<PageResult<LabelGroupListVo>> page(@Validated PageParam pageParam, @Validated LabelGroupSearchParam searchParam) {
         PageResult<LabelGroupListVo> list = labelGroupService.page(pageParam, searchParam);
         return Result.success(list);
@@ -45,6 +48,7 @@ public class LabelGroupController {
      * @return
      */
     @GetMapping("/list")
+    @Description("获取商品标签分组列表")
     public Result<List<LabelGroupListVo>> list(@Validated LabelGroupSearchParam searchParam) {
         return Result.success(labelGroupService.list(searchParam));
     }
@@ -56,6 +60,7 @@ public class LabelGroupController {
      * @return Result<LabelGroupInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("获取商品标签分组详情")
     public Result<LabelGroupInfoVo> info(@PathVariable("id") Integer id) {
         LabelGroupInfoVo info = labelGroupService.info(id);
         return Result.success(info);
@@ -68,6 +73,7 @@ public class LabelGroupController {
      * @return Result<Object>
      */
     @PostMapping("")
+    @Description("添加商品标签分组")
     public Result<Object> add(@Validated @RequestBody LabelGroupParam addParam) {
         labelGroupService.add(addParam);
         return Result.success();
@@ -80,6 +86,7 @@ public class LabelGroupController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("编辑商品标签分组")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody LabelGroupParam editParam) {
         labelGroupService.edit(id, editParam);
         return Result.success();
@@ -92,6 +99,7 @@ public class LabelGroupController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("删除商品标签分组")
     public Result<Object> del(@PathVariable("id") Integer id) {
         labelGroupService.del(id);
         return Result.success();
@@ -104,6 +112,7 @@ public class LabelGroupController {
      * @return Result<Object>
      */
     @PutMapping("/sort")
+    @Description("修改商品标签分组排序")
     public Result<Object> modifySort(@Validated @RequestBody LabelGroupModifySortParam editParam) {
         labelGroupService.modifySort(editParam);
         return Result.success();

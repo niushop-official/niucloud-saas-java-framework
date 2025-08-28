@@ -11,12 +11,14 @@
                 <!-- 优惠券信息 -->
                 <!-- 优惠券名称 -->
                 <el-form-item :label="t('title')" prop="title">
-                    <el-input v-model.trim="formData.title" clearable :placeholder="t('titlePlaceholder')" class="input-width" :maxlength="20" />
+                    <el-input v-model.trim="formData.title" clearable :placeholder="t('titlePlaceholder')"
+                        class="input-width" :maxlength="20" />
                 </el-form-item>
 
                 <!-- 优惠券面额 -->
                 <el-form-item :label="t('price')" prop="price">
-                    <el-input v-model.trim="formData.price" clearable :placeholder="t('pricePlaceholder')" class="input-width" maxlength="5" @keyup="filterDigit($event)">
+                    <el-input v-model.trim="formData.price" clearable :placeholder="t('pricePlaceholder')"
+                        class="input-width" maxlength="5" @keyup="filterDigit($event)">
                         <template #append>元</template>
                     </el-input>
                 </el-form-item>
@@ -24,9 +26,9 @@
                 <!-- 优惠券类型 -->
                 <el-form-item :label="t('type')" prop="type">
                     <el-radio-group v-model="formData.type">
-                        <el-radio :label="1">通用券</el-radio>
-                        <el-radio :label="2">品类券</el-radio>
-                        <el-radio :label="3">商品券</el-radio>
+                        <el-radio :value="1">通用券</el-radio>
+                        <el-radio :value="2">品类券</el-radio>
+                        <el-radio :value="3">商品券</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -39,16 +41,57 @@
                 <el-form-item v-if="formData.type == 3" prop="goods_ids">
                     <div>
                         <el-form-item>
-                            <goods-select-popup ref="goodsSelectPopupRef" v-model="formData.goods_ids" :min="1" :max="99" />
+                            <goods-select-popup ref="goodsSelectPopupRef" v-model="formData.goods_ids" @goodsSelect="goodsSelect" :min="1" :max="99" />
                         </el-form-item>
                     </div>
+                </el-form-item>
+                <el-form-item v-if="formData.goods_list && formData.goods_list.length && formData.type == 3">
+                    <el-table :data="formData.goods_list" size="large" max-height="400">
+                        <el-table-column prop="goods_id" :label="t('goodsSelectPopupGoodsInfo')" min-width="300">
+                            <template #default="{ row }">
+                                <div class="flex items-center cursor-pointer">
+                                <div class="min-w-[60px] h-[60px] flex items-center justify-center">
+                                    <el-image v-if="row.goods_image" class="w-[60px] h-[60px]" :src="img(row.goods_image)" fit="contain">
+                                    <template #error>
+                                        <div class="image-slot">
+                                        <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
+                                        </div>
+                                    </template>
+                                    </el-image>
+                                    <img v-else class="w-[70px] h-[60px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
+                                </div>
+                                <div class="ml-2">
+                                    <span :title="row.sku_name" class="multi-hidden">{{row.sku_name ? row.goods_name + " " + row.sku_name: row.goods_name}}</span>
+                                    <span class="text-primary text-[12px]">{{row.goods_type_name}}</span>
+                                </div>
+                                </div>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column prop="price" :label="t('goodsSelectPopupPrice')" min-width="120">
+                            <template #default="{ row }">
+                                <div>￥{{ row.price }}</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="stock" :label="t('goodsSelectPopupStock')" min-width="120">
+                            <template #default="{ row }">
+                                <div>{{ row.stock }}</div>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column :label="t('operation')" align="right" min-width="160">
+                            <template #default="{ row, $index }">
+                                <el-button type="primary" link @click="deleteGoodsEvent(row, $index)">{{ t("delete") }}</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </el-form-item>
 
                 <!-- 使用门槛 -->
                 <el-form-item :label="t('threshold')">
                     <el-radio-group v-model="formData.threshold">
-                        <el-radio :label="1">{{ t('reduction') }}</el-radio>
-                        <el-radio :label="2">{{ t('noThreshold') }}</el-radio>
+                        <el-radio :value="1">{{ t('reduction') }}</el-radio>
+                        <el-radio :value="2">{{ t('noThreshold') }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -63,8 +106,8 @@
                 <!-- 使用时间 -->
                 <el-form-item :label="t('validType')">
                     <el-radio-group v-model="formData.valid_type">
-                        <el-radio :label="1">{{ t('days') }}</el-radio>
-                        <el-radio :label="2">{{ t('times') }}</el-radio>
+                        <el-radio :value="1">{{ t('days') }}</el-radio>
+                        <el-radio :value="2">{{ t('times') }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -77,7 +120,7 @@
                 </el-form-item>
 
                 <el-form-item prop="valid_time" v-if="formData.valid_type == 2">
-                    领劵后立即生效，使用时间截止至 
+                    领劵后立即生效，使用时间截止至
                     <div class="w-[220px] pl-[5px]">
                         <el-date-picker v-model="formData.valid_time" type="datetime" />
                     </div>
@@ -88,8 +131,8 @@
                 <el-form-item :label="t('receiveType')">
                     <div>
                         <el-radio-group v-model="formData.receive_type">
-                            <el-radio :label="1">{{ t('user') }}</el-radio>
-                            <el-radio :label="2">{{ t('grant') }}</el-radio>
+                            <el-radio :value="1">{{ t('user') }}</el-radio>
+                            <el-radio :value="2">{{ t('grant') }}</el-radio>
                         </el-radio-group>
                     </div>
                     <div class="form-tip">开启手动领取后，会员可以直接在优惠券列表以及优惠券推广中直接领取</div>
@@ -98,22 +141,23 @@
                 <!--  领取时间  -->
                 <el-form-item :label="t('receiveTime')" v-show="formData.receive_type == 1">
                     <el-radio-group v-model="formData.receive_type_time">
-                        <el-radio :label="1">{{ t('limitedTime') }}</el-radio>
-                        <el-radio :label="2">{{ t('unlimitedTime') }}</el-radio>
+                        <el-radio :value="1">{{ t('limitedTime') }}</el-radio>
+                        <el-radio :value="2">{{ t('unlimitedTime') }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
-                <el-form-item prop="receive_time" v-show="formData.receive_type_time == 1 && formData.receive_type == 1">
+                <el-form-item prop="receive_time"
+                    v-show="formData.receive_type_time == 1 && formData.receive_type == 1">
                     <div class="w-[180px]">
-                        <el-date-picker v-model="formData.receive_time" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"/>
+                        <el-date-picker v-model="formData.receive_time" type="datetimerange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" />
                     </div>
                 </el-form-item>
 
                 <!--  优惠券数量  -->
                 <el-form-item :label="t('receiveNumber')" v-show="formData.receive_type == 1">
                     <el-radio-group v-model="formData.limit">
-                        <el-radio :label="1">{{ t('limit') }}</el-radio>
-                        <el-radio :label="2">{{ t('unlimited') }}</el-radio>
+                        <el-radio :value="1">{{ t('limit') }}</el-radio>
+                        <el-radio :value="2">{{ t('unlimited') }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
 
@@ -157,7 +201,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getGoodsCategoryList, addCoupon } from '@/addon/shop/api/marketing'
 import type { FormInstance } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
-import { filterNumber, filterDigit } from '@/utils/common'
+import { filterNumber, filterDigit, deepClone, img } from '@/utils/common'
 import goodsSelectPopup from '@/addon/shop/views/goods/components/goods-select-popup.vue'
 import { cloneDeep } from 'lodash-es'
 
@@ -189,6 +233,7 @@ interface FormDataType {
     valid_type: number
     receive_time: any
     valid_time: any
+    goods_list: any[]
 }
 
 const formData = ref<FormDataType>({
@@ -203,12 +248,13 @@ const formData = ref<FormDataType>({
     // status: 1,  //状态 1 正常 2 未开启 3 已无效
     min_condition_money: 1, // 商品最低多少金额可用优惠券
     length: 30, // 有效期时长(天)
-    goods_ids: [], // 关联商品id 
+    goods_ids: [], // 关联商品id
     goods_category_ids: [], // 关联商品分类id
     receive_type_time: 2,
     valid_type: 1, // 有效方式，1=时长，2=范围
     receive_time: [start, end],
-    valid_time: end
+    valid_time: end,
+    goods_list: []
 })
 
 const formRef = ref<FormInstance>()
@@ -231,10 +277,10 @@ const formRules = computed(() => {
         min_condition_money: [
             { required: true, validator: minConditionMoney, trigger: 'blur' }
         ],
-        valid_time:[
+        valid_time: [
             { required: true, validator: validTime, trigger: 'blur' }
         ],
-        receive_time:[
+        receive_time: [
             { required: true, validator: receiveTime, trigger: 'blur' }
         ],
         remain_count: [
@@ -245,9 +291,9 @@ const formRules = computed(() => {
         ]
     }
 })
- 
+
 const receiveTime = (rule: any, value: any, callback: any) => {
-    if(formData.value.receive_type_time == 1 && formData.value.receive_type == 1){
+    if (formData.value.receive_type_time == 1 && formData.value.receive_type == 1) {
         if (!formData.value.receive_time[0] || timestampFn(formData.value.receive_time[0]) <= Date.now()) {
             callback(new Error(t('领取开始时间不能小于等于当前时间')))
         }
@@ -262,16 +308,16 @@ const validTime = (rule: any, value: any, callback: any) => {
     if (formData.value.valid_type == 2 && formData.value.valid_time <= Date.now()) {
         callback(new Error(t('有效期不能小于等于当前时间')))
     }
-    if(formData.value.valid_type == 2 && formData.value.receive_type_time == 1 && formData.value.receive_type == 1){
-		if (timestampFn(formData.value.valid_time) <= timestampFn(formData.value.receive_time[1])) {
-			callback(new Error(t('有效期不能小于等于领取结束时间')))
-		}
-	}
+    if (formData.value.valid_type == 2 && formData.value.receive_type_time == 1 && formData.value.receive_type == 1) {
+        if (timestampFn(formData.value.valid_time) <= timestampFn(formData.value.receive_time[1])) {
+            callback(new Error(t('有效期不能小于等于领取结束时间')))
+        }
+    }
     callback()
 }
 
 const minConditionMoney = (rule: any, value: any, callback: any) => {
-    if (formData.value.threshold == 1 && formData.value.min_condition_money <= 0 ) {
+    if (formData.value.threshold == 1 && formData.value.min_condition_money <= 0) {
         callback(new Error(t('使用门槛最低不能小于0元')))
     }
     callback()
@@ -297,16 +343,16 @@ const limitCountRule = (rule: any, value: any, callback: any) => {
     if (!formData.value.limit_count || formData.value.limit_count != '' && formData.value.limit_count < 1) {
         callback(new Error(t('userLimitCountPlaceholder')))
     }
-	if (formData.value.limit == 1 && formData.value.limit_count != '' && formData.value.remain_count != '' && parseInt(formData.value.limit_count) > parseInt(formData.value.remain_count)) {
+    if (formData.value.limit == 1 && formData.value.limit_count != '' && formData.value.remain_count != '' && parseInt(formData.value.limit_count) > parseInt(formData.value.remain_count)) {
         callback(new Error(t('限领张数不能大于发放数量')))
     }
     callback()
 }
 
 // 时间格式转换时间戳
-const timestampFn = (data)=>{
-    var dateObject = new Date(data);
-    return dateObject.getTime();
+const timestampFn = (data) => {
+    const dateObject = new Date(data)
+    return dateObject.getTime()
 }
 
 // 优惠券类型
@@ -323,14 +369,14 @@ const onSave = async (formEl: FormInstance | undefined) => {
     await formEl.validate(async (valid) => {
         if (valid) {
             loading.value = true
-            let data = cloneDeep(formData.value);
-            if(data.type == 1){
-                delete data.goods_category_ids;
-                delete data.goods_ids;
-            }else if(data.type == 2){
-                delete data.goods_ids;
-            }else if(data.type == 3){
-                delete data.goods_category_ids;
+            const data = cloneDeep(formData.value)
+            if (data.type == 1) {
+                delete data.goods_category_ids
+                delete data.goods_ids
+            } else if (data.type == 2) {
+                delete data.goods_ids
+            } else if (data.type == 3) {
+                delete data.goods_category_ids
             }
             const save = addCoupon
             save(data).then(res => {
@@ -345,6 +391,36 @@ const onSave = async (formEl: FormInstance | undefined) => {
 
 const back = () => {
     router.push('/shop/marketing/coupon/list')
+}
+// 删除商品
+
+const deleteGoodsEvent = (row: any, index: any) => {
+    formData.value.goods_list.splice(index, 1)
+    formData.value.goods_ids.splice(formData.value.goods_ids.indexOf(row.goods_id), 1)
+}
+// 选择商品
+const goodsSelect = (value: any) => {
+    const arr = []
+    for (const key in value) {
+        const goods_sku: any = value[key]
+        let sku: any = {
+            goods_id: goods_sku.goods_id,
+            price: goods_sku.goodsSku.price,
+            goods_type_name: goods_sku.goods_type_name,
+            goods_image: goods_sku.goods_cover,
+            goods_name: goods_sku.goods_name,
+            stock: goods_sku.stock
+        }
+        if (formData.value.goods_list.length) {
+            formData.value.goods_list.forEach((el: any) => {
+                if (el.goods_id == sku.goods_id) {
+                    sku = Object.assign(sku, el)
+                }
+            })
+        }
+        arr.push(deepClone(sku))
+    }
+    formData.value.goods_list = arr
 }
 
 </script>

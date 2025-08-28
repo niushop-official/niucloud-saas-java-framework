@@ -1,17 +1,24 @@
 package com.niu.boot.process;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.niu.boot.config.BootConfig;
+import com.niu.boot.dto.UpgradeDTO;
 import com.niu.boot.utils.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ProcessManager {
 
@@ -50,7 +57,7 @@ public class ProcessManager {
     /**
      * 监视
      */
-    public void watch() {
+    public void watch() throws Exception {
         String pipeContent = this.readPipe();
         if (!"".equals(pipeContent)) {
             BootLogUtils.log("命名管道接收信息为：" + pipeContent);
@@ -174,107 +181,168 @@ public class ProcessManager {
             this.stop();
 
             String[] data = pipeContent.split(",");
-            String addon = data[1];
-            String dir = data[2];
-            String version = data[3];
+            String upgradeKey = data[1];
+            String backupKey = data[2];
 
-            // 判断升級文件是否存在
-            File upgradeDir = new File(bootConfig.getRootPath(), "webroot/runtime/upgrade/" + addon + "/" + dir);
-            BootLogUtils.log("升级覆盖文件路径：" + upgradeDir.getPath());
             String command = "upgradesuccess,";
-
-            if (upgradeDir.exists()) {
+            try {
+                this.coverUpgradeFile(upgradeKey, backupKey);
+            } catch (Exception e) {
+                restoreBackup(backupKey);
+                command = "upgradefail,升级覆盖文件失败错误原因：" + e.getMessage();
+                BootLogUtils.log("升级覆盖文件失败,错误原因：" + e.getMessage());
+                e.printStackTrace();
+            }
+            if (!command.startsWith("upgradesuccess,")) {
                 try {
-                    this.coverUpgradeFile(upgradeDir, addon, version);
-                } catch (Exception e) {
-                    command = "upgradefail,升级覆盖文件失败错误原因：" + e.getMessage();
-                    BootLogUtils.log("升级覆盖文件失败,错误原因：" + e.getMessage());
-                    e.printStackTrace();
-                }
-            } else {
-                BootLogUtils.log("升级覆盖文件路径不存在" + upgradeDir.getPath());
+                    restoreBackup(backupKey);
+                } catch (Exception e) {}
             }
             this.writePipe(command);
             this.start();
-        } else if (pipeContent.startsWith("upgraderollback,")) {
+        } else if (pipeContent.startsWith("restorebackup,")) {
             this.resetPipe();
             this.stop();
 
             String[] data = pipeContent.split(",");
-            String addon = data[1];
-            String dir = data[2];
+            String backupKey = data[1];
+            String command = "restorebackupsuccess,";
 
-            // 判断升級文件是否存在
-            File upgradeDir = new File(bootConfig.getRootPath(), "webroot/runtime/upgrade/" + addon + "/" + dir);
-            BootLogUtils.log("升级文件路径：" + upgradeDir.getPath());
-            String command = "upgraderollbacksuccess,";
-
-            if (upgradeDir.exists()) {
-                try {
-                    FileUtils.copyDirectory(new File(upgradeDir, "backup/code"), new File(bootConfig.getRootPath()));
-                } catch (Exception e) {
-                    command = "upgraderollbackfail,升级变更文件回滚失败错误原因：" + e.getMessage();
-                    BootLogUtils.log("升级变更文件回滚失败错误原因：" + e.getMessage());
-                    e.printStackTrace();
-                }
-            } else {
-                BootLogUtils.log("升级文件路径不存在" + upgradeDir.getPath());
+            try {
+                restoreBackup(backupKey);
+            } catch (Exception e) {
+                command = "restorebackupfail,升级变更文件回滚失败错误原因：" + e.getMessage();
+                BootLogUtils.log("升级变更文件回滚失败错误原因：" + e.getMessage());
+                e.printStackTrace();
             }
+
             this.writePipe(command);
             this.start();
         }
     }
 
-    private void coverUpgradeFile(File upgradeDir, String addon, String versionList) throws Exception {
-        for (String version: versionList.split("-")) {
-            File changeRecord = new File(upgradeDir, "download/" + version + ".txt");
+    private void coverUpgradeFile(String upgradeKey, String backupKey) throws Exception {
+        File upgradeDir = new File(bootConfig.getRootPath(), "webroot/runtime/upgrade/" + upgradeKey);
+        System.out.println("upgrade file dir：" + upgradeDir.getPath());
+        if (!upgradeDir.exists()) throw new Exception("升级文件不存在");
 
-            File sourceFile = null;
+        File jsonFile = new File(upgradeDir, "upgrade.json");
+        if (!jsonFile.exists()) throw new Exception("升级文件不存在");
 
-            if (addon.equals("niucloud-admin")) {
-                sourceFile = new File(bootConfig.getRootPath());
-            } else {
-                sourceFile = new File(bootConfig.getRootPath(), "webroot/addon/" + addon);
-            }
+        UpgradeDTO upgrade = JSONUtil.toBean(JSONUtil.parseObj(JsonLoadUtils.loadJsonString(jsonFile)), UpgradeDTO.class);
+        upgrade.getContent().forEach(item -> {
+            String appKey = item.getApp().getAppKey();
+            File codeDir = new File(upgradeDir, "/download/" + appKey);
 
-            // 移除已删除文件
-            if (changeRecord.exists()) {
-                List<String> change =  Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
-                for (String line : change) {
-                    String[] content = line.split(" ");
-                    if (content[0].equals("-")) {
-                        (new File(sourceFile, content[2])).deleteOnExit();
+            // 判断目录存在并且不为空
+            if (codeDir.exists() && codeDir.listFiles().length > 0) {
+                item.getVersionList().stream().collect(Collectors.collectingAndThen(
+                    Collectors.toList(),
+                    l -> {
+                        Collections.reverse(l);
+                        return l.stream();
+                    })).forEach(version -> {
+                    // 如果是框架
+                    File rootDir = null;
+                    if (appKey.equals("niucloud-admin")) {
+                        rootDir = new File(bootConfig.getRootPath());
+                    } else {
+                        rootDir = new File(bootConfig.getRootPath(), "webroot/addon/" + appKey);
                     }
-                }
-            }
 
-            // 覆盖变更文件
-            File codeDir = new File(upgradeDir, "download/" + version);
-            if (addon.equals("niucloud-admin")) {
-                IOFileFilter envFile = FileTools.createExclusionFilter(new String[]{
-                        "application-prod.yml",
-                        ".env.development",
-                        ".env.production",
-                        ".env.dev",
-                        ".env.product"
+                    // 处理文件变更记录
+                    File changeRecord = new File(codeDir,  version.getVersionNo() + ".txt");
+                    if (changeRecord.exists()) {
+                        // 移除新版本删除的文件
+                        List<String> change = null;
+                        try {
+                            change = Arrays.asList(FileUtils.readFileToString(changeRecord, "UTF-8").split("\n"));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        if (ObjectUtil.isNotEmpty(change)) {
+                            for (String line : change) {
+                                String[] content = line.split(" ");
+                                if (content[0].equals("-")) {
+                                    (new File(rootDir, content[2])).deleteOnExit();
+                                }
+                            }
+                        }
+                    }
+                    // 覆盖更新文件
+                    if (appKey.equals("niucloud-admin")) {
+                        IOFileFilter envFile = FileTools.createExclusionFilter(new String[]{
+                            "application-prod.yml",
+                            ".env.development",
+                            ".env.production",
+                            ".env.dev",
+                            ".env.product",
+                            "web-app-boot-exec.jar"
+                        });
+                        File[] childFile = new File(codeDir, version.getVersionNo()).listFiles();
+                        for (File file : childFile) {
+                            if (file.isDirectory()) {
+                                if (new File(bootConfig.getRootPath(), file.getName()).exists()) {
+                                    try {
+                                        FileUtils.copyDirectory(file, new File(bootConfig.getRootPath(), file.getName()), envFile);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            } else {
+                                try {
+                                    FileUtils.copyFile(file, new File(bootConfig.getRootPath(), file.getName()));
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                    } else {
+                        File changeDir = new File(codeDir, version.getVersionNo());
+                        if (changeDir.exists()) {
+                            try {
+                                FileUtils.copyDirectory(changeDir, rootDir);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
                 });
 
-                File[] childFile = codeDir.listFiles();
-                for (File file : childFile) {
-                    if (file.isDirectory()) {
-                        if (new File(sourceFile, file.getName()).exists()) FileUtils.copyDirectory(file, new File(sourceFile, file.getName()), envFile);
-                    } else {
-                        FileUtils.copyFile(file, new File(sourceFile, file.getName()));
+                if (!appKey.equals("niucloud-admin")) {
+                    File projectDir = new File(bootConfig.getRootPath(), "niucloud-addon/" + appKey);;
+                    if (projectDir.exists()) {
+                        try {
+                            FileUtils.copyDirectory(new File(bootConfig.getRootPath(), "webroot/addon/" + appKey + "/java"), projectDir);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    // 合并resource
+                    try {
+                        FileUtils.copyDirectory(new File(bootConfig.getRootPath(), "webroot/addon/" + appKey + "/resource"), new File(bootConfig.getRootPath(), "webroot/resource/" + appKey));
+                    } catch (IOException e) {
+                    }
+                    // 更新插件jar包
+                    File jarFile = new File(bootConfig.getRootPath(), "webroot/addon/" + appKey + "/jar/" + appKey + ".jar");
+                    if (jarFile.exists()) {
+                        try {
+                            FileUtils.copyFile(jarFile, new File(bootConfig.getRootPath(), "webroot/jar/addon/" + appKey + ".jar"));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-            } else {
-                // 覆盖jar包
-                FileUtils.copyDirectory(codeDir, sourceFile);
-
-                File jarFile = new File(codeDir, "jar/" + addon + ".jar");
-                if (jarFile.exists()) FileUtils.copyFile(jarFile, new File(bootConfig.getRootPath(), "webroot/jar/addon/" + addon + ".jar"));
             }
-        }
+        });
+    }
+
+    private void restoreBackup(String backupKey) throws Exception {
+        File backupDir = new File(bootConfig.getRootPath(), "webroot/runtime/upgrade/" + backupKey + "/backup/code");
+        if (!backupDir.exists()) throw new Exception("备份文件不存在");
+
+        FileUtils.copyDirectory(backupDir, new File(bootConfig.getRootPath()));
     }
 
     /**

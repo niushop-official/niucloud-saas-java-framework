@@ -4,12 +4,10 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
-import com.niu.core.service.admin.site.param.SiteAddParam;
-import com.niu.core.service.admin.site.param.SiteEditParam;
-import com.niu.core.service.admin.site.param.SiteParam;
-import com.niu.core.service.admin.site.param.SiteSearchParam;
+import com.niu.core.service.admin.site.param.*;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.site.vo.ShowAppListVo;
+import com.niu.core.service.admin.site.vo.ShowMarketingVo;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.site.vo.SiteListVo;
 
@@ -102,4 +100,16 @@ public interface ISiteService {
      * @return
      */
     Map<String, ShowAppListVo> getShowAppTools();
+
+    /**
+     * 获取营销列表
+     */
+    Map<String, ShowMarketingVo> getShowMarketingTools();
+
+    /**
+     * 站点初始化
+     * @param siteId
+     * @return
+     */
+    Boolean siteInit(Integer siteId);
 }

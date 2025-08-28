@@ -33,21 +33,21 @@ export function getShopOrderNum() {
  * 获取订单详情
  */
 export function getShopOrderDetail(order_id: any) {
-    return request.get(`shop/order/${order_id}`)
+    return request.get(`shop/order/${ order_id }`)
 }
 
 /**
  * 关闭订单
  */
 export function orderClose(order_id: number) {
-    return request.put(`shop/order/close/${order_id}`)
+    return request.put(`shop/order/close/${ order_id }`)
 }
 
 /**
  * 订单完成
  */
 export function orderFinish(order_id: number) {
-    return request.put(`shop/order/finish/${order_id}`)
+    return request.put(`shop/order/finish/${ order_id }`)
 }
 
 /**
@@ -83,4 +83,11 @@ export function getStoreList(params: Record<string, any>) {
  */
 export function getMaterialflowList(params: Record<string, any>) {
     return request.get('shop/order/logistics', params)
+}
+
+/**
+ * 查询同城配送预约配置
+ */
+export function getLocal() {
+    return request.get('shop/order_create/local')
 }

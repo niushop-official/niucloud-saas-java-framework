@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 小程序版本管理
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("adminapi/weapp")
 @SaCheckLogin
+@Description("小程序版本管理")
 public class VersionController {
 
     @Resource
@@ -33,6 +35,7 @@ public class VersionController {
      * @return Result<PageResult<WechatReplyListVo>>
      */
     @PostMapping("/version")
+    @Description("上传版本")
     public Result add(@RequestBody WeappVersionAddParam param) {
         weappVersionService.add(param);
         return Result.success();
@@ -44,6 +47,7 @@ public class VersionController {
      * @return Result
      */
     @GetMapping("/version")
+    @Description("版本列表")
     public Result<PageResult<WeappVersionListVo>> list(@Validated PageParam pageParam) {
         return Result.success(weappVersionService.list(pageParam));
     }
@@ -54,6 +58,7 @@ public class VersionController {
      * @return Result
      */
     @GetMapping("/preview")
+    @Description("获取预览码")
     public Result preview() {
         return Result.success("", weappVersionService.getWeappPreviewImage());
     }
@@ -64,6 +69,7 @@ public class VersionController {
      * @return Result
      */
     @GetMapping("/upload/{key}")
+    @Description("获取小程序上传日志")
     public Result uploadLog(@PathVariable("key") String key) {
         return Result.success(weappVersionService.getWeappCompileLog(key));
     }

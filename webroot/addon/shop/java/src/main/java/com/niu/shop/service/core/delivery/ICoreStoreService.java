@@ -23,4 +23,6 @@ public interface ICoreStoreService {
      *
      */
     List<StoreListVo> getStoreList(Integer siteId, LatlngParam latlng);
+
+    Double calculateDistance(double lat1, double lng1, double lat2, double lng2);
 }

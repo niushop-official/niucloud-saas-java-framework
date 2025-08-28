@@ -5,7 +5,10 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.ApiException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
@@ -14,21 +17,21 @@ import com.niu.core.entity.diy_form.*;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
 import com.niu.core.entity.member.MemberLevel;
+import com.niu.core.enums.diy_form.DiyFormTypeEnum;
 import com.niu.core.mapper.diy_form.*;
 import com.niu.core.mapper.member.MemberLabelMapper;
 import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.diy.IDiyService;
+import com.niu.core.service.admin.member.vo.MemberConfigVo;
 import com.niu.core.service.api.diy.IDiyFormService;
 import com.niu.core.service.api.diy.param.DiyFormParam;
-import com.niu.core.service.api.diy.vo.DiyFormInfoVo;
-import com.niu.core.service.api.diy.vo.DiyFormRecordsDetailVo;
-import com.niu.core.service.api.diy.vo.DiyFormRecordsInfoVo;
+import com.niu.core.service.api.diy.vo.*;
 import com.niu.core.service.core.diy_form.ICoreDiyFormConfigService;
 import com.niu.core.service.core.diy_form.ICoreDiyFormRecordsService;
 import com.niu.core.service.core.diy_form.param.DiyFormRecordsParam;
-import com.niu.core.service.api.diy.vo.DiyFormRecordsFieldsListVo;
 import com.niu.core.service.core.diy_form.vo.DiyFormSubmitConfigInfoVo;
+import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -42,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DiyFormServiceImpl implements IDiyFormService {
@@ -85,6 +89,9 @@ public class DiyFormServiceImpl implements IDiyFormService {
     @Resource
     ICoreSysConfigService systemConfigService;
 
+    @Resource
+    private ICoreMemberConfigService coreMemberConfigService;
+
     @Override
     public DiyFormInfoVo getInfo(Integer formId) {
         // 查询 DiyFormWriteConfig
@@ -106,8 +113,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
             BeanUtil.copyProperties(formInfo, info);
             // 过滤隐藏的组件
             JSONObject valueObj = JSONUtil.parseObj(formInfo.getValue());
-            if(valueObj.containsKey("value"))
-            {
+            if (valueObj.containsKey("value")) {
                 JSONArray valueArray = valueObj.getJSONArray("value");
                 if (valueArray != null) {
                     JSONArray newArray = new JSONArray();
@@ -227,7 +233,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
                 break;
             case "diy":
                 JSONObject memberWriteRule = JSONUtil.parseObj(diyFormWriteConfig.getMemberWriteRule());
-                String timeUnit =  memberWriteRule.getStr("time_unit");
+                String timeUnit = memberWriteRule.getStr("time_unit");
                 String timeText;
                 switch (timeUnit) {
                     case "day":
@@ -407,10 +413,10 @@ public class DiyFormServiceImpl implements IDiyFormService {
                 .eq("site_id", RequestUtils.siteId());
         DiyForm formInfo = diyFormMapper.selectOne(formQueryWrapper);
         if (formInfo == null) {
-            throw new ApiException("DIY_FORM_NOT_EXIST");
+            throw new ApiException("表单不存在");
         }
         if (formInfo.getStatus() == 0) {
-            throw new ApiException("DIY_FORM_NOT_OPEN");
+            throw new ApiException("该表单已关闭");
         }
 
         // 查询表单填写配置
@@ -452,13 +458,12 @@ public class DiyFormServiceImpl implements IDiyFormService {
     @Override
     public DiyFormRecordsInfoVo getResult(Integer recordId) {
         DiyFormRecords diyFormRecords = diyFormRecordsMapper.selectOne(new QueryWrapper<DiyFormRecords>().eq("record_id", recordId).eq("site_id", RequestUtils.siteId()).eq("member_id", RequestUtils.memberId()));
-        if(ObjectUtil.isEmpty(diyFormRecords)) throw new ApiException("表单记录不存在");
+        if (ObjectUtil.isEmpty(diyFormRecords)) throw new ApiException("表单记录不存在");
         DiyFormRecordsInfoVo vo = new DiyFormRecordsInfoVo();
         BeanUtil.copyProperties(diyFormRecords, vo);
         DiyFormSubmitConfig diyFormSubmitConfig = diyFormSubmitConfigMapper.selectOne(new QueryWrapper<DiyFormSubmitConfig>().eq("form_id", vo.getFormId()));
         DiyFormSubmitConfigInfoVo configInfoVo = new DiyFormSubmitConfigInfoVo();
-        if(ObjectUtil.isNotEmpty(diyFormSubmitConfig))
-        {
+        if (ObjectUtil.isNotEmpty(diyFormSubmitConfig)) {
             BeanUtil.copyProperties(diyFormSubmitConfig, configInfoVo);
         }
         vo.setDiyFormSubmitConfig(configInfoVo);
@@ -468,12 +473,13 @@ public class DiyFormServiceImpl implements IDiyFormService {
     @Override
     public DiyFormRecordsDetailVo getFormRecordInfo(Integer recordId) {
         DiyFormRecords diyFormRecords = diyFormRecordsMapper.selectOne(new QueryWrapper<DiyFormRecords>().eq("record_id", recordId).eq("site_id", RequestUtils.siteId()).eq("member_id", RequestUtils.memberId()));
-        if(ObjectUtil.isEmpty(diyFormRecords)) throw new ApiException("表单记录不存在");
         DiyFormRecordsDetailVo vo = new DiyFormRecordsDetailVo();
+        if (ObjectUtil.isEmpty(diyFormRecords)) {
+            return vo;
+        }
         BeanUtil.copyProperties(diyFormRecords, vo);
         List<DiyFormRecordsFields> list = diyFormRecordsFieldsMapper.selectList(new QueryWrapper<DiyFormRecordsFields>().eq("record_id", vo.getRecordId()));
-        if(ObjectUtil.isNotEmpty(list))
-        {
+        if (ObjectUtil.isNotEmpty(list)) {
             List<DiyFormRecordsFieldsListVo> volist = new ArrayList<>();
             for (DiyFormRecordsFields item : list) {
                 DiyFormRecordsFieldsListVo diyFormRecordsFieldsListVo = new DiyFormRecordsFieldsListVo();
@@ -482,6 +488,113 @@ public class DiyFormServiceImpl implements IDiyFormService {
             }
             vo.setRecordsFieldList(volist);
         }
+        return vo;
+    }
+
+    @Override
+    public Object getMemberInfoRecord() {
+        MemberConfigVo memberConfig = coreMemberConfigService.getMemberConfig(RequestUtils.siteId());
+        if (ObjectUtil.isEmpty(memberConfig.getFormId())) {
+            return List.of();
+        }
+        Integer formId = memberConfig.getFormId();
+        MPJQueryWrapper<DiyFormRecords> mpjqw = new MPJQueryWrapper<>();
+        mpjqw.setAlias("fr").leftJoin("?_diy_form_records_fields frf on frf.record_id = fr.record_id".replace("?_", GlobalConfig.tablePrefix));
+        mpjqw.select("frf.form_id, frf.form_field_id, frf.field_key, frf.field_type, frf.field_name, frf.field_value, frf.field_required, frf.field_unique, frf.privacy_protection");
+        mpjqw.eq("fr.member_id", RequestUtils.memberId())
+                .eq("fr.form_id", formId)
+                .orderByDesc("fr.create_time");
+        List<DiyFormRecordsFields> diyFormRecordsFields = diyFormRecordsMapper.selectJoinList(DiyFormRecordsFields.class, mpjqw);
+
+        MPJQueryWrapper<DiyForm> diyFormMpjqw = new MPJQueryWrapper<>();
+        diyFormMpjqw.setAlias("df")
+                .leftJoin("?_diy_form_fields dfi on dfi.form_id = df.form_id".replace("?_", GlobalConfig.tablePrefix));
+        diyFormMpjqw.select("df.form_id,df.type, dfi.field_id, dfi.field_key, dfi.field_type, dfi.field_name, dfi.field_required, dfi.field_hidden, dfi.field_unique, dfi.privacy_protection");
+        diyFormMpjqw.eq("df.form_id", formId).eq("df.status", 1);
+        List<DiyFormFields> diyFormFields = diyFormMapper.selectJoinList(DiyFormFields.class, diyFormMpjqw);
+
+
+        if (ObjectUtil.isEmpty(diyFormFields)) {
+            return List.of();
+        }
+        if (ObjectUtil.isEmpty(diyFormRecordsFields)) {
+            return setResult(diyFormFields);
+        }
+
+        DiyMemberRecordVo result = setResult(diyFormFields);
+        Map<String, DiyFormRecordsFields> fieldMap = diyFormRecordsFields.stream().collect(Collectors.toMap(DiyFormRecordsFields::getFieldKey, field -> field));
+        for (DiyFormRecordsFields field : result.getFormField()) {
+            if (fieldMap.containsKey(field.getFieldKey())) {
+                field.setFieldValue(fieldMap.get(field.getFieldKey()).getFieldValue() == null ? "" : fieldMap.get(field.getFieldKey()).getFieldValue());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void editRecord(DiyFormRecordsParam param) {
+        DiyFormRecords diyFormRecords = diyFormRecordsMapper.selectById(param.getRecordId());
+        if (ObjectUtil.isEmpty(diyFormRecords)) {
+            throw new ApiException("表单记录不存在");
+        }
+        DiyForm diyForm = diyFormMapper.selectOne(new LambdaQueryWrapper<DiyForm>().eq(DiyForm::getFormId, param.getFormId()));
+        if (ObjectUtil.isEmpty(diyForm)) {
+            throw new ApiException("表单不存在");
+        }
+        if (diyForm.getStatus() == 0) {
+            throw new ApiException("该表单已关闭");
+        }
+        // 查询表单填写配置
+        QueryWrapper<DiyFormWriteConfig> writeConfigQueryWrapper = new QueryWrapper<>();
+        writeConfigQueryWrapper.eq("form_id", param.getFormId())
+                .eq("site_id", RequestUtils.siteId());
+        DiyFormWriteConfig writeConfig = diyFormWriteConfigMapper.selectOne(writeConfigQueryWrapper);
+
+        if (writeConfig != null) {
+            // 检查会员是否可以参与
+            Map<String, String> canJoinError = checkMemberCanJoinOrNot(RequestUtils.memberId(), writeConfig);
+            if (!canJoinError.isEmpty()) {
+                throw new ApiException(canJoinError.get("desc"));
+            }
+
+            // 检查表单填写时间
+            Map<String, String> timeError = checkFormWriteTime(writeConfig);
+            if (!timeError.isEmpty()) {
+                throw new ApiException(timeError.get("desc"));
+            }
+
+            // 检查表单总填写次数限制
+            Map<String, String> formLimitError = checkFormWriteLimitNum(param.getFormId(), writeConfig);
+            if (!formLimitError.isEmpty()) {
+                throw new ApiException(formLimitError.get("desc"));
+            }
+
+            // 检查会员填写次数限制
+            Map<String, String> memberLimitError = checkMemberWriteLimitNum(RequestUtils.memberId(), param.getFormId(), writeConfig);
+            if (!memberLimitError.isEmpty()) {
+                throw new ApiException(memberLimitError.get("desc"));
+            }
+        }
+        coreDiyFormRecordsService.edit(param);
+    }
+
+    private DiyMemberRecordVo setResult(List<DiyFormFields> diyFormFields) {
+        DiyMemberRecordVo vo = new DiyMemberRecordVo();
+        DiyFormFields fieIds = diyFormFields.get(0);
+        vo.setFormId(fieIds.getFormId());
+        DiyFormTypeEnum diyFormTypeEnum = new DiyFormTypeEnum();
+        JSONObject type = diyFormTypeEnum.getType(fieIds.getType());
+        vo.setTypeName(type != null ? type.getStr("title") : "");
+        vo.setType(fieIds.getType());
+        List<DiyFormRecordsFields> diyFormRecordsFields = new ArrayList<>();
+        for (DiyFormFields diyFormField : diyFormFields) {
+            DiyFormRecordsFields diyFormRecordsFields1 = new DiyFormRecordsFields();
+            BeanUtils.copyProperties(diyFormField, diyFormRecordsFields1);
+            diyFormRecordsFields1.setFormFieldId(diyFormField.getFieldId());
+            diyFormRecordsFields1.setFieldValue(diyFormField.getFieldDefault() == null ? "" : diyFormField.getFieldDefault());
+            diyFormRecordsFields.add(diyFormRecordsFields1);
+        }
+        vo.setFormField(diyFormRecordsFields);
         return vo;
     }
 }

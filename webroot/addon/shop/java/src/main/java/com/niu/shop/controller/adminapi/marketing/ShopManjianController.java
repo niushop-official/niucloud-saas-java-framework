@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.marketing;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
@@ -26,6 +27,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop")
+@Description("满减活动管理")
 public class ShopManjianController {
 
     @Resource
@@ -38,6 +40,7 @@ public class ShopManjianController {
      * @return
      */
     @GetMapping("/manjian")
+    @Description("获取满减活动分页列表")
     public Result<PageResult<ShopManjianListVo>> lists(@Validated PageParam pageParam,
                                                         @Validated ShopManjianSearchParam searchParam) {
         PageResult<ShopManjianListVo> list = manjianService.page(pageParam, searchParam);
@@ -51,7 +54,8 @@ public class ShopManjianController {
      * @return ResponseEntity 返回表示操作成功的响应实体
      */
     @PutMapping("/manjian/close/{id}")
-    public Result<Object> closeManjian(@PathVariable("id") Integer id) {
+    @Description("关闭满减活动")
+    public Result<Object> closeManjian(@Validated @PathVariable("id") Integer id) {
         manjianService.closeManjian(id);
         return Result.success();
     }
@@ -62,7 +66,8 @@ public class ShopManjianController {
      * @param id 满减活动ID
      */
     @DeleteMapping("/manjian/{id}")
-    public Result<Object> del(@PathVariable("id") Integer id) {
+    @Description("删除满减活动")
+    public Result<Object> del(@Validated @PathVariable("id") Integer id) {
         manjianService.del(id);
         return Result.success();
     }
@@ -73,7 +78,8 @@ public class ShopManjianController {
      * @return
      */
     @GetMapping("/manjian/{id}")
-    public Result<ShopManjianInfoVo> info(@PathVariable("id") Integer id) {
+    @Description("获取满减活动详情")
+    public Result<ShopManjianInfoVo> info(@Validated @PathVariable("id") Integer id) {
         return Result.success(manjianService.info(id));
     }
 
@@ -84,7 +90,8 @@ public class ShopManjianController {
      * @return
      */
     @GetMapping("/manjian/member/{id}")
-    public Result<PageResult<ShopManjianMemberVo>> member(@PathVariable("id") Integer id, PageParam pageParam) {
+    @Description("获取满减活动会员列表")
+    public Result<PageResult<ShopManjianMemberVo>> member(@Validated @PathVariable("id") Integer id, @Validated PageParam pageParam) {
         return Result.success(manjianService.member(pageParam, id));
     }
 
@@ -94,7 +101,8 @@ public class ShopManjianController {
      * @return
      */
     @PostMapping("/manjian")
-    public Result<Object> add(@RequestBody ShopManjianParam data) {
+    @Description("添加满减活动")
+    public Result<Object> add(@Validated @RequestBody ShopManjianParam data) {
         return Result.success(manjianService.add(data));
     }
 
@@ -104,7 +112,8 @@ public class ShopManjianController {
      * @return
      */
     @GetMapping("/manjian/init")
-    public Result<ShopManjianInitVo> init(ShopManjianInitParam data) {
+    @Description("获取满减活动初始化数据")
+    public Result<ShopManjianInitVo> init(@Validated ShopManjianInitParam data) {
         return Result.success(manjianService.getInit(data));
     }
 
@@ -115,7 +124,8 @@ public class ShopManjianController {
      * @return
      */
     @PutMapping("/manjian/{id}")
-    public Result<Object> edit(@PathVariable("id") Integer id, @RequestBody ShopManjianParam data) {
+    @Description("编辑满减活动")
+    public Result<Object> edit(@Validated @PathVariable("id") Integer id, @Validated @RequestBody ShopManjianParam data) {
 
         return Result.success(manjianService.edit(id, data));
     }
@@ -126,6 +136,7 @@ public class ShopManjianController {
      * @return ResponseEntity 返回包含活动状态信息的响应实体（这里假设`ManjianDict`枚举类有对应的获取状态的方法来获取状态数据）
      */
     @GetMapping("/manjian/status")
+    @Description("获取满减活动状态")
     public Result<Object> status() {
         return Result.success(ShopManjianStatusEnum.getMap());
     }
@@ -136,7 +147,8 @@ public class ShopManjianController {
      * @return
      */
     @PostMapping("/manjian/goods/check")
-    public Result<Object> checkGoods(@RequestBody ShopManjianCheckGoodsParam data) {
+    @Description("检测满减活动商品")
+    public Result<Object> checkGoods(@Validated @RequestBody ShopManjianCheckGoodsParam data) {
         manjianService.checkGoods(data);
         return Result.success();
     }
@@ -147,7 +159,8 @@ public class ShopManjianController {
      * @return
      */
     @PutMapping("/manjian/goods/batchClose")
-    public Result<Object> batchClose(@RequestBody ShopManjianBatchParam data) {
+    @Description("批量关闭满减活动")
+    public Result<Object> batchClose(@Validated @RequestBody ShopManjianBatchParam data) {
         manjianService.batchClose(data);
         return Result.success();
     }
@@ -158,7 +171,8 @@ public class ShopManjianController {
      * @return
      */
     @DeleteMapping("/manjian/goods/batchDelete")
-    public Result<Object> batchDelete(@RequestBody ShopManjianBatchParam data) {
+    @Description("批量删除满减活动")
+    public Result<Object> batchDelete(@Validated @RequestBody ShopManjianBatchParam data) {
         manjianService.batchDel(data);
         return Result.success();
     }

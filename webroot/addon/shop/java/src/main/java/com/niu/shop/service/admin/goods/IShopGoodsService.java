@@ -76,6 +76,13 @@ public interface IShopGoodsService {
     void editStatus(EditGoodsStatusParam param);
 
     /**
+     * 修改商品上下架状态(单商品）
+     *
+     * @param param
+     */
+    void editSimpleStatus(EditGoodsSimpleStatusParam param);
+
+    /**
      * 修改商品排序号
      *
      * @param param
@@ -138,6 +145,15 @@ public interface IShopGoodsService {
     ShopSelectGoodsListVo getSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam);
 
     /**
+     * 商品选择分页列表为种草社区
+     *
+     * @param pageParam
+     * @param searchParam
+     */
+    ShopSelectGoodsListVo getZhongcaoSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam);
+
+
+    /**
      * 获取商品选择列表带ku
      */
     List<ShopSelectGoodsListVo.ListVo> getSelectGoodsSku(ShopGoodsSelectSearchParam searchParam);
@@ -176,4 +192,12 @@ public interface IShopGoodsService {
     GetBuySkuSelectVo getBuySkuSelect(BuySkuSelectParam param);
 
     List<GetBuyGoodsSelectedVo> getBuyGoodsSelected(BuyGoodsSelectedParam param);
+
+    /**
+     * 批量设置商品
+     * @param param
+     */
+    void batchSet(ShopGoodsBatchSetParam param);
+
+    Boolean verifySkuNo(ShopGoodsVerifySkuNoParam param);
 }

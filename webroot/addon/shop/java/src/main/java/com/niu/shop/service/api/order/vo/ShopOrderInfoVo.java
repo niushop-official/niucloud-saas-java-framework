@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
@@ -91,6 +92,7 @@ public class ShopOrderInfoVo implements Serializable {
     private BigDecimal couponMoney = BigDecimal.ZERO;
     private BigDecimal manjianDiscountMoney = BigDecimal.ZERO;
     private Integer formRecordId;
+    private String buyerAskDeliveryTime = "";
 
     @Data
     public static class OrderGoods {
@@ -122,12 +124,9 @@ public class ShopOrderInfoVo implements Serializable {
         private Integer isGift;
         private Integer formRecordId;
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsImageThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsImage());
         }
 
         public JSONObject getExtend() {
@@ -166,6 +165,7 @@ public class ShopOrderInfoVo implements Serializable {
         private String subDeliveryType; // 详细配送方式
         private Integer expressCompanyId; // 快递公司id
         private String expressNumber; // 配送单号
+        private String thirdDelivery; //配送方（三方配送）
         @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
         private Long createTime; // 创建时间
     }
@@ -183,6 +183,12 @@ public class ShopOrderInfoVo implements Serializable {
     }
 
     public Map<String, Object> getStatusName() {
-        return OrderStatusEnum.getMapByStatus(Integer.valueOf(this.status));
+        Map<String, Object> res = OrderStatusEnum.getMapByStatus(Integer.valueOf(this.status));
+        if (status.equals(OrderStatusEnum.WAIT_DELIVERY.getStatus().toString()) && this.deliveryType.equals("store")){
+            res.put("name", "待提货");
+            return res;
+        } else {
+            return res;
+        }
     }
 }

@@ -25,7 +25,9 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import jdk.jfr.Description;
 
+@Description("代码生成")
 @RestController
 @RequestMapping("adminapi/generator")
 public class GenerateController {
@@ -39,6 +41,7 @@ public class GenerateController {
      * @param searchParam
      * @return
      */
+    @Description("生成列表")
     @GetMapping("/generator")
     public Result<PageResult<GenerateListVo>> list(@Validated PageParam pageParam,
                                                    @Validated GenerateSearchParam searchParam) {
@@ -51,6 +54,7 @@ public class GenerateController {
      * @param id
      * @return
      */
+    @Description("生成详情")
     @GetMapping("/generator/{id}")
     public Result<GenerateDetailVo> detail(@PathVariable("id") Integer id) {
         GenerateDetailVo detail = generateService.getInfo(id);
@@ -62,6 +66,7 @@ public class GenerateController {
      * @param generateParam
      * @return
      */
+    @Description("添加代码生成")
     @PostMapping("/generator")
     public Result<Map<String, Integer>> add(@Validated @RequestBody GenerateParam generateParam) {
         Integer id = generateService.add(generateParam);
@@ -76,6 +81,7 @@ public class GenerateController {
      * @param generateParam
      * @return
      */
+    @Description("编辑代码生成")
     @PutMapping("/generator/{id}")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody GenerateEditParam generateParam) {
         generateService.edit(id, generateParam);
@@ -87,6 +93,7 @@ public class GenerateController {
      * @param id
      * @return
      */
+    @Description("删除代码生成")
     @DeleteMapping("/generator/{id}")
     public Result<Object> del(@PathVariable("id") Integer id) {
         generateService.del(id);
@@ -98,6 +105,7 @@ public class GenerateController {
      * @param generateCodeParam
      * @return
      */
+    @Description("下载生成代码")
     @PostMapping("/download")
     public Result<Map<String, String>> create(@Validated @RequestBody GenerateCodeParam generateCodeParam) {
         generateService.generate(generateCodeParam);
@@ -111,6 +119,7 @@ public class GenerateController {
      * @param content
      * @return
      */
+    @Description("数据表列表")
     @GetMapping("/table")
     public Result<List<Map<String, Object>>> tableList(@RequestParam(name = "name", defaultValue = "") String name, @RequestParam(name = "content", defaultValue = "") String content) {
         List<Map<String, Object>> list = generateService.tableList(name, content);
@@ -122,6 +131,7 @@ public class GenerateController {
      * @param id
      * @return
      */
+    @Description("生成预览")
     @GetMapping("/preview/{id}")
     public Result<List<GeneratePreviewVo>> preview(@PathVariable("id") Integer id) {
 
@@ -133,6 +143,7 @@ public class GenerateController {
      * @param id
      * @return
      */
+    @Description("检测文件")
     @GetMapping("/check_file")
     public Result<Integer> checkFile(@RequestParam("id") String id) {
 
@@ -144,6 +155,7 @@ public class GenerateController {
      * @param tableName
      * @return
      */
+    @Description("数据表字段")
     @GetMapping("/table_column")
     public Result<List<TableFiledVo>> getTableColumn(@RequestParam("table_name") String tableName) {
         List<TableFiledVo> list = generateService.getTableColumn(tableName);
@@ -155,6 +167,7 @@ public class GenerateController {
      * @param addon
      * @return
      */
+    @Description("获取mapper")
     @GetMapping("/all_model")
     public Result<?> getAllMapper(@RequestParam("addon") String addon) {
         if (addon.equals("system")) addon = "core";
@@ -166,6 +179,7 @@ public class GenerateController {
      * @param model
      * @return
      */
+    @Description("根据mapper获取表字段")
     @GetMapping("/model_table_column")
     public Result<?> gettableColumn(@RequestParam("model") String model) {
         return Result.success(generateService.getTableColumnByMapper(model));

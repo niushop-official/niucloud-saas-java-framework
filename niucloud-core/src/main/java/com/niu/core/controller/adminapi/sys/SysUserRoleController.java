@@ -11,6 +11,7 @@ import com.niu.core.service.admin.sys.vo.SysUserRoleInfoVo;
 import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jdk.jfr.Description;
 
 import jakarta.annotation.Resource;
 
@@ -20,6 +21,7 @@ import jakarta.annotation.Resource;
 @RestController
 @RequestMapping("/api/user_role")
 @SaCheckLogin
+@Description("用户权限管理")
 public class SysUserRoleController {
 
     @Resource
@@ -33,6 +35,7 @@ public class SysUserRoleController {
      * @return Result<Object>
      */
     @GetMapping("")
+    @Description("获取用户权限列表")
     public Result<PageResult<SysUserRoleListVo>> list(@Validated PageParam pageParam,
                                                           @Validated SysUserRoleSearchParam searchParam) {
         PageResult<SysUserRoleListVo> list = sysUserService.list(pageParam, searchParam);
@@ -46,6 +49,7 @@ public class SysUserRoleController {
      * @return Result<SysUserRoleInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("获取用户权限详情")
     public Result<SysUserRoleInfoVo> info(@Validated @PathVariable("id") Integer id) {
         SysUserRoleInfoVo info = sysUserService.info(id);
         return Result.success(info);
@@ -58,6 +62,7 @@ public class SysUserRoleController {
      * @return Result<Object>
      */
     @PostMapping("")
+    @Description("添加用户权限")
     public Result<Object> add(@Validated @RequestBody SysUserRoleParam addParam) {
         sysUserService.add(addParam);
         return Result.success();
@@ -70,6 +75,7 @@ public class SysUserRoleController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("编辑用户权限")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody SysUserRoleParam editParam) {
         sysUserService.edit(editParam);
         return Result.success();
@@ -82,6 +88,7 @@ public class SysUserRoleController {
      * @return Result<Object>
      */
     @PostMapping("/del")
+    @Description("删除用户权限")
     public Result<Object> del(@Validated @RequestBody Integer id) {
         sysUserService.del(id);
         return Result.success();

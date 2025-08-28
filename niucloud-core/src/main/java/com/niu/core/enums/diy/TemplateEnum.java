@@ -9,7 +9,10 @@ import com.niu.core.entity.addon.Addon;
 import com.niu.core.service.admin.diy.param.TemplateParam;
 import com.niu.core.service.core.site.ICoreSiteService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TemplateEnum {
 
@@ -18,34 +21,41 @@ public class TemplateEnum {
     }
 
     /**
-     * 获取微页面模板按插件分组
+     * 获取微页面模板和插件
      *
      * @param siteId
      * @return
      */
-    public static JSONObject getTemplateAddonGroup(Integer siteId){
-        JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+    public static List<Map<String, Object>> getTemplateAddons(Integer siteId) {
+        JsonModuleLoader jsonLoader = new JsonModuleLoader();
+        List<Map<String, Object>> templateList = new ArrayList<>();
 
-        JSONObject template = new JSONObject();
+        // 加载系统核心模板
+        JSONObject coreTemplates = jsonLoader.getResultElement("core", "diy/template.json");
+        for (Map.Entry<String, Object> entry : coreTemplates.entrySet()) {
+            Map<String, Object> template = (Map<String, Object>) entry.getValue();
+            template.put("title", "系统");
+            template.put("key", "app");
+            template.put("type", entry.getKey());
+            templateList.add(template);
+        }
 
-        JSONObject systemTemplate = new JSONObject();
-        systemTemplate.put("title", "系统");
-        systemTemplate.put("key", "app");
-        systemTemplate.put("list", jsonModuleLoader.getResultElement("core", "diy/template.json"));
-
-        List<Addon> addons = coreSiteService().getSiteAddons(siteId);
-        for (Addon addon : addons) {
-            JSONObject addonTemplate = jsonModuleLoader.getResultElement(addon.getKey(), "diy/template.json");
-            if (addonTemplate != null) {
-                JSONObject templateItem = new JSONObject();
-                templateItem.put("title", addon.getTitle());
-                templateItem.put("key", addon.getKey());
-                templateItem.put("list", addonTemplate);
-                template.put(addon.getKey(), templateItem);
+        // 加载插件模板
+        List<Addon> siteAddons = coreSiteService().getSiteAddons(siteId);
+        for (Addon addon : siteAddons) {
+            JSONObject addonTemplates = jsonLoader.getResultElement(addon.getKey(), "diy/template.json");
+            if (addonTemplates != null) {
+                for (Map.Entry<String, Object> entry : addonTemplates.entrySet()) {
+                    Map<String, Object> template = (Map<String, Object>) entry.getValue();
+                    template.put("title", addon.getTitle());
+                    template.put("key", addon.getKey());
+                    template.put("type", entry.getKey());
+                    templateList.add(template);
+                }
             }
         }
 
-        return template;
+        return templateList;
     }
 
     /**

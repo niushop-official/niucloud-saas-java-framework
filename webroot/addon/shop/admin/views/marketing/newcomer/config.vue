@@ -7,13 +7,13 @@
             <!-- <el-tabs v-model="activeName">
                 <el-tab-pane :label="t('basicInfoTab')" name="basic"> -->
                     <el-alert type="warning" :closable="false" class="!mb-[0px]">
-						<template #default>
-							<p class="mb-[5px]">* 新人专享活动旨在通过专属优惠提升新老客户的转化率。达到参与门槛的用户可以享受特定商品的限时新人价优惠。</p>
-							<p class="mb-[5px]">* 每位用户限购1件新人专享商品，超出1件的部分将按正常价购买。</p>
-							<p class="mb-[5px]">* 订单支付成功后，将视为用户已参与过新人专享活动。</p>
-							<p class="mb-[5px]">* 若订单中的单个商品发生退款，用户将无法重新参与新人专享活动，只有当整个订单全部退货后，用户方可重新参与该活动。</p>
-						</template>
-					</el-alert>
+                        <template #default>
+                            <p class="mb-[5px]">* 新人专享活动旨在通过专属优惠提升新老客户的转化率。达到参与门槛的用户可以享受特定商品的限时新人价优惠。</p>
+                            <p class="mb-[5px]">* 每位用户限购1件新人专享商品，超出1件的部分将按正常价购买。</p>
+                            <p class="mb-[5px]">* 订单支付成功后，将视为用户已参与过新人专享活动。</p>
+                            <p class="mb-[5px]">* 若订单中的单个商品发生退款，用户将无法重新参与新人专享活动，只有当整个订单全部退货后，用户方可重新参与该活动。</p>
+                        </template>
+                    </el-alert>
                     <el-form :model="formData" label-width="120px" ref="formRef" :rules="formRules" class="page-form">
                         <el-card class="box-card !border-none" shadow="never">
                             <h3 class="panel-title !text-sm pl-[15px]">{{ t('basicInfoTab') }}</h3>
@@ -102,10 +102,10 @@
                                 <goods-select-popup ref="goodsSelectPopupRef" v-model="formData.goodsSkuIds" @goodsSelect="goodsSelect" mode="sku" :min="1" :max="99" />
                             </el-form-item>
                             <el-form-item v-if="formData.goodsSkuList && formData.goodsSkuList.length">
-                                <div class="">
-                                    <el-table class="sku_list !w-[1400px]"  ref="goods_listTableRef" :data="formData.goodsSkuList" size="large" max-height="480" @selection-change="handleSelectionChange">
+                                <div>
+                                    <el-table class="sku_list" ref="goods_listTableRef" :data="formData.goodsSkuList" size="large" max-height="480" @selection-change="handleSelectionChange">
                                         <el-table-column type="selection" width="55" />
-                                        <el-table-column :label="t('goodsSelectPopupGoodsInfo')" min-width="300">
+                                        <el-table-column :label="t('goodsSelectPopupGoodsInfo')" min-width="550">
                                             <template #default="{ row }">
                                                 <div class="flex items-center cursor-pointer">
                                                     <div class="min-w-[60px] h-[60px] flex items-center justify-center">
@@ -119,18 +119,22 @@
                                                         <img v-else class="w-[70px] h-[60px]" src="@/addon/shop/assets/goods_default.png" fit="contain" />
                                                     </div>
                                                     <div class="ml-2">
-                                                        <span :title="row.sku_name" class="multi-hidden">{{ row.sku_name ? row.goods_name + ' ' + row.sku_name : row.goods_name }}</span>
-                                                        <span class="text-primary text-[12px]">{{ row.goods_type_name }}</span>
+                                                        <span :title="row.sku_name" class="multi-hidden">{{ row.goods_name }}</span>
+                                                        <div class="flex items-center">
+                                                            <span class="text-primary text-[12px]">{{row.sku_name}}</span>
+                                                            <span class="mx-[8px] text-[#999] text-[12px]" v-if="row.sku_name">|</span>
+                                                            <span class="text-primary text-[12px]">{{ row.goods_type_name }}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </template>
                                         </el-table-column>
-                                        <el-table-column :label="t('oldPrice')" min-width="120">
+                                        <el-table-column :label="t('oldPrice')" min-width="160">
                                             <template #default="{ row }">
                                                 <div>￥{{ row.price }}</div>
                                             </template>
                                         </el-table-column>
-                                        <el-table-column :label="t('newcomerPrice')" min-width="120">
+                                        <el-table-column :label="t('newcomerPrice')" min-width="160">
                                             <template #default="{ row,$index }">
                                                 <el-form-item :prop="'goodsSkuList.'+ $index + '.newcomer_price'" :rules="[{
                                                         trigger: 'blur',
@@ -152,8 +156,8 @@
                                                 </el-form-item>
                                             </template>
                                         </el-table-column>
-                                        <el-table-column prop="stock" :label="t('goodsSelectPopupStock')" min-width="120" align="right" />
-                                        <el-table-column :label="t('operation')"  align="right" min-width="160">
+                                        <el-table-column prop="stock" :label="t('goodsSelectPopupStock')" min-width="160" align="right" />
+                                        <el-table-column :label="t('operation')" align="right" min-width="160">
                                             <template #default="{ row,$index }">
                                                 <el-button type="primary" link @click="deleteGoodsEvent(row,$index)">{{ t('delete') }}</el-button>
                                             </template>
@@ -167,6 +171,7 @@
                                         <label>{{ t('batchOperation') }}</label>
                                         <el-input v-model.trim="newcomer_price" clearable class="!w-[130px] ml-[10px]" :placeholder="t('newcomerPricePlaceholder')" maxlength="8" />
                                         <el-button class="ml-[10px]" type="primary" @click="saveBatch">{{ t('confirm') }}</el-button>
+                                        <el-button class="ml-[10px]" type="primary" @click="deleteBatch">{{ t('批量删除') }}</el-button>
                                     </div>
                                 </div>
                             </el-form-item>
@@ -182,7 +187,7 @@
                 </el-tab-pane>
                 <el-tab-pane :label="t('bannerList')" name="banner"> -->
                     <!-- <el-form class="page-form" :model="formData" label-width="120px" ref="bannerFormRef"> -->
-                        
+
                         <!-- <div class="flex w-full justify-center">
                             <el-button class="w-[400px]" @click="addConfigList">{{ t('addConfigList') }}</el-button>
                         </div> -->
@@ -238,7 +243,7 @@ const regExp = {
 
 const formRules = computed(() => {
     return {
-        appoint_time: [ 
+        appoint_time: [
             { required: true, message: t('appointTimePlaceholder'), trigger: 'change' }
         ],
         validity_day: [
@@ -248,9 +253,9 @@ const formRules = computed(() => {
                 }else if(parseInt(value)<=0){
                     callback(t('validityDayTips'))
                 }else {
-                    callback() 
+                    callback()
                 }
-                
+
             }, trigger: 'blur' }
         ],
         validity_time: [
@@ -266,9 +271,9 @@ const formRules = computed(() => {
                         callback()
                     }
                 }else {
-                    callback() 
+                    callback()
                 }
-                
+
             }, trigger: 'change' }
         ],
         goodsSkuIds: [
@@ -293,6 +298,7 @@ const formRules = computed(() => {
         // ]
     }
 })
+
 const formRef = ref<FormInstance>()
 const bannerFormRef = ref<FormInstance>()
 // 商品选择回调
@@ -391,6 +397,21 @@ const saveBatch = () => {
         }
     })
 }
+const deleteBatch = () => {
+  if (!multipleSelection.value.length) {
+    ElMessage({
+      type: 'warning',
+      message: `${t('batchEmptySelectedGoodsTips')}`
+    })
+    return
+  }
+  formData.value.goodsSkuList = formData.value.goodsSkuList.filter(item => !multipleSelection.value.some(selected => selected.sku_id === item.sku_id))
+  formData.value.goodsSkuIds = formData.value.goodsSkuList.map(item => item.sku_id)
+  multipleSelection.value = []
+  toggleCheckbox.value = false
+  isIndeterminate.value = false
+  ElMessage.success(t('删除成功'))
+}
 // 删除商品
 const deleteGoodsEvent = (row: any, index: any) => {
     formData.value.goodsSkuList.splice(index, 1);
@@ -409,7 +430,7 @@ const getActiveNewcomerConfigFn = () => {
             return item
         });
         loading.value = false;
-        
+
     }).catch(() => {
         loading.value = false
     })
@@ -439,7 +460,7 @@ const onSave = async () => {
                 preventDuplication.value = false
             })
         }
-    })  
+    })
 
 }
 /**

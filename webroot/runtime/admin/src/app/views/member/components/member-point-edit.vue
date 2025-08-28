@@ -14,11 +14,11 @@
             </el-form-item>
 
             <el-form-item :label="t('adjustPoint')" prop="adjust">
-                <el-input-number v-model="formData.adjust" clearable :min="0" :max="999999" :placeholder="t('adjustPlaceholder')"/>
+                <el-input-number v-model="formData.adjust" clearable :min="0" :max="999999" :placeholder="t('adjustPlaceholder')"  @focus="formData.adjust = ''"  class="!w-[200px]"/>
             </el-form-item>
 
             <el-form-item :label="t('memo')" prop="memo">
-                <el-input v-model="formData.memo" type="textarea" rows="4" clearable :placeholder="t('memoPlaceholder')" class="input-width"/>
+                <el-input v-model.trim="formData.memo" type="textarea" rows="4" clearable :placeholder="t('memoPlaceholder')" class="input-width"/>
             </el-form-item>
 
         </el-form>
@@ -94,7 +94,7 @@ const confirm = async (formEl: FormInstance | undefined) => {
     await formEl.validate(async (valid) => {
         if (valid) {
             loading.value = true
-            
+
             if (repeat.value) return
             repeat.value = true
 

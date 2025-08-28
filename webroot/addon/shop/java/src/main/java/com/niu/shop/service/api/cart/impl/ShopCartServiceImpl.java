@@ -30,9 +30,12 @@ import com.niu.shop.service.api.goods.IGoodsService;
 import com.niu.shop.service.api.marketing.IShopManjianService;
 import com.niu.shop.service.api.marketing.param.ShopManjianInfoParam;
 import com.niu.shop.service.api.marketing.vo.ShopManjianInfoVo;
+import com.niu.shop.service.core.goods.ICoreGoodsActivePriceService;
 import com.niu.shop.service.core.goods.ICoreGoodsLimitBuyService;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
+import com.niu.shop.service.core.goods.param.GetShowPriceParam;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
+import com.niu.shop.service.core.goods.vo.ShowPriceVo;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -83,6 +86,9 @@ public class ShopCartServiceImpl implements IShopCartService {
     @Resource
     ICoreGoodsStatService coreGoodsStatService;
 
+    @Resource
+    ICoreGoodsActivePriceService coreGoodsActivePriceService;
+
     /**
      * 购物车列表
      *
@@ -117,16 +123,18 @@ public class ShopCartServiceImpl implements IShopCartService {
             ShopGoodsSku sku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().eq("sku_id", item.getSkuId()));
             BeanUtils.copyProperties(sku, skuVo);
 
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                .skuId(sku.getSkuId())
+                .price(sku.getPrice())
+                .memberDiscount(goods.getMemberDiscount())
+                .memberPrice(sku.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
+            skuVo.setShowPrice(skuShowPrice.getShowPrice());
+            skuVo.setShowType(skuShowPrice.getShowType());
+
             List<ShopCartListVo.GoodsSpec> specList = CollectUtils.convert(shopGoodsSpecMapper.selectList(new QueryWrapper<ShopGoodsSpec>().eq("goods_id", item.getGoodsId())), ShopCartListVo.GoodsSpec.class);
             vo.setGoodsSpec(specList);
-
-            if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
-                skuVo.setMemberPrice(goodsService.calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
-            } else {
-                skuVo.setMemberPrice(sku.getPrice());
-            }
-
             vo.setGoodsSku(skuVo);
 
             list.add(vo);
@@ -143,8 +151,6 @@ public class ShopCartServiceImpl implements IShopCartService {
 
         List<ShopCart> record = shopCartMapper.selectList(queryWrapper);
 
-        MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
-
         List<ShopCartGoodsListVo> list = new LinkedList<>();
         for (ShopCart item : record) {
             ShopCartGoodsListVo vo = new ShopCartGoodsListVo();
@@ -157,7 +163,6 @@ public class ShopCartServiceImpl implements IShopCartService {
             if (ObjectUtil.isNotEmpty(manjianInfo)) {
                 vo.setManjianInfo(manjianInfo);
             }
-
 
             ShopCartGoodsListVo.Goods goodsVo = new ShopCartGoodsListVo.Goods();
             ShopGoods goods = shopGoodsMapper.selectOne(new QueryWrapper<ShopGoods>().eq("goods_id", item.getGoodsId()));
@@ -175,14 +180,18 @@ public class ShopCartServiceImpl implements IShopCartService {
             List<ShopCartGoodsListVo.GoodsSpec> specList = CollectUtils.convert(shopGoodsSpecMapper.selectList(new QueryWrapper<ShopGoodsSpec>().eq("goods_id", item.getGoodsId())), ShopCartGoodsListVo.GoodsSpec.class);
             vo.setGoodsSpec(specList);
 
-            if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(sku.getMemberPrice()) ? JSONUtil.parseObj(sku.getMemberPrice()) : new JSONObject();
-                skuVo.setMemberPrice(goodsService.calculateMemberPrice(memberLevel, goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
-            } else {
-                skuVo.setMemberPrice(sku.getPrice());
-            }
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                .skuId(sku.getSkuId())
+                .price(sku.getPrice())
+                .memberDiscount(goods.getMemberDiscount())
+                .memberPrice(sku.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
+            skuVo.setShowPrice(skuShowPrice.getShowPrice());
+            skuVo.setShowType(skuShowPrice.getShowType());
 
             vo.setGoodsSku(skuVo);
+            vo.setShowPrice(skuVo.getPrice());
 
             list.add(vo);
         }
@@ -208,10 +217,14 @@ public class ShopCartServiceImpl implements IShopCartService {
             BeanUtils.copyProperties(goods, matchGoods);
             if (ObjectUtil.isNotEmpty(goods.getPromotion()) && goods.getPromotion().containsKey("manjian")) {
                 JSONObject manjian = (JSONObject) goods.getPromotion().get("manjian");
-                if (manjian.containsKey("discount_array")) {
-                    Map<String, String> discountArray = JSONUtil.toBean(manjian.getJSONObject("discount_array"), Map.class);
+                JSONObject manjianObj = manjian.getJSONObject("manjian");
+                if (manjianObj.containsKey("discountArray")) {
+                    // 获取折扣价格
+                    Map<String, String> discountArray = JSONUtil.toBean(manjianObj.getJSONObject("discountArray"), Map.class);
                     if (discountArray.containsKey("level") && Integer.parseInt(discountArray.get("level")) > 0) {
                         matchGoods.setLevel(Integer.parseInt(discountArray.get("level")));
+                    }else{
+                        matchGoods.setLevel(0);
                     }
                 }
             }
@@ -233,7 +246,7 @@ public class ShopCartServiceImpl implements IShopCartService {
         MPJQueryWrapper<ShopGoodsSku> queryWrapper = new MPJQueryWrapper<>();
 
         //sql语句
-        queryWrapper.select("nsgs.sku_id, nsgs.sku_name, nsgs.goods_id, nsgs.price, nsgs.stock, nsgs.member_price AS member_price_desc, nsc.id AS cart_id, nsc.num, nsg.member_discount")
+        queryWrapper.select("nsgs.sku_id, nsgs.sku_name, nsgs.goods_id, nsgs.price, nsgs.stock, nsgs.member_price, nsc.id AS cart_id, nsc.num, nsg.member_discount")
                 .setAlias("nsgs")
                 .innerJoin("?_shop_cart nsc ON nsgs.sku_id = nsc.sku_id".replace("?_", GlobalConfig.tablePrefix))
                 .innerJoin("?_shop_goods nsg ON nsgs.goods_id = nsg.goods_id".replace("?_", GlobalConfig.tablePrefix));
@@ -248,23 +261,25 @@ public class ShopCartServiceImpl implements IShopCartService {
         vo.setGoodsMoney(BigDecimal.ZERO);
         if (ObjectUtil.isNotEmpty(cartGoodsList)) {
 
-            MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(memberId);
             List<ShopCartCalculateVo.Goods> goodsList = new ArrayList<>();
             for (ShopCartCalculateVo.Goods item : cartGoodsList) {
                 Integer itemNum = calculateParam.getSkuIds().stream().filter(skuItem -> skuItem.getSkuId().equals(item.getSkuId())).findFirst().get().getNum();
 
-                if (memberLevel != null) {
-                    JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(item.getMemberPriceDesc()) ? JSONUtil.parseObj(item.getMemberPriceDesc()) : new JSONObject();
-                    item.setPrice(goodsService.calculateMemberPrice(memberLevel, item.getMemberDiscount(), memberPriceConfig, item.getPrice()));
-                }
-
+                ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                    .skuId(item.getSkuId())
+                    .price(item.getPrice())
+                    .memberDiscount(item.getMemberDiscount())
+                    .memberPrice(item.getMemberPrice())
+                    .memberId(RequestUtils.memberId())
+                    .build());
+                item.setShowPrice(skuShowPrice.getShowPrice());
+                item.setShowType(skuShowPrice.getShowType());
+                item.setPrice(skuShowPrice.getShowPrice());
                 item.setGoodsMoney(item.getPrice().multiply(BigDecimal.valueOf(itemNum)));
                 item.setRealGoodsMoney(item.getGoodsMoney());
                 vo.setGoodsNum(vo.getGoodsNum() + itemNum);
-
                 vo.setGoodsMoney(vo.getGoodsMoney().add(item.getPrice().multiply(BigDecimal.valueOf(itemNum))));
                 goodsList.add(item);
-
             }
             vo.setGoodsList(goodsList);
             return vo;

@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
@@ -18,6 +19,7 @@ import com.niu.shop.enums.coupon.*;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.coupon.ShopCouponMapper;
 import com.niu.shop.mapper.coupon.ShopCouponMemberMapper;
+import com.niu.shop.service.admin.marketing.param.ShopCouponDelParam;
 import com.niu.shop.service.api.marketing.ICouponService;
 import com.niu.shop.service.api.marketing.param.ShopCouponReceiveParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponSearchParam;
@@ -221,10 +223,10 @@ public class ICouponServiceImpl implements ICouponService {
             if (shopCoupon.getStartTime() > time) throw new ApiException("优惠券未开始");
             if (shopCoupon.getEndTime() < time) throw new ApiException("优惠券已过期");
         }
-        if (shopCoupon.getValidEndTime() > 0) {
-            if (shopCoupon.getValidStartTime() > time) throw new ApiException("优惠券未开始");
-            if (shopCoupon.getValidEndTime() < time) throw new ApiException("优惠券已过期");
-        }
+//        if (shopCoupon.getValidEndTime() > 0) {
+//            if (shopCoupon.getValidStartTime() > time) throw new ApiException("优惠券未开始");
+//            if (shopCoupon.getValidEndTime() < time) throw new ApiException("优惠券已过期");
+//        }
         ShopCoupon updateCoupon = new ShopCoupon();
 
         if (shopCoupon.getRemainCount() != -1) {
@@ -384,6 +386,21 @@ public class ICouponServiceImpl implements ICouponService {
         data.put("coupon_id", couponId);
 
         return QrcodeUtils.qrcodeToFile(RequestUtils.siteId(), RequestUtils.channel(), "", "addon/shop/pages/coupon/detail", data, "");
+    }
+
+    @Override
+    public void invalidCoupon(ShopCouponDelParam shopCouponDelParam) {
+
+        if(shopCouponDelParam.getIds().size()>0){
+            UpdateWrapper<ShopCoupon> updateWrapper = new UpdateWrapper();
+            updateWrapper.eq("site_id", RequestUtils.siteId());
+            updateWrapper.eq("status", CouponMemberStatusEnum.WAIT_USE.getStatus());
+            updateWrapper.in("id", shopCouponDelParam.getIds());
+            ShopCoupon shopCoupon = new ShopCoupon();
+            shopCoupon.setStatus(CouponMemberStatusEnum.INVALID.getStatus());
+            shopCouponMapper.update(shopCoupon,updateWrapper);
+        }
+
     }
 
 

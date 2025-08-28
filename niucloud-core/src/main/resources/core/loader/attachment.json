@@ -1,0 +1,52 @@
+[
+  {
+    "name": "banner1.jpg",
+    "real_name": "轮播素材01",
+    "path": "static/resource/images/attachment/banner1.jpg",
+    "url": "static/resource/images/attachment/banner1.jpg",
+    "dir": "static/resource/images/attachment",
+    "att_size": 84097,
+    "att_type": "image",
+    "storage_type": "local"
+  },
+  {
+    "name": "banner2.jpg",
+    "real_name": "轮播素材02",
+    "path": "static/resource/images/attachment/banner2.jpg",
+    "url": "static/resource/images/attachment/banner2.jpg",
+    "dir": "static/resource/images/attachment",
+    "att_size": 54862,
+    "att_type": "image",
+    "storage_type": "local"
+  },
+  {
+    "name": "banner3.jpg",
+    "real_name": "轮播素材03",
+    "path": "static/resource/images/attachment/banner3.jpg",
+    "url": "static/resource/images/attachment/banner3.jpg",
+    "dir": "static/resource/images/attachment",
+    "att_size": 78247,
+    "att_type": "image",
+    "storage_type": "local"
+  },
+  {
+    "name": "logo.png",
+    "real_name": "生活圈",
+    "path": "static/resource/images/attachment/logo.png",
+    "url": "static/resource/images/attachment/logo.png",
+    "dir": "static/resource/images/attachment",
+    "att_size": 1517,
+    "att_type": "image",
+    "storage_type": "local"
+  },
+  {
+    "name": "nav_coupon.png",
+    "real_name": "优惠券",
+    "path": "static/resource/images/attachment/nav_coupon.png",
+    "url": "static/resource/images/attachment/nav_coupon.png",
+    "dir": "static/resource/images/attachment",
+    "att_size": 30937,
+    "att_type": "image",
+    "storage_type": "local"
+  }
+]

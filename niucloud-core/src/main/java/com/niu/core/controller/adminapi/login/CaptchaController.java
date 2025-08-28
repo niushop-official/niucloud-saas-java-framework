@@ -18,10 +18,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 图文验证码控制器
  */
+@Description("图文验证码控制器")
 @RestController
 @RequestMapping("/adminapi/captcha")
 public class CaptchaController {
@@ -36,6 +38,7 @@ public class CaptchaController {
      * @param captchaType
      * @return
      */
+    @Description("创建验证码")
     @GetMapping("/create")
     public Result create(@Validated @RequestParam("captchaType") String captchaType){
         return Result.success(coreCaptchaImgService.create(captchaType));
@@ -43,11 +46,12 @@ public class CaptchaController {
 
 
     /**
-     * 一次验证验证码
+     * 验证验证码
      *
      * @param coreCaptchaValiDateParam
      * @return
      */
+    @Description("验证验证码")
     @GetMapping("/check")
     public Result check(@Validated CoreCaptchaValiDateParam coreCaptchaValiDateParam){
 

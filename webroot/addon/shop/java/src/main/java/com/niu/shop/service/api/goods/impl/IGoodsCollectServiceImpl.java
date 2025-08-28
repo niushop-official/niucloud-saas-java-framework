@@ -13,9 +13,13 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.shop.entity.goods.ShopGoodsCollect;
 import com.niu.shop.mapper.goods.ShopGoodsCollectMapper;
 import com.niu.shop.service.api.goods.IGoodsCollectService;
+import com.niu.shop.service.api.goods.vo.GoodsBrowseListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsCollectVo;
+import com.niu.shop.service.core.goods.ICoreGoodsActivePriceService;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
+import com.niu.shop.service.core.goods.param.GetShowPriceParam;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
+import com.niu.shop.service.core.goods.vo.ShowPriceVo;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -28,6 +32,9 @@ public class IGoodsCollectServiceImpl implements IGoodsCollectService {
 
     @Resource
     ShopGoodsCollectMapper shopGoodsCollectMapper;
+
+    @Resource
+    ICoreGoodsActivePriceService coreGoodsActivePriceService;
 
     @Override
     public PageResult<ShopGoodsCollectVo> getMemberGoodsCollectList(PageParam pageParam) {
@@ -42,10 +49,21 @@ public class IGoodsCollectServiceImpl implements IGoodsCollectService {
                 .leftJoin("?_shop_goods_sku ngs ON gc.goods_id = ngs.goods_id and ngs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
         queryWrapper.eq("gc.member_id", RequestUtils.memberId());
         queryWrapper.eq("gc.site_id", RequestUtils.siteId());
-        queryWrapper.select("gc.*", "ng.goods_name", "ng.goods_cover", "ngs.sku_name", "ngs.price");
+        queryWrapper.select("gc.*", "ng.goods_name", "ng.goods_cover", "ng.member_discount", "ngs.sku_name", "ngs.price", "ngs.price", "ngs.sku_id", "ngs.member_price");
         queryWrapper.orderByDesc("gc.id");
 
         IPage<ShopGoodsCollectVo> iPage = shopGoodsCollectMapper.selectJoinPage(new Page<>(page, limit), ShopGoodsCollectVo.class, queryWrapper);
+        for (ShopGoodsCollectVo vo : iPage.getRecords()) {
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                .skuId(vo.getSkuId())
+                .price(vo.getPrice())
+                .memberDiscount(vo.getMemberDiscount())
+                .memberPrice(vo.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
+            vo.setShowPrice(skuShowPrice.getShowPrice());
+            vo.setShowType(skuShowPrice.getShowType());
+        }
 
         return PageResult.build(iPage);
     }

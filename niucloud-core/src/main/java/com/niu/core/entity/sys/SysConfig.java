@@ -4,6 +4,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -27,6 +28,12 @@ public class SysConfig implements Serializable {
      * 站点id
      */
     private Integer siteId;
+
+    /**
+     * 站点名称
+     */
+    @TableField(select = false)
+    private String siteName;
 
     /**
      * 配置项关键字

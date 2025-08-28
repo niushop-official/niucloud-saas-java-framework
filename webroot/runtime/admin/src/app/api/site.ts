@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-//包含站点管理，站点用户管理，站点操作日志
+// 包含站点管理，站点用户管理，站点操作日志
 
 /***************************************************** 站点管理 ****************************************************/
 
@@ -18,7 +18,7 @@ export function getSiteList(params: Record<string, any>) {
  * @param site_id
  */
 export function getSiteInfo(site_id: number) {
-    return request.get(`site/site/${site_id}`);
+    return request.get(`site/site/${ site_id }`);
 }
 
 /**
@@ -35,15 +35,15 @@ export function addSite(params: Record<string, any>) {
  * @param params
  */
 export function editSite(params: Record<string, any>) {
-    return request.put(`site/site/${params.site_id}`, params, { showSuccessMessage: true })
+    return request.put(`site/site/${ params.site_id }`, params, { showSuccessMessage: true })
 }
 
 /**
  * 删除站点
  * @param siteId
  */
-export function deleteSite(siteId: number) {
-    return request.delete(`site/site/${siteId}`)
+export function deleteSite(params: Record<string, any>) {
+    return request.delete(`site/site/${ params.site_id }?captcha_code=${ params.captcha_code }&captcha_key=${ params.captcha_key }`)
 }
 
 /**
@@ -51,15 +51,24 @@ export function deleteSite(siteId: number) {
  * @param params
  */
 export function closeSite(params: Record<string, any>) {
-    return request.put(`site/closesite/${params.site_id}`, params, { showSuccessMessage: true })
+    return request.put(`site/closesite/${ params.site_id }`, params, { showSuccessMessage: true })
 }
+
+/**
+ * 初始化站点
+ * @param params
+ */
+export function initSite(params: Record<string, any>) {
+    return request.post(`site/init`, params, { showSuccessMessage: true })
+}
+
 
 /**
  * 打开站点
  * @param params
  */
 export function openSite(params: Record<string, any>) {
-    return request.put(`site/opensite/${params.site_id}`, params, { showSuccessMessage: true })
+    return request.put(`site/opensite/${ params.site_id }`, params, { showSuccessMessage: true })
 }
 
 /**
@@ -69,6 +78,19 @@ export function getStatusList() {
     return request.get(`site/statuslist`)
 }
 
+/**
+ * 获取是否显示切换站点
+ */
+export function getSiteAllowChange() {
+    return request.get(`site/allow_change`)
+}
+
+/**
+ * 修改是否显示切换站点
+ */
+export function putSiteAllowChange(params: Record<string, any>) {
+    return request.put(`site/allow_change`,params, { showSuccessMessage: true })
+}
 
 /***************************************************** 站点分组管理 ****************************************************/
 
@@ -86,7 +108,7 @@ export function getSiteGroupList(params: Record<string, any>) {
  * @param groupId
  */
 export function getSiteGroupInfo(groupId: number) {
-    return request.get(`site/group/${groupId}`);
+    return request.get(`site/group/${ groupId }`);
 }
 
 /**
@@ -103,7 +125,7 @@ export function addSiteGroup(params: Record<string, any>) {
  * @param params
  */
 export function editSiteGroup(params: Record<string, any>) {
-    return request.put(`site/group/${params.group_id}`, params, { showSuccessMessage: true })
+    return request.put(`site/group/${ params.group_id }`, params, { showSuccessMessage: true })
 }
 
 /**
@@ -111,7 +133,7 @@ export function editSiteGroup(params: Record<string, any>) {
  * @param group_id
  */
 export function deleteSiteGroup(group_id: number) {
-    return request.delete(`site/group/${group_id}`, { showSuccessMessage: true });
+    return request.delete(`site/group/${ group_id }`, { showSuccessMessage: true });
 }
 
 /**
@@ -147,7 +169,7 @@ export function getUserList(params: Record<string, any>) {
  * @param uid
  */
 export function getUserInfo(uid: number) {
-    return request.get(`site/user/${uid}`);
+    return request.get(`site/user/${ uid }`);
 }
 
 /**
@@ -164,9 +186,8 @@ export function addUser(params: Record<string, any>) {
  * @param params
  */
 export function editUser(params: Record<string, any>) {
-    return request.put(`site/user/${params.uid}`, params, { showSuccessMessage: true })
+    return request.put(`site/user/${ params.uid }`, params, { showSuccessMessage: true })
 }
-
 
 /**
  * 锁定用户
@@ -174,9 +195,8 @@ export function editUser(params: Record<string, any>) {
  * @returns
  */
 export function lockUser(uid: number) {
-    return request.put(`site/user/lock/${uid}`)
+    return request.put(`site/user/lock/${ uid }`)
 }
-
 
 /**
  * 解锁用户
@@ -184,9 +204,17 @@ export function lockUser(uid: number) {
  * @returns
  */
 export function unlockUser(uid: number) {
-    return request.put(`site/user/unlock/${uid}`)
+    return request.put(`site/user/unlock/${ uid }`)
 }
 
+/**
+ * 删除用户
+ *
+ * @param uid
+ */
+export function deleteUser(uid: number) {
+    return request.delete(`site/user/${ uid }`)
+}
 
 /***************************************************** 操作日志 **************************************************/
 
@@ -204,7 +232,15 @@ export function getLogList(params: Record<string, any>) {
  * @param id
  */
 export function getLogInfo(id: number) {
-    return request.get(`site/log/${id}`)
+    return request.get(`site/log/${ id }`)
+}
+
+/**
+ * 清空操作日志列表
+ * @returns
+ */
+export function logDestroy() {
+    return request.delete(`site/log/destroy`)
 }
 
 /***************************************************** 账单列表 **************************************************/
@@ -223,7 +259,7 @@ export function getAccountList(params: Record<string, any>) {
  * @param id
  */
 export function getAccountInfo(id: number) {
-    return request.get(`site/account/${id}`)
+    return request.get(`site/account/${ id }`)
 }
 
 /**
@@ -256,4 +292,12 @@ export function getSiteAddons() {
  */
 export function getShowApp() {
     return request.get('site/showApp')
+}
+
+/**
+ * 获取营销列表
+ * @returns
+ */
+export function getShowMarketing() {
+    return request.get('site/showMarketing')
 }

@@ -1,6 +1,7 @@
 package com.niu.shop.service.admin.delivery.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,14 +14,15 @@ import com.niu.shop.mapper.delivery.ShopStoreMapper;
 import com.niu.shop.service.admin.delivery.param.ShopStoreParam;
 import com.niu.shop.service.admin.delivery.param.ShopStoreSearchParam;
 import com.niu.shop.service.admin.delivery.IShopStoreService;
+import com.niu.shop.service.admin.delivery.param.TradeTimeItemParam;
 import com.niu.shop.service.admin.delivery.vo.ShopStoreInfoVo;
 import com.niu.shop.service.admin.delivery.vo.ShopStoreListVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import jakarta.annotation.Resource;
-import java.util.LinkedList;
-import java.util.List;
+
+import java.util.*;
 
 
 /**
@@ -34,6 +36,99 @@ public class ShopStoreServiceImpl implements IShopStoreService {
 
     @Resource
     ISysAreaService areaService;
+
+    /**
+     * 获取展示用信息
+     */
+    @Override
+    public HashMap initInfo(){
+        HashMap hashMap = new HashMap();
+        //获取时段列表
+        hashMap.put("time_interval_list",getTimeIntervalList());
+        //获取周列表
+        hashMap.put("week_list",getWeekList());
+        return hashMap;
+    }
+
+    // 内部类
+    public class IntervalOption {
+        private int type;
+        private String name;
+
+        public IntervalOption(int type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        // getter方法
+        public int getType() {
+            return type;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    // 获取时间间隔列表
+    public Map<Integer, IntervalOption> getTimeIntervalList() {
+        Map<Integer, IntervalOption> list = new HashMap<>();
+
+        list.put(30, new IntervalOption(
+                30,
+                "30分钟"
+        ));
+
+        list.put(60, new IntervalOption(
+                60,
+                "1小时"
+        ));
+
+        list.put(90, new IntervalOption(
+                90,
+                "90分钟"
+        ));
+
+        list.put(120, new IntervalOption(
+                120,
+                "2小时"
+        ));
+
+        return list;
+    }
+
+    public Map<Integer, IntervalOption> getWeekList(){
+        Map<Integer, IntervalOption> list = new HashMap<>();
+        list.put(0,new IntervalOption(
+                0,
+                "周日"
+        ));
+        list.put(1,new IntervalOption(
+                1,
+                "周一"
+        ));
+        list.put(2,new IntervalOption(
+                2,
+                "周二"
+        ));
+        list.put(3,new IntervalOption(
+                3,
+                "周三"
+        ));
+        list.put(4,new IntervalOption(
+                4,
+                "周四"
+        ));
+        list.put(5,new IntervalOption(
+                5,
+                "周五"
+        ));
+        list.put(6,new IntervalOption(
+                6,
+                "周六"
+        ));
+        return list;
+    }
 
     /**
      * 自提门店分页列表
@@ -102,7 +197,9 @@ public class ShopStoreServiceImpl implements IShopStoreService {
         vo.setProvinceName(areaService.getAreaName(model.getProvinceId()));
         vo.setCityName(areaService.getAreaName(model.getCityId()));
         vo.setDistrictName(areaService.getAreaName(model.getDistrictId()));
-
+        vo.setTimeWeek(JSONUtil.parseArray(model.getTimeWeek()).toList(String.class));
+        vo.setTradeTimeJson(JSONUtil.parseArray(model.getTradeTimeJson()).toList(TradeTimeItemParam.class));
+        vo.setTimeInterval(model.getTimeInterval());
         return vo;
     }
 
@@ -119,6 +216,9 @@ public class ShopStoreServiceImpl implements IShopStoreService {
         model.setCityId(areaService.getAreaId(addParam.getCityName(), 2));
         model.setDistrictId(areaService.getAreaId(addParam.getDistrictName(), 3));
         model.setCreateTime(System.currentTimeMillis() / 1000);
+        model.setTimeWeek(JSONUtil.toJsonStr(addParam.getTimeWeek()));
+        model.setTimeInterval(addParam.getTimeInterval());
+        model.setTradeTimeJson(JSONUtil.toJsonStr(addParam.getTradeTimeJson()));
         shopStoreMapper.insert(model);
     }
 
@@ -141,6 +241,9 @@ public class ShopStoreServiceImpl implements IShopStoreService {
         model.setCityId(areaService.getAreaId(editParam.getCityName(), 2));
         model.setDistrictId(areaService.getAreaId(editParam.getDistrictName(), 3));
         model.setUpdateTime(System.currentTimeMillis() / 1000);
+        model.setTimeWeek(JSONUtil.toJsonStr(editParam.getTimeWeek()));
+        model.setTimeInterval(editParam.getTimeInterval());
+        model.setTradeTimeJson(JSONUtil.toJsonStr(editParam.getTradeTimeJson()));
         shopStoreMapper.updateById(model);
     }
 

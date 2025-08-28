@@ -40,7 +40,7 @@ const userStore = defineStore('user', {
         },
         login(form: object, app_type: any) {
             return new Promise((resolve, reject) => {
-                login(form, app_type).then(async(res) => {
+                login(form, app_type).then(async (res) => {
                     if (app_type == 'admin' && Test.empty(res.data.userrole)) {
                         storage.setPrefix('site')
                     }
@@ -59,20 +59,30 @@ const userStore = defineStore('user', {
                 })
             })
         },
+        clearRouters() {
+            this.routers = []
+        },
         logout() {
             if (!this.token) return
             this.token = ''
             this.userInfo = {}
             this.siteInfo = {}
             removeToken()
-            storage.remove(['userinfo', 'siteInfo'])
+            window.localStorage.removeItem('admin.token')
+            window.localStorage.removeItem('admin.userinfo')
+            window.localStorage.removeItem('admin.siteInfo')
+            window.localStorage.removeItem('site.token')
+            window.localStorage.removeItem('site.userinfo')
+            window.localStorage.removeItem('site.siteInfo')
+            storage.remove(['userinfo', 'siteInfo', 'darksideMarketingKeys', 'defaultMarketingKeys'])
             this.routers = []
             this.rules = []
             logout()
             // 清除tabbar
             useTabbarStore().clearTab()
             const login = getAppType() == 'admin' ? '/admin/login' : '/site/login'
-            router.push(login)
+            // router.push(login)
+            location.href = `${location.origin}${login}`
         },
         getAuthMenusFn() {
             return new Promise((resolve, reject) => {

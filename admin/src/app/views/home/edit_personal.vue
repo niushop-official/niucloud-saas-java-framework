@@ -1,5 +1,5 @@
 <template>
-    <div class="main-container w-full pt-[64px] " v-loading="loading">
+    <div class="main-container w-full pt-[64px]" v-loading="loading">
         <div class="flex justify-between items-center h-[32px] mb-4">
             <span class="text-page-title">{{ t('editPersonal') }}</span>
         </div>
@@ -12,7 +12,7 @@
                     <span>{{ saveInfo.username }}</span>
                 </el-form-item>
                 <el-form-item :label="t('realName')">
-                    <el-input v-model="saveInfo.real_name" :placeholder="t('realNamePlaceholder')" clearable class="input-width" />
+                    <el-input v-model.trim="saveInfo.real_name" :placeholder="t('realNamePlaceholder')" clearable class="input-width" />
                 </el-form-item>
             </el-form>
             <div class="flex justify-center mt-[50px]">
@@ -105,4 +105,5 @@ const returnFn = () => {
             margin-right: auto;
         }
     }
-}</style>
+}
+</style>

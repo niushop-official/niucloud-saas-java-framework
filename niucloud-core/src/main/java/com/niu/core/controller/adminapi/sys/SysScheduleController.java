@@ -5,15 +5,16 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.sys.ISysScheduleService;
-import com.niu.core.service.admin.sys.param.SysScheduleParam;
-import com.niu.core.service.admin.sys.param.SysScheduleSearchParam;
-import com.niu.core.service.admin.sys.param.SysScheduleStatusParam;
+import com.niu.core.service.admin.sys.param.*;
 import com.niu.core.service.admin.sys.vo.SysScheduleInfoVo;
 import com.niu.core.service.admin.sys.vo.SysScheduleListVo;
+import com.niu.core.service.admin.sys.vo.SysScheduleLogListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+
+import java.util.List;
 
 /**
  * 系统任务控制器
@@ -129,4 +130,48 @@ public class SysScheduleController {
         return Result.success(sysScheduleService.dateType());
     }
 
+    /**
+     * 重置定时任务
+     */
+    @PostMapping("/reset")
+    public Result reset() {
+        sysScheduleService.resetSchedule();
+        return Result.success();
+    }
+
+    /**
+     * 计划任务执行记录分页列表
+     */
+    @GetMapping("/log/list")
+    public Result logList(@Validated PageParam pageParam, @Validated SysScheduleLogSearchParam searchParam) {
+        PageResult<SysScheduleLogListVo> pageResult = sysScheduleService.logList(pageParam, searchParam);
+        return Result.success(pageResult);
+    }
+
+    /**
+     * 执行一次任务
+     */
+    @PutMapping("/do/{id}")
+    public Result doSchedule(@PathVariable("id") Integer id) {
+        sysScheduleService.doSchedule(id);
+        return Result.success();
+    }
+
+    /**
+     * 删除日志
+     */
+    @PutMapping("/log/delete")
+    public Result delLog(@RequestBody SysScheduleLogDelParam param) {
+        sysScheduleService.delLog(param.getIds());
+        return Result.success();
+    }
+
+    /**
+     * 清空计划任务执行记录
+     */
+    @PutMapping("/log/clear")
+    public Result clearLog(@RequestBody SysScheduleLogDelParam param) {
+        sysScheduleService.clearLog(param.getScheduleId());
+        return Result.success();
+    }
 }

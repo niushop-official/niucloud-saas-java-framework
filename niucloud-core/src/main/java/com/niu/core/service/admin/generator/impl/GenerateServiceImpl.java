@@ -2,17 +2,17 @@ package com.niu.core.service.admin.generator.impl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
+import com.github.yulichang.base.MPJBaseMapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.config.GlobalConfig;
@@ -20,14 +20,9 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
-import com.niu.core.common.loader.pay.BasePay;
-import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.entity.generator.GenerateColumn;
 import com.niu.core.entity.generator.GenerateTable;
-import com.niu.core.entity.site.Site;
-import com.niu.core.entity.site.SiteGroup;
-import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.generator.SqlColumnEnum;
 import com.niu.core.mapper.generator.GenerateColumnMapper;
 import com.niu.core.mapper.generator.GenerateTableMapper;
@@ -38,33 +33,34 @@ import com.niu.core.service.admin.generator.param.GenerateEditParam;
 import com.niu.core.service.admin.generator.param.GenerateParam;
 import com.niu.core.service.admin.generator.param.GenerateSearchParam;
 import com.niu.core.service.admin.generator.vo.*;
-import com.niu.core.service.admin.site.vo.SiteAdminVo;
-import com.niu.core.service.admin.site.vo.SiteListVo;
 import com.niu.core.service.core.app.tools.SQLScriptRunnerTools;
 import com.niu.core.service.core.generator.CoreGenerateService;
-import com.niu.core.service.core.generator.vo.CoreGenerateColumnVo;
 import com.niu.core.service.core.generator.vo.CoreGenerateTemplateVo;
 import com.niu.core.service.core.generator.vo.MapperInfoVo;
-import com.qiniu.storage.ApiUploadV2AbortUpload;
-import org.apache.commons.io.IOUtils;
+import jakarta.annotation.Resource;
+import lombok.extern.log4j.Log4j2;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.Resource;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
+@Log4j2
 @Service
 public class GenerateServiceImpl implements IGenerateService {
 
@@ -495,5 +491,55 @@ public class GenerateServiceImpl implements IGenerateService {
             tableColumn.put((String) column.get("COLUMN_NAME"), item);
         }
         return tableColumn;
+    }
+
+    /**
+     * 扫描指定包下的 Mapper 接口
+     * @param addon 插件名称，如果是系统模块则为 "system"
+     * @return Mapper 接口 Class 对象列表
+     */
+    public List<Class<? extends BaseMapper<?>>> getMappers(String addon) {
+        List<Class<? extends BaseMapper<?>>> mapperClasses = new ArrayList<>();
+
+        try {
+            String basePackage = "system".equals(addon)
+                    ? "com.niu.core.mapper"
+                    : "com.niu." + addon + ".mapper";
+
+            PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
+            MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourceResolver);
+
+            String packageSearchPath = "classpath*:" +
+                    basePackage.replace('.', '/') +
+                    "/**/*.class";
+
+            org.springframework.core.io.Resource[] resources = resourceResolver.getResources(packageSearchPath);
+
+            for (org.springframework.core.io.Resource resource : resources) {
+                if (resource.isReadable()) {
+                    MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
+
+                    // 检查是否是接口且有 @Mapper 注解
+                    if (metadataReader.getClassMetadata().isInterface() &&
+                            metadataReader.getAnnotationMetadata().hasAnnotation(Mapper.class.getName())) {
+
+                        String className = metadataReader.getClassMetadata().getClassName();
+                        Class<?> clazz = Class.forName(className);
+
+                        // 检查是否继承自 BaseMapper 或 MPJBaseMapper
+                        if (BaseMapper.class.isAssignableFrom(clazz) ||
+                                MPJBaseMapper.class.isAssignableFrom(clazz)) {
+
+                            // 安全的类型转换
+                            mapperClasses.add((Class<? extends BaseMapper<?>>) clazz);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("扫描 Mapper 接口失败", e);
+        }
+
+        return mapperClasses;
     }
 }

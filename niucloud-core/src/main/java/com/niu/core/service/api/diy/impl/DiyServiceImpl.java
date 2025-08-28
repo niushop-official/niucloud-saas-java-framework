@@ -91,6 +91,8 @@ public class DiyServiceImpl implements IDiyService {
             } else if (!name.isEmpty()) {
                 queryWrapper.eq("name", name);
                 queryWrapper.eq("is_default", 1);
+                queryWrapper.orderByDesc("create_time");
+                queryWrapper.last("limit 1");
                 info = diyPageMapper.selectOne(queryWrapper);
             }
 
@@ -100,8 +102,15 @@ public class DiyServiceImpl implements IDiyService {
                 if (!name.isEmpty()) {
                     JSONObject pageData = getFirstPageData(name, "");
                     if (pageData != null) {
-                        info = JSONUtil.toBean(pageData, DiyPage.class);
+                        info = new DiyPage();
                         info.setId(param.siteId());
+                        info.setTitle(pageData.getStr("title"));
+                        info.setName(pageData.getStr("type"));
+                        info.setType(pageData.getStr("type"));
+                        info.setTemplate(pageData.getStr("template"));
+                        info.setMode(pageData.getStr("mode"));
+                        info.setValue(pageData.getJSONObject("data").toString());
+                        info.setIsDefault(1);
                     }
                 }
             }
@@ -126,9 +135,10 @@ public class DiyServiceImpl implements IDiyService {
         JSONObject pages = PagesEnum.getPagesByAddon(type, addon);
         if (pages == null || pages.keySet().size() == 0) return null;
 
-        JSONObject data = new JSONObject();
+        String template = pages.keySet().iterator().next();
+        JSONObject data = pages.getJSONObject(template);
         data.set("type", type);
-        data.set("template", pages.getJSONObject(pages.keySet().iterator().next()));
+        data.set("template", template);
 
         return data;
     }

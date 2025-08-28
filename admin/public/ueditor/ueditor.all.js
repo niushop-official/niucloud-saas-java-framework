@@ -30460,7 +30460,7 @@ UE.plugin.register("simpleupload", function () {
                     if ('SUCCESS' === res.data.state && res.data.url) {
                         const loader = me.document.getElementById(loadingId);
                         domUtils.removeClasses(loader, "uep-loading");
-                        const link = me.options.imageUrlPrefix + res.data.url;
+                        const link = (res.data.url.indexOf('http://') == -1 && res.data.url.indexOf('https://') == -1) ? me.options.imageUrlPrefix + res.data.url : res.data.url;
                         loader.setAttribute("src", link);
                         loader.setAttribute("_src", link);
                         loader.setAttribute("alt", res.data.original || "");

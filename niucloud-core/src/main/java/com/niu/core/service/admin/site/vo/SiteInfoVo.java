@@ -52,7 +52,8 @@ public class SiteInfoVo implements Serializable {
     private String initalledAddon;  // 站点已执行初始化方法的插件
     private String siteDomain;  // 站点域名
     private String statusName;
-
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long createTime;
     public String getStatusName() {
         return SiteStatusEnum.getNameByCode(this.status);
     }

@@ -38,7 +38,7 @@ function addOkListener() {
             for (var j = 0, url; url = imageUrls[j++];) {
                 // console.log('url',src, url);
                 if (src.indexOf(url.name.replace(" ", "")) != -1) {
-                    img.src = urlPrefix + url.url;
+                    img.src = (url.url.indexOf('http://') == -1 && url.url.indexOf('https://') == -1) ? urlPrefix + url.url : url.url;
                     img.setAttribute("_src", urlPrefix + url.url);  //同时修改"_src"属性
                     img.setAttribute("title", url.title);
                     domUtils.removeAttributes(img, ["data-word-image", "style", "width", "height"]);

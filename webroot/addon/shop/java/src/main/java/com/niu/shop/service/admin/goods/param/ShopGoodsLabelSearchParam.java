@@ -12,4 +12,6 @@ public class ShopGoodsLabelSearchParam implements Serializable {
 
     private String labelName;
 
+    private Integer groupId;
+
 }

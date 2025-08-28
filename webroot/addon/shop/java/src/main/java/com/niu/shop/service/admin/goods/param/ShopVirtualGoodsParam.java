@@ -56,10 +56,10 @@ public class ShopVirtualGoodsParam implements Serializable {
 
     private Integer sort = 0;
 
-    private Integer attrId = 0;
+    private JSONArray attrIds = new JSONArray();
 
     @NotNull(message = "attr_format参数缺失")
-    private String attrFormat;
+    private JSONArray attrFormat = new JSONArray();
 
     private Integer isGift = 0;
 
@@ -110,6 +110,8 @@ public class ShopVirtualGoodsParam implements Serializable {
     private Integer posterId = 0;
 
     private Integer formId = 0;
+
+    private Integer diyDetailId = 0;
 
     @Data
     public static class SkuData {

@@ -9,18 +9,19 @@ import com.niu.core.service.admin.member.IMemberConfigService;
 import com.niu.core.service.admin.member.IMemberSignService;
 import com.niu.core.service.admin.member.param.*;
 import com.niu.core.service.admin.member.vo.*;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 
 /**
- * 会员签到控制器
+ * 会员配置控制器
  */
-
 @RestController
 @RequestMapping("adminapi/member/config")
 @SaCheckLogin
+@Description("会员设置")
 public class MemberConfigController {
 
     @Resource
@@ -30,6 +31,7 @@ public class MemberConfigController {
      *获取注册与登录设置
      * @return
      */
+    @Description("获取注册与登录设置")
     @GetMapping("/login")
     public Result<LoginConfigVo> getLoginConfig() {
         LoginConfigVo config = memberConfigService.getLoginConfig();
@@ -42,6 +44,7 @@ public class MemberConfigController {
      * @return
      */
     @PostMapping("/login")
+    @Description("设置注册与登录设置")
     public Result setLoginConfig(@Validated @RequestBody LoginConfigParam configParam) {
         memberConfigService.setLoginConfig(configParam);
         return Result.success();
@@ -52,6 +55,7 @@ public class MemberConfigController {
      * @return
      */
     @GetMapping("/cash_out")
+    @Description("获取会员提现设置")
     public Result<CashOutConfigVo> getCashOutConfig() {
         CashOutConfigVo config = memberConfigService.getCashOutConfig();
         return Result.success(config);
@@ -63,6 +67,7 @@ public class MemberConfigController {
      * @return
      */
     @PostMapping("/cash_out")
+    @Description("设置会员提现设置")
     public Result setCashOutConfig(@Validated @RequestBody CashOutConfigParam configParam) {
         memberConfigService.setCashOutConfig(configParam);
         return Result.success();
@@ -73,6 +78,7 @@ public class MemberConfigController {
      * @return
      */
     @GetMapping("/member")
+    @Description("获取会员配置")
     public Result<MemberConfigVo> getMemberConfig() {
         MemberConfigVo config = memberConfigService.getMemberConfig();
         return Result.success(config);
@@ -84,6 +90,7 @@ public class MemberConfigController {
      * @return
      */
     @PostMapping("/member")
+    @Description("设置会员配置")
     public Result setMemberConfig(@Validated @RequestBody MemberConfigParam configParam) {
         memberConfigService.setMemberConfig(configParam);
         return Result.success();
@@ -93,6 +100,7 @@ public class MemberConfigController {
      * 设置成长值规则
      */
     @GetMapping("/growth_rule")
+    @Description("获取成长值规则")
     public Result<JSONObject> getGrowthRuleConfig() {
         JSONObject config = memberConfigService.getGrowthRuleConfig();
         return Result.success(config);
@@ -102,6 +110,7 @@ public class MemberConfigController {
      * 设置成长值规则
      */
     @PostMapping("/growth_rule")
+    @Description("设置成长值规则")
     public Result setGrowthRuleConfig(@Validated @RequestBody JSONObject configParam) {
         memberConfigService.setGrowthRuleConfig(configParam);
         return Result.success();
@@ -111,6 +120,7 @@ public class MemberConfigController {
      * 设置成长值规则
      */
     @GetMapping("/point_rule")
+    @Description("获取积分规则")
     public Result<JSONObject> getPointRuleConfig() {
         JSONObject config = memberConfigService.getPointRuleConfig();
         return Result.success(config);
@@ -120,6 +130,7 @@ public class MemberConfigController {
      * 设置积分规则
      */
     @PostMapping("/point_rule")
+    @Description("设置积分规则")
     public Result setPointRuleConfig(@Validated @RequestBody JSONObject configParam) {
         memberConfigService.setPointRuleConfig(configParam);
         return Result.success();

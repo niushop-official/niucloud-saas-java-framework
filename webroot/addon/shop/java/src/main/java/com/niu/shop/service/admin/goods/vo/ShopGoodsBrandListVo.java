@@ -1,5 +1,8 @@
 package com.niu.shop.service.admin.goods.vo;
 
+import cn.hutool.json.JSONObject;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,6 +21,8 @@ public class ShopGoodsBrandListVo implements Serializable {
     private String logo;  // 品牌logo
     private String desc;  // 品牌介绍
     private Integer sort;  // 排序
+    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+    private String colorJson; // 品牌颜色
     private String createTime; // 创建时间
     private String updateTime; // 更新时间
 

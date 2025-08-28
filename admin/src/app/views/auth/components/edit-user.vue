@@ -15,7 +15,7 @@
             </el-form-item> -->
 
             <el-form-item :label="t('accountNumber')" prop="username" >
-                <el-input v-model.trim="formData.username" :placeholder="t('accountNumberPlaceholder')" clearable :disabled="formData.uid" class="input-width" maxlength="10" show-word-limit />
+                <el-input v-model.trim="formData.username" :placeholder="t('accountNumberPlaceholder')" clearable :disabled="formData.uid" class="input-width" maxlength="20" show-word-limit />
             </el-form-item>
 
             <div v-if="needAddUserInfo">
@@ -39,7 +39,7 @@
 
             <el-form-item :label="t('userRoleName')" prop="role_ids" v-if="!formData.userrole.is_admin">
                 <el-select v-model="formData.role_ids" :placeholder="t('userRolePlaceholder')" class="input-width" multiple collapse-tags collapse-tags-tooltip>
-                    <el-option :label="item.role_name" :value="item.role_id" v-for="(item, index) in roles" :key="index" />
+                    <el-option :label="item.role_name" :value="item.role_id" v-for="(item, index) in roles" :key="index" :disabled="item.disabled" />
                 </el-select>
             </el-form-item>
 

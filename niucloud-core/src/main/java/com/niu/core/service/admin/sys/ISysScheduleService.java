@@ -2,12 +2,16 @@ package com.niu.core.service.admin.sys;
 
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.domain.Result;
 import com.niu.core.entity.sys.SysSchedule;
+import com.niu.core.entity.sys.SysScheduleLog;
+import com.niu.core.service.admin.sys.param.SysScheduleLogSearchParam;
 import com.niu.core.service.admin.sys.param.SysScheduleParam;
 import com.niu.core.service.admin.sys.param.SysScheduleSearchParam;
 import com.niu.core.service.admin.sys.param.SysScheduleStatusParam;
 import com.niu.core.service.admin.sys.vo.SysScheduleInfoVo;
 import com.niu.core.service.admin.sys.vo.SysScheduleListVo;
+import com.niu.core.service.admin.sys.vo.SysScheduleLogListVo;
 import com.niu.core.service.admin.sys.vo.SysScheduleTemplateVo;
 
 import java.util.List;
@@ -90,4 +94,46 @@ public interface ISysScheduleService {
      */
     Map<String, String> dateType();
 
+    /*
+    * 清理计划任务日志
+     */
+    void deleteScheduleLog(long successThreshold, String status);
+
+    /**
+     * 重置计划任务
+     * @return
+     */
+    void resetSchedule();
+
+    /**
+     * 计划任务执行记录分页列表
+     * @param pageParam
+     * @param searchParam
+     * @return
+     */
+    PageResult<SysScheduleLogListVo> logList(PageParam pageParam, SysScheduleLogSearchParam searchParam);
+
+    /**
+     * 新增日志
+     * @param log
+     */
+    void addLog(SysScheduleLog log);
+
+    /**
+     * 执行一次任务
+     * @param id
+     */
+    void doSchedule(Integer id);
+
+    /**
+     * 删除日志
+     * @param ids
+     */
+    void delLog(Integer[] ids);
+
+    /**
+     * 清空计划任务执行记录
+     * @param scheduleId
+     */
+    void clearLog(Integer scheduleId);
 }

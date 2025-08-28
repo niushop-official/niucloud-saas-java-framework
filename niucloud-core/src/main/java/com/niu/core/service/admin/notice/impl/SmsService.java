@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.enums.sys.SmsTypeEnum;
 import com.niu.core.service.admin.notice.ISmsService;
 import com.niu.core.service.admin.notice.param.SmsTypeParam;
@@ -59,7 +60,12 @@ public class SmsService implements ISmsService {
                    JSONObject smsTypeParam = (JSONObject) smsTypeConfig.get(entry.getKey());
 
                    if(!ObjectUtil.isEmpty(smsTypeParam)){
-                       paramVo.setValue(smsTypeParam.getStr(paramEntry.getKey()));
+                       if ("secret_key".equals(paramEntry.getKey()) && ObjectUtil.isNotEmpty(paramEntry.getValue())){
+                           String secretValue = smsTypeParam.getStr("secret_key");
+                           paramVo.setValue(StringUtils.hide(secretValue, 0, secretValue.length()));
+                       }else {
+                           paramVo.setValue(smsTypeParam.getStr(paramEntry.getKey()));
+                       }
                    }else{
                         paramVo.setValue("");
                    }

@@ -1,5 +1,6 @@
 package com.niu.core.common.domain;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.pagehelper.PageInfo;
@@ -34,8 +35,8 @@ public class PageResult<E> {
     }
 
     /**
-     * @param page
-     * @param limit
+     * @param page 页码
+     * @param limit 数量
      */
     public PageResult(long page, long limit) {
         this.currentPage = page;
@@ -43,9 +44,9 @@ public class PageResult<E> {
     }
 
     /**
-     * @param page
-     * @param limit
-     * @param total
+     * @param page 页码
+     * @param limit 数量
+     * @param total 总数
      */
     public PageResult(long page, long limit, long total) {
         this.currentPage = page;
@@ -54,10 +55,10 @@ public class PageResult<E> {
     }
 
     /**
-     * @param page
-     * @param limit
-     * @param total
-     * @param list
+     * @param page 页码
+     * @param limit 数量
+     * @param total 总数
+     * @param list 数据
      */
     public PageResult(long page, long limit, long total, List<E> list) {
         this.currentPage = page;
@@ -67,30 +68,27 @@ public class PageResult<E> {
     }
 
     /**
-     * @param page
-     * @param limit
-     * @return
+     * @param page 页码
+     * @param limit 数量
      */
     public static <E> PageResult<E> build(long page, long limit) {
         return new PageResult<>(page, limit);
     }
 
     /**
-     * @param page
-     * @param limit
-     * @param total
-     * @return
+     * @param page 页码
+     * @param limit 数量
+     * @param total 总数
      */
-    public static PageResult build(long page, long limit, long total) {
+    public static  PageResult  build(long page, long limit, long total) {
         return new PageResult(page, limit, total);
     }
 
     /**
-     * @param page
-     * @param limit
-     * @param total
-     * @param list
-     * @return
+     * @param page 页码
+     * @param limit 数量
+     * @param total 总数
+     * @param list 数据
      */
     public static <T> PageResult<T> build(long page, long limit, long total, List<T> list) {
         return new PageResult<>(page, limit, total, list);
@@ -100,11 +98,9 @@ public class PageResult<E> {
     /**
      * 将Mybatis-plus分页插件（com.baomidou.mybatisplus.extension.plugins.pagination.Page）转换
      *
-     * @param page
-     * @param limit
-     * @param pageObj
-     * @param <E>
-     * @return
+     * @param page 页码
+     * @param limit 数量
+     * @param pageObj 总数
      */
     public static <E> PageResult<E> build(long page, long limit, Page<E> pageObj) {
         PageResult<E> pageList = PageResult.build(page, limit);
@@ -116,11 +112,9 @@ public class PageResult<E> {
     /**
      * 将Mybatis分页插件（com.github.pagehelper）转换
      *
-     * @param page
-     * @param limit
-     * @param pageInfo
-     * @param <E>
-     * @return
+     * @param page 页码
+     * @param limit 数量
+     * @param pageInfo 分页类
      */
     public static <E> PageResult<E> build(int page, int limit, PageInfo<E> pageInfo) {
         PageResult<E> pageList = PageResult.build(page, limit);
@@ -134,13 +128,11 @@ public class PageResult<E> {
     /**
      * Mybatis-plus分页插件（com.baomidou.mybatisplus.extension.plugins.pagination.Page）转换
      *
-     * @param page
-     * @param <E>
-     * @return
+     * @param page 分页类
      */
     public static <E> PageResult<E> build(Page<E> page) {
         PageResult<E> pageList = PageResult.build(page.getCurrent(), page.getSize());
-        if (page != null) {
+        if (ObjectUtil.isNotEmpty(page)) {
             pageList = PageResult.build(page.getCurrent(), page.getSize());
             pageList.setTotal(page.getTotal());
             pageList.setData(page.getRecords());
@@ -151,9 +143,7 @@ public class PageResult<E> {
     /**
      * Mybatis-plus分页插件（com.baomidou.mybatisplus.core.metadata.IPage）转换
      *
-     * @param page
-     * @param <E>
-     * @return
+     * @param page 分页类
      */
     public static <E> PageResult<E> build(IPage<E> page) {
         PageResult<E> pageList = null;
@@ -178,13 +168,11 @@ public class PageResult<E> {
     /**
      * PageHelper分页转换
      *
-     * @param pageInfo
-     * @param <E>
-     * @return
+     * @param pageInfo 分页类
      */
     public static <E> PageResult<E> build(PageInfo<E> pageInfo) {
         PageResult<E> pageList = PageResult.build(pageInfo.getPageNum(), pageInfo.getPageSize());
-        if (pageInfo != null) {
+        if (ObjectUtil.isNotEmpty(pageInfo)) {
             pageList.setTotal(pageInfo.getTotal());
             pageList.setData(pageInfo.getList());
         }

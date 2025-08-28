@@ -28,4 +28,6 @@ public class SysWebsiteVo {
     private String frontEndLogo = "";  // 前台logo
     private String frontEndIcon = "";  // 前台icon
     private String icon = "";  // 网站图标
+    private String siteLoginLogo = "";
+    private String siteLoginBgImg = "";
 }

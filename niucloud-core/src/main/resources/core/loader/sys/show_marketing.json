@@ -1,0 +1,15 @@
+{
+  "app": [
+  ],
+  "tool": [
+  ],
+  "marketing": [
+    {
+      "title": "会员签到",
+      "desc": "客户每日签到发放奖励",
+      "icon": "static/resource/images/marketing/sign.png",
+      "key": "sign",
+      "url": "/marketing/sign/config"
+    }
+  ]
+}

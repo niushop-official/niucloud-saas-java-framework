@@ -3,6 +3,7 @@ package com.niu.core.controller.adminapi.pay;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.enums.pay.RefundStatusEnum;
 import com.niu.core.enums.pay.RefundTypeEnum;
 import com.niu.core.service.admin.pay.IPayRefundService;
 import com.niu.core.service.admin.pay.param.PayRefundSearchParam;
@@ -71,5 +72,16 @@ public class PayRefundController {
     public Result transfer(@Validated @RequestBody PayRefundTransferParam param) {
         payRefundService.transfer(param);
         return Result.success();
+    }
+
+    /**
+     * 退款记录详情
+     *
+     * @param
+     * @return Result<PayRefundInfoVo>
+     */
+    @GetMapping("/status")
+    public Result<?> getStatus() {
+        return Result.success(RefundStatusEnum.getMap());
     }
 }

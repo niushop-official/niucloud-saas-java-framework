@@ -4,6 +4,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.shop.service.admin.marketing.param.ShopCouponDelParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponReceiveParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponSearchParam;
@@ -101,5 +102,6 @@ public interface ICouponService {
      */
     String getQrcode(Integer couponId);
 
+    void invalidCoupon(ShopCouponDelParam shopCouponDelParam);
 
 }

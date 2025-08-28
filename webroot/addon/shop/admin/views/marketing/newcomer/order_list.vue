@@ -50,13 +50,13 @@
                 <el-tab-pane :label="t('closed')" name="-1"></el-tab-pane>
             </el-tabs>
             <div>
-				<el-table :data="orderTable.data" size="large" class="table-top">
-					<el-table-column :label="t('orderGoods')" min-width="200" />
-					<el-table-column :label="t('goodsPriceNumber')" min-width="150" />
-					<el-table-column :label="t('orderMoney')" min-width="150" />
-					<el-table-column :label="t('orderStatus')" min-width="100" />
-					<el-table-column :label="t('operation')" fixed="right" align="right" min-width="100" />
-				</el-table>
+                <el-table :data="orderTable.data" size="large" class="table-top">
+                    <el-table-column :label="t('orderGoods')" min-width="200" />
+                    <el-table-column :label="t('goodsPriceNumber')" min-width="150" />
+                    <el-table-column :label="t('orderMoney')" min-width="150" />
+                    <el-table-column :label="t('orderStatus')" min-width="100" />
+                    <el-table-column :label="t('operation')" fixed="right" align="right" min-width="100" />
+                </el-table>
             </div>
             <div class="table-body min-h-[150px]" v-loading="orderTable.loading">
                 <div v-if="!orderTable.loading">
@@ -82,7 +82,7 @@
                                 </el-table-column> -->
                                 <el-table-column min-width="200">
                                     <template #default="{ row }">
-                                        <div class="flex cursor-pointer">
+                                        <div class="flex cursor-pointer"  @click="detailEvent(row)">
                                             <div class="flex items-center min-w-[50px] mr-[10px]">
                                                 <img class="w-[50px] h-[50px]" v-if="row.goods_image_thumb_small" :src="img(row.goods_image_thumb_small)" alt="">
                                                 <img class="w-[50px] h-[50px]" v-else src="@/addon/shop/assets/goods_default.png" alt="">
@@ -151,7 +151,7 @@
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
 import { getOrderList, getOrderStatus, getOrderPayType, getOrderFrom } from '@/addon/shop/api/order'
-import { img,setTablePageStorage,getTablePageStorage } from '@/utils/common'
+import { img, setTablePageStorage, getTablePageStorage } from '@/utils/common'
 import { FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -193,7 +193,7 @@ const orderTable = reactive<OrderTable>({
         status: '',
         create_time: [],
         pay_time: [],
-        activity_type:'newcomer_discount'
+        activity_type: 'newcomer_discount'
     }
 })
 
@@ -219,12 +219,12 @@ const loadOrderList = (page: number = 1) => {
             return el
         })
         orderTable.total = res.data.total
-        setTablePageStorage(orderTable.page, orderTable.limit, orderTable.searchParam);
+        setTablePageStorage(orderTable.page, orderTable.limit, orderTable.searchParam)
     }).catch(() => {
         orderTable.loading = false
     })
 }
-loadOrderList(getTablePageStorage(orderTable.searchParam).page);
+loadOrderList(getTablePageStorage(orderTable.searchParam).page)
 // 合并表格行
 const arraySpanMethod = ({
     row,

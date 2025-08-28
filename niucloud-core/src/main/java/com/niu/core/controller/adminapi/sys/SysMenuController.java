@@ -121,4 +121,9 @@ public class SysMenuController {
         return Result.success(sysMenuService.getMenuByTypeDir(addon));
     }
 
+    @GetMapping("/menu/addon_menu/{app_key}")
+    public Result<?> getAddonMenu(@PathVariable("app_key") String appKey) {
+        return Result.success(sysMenuService.getAddonMenu(appKey, "all", 1, 0));
+    }
+
 }

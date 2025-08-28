@@ -4,7 +4,7 @@
     <el-form :model="buttonData" label-width="140px" ref="formRef" :rules="formRules" class="page-form mt-[30px]">
 
         <el-form-item :label="t('menuName')" prop="name">
-            <el-input v-model="buttonData.name" :placeholder="t('menuNamePlaceholder')" class="input-width" clearable />
+            <el-input v-model.trim="buttonData.name" :placeholder="t('menuNamePlaceholder')" class="input-width" clearable />
             <div class="form-tip">{{ buttonData.sub_button ? t('menuNameTips') : t('subMenuNameTips') }}</div>
         </el-form-item>
 
@@ -17,15 +17,15 @@
             </el-form-item>
 
             <el-form-item :label="t('webpageUrl')" prop="url">
-                <el-input v-model="buttonData.url" :placeholder="t('webpageUrlPlaceholder')" class="input-width" clearable />
+                <el-input v-model.trim="buttonData.url" :placeholder="t('webpageUrlPlaceholder')" class="input-width" clearable />
             </el-form-item>
 
             <el-form-item :label="t('weappAppid')" prop="appid" v-show="buttonData.type == 'miniprogram'">
-                <el-input v-model="buttonData.appid" :placeholder="t('weappAppidPlaceholder')" class="input-width" clearable />
+                <el-input v-model.trim="buttonData.appid" :placeholder="t('weappAppidPlaceholder')" class="input-width" clearable />
             </el-form-item>
 
             <el-form-item :label="t('weappPage')" prop="pagepath" v-show="buttonData.type == 'miniprogram'">
-                <el-input v-model="buttonData.pagepath" :placeholder="t('weappPagePlaceholder')" class="input-width" clearable />
+                <el-input v-model.trim="buttonData.pagepath" :placeholder="t('weappPagePlaceholder')" class="input-width" clearable />
             </el-form-item>
 
         </template>
@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
 import { t } from '@/lang'
-import { strByteLength } from '@/utils/common'
+import { strByteLength, isUrl } from '@/utils/common'
 
 const prop = defineProps({
     data: {
@@ -84,7 +84,20 @@ const formRules = computed(() => {
             }
         ],
         url: [
-            { required: !buttonData.value.sub_button || !buttonData.value.sub_button.length, message: t('webpageUrlPlaceholder'), trigger: 'blur' }
+            { required: !buttonData.value.sub_button || !buttonData.value.sub_button.length, message: t('webpageUrlPlaceholder'), trigger: 'blur' },
+            {
+                validator: (rule: any, value: string, callback: any) => {
+                    if (!buttonData.value.sub_button || !buttonData.value.sub_button.length) {
+                        if (!isUrl(value)) {
+                            callback(new Error(t('menuUrlErrorTips')))
+                        } else {
+                            callback()
+                        }
+                    } else {
+                        callback()
+                    }
+                }
+            }
         ],
         appid: [
             { required: ((!buttonData.value.sub_button || !buttonData.value.sub_button.length) && buttonData.value.type == 'miniprogram'), message: t('weappAppidPlaceholder'), trigger: 'blur' }

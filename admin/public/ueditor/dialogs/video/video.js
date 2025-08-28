@@ -328,7 +328,7 @@
         for (var key in uploadVideoList) {
             var file = uploadVideoList[key];
             videoObjs.push({
-                url: uploadDir + file.url,
+                url: (file.url.indexOf('http://') == -1 && file.url.indexOf('https://') == -1) ? uploadDir + file.url : file.url,
                 width: width,
                 height: height,
                 align: align

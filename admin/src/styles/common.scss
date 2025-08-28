@@ -15,6 +15,18 @@ html, body {
     outline: none;
 }
 
+// 字体设置
+// 海报价格字体
+@font-face {
+    font-family: 'poster_price_font';
+    src: url('./font/price.ttf') format('truetype');
+}
+// 海报价格字体
+@font-face {
+    font-family: 'poster_default_font';
+    src: url('./font/SourceHanSansCN-Regular.ttf') format('truetype');
+}
+
 // 以下最新，请勿改动 2024.5.25
 
 /** 数据展示面板 **/
@@ -78,7 +90,7 @@ html, body {
 
     .fixed-footer {
         position: absolute;
-        z-index: 1000;
+        z-index: 4;
         right: 15px;
         bottom: 0;
         left: 15px;
@@ -92,6 +104,16 @@ html, body {
         justify-content: center;
         transition:var(--el-transition-duration) width ease-in-out,var(--el-transition-duration) padding-left ease-in-out,var(--el-transition-duration) padding-right ease-in-out;
     }
+}
+/* 单行超出隐藏 */
+.using-hidden {
+    word-break: break-all;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    white-space: break-spaces;
 }
 
 /** 多行超出隐藏 **/
@@ -120,7 +142,7 @@ html.dark {
         --el-table-header-text-color: var(--el-text-color-secondary) !important;
         --el-table-header-bg-color: var(--el-bg-color) !important;
     }
-    
+
     // 编辑器
     .edui-default {
 
@@ -268,5 +290,32 @@ html.dark {
 
     .right{
         font-size: 24px;
+    }
+}
+
+.t-window {
+    line-height: normal!important;
+    padding-top: 10px!important;
+    --t-main-background-color: #1d1f3a;
+    --t-main-font-color: #ececee;
+
+    .t-cmd-key {
+        font-weight: normal;
+        color: var(--t-main-font-color);
+    }
+
+    .t-log-box {
+        margin-block-start: 3px;
+        margin-block-end: 3px;
+        &:first-child {
+            display: none;
+        }
+    }
+    .t-content-normal .error {
+        display: none;
+
+        & + span {
+            color: red;
+        }
     }
 }

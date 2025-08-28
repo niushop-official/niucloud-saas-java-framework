@@ -215,6 +215,7 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
 
                 if (ObjectUtil.isNotEmpty(recharge.getGiftJson())) {
                     CommonEvent event = new CommonEvent();
+                    event.setName("CommonEvent");
                     event.setEventName("RechargeAfterListener");
                     event.setData(recharge);
                     event.setMemberId(order.getMemberId());

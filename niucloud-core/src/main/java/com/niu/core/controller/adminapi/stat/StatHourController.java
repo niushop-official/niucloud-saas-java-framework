@@ -12,6 +12,7 @@ import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 小时统计控制器
@@ -20,6 +21,7 @@ import jakarta.annotation.Resource;
 @RestController
 @RequestMapping("adminapi/hour")
 @SaCheckLogin
+@Description("小时统计控制器")
 public class StatHourController {
 
     @Resource
@@ -32,6 +34,7 @@ public class StatHourController {
      * @return Result<PageResult<StatHourListVo>>
      */
     @GetMapping("/list")
+    @Description("小时统计列表")
     public Result<PageResult<StatHourListVo>> list(@Validated PageParam pageParam,
                                                      @Validated StatHourSearchParam searchParam) {
         PageResult<StatHourListVo> list = statHourService.list(pageParam, searchParam);
@@ -44,6 +47,7 @@ public class StatHourController {
      * @return Result<StatHourInfoVo>
      */
     @GetMapping("/info")
+    @Description("小时统计详情")
     public Result<StatHourInfoVo> info(@Validated @RequestParam("id") Integer id) {
         StatHourInfoVo info = statHourService.info(id);
         return Result.success(info);
@@ -55,6 +59,7 @@ public class StatHourController {
      * @return Result<Object>
      */
     @PostMapping("/add")
+    @Description("小时统计添加")
     public Result<Object> add(@Validated @RequestBody StatHourParam addParam) {
         statHourService.add(addParam);
         return Result.success();
@@ -66,6 +71,7 @@ public class StatHourController {
      * @return Result<Object>
      */
     @PostMapping("/edit")
+    @Description("小时统计编辑")
     public Result<Object> edit(Integer id, @Validated @RequestBody StatHourParam editParam) {
         statHourService.edit(id, editParam);
         return Result.success();
@@ -77,6 +83,7 @@ public class StatHourController {
      * @return Result<Object>
      */
     @PostMapping("/del")
+    @Description("小时统计删除")
     public Result<Object> del(@Validated @RequestBody Integer id) {
         statHourService.del(id);
         return Result.success();

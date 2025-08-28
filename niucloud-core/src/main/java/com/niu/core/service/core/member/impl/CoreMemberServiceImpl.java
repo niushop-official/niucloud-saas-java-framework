@@ -57,7 +57,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
         MemberConfigVo memberConfig = coreMemberConfigService.getMemberConfig(siteId);
 
         String no = (site.getMemberNo() + 1) + "";
-        String memberNo = memberConfig.getPrefix() + (memberConfig.getPrefix().length() > memberConfig.getLength() ? no : StringUtils.leftPad(no, memberConfig.getLength(), "0"));
+        String memberNo = memberConfig.getPrefix() + (memberConfig.getPrefix().length() > memberConfig.getLength() ? no : StringUtils.leftPad(no, memberConfig.getLength()-memberConfig.getPrefix().length(), "0"));
 
         Member member = memberMapper.selectOne(new QueryWrapper<Member>()
                 .eq("site_id", siteId).eq("member_no", memberNo).last("limit 1"));
@@ -124,6 +124,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
      * @return
      */
     public JSONObject getGiftContent(Integer siteId, JSONObject gifts, String scene) {
+        if (gifts == null) gifts = new JSONObject();
+
         JSONObject giftEnum = GiftEnum.getType();
 
         for (String key : gifts.keySet()) {
@@ -155,6 +157,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
      * @return
      */
     public JSONObject getBenefitsContent(Integer siteId, JSONObject benefits, String scene) {
+        if (benefits == null) benefits = new JSONObject();
         JSONObject benefitsEnum = BenefitsEnum.getType();
 
         for (String key : benefits.keySet()) {

@@ -65,8 +65,8 @@ import { t } from '@/lang'
 import { getLabelGroupPageList, deleteLabelGroup, modifyLabelGroupSort } from '@/addon/shop/api/goods'
 import { ElMessageBox, FormInstance, ElMessage } from 'element-plus'
 import LabelGroupEdit from '@/addon/shop/views/goods/components/label-group-edit.vue'
-import { useRoute,useRouter } from 'vue-router'
-import { debounce } from '@/utils/common'
+import { useRoute, useRouter } from 'vue-router'
+import { debounce, setTablePageStorage, getTablePageStorage } from '@/utils/common'
 
 const route = useRoute()
 const router = useRouter()
@@ -121,11 +121,12 @@ const loadLabelGroupList = (page: number = 1) => {
         labelTable.loading = false
         labelTable.data = res.data.data
         labelTable.total = res.data.total
+        setTablePageStorage(labelTable.page, labelTable.limit, labelTable.searchParam)
     }).catch(() => {
         labelTable.loading = false
     })
 }
-loadLabelGroupList()
+loadLabelGroupList(getTablePageStorage(labelTable.searchParam).page)
 
 const editLabelGroupDialog: Record<string, any> | null = ref(null)
 
@@ -169,7 +170,7 @@ const sortInputListener = debounce((sort, row) => {
     if (isNaN(sort) || !/^\d{0,8}$/.test(sort)) {
         ElMessage({
             type: 'warning',
-            message: `${ t('sortTips') }`
+            message: `${t('sortTips')}`
         })
         return
     }

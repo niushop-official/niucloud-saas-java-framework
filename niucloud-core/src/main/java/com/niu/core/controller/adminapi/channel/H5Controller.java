@@ -10,10 +10,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * h5端
  */
+@Description("h5端")
 @RestController
 @RequestMapping("/adminapi/channel/h5")
 @SaCheckLogin
@@ -26,6 +28,7 @@ public class H5Controller {
      * 获取h5端配置
      * @return Result<H5ConfigVo>
      */
+    @Description("获取h5端配置")
     @GetMapping("/config")
     public Result<H5ConfigVo> getH5() {
         Integer siteId= RequestUtils.siteId();
@@ -36,6 +39,7 @@ public class H5Controller {
      * 设置h5端配置
      * @return Result
      */
+    @Description("设置h5端配置")
     @PutMapping("/config")
     public Result<Object> setH5(@Validated @RequestBody SetH5Param param) {
         coreH5Service.setH5(param);

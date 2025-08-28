@@ -9,9 +9,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
-import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.active.ShopActiveGoods;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsSku;
@@ -51,7 +50,6 @@ import java.util.stream.Collectors;
 public class ShopNewcomerServiceImpl implements IShopNewcomerService {
     private final ShopGoodsMapper shopGoodsMapper;
     private final ShopActiveMapper shopActiveMapper;
-    private final ICoreUploadService coreUploadService;
     private final ShopGoodsSkuMapper shopGoodsSkuMapper;
     private final ShopActiveGoodsMapper shopActiveGoodsMapper;
     private final ICoreShopNewcomerService coreShopNewcomerService;
@@ -120,8 +118,8 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             var vo = new ShopNewcomerListVo();
             BeanUtils.copyProperties(shopGood, vo);
             vo.setGoodsTypeName(GoodsTypeEnum.getNameByType(shopGood.getGoodsType()));
-            vo.setGoodsCoverThumbSmall(coreUploadService.thumb(RequestUtils.siteId(), shopGood.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
-            vo.setGoodsCoverThumbMid(coreUploadService.thumb(RequestUtils.siteId(), shopGood.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
+            vo.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), shopGood.getGoodsCover()));
+            vo.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), shopGood.getGoodsCover()));
 
             var skuList = goodsSkuMap.getOrDefault(shopGood.getGoodsId(), Collections.emptyList());
             var skuVoList = new ArrayList<ShopNewcomerListVo.Sku>(skuList.size());

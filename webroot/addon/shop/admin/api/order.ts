@@ -57,6 +57,15 @@ export function orderClose(order_id: number) {
 }
 
 /**
+ * 订单删除
+ * @return
+ */
+export function orderDelete(params: Record<string, any>) {
+    return request.post(`shop/order/delete`,params, { showSuccessMessage: true })
+}
+
+
+/**
  * 获取订单配送方式
  * @return
  */
@@ -105,7 +114,7 @@ export function deliveryPackageList(params: Record<string, any>) {
 }
 
 /**
- * 退款维权列表
+ * 退款售后列表
  * @param {Record<string, any>} params
  * @return
  */
@@ -114,7 +123,7 @@ export function orderRefund(params: Record<string, any>) {
 }
 
 /**
- * 退款维权详情
+ * 退款售后详情
  */
 export function orderRefundDetail(refund_id: number) {
     return request.get(`shop/order/refund/${ refund_id }`)
@@ -247,4 +256,12 @@ export function getOrderBatchDeliveryState() {
  */
 export function getOrderBatchDeliveryType() {
     return request.get(`shop/order_batch_delivery/get_type`)
+}
+
+/**
+ * 关闭售后
+ * @return
+ */
+export function closeRefund(order_refund_no: number) {
+    return request.put(`shop/order/refund/close/${order_refund_no}`)
 }

@@ -42,8 +42,8 @@ public class CoreOrderFinishServiceImpl implements ICoreOrderFinishService {
         ShopOrder shopOrder = shopOrderMapper.selectOne(new QueryWrapper<ShopOrder>().eq("site_id", param.getSiteId()).eq("order_id", param.getOrderId()));
         if (ObjectUtil.isEmpty(shopOrder)) throw new CommonException("订单信息不存在");
 
-        if (!shopOrder.getStatus().equals(OrderStatusEnum.WAIT_TAKE.getStatus().toString()))
-            throw new CommonException("只有待收货订单才能完成");
+//        if (!shopOrder.getStatus().equals(OrderStatusEnum.WAIT_TAKE.getStatus().toString()))
+//            throw new CommonException("只有待收货订单才能完成");
         if (shopOrder.getStatus().equals(OrderStatusEnum.FINISH.getStatus().toString()))
             throw new CommonException("订单已完成");
         Long refundCount = shopOrderGoodsMapper.selectCount(new QueryWrapper<ShopOrderGoods>().eq("order_id", param.getOrderId()).eq("status", OrderGoodsRefundEnum.REFUNDING.getStatus()));

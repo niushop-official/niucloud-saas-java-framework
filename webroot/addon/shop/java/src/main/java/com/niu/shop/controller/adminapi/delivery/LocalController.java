@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.delivery;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.delivery.param.ShopDeliveryLocalDeliveryParam;
@@ -17,7 +18,8 @@ import jakarta.annotation.Resource;
  */
 
 @RestController
-@RequestMapping("adminapi/shop/local")
+@RequestMapping("adminapi/shop")
+@Description("同城配送管理")
 public class LocalController {
 
     @Resource
@@ -28,7 +30,8 @@ public class LocalController {
      *
      * @return Result<ShopDeliveryLocalDeliveryInfoVo>
      */
-    @GetMapping("")
+    @GetMapping("/local")
+    @Description("获取同城配送配置")
     public Result<ShopDeliveryLocalDeliveryInfoVo> getLocal() {
         ShopDeliveryLocalDeliveryInfoVo info = iShopDeliveryLocalDeliveryService.getLocal();
         return Result.success(info);
@@ -40,10 +43,19 @@ public class LocalController {
      * @param param 编辑参数
      * @return Result<Object>
      */
-    @PutMapping("")
+    @PutMapping("/local")
+    @Description("设置同城配送配置")
     public Result<Object> setLocal(@Validated @RequestBody ShopDeliveryLocalDeliveryParam param) {
         iShopDeliveryLocalDeliveryService.setLocal(param);
         return Result.success();
+    }
+
+    /**
+     * 查看三方配送初始化信息
+     */
+    @GetMapping("/third/init")
+    public Result<?> getThirdPartyInit() {
+        return Result.success(iShopDeliveryLocalDeliveryService.getThirdTypeConfig());
     }
 
 

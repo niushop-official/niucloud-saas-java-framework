@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.delivery;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.delivery.param.ShopDeliveryShippingTemplateParam;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("adminapi/shop/shipping/template")
+@Description("运费模板管理")
 public class ShippingTemplateController {
 
     @Resource
@@ -31,6 +33,7 @@ public class ShippingTemplateController {
      * @return Result<PageResult<ShopDeliveryShippingTemplateListVo>>
      */
     @GetMapping("")
+    @Description("获取运费模板分页列表")
     public Result<PageResult<ShopDeliveryShippingTemplateListVo>> page(@Validated PageParam pageParam, @Validated ShopDeliveryShippingTemplateSearchParam searchParam) {
         PageResult<ShopDeliveryShippingTemplateListVo> list = iShopDeliveryShippingTemplateService.page(pageParam, searchParam);
         return Result.success(list);
@@ -42,6 +45,7 @@ public class ShippingTemplateController {
      * @return Result<PageResult<ShopDeliveryShippingTemplateListVo>>
      */
     @GetMapping("/list")
+    @Description("获取运费模板列表")
     public Result<List<ShopDeliveryShippingTemplateListVo>> list(@Validated ShopDeliveryShippingTemplateSearchParam searchParam) {
         List<ShopDeliveryShippingTemplateListVo> list = iShopDeliveryShippingTemplateService.list(searchParam);
         return Result.success(list);
@@ -53,6 +57,7 @@ public class ShippingTemplateController {
      * @return Result<ShopDeliveryShippingTemplateInfoVo>
      */
     @GetMapping("/{template_id}")
+    @Description("获取运费模板详情")
     public Result<ShopDeliveryShippingTemplateInfoVo> info(@PathVariable("template_id") Integer id) {
         ShopDeliveryShippingTemplateInfoVo info = iShopDeliveryShippingTemplateService.info(id);
         return Result.success(info);
@@ -64,6 +69,7 @@ public class ShippingTemplateController {
      * @return AjaxResult<Object>
      */
     @PostMapping("")
+    @Description("添加运费模板")
     public Result<Object> add(@Validated @RequestBody ShopDeliveryShippingTemplateParam addParam) {
         iShopDeliveryShippingTemplateService.add(addParam);
         return Result.success();
@@ -75,6 +81,7 @@ public class ShippingTemplateController {
      * @return Result<Object>
      */
     @PutMapping("/{template_id}")
+    @Description("编辑运费模板")
     public Result<Object> edit(@PathVariable("template_id") Integer id, @Validated @RequestBody ShopDeliveryShippingTemplateParam editParam) {
         iShopDeliveryShippingTemplateService.edit(id, editParam);
         return Result.success();
@@ -86,6 +93,7 @@ public class ShippingTemplateController {
      * @return Result<Object>
      */
     @DeleteMapping("/{template_id}")
+    @Description("删除运费模板")
     public Result<Object> del(@PathVariable("template_id") Integer id) {
         iShopDeliveryShippingTemplateService.del(id);
         return Result.success();

@@ -13,7 +13,7 @@
             </el-form-item>
 
             <el-form-item :label="t('weappTempKey')">
-                <div class="input-width"> {{ formData.temp_key }} </div>
+                <div class="input-width"> {{ formData.tid }} </div>
             </el-form-item>
 
             <el-form-item :label="t('content')">
@@ -54,7 +54,7 @@ const initialFormData = {
     content: [],
     first: '',
     remark: '',
-    temp_key: ''
+    tid: ''
 }
 const formData: Record<string, any> = reactive({ ...initialFormData })
 
@@ -89,7 +89,6 @@ const confirm = async (formEl: FormInstance | undefined) => {
                 emit('complete')
             }).catch(() => {
                 loading.value = false
-                // showDialog.value = false
             })
         }
     })

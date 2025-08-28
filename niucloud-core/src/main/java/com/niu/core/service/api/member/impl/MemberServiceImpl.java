@@ -2,15 +2,21 @@ package com.niu.core.service.api.member.impl;
 
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.entity.diy_form.DiyFormRecords;
 import com.niu.core.entity.member.Member;
+import com.niu.core.mapper.diy_form.DiyFormRecordsMapper;
 import com.niu.core.mapper.member.MemberMapper;
+import com.niu.core.service.admin.member.vo.MemberConfigVo;
 import com.niu.core.service.api.login.IRegisterService;
 import com.niu.core.service.api.member.IMemberLevelService;
 import com.niu.core.service.api.member.IMemberService;
@@ -18,6 +24,8 @@ import com.niu.core.service.api.member.param.*;
 import com.niu.core.service.api.member.vo.MemberCenterVo;
 import com.niu.core.service.api.member.vo.MemberInfoVo;
 import com.niu.core.service.api.member.vo.MemberQcodeVo;
+import com.niu.core.service.core.member.ICoreMemberConfigService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +45,12 @@ public class MemberServiceImpl implements IMemberService {
     @Autowired
     private IRegisterService registerService;
 
+    @Resource
+    private ICoreMemberConfigService coreMemberConfigService;
+
+    @Resource
+    private DiyFormRecordsMapper diyFormRecordsMapper;
+
     @Override
     public MemberInfoVo info(MemberInfoParam param) {
         MPJQueryWrapper<Member> queryWrapper = new MPJQueryWrapper<>();
@@ -47,6 +61,20 @@ public class MemberServiceImpl implements IMemberService {
         // SAAS域控制（交给SQL引擎处理）
         queryWrapper.eq("m.site_id", param.siteId());
         MemberInfoVo memberInfoVo = memberMapper.selectJoinOne(MemberInfoVo.class, queryWrapper);
+        if (ObjectUtil.isNotEmpty(memberInfoVo)){
+            MemberConfigVo memberConfig = coreMemberConfigService.getMemberConfig(memberInfoVo.getSiteId());
+            memberInfoVo.setFormId(memberConfig.getFormId() == null ? "" : memberConfig.getFormId().toString());
+            memberInfoVo.setFormRecordId("");
+            if (StringUtils.isNotEmpty(memberInfoVo.getFormId())){
+                DiyFormRecords diyFormRecords = diyFormRecordsMapper.selectOne(new LambdaQueryWrapper<DiyFormRecords>()
+                        .eq(DiyFormRecords::getFormId, memberConfig.getFormId())
+                        .eq(DiyFormRecords::getMemberId, memberInfoVo.getMemberId())
+                        .orderByDesc(DiyFormRecords::getCreateTime));
+                if (ObjectUtil.isNotEmpty(diyFormRecords)){
+                    memberInfoVo.setFormRecordId(diyFormRecords.getRecordId().toString());
+                }
+            }
+        }
         return memberInfoVo;
     }
 

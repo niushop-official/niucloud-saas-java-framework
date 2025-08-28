@@ -12,6 +12,7 @@ import com.niu.core.service.core.weapp.param.WeappConfigParam;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import com.niu.core.service.core.wechat.param.WechatConfigParam;
 import com.niu.core.service.core.wechat.vo.WechatConfigVo;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("adminapi/weapp")
 @SaCheckLogin
+@Description("微信小程序配置")
 public class ConfigController {
 
     @Resource
@@ -35,6 +37,7 @@ public class ConfigController {
      * 获取微信小程序配置
      */
     @GetMapping("/config")
+    @Description("获取微信小程序配置")
     public Result<WeappConfigVo> get() {
         return Result.success(weappConfigService.getWeappConfig());
     }
@@ -44,6 +47,7 @@ public class ConfigController {
      * @return Result<Object>
      */
     @PutMapping("/config")
+    @Description("设置微信小程序配置")
     public Result<Object> set(@Validated @RequestBody WeappConfigParam weappConfigParam) {
         weappConfigService.setWeappConfig(weappConfigParam);
         return Result.success();
@@ -55,6 +59,7 @@ public class ConfigController {
      * @return
      */
     @GetMapping("/delivery/getIsTradeManaged")
+    @Description("查询小程序是否已开通发货信息管理服务")
     public Result getIsTradeManaged() {
         Map<String, Object> data = new HashMap<>();
         data.put("is_trade_managed", false);
@@ -65,6 +70,7 @@ public class ConfigController {
      * 设置微信域名
      */
     @PutMapping("/domain")
+    @Description("设置微信域名")
     public Result<Object> setDomain(SetDomainParam setDomainParam) {
         weappConfigService.setDomain(setDomainParam);
         return Result.success();
@@ -74,6 +80,7 @@ public class ConfigController {
      * 设置微信域名
      */
     @PutMapping("/privacysetting")
+    @Description("设置微信隐私设置")
     public Result<Object> setPrivacySetting(@RequestBody JSONObject data) {
         weappConfigService.setPrivacySetting(data);
         return Result.success();
@@ -83,6 +90,7 @@ public class ConfigController {
      * 获取微信隐私设置
      */
     @GetMapping("/privacysetting")
+    @Description("获取微信隐私设置")
     public Result<Object> getPrivacySetting() {
         return Result.success(weappConfigService.getPrivacySetting());
     }

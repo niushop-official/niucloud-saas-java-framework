@@ -1,4 +1,5 @@
 package com.niu.shop.service.admin.goods.vo;
+import cn.hutool.json.JSONObject;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,5 +18,7 @@ public class ShopGoodsBrandInfoVo implements Serializable {
     private String logo;  // 品牌logo
     private String desc;  // 品牌介绍
     private Integer sort;  // 排序
+
+    private JSONObject colorJson; //颜色json
 
 }

@@ -21,7 +21,7 @@ export function getWechatStatic() {
  * @returns
  */
 export function editWechatConfig(params: Record<string, any>) {
-    return request.put('wechat/config', params, {showSuccessMessage: true})
+    return request.put('wechat/config', params, { showSuccessMessage: true })
 }
 
 /**
@@ -38,7 +38,7 @@ export function getWechatMenu() {
  * @returns
  */
 export function editWechatMenu(params: Record<string, any>) {
-    return request.put('wechat/menu', params, {showSuccessMessage: true})
+    return request.put('wechat/menu', params, { showSuccessMessage: true })
 }
 
 /**
@@ -49,14 +49,13 @@ export function getTemplateList() {
     return request.get('wechat/template')
 }
 
-
 /**
  * 获取同步
  * @param params
  * @returns
  */
 export function getBatchAcquisition(params: Record<string, any>) {
-    return request.put('wechat/template/sync', params, {showSuccessMessage: true})
+    return request.put('wechat/template/sync', params, { showSuccessMessage: true })
 }
 
 /**
@@ -70,7 +69,7 @@ export function getKeywordsReplyList(params: Record<string, any>) {
  * 修改关键字回复
  */
 export function editKeywordsReply(params: Record<string, any>) {
-    return request.put(`wechat/reply/keywords/${params.id}`, params, { showSuccessMessage: true })
+    return request.put(`wechat/reply/keywords/${ params.id }`, params, { showSuccessMessage: true })
 }
 
 /**
@@ -85,14 +84,14 @@ export function addKeywordsReply(params: Record<string, any>) {
  * @param id
  */
 export function getKeywordsReplyInfo(id: number) {
-    return request.get(`wechat/reply/keywords/${id}`)
+    return request.get(`wechat/reply/keywords/${ id }`)
 }
 
 /**
  * 修改关键字回复
  */
 export function delKeywordsReply(id: number) {
-    return request.delete(`wechat/reply/keywords/${id}`, { showSuccessMessage: true })
+    return request.delete(`wechat/reply/keywords/${ id }`, { showSuccessMessage: true })
 }
 
 /**
@@ -130,7 +129,6 @@ export function setSubscribeReply(params: Record<string, any>) {
 export function getMediaList(params: Record<string, any>) {
     return request.get('wechat/media', { params })
 }
-
 
 /**
  * 同步素材库

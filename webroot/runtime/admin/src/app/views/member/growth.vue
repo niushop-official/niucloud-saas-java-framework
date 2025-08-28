@@ -43,8 +43,8 @@
                         <template #default="{ row }">
                             <div class="flex items-center cursor-pointer" @click="toMember(row.member_id)">
                                 <img class="w-[50px] h-[50px] mr-[10px]" v-if="row.member.headimg" :src="img(row.member.headimg)" alt="">
-                                <img class="w-[50px] h-[50px] mr-[10px]" v-else src="@/app/assets/images/default_headimg.png" alt="">
-                                <div class="flex flex flex-col">
+                                <img class="w-[50px] h-[50px] mr-[10px] rounded-full" v-else src="@/app/assets/images/member_head.png" alt="">
+                                <div class="flex flex-col">
                                     <span>{{ row.member.nickname || '' }}</span>
                                 </div>
                             </div>
@@ -93,7 +93,7 @@ import { useRouter, useRoute } from 'vue-router'
 const route = useRoute()
 const pageName = route.meta.title
 
-const memberId: number = parseInt(route.query.id || 0)
+const member_id: number = parseInt(route.query.id || 0)
 
 const memberAccountLogTableData = reactive({
     page: 1,
@@ -106,7 +106,7 @@ const memberAccountLogTableData = reactive({
         from_type: '',
         create_time: '',
         mobile: '',
-        member_id: memberId
+        member_id
     }
 })
 

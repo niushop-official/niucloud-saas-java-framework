@@ -1,8 +1,10 @@
 package com.niu.shop.controller.api.goods;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
+import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import com.niu.shop.service.api.goods.param.ShopGoodsComponentsSearchParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsDetailParam;
 import com.niu.shop.service.api.goods.param.ShopGoodsSearchParam;
@@ -66,5 +68,16 @@ public class GoodsController {
     public Result components(@RequestParam(value = "goods_ids[]", required = false) Integer[] goodsIds, ShopGoodsComponentsSearchParam param) {
         param.setGoodsIds(goodsIds);
         return Result.success(goodsService.getGoodsComponents(param));
+    }
+
+    /**
+     * 搜索功能展示
+     *
+     * @return
+     */
+    @GetMapping("/config/search")
+    public Result searchConfig() {
+        CoreSysConfigVo coreSysConfigVo = goodsService.searchConfig();
+        return Result.success(coreSysConfigVo.getValueJson());
     }
 }

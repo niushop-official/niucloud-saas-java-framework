@@ -1,6 +1,5 @@
 package com.niu.shop.service.admin.goods.param;
 
-import io.swagger.models.auth.In;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotEmpty;

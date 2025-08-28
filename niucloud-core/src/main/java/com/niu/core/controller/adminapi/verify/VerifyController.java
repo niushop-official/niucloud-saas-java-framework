@@ -12,6 +12,7 @@ import com.niu.core.common.domain.PageParam;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 核销记录控制器
@@ -20,6 +21,7 @@ import jakarta.annotation.Resource;
 @RestController
 @RequestMapping("adminapi/verify/verify")
 @SaCheckLogin
+@Description("核销")
 public class VerifyController {
 
     @Resource
@@ -32,6 +34,7 @@ public class VerifyController {
      * @return Result<PageResult<VerifyListVo>>
      */
     @GetMapping("/record")
+    @Description("核销记录列表")
     public Result<PageResult<VerifyListVo>> list(@Validated PageParam pageParam, @Validated VerifySearchParam searchParam) {
         PageResult<VerifyListVo> list = verifyService.list(pageParam, searchParam);
         return Result.success(list);
@@ -41,6 +44,7 @@ public class VerifyController {
      * 核销记录详情
      */
     @GetMapping("/{verify_code}")
+    @Description("核销记录详情")
     public Result<VerifyInfoVo> info(@PathVariable("verify_code") String code) {
         VerifyInfoVo info = verifyService.detail(code);
         return Result.success(info);

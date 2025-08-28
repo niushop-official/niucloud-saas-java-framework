@@ -29,8 +29,8 @@ public class MemberAddParam implements Serializable {
     @NotBlank(message = "密码不能为空")
     private String password;
 
-    @NotNull(message = "nickname参数缺失")
-    @NotBlank(message = "昵称不能为空")
+//    @NotNull(message = "nickname参数缺失")
+//    @NotBlank(message = "昵称不能为空")
     private String nickname;
 
     private String headimg;

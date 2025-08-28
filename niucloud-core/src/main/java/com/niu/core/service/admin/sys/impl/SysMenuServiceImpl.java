@@ -2,7 +2,9 @@ package com.niu.core.service.admin.sys.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
@@ -12,6 +14,8 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
+import com.niu.core.common.utils.json.JsonModuleLoader;
+import com.niu.core.common.utils.language.LanguageUtils;
 import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.enums.sys.MenuSourceEnum;
@@ -20,12 +24,15 @@ import com.niu.core.service.admin.sys.ISysMenuService;
 import com.niu.core.service.admin.sys.param.SysMenuParam;
 import com.niu.core.service.admin.sys.vo.SysMenuInfoVo;
 import com.niu.core.service.core.site.ICoreSiteService;
+import com.niu.core.service.core.sys.ICoreMenuService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.DigestUtils;
+
 import java.util.*;
 
 /**
@@ -290,6 +297,64 @@ public class SysMenuServiceImpl implements ISysMenuService {
         });
     }
 
+    @Override
+    public List<SysMenu> getMenuListByKeys(String appType, Integer siteId, Integer isTree, Integer isButton, List<String> menuKeys, String addon) {
+        String menuKeysVal = String.join("_", menuKeys);
+        String menuKeysValMD5 = SecureUtil.md5(menuKeysVal);
+        String menuCatch = "menu" + menuKeysValMD5 + isTree.toString() + addon + siteId;
+        List<SysMenu> outterMenuList = cached.cache(useCache, cacheTagName, menuCatch, uniqueKey -> {
+            //通过站点id获取支持的应用插件
+            List<String> addonList = coreSiteService.getAddonKeysBySiteId(siteId);
+
+            //组装查询条件
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            if (menuKeys.size() > 0) {
+                queryWrapper.in("menu_key", menuKeys);
+            }
+            List<SysMenu> paichuList = null;
+            if(!addon.equals("all")){
+                queryWrapper.eq("addon",addon);
+
+                JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+                JSONObject jsonObject = jsonModuleLoader.getResultElement(addon,  "menu/site.json");
+                JSONArray delJsonInfo = jsonObject.getJSONArray("delete");
+                paichuList = JSONUtil.toList(delJsonInfo,SysMenu.class);
+            }else{
+                queryWrapper.in("addon", addonList);
+                for(int i=0; i<addonList.size(); i++){
+                    JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+                    JSONObject jsonObject = jsonModuleLoader.getResultElement(addonList.get(i),  "menu/site.json");
+                    JSONArray delJsonInfo = jsonObject.getJSONArray("delete");
+                    paichuList = JSONUtil.toList(delJsonInfo,SysMenu.class);
+                }
+            }
+            if (ObjectUtil.isNotEmpty(appType)) {
+                queryWrapper.eq("app_type", appType);
+            }
+
+            //排除菜单
+            if(ObjectUtil.isNotNull(paichuList) && paichuList.size()>0){
+                List<String> paichuArr = new ArrayList<>();
+                for(int i=0; i<paichuList.size(); i++){
+                    paichuArr.add(paichuList.get(i).getMenuKey());
+                }
+                queryWrapper.notIn("menu_key", paichuArr);
+            }
+
+            List<SysMenu> menuList = sysMenuMapper.selectList(queryWrapper);
+            for (SysMenu menu : menuList) {
+                String langMenuKey = "dict_menu_" + menu.getAppType() + "." + menu.getMenuKey();
+                String langMenuName = LanguageUtils.get(langMenuKey);
+
+                if (!langMenuKey.equals(langMenuName)) {
+                    menu.setMenuName(langMenuName);
+                }
+            }
+            return menuList;
+        });
+        return outterMenuList;
+    }
+
     /**
      * 获取所有接口菜单
      *
@@ -338,6 +403,68 @@ public class SysMenuServiceImpl implements ISysMenuService {
         return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
     }
 
+    @Override
+    public List<SysMenu> getAllMenuList(String appType, String status, Integer isTree, Integer isButton) {
+        //站点id
+        Integer siteId= RequestUtils.siteId();
+
+        // 缓存Key值计算参数
+        String key = "site_menu_api_"+appType+"_"+status +"_"+ isTree.toString() +"_"+ isButton.toString() +"_"+ siteId.toString();
+
+        List<SysMenu> outterMenuList= cached.cache(useCache, cacheTagName, key, uniqueKey -> {
+            List<SysMenu> menuList = new ArrayList<>();
+            try {
+                QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+                if (ObjectUtil.isNotEmpty(appType)) {
+                    queryWrapper.eq("app_type", appType);
+                }
+
+                //站点相关插件
+                List<SysMenu> paichuList = null;
+                if (!RequestUtils.defaultSiteId().equals(siteId)) {
+                    List<String> addonList = coreSiteService.getAddonKeysBySiteId(siteId);
+
+                    if (addonList.size() > 0) {
+                        addonList.add("");
+                        queryWrapper.in("addon", addonList);
+
+                        //排除菜单
+                        for(int i=0; i<addonList.size(); i++){
+                            JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+                            JSONObject jsonObject = jsonModuleLoader.getResultElement(addonList.get(i),  "menu/site.json");
+                            JSONArray delJsonInfo = jsonObject.getJSONArray("delete");
+                            paichuList = JSONUtil.toList(delJsonInfo,SysMenu.class);
+                        }
+                    }
+                }
+
+                //排除菜单
+                if(ObjectUtil.isNotNull(paichuList) && paichuList.size()>0){
+                    List<String> paichuArr = new ArrayList<>();
+                    for(int i=0; i<paichuList.size(); i++){
+                        paichuArr.add(paichuList.get(i).getMenuKey());
+                    }
+                    queryWrapper.notIn("menu_key", paichuArr);
+                }
+
+                if (!status.equals("all")) {
+                    queryWrapper.eq("status", status);
+                }
+
+                if (isButton == 0) {
+                    queryWrapper.ne("menu_type", 2);
+                }
+
+                menuList = sysMenuMapper.selectList(queryWrapper);
+            } catch (Exception e) {
+                throw new BaseException("查询菜单错误");
+            }
+            return menuList;
+        });
+
+        return outterMenuList;
+    }
+
     /**
      * 查询菜单
      *
@@ -374,4 +501,26 @@ public class SysMenuServiceImpl implements ISysMenuService {
         return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
     }
 
+    @Override
+    public JSONArray getAddonMenu(String appKey, String status, Integer isTree, Integer isButton) {
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getAddonMenu", appKey, status, isTree.toString(), isButton.toString()), uniqueKey ->{
+
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("app_type", "site");
+            queryWrapper.eq("addon", appKey);
+            queryWrapper.orderByDesc(Arrays.asList("sort", "id"));
+            if (!status.equals("all")) {
+                queryWrapper.eq("status", status);
+            }
+            if (isButton == 0) {
+                queryWrapper.in("menu_type", new Integer[]{0, 1});
+            }
+            List<SysMenu> sysMenuList = sysMenuMapper.selectList(queryWrapper);
+            JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(sysMenuList));
+            if (isTree == 0) {
+                return jsonArray;
+            }
+            return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
+        });
+    }
 }

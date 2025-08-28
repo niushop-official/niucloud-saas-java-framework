@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 店铺分组（分组权限）控制器
@@ -29,6 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("adminapi/site/group")
 @SaCheckLogin
+@Description("站点分组")
 public class SiteGroupController {
 
     @Resource
@@ -41,6 +43,7 @@ public class SiteGroupController {
      * @return Result<PageResult<SiteGroupListVo>>
      */
     @GetMapping("")
+    @Description("店铺分组（分组权限）列表")
     public Result<PageResult<SiteGroupListVo>> list(@Validated PageParam pageParam,
                                                      @Validated SiteGroupSearchParam searchParam) {
         PageResult<SiteGroupListVo> list = siteGroupService.list(pageParam, searchParam);
@@ -48,6 +51,7 @@ public class SiteGroupController {
     }
 
     @PostMapping("")
+    @Description("新增分组")
     public Result<Object> add(@Validated @RequestBody SiteGroupAddParam siteGroupAddParam){
         siteGroupService.add(siteGroupAddParam);
         return Result.success();
@@ -59,6 +63,7 @@ public class SiteGroupController {
      * @return Result<SiteGroupInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("分组详情")
     public Result<SiteGroup> info(@Validated @PathVariable("id") Integer id) {
         SiteGroup info = siteGroupService.info(id);
         return Result.success(info);
@@ -70,6 +75,7 @@ public class SiteGroupController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("编辑分组")
     public Result<Object> edit(@Validated @PathVariable("id") Integer id, @Validated @RequestBody SiteGroupParam editParam) {
         siteGroupService.edit(id, editParam);
         return Result.success();
@@ -81,6 +87,7 @@ public class SiteGroupController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("删除分组")
     public Result<Object> del(@Validated @PathVariable("id") Integer id) {
         siteGroupService.del(id);
         return Result.success();
@@ -91,6 +98,7 @@ public class SiteGroupController {
      * @return
      */
     @GetMapping("/all")
+    @Description("获取所有分组")
     public Result<List<SiteGroup>> all(){
         return Result.success(siteGroupService.getAll());
     }
@@ -103,6 +111,7 @@ public class SiteGroupController {
      * @return
      */
     @GetMapping("/user")
+    @Description("所有站点分组")
     public Result<List<SiteGroupListVo>> getUserSiteGroupAll(@Validated @RequestParam("uid") Integer uid){
         List<SiteGroupListVo> siteGroupListVoList=new ArrayList<>();
         siteGroupListVoList=siteGroupService.getUserSiteGroupAll(uid);
@@ -111,6 +120,7 @@ public class SiteGroupController {
 
 
     @GetMapping("/test")
+    @Description("测试方法")
     public Result<Object> test(){
         CoreAddonBaseService coreAddonBaseService = new CoreAddonBaseService();
         return  Result.success(coreAddonBaseService.getPath());

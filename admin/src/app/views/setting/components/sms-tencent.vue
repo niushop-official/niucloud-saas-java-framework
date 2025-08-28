@@ -9,19 +9,19 @@
             </el-form-item>
 
             <el-form-item :label="t('tencentSign')" prop="sign">
-                <el-input v-model="formData.sign" :placeholder="t('tencentSignPlaceholder')" class="input-width" show-word-limit clearable />
+                <el-input v-model.trim="formData.sign" :placeholder="t('tencentSignPlaceholder')" class="input-width" show-word-limit clearable />
             </el-form-item>
 
             <el-form-item :label="t('tencentAppId')" prop="app_id">
-                <el-input v-model="formData.app_id" :placeholder="t('tencentAppIdPlaceholder')" class="input-width" show-word-limit clearable />
+                <el-input v-model.trim="formData.app_id" :placeholder="t('tencentAppIdPlaceholder')" class="input-width" show-word-limit clearable />
             </el-form-item>
 
             <el-form-item :label="t('tencentSecretId')" prop="secret_id">
-                <el-input v-model="formData.secret_id" :placeholder="t('tencentSecretIdPlaceholder')" class="input-width" clearable />
+                <el-input v-model.trim="formData.secret_id" :placeholder="t('tencentSecretIdPlaceholder')" class="input-width" clearable />
             </el-form-item>
 
             <el-form-item :label="t('tencentSecretKey')" prop="secret_key">
-                <el-input v-model="formData.secret_key" :placeholder="t('tencentSecretKeyPlaceholder')" class="input-width" clearable />
+                <el-input v-model.trim="formData.secret_key" :placeholder="t('tencentSecretKeyPlaceholder')" class="input-width" clearable />
             </el-form-item>
 
         </el-form>
@@ -53,8 +53,8 @@ const initialFormData = {
     access_key: '',
     secret_key: '',
     is_use: '',
-    app_id:'',
-    secret_id:'',
+    app_id: '',
+    secret_id: ''
 }
 const formData: Record<string, any> = reactive({ ...initialFormData })
 

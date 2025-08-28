@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.addon.impl;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.Method;
@@ -21,18 +22,17 @@ import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.service.admin.addon.param.AddonParam;
 import com.niu.core.service.admin.addon.param.AddonSearchParam;
 import com.niu.core.service.admin.addon.IAddonService;
-import com.niu.core.service.admin.addon.vo.AddonInfoVo;
+import com.niu.core.service.admin.addon.vo.*;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.mapper.addon.AddonMapper;
-import com.niu.core.service.admin.addon.vo.AddonListVo;
-import com.niu.core.service.admin.addon.vo.LocalAddonInfoVo;
-import com.niu.core.service.admin.addon.vo.LocalAddonListVo;
 import com.niu.core.service.admin.niucloud.INiucloudService;
 import com.niu.core.service.admin.niucloud.vo.ModuleListVo;
 import com.niu.core.service.core.addon.ICoreAddonInstallService;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
+import com.niu.core.service.core.niucloud.ICoreNiucloudConfigService;
+import com.niu.core.service.core.niucloud.vo.NiucloudConfigVo;
 import com.niu.core.service.core.site.vo.SiteInfoCacheVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -75,6 +75,10 @@ public class AddonServiceImpl implements IAddonService {
 
     @Resource
     INiucloudService niucloudService;
+
+    @Resource
+    private ICoreNiucloudConfigService coreNiucloudConfigService;
+
 
     /**
      * 获取本地插件
@@ -353,11 +357,26 @@ public class AddonServiceImpl implements IAddonService {
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(response.bodyBytes());
-            ZipUtil.unzip(file.getPath(), WebAppEnvs.get().webRootDownAddon);
+            ZipUtil.unzip(file.getPath(), WebAppEnvs.get().webRootDownAddon, CharsetUtil.CHARSET_UTF_8);
         }  catch (Exception e) {
             e.printStackTrace();
             throw new CommonException(e.getMessage());
         }
+    }
+
+    @Override
+    public JSONArray getIndexAddonList(IndexAddonListParam param) {
+        Map<String, Object> params = new HashMap<>();
+        NiucloudConfigVo config = coreNiucloudConfigService.getNiucloudConfig();
+        params.put("code", config.getAuthCode());
+        params.put("secret", config.getAuthSecret());
+        params.put("labels", param.getLabelId());
+        params.put("product_key", "sass");
+        params.put("is_recommend", 1);
+        params.put("order_field", "sale_num desc, visit_num desc");
+        JSONObject jsonObject = NiucloudUtils.Niucloud.get("store/app", params);
+        JSONObject data = jsonObject.getJSONObject("data");
+        return data.getJSONArray("data");
     }
 
     /**

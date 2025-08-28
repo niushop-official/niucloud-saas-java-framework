@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.goods;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.goods.param.EditGoodsBrandSortParam;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("adminapi/shop/goods/brand")
+@Description("商品品牌管理")
 public class BrandController {
 
     @Resource
@@ -33,6 +35,7 @@ public class BrandController {
      * @return Result<PageResult<ShopGoodsBrandListVo>>
      */
     @GetMapping("")
+    @Description("获取商品品牌分页列表")
     public Result<PageResult<ShopGoodsBrandListVo>> page(@Validated PageParam pageParam, @Validated ShopGoodsBrandSearchParam searchParam) {
         PageResult<ShopGoodsBrandListVo> list = goodsBrandService.page(pageParam, searchParam);
         return Result.success(list);
@@ -45,6 +48,7 @@ public class BrandController {
      * @return Result<PageResult<ShopGoodsBrandListVo>>
      */
     @GetMapping("/list")
+    @Description("获取商品品牌列表")
     public Result<List<ShopGoodsBrandListVo>> list(@Validated ShopGoodsBrandSearchParam searchParam) {
         List<ShopGoodsBrandListVo> list = goodsBrandService.list(searchParam);
         return Result.success(list);
@@ -57,6 +61,7 @@ public class BrandController {
      * @return Result<ShopGoodsBrandInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("获取商品品牌详情")
     public Result<ShopGoodsBrandInfoVo> info(@PathVariable("id") Integer id) {
         ShopGoodsBrandInfoVo info = goodsBrandService.info(id);
         return Result.success(info);
@@ -69,6 +74,7 @@ public class BrandController {
      * @return AjaxResult<Object>
      */
     @PostMapping("")
+    @Description("添加商品品牌")
     public Result<Object> add(@Validated @RequestBody ShopGoodsBrandParam addParam) {
         goodsBrandService.add(addParam);
         return Result.success();
@@ -81,6 +87,7 @@ public class BrandController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("编辑商品品牌")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopGoodsBrandParam editParam) {
         goodsBrandService.edit(id, editParam);
         return Result.success();
@@ -93,6 +100,7 @@ public class BrandController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("删除商品品牌")
     public Result<Object> del(@PathVariable("id") Integer id) {
         goodsBrandService.del(id);
         return Result.success();
@@ -104,6 +112,7 @@ public class BrandController {
      * @return
      */
     @PutMapping("/sort")
+    @Description("修改商品品牌排序")
     public Result<Object> modifySort(@Validated @RequestBody EditGoodsBrandSortParam editParam) {
         goodsBrandService.modifySort(editParam);
         return Result.success();

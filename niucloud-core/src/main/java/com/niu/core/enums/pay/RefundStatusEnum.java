@@ -15,7 +15,8 @@ public enum RefundStatusEnum {
     SUCCESS("退款成功", "success"),
     WAIT("待退款", "wait"),
     DEALING("退款处理中", "dealing"),
-    FAIL("退款失败", "fail")
+    FAIL("退款失败", "fail"),
+    CANCEL("已取消", "cancel"),
     ;
 
     private final String name;

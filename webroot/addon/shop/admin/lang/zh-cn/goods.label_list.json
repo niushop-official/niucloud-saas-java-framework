@@ -26,5 +26,7 @@
   "statusOff": "关闭",
   "status": "状态",
   "label": "标签",
-  "createTime": "创建时间"
+  "createTime": "创建时间",
+  "copyLabel": "复制",
+  "labelCopyTips": "确定要复制该标签吗？"
 }

@@ -1,6 +1,7 @@
 package com.niu.shop.service.admin.goods.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -124,7 +125,7 @@ public class ShopGoodsBrandServiceImpl implements IShopGoodsBrandService {
         model.setDesc(addParam.getDesc());
         model.setSort(ObjectUtil.isNotEmpty(addParam.getSort()) ? Integer.parseInt(addParam.getSort()) : 0);
         model.setCreateTime(System.currentTimeMillis() / 1000);
-
+        model.setColorJson(JSONUtil.toJsonStr(addParam.getColorJson()));
         shopGoodsBrandMapper.insert(model);
     }
 
@@ -153,6 +154,7 @@ public class ShopGoodsBrandServiceImpl implements IShopGoodsBrandService {
         model.setDesc(editParam.getDesc());
         model.setSort(ObjectUtil.isNotEmpty(editParam.getSort()) ? Integer.parseInt(editParam.getSort()) : 0);
         model.setUpdateTime(System.currentTimeMillis() / 1000);
+        model.setColorJson(JSONUtil.toJsonStr(editParam.getColorJson()));
 
         shopGoodsBrandMapper.updateById(model);
     }

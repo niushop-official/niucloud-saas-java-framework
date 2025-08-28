@@ -32,24 +32,9 @@ public interface ISysUserLogService extends IService<SysUserLog> {
     SysUserLogInfoVo info(Integer id);
 
     /**
-     * 管理员操作记录添加
-     *
-     * @param addParam 参数
-     */
-    void add(SysUserLogParam addParam);
-
-    /**
-     * 管理员操作记录编辑
-     *
-     * @param editParam 参数
-     */
-    void edit(Integer id, SysUserLogParam editParam);
-
-    /**
      * 管理员操作记录删除
      *
-     * @param id 主键ID
      */
-    void del(Integer id);
+    void destroy();
 
 }

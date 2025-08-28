@@ -15,12 +15,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+
+import java.io.IOException;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 站点控制器
  */
-
+@Description("站点控制器")
 @RestController
 @RequestMapping("adminapi/home")
 @SaCheckLogin
@@ -36,6 +39,7 @@ public class SiteController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<SiteListVo>>
      */
+    @Description("站点列表")
     @GetMapping("/site")
     public Result<PageResult<SiteListVo>> list(@Validated PageParam pageParam,
                                                      @Validated SiteSearchParam searchParam) {
@@ -49,6 +53,7 @@ public class SiteController {
      * @param id 主键ID
      * @return Result<SiteInfoVo>
      */
+    @Description("站点详情")
     @GetMapping("/site/{id}")
     public Result<SiteInfoVo> info(@Validated @PathVariable("id") Integer id) {
         SiteInfoVo info = authSiteService.info(id);
@@ -61,6 +66,7 @@ public class SiteController {
      * @param editParam 编辑参数
      * @return Result<Object>
      */
+    @Description("站点编辑")
     @PutMapping("/site/{id}")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody SiteParam editParam) {
         authSiteService.edit(id, editParam);
@@ -72,6 +78,7 @@ public class SiteController {
      *
      * @return
      */
+    @Description("获得可选择的店铺套餐")
     @GetMapping("/site/group")
     public Result<List<UserCreateSiteVo>> getSiteGroup() {
         return Result.success(authSiteService.getSiteGroup());
@@ -83,10 +90,20 @@ public class SiteController {
      * @param homeSiteAddParam
      * @return
      */
+    @Description("用户自己创建站点")
     @PostMapping("/site/create")
     public Result<Object> create(@Validated @RequestBody HomeSiteAddParam homeSiteAddParam){
         authSiteService.createSite(homeSiteAddParam);
         return Result.success();
+    }
+
+    /**
+     * 获取站点分组应用列表
+     */
+    @Description("获取站点分组应用列表")
+    @GetMapping("/site/group/app_list")
+    public Result<?> getSiteGroupAppList() {
+        return Result.success(authSiteService.getSiteGroupAppList());
     }
 
 }

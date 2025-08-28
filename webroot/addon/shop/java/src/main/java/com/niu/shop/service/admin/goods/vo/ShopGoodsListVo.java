@@ -21,6 +21,7 @@ public class ShopGoodsListVo implements Serializable {
     private Integer goodsId;  // 商品id
     private Integer siteId;  // 站点id
     private String goodsName;  // 商品名称
+    private String subTitle;
     private String goodsType;  // 商品类型
     private String goodsCover;  // 商品封面
     private String goodsCoverThumbSmall;

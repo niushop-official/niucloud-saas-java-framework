@@ -61,4 +61,7 @@ private static final long serialVersionUID = 1L;
     /** 更新时间 */
     private Long updateTime;
 
+    @TableField(exist = false)
+    private String type;
+
 }

@@ -2,13 +2,16 @@ package com.niu.core.service.admin.site.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.sys.SysRole;
@@ -18,6 +21,8 @@ import com.niu.core.enums.member.StatusEnum;
 import com.niu.core.mapper.sys.SysRoleMapper;
 import com.niu.core.mapper.sys.SysUserMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
+import com.niu.core.service.admin.auth.IAuthService;
+import com.niu.core.service.admin.auth.ILoginService;
 import com.niu.core.service.admin.site.ISiteUserService;
 import com.niu.core.service.admin.site.param.SiteUserParam;
 import com.niu.core.service.admin.site.param.SiteUserSearchParam;
@@ -26,10 +31,14 @@ import com.niu.core.service.admin.sys.ISysUserRoleService;
 import com.niu.core.service.admin.sys.ISysUserService;
 import com.niu.core.service.admin.sys.param.SysUserParam;
 import com.niu.core.service.admin.sys.param.SysUserRoleParam;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +54,12 @@ public class SiteUserServiceImpl implements ISiteUserService {
     ISysUserRoleService sysUserRoleService;
     @Resource
     SysUserMapper sysUserMapper;
+    @Resource
+    private ILoginService loginService;
+    @Resource
+    private Cached cached;
+
+
     /**
      * 用户管理员列表
      *
@@ -65,7 +80,7 @@ public class SiteUserServiceImpl implements ISiteUserService {
             userRoleMPJQueryWrapper.like("nsu.username", searchParam.getUsername());
         }
         userRoleMPJQueryWrapper.eq("nsur.site_id", RequestUtils.siteId());
-
+        userRoleMPJQueryWrapper.isNotNull("nsu.uid");
         userRoleMPJQueryWrapper.orderByDesc("nsur.is_admin");
         userRoleMPJQueryWrapper.orderByDesc("nsur.id");
         IPage<SiteUserVo> iPage = sysUserRoleMapper.selectJoinPage(new Page<>(page, limit), SiteUserVo.class, userRoleMPJQueryWrapper);
@@ -92,6 +107,9 @@ public class SiteUserServiceImpl implements ISiteUserService {
     @Transactional
     @Override
     public void add(SiteUserParam siteUserParam) {
+        if (siteUserParam.getUsername().matches(".*[\\u4e00-\\u9fa5].*")){
+            throw new AdminException("用户名不能包含中文");
+        }
         sysUserService.addSiteUser(siteUserParam, RequestUtils.siteId());
     }
 
@@ -169,5 +187,20 @@ public class SiteUserServiceImpl implements ISiteUserService {
         SysUser sysUser=sysUserMapper.selectById(uid);
         sysUser.setStatus(StatusEnum.ON.getStatus());
         sysUserMapper.updateById(sysUser);
+    }
+
+    @Override
+    public void delete(Integer uid) {
+        List<SysUserRole> sysUserRoleList = sysUserRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUid, uid).eq(SysUserRole::getSiteId, RequestUtils.siteId()).last("limit 1"));
+        if (CollectionUtils.isEmpty(sysUserRoleList)){
+            throw new CommonException("用户不存在");
+        }
+        SysUserRole sysUserRole = sysUserRoleList.get(0);
+        if (sysUserRole.getIsAdmin() == 1){
+            throw new CommonException("超级管理员不允许删除");
+        }
+        sysUserMapper.deleteById(uid);
+        loginService.clearToken(uid,null, null);
+        cached.remove("user_role_list_" + uid);
     }
 }

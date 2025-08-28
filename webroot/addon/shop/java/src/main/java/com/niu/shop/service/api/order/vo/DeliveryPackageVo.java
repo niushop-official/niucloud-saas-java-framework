@@ -3,6 +3,7 @@ package com.niu.shop.service.api.order.vo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.service.core.order.vo.DeliveryTraceVo;
@@ -53,12 +54,9 @@ public class DeliveryPackageVo implements Serializable {
         private BigDecimal price;
         private Integer siteId;
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsImageThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(this.siteId, this.goodsImage);
         }
     }
 }

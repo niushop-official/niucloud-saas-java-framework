@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
@@ -122,8 +123,8 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
             if (ObjectUtil.isNotEmpty(vo.getImage())) {
                 String image = vo.getImage().split(",")[0];
-                vo.setGoodsCoverThumbBig(coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
-                vo.setGoodsCoverThumbSmall(coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
+                vo.setGoodsCoverThumbBig(CommonUtils.thumbImageBig(RequestUtils.siteId(), image));
+                vo.setGoodsCoverThumbSmall(CommonUtils.thumbImageBig(RequestUtils.siteId(), image));
             }
 
             vo.setCreateTime(DateUtils.timestampToString(item.getCreateTime()));

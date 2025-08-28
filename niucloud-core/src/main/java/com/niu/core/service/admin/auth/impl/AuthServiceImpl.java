@@ -1,8 +1,10 @@
 package com.niu.core.service.admin.auth.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
@@ -10,14 +12,17 @@ import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.AuthException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.entity.sys.SysUser;
+import com.niu.core.entity.sys.SysUserLog;
 import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.site.SiteStatusEnum;
 import com.niu.core.enums.sys.AppTypeEnum;
+import com.niu.core.mapper.sys.SysUserLogMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
 import com.niu.core.service.admin.auth.IAuthService;
 import com.niu.core.service.admin.auth.param.EditAuthUserParam;
@@ -31,14 +36,21 @@ import com.niu.core.service.admin.sys.ISysUserService;
 import com.niu.core.service.admin.sys.param.SysUserParam;
 import com.niu.core.service.admin.sys.vo.SysUserDetailVo;
 import com.niu.core.service.admin.sys.vo.SysUserRoleInfoVo;
+import com.niu.core.service.core.sys.ICoreConfigService;
+import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
+import jdk.jfr.Description;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -63,6 +75,12 @@ public class AuthServiceImpl implements IAuthService {
 
     @Resource
     Cached cached;
+
+    @Resource
+    SysUserLogMapper sysUserLogMapper;
+
+    @Resource
+    private ICoreConfigService coreConfigService;
 
     /**
      * 校验用户和传入站点是否存在从属关系
@@ -233,6 +251,38 @@ public class AuthServiceImpl implements IAuthService {
         return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
     }
 
+    @Override
+    public JSONArray getAuthMenuTreeList(Integer isTree, String addon) {
+        Integer isAdmin = 0;
+        Integer siteId = RequestUtils.siteId();
+        Integer uid = RequestUtils.uid();
+        String appType = RequestUtils.appType();
+        Map<String, List<String>> authApi = new HashMap<>();
+        SysUserRoleInfoVo sysUserRoleInfoVo = new SysUserRoleInfoVo();
+        List<SysMenu> menuList = new ArrayList<>();
+        if (isSuperAdmin()) {
+            isAdmin = 1;
+        } else {
+            sysUserRoleInfoVo = sysUserRoleService.getUserRole(siteId, uid);
+            if (ObjectUtil.isNull(sysUserRoleInfoVo)) {
+                return new JSONArray();
+            }
+            isAdmin = sysUserRoleInfoVo.getIsAdmin();//是否是超级管理员
+        }
+
+        if (isAdmin > 0) {
+            menuList = sysMenuService.getAllMenuList(appType, addon, isTree,0);
+        } else {
+            List<String> roleIdList = JSONUtil.toList(JSONUtil.parseArray(sysUserRoleInfoVo.getRoleIds()), String.class);
+            List<String> menuKeyList = sysRoleService.getMenuIdsByRoleIds(siteId, roleIdList);
+            menuList = sysMenuService.getMenuListByKeys(appType, siteId, isTree,0, menuKeyList, addon);
+        }
+
+        JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(menuList));
+        return isTree==1?TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children"):jsonArray;
+
+    }
+
     /**
      * 获取授权用户信息
      *
@@ -282,4 +332,84 @@ public class AuthServiceImpl implements IAuthService {
         sysUserService.edit(RequestUtils.uid(), sysUserParam);
     }
 
+    @Override
+    public Map<String, Integer> getIsAllowChangeSite() {
+        Map<String, Integer> result = new HashMap<>();
+        CoreSysConfigVo vo = coreConfigService.getConfig(0, "IS_ALLOW_CHANGE_SITE");
+        if (ObjectUtil.isEmpty(vo) || StringUtils.isEmpty(vo.getConfigKey()) || StringUtils.isEmpty(vo.getValue())){
+            result.put("is_allow", 1);
+        }else {
+            JSONObject jsonObject = JSONUtil.parseObj(vo.getValue());
+            result.put("is_allow", jsonObject.getInt("is_allow"));
+        }
+        return result;
+    }
+
+    @Override
+    public void addUserLog(HttpServletRequest request) {
+        if (RequestUtils.getRequestMethod().equals("get")) return;
+
+        try {
+            SysUserLog model = new SysUserLog();
+            model.setSiteId(RequestUtils.siteId());
+            model.setUid(RequestUtils.uid());
+            model.setIp(RequestUtils.ip());
+            model.setUsername(StpUtil.getExtra("userName").toString());
+            model.setUrl(RequestUtils.getReqeustURI());
+            model.setParams("{}");
+            model.setType(RequestUtils.getRequestMethod());
+            model.setCreateTime(System.currentTimeMillis() / 1000);
+            model.setOperation(getDescription(request));
+            sysUserLogMapper.insert(model);
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void setIsAllowChangeSite(Map<String, Integer> param) {
+        coreConfigService.setConfig(0,"IS_ALLOW_CHANGE_SITE", JSONUtil.parseObj(param));
+    }
+
+    /**
+     * 从当前请求中获取 @Description 注解的值
+     * 优先级：方法上的注解 > 类上的注解
+     */
+    private String getDescription(HttpServletRequest request) {
+        try {
+            // 获取当前请求的 HandlerMethod
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HandlerMethod handlerMethod = (HandlerMethod) attributes.getAttribute(
+                HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE,
+                ServletRequestAttributes.SCOPE_REQUEST
+            );
+
+            if (handlerMethod == null) {
+                return "";
+            }
+
+            List<String> description = new LinkedList<>();
+
+            // 获取类上的 @Description
+            Class<?> clazz = handlerMethod.getBeanType();
+            if (clazz.isAnnotationPresent(Description.class)) {
+                Description desc = clazz.getAnnotation(Description.class);
+                if (!desc.value().isEmpty()) {
+                    description.add(desc.value());
+                }
+            }
+
+            // 获取方法上的 @Description
+            Method method = handlerMethod.getMethod();
+            if (method.isAnnotationPresent(Description.class)) {
+                Description desc = method.getAnnotation(Description.class);
+                if (!desc.value().isEmpty()) {
+                    description.add(desc.value());
+                }
+            }
+
+            return String.join("-", description);
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

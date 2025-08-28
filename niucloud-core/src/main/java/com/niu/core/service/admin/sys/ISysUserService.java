@@ -137,4 +137,10 @@ public interface ISysUserService {
      */
     SysUser find(Integer uid);
 
+    /**
+     * 获取用户下拉框
+     * @param siteId
+     * @return
+     */
+    List<SysUserInfoVo> getUserSelect(String siteId);
 }

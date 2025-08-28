@@ -175,4 +175,17 @@ public class CorePosterServiceImpl implements ICorePosterService {
         BeanUtils.copyProperties(param, sysPoster);
         sysPosterMapper.insert(sysPoster);
     }
+
+    @Override
+    public Integer getDefaultPosterIdByType(Integer siteId, String type, String addon) {
+        QueryWrapper<SysPoster> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", siteId)
+                .eq("type", type)
+                .eq("addon", addon)
+                .eq("is_default", 1)
+                .eq("status", 1);
+
+        SysPoster poster = sysPosterMapper.selectOne(queryWrapper);
+        return poster != null ? poster.getId() : 0;
+    }
 }

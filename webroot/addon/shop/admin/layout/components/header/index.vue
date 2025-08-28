@@ -194,7 +194,7 @@ const toPreview = () => {
 .layout-header{
     position: relative;
     z-index: 5;
-    box-shadow: 0px 0px 4px 0px rgba(0,145,255,0.1);
+    box-shadow: 0 0 4px 0 rgba(0,145,255,0.1);
 }
 .navbar-item {
     padding: 0 8px;
@@ -203,17 +203,18 @@ const toPreview = () => {
     }
 }
 .index-item {
-	border: 1px solid;
-	border-color: var(--el-color-primary);
+    border: 1px solid;
+    border-color: var(--el-color-primary);
+
     &:hover {
-		color: #fff;
+        color: #fff;
         background-color: var(--el-color-primary);
     }
 }
 :deep(.el-dropdown-menu__item) {
-	&:focus {
-		background-color: transparent !important;
-		color: #333 !important;
-	}
+    &:focus {
+        background-color: transparent !important;
+        color: #333 !important;
+    }
 }
 </style>

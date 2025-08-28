@@ -1,10 +1,8 @@
 package com.niu.shop.service.admin.marketing.vo;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
-import com.niu.shop.entity.active.ShopActiveGoods;
-import com.niu.shop.enums.active.ActiveGoodsTypeEnum;
 import com.niu.shop.enums.active.ActiveStatusEnum;
-import com.niu.shop.enums.active.ActiveTypeEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,53 +17,74 @@ public class ShopDiscountDetailVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer activeId;  // 活动id
-    private Integer siteId;  // 站点id
-    private String activeName;  // 活动名称
-    private String activeDesc;  // 活动说明
-    private String activeType;  // 活动类型(店铺活动，会员活动，商品活动)
-    private String activeGoodsType;  // 商品活动类型（单品，独立商品，店铺整体商品）
-    @JsonSerialize(using = BeanJsonSerializer.StringToJSONObjectSerializer.class)
-    private String activeGoodsInfo;  // 参与活动商品信息
-    private String activeClass;  // 活动类别
-    private String activeClassCategory;  // 活动类别子分类（活动管理）
-    private String relateMember;  // 参与会员条件(默认全部)
-    private String activeValue;  // 活动扩展信息数据
+    private String statusName;
+    private Integer discountId;
+    private Integer siteId;
+    private String name;
+    private String remark;
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long startTime; // 活动开始时间
+    private Long startTime;
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long endTime; // 活动结束时间
+    private Long endTime;
+    private String status;
+    private BigDecimal orderMoney;
+    private Integer orderNum;
+    private Integer memberNum;
+    private Integer successNum;
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Long createTime; // 添加时间
-    private String activeStatus;  // 活动状态
-    private BigDecimal activeOrderMoney;  // 活动累计金额
-    private Integer activeOrderNum;  // 活动累计订单数
-    private Integer activeMemberNum;  // 活动参与会员数
-    private Integer activeSuccessNum;  // 活动成功参与会员数
-    private List<ShopActiveGoods> activeGoods; // 活动商品
+    private Long createTime;
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long updateTime;
+    private List<GoodsInfoVO> goodsInfo;
 
-    /**
-     * 获取活动类型
-     * @return
-     */
-    public String getActiveTypeName() {
-        return ActiveTypeEnum.getNameByType(this.activeType);
+    public String getStatusName() {
+        return ActiveStatusEnum.getNameByStatus(this.status);
     }
 
-    /**
-     * 获取活动商品类型
-     * @return
-     */
-    public String getActiveGoodsTypeName() {
-        return ActiveGoodsTypeEnum.getNameByType(this.activeGoodsType);
+    @Data
+    public static class GoodsInfoVO {
+        private String goodsCoverThumbSmall;
+        private Integer goodsId;
+        private Integer skuId;
+        private String type;
+        private String goodsType;
+        private String goodsTypeName;
+        private String goodsName;
+        private BigDecimal price;
+        private BigDecimal rate;
+        private BigDecimal reduceMoney;
+        private BigDecimal discountPrice;
+        private String specType;
+        private List<GoodsSkuVO> goodsSkuList;
+
+        // 多规格商品特有字段
+        private BigDecimal minRate;
+        private BigDecimal maxRate;
+        private BigDecimal minReduceMoney;
+        private BigDecimal maxReduceMoney;
+        private BigDecimal minDiscountPrice;
+        private BigDecimal maxDiscountPrice;
+
     }
 
-    /**
-     * 获取活动状态
-     * @return
-     */
-    public String getActiveStatusName() {
-        return ActiveStatusEnum.getNameByStatus(this.activeStatus);
+    @Data
+    public static class GoodsSkuVO {
+        private String goodsCoverThumbSmall;
+        private Integer discountGoodsId;
+        private Integer siteId;
+        private Integer discountId;
+        private Integer goodsId;
+        private Integer skuId;
+        private String type;
+        private BigDecimal rate;
+        private BigDecimal reduceMoney;
+        private BigDecimal discountPrice;
+        private Integer isEnabled;
+        private String goodsName;
+        private String goodsCover;
+        private String goodsType;
+        private BigDecimal price;
+        private String skuName;
+        private String skuImage;
     }
-
 }

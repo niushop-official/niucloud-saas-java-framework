@@ -54,6 +54,10 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
 
         SysWebsiteVo vo = new SysWebsiteVo();
         BeanUtils.copyProperties(model, vo);
+
+        SysServiceVo sysService = getService(siteId);
+        if (sysService != null) BeanUtils.copyProperties(sysService, vo);
+
         return vo;
     }
 
@@ -74,6 +78,8 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
         service.set("wechat_code", configParam.getWechatCode());
         service.set("enterprise_wechat", configParam.getEnterpriseWechat());
         service.set("tel", configParam.getTel());
+        service.set("site_login_logo", configParam.getSiteLoginLogo());
+        service.set("site_login_bg_img", configParam.getSiteLoginBgImg());
         coreConfigService.setConfig(siteId, "SERVICE_INFO", service);
     }
 

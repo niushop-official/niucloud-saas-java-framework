@@ -7,11 +7,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.ImageToBase64ConverterUtil;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.addon.Addon;
@@ -37,10 +39,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 
 /**
@@ -121,17 +125,38 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
             vo.setApp(appJson);
             List<String> addonStr = new ArrayList<>();
             List<String> appStr = new ArrayList<>();
+            List<SiteGroupListVo.IconAndTitle> appList = new ArrayList<>();
+            List<SiteGroupListVo.IconAndTitle> addonListResult = new ArrayList<>();
             for(Addon addon : addonList)
             {
                 if(addonJson.contains(addon.getKey())){
                     addonStr.add(addon.getTitle());
+                    SiteGroupListVo.IconAndTitle iconAndTitle = new SiteGroupListVo.IconAndTitle();
+                    iconAndTitle.setTitle(addon.getTitle());
+                    try {
+                        iconAndTitle.setIcon(ImageToBase64ConverterUtil.convertToBase64(addon.getIcon()));
+                    } catch (Exception e) {
+                        iconAndTitle.setIcon("");
+                    }
+                    addonListResult.add(iconAndTitle);
                 }
                 if(appJson.contains(addon.getKey())){
                     appStr.add(addon.getTitle());
+                    SiteGroupListVo.IconAndTitle iconAndTitle = new SiteGroupListVo.IconAndTitle();
+                    iconAndTitle.setTitle(addon.getTitle());
+                    try {
+                        iconAndTitle.setIcon(ImageToBase64ConverterUtil.convertToBase64(addon.getIcon()));
+                    } catch (Exception e) {
+                        iconAndTitle.setIcon("");
+                    }
+
+                    appList.add(iconAndTitle);
                 }
             }
             vo.setAddonName(addonStr);
             vo.setAppName(appStr);
+            vo.setAddonList(addonListResult);
+            vo.setAppList(appList);
             list.add(vo);
         }
         return PageResult.build(iPage.getCurrent(), iPage.getSize(), iPage.getTotal()).setData(list);

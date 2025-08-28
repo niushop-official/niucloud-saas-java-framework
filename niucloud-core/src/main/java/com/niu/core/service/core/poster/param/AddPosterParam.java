@@ -1,7 +1,13 @@
 package com.niu.core.service.core.poster.param;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class AddPosterParam {
     private Integer siteId;

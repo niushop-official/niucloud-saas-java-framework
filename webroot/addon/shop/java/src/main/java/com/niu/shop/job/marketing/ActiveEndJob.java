@@ -30,7 +30,7 @@ public class ActiveEndJob extends AbstractJobProvider implements IJobProvider {
         List<ShopActive> activeList = shopActiveMapper().selectList(new QueryWrapper<ShopActive>()
                 .eq("active_status", ActiveStatusEnum.ACTIVE.getStatus())
                 .lt("end_time", System.currentTimeMillis() / 1000)
-                .select("active_id")
+                .select("active_id, end_time")
         );
         if (ObjectUtil.isNotEmpty(activeList)) {
             for (ShopActive item : activeList) {

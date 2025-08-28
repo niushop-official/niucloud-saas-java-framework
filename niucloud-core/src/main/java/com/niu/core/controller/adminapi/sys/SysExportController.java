@@ -61,7 +61,9 @@ public class SysExportController {
      */
     @GetMapping("/export/check/{type}")
     public Result<Object> check(@Validated @PathVariable("type") String type, @RequestParam Map<String, Object> objectMap) {
-        return Result.success("", sysExportService.checkExportData(type, objectMap));
+        Boolean status = sysExportService.checkExportData(type, objectMap);
+        String msg = status ? "" : "暂无可导出数据";
+        return Result.success(msg, status);
     }
 
     /**

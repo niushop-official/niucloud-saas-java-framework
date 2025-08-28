@@ -15,7 +15,6 @@ import com.niu.core.service.core.diy_form.param.DiyFormSubmitConfigParam;
 import com.niu.core.service.core.diy_form.param.DiyFormWriteConfigParam;
 import com.niu.core.service.core.diy_form.vo.DiyFormRecordsInfoVo;
 import com.niu.core.service.core.diy_form.vo.DiyFormRecordsListVo;
-import io.swagger.models.auth.In;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +22,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import jdk.jfr.Description;
+
 /**
  * 万能表单表控制器
  */
+@Description("万能表单表控制器")
 @RestController
 @RequestMapping("adminapi/diy")
 public class DiyFormController {
@@ -42,10 +44,11 @@ public class DiyFormController {
     /**
      * 万能表单表分页列表
      *
-     * @param pageParam 分页
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<DiyFormListVo>>
+     * @return Result<PageResult < DiyFormListVo>>
      */
+    @Description("万能表单表分页列表")
     @GetMapping("/form")
     public Result<PageResult<DiyFormListVo>> page(@Validated PageParam pageParam, @Validated DiyFormSearchParam searchParam) {
         PageResult<DiyFormListVo> list = diyFormService.getPage(pageParam, searchParam);
@@ -58,6 +61,7 @@ public class DiyFormController {
      * @param id 主键ID
      * @return Result<DiyFormInfoVo>
      */
+    @Description("万能表单表详情")
     @GetMapping("/form/{id}")
     public Result<DiyFormInfoVo> info(@PathVariable("id") Integer id) {
         DiyFormInfoVo info = diyFormService.getInfo(id);
@@ -70,6 +74,7 @@ public class DiyFormController {
      * @param addParam 添加参数
      * @return Result<Object>
      */
+    @Description("万能表单表添加")
     @PostMapping("/form")
     public Result<Object> add(@Validated @RequestBody DiyFormParam addParam) {
         diyFormService.add(addParam);
@@ -82,6 +87,7 @@ public class DiyFormController {
      * @param editParam 编辑参数
      * @return Result<Object>
      */
+    @Description("万能表单表编辑")
     @PutMapping("/form/{id}")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody DiyFormParam editParam) {
         diyFormService.edit(id, editParam);
@@ -94,6 +100,7 @@ public class DiyFormController {
      * @param diyFormDeleteParam 参数
      * @return Result<Object>
      */
+    @Description("万能表单表删除")
     @PutMapping("/form/delete")
     public Result<Object> del(@RequestBody DiyFormDeleteParam diyFormDeleteParam) {
         diyFormService.del(diyFormDeleteParam.getFormIds());
@@ -102,9 +109,11 @@ public class DiyFormController {
 
     /**
      * 获取万能表单列表
+     *
      * @param searchParam 搜索参数
-     * @return Result<List<DiyFormListVo>>
+     * @return Result<List < DiyFormListVo>>
      */
+    @Description("获取万能表单列表")
     @GetMapping("/form/list")
     public Result<List<DiyFormListVo>> lists(@Validated DiyFormSearchParam searchParam) {
         List<DiyFormListVo> list = diyFormService.getList(searchParam);
@@ -113,9 +122,11 @@ public class DiyFormController {
 
     /**
      * 获取万能表单初始化数据
+     *
      * @param params 参数
-     * @return Result<Map<String, Object>>
+     * @return Result<Map < String, Object>>
      */
+    @Description("获取万能表单初始化数据")
     @GetMapping("/form/init")
     public Result<DiyFormInitVo> getInit(DiyFormInitParam params) {
         DiyFormInitVo initData = diyFormService.getInit(params);
@@ -124,8 +135,10 @@ public class DiyFormController {
 
     /**
      * 获取万能表单模板
-     * @return Result<Map<String, Object>>
+     *
+     * @return Result<Map < String, Object>>
      */
+    @Description("获取万能表单模板")
     @GetMapping("/form/template")
     public Result<Map<String, Object>> getTemplate(DiyFormTemplateParam params) {
         Map<String, Object> template = diyFormService.getTemplate(params);
@@ -134,9 +147,11 @@ public class DiyFormController {
 
     /**
      * 修改页面分享内容
+     *
      * @param share 分享内容数据
      * @return Result<Object>
      */
+    @Description("修改页面分享内容")
     @PutMapping("/form/share")
     public Result<Object> modifyShare(@RequestBody DiyFormShareParam share) {
         diyFormService.modifyShare(share.getFormId(), share.getShare());
@@ -145,8 +160,10 @@ public class DiyFormController {
 
     /**
      * 复制模版
+     *
      * @return Result<Integer>
      */
+    @Description("复制模版")
     @PostMapping("/form/copy")
     public Result<Integer> copy(@RequestBody DiyFormCopyParam diyFormCopyParam) {
         Integer id = diyFormService.copy(diyFormCopyParam.getFormId());
@@ -155,8 +172,10 @@ public class DiyFormController {
 
     /**
      * 获取万能表单类型
-     * @return Result<List<Map<String, Object>>>
+     *
+     * @return Result<List < Map < String, Object>>>
      */
+    @Description("获取万能表单类型")
     @GetMapping("/form/type")
     public Result<Object> getFormType() {
         JSONObject formTypeList = diyFormService.getFormType();
@@ -165,8 +184,10 @@ public class DiyFormController {
 
     /**
      * 修改状态
+     *
      * @return Result<Object>
      */
+    @Description("修改状态")
     @PutMapping("/form/status")
     public Result<Object> modifyStatus(@RequestBody DiyFormStatusParam formStatusParam) {
         diyFormService.modifyStatus(formStatusParam);
@@ -175,9 +196,11 @@ public class DiyFormController {
 
     /**
      * 获取使用记录
+     *
      * @param searchParam 查询数据
-     * @return Result<PageResult<DiyFormRecordsListVo>>
+     * @return Result<PageResult < DiyFormRecordsListVo>>
      */
+    @Description("获取使用记录")
     @GetMapping("/form/records")
     public Result<PageResult<DiyFormRecordsListVo>> getRecordPages(PageParam pageParam, DiyFormRecordsSearchParam searchParam) {
 
@@ -186,9 +209,11 @@ public class DiyFormController {
 
     /**
      * 获取使用记录详情
+     *
      * @param recordsId 记录ID
-     * @return Result<Map<String, Object>>
+     * @return Result<Map < String, Object>>
      */
+    @Description("获取使用记录详情")
     @GetMapping("/form/records/{records_id}")
     public Result<DiyFormRecordsInfoVo> getRecordInfo(@PathVariable("records_id") Integer recordsId) {
         return Result.success(diyFormService.getRecordInfo(recordsId));
@@ -196,8 +221,10 @@ public class DiyFormController {
 
     /**
      * 使用记录删除
+     *
      * @return Result<Object>
      */
+    @Description("使用记录删除")
     @DeleteMapping("/form/records/delete")
     public Result<Object> delRecord(DiyFormRecordsDelParam delParam) {
         diyFormService.delRecord(delParam.getFormId(), delParam.getRecordId());
@@ -206,9 +233,11 @@ public class DiyFormController {
 
     /**
      * 获取万能表单字段记录
-     * @return Result<List<Map<String, Object>>>
+     *
+     * @return Result<List < Map < String, Object>>>
      */
     @GetMapping("/form/fields/list")
+    @Description("获取万能表单字段记录")
     public Result<Object> getFieldsList(DiyFormRecordsFieldsSearchParam diyFormRecordsFieldsSearchParam) {
         List<DiyFormFieldsListVo> fieldsList = diyFormService.getFieldsList(diyFormRecordsFieldsSearchParam);
         return Result.success(fieldsList);
@@ -216,10 +245,12 @@ public class DiyFormController {
 
     /**
      * 获取表单填写配置
+     *
      * @param formId 表单ID
-     * @return Result<Map<String, Object>>
+     * @return Result<Map < String, Object>>
      */
     @GetMapping("/form/write/{form_id}")
+    @Description("获取表单填写配置")
     public Result<Object> getWriteConfig(@PathVariable("form_id") Integer formId) {
 
         return Result.success(diyFormConfigService.getWriteConfig(formId));
@@ -227,6 +258,7 @@ public class DiyFormController {
 
     /**
      * 编辑表单填写配置
+     *
      * @param editParam 配置数据
      * @return Result<Object>
      */
@@ -238,10 +270,12 @@ public class DiyFormController {
 
     /**
      * 获取表单提交成功页配置
+     *
      * @param formId 表单ID
-     * @return Result<Map<String, Object>>
+     * @return Result<Map < String, Object>>
      */
     @GetMapping("/form/submit/{form_id}")
+    @Description("获取表单提交成功页配置")
     public Result<Object> getSubmitConfig(@PathVariable("form_id") Integer formId) {
 
         return Result.success(diyFormConfigService.getSubmitConfig(formId));
@@ -249,6 +283,7 @@ public class DiyFormController {
 
     /**
      * 编辑表单提交成功页配置
+     *
      * @param editParam 配置数据
      * @return Result<Object>
      */
@@ -260,8 +295,9 @@ public class DiyFormController {
 
     /**
      * 获取万能表单填表人统计列表
+     *
      * @param searchParam 查询数据
-     * @return Result<PageResult<Map<String, Object>>>
+     * @return Result<PageResult < Map < String, Object>>>
      */
     @GetMapping("/form/records/member/stat")
     public Result<Object> memberStatPages(PageParam pageParam, com.niu.core.service.admin.diy_form.param.DiyFormRecordsSearchParam searchParam) {
@@ -270,8 +306,9 @@ public class DiyFormController {
 
     /**
      * 获取万能表单字段统计列表
+     *
      * @param data 查询数据
-     * @return Result<List<Map<String, Object>>>
+     * @return Result<List < Map < String, Object>>>
      */
     @GetMapping("/form/records/field/stat")
     public Result<Object> fieldStatList(com.niu.core.service.admin.diy_form.param.DiyFormRecordsSearchParam data) {
@@ -280,12 +317,21 @@ public class DiyFormController {
 
     /**
      * 获取万能表单微信小程序二维码
+     *
      * @param formId 表单ID
-     * @return Result<Map<String, Object>>
+     * @return Result<Map < String, Object>>
      */
     @GetMapping("/form/qrcode")
+    @Description("获取万能表单微信小程序二维码")
     public Result<Object> getQrcode(@RequestParam("form_id") Integer formId) {
         //Map<String, Object> qrcode = diyFormService.getQrcode(formId);
         return Result.success();
+    }
+
+    @GetMapping("/form/select")
+    @Description("万能表单分页列表（用于弹框选择）")
+    public Result<?> selectPage(@Validated PageParam pageParam, @Validated DiyFormSelectParam searchParam) {
+        PageResult<DiyFormInfoVo> list = diyFormService.getSelectPage(pageParam, searchParam);
+        return Result.success(list);
     }
 }

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
@@ -17,27 +18,31 @@ import com.niu.core.common.utils.object.ObjectUtils;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.shop.entity.active.ShopActive;
 import com.niu.shop.entity.active.ShopActiveGoods;
+import com.niu.shop.entity.discount.ShopDiscount;
+import com.niu.shop.entity.discount.ShopDiscountGoods;
+import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsLabel;
+import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.enums.active.ActiveStatusEnum;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
 import com.niu.shop.mapper.active.ShopActiveMapper;
+import com.niu.shop.mapper.discount.ShopDiscountGoodsMapper;
+import com.niu.shop.mapper.discount.ShopDiscountMapper;
+import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsLabelListVo;
 import com.niu.shop.service.admin.marketing.vo.ShopDiscountOrderListVo;
 import com.niu.shop.service.api.marketing.IShopDiscountService;
 import com.niu.shop.service.api.marketing.param.DiscountGoodsSearchParam;
 import com.niu.shop.service.api.marketing.param.ShopDiscountListParam;
-import com.niu.shop.service.api.marketing.vo.ShopDiscountGoodsInfoVo;
-import com.niu.shop.service.api.marketing.vo.ShopDiscountGoodsListVo;
-import com.niu.shop.service.api.marketing.vo.ShopDiscountListVo;
+import com.niu.shop.service.api.marketing.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,24 +52,32 @@ public class IShopDiscountServiceImpl implements IShopDiscountService {
     ShopActiveMapper shopActiveMapper;
 
     @Resource
+    ShopDiscountMapper shopDiscountMapper;
+
+    @Resource
     ShopActiveGoodsMapper shopActiveGoodsMapper;
 
     @Resource
     ICoreConfigService coreConfigService;
 
+    @Resource
+    ShopDiscountGoodsMapper shopDiscountGoodsMapper;
+
+    @Resource
+    ShopGoodsSkuMapper shopGoodsSkuMapper;
+
     @Override
     public ShopDiscountGoodsInfoVo getInfoByGoods(Integer goodsId) {
-        ShopActiveGoods shopActiveGoods = shopActiveGoodsMapper.selectOne(new QueryWrapper<ShopActiveGoods>()
+        ShopDiscountGoods shopActiveGoods = shopDiscountGoodsMapper.selectOne(new QueryWrapper<ShopDiscountGoods>()
                 .eq("site_id", RequestUtils.siteId())
-                .eq("active_goods_status", "active")
+                .eq("status", "active")
                 .eq("goods_id", goodsId)
-                .eq("active_class", "discount")
                 .last("limit 1")
         );
         ShopDiscountGoodsInfoVo vo = new ShopDiscountGoodsInfoVo();
         if (shopActiveGoods != null) {
             BeanUtils.copyProperties(shopActiveGoods, vo);
-            vo.setActive(shopActiveMapper.selectById(shopActiveGoods.getActiveId()));
+            vo.setActive(shopDiscountMapper.selectById(shopActiveGoods.getDiscountId()));
             return vo;
         }
         return null;
@@ -87,36 +100,40 @@ public class IShopDiscountServiceImpl implements IShopDiscountService {
      * @param searchParam
      */
     @Override
-    public PageResult<ShopDiscountGoodsListVo> getGoodsPage(PageParam pageParam, DiscountGoodsSearchParam searchParam) {
-        MPJQueryWrapper<ShopActiveGoods> wrapper = new MPJQueryWrapper<>();
-        wrapper.setAlias("ag")
-                .innerJoin("?_shop_goods g ON ag.goods_id = g.goods_id".replace("?_", GlobalConfig.tablePrefix));
-        wrapper.select("g.*,ag.active_goods_value,ag.active_goods_status");
-        wrapper.eq("ag.site_id", RequestUtils.siteId());
-        wrapper.in("ag.active_goods_status", new String[]{ ActiveStatusEnum.ACTIVE.getStatus(), ActiveStatusEnum.NOT_ACTIVE.getStatus() });
-        wrapper.eq("ag.active_class", "discount");
-        wrapper.eq("ag.active_id", searchParam.getActiveId());
+    public PageResult<ShopDiscountGoodsListNewVo> getGoodsPage(PageParam pageParam, DiscountGoodsSearchParam searchParam) {
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
-        IPage<ShopDiscountGoodsListVo> iPage = shopActiveGoodsMapper.selectJoinPage(new Page<>(pageParam.getPage(), pageParam.getLimit()), ShopDiscountGoodsListVo.class, wrapper);
-        for (ShopDiscountGoodsListVo vo: iPage.getRecords()) {
-            JSONArray activeGoodsValue = JSONUtil.parseArray(vo.getActiveGoodsValue());
-            activeGoodsValue.toList(JSONObject.class).stream().filter(i -> i.getInt("is_enabled") == 1).collect(Collectors.toList()).sort(Comparator.comparingDouble(o -> ((JSONObject)o).getDouble("discount_price")));
-            if (activeGoodsValue.size() > 0) {
-                JSONObject sku = activeGoodsValue.getJSONObject(0);
-                ShopDiscountGoodsListVo.GoodsSku skuVo = JSONUtil.toBean(sku, ShopDiscountGoodsListVo.GoodsSku.class);
-                skuVo.setActiveDiscountPrice(ObjectUtil.defaultIfNull(sku.getBigDecimal("discount_price"), skuVo.getSalePrice()));
-                skuVo.setActiveDiscountRate(sku.getBigDecimal("discount_rate"));
-                skuVo.setActiveDiscountType(sku.getStr("discount_type"));
-                skuVo.setActiveReduceMoney(sku.getBigDecimal("reduce_money"));
-                skuVo.setActiveSpecifyPrice(sku.getBigDecimal("specify_price"));
-                vo.setGoodsSku(skuVo);
-            }
+        // 创建MPJQueryWrapper实例
+        MPJQueryWrapper<ShopDiscountGoods> queryWrapper = new MPJQueryWrapper();
 
-            ShopDiscountGoodsListVo.ActiveGoods activeGoodsVo = new ShopDiscountGoodsListVo.ActiveGoods();
-            activeGoodsVo.setActiveGoodsStatus(vo.getActiveGoodsStatus());
-            vo.setActiveGoods(activeGoodsVo);
+        // 设置查询条件
+        queryWrapper.setAlias("sdg")
+                .select("nsg.site_id,nsg.goods_category,nsg.goods_cover,nsg.goods_id,nsg.goods_name,nsg.goods_type,nsg.is_discount,nsg.member_discount,nsg.unit,nsg.sub_title,nsg.sale_num + nsg.virtual_sale_num as sale_num," +
+                        "sdg.sku_id,sdg.discount_id,sdg.status as discount_status,sdg.type,sdg.rate,sdg.rate as discount_rate,sdg.discount_price,sdg.reduce_money,sdg.type as discount_type")  // 选择商品表的所有字段
+                .innerJoin("nc_shop_goods as nsg on sdg.goods_id = nsg.goods_id")  // 设置关联表
+                .eq("sdg.site_id", RequestUtils.siteId())
+                .in("sdg.status", Arrays.asList("active", "not_active"));
+        if(ObjectUtil.isNotEmpty(searchParam.getDiscountId())){
+            queryWrapper.eq("sdg.discount_id", searchParam.getDiscountId());
         }
-        return PageResult.build(iPage);
+        queryWrapper.groupBy("sdg.goods_id");
+
+        // 执行查询
+        IPage<ShopDiscountGoodsListNewVo> iPage = shopDiscountGoodsMapper.selectJoinPage(new Page<>(pageParam.getPage(), pageParam.getLimit()), ShopDiscountGoodsListNewVo.class, queryWrapper);
+
+        List<ShopDiscountGoodsListNewVo> list = iPage.getRecords();
+        for (int i=0; i<list.size(); i++) {
+            List<ShopGoodsSku> shopGoodsSkuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", list.get(i).getGoodsId()).eq("sku_id", list.get(i).getSkuId()));
+            ShopDiscountGoodsListNewVo.SkuInfo goodsSku = new ShopDiscountGoodsListNewVo.SkuInfo();
+            BeanUtils.copyProperties(shopGoodsSkuList.get(0), goodsSku);
+            goodsSku.setDiscountType(list.get(i).getType());
+            goodsSku.setDiscountPrice(list.get(i).getDiscountPrice());
+            goodsSku.setDiscountRate(list.get(i).getDiscountRate());
+            goodsSku.setReduceMoney(list.get(i).getReduceMoney());
+            list.get(i).setGoodsSku(goodsSku);
+        }
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
     /**
@@ -126,24 +143,23 @@ public class IShopDiscountServiceImpl implements IShopDiscountService {
      * @return
      */
     @Override
-    public List<ShopDiscountListVo> getList(ShopDiscountListParam shopDiscountListParam) {
-        QueryWrapper<ShopActive> queryWrapper = new QueryWrapper();
+    public List<ShopDiscountVo> getList(ShopDiscountListParam shopDiscountListParam) {
+        QueryWrapper<ShopDiscount> queryWrapper = new QueryWrapper();
         queryWrapper.eq("site_id", RequestUtils.siteId())
-                .in("active_status", Arrays.asList("active", "not_active"))
-                .eq("active_class", "discount");
+                .in("status", Arrays.asList("active", "not_active"));
         if(ObjectUtil.isNotEmpty(shopDiscountListParam.getActiveName()))
         {
-            queryWrapper.like("active_name", shopDiscountListParam.getActiveName());
+            queryWrapper.like("name", shopDiscountListParam.getActiveName());
         }
         if(ObjectUtil.isNotEmpty(shopDiscountListParam.getLimit()))
         {
             queryWrapper.last("limit " + shopDiscountListParam.getLimit());
         }
         queryWrapper.orderByAsc("start_time");
-        List<ShopActive> shopActiveList = shopActiveMapper.selectList(queryWrapper);
-        List<ShopDiscountListVo> list = new LinkedList<>();
-        for (ShopActive item : shopActiveList) {
-            ShopDiscountListVo vo = new ShopDiscountListVo();
+        List<ShopDiscount> shopActiveList = shopDiscountMapper.selectList(queryWrapper);
+        List<ShopDiscountVo> list = new LinkedList<>();
+        for (ShopDiscount item : shopActiveList) {
+            ShopDiscountVo vo = new ShopDiscountVo();
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }

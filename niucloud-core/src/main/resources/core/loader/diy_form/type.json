@@ -4,5 +4,12 @@
     "preview": "static/resource/images/diy_form/diy_from_preview.jpg",
     "sort": 10001,
     "addon": ""
+  },
+  "DIY_FORM_MEMBER_INFO":{
+    "title": "个人资料",
+    "preview": "static/resource/images/diy_form/diy_form_member_info_preview.jpg",
+    "sort": 10002,
+    "addon": "",
+    "app_type": ["admin"]
   }
 }

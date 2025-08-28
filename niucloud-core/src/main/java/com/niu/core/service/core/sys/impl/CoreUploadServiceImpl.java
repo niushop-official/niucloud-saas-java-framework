@@ -2,11 +2,13 @@ package com.niu.core.service.core.sys.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
+import com.github.pagehelper.util.StringUtil;
 import com.niu.core.common.component.upload.model.*;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.component.upload.IUploadProvider;
 import com.niu.core.common.component.upload.factory.UploadProviderFactory;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.sys.SysAttachment;
 import com.niu.core.enums.sys.StorageEnum;
 import com.niu.core.enums.upload.UploadRolesEnum;
@@ -54,6 +56,9 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
             configObject = coreStorageService.getStorageByType(attachmentUploadParam.getSiteId(), attachmentUploadParam.getStorageType());
         } else {
             configObject = coreStorageService.getDefaultStorage(attachmentUploadParam.getSiteId());
+            if (configObject == null || StringUtil.isEmpty(configObject.getStr("storage_type"))){
+                configObject = coreStorageService.getDefaultStorage(RequestUtils.defaultSiteId());
+            }
         }
 
         // 根据配置初始化

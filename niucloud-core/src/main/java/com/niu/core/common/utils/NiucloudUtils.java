@@ -11,6 +11,7 @@ import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.component.context.cache.CacheFactory;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.admin.sys.vo.SysDeveloperTokenVo;
 import com.niu.core.service.core.niucloud.ICoreNiucloudConfigService;
 import com.niu.core.service.core.niucloud.vo.NiucloudConfigVo;
@@ -88,6 +89,16 @@ public class NiucloudUtils {
          */
         public static JSONObject post(String url, Object data) {
             return execute(HttpRequest.post(baseUrl + url).body(JSONUtil.parse(data).toString()));
+        }
+
+        /**
+         * 发起 PUT 请求
+         * @param url
+         * @param data
+         * @return
+         */
+        public static JSONObject put(String url, Object data) {
+            return execute(HttpRequest.put(baseUrl + url).body(JSONUtil.parse(data).toString()));
         }
 
         private static HttpRequest handleRequest(HttpRequest request) {
@@ -186,6 +197,18 @@ public class NiucloudUtils {
 
         private HttpRequest request;
 
+        public Cloud useThirdBuild() {
+            ICloudBuildService cloudBuildService = SpringContext.bean(ICloudBuildService.class);
+            Map<String, Object> config = cloudBuildService.getLocalCloudCompileConfig();
+            int isOpen = (int) config.get("isOpen");
+            String baseUri = (String) config.get("baseUri");
+            if (isOpen == 1 && !baseUri.isEmpty()) {
+                if (!baseUri.endsWith("/")) baseUri += "/";
+                this.baseUrl = baseUri;
+            }
+            return this;
+        }
+
         public Cloud build(String url) {
             this.url = baseUrl + url;
             this.request = new HttpRequest(this.url);
@@ -230,8 +253,33 @@ public class NiucloudUtils {
         }
 
         public HttpResponse execute() {
-            HttpResponse response = this.request.execute();
-            return response;
+            int maxRetries = 3;
+            long[] backoffDelays = {100L, 200L, 400L}; // 指数退避：100ms, 200ms, 400ms
+
+            Exception lastException = null;
+
+            for (int i = 0; i <= maxRetries; i++) {
+                try {
+                    HttpResponse response = this.request.execute();
+                    return response;
+                } catch (Exception e) {
+                    lastException = e;
+                    // 如果是最后一次尝试，不再重试
+                    if (i == maxRetries) {
+                        break;
+                    }
+                    long delay = backoffDelays[i]; // 第 i 次重试的延迟时间
+                    // 阻塞等待一段时间再重试
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ie) {
+                        // 如果线程被中断，恢复中断状态并退出
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+            throw new RuntimeException("HTTP请求失败: " + this.request.getUrl(), lastException);
         }
     }
 }

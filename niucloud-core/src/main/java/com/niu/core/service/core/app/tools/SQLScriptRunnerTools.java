@@ -32,7 +32,7 @@ public final class SQLScriptRunnerTools {
             connection.commit();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("执行脚本异常.");
+            throw new RuntimeException("执行脚本异常." + e.getMessage());
         }
     }
 
@@ -56,7 +56,7 @@ public final class SQLScriptRunnerTools {
             execScript(fileReader);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("执行脚本异常.");
+            throw new RuntimeException("执行脚本异常." + e.getMessage());
         }
     }
 
@@ -68,7 +68,7 @@ public final class SQLScriptRunnerTools {
             execScript(reader);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("执行脚本异常.");
+            throw new RuntimeException("执行脚本异常." + e.getMessage());
         }
     }
 

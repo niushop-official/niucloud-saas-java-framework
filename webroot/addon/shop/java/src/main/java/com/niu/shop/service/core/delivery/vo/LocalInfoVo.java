@@ -36,6 +36,9 @@ public class LocalInfoVo implements Serializable {
     public static class LatLnt {
         private BigDecimal lat;
         private BigDecimal lng;
+
+        public LatLnt(BigDecimal lat, BigDecimal lng) {
+        }
     }
 
     @Data

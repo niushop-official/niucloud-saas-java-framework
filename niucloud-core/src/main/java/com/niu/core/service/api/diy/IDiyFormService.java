@@ -5,6 +5,7 @@ import com.niu.core.service.api.diy.param.*;
 import com.niu.core.service.api.diy.vo.DiyFormInfoVo;
 import com.niu.core.service.api.diy.vo.DiyFormRecordsDetailVo;
 import com.niu.core.service.api.diy.vo.DiyFormRecordsInfoVo;
+import com.niu.core.service.api.diy.vo.DiyMemberRecordVo;
 import com.niu.core.service.core.diy_form.param.DiyFormRecordsParam;
 
 import java.util.Map;
@@ -71,4 +72,15 @@ public interface IDiyFormService {
      */
     DiyFormRecordsDetailVo getFormRecordInfo(Integer recordId);
 
+    /**
+     * 获取个人资料表单填写记录
+     * @return
+     */
+    Object getMemberInfoRecord();
+
+    /**
+     * 修改表单填写记录
+     * @param param
+     */
+    void editRecord(DiyFormRecordsParam param);
 }

@@ -30,5 +30,4 @@ const menuLevel = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-
 </style>

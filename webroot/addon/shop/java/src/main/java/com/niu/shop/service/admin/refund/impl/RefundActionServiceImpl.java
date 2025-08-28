@@ -37,6 +37,7 @@ import com.niu.shop.mapper.order.ShopOrderRefundMapper;
 import com.niu.shop.mapper.shop_address.ShopAddressMapper;
 import com.niu.shop.service.admin.refund.IRefundActionService;
 import com.niu.shop.service.core.refund.ICoreRefundActionService;
+import com.niu.shop.service.core.refund.param.ActiveRefundCloseParam;
 import com.niu.shop.service.core.refund.param.ActiveRefundParam;
 import com.niu.shop.service.admin.refund.param.AuditApplyParam;
 import com.niu.shop.service.admin.refund.param.AuditRefundGoodsParam;
@@ -89,6 +90,7 @@ public class RefundActionServiceImpl implements IRefundActionService {
 
     @Resource
     ICoreRefundActionService coreRefundActionService;
+
 
     /**
      * 订单退款列表
@@ -326,5 +328,15 @@ public class RefundActionServiceImpl implements IRefundActionService {
         param.setMainId(RequestUtils.uid());
         param.setSiteId(RequestUtils.siteId());
         coreRefundActionService.shopActiveRefund(param);
+    }
+
+    @Override
+    public void close(String orderRefundNo) {
+        coreRefundActionService.close(new ActiveRefundCloseParam().builder()
+                .orderRefundNo(orderRefundNo)
+                .mainId(RequestUtils.uid())
+                .mainType(OrderLogMainTypeEnum.STORE.getType())
+                .siteId(RequestUtils.siteId())
+                .build(), OrderRefundStatusEnum.SHOP_ACTIVE_CLOSE_REFUND.getStatus());
     }
 }

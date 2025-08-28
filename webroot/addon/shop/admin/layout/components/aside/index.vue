@@ -50,7 +50,7 @@ watch(route, () => {
 
 .aside-drawer {
     .el-drawer__body {
-        padding: 0px !important;
+        padding: 0 !important;
     }
 }
 </style>

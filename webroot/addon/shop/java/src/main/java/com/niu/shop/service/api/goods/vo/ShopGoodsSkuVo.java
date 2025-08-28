@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.goods.ShopGoodsSpec;
@@ -40,6 +41,8 @@ public class ShopGoodsSkuVo implements Serializable {
     private Integer saleNum; // 销量
     private Integer isDefault; // 是否默认
     private BigDecimal memberPrice;
+    private BigDecimal showPrice;
+    private String showType;
 
     @JsonProperty("skuList")
     private List<Sku> skuList;
@@ -96,27 +99,24 @@ public class ShopGoodsSkuVo implements Serializable {
         private Integer posterId; // 海报id
         private Integer formId;
 
-        private ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsCoverThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(siteId, this.getGoodsCover());
         }
 
         public String getGoodsCoverThumbMid() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            return CommonUtils.thumbImageMiddle(siteId, this.getGoodsCover());
         }
 
         public String getGoodsCoverThumbBig() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+            return CommonUtils.thumbImageBig(siteId, this.getGoodsCover());
         }
 
         public List<String> getGoodsImageThumbSmall() {
             List<String> list = new LinkedList<>();
             List<String> images = Arrays.asList(this.goodsImage.split(","));
             for (String path: images) {
-                list.add(coreUploadService().thumb(this.siteId, path, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
+                list.add(CommonUtils.thumbImageSmall(siteId, path));
             }
             return list;
         }
@@ -125,7 +125,7 @@ public class ShopGoodsSkuVo implements Serializable {
             List<String> list = new LinkedList<>();
             List<String> images = Arrays.asList(this.goodsImage.split(","));
             for (String path: images) {
-                list.add(coreUploadService().thumb(this.siteId, path, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
+                list.add(CommonUtils.thumbImageMiddle(siteId, path));
             }
             return list;
         }
@@ -134,7 +134,7 @@ public class ShopGoodsSkuVo implements Serializable {
             List<String> list = new LinkedList<>();
             List<String> images = Arrays.asList(this.goodsImage.split(","));
             for (String path: images) {
-                list.add(coreUploadService().thumb(this.siteId, path, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType()));
+                list.add(CommonUtils.thumbImageBig(siteId, path));
             }
             return list;
         }
@@ -159,6 +159,8 @@ public class ShopGoodsSkuVo implements Serializable {
         private Integer saleNum; // 销量
         private Integer isDefault; // 是否默认
         private BigDecimal memberPrice;
+        private BigDecimal showPrice;
+        private String showType;
     }
 
     @Data

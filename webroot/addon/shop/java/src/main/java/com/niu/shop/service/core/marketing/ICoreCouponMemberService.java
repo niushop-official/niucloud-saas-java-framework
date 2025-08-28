@@ -2,6 +2,7 @@ package com.niu.shop.service.core.marketing;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.niu.shop.entity.coupon.ShopCouponMember;
+import com.niu.shop.entity.coupon.ShopCouponSendRecords;
 
 import java.util.List;
 
@@ -42,4 +43,12 @@ public interface ICoreCouponMemberService  extends IService<ShopCouponMember> {
      * @param num 发放数量
      */
     void sendCoupon(Integer siteId, Integer memberId, Integer couponId, Integer num);
+
+
+    /**
+     * 批量发放优惠券
+     * @param shopCouponSendRecords
+     * @param memberIds
+     */
+    Integer sendCouponBatch(ShopCouponSendRecords shopCouponSendRecords, List<Integer> memberIds);
 }

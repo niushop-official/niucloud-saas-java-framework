@@ -45,7 +45,7 @@
                     </el-form-item>
 
                     <el-form-item :label="t('memberInfo')" prop="keywords">
-                        <el-input v-model.trim="orderTableData.searchParam.keywords" class="w-[240px]"
+                        <el-input v-model.trim="orderTableData.searchParam.keywords" class="!w-[230px]"
                             :placeholder="t('memberInfoPlaceholder')" />
                     </el-form-item>
 
@@ -81,18 +81,18 @@
 
             <div class="mt-[10px]">
                 <el-table :data="orderTableData.data" size="large" class="table-top">
-					<el-table-column :label="t('memberInfo')" min-width="180" />
-					<el-table-column :label="t('cashOutMethod')" align="center" min-width="100" />
-					<el-table-column :label="t('cashOutInfo')" min-width="180" />
-					<el-table-column :label="t('applicationForWithdrawalAmount')" align="center" min-width="120" />
-					<el-table-column :label="t('actualTransferAmount')" align="center" min-width="120" />
-					<el-table-column :label="t('cashOutCommission')" align="center" min-width="110" />
-					<el-table-column :label="t('cashOutStatus')" align="center" min-width="150" />
+                    <el-table-column :label="t('memberInfo')" min-width="180" />
+                    <el-table-column :label="t('cashOutMethod')" align="center" min-width="100" />
+                    <el-table-column :label="t('cashOutInfo')" min-width="180" />
+                    <el-table-column :label="t('applicationForWithdrawalAmount')" align="center" min-width="120" />
+                    <el-table-column :label="t('actualTransferAmount')" align="center" min-width="120" />
+                    <el-table-column :label="t('cashOutCommission')" align="center" min-width="110" />
+                    <el-table-column :label="t('cashOutStatus')" align="center" min-width="150" />
                     <el-table-column :label="t('applyTime')" align="center" min-width="160" />
                     <el-table-column :label="t('auditTime')" align="center" min-width="160" />
                     <el-table-column :label="t('transferTime')" align="center" min-width="160" />
-					<el-table-column :label="t('operation')" fixed="right" align="right" min-width="120" />
-				</el-table>
+                    <el-table-column :label="t('operation')" fixed="right" align="right" min-width="120" />
+                </el-table>
                 <div class="table-body min-h-[150px]" v-loading="orderTableData.loading">
                     <div v-if="!orderTableData.loading">
                         <template v-if="orderTableData.data.length">
@@ -126,7 +126,7 @@
                                                     <span class="w-[70px] flex-shrink-0 text-right">{{t('account') }}：</span>
                                                     <span>{{ row.transfer_account }}</span>
                                                 </div>
-                                                <div class="flex items-center" v-if="row.transfer_payment_code">
+                                                <div class="flex items-start" v-if="row.transfer_payment_code">
                                                     <span class="w-[70px] flex-shrink-0 text-right">{{ t('transferCode') }}：</span>
                                                     <el-image   :src="img(row.transfer_payment_code)" :preview-src-list="[img(row.transfer_payment_code)]" :hide-on-click-modal="true" class="w-[50px] h-[50px]"></el-image>
                                                 </div>
@@ -177,7 +177,7 @@
                                         </template>
                                     </el-table-column>
 
-                                    <el-table-column  align="right" fixed="right" width="120">
+                                    <el-table-column align="right" fixed="right" width="120">
                                         <template #default="{ row }">
                                             <el-button  type="primary" link @click="successfulAuditFn(row)" v-if="row.status == 1"> {{ t('successfulAudit') }}</el-button>
                                             <el-button  type="primary" link @click="auditFailureFn(row)" v-if="row.status == 1"> {{ t('auditFailure') }}</el-button>
@@ -189,9 +189,9 @@
                                     </el-table-column>
                                 </el-table>
                                 <div v-if="item.remark" class="text-[14px] min-h-[30px] leading-[30px] px-3 bg-[#fff0e5] text-[#ff7f5b] mb-[10px] relative remark">
-									<span class="mr-[5px]">{{ t('notes') }}：</span>
-									<span>{{ item.remark }}</span>
-								</div>
+                                    <span class="mr-[5px]">{{ t('notes') }}：</span>
+                                    <span>{{ item.remark }}</span>
+                                </div>
                             </div>
                         </template>
                         <el-empty v-else :image-size="1" :description="t('emptyData')" />

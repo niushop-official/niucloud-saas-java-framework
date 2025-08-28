@@ -6,7 +6,7 @@
 
 <script lang="ts" setup>
 import { ref, defineAsyncComponent, computed, watch } from 'vue'
-import {getPackageGiftDict} from "@/addon/recharge/api/recharge";
+import { getPackageGiftDict } from '@/addon/recharge/api/recharge'
 
 const gifts = ref({})
 const props = defineProps({
@@ -45,7 +45,7 @@ getPackageGiftDict().then(({ data }) => {
         if (modules[data[key].edit_component]) {
             data[key].edit_component && (data[key].edit_component = defineAsyncComponent(modules[data[key].edit_component]))
         } else {
-            data.splice(key, 1);
+            data.splice(key, 1)
         }
     })
     gifts.value = data

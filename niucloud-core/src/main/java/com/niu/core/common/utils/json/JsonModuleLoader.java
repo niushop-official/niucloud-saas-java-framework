@@ -267,7 +267,7 @@ public class JsonModuleLoader {
      * @param siteId
      * @return
      */
-    private List<String> getSiteAddonModules(Integer siteId) {
+    public List<String> getSiteAddonModules(Integer siteId) {
         List<String> addonModules = new LinkedList<>();
         addonModules.add("core");
         if (ObjectUtil.isNull(siteId) || siteId == 0) {

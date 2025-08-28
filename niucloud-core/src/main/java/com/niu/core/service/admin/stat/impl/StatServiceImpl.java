@@ -88,7 +88,7 @@ public class StatServiceImpl implements IStatService {
          * 系统数据类
          */
         StatSystemVo statSystemVo = new StatSystemVo();
-        statSystemVo = systemService.getSystemInfo();
+        statSystemVo = systemService.getInfo();
 
         statInfoVo.setTodayData(statToDayVo);
         statInfoVo.setSystem(statSystemVo);

@@ -16,5 +16,23 @@
 		"page": "/addon/shop/pages/point/index",
 		"action": "decorate",
 		"type": ""
+	},
+	"DIY_SHOP_GOODS_DETAIL": {
+		"title": "商品详情",
+		"page": "/addon/shop/pages/goods/detail",
+		"action": "decorate",
+		"type": "",
+		"ignoreComponents": [
+			"CarouselSearch"
+		],
+		"global": {
+			"topStatusBar": {
+				"control": false
+			},
+			"bottomTabBar": {
+				"control": false,
+				"isShow": false
+			}
+		}
 	}
 }

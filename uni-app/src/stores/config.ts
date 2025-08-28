@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { getConfig } from '@/app/api/auth'
 import { isWeixinBrowser } from "@/utils/common";
+import useSystemStore from "@/stores/system";
 
 interface loginConfig {
     is_username: number | boolean,
@@ -8,19 +9,18 @@ interface loginConfig {
     is_auth_register: number | boolean,
     is_force_access_user_info: number | boolean,
     is_bind_mobile: number | boolean,
+    wechat_error: string,
     agreement_show: number | boolean,
     bg_url: string,
     logo: string,
     desc: string
 }
-
 interface tabbarConfig {
     backgroundColor: string,
     textColor: string,
     textHoverColor: string,
     list: AnyObject[]
 }
-
 interface Config {
     login: loginConfig,
     tabbarList: any,
@@ -38,6 +38,7 @@ const useConfigStore = defineStore('config', {
                 is_auth_register: 0,
                 is_force_access_user_info: 0,
                 is_bind_mobile: 0,
+                wechat_error: '',
                 agreement_show: 0,
                 bg_url: '',
                 logo: '',
@@ -51,11 +52,11 @@ const useConfigStore = defineStore('config', {
     },
     actions: {
         async getLoginConfig() {
-
             let url = '';
             // #ifdef H5
             if (isWeixinBrowser()) {
-                url = uni.getSystemInfoSync().platform == 'ios' ? uni.getStorageSync('initUrl') : location.href
+                const systemStore = useSystemStore()
+                url = systemStore.systemInfo.platform == 'ios' ? uni.getStorageSync('initUrl') : location.href
             }
             // #endif
             await getConfig({ url }).then((res: any) => {

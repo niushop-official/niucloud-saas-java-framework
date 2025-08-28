@@ -22,4 +22,17 @@ public class OrderCreateParam implements Serializable {
 
     private JSONObject formData;
 
+    private Delivery delivery;
+
+    @Data
+    public static class Delivery {
+
+        private String buyerAskDeliveryTime;
+
+        private String localDeliveryType;
+
+        private String takerName;
+
+        private String takerMobile;
+    }
 }

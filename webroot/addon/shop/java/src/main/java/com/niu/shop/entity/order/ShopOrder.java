@@ -69,5 +69,6 @@ public class ShopOrder implements Serializable {
     private Integer point; // 积分兑换
     private String activityType; // 营销类型
     private Integer formRecordId;
+    private String buyerAskDeliveryTime;
 
 }

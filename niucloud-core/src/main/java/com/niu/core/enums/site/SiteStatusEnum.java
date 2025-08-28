@@ -14,8 +14,8 @@ import java.util.Map;
 public enum SiteStatusEnum {
     EXPIRE("过期", 2),
     ON("正常", 1),
-    CLOSE("停止", 3),
-    DELETE("删除", 0),
+    CLOSE("停止", 3)
+//    DELETE("删除", 0),
     ;
     private final String name;
     private final Integer code;

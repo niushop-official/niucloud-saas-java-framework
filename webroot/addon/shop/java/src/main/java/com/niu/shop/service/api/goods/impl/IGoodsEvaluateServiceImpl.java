@@ -7,12 +7,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.entity.member.Member;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.mapper.member.MemberMapper;
-import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.goods.ShopGoodsEvaluate;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.config.ShopOrderEvaluate;
@@ -50,9 +48,6 @@ public class IGoodsEvaluateServiceImpl implements IGoodsEvaluateService {
     @Resource
     ICoreOrderConfigService coreOrderConfigService;
 
-    private ICoreUploadService coreUploadService() {
-        return SpringContext.bean(ICoreUploadService.class);
-    }
 
 
     @Override
@@ -80,7 +75,7 @@ public class IGoodsEvaluateServiceImpl implements IGoodsEvaluateService {
             {
                 List<String> listImageMid = new ArrayList<>();
                 for (String image : vo.getImages()) {
-                    listImageMid.add(coreUploadService().thumb(item.getSiteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
+                    listImageMid.add(CommonUtils.thumbImageMiddle(item.getSiteId(), image));
                 }
                 vo.setImageMid(listImageMid);
             }
@@ -109,8 +104,8 @@ public class IGoodsEvaluateServiceImpl implements IGoodsEvaluateService {
             List<String> listImageMid = new ArrayList<>();
             List<String> listImageBig = new ArrayList<>();
             for (String image : vo.getImages()) {
-                listImageMid.add(coreUploadService().thumb(vo.getSiteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
-                listImageBig.add(coreUploadService().thumb(vo.getSiteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType()));
+                listImageMid.add(CommonUtils.thumbImageMiddle(vo.getSiteId(), image));
+                listImageBig.add(CommonUtils.thumbImageBig(vo.getSiteId(), image));
             }
             vo.setImageMid(listImageMid);
             vo.setImageBig(listImageBig);
@@ -180,7 +175,7 @@ public class IGoodsEvaluateServiceImpl implements IGoodsEvaluateService {
             {
                 List<String> listImageMid = new ArrayList<>();
                 for (String image : vo.getImages()) {
-                    listImageMid.add(coreUploadService().thumb(item.getSiteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
+                    listImageMid.add(CommonUtils.thumbImageMiddle(item.getSiteId(), image));
                 }
                 vo.setImageMid(listImageMid);
             }
@@ -212,8 +207,8 @@ public class IGoodsEvaluateServiceImpl implements IGoodsEvaluateService {
                 List<String> listImageMid = new ArrayList<>();
                 List<String> listImageBig = new ArrayList<>();
                 for (String image : vo.getImages()) {
-                    listImageMid.add(coreUploadService().thumb(vo.getSiteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
-                    listImageBig.add(coreUploadService().thumb(vo.getSiteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType()));
+                    listImageMid.add(CommonUtils.thumbImageMiddle(vo.getSiteId(), image));
+                    listImageBig.add(CommonUtils.thumbImageBig(vo.getSiteId(), image));
                 }
                 vo.setImageMid(listImageMid);
                 vo.setImageBig(listImageBig);

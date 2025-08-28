@@ -214,39 +214,45 @@ const router = useRouter()
 const visitStat = ref<any>(null)
 const hourStat = ref<any>(null)
 
-interface statTotalType{
-    order_num: number,
-    sale_money: number,
-    refund_money: number,
-    access_sum: number
+interface statTotalType {
+    order_num: [number, string],
+    sale_money: [number, string],
+    refund_money: [number, string],
+    access_sum: [number, string]
 }
-interface statTodayType{
-    order_num: number,
-    sale_money: number,
-    refund_money: number,
-    access_sum: number
+
+interface statTodayType {
+    order_num: [number, string],
+    sale_money: [number, string],
+    refund_money: [number, string],
+    access_sum: [number, string]
 }
-interface statYesterdayType{
-    order_num: number,
-    sale_money: number,
-    refund_money: number,
-    access_sum: number
+
+interface statYesterdayType {
+    order_num: [number, string],
+    sale_money: [number, string],
+    refund_money: [number, string],
+    access_sum: [number, string]
 }
-interface statOrderType{
-    wait_pay_order: number,
-    wait_delivery_order: number,
-    wait_take_order: number,
-    refund_order: number
+
+interface statOrderType {
+    wait_pay_order: [number, string],
+    wait_delivery_order: [number, string],
+    wait_take_order: [number, string],
+    refund_order: [number, string]
 }
-interface statGoodsType{
-    sale_goods_num: number,
-    warehouse_goods_num: number
+
+interface statGoodsType {
+    sale_goods_num: [number, string],
+    warehouse_goods_num: [number, string]
 }
-interface statCountType{
-    order_num: number,
+
+interface statCountType {
+    order_num: [number, string],
     time: string,
-    sale_money: number
+    sale_money: [number, string]
 }
+
 const statTotal = ref<statTotalType|any>([])
 const statToday = ref<statTodayType|any>([])
 const statYesterday = ref<statYesterdayType|any>([])
@@ -256,12 +262,15 @@ const statGoods = ref<statGoodsType|any>([])
 
 const getStatInfoFn = async () => {
     let statTotalData = await (await getShopCountList()).data
-    for( let i in statTotalData){
+    for (let i in statTotalData) {
         statTotalData[i] = Number(statTotalData[i])
-
     }
     statTotal.value = statTotalData
     statToday.value = await (await getShopTodayCountList()).data
+    statToday.value.sale_money = statToday.value.sale_money == '0.00' ? 0 : Number(statToday.value.sale_money)
+    statToday.value.refund_money = statToday.value.refund_money == '0.00' ? 0 : Number(statToday.value.refund_money)
+    statToday.value.order_num = Number(statToday.value.order_num)
+    statToday.value.access_sum = Number(statToday.value.access_sum)
     statYesterday.value = await (await getShopYesterdayCountList()).data
     statOrder.value = await (await getShopOrderStat()).data
     statGoods.value = await (await getShopGoodsStat()).data
@@ -271,6 +280,7 @@ const getStatInfoFn = async () => {
         drawChartTo('')
     }, 20)
 }
+
 getStatInfoFn()
 
 const drawChart = (item:any) => {
@@ -288,8 +298,15 @@ const drawChart = (item:any) => {
         },
         yAxis: {},
         tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            formatter: (params: any[]) => {
+                if (!params.length) return '';
+                const date = params[0].axisValue; // 时间
+                const data = params[0].data;
+                return `${date}<br/>订单量: ${data} 单`;
+            }
         },
+
         series: [
             {
                 type: 'line',
@@ -316,7 +333,13 @@ const drawChartTo = (item:any) => {
         },
         yAxis: {},
         tooltip: {
-            trigger: 'axis'
+            trigger: 'axis',
+            formatter: (params: any[]) => {
+                if (!params.length) return '';
+                const date = params[0].axisValue;
+                const data = params[0].data;
+                return `${date}<br/>销售额: ${data} 元`;
+            }
         },
         series: [
             {

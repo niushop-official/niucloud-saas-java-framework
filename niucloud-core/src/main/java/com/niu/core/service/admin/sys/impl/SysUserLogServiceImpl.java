@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.service.admin.sys.param.SysUserLogParam;
 import com.niu.core.service.admin.sys.param.SysUserLogSearchParam;
 import com.niu.core.service.admin.sys.ISysUserLogService;
@@ -49,6 +50,7 @@ public class SysUserLogServiceImpl extends ServiceImpl<SysUserLogMapper, SysUser
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<SysUserLog> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.orderByDesc("id");
         if(ObjectUtil.isNotNull(searchParam.getUsername()) && ObjectUtil.isNotEmpty(searchParam.getUsername())){
             queryWrapper.like("username", searchParam.getUsername());
@@ -82,6 +84,7 @@ public class SysUserLogServiceImpl extends ServiceImpl<SysUserLogMapper, SysUser
         SysUserLog model = sysUserLogMapper.selectOne(
                 new QueryWrapper<SysUserLog>()
                         .eq("id", id)
+                        .eq("site_id", RequestUtils.siteId())
                         .last("limit 1"));
 
         Assert.notNull(model, "数据不存在");
@@ -91,65 +94,8 @@ public class SysUserLogServiceImpl extends ServiceImpl<SysUserLogMapper, SysUser
         return vo;
     }
 
-    /**
-     * 管理员操作记录新增
-     *
-     * @param addParam 参数
-     */
     @Override
-    public void add(SysUserLogParam addParam) {
-        SysUserLog model = new SysUserLog();
-        model.setIp(addParam.getIp());
-        model.setSiteId(addParam.getSiteId());
-        model.setUid(addParam.getUid());
-        model.setUsername(addParam.getUsername());
-        model.setUrl(addParam.getUrl());
-        model.setParams(addParam.getParams());
-        model.setType(addParam.getType());
-        model.setCreateTime(System.currentTimeMillis() / 1000);
-        sysUserLogMapper.insert(model);
+    public void destroy() {
+        sysUserLogMapper.delete(new QueryWrapper<SysUserLog>().eq("site_id", RequestUtils.siteId()));
     }
-
-    /**
-     * 管理员操作记录编辑
-     *
-     * @param editParam 参数
-     */
-    @Override
-    public void edit(Integer id, SysUserLogParam editParam) {
-        SysUserLog model = sysUserLogMapper.selectOne(
-                new QueryWrapper<SysUserLog>()
-                        .eq("id", id)
-                        .last("limit 1"));
-
-        Assert.notNull(model, "数据不存在!");
-
-        model.setId(id);
-        model.setIp(editParam.getIp());
-        model.setSiteId(editParam.getSiteId());
-        model.setUid(editParam.getUid());
-        model.setUsername(editParam.getUsername());
-        model.setUrl(editParam.getUrl());
-        model.setParams(editParam.getParams());
-        model.setType(editParam.getType());
-        sysUserLogMapper.updateById(model);
-    }
-
-    /**
-     * 管理员操作记录删除
-     *
-     * @param id 主键ID
-     */
-    @Override
-    public void del(Integer id) {
-        SysUserLog model = sysUserLogMapper.selectOne(
-                new QueryWrapper<SysUserLog>()
-                        .eq("id", id)
-                        .last("limit 1"));
-
-        Assert.notNull(model, "数据不存在!");
-
-        sysUserLogMapper.delete(new QueryWrapper<SysUserLog>().eq("id", id));
-    }
-
 }

@@ -15,11 +15,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 核销员控制器
  */
 
+@Description("核销员管理")
 @RestController
 @RequestMapping("adminapi/verify/verifier")
 @SaCheckLogin
@@ -34,6 +36,7 @@ public class VerifierController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<VerifierListVo>>
      */
+    @Description("核销员列表")
     @GetMapping("")
     public Result<PageResult<VerifierListVo>> list(@Validated PageParam pageParam, @Validated VerifierSearchParam searchParam) {
         PageResult<VerifierListVo> list = verifierService.list(pageParam, searchParam);
@@ -44,6 +47,7 @@ public class VerifierController {
      * 获取核销员列表
      * @return
      */
+    @Description("获取核销员列表")
     @GetMapping("/select")
     public Result<List<VerifierListVo>> all() {
         return Result.success(verifierService.all());
@@ -54,6 +58,7 @@ public class VerifierController {
      * @param addParam 添加参数
      * @return Result<Object>
      */
+    @Description("核销员添加")
     @PostMapping("")
     public Result<Object> add(@Validated @RequestBody VerifierParam addParam) {
         verifierService.add(addParam);
@@ -65,6 +70,7 @@ public class VerifierController {
      * @param id 参数
      * @return Result<Object>
      */
+    @Description("核销员删除")
     @DeleteMapping("/{id}")
     public Result<Object> del(@PathVariable("id") Integer id) {
         verifierService.del(id);
@@ -75,6 +81,7 @@ public class VerifierController {
      * 获取核销类型
      * @return Result<JSONObject>
      */
+    @Description("获取核销类型")
     @GetMapping("/type")
     public Result<JSONObject> getVerifyType() {
         return Result.success(VerifyTypeEnum.getType());

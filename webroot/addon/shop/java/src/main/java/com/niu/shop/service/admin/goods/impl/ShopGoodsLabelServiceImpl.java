@@ -1,6 +1,7 @@
 package com.niu.shop.service.admin.goods.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,10 +14,7 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.shop.entity.goods.ShopGoodsBrand;
 import com.niu.shop.entity.goods.ShopGoodsLabel;
 import com.niu.shop.mapper.goods.ShopGoodsLabelMapper;
-import com.niu.shop.service.admin.goods.param.EditGoodsLabelSortParam;
-import com.niu.shop.service.admin.goods.param.EditGoodsLabelStatusParam;
-import com.niu.shop.service.admin.goods.param.ShopGoodsLabelParam;
-import com.niu.shop.service.admin.goods.param.ShopGoodsLabelSearchParam;
+import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.IShopGoodsLabelService;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsLabelInfoVo;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsLabelListVo;
@@ -53,6 +51,9 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
                 .leftJoin("?_shop_goods_label_group lg ON l.group_id = lg.group_id".replace("?_", GlobalConfig.tablePrefix));
         queryWrapper.select("l.*, lg.group_name");
         queryWrapper.eq("l.site_id", RequestUtils.siteId());
+        if(ObjectUtil.isNotNull(searchParam.getGroupId()) && ObjectUtil.isNotEmpty(searchParam.getGroupId())){
+            queryWrapper.eq("l.group_id", searchParam.getGroupId());
+        }
         if (ObjectUtil.isNotEmpty(searchParam.getLabelName())) queryWrapper.like("label_name", searchParam.getLabelName());
         queryWrapper.orderByDesc("label_id");
 
@@ -196,5 +197,25 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
         model.setUpdateTime(System.currentTimeMillis() / 1000);
 
         shopGoodsLabelMapper.updateById(model);
+    }
+
+    /*
+     * 商品标签复制
+     */
+    @Override
+    public void copy(Integer id) {
+        // 查询原始数据并且复制原来数据
+        QueryWrapper<ShopGoodsLabel> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("label_id",id)
+                .select("site_id, label_name, group_id, style_type, color_json, icon, memo, sort");
+
+        ShopGoodsLabel label = shopGoodsLabelMapper.selectOne(queryWrapper);
+        ShopGoodsLabel copyLabel = new ShopGoodsLabel();
+        BeanUtils.copyProperties(label, copyLabel);
+        copyLabel.setLabelName(label.getLabelName() + "_副本");
+        copyLabel.setCreateTime(System.currentTimeMillis() / 1000);
+
+        // 插入数据
+        shopGoodsLabelMapper.insert(copyLabel);
     }
 }

@@ -19,7 +19,7 @@ public class MemberModifyParam<T> implements Serializable {
 
     private String field;
 
-    @NotNull(message = "value参数缺失")
+//    @NotNull(message = "value参数缺失")
     private Object value;
 
 }

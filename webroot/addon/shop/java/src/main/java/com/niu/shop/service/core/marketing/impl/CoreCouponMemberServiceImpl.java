@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niu.core.common.exception.CommonException;
 import com.niu.shop.entity.coupon.ShopCoupon;
 import com.niu.shop.entity.coupon.ShopCouponMember;
+import com.niu.shop.entity.coupon.ShopCouponSendRecords;
 import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.enums.coupon.CouponMemberStatusEnum;
 import com.niu.shop.mapper.cart.ShopCartMapper;
@@ -118,19 +119,7 @@ public class CoreCouponMemberServiceImpl  extends ServiceImpl<ShopCouponMemberMa
 
         List<ShopCouponMember> memberCouponData = new ArrayList<>();
         for (int i = 0; i < num; i++) {
-            ShopCouponMember memberCoupon = new ShopCouponMember();
-            memberCoupon.setSiteId(siteId);
-            memberCoupon.setCouponId(couponId);
-            memberCoupon.setMemberId(memberId);
-            memberCoupon.setCreateTime(currentTime);
-            memberCoupon.setExpireTime(expireTime);
-            memberCoupon.setReceiveType("send");
-            memberCoupon.setType(coupon.getType().toString());
-            memberCoupon.setTitle(coupon.getTitle());
-            memberCoupon.setPrice(coupon.getPrice());
-            memberCoupon.setStatus(CouponMemberStatusEnum.WAIT_USE.getStatus());
-            memberCoupon.setMinConditionMoney(coupon.getMinConditionMoney());
-
+            ShopCouponMember memberCoupon = createShopCouponMember(siteId, couponId, memberId, currentTime, expireTime, coupon);
             memberCouponData.add(memberCoupon);
         }
 
@@ -143,6 +132,62 @@ public class CoreCouponMemberServiceImpl  extends ServiceImpl<ShopCouponMemberMa
         }*/
         shopCouponMapper.updateById(coupon);
     }
+
+    /**
+     * 批量发送优惠券
+     * @param shopCouponSendRecords  发卷信息
+     * @param memberIds 会员ID集合
+     */
+    @Override
+    public Integer sendCouponBatch(ShopCouponSendRecords shopCouponSendRecords, List<Integer> memberIds) {
+        Integer couponId = shopCouponSendRecords.getCouponId();
+        Integer siteId = shopCouponSendRecords.getSiteId();
+        Integer num = shopCouponSendRecords.getSendNum();
+        // 根据优惠券ID和站点ID查询优惠券信息
+        QueryWrapper<ShopCoupon> couponQueryWrapper = new QueryWrapper<>();
+        couponQueryWrapper.eq("id", couponId).eq("site_id", siteId);
+        ShopCoupon coupon = shopCouponMapper.selectOne(couponQueryWrapper);
+        if (coupon == null) {
+            throw new CommonException("优惠券不存在");
+        }
+
+        // 判断领取时间是否符合要求
+        long currentTime = System.currentTimeMillis() / 1000;
+
+        long expireTime = coupon.getValidType() == 1
+                ? 86400L * coupon.getLength() + currentTime
+                : coupon.getValidEndTime();
+
+        List<ShopCouponMember> memberCouponData = new ArrayList<>();
+        memberIds.forEach(memberId -> {
+            ShopCouponMember memberCoupon = createShopCouponMember(siteId, couponId, memberId, currentTime, expireTime, coupon);
+            for (int i = 0; i < num; i++) {
+                memberCouponData.add(memberCoupon);
+            }
+        });
+
+        this.saveBatch(memberCouponData);
+        coupon.setReceiveCount(coupon.getReceiveCount() + memberCouponData.size());
+        shopCouponMapper.updateById(coupon);
+        return memberCouponData.size();
+    }
+
+    public ShopCouponMember createShopCouponMember(Integer siteId, Integer couponId, Integer memberId, Long currentTime, Long expireTime, ShopCoupon coupon) {
+        ShopCouponMember memberCoupon = new ShopCouponMember();
+        memberCoupon.setSiteId(siteId);
+        memberCoupon.setCouponId(couponId);
+        memberCoupon.setMemberId(memberId);
+        memberCoupon.setCreateTime(currentTime);
+        memberCoupon.setExpireTime(expireTime);
+        memberCoupon.setReceiveType("send");
+        memberCoupon.setType(coupon.getType().toString());
+        memberCoupon.setTitle(coupon.getTitle());
+        memberCoupon.setPrice(coupon.getPrice());
+        memberCoupon.setStatus(CouponMemberStatusEnum.WAIT_USE.getStatus());
+        memberCoupon.setMinConditionMoney(coupon.getMinConditionMoney());
+        return memberCoupon;
+    }
+
 
 
 }

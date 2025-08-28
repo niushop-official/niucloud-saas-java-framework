@@ -1,6 +1,8 @@
 package com.niu.shop.service.admin.delivery.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,10 +17,12 @@ import com.niu.shop.service.admin.delivery.param.ShopDeliveryCompanySearchParam;
 import com.niu.shop.service.admin.delivery.IShopDeliveryCompanyService;
 import com.niu.shop.service.admin.delivery.vo.ShopDeliveryCompanyInfoVo;
 import com.niu.shop.service.admin.delivery.vo.ShopDeliveryCompanyListVo;
+import org.jacoco.agent.rt.internal_43f5073.core.internal.flow.IFrame;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import jakarta.annotation.Resource;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,24 +32,27 @@ import java.util.List;
  */
 @Service
 public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryCompanyMapper, ShopDeliveryCompany> implements IShopDeliveryCompanyService {
-        
+
     @Resource
     ShopDeliveryCompanyMapper shopDeliveryCompanyMapper;
 
     /**
      * 物流公司分页列表
-     * @param pageParam 分页参数
+     *
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<ShopDeliveryCompanyListVo>
      */
     @Override
     public PageResult<ShopDeliveryCompanyListVo> page(PageParam pageParam, ShopDeliveryCompanySearchParam searchParam) {
-        Integer page  = pageParam.getPage();
-        Integer limit =pageParam.getLimit();
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopDeliveryCompany> queryWrapper = new QueryWrapper<>();
-        if (ObjectUtil.isNotEmpty(searchParam.getCompanyName())) queryWrapper.like("company_name", searchParam.getCompanyName());
-        if (ObjectUtil.isNotEmpty(searchParam.getElectronicSheetSwitch())) queryWrapper.eq("electronic_sheet_switch", searchParam.getElectronicSheetSwitch());
+        if (ObjectUtil.isNotEmpty(searchParam.getCompanyName()))
+            queryWrapper.like("company_name", searchParam.getCompanyName());
+        if (ObjectUtil.isNotEmpty(searchParam.getElectronicSheetSwitch()))
+            queryWrapper.eq("electronic_sheet_switch", searchParam.getElectronicSheetSwitch());
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.orderByDesc("company_id");
 
@@ -61,16 +68,22 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
 
     /**
      * 物流公司列表
+     *
      * @param searchParam 搜索参数
      * @return PageResult<ShopDeliveryCompanyListVo>
      */
     @Override
     public List<ShopDeliveryCompanyListVo> list(ShopDeliveryCompanySearchParam searchParam) {
-        QueryWrapper<ShopDeliveryCompany> queryWrapper = new QueryWrapper<>();
-        if (ObjectUtil.isNotEmpty(searchParam.getCompanyName())) queryWrapper.like("company_name", searchParam.getCompanyName());
-        if (ObjectUtil.isNotEmpty(searchParam.getElectronicSheetSwitch())) queryWrapper.eq("electronic_sheet_switch", searchParam.getElectronicSheetSwitch());
-        queryWrapper.eq("site_id", RequestUtils.siteId());
-        queryWrapper.orderByDesc("company_id");
+        LambdaQueryWrapper<ShopDeliveryCompany> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(ObjectUtil.isNotEmpty(searchParam.getCompanyName()), ShopDeliveryCompany::getCompanyName, searchParam.getCompanyName());
+        queryWrapper.eq(ObjectUtil.isNotEmpty(searchParam.getElectronicSheetSwitch()), ShopDeliveryCompany::getElectronicSheetSwitch, searchParam.getElectronicSheetSwitch());
+        if(ObjectUtil.isNotEmpty(searchParam.getSiteId())){
+            queryWrapper.eq(ShopDeliveryCompany::getSiteId, searchParam.getSiteId());
+        }else {
+            queryWrapper.eq(ShopDeliveryCompany::getSiteId, RequestUtils.siteId());
+        }
+        queryWrapper.in(CollectionUtil.isNotEmpty(searchParam.getExpressNoElectronicSheet()), ShopDeliveryCompany::getExpressNoElectronicSheet, searchParam.getExpressNoElectronicSheet());
+        queryWrapper.orderByDesc(ShopDeliveryCompany::getCompanyId);
 
         List<ShopDeliveryCompany> record = shopDeliveryCompanyMapper.selectList(queryWrapper);
         List<ShopDeliveryCompanyListVo> list = new LinkedList<>();
@@ -84,6 +97,7 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
 
     /**
      * 物流公司详情
+     *
      * @param id 主键
      * @return ShopDeliveryCompanyInfoVo
      */
@@ -91,8 +105,8 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
     public ShopDeliveryCompanyInfoVo info(Integer id) {
         ShopDeliveryCompany model = shopDeliveryCompanyMapper.selectOne(
                 new QueryWrapper<ShopDeliveryCompany>()
-                    .eq("company_id", id)
-                    .eq("site_id", RequestUtils.siteId()));
+                        .eq("company_id", id)
+                        .eq("site_id", RequestUtils.siteId()));
 
         Assert.notNull(model, "物流公司不存在");
 
@@ -103,6 +117,7 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
 
     /**
      * 物流公司添加
+     *
      * @param addParam 参数
      */
     @Override
@@ -140,6 +155,7 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
 
     /**
      * 物流公司删除
+     *
      * @param id 主键ID
      */
     @Override

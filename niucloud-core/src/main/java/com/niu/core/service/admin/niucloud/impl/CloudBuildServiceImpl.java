@@ -1,9 +1,12 @@
 package com.niu.core.service.admin.niucloud.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.hutool.http.HttpException;
+import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONArray;
@@ -11,13 +14,19 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
+import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.file.FileTools;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.admin.niucloud.INiucloudService;
+import com.niu.core.service.admin.niucloud.param.ConnectTestParam;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
+import com.niu.core.service.core.sys.ICoreConfigService;
+import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.springframework.stereotype.Service;
@@ -25,6 +34,9 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -43,6 +55,12 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
     ICoreAddonService coreAddonService;
 
     private JSONObject buildTask;
+
+    @Resource
+    private ICoreConfigService coreConfigService;
+
+    private boolean isConnected = false;
+    private String baseUrl = "http://oss.niucloud.com/";
 
 
     /**
@@ -74,6 +92,8 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      * @return
      */
     public JSONObject build(String mode) {
+        getBuildTask(mode);
+
         if (this.buildTask != null) throw new CommonException("已有正在执行中的编译任务");
 
         String taskKey = RandomUtil.randomString(10);
@@ -101,7 +121,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
         query.put("timestamp", System.currentTimeMillis() / 1000);
         query.put("token", actionToken == null ? "" : actionToken.getStr("token"));
 
-        HttpResponse response = new NiucloudUtils.Cloud().build("cloud/build").query(query)
+        HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build").query(query)
                 .func(i -> {
                     i.form("file", zipFile, "build.zip");
                 })
@@ -123,6 +143,8 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      * @return
      */
     public JSONObject getBuildLog(String mode) {
+        getBuildTask(mode);
+
         if (this.buildTask == null) return null;
         if (!this.buildTask.getStr("mode").equals(mode)) return null;
 
@@ -132,7 +154,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
         query.put("authorize_code", instance.getCode());
         query.put("timestamp", this.buildTask.getStr("timestamp"));
 
-        HttpResponse response = new NiucloudUtils.Cloud().build("cloud/get_build_logs").query(query).method(Method.GET).execute();
+        HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/get_build_logs").query(query).method(Method.GET).execute();
         if (!JSONUtil.isJson(response.body())) return null;
 
         JSONObject res =  JSONUtil.parseObj(response.body());
@@ -145,6 +167,71 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
             }
         }
         return res;
+    }
+
+    @Override
+    public Map<String, Object> getLocalCloudCompileConfig() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("baseUri", "");
+        result.put("isOpen", 0);
+        CoreSysConfigVo config = coreConfigService.getConfig(RequestUtils.defaultSiteId(), "LOCAL_CLOUD_COMPILE_CONFIG");
+        String value = config.getValue();
+        if (StringUtils.isEmpty(value)){
+            return result;
+        }
+        JSONObject json = JSONUtil.parseObj(value);
+        result.put("baseUri", ObjectUtil.isNotEmpty(json.get("url")) ? json.get("url") : "");
+        result.put("isOpen", ObjectUtil.isNotEmpty(json.get("isOpen")) ? json.getInt("isOpen") : 0);
+        return result;
+    }
+
+    @Override
+    public void setLocalCloudCompileConfig(ConnectTestParam param) {
+        JSONObject jsonObject = JSONUtil.parseObj(JSONUtil.toJsonPrettyStr(param));
+        coreConfigService.setConfig(RequestUtils.defaultSiteId(), "LOCAL_CLOUD_COMPILE_CONFIG", jsonObject);
+    }
+
+    @Override
+    public Boolean connectTest(Boolean checkLocal, String url) {
+        try {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("http://")
+                    .append(InetAddress.getByName("oss.niucloud.com").getHostAddress())
+                    .append(":8000/");
+            baseUrl = stringBuilder.toString();
+            if (checkLocal){
+                isConnected =checkLocal(url);
+            }
+            return isConnected;
+        } catch (UnknownHostException e) {
+            throw new AdminException("联通测试失败");
+        }
+    }
+
+    private Boolean checkLocal(String url) {
+        String currentBaseUri = baseUrl;
+        CoreSysConfigVo config = coreConfigService.getConfig(RequestUtils.defaultSiteId(), "LOCAL_CLOUD_COMPILE_CONFIG");
+        String value = config.getValue();
+        if (StringUtils.isNotEmpty(value)){
+            JSONObject json = JSONUtil.parseObj(value);
+            if (json.containsKey("isOpen") && json.getInt("isOpen", 0).equals(1)){
+                currentBaseUri = json.getStr("baseUri");
+            }
+        }
+        if (StringUtils.isNotEmpty(url)){
+            currentBaseUri = url;
+        }
+        isConnected = false;
+        try {
+            HttpResponse response = HttpRequest.get(currentBaseUri).execute();
+            if (response.isOk() && "欢迎使用NiuCloud编译服务!".equals(response.body())) {
+                baseUrl = currentBaseUri;
+                isConnected = true;
+            }
+        } catch (HttpException e) {
+            throw new CommonException("连接失败");
+        }
+        return isConnected;
     }
 
     /**
@@ -166,13 +253,14 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
             Integer chunkSize = 1 * 1024 * 1024;
 
             if (this.buildTask.getInt("index") == null) {
-                HttpResponse response = new NiucloudUtils.Cloud().build("cloud/build_download").query(query).header("Range", "bytes=0-").method(Method.HEAD).execute();
+                HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build_download").query(query).header("Range", "bytes=0-").method(Method.HEAD).execute();
                 String totalLength = response.header("Content-range");
                 String length = ObjectUtil.defaultIfNull(totalLength.split("/")[1], "");
                 Double step = Math.ceil(Double.valueOf(length) / chunkSize);
                 this.buildTask.set("index", 0);
                 this.buildTask.set("step", step.intValue());
                 this.buildTask.set("length", length);
+                cached.put("cloud_build_task", this.buildTask);
             } else {
                 File file = new File(tempDir + "download.zip");
                 FileOutputStream fos = new FileOutputStream(file, true);
@@ -184,10 +272,11 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
                     Integer end = (index + 1) * chunkSize;
                     if (end > this.buildTask.getInt("length")) end = this.buildTask.getInt("length");
 
-                    HttpResponse response = new NiucloudUtils.Cloud().build("cloud/build_download").query(query).header("Range", "bytes=" + start + "-" + end).method(Method.GET).execute();
+                    HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build_download").query(query).header("Range", "bytes=" + start + "-" + end).method(Method.GET).execute();
                     fos.write(response.bodyBytes());
 
                     this.buildTask.set("index", index + 1);
+                    cached.put("cloud_build_task", this.buildTask);
 
                     JSONObject log = new JSONObject();
                     log.set("code", 1);
@@ -202,7 +291,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
                     logArray.put(log);
 
                     FileTools.createDirs(tempDir + "download");
-                    File unzipFile = ZipUtil.unzip(file.getPath(), tempDir + "download");
+                    File unzipFile = ZipUtil.unzip(file.getPath(), tempDir + "download", CharsetUtil.CHARSET_UTF_8);
                     FileUtils.copyDirectory(unzipFile, new File(WebAppEnvs.get().webRoot));
                     this.clearBuildTask();
                 }

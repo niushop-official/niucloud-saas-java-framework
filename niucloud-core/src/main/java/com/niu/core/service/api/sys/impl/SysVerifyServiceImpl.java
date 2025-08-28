@@ -4,7 +4,10 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,15 +15,19 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.QrcodeUtils;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.common.utils.object.CollectBuildUtils;
 import com.niu.core.common.utils.object.ObjectGroupUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.verify.Verifier;
 import com.niu.core.entity.verify.Verify;
 import com.niu.core.enums.sys.VerifyTypeEnum;
+import com.niu.core.event.sys.VerifyCheckEventDefiner;
 import com.niu.core.event.sys.VerifyCreateEventDefiner;
 import com.niu.core.event.sys.VerifyEventDefiner;
 import com.niu.core.mapper.member.MemberMapper;
@@ -188,15 +195,10 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
      */
     @Override
     public Boolean checkVerifier(SysVerifyCheckVerifierParam param) {
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.select("id");
-        queryWrapper.eq("member_id", param.memberId());
-        queryWrapper.eq("site_id", param.siteId());
-        List<Verifier> verifierList = verifierMapper.selectList(queryWrapper);
-        if (verifierList != null && verifierList.size() > 0) {
-            return true;
-        }
-        return false;
+        LambdaQueryWrapper<Verifier> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(Verifier::getMemberId, RequestUtils.memberId());
+        queryWrapper.eq(Verifier::getSiteId, RequestUtils.siteId());
+        return verifierMapper.exists(queryWrapper);
     }
 
     /**
@@ -220,8 +222,8 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         if (StrUtil.isNotEmpty(param.getType())) {
             queryWrapper.eq("type", param.getType());
         }
-        if (StrUtil.isNotEmpty(param.getCreateTime())) {
-            queryWrapper.eq("create_time", param.getCreateTime());
+        if (ObjectUtil.isNotEmpty(param.getCreateTime())) {
+            QueryMapperUtils.buildByTime(queryWrapper, "create_time", param.getCreateTime());
         }
         if (StrUtil.isNotEmpty(param.getRelateTag())) {
             queryWrapper.eq("relate_tag", param.getRelateTag());
@@ -290,6 +292,31 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
                 sysVerifyDetailVo.setMember(membervo);
             }
         }
+
+        //处理时间的问题 解析JSON字符串
+        JSONObject jsonObject = JSONUtil.parseObj(sysVerifyDetailVo.getValue().toString());
+        // 获取content下的diy数组
+        JSONArray diyArray = jsonObject.getJSONObject("content").getJSONArray("diy");
+        // 遍历diy数组
+        for (int i = 0; i < diyArray.size(); i++) {
+            JSONObject diyItem = diyArray.getJSONObject(i);
+            JSONArray listArray = diyItem.getJSONArray("list");
+
+            // 遍历list数组
+            for (int j = 0; j < listArray.size(); j++) {
+                JSONObject listItem = listArray.getJSONObject(j);
+                String title = listItem.getStr("title");
+
+                // 如果是支付时间，则转换格式
+                if ("支付时间".equals(title)) {
+                    long timestamp = listItem.getLong("value");
+                    String timeStr = DateUtils.timestampToString(timestamp);
+                    listItem.put("value", timeStr);
+                }
+            }
+        }
+        sysVerifyDetailVo.setValue(JSONUtil.toJsonStr(jsonObject));
+
         return sysVerifyDetailVo;
     }
 
@@ -307,7 +334,47 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
             // 核销码已过期
             throw new RuntimeException("当前核销码已核销或已失效");
         }
-        codeMap.put("value", JSONUtil.parseObj(codeMap.get("value")));
+
+        // 2、通过事件获取核销创建，取第一条
+        VerifyCheckEventDefiner.VerifyCheckEvent verifyCheckEvent = new VerifyCheckEventDefiner.VerifyCheckEvent();
+        verifyCheckEvent.setData(codeMap);
+        verifyCheckEvent.setSiteId(RequestUtils.siteId());
+        List<VerifyCheckEventDefiner.VerifyCheckEventResult> list = EventAndSubscribeOfPublisher.publishAndCallback(verifyCheckEvent);
+        if (list != null && list.size() > 0) {
+            codeMap = list.get(0).getData();
+        }
+        LambdaQueryWrapper<Verifier> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(Verifier::getMemberId, RequestUtils.memberId());
+        queryWrapper.eq(Verifier::getSiteId, RequestUtils.siteId());
+        queryWrapper.last("LIMIT 1");
+        Verifier verifier = verifierMapper.selectOne(queryWrapper);
+        if (ObjectUtil.isEmpty(verifier) || !verifier.getVerifyType().contains(codeMap.get("type").toString())){
+            throw new CommonException("该核销员没有权限");
+        }
+
+        //处理时间的问题 解析JSON字符串
+        JSONObject jsonObject = JSONUtil.parseObj(codeMap.get("value").toString());
+        // 获取content下的diy数组
+        JSONArray diyArray = jsonObject.getJSONObject("content").getJSONArray("diy");
+        // 遍历diy数组
+        for (int i = 0; i < diyArray.size(); i++) {
+            JSONObject diyItem = diyArray.getJSONObject(i);
+            JSONArray listArray = diyItem.getJSONArray("list");
+
+            // 遍历list数组
+            for (int j = 0; j < listArray.size(); j++) {
+                JSONObject listItem = listArray.getJSONObject(j);
+                String title = listItem.getStr("title");
+
+                // 如果是支付时间，则转换格式
+                if ("支付时间".equals(title)) {
+                    long timestamp = listItem.getLong("value");
+                    String timeStr = DateUtils.timestampToString(timestamp);
+                    listItem.put("value", timeStr);
+                }
+            }
+        }
+        codeMap.put("value", jsonObject);
         return codeMap;
     }
 
@@ -327,12 +394,11 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
             throw new RuntimeException("当前核销码已核销或已失效");
         }
         // 检测核销员身份
-        QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.select("id");
-        queryWrapper.eq("member_id", param.memberId());
-        queryWrapper.eq("site_id", param.siteId());
-        Verifier verifier = verifierMapper.selectOne(queryWrapper);
-        if (verifier == null) {
+        LambdaQueryWrapper<Verifier> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(Verifier::getMemberId, param.memberId());
+        queryWrapper.eq(Verifier::getSiteId, param.siteId());
+        Boolean verifier = verifierMapper.exists(queryWrapper);
+        if (!verifier) {
             throw new RuntimeException("核销员不存在");
         }
         // 核销操作

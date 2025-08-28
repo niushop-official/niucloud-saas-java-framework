@@ -3,7 +3,7 @@
     <div class="main-container">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <el-form class="page-form mt-[15px]" :model="formData" label-width="150px" ref="formRef" :rules="formRules" v-loading="loading">
@@ -83,8 +83,7 @@
                 <el-form-item :label="t('businessDomain')">
                     <el-input :model-value="wechatStatic.business_domain" placeholder="Please input" class="input-width" :readonly="true">
                         <template #append>
-                            <div class="cursor-pointer" @click="copyEvent(wechatStatic.business_domain)">{{ t('copy') }}
-                            </div>
+                            <div class="cursor-pointer" @click="copyEvent(wechatStatic.business_domain)">{{ t('copy') }}</div>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -92,8 +91,7 @@
                 <el-form-item :label="t('jsSecureDomain')">
                     <el-input :model-value="wechatStatic.js_secure_domain" placeholder="Please input" class="input-width" :readonly="true">
                         <template #append>
-                            <div class="cursor-pointer" @click="copyEvent(wechatStatic.business_domain)">{{ t('copy') }}
-                            </div>
+                            <div class="cursor-pointer" @click="copyEvent(wechatStatic.business_domain)">{{ t('copy') }}</div>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -101,8 +99,7 @@
                 <el-form-item :label="t('webAuthDomain')">
                     <el-input :model-value="wechatStatic.web_auth_domain" placeholder="Please input" class="input-width" :readonly="true">
                         <template #append>
-                            <div class="cursor-pointer" @click="copyEvent(wechatStatic.business_domain)">{{ t('copy') }}
-                            </div>
+                            <div class="cursor-pointer" @click="copyEvent(wechatStatic.business_domain)">{{ t('copy') }}</div>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -129,7 +126,9 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
-
+const back = () => {
+    router.push('/channel/wechat')
+}
 const loading = ref(true)
 
 const formData = reactive<Record<string, any>>({

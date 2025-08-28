@@ -370,6 +370,7 @@
 <script lang="ts" setup>
 import { ref, reactive, toRaw, watch, inject, computed } from 'vue'
 import { t } from '@/lang'
+import { ArrowLeft } from "@element-plus/icons-vue"
 import { img } from '@/utils/common'
 import { getDiyTemplatePages, addDiyForm, editDiyForm, initPage } from '@/app/api/diy_form'
 import { useRoute, useRouter } from 'vue-router'
@@ -745,7 +746,7 @@ const initLoad = () => {
 
 // 验证表单组件公共属性
 const verifyFormComponent = () => {
-    for (var i = 0; i < diyStore.value.length; i++) {
+    for (let i = 0; i < diyStore.value.length; i++) {
         try {
             if (diyStore.value[i].componentType == 'diy_form' && diyStore.value[i].componentName != 'FormSubmit' && diyStore.value[i].field.name == '') {
                 diyStore.changeCurrentIndex(i, diyStore.value[i])

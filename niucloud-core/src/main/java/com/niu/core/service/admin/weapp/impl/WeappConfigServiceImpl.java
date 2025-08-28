@@ -110,7 +110,7 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
     public GetPrivacySettingResult getPrivacySetting() {
         try {
             WxOpenMaService wxOpenMaService = (WxOpenMaService) WechatUtils.miniapp(RequestUtils.siteId());
-            return wxOpenMaService.getPrivacyService().getPrivacySetting(1);
+            return wxOpenMaService.getPrivacyService().getPrivacySetting(2);
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
@@ -121,6 +121,7 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
         try {
             WxOpenMaService wxOpenMaService = (WxOpenMaService) WechatUtils.miniapp(RequestUtils.siteId());
             SetPrivacySetting setPrivacySetting = JSONUtil.toBean(privacySetting, SetPrivacySetting.class);
+            setPrivacySetting.setPrivacyVer(2);
             wxOpenMaService.getPrivacyService().setPrivacySetting(setPrivacySetting);
         } catch (Exception e) {
             throw new CommonException(e.getMessage());

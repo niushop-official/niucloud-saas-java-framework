@@ -18,7 +18,6 @@
                         <template #default="{ row }">
                             <el-tag class="ml-2" type="success" v-if="row.is_use == 1">{{ t('statusNormal') }}</el-tag>
                             <el-tag class="ml-2" type="error" v-if="row.is_use == 0">{{t('statusDeactivate') }}</el-tag>
-
                         </template>
                     </el-table-column>
 

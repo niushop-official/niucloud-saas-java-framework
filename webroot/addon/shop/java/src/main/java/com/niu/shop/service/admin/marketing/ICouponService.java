@@ -3,13 +3,8 @@ package com.niu.shop.service.admin.marketing;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
-import com.niu.shop.service.admin.marketing.param.ShopCouponParam;
-import com.niu.shop.service.admin.marketing.param.ShopCouponSearchParam;
-import com.niu.shop.service.admin.marketing.param.ShopCouponSelectParam;
-import com.niu.shop.service.admin.marketing.vo.ShopCouponInfoVo;
-import com.niu.shop.service.admin.marketing.vo.ShopCouponListVo;
-import com.niu.shop.service.admin.marketing.vo.ShopCouponMemberListVo;
-import com.niu.shop.service.admin.marketing.vo.ShopCouponSelectVo;
+import com.niu.shop.service.admin.marketing.param.*;
+import com.niu.shop.service.admin.marketing.vo.*;
 
 import java.util.List;
 
@@ -67,6 +62,8 @@ public interface ICouponService {
      */
     void delete(Integer couponId);
 
+    void deleteAll(ShopCouponDelParam shopCouponDelParam);
+
     /**
      * 获取会员优惠券
      * @param pageParam
@@ -88,4 +85,23 @@ public interface ICouponService {
      * @param couponId
      */
     void couponInvalid(Integer couponId);
+
+    void couponInvalidAll(ShopCouponDelParam shopCouponDelParam);
+
+    /**
+     * 获取发送记录分页列表
+     *
+     * @param pageParam
+     * @param couponId
+     * @param param
+     * @return
+     */
+    PageResult<ShopCouponSendRecordsVo> getSendPages(PageParam pageParam, Integer couponId, ShopCouponSendPageParam param);
+
+    /**
+     * 发放优惠券
+     * @param couponId
+     * @param param
+     */
+    void sendCoupon(Integer couponId, ShopCouponSendParam param);
 }

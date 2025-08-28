@@ -97,8 +97,7 @@ public class LocalUploadProvider extends AbstractUploadProvider implements IUplo
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new UploadException(e.getMessage());
+            return thumbModelResult;
         }
         return thumbModelResult;
     }

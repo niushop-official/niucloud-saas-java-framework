@@ -18,7 +18,7 @@ export function getVerifyRecord(params: Record<string, any>) {
  * @returns
  */
 export function getVerifyDetail(verifyCode: string) {
-    return request.get(`verify/verify/${verifyCode}`)
+    return request.get(`verify/verify/${ verifyCode }`)
 }
 
 /***************************************************** 核销员 ****************************************************/
@@ -34,7 +34,6 @@ export function getVerifierList(params: Record<string, any>) {
 
 /**
  * 获取核销员列表
- * @param params
  * @returns
  */
 export function getVerifierSelect() {
@@ -65,5 +64,21 @@ export function addVerifier(params: Record<string, any>) {
  * @returns
  */
 export function deleteVerifier(id: number) {
-    return request.delete(`verify/verifier/${id}`, { showSuccessMessage: true })
+    return request.delete(`verify/verifier/${ id }`, { showSuccessMessage: true })
+}
+
+/**
+ * 获取核销员信息
+ * @returns
+ */
+export function getVerifyInfo(id: number) {
+    return request.get(`verify/verifier/${ id }`)
+}
+
+/**
+ * 修改核销员信息
+ * @returns
+ */
+export function editVerifier(params: Record<string, any>) {
+    return request.post(`verify/verifier/${ params.id }`, params,{ showSuccessMessage: true })
 }

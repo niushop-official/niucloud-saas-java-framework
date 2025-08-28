@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
+import java.util.Map;
+
 import jakarta.validation.constraints.*;
 
 /**
@@ -46,4 +48,23 @@ public class ShopDeliveryLocalDeliveryParam implements Serializable {
     @NotNull(message = "center参数缺失")
     private JSONObject center;
 
+    private Integer timeIsOpen = 0;
+
+    private Integer timeType = 0;
+
+    private String timeWeek;
+
+    private Integer timeInterval = 30;
+
+    private Integer advanceDay = 0;
+
+    private Integer mostDay = 7;
+
+    private Long startTime;
+
+    private Long endTime;
+
+    private JSONArray deliveryTime;
+
+    private Map<String, Object> thirdPartyConfig;
 }

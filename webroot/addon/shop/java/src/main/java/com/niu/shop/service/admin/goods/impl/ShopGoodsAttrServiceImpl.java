@@ -67,6 +67,9 @@ public class ShopGoodsAttrServiceImpl implements IShopGoodsAttrService {
     public List<ShopGoodsAttrListVo> list(ShopGoodsAttrSearchParam searchParam) {
         QueryWrapper<ShopGoodsAttr> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
+        if(ObjectUtil.isNotNull(searchParam.getAttrIdArr()) && searchParam.getAttrIdArr().size() > 0){
+            queryWrapper.in("attr_id", searchParam.getAttrIdArr());
+        }
         if (ObjectUtil.isNotEmpty(searchParam.getAttrName())) queryWrapper.like("attr_name", searchParam.getAttrName());
         queryWrapper.orderByDesc(Arrays.asList("sort", "attr_id"));
 

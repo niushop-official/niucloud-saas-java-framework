@@ -13,6 +13,7 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
@@ -147,8 +148,8 @@ public class ShopGoodsStatServiceImpl implements IShopGoodsStatService {
         String date = param.getDate();
         String dateType = "day";
         if (ObjectUtil.isEmpty(param.getDate())) {
-            String start = new DateTime().offset(DateField.MONTH, -1).toString("yyyy-MM-dd");
-            String end = new DateTime().toString("yyyy-MM-dd");
+            String start = new DateTime().offset(DateField.MONTH, -1).toString("yyyy/MM/dd");
+            String end = new DateTime().toString("yyyy/MM/dd");
             date = start + "-" + end;
         }
 
@@ -265,6 +266,7 @@ public class ShopGoodsStatServiceImpl implements IShopGoodsStatService {
                 .eq("goods.delete_time", 0)
                 .setAlias("stat")
                 .leftJoin("?_shop_goods goods on stat.goods_id=goods.goods_id".replace("?_", GlobalConfig.tablePrefix))
+                .eq("goods.site_id", RequestUtils.siteId())
                 .groupBy("stat.goods_id")
                 .select("stat.site_id,stat.goods_id,sum(stat.cart_num) as cart_num,sum(stat.sale_num) as sale_num,sum(stat.pay_num) as pay_num,sum(stat.pay_money) as pay_money,sum(stat.refund_num) as refund_num,sum(stat.refund_money) as refund_money,sum(stat.collect_num) as collect_num,sum(stat.evaluate_num) as evaluate_num,sum(stat.access_num) as access_num,sum(goods_visit_member_count) as goods_visit_member_count,goods_name,goods_cover,is_gift");
 
@@ -287,8 +289,7 @@ public class ShopGoodsStatServiceImpl implements IShopGoodsStatService {
 
         IPage<GoodsStatRankInfo> iPage = shopGoodsStatMapper.selectJoinPage(new Page<>(pageParam.getPage(), pageParam.getLimit()), GoodsStatRankInfo.class, queryWrapper);
         iPage.getRecords().forEach(record -> {
-            String cover = coreUploadService.thumb(RequestUtils.siteId(), record.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType())
-                    .getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            String cover = CommonUtils.thumbImageSmall(RequestUtils.siteId(), record.getGoodsCover());
             record.setGoodsCoverThumbSmall(cover);
         });
         return PageResult.build(iPage);

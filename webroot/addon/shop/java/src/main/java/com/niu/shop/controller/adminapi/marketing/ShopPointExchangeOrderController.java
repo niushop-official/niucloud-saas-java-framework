@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.marketing;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.marketing.param.ShopPointExchangeOrderParam;
@@ -18,6 +19,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/order/point")
+@Description("积分兑换订单管理")
 public class ShopPointExchangeOrderController {
 
     @Resource
@@ -30,6 +32,7 @@ public class ShopPointExchangeOrderController {
      * @return Result<PageResult<ShopPointExchangeOrderListVo>>
      */
     @GetMapping("/list")
+    @Description("获取积分兑换订单分页列表")
     public Result<PageResult<ShopPointExchangeOrderListVo>> list(@Validated PageParam pageParam,
                                                      @Validated ShopPointExchangeOrderSearchParam searchParam) {
         PageResult<ShopPointExchangeOrderListVo> list = iShopPointExchangeOrderService.list(pageParam, searchParam);
@@ -42,6 +45,7 @@ public class ShopPointExchangeOrderController {
      * @return Result<ShopPointExchangeOrderInfoVo>
      */
     @GetMapping("/info")
+    @Description("获取积分兑换订单详情")
     public Result<ShopPointExchangeOrderInfoVo> info(@Validated @RequestParam("id") Integer id) {
         ShopPointExchangeOrderInfoVo info = iShopPointExchangeOrderService.info(id);
         return Result.success(info);
@@ -53,6 +57,7 @@ public class ShopPointExchangeOrderController {
      * @return AjaxResult<Object>
      */
     @PostMapping("/add")
+    @Description("添加积分兑换订单")
     public Result<Object> add(@Validated @RequestBody ShopPointExchangeOrderParam addParam) {
         iShopPointExchangeOrderService.add(addParam);
         return Result.success();
@@ -64,7 +69,8 @@ public class ShopPointExchangeOrderController {
      * @return Result<Object>
      */
     @PostMapping("/edit")
-    public Result<Object> edit(Integer id, @Validated @RequestBody ShopPointExchangeOrderParam editParam) {
+    @Description("编辑积分兑换订单")
+    public Result<Object> edit(@Validated Integer id, @Validated @RequestBody ShopPointExchangeOrderParam editParam) {
         iShopPointExchangeOrderService.edit(id, editParam);
         return Result.success();
     }
@@ -75,6 +81,7 @@ public class ShopPointExchangeOrderController {
      * @return Result<Object>
      */
     @PostMapping("/del")
+    @Description("删除积分兑换订单")
     public Result<Object> del(@Validated @RequestBody Integer id) {
         iShopPointExchangeOrderService.del(id);
         return Result.success();

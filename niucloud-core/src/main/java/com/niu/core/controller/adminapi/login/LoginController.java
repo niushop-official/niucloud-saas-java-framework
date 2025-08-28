@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import jdk.jfr.Description;
 
+@Description("登录")
 @RestController
 @RequestMapping("adminapi/login")
 public class LoginController {
@@ -33,6 +35,7 @@ public class LoginController {
     @Resource
     IConfigService configService;
 
+    @Description("登录")
     @GetMapping("/{appType}")
     public Result<LoginResultVo> login(@Validated UserLoginParam userLoginParam){
         LoginResultVo loginResultVo=loginService.login(userLoginParam);
@@ -43,17 +46,20 @@ public class LoginController {
      * 获取登录设置
      * @return
      */
+    @Description("获取登录设置")
     @GetMapping("config")
     public Result<LoginConfigVo> getConfig(){
         return Result.success(configService.getLoginConfig());
     }
 
+    @Description("获取token信息")
     @RequestMapping("/tokenInfo")
     public SaResult tokenInfo() {
         return SaResult.data(StpUtil.getTokenInfo());
     }
 
     // 测试注销
+    @Description("注销")
     @RequestMapping("/logout")
     public SaResult logout() {
         StpUtil.logout();

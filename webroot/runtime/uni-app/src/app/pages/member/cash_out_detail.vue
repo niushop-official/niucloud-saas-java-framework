@@ -1,6 +1,6 @@
 <template>
     <view class="min-h-[100vh] bg-[var(--page-bg-color)] overflow-hidden" :style="themeColor()">
-        <block v-if="!loading">
+        <template v-if="!loading">
             <view class="sidebar-margin card-template mt-[20rpx] !pt-[60rpx] !pb-[40rpx]">
                 <!-- <view class="flex flex-col justify-center items-center mb-[44rpx]" v-if="cashOutInfo.status == 4 && cashOutInfo.transfer_type == 'wechatpay'">
                   <image class="h-[70rpx] w-[70rpx] mb-[24rpx]" :src="img('static/resource/images/member/apply_withdrawal/transfer.png')" mode="widthFix" />
@@ -16,8 +16,7 @@
                         <text class="text-[#333] w-[200rpx]">{{ t('cashOutNo') }}</text>
                         <text class="text-[#333]">{{ cashOutInfo.cash_out_no }}</text>
                     </view>
-                    <view class="flex justify-between text-[28rpx] mt-[34rpx] leading-[32rpx]"
-                          v-if="Number(cashOutInfo.service_money)">
+                    <view class="flex justify-between text-[28rpx] mt-[34rpx] leading-[32rpx]" v-if="Number(cashOutInfo.service_money)">
                         <text class="text-[#333] w-[200rpx]">{{ t('serviceMoney') }}</text>
                         <text class="text-[#333]">￥{{ cashOutInfo.service_money }}</text>
                     </view>
@@ -111,7 +110,7 @@
                     :loading="operateLoading" @click="cashTransfer"
                     v-else-if="cashOutInfo.transfer_type == 'wechatpay' && cashOutInfo.status == 4">{{ t('cashOutNow') }}</button>
             </view>
-        </block>
+        </template>
         <loading-page :loading="loading"></loading-page>
     </view>
 </template>
@@ -201,7 +200,9 @@ const cashOut = () => {
                 clearTimeout(timer)
             }, 6000)
         })
-    })
+    }).catch((err:any)=>{
+		operateLoading.value = false;
+	})
 
 }
 const cashTransfer = () => {

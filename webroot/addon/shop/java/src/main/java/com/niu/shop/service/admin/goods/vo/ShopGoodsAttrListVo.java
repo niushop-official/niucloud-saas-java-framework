@@ -16,5 +16,6 @@ public class ShopGoodsAttrListVo implements Serializable {
     private Integer siteId;  // 站点id
     private String attrName;  // 参数名称
     private Integer sort;  // 参数排序号
+    private String attrValueFormat; // 参数值格式
 
 }

@@ -12,15 +12,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberAccountLog;
 import com.niu.core.enums.member.AccountTypeEnum;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.mapper.member.MemberAccountLogMapper;
 import com.niu.core.mapper.member.MemberMapper;
-import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.exchange.ShopPointExchange;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.enums.marketing.ShopPointExchangeStatusEnum;
@@ -55,8 +54,6 @@ import java.util.stream.Collectors;
 public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     private static final List<String> PRESETS_ORDER_COLUMN = List.of("total_order_num", "total_exchange_num", "price");
-    @Resource
-    ICoreUploadService coreUploadService;
     @Resource
     IGoodsService goodsService;
     @Resource
@@ -97,13 +94,12 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             vo.setStatusName(ShopPointExchangeStatusEnum.getNameByStatus(item.getStatus()));
             if (ObjectUtil.isNotEmpty(item.getImage())) {
                 String image = item.getImage().split(",")[0];
-                String coverBig = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+                String coverBig = CommonUtils.thumbImageBig(RequestUtils.siteId(), image);
                 vo.setGoodsCoverThumbBig(coverBig);
-
-                String coverMid = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+                String coverMid = CommonUtils.thumbImageMiddle(RequestUtils.siteId(), image);
                 vo.setGoodsCoverThumbMid(coverMid);
 
-                String coverSmall = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+                String coverSmall = CommonUtils.thumbImageSmall(RequestUtils.siteId(), image);
                 vo.setGoodsCoverThumbSmall(coverSmall);
             }
             list.add(vo);
@@ -135,9 +131,9 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
         // 最简单的详情信息
         ShopPointExchangeInfoVo shopPointExchangeInfoVo = new ShopPointExchangeInfoVo();
-        String small = coreUploadService.thumb(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
-        String mid = coreUploadService.thumb(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
-        String big = coreUploadService.thumb(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+        String small = CommonUtils.thumbImageSmall(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage());
+        String mid = CommonUtils.thumbImageMiddle(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage());
+        String big = CommonUtils.thumbImageBig(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage());
         shopPointExchangeInfoVo.setSkuImageThumbSmall(small);
         shopPointExchangeInfoVo.setSkuImageThumbMid(mid);
         shopPointExchangeInfoVo.setSkuImageThumbBig(big);
@@ -156,7 +152,6 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         shopPointExchangeInfoVo.setVolume(shopGoodsDetailVo.getVolume().toString());
         shopPointExchangeInfoVo.setSaleNum(shopGoodsDetailVo.getSaleNum());
         shopPointExchangeInfoVo.setIsDefault(shopGoodsDetailVo.getIsDefault());
-        shopPointExchangeInfoVo.setMemberPrice(shopGoodsDetailVo.getMemberPrice().toString());
         shopPointExchangeInfoVo.setType(shopPointExchange.getType());
         shopPointExchangeInfoVo.setTypeName(ShopPointExchangeTypeEnum.getNameByType(shopPointExchange.getType()));
         shopPointExchangeInfoVo.setEvaluateIsShow(shopGoodsDetailVo.getEvaluateIsShow());
@@ -185,7 +180,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         goodsDTO.setDeliveryMoney(shopGoodsDetailVo.getGoods().getDeliveryMoney().toString());
         goodsDTO.setDeliveryTemplateId(shopGoodsDetailVo.getGoods().getDeliveryTemplateId());
         goodsDTO.setAttrId(shopGoodsDetailVo.getGoods().getAttrId());
-        goodsDTO.setAttrFormat(shopGoodsDetailVo.getGoods().getAttrFormat());
+        goodsDTO.setAttrFormat(JSONUtil.toJsonStr(shopGoodsDetailVo.getGoods().getAttrFormat()));
         goodsDTO.setMemberDiscount(shopGoodsDetailVo.getGoods().getMemberDiscount());
         goodsDTO.setPosterId(shopGoodsDetailVo.getGoods().getPosterId());
         goodsDTO.setVirtualReceiveType(shopGoodsDetailVo.getGoods().getVirtualReceiveType());
@@ -241,7 +236,6 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             skuListDTO.setWeight(sku.getWeight().toString());
             skuListDTO.setVolume(sku.getVolume().toString());
             skuListDTO.setIsDefault(sku.getIsDefault());
-            skuListDTO.setMemberPrice(sku.getMemberPrice().toString());
             skuListDTO.setLimitNum(ObjectUtil.isEmpty(sku.getLimitNum()) ? "0" : sku.getLimitNum().toString());
             skuListDTO.setPoint(sku.getPoint() == null ? "0" : sku.getPoint().toString());
 
@@ -251,6 +245,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             productDetailOptional.ifPresent(detail -> {
                 BeanUtils.copyProperties(detail, skuListDTO);
                 skuListDTO.setSalePrice(detail.getPrice());
+                skuListDTO.setIsJoinExchange(1);
             });
 
             return skuListDTO;
@@ -319,13 +314,13 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
                     if (ObjectUtil.isNotEmpty(shopPointExchange.getImage())) {
                         String image = shopPointExchange.getImage().split(",")[0];
-                        String coverBig = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+                        String coverBig = CommonUtils.thumbImageBig(RequestUtils.siteId(), image);
                         shopPointExchangeListVo.setGoodsCoverThumbBig(coverBig);
 
-                        String coverMid = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+                        String coverMid = CommonUtils.thumbImageMiddle(RequestUtils.siteId(), image);
                         shopPointExchangeListVo.setGoodsCoverThumbMid(coverMid);
 
-                        String coverSmall = coreUploadService.thumb(RequestUtils.siteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+                        String coverSmall = CommonUtils.thumbImageSmall(RequestUtils.siteId(), image);
                         shopPointExchangeListVo.setGoodsCoverThumbSmall(coverSmall);
                     }
 

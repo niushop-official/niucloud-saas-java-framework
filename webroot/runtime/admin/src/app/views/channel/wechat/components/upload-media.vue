@@ -25,10 +25,9 @@ const upload = computed(() => {
     const headers: Record<string, any> = {}
     headers[import.meta.env.VITE_REQUEST_HEADER_TOKEN_KEY] = getToken()
     headers[import.meta.env.VITE_REQUEST_HEADER_SITEID_KEY] = storage.get('siteId') || 0
-    const baseURL = import.meta.env.VITE_APP_BASE_URL.substr(-1) == '/' ? import.meta.env.VITE_APP_BASE_URL : `${import.meta.env.VITE_APP_BASE_URL}/`;
 
     return {
-        action: `${baseURL}wechat/media/${prop.type}`,
+        action: `${import.meta.env.VITE_APP_BASE_URL}/wechat/media/${prop.type}`,
         multiple: true,
         headers,
         accept: prop.type == 'image' ? '.bmp,.png,.jpeg,.jpg,.gif' : '.mp4',

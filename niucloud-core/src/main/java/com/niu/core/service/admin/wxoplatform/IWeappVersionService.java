@@ -7,6 +7,8 @@ import com.niu.core.entity.oplatform.WxOplatfromWeappVersion;
 import com.niu.core.service.admin.wechat.param.WechatFansSearchParam;
 import com.niu.core.service.admin.wechat.vo.WechatFansListVo;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
+import com.niu.core.service.admin.wxoplatform.param.SyncSiteGroupAuthWeappParam;
+import com.niu.core.service.admin.wxoplatform.param.UndoAuditParam;
 import com.niu.core.service.admin.wxoplatform.vo.SiteGroupWeappVersionVo;
 import com.niu.core.service.admin.wxoplatform.vo.WxOplatfromWeappVersionVo;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
@@ -70,4 +72,12 @@ public interface IWeappVersionService {
      * @return
      */
     PageResult<SiteGroupWeappVersionVo> getSiteGroupCommitRecord(PageParam pageParam);
+
+    /**
+     * 撤销审核
+     * @param param
+     */
+    void undoAudit(UndoAuditParam param);
+
+    void syncSiteGroupAuthWeapp(SyncSiteGroupAuthWeappParam param);
 }

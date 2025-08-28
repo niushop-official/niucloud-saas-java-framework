@@ -27,7 +27,6 @@
                     <div class="max-w-[260px]"> {{ formData.roles[0].site_name }} </div>
                     <el-link class="ml-10 text-blue-700" href="/site/login" target="_blank" :underline="false">{{ t('enterSite') }}</el-link>
                 </div>
-
             </el-form-item>
 
             <el-form-item :label="t('isAdmin')">
@@ -87,7 +86,6 @@ const initialFormData = {
     uid: '',
     update_time: '',
     roles: []
-
 }
 const formData: Record<string, any> = reactive({ ...initialFormData })
 

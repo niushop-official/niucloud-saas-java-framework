@@ -1,9 +1,9 @@
 <template>
     <div class="main-container">
-
-        <el-form class="page-form" :model="formData" label-width="150px" ref="formRef" :rules="formRules" v-loading="loading">
+        <el-form class="page-form loading-box" :model="formData" label-width="150px" ref="formRef" :rules="formRules" v-loading="loading">
             <el-card class="box-card !border-none" shadow="never">
-                <h3 class="panel-title !text-sm">{{ t('websiteInfo') }}</h3>
+                <h3 class="text-[16px] text-[#1D1F3A] font-bold mb-4">{{ pageName }}</h3>
+                <h3 class="panel-title !text-[14px] bg-[#F4F5F7] p-3 border-[#E6E6E6] border-solid border-b-[1px]">{{ t('websiteInfo') }}</h3>
 
                 <el-form-item :label="t('siteName')" prop="site_name">
                     <el-input v-model.trim="formData.site_name" :placeholder="t('siteNamePlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
@@ -20,42 +20,63 @@
                         <p class="text-[12px] text-[#a9a9a9]">{{ t('iconPlaceholder') }}</p>
                     </div>
                 </el-form-item>
+                <el-form-item :label="t('siteLoginLogo')" v-if="appType == 'admin'">
+                    <div>
+                        <upload-image v-model="formData.site_login_logo" />
+                        <p class="text-[12px] text-[#a9a9a9]">{{ t('siteLoginLogoTips') }}</p>
+                    </div>
+                </el-form-item>
+                <el-form-item :label="t('siteLoginBgImg')" v-if="appType == 'admin'">
+                    <div>
+                        <upload-image v-model="formData.site_login_bg_img" />
+                        <p class="text-[12px] text-[#a9a9a9]">{{ t('siteLoginBgImgTips') }}</p>
+                    </div>
+                </el-form-item>
                 <el-form-item :label="t('keywords')">
-                    <el-input v-model="formData.keywords" :placeholder="t('keywordsPlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
+                    <el-input v-model.trim="formData.keywords" :placeholder="t('keywordsPlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
                 </el-form-item>
                 <el-form-item :label="t('desc')">
-                    <el-input v-model="formData.desc" type="textarea" :rows="4" clearable :placeholder="t('descPlaceholder')" class="input-width" maxlength="100" show-word-limit />
+                    <el-input v-model.trim="formData.desc" type="textarea" :rows="4" clearable :placeholder="t('descPlaceholder')" class="input-width" maxlength="100" show-word-limit />
                 </el-form-item>
-            </el-card>
 
-            <el-card class="box-card mt-[15px] !border-none" shadow="never" v-show="appType == 'site'">
-                <h3 class="panel-title !text-sm">{{ t('frontEndInfo') }}</h3>
-                <el-form-item :label="t('frontEndName')">
-                    <el-input v-model="formData.front_end_name" :placeholder="t('frontEndNamePlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
-                </el-form-item>
-                <el-form-item :label="t('phone')">
-                    <el-input v-model="formData.phone" :placeholder="t('phonePlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
-                </el-form-item>
-                <el-form-item :label="t('logo')">
-                    <upload-image v-model="formData.front_end_logo" />
-                </el-form-item>
-                <el-form-item :label="t('icon')">
-                    <upload-image v-model="formData.front_end_icon" />
-                </el-form-item>
-            </el-card>
+                <div class="mt-[20px]" v-show="appType == 'site'">
+                    <h3 class="panel-title !text-[14px] bg-[#F4F5F7] p-3 border-[#E6E6E6] border-solid border-b-[1px]">{{ t('frontEndInfo') }}</h3>
+                    <el-form-item :label="t('frontEndName')">
+                        <el-input v-model.trim="formData.front_end_name" :placeholder="t('frontEndNamePlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
+                    </el-form-item>
+                    <el-form-item :label="t('phone')">
+                        <el-input v-model.trim="formData.phone" :placeholder="t('phonePlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
+                    </el-form-item>
+                    <el-form-item :label="t('logo')">
+                        <upload-image v-model="formData.front_end_logo" />
+                    </el-form-item>
+                    <el-form-item :label="t('icon')">
+                        <upload-image v-model="formData.front_end_icon" />
+                    </el-form-item>
 
-            <el-card class="box-card mt-[15px] !border-none" shadow="never" v-if="appType == 'admin'">
-                <h3 class="panel-title !text-sm">{{ t('serviceInformation') }}</h3>
+                    <el-form-item :label="t('metaTitle')">
+                        <el-input v-model.trim="formData.meta_title" :placeholder="t('MetaPlaceholder')" class="input-width" clearable maxlength="40" show-word-limit />
+                    </el-form-item>
+                    <el-form-item :label="t('metaDescription')">
+                        <el-input v-model.trim="formData.meta_desc" :placeholder="t('metaDescriptionPlaceholder')" class="input-width" clearable maxlength="200" show-word-limit />
+                    </el-form-item>
+                    <el-form-item :label="t('metaKeywords')">
+                        <el-input v-model.trim="formData.meta_keyword" :placeholder="t('metaKeywordsPlaceholder')" class="input-width" clearable maxlength="200" show-word-limit />
+                    </el-form-item>
+                </div>
 
-                <el-form-item :label="t('contactsTel')">
-                    <el-input v-model="formData.tel" :placeholder="t('contactsTelPlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
-                </el-form-item>
-                <el-form-item :label="t('wechatCode')">
-                    <upload-image v-model="formData.wechat_code" />
-                </el-form-item>
-                <el-form-item :label="t('customerServiceCode')">
-                    <upload-image v-model="formData.enterprise_wechat" />
-                </el-form-item>
+                <div class="mt-[20px]" v-if="appType == 'admin'">
+                    <h3 class="panel-title !text-[14px] bg-[#F4F5F7] p-3 border-[#E6E6E6] border-solid border-b-[1px]">{{ t('serviceInformation') }}</h3>
+                    <el-form-item :label="t('contactsTel')">
+                        <el-input v-model.trim="formData.tel" :placeholder="t('contactsTelPlaceholder')" class="input-width" clearable maxlength="20" show-word-limit />
+                    </el-form-item>
+                    <el-form-item :label="t('wechatCode')">
+                        <upload-image v-model="formData.wechat_code" />
+                    </el-form-item>
+                    <el-form-item :label="t('customerServiceCode')">
+                        <upload-image v-model="formData.enterprise_wechat" />
+                    </el-form-item>
+                </div>
             </el-card>
         </el-form>
 
@@ -73,15 +94,15 @@ import { t } from '@/lang'
 import { setWebsite, getWebsite, getService } from '@/app/api/sys'
 import { FormInstance, FormRules } from 'element-plus'
 import { getAppType } from '@/utils/common'
-import { useRoute } from 'vue-router'
 import useUserStore from '@/stores/modules/user'
-import useSystemStore from '@/stores/modules/system';
+import useSystemStore from '@/stores/modules/system'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const pageName = route.meta.title
 const loading = ref(true)
 const appType = ref(getAppType())
-const formData = reactive<Record<string, string>>({
+const formData: any = reactive<Record<string, string>>({
     site_name: '',
     logo: '',
     desc: '',
@@ -101,19 +122,26 @@ const formData = reactive<Record<string, string>>({
     icon: '',
     wechat_code: '',
     enterprise_wechat: '',
-    tel: ''
+    tel: '',
+    site_login_logo: '',
+    site_login_bg_img: '',
+    meta_title:"",
+    meta_desc:"",
+    meta_keyword:"",
 })
 
-const setFormData = async (id: number = 0) => {
+const setFormData = async () => {
     const data = await (await getWebsite()).data
     Object.keys(formData).forEach((key: string) => {
         if (data[key] != undefined) formData[key] = data[key]
     })
 
-    const service_data = await (await getService()).data
-    formData['wechat_code'] = service_data.wechat_code
-    formData['enterprise_wechat'] = service_data.enterprise_wechat
-    formData['tel'] = service_data.tel
+    const service_data: any = await (await getService()).data
+    formData.wechat_code = service_data.wechat_code
+    formData.enterprise_wechat = service_data.enterprise_wechat
+    formData.tel = service_data.tel
+    formData.site_login_logo = service_data.site_login_logo
+    formData.site_login_bg_img = service_data.site_login_bg_img
     loading.value = false
 }
 setFormData()
@@ -139,7 +167,6 @@ const save = async (formEl: FormInstance | undefined) => {
     await formEl.validate(async (valid) => {
         if (valid) {
             loading.value = true
-
             setWebsite(formData).then(() => {
                 loading.value = false
                 appType.value == 'admin' ? useSystemStore().getWebsiteInfo() : useUserStore().getSiteInfo()
@@ -151,4 +178,8 @@ const save = async (formEl: FormInstance | undefined) => {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+:deep(.loading-box .el-loading-spinner){
+    top: 33%;
+}
+</style>

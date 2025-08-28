@@ -2,6 +2,7 @@ package com.niu.shop.service.api.goods.vo;
 
 import cn.hutool.core.date.DateUtil;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import lombok.Data;
@@ -39,12 +40,16 @@ public class GoodsBrowseListVo implements Serializable {
 
     private BigDecimal marketPrice;
 
-    private Object memberPrice;
+    private String memberPrice;
 
     private String memberDiscount;
 
+    private BigDecimal showPrice;
+
+    private String showType;
+
     public String getGoodsCoverThumbMid() {
-        return SpringContext.bean(ICoreUploadService.class).thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+        return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover());
     }
 
     public String getBrowseTime() {

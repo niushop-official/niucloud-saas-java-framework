@@ -34,7 +34,7 @@ public class MemberInfoVo implements Serializable {
     private String password;  // 会员密码
     private String nickname;  // 会员昵称
     private String headimg;  // 会员头像
-    private Integer memberLevel;  // 会员等级
+    private String memberLevel;  // 会员等级
     private String memberLevelName;  // 会员等级
     @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String memberLabel;  // 会员标签
@@ -85,6 +85,8 @@ public class MemberInfoVo implements Serializable {
     private String loginChannelName;
     private String loginTypeName;
     private String statusName;
+    private String idCard;
+    private String remark;
 
     /**
      * 注册渠道名称

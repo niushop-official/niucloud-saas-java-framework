@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 消息管理控制器
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("adminapi/notice")
 @SaCheckLogin
+@Description("消息管理")
 public class NoticeController {
 
     @Resource
@@ -35,6 +37,7 @@ public class NoticeController {
      * @return Response
      */
     @GetMapping("/notice")
+    @Description("消息列表")
     public Result<List<AddonNoticeListVo>> list() {
         return Result.success(noticeService.getAddonList());
     }
@@ -44,6 +47,7 @@ public class NoticeController {
      * @param key
      */
     @GetMapping("/notice/{key}")
+    @Description("获取消息内容")
     public Result<NoticeInfoVo> info(@Validated @PathVariable("key") String key) {
         return Result.success(noticeService.getInfo(key));
     }
@@ -54,6 +58,7 @@ public class NoticeController {
      * @return Result<PayInfoVo>
      */
     @PostMapping("/notice/edit")
+    @Description("消息修改")
     public Result<?> edit(@Validated @RequestBody JSONObject data) {
         noticeService.edit(data.getStr("key"), data);
         return Result.success();
@@ -63,7 +68,8 @@ public class NoticeController {
      * 短信配置列表
      * @return Response
      */
-    @GetMapping("/notice/sms/list")
+    @GetMapping("/notice/sms")
+    @Description("短信配置列表")
     public Result<List<SmsTypeVo>> smsList(){
         return Result.success(smsService.getList());
     }
@@ -73,6 +79,7 @@ public class NoticeController {
      * @return Response
      */
     @GetMapping("/notice/sms/{sms_type}")
+    @Description("短信配置详情")
     public Result<SmsTypeVo> smsConfig(@PathVariable("sms_type") String smsType){
         return Result.success(smsService.getConfig(smsType));
     }
@@ -82,6 +89,7 @@ public class NoticeController {
      * @return Response
      */
     @PutMapping("/notice/sms/{sms_type}")
+    @Description("短信配置修改")
     public Result<?> editSms(@PathVariable("sms_type") String smsType, @RequestBody JSONObject data){
         smsService.setConfig(smsType, data);
         return Result.success();
@@ -93,6 +101,7 @@ public class NoticeController {
      * @return
      */
     @PostMapping("/notice/editstatus")
+    @Description("消息启动与关闭")
     public Result editStatus(@Validated @RequestBody EditMessageStatusParam param) {
         noticeService.editMessageStatus(param);
         return Result.success();

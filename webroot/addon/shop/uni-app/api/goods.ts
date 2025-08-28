@@ -105,3 +105,10 @@ export function getBrowse(params: Record<string, any>) {
 export function delBrowse(params: Record<string, any>) {
     return request.delete(`shop/goods/browse`, params)
 }
+
+/**
+ *  获取商品搜索配置
+ */
+export function getGoodsConfigSearch() {
+    return request.get(`shop/goods/config/search`)
+}

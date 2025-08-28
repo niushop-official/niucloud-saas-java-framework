@@ -9,9 +9,12 @@ import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.wxoplatform.IOplatformConfigService;
 import com.niu.core.service.admin.wxoplatform.IWeappVersionService;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
+import com.niu.core.service.admin.wxoplatform.param.SyncSiteGroupAuthWeappParam;
+import com.niu.core.service.admin.wxoplatform.param.UndoAuditParam;
 import com.niu.core.service.admin.wxoplatform.vo.SiteGroupWeappVersionVo;
 import com.niu.core.service.admin.wxoplatform.vo.WxOplatfromWeappVersionVo;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +58,7 @@ public class WeappVersionController {
      *
      * @return
      */
+    @Description("平台提交小程序版本")
     @PostMapping("/weapp/version/commit")
     public Result weappCommit(@RequestBody Map<String, Object> params){
         Integer siteGroupId = ObjectUtil.isEmpty(params.get("site_group_id")) ? 0 : (Integer) params.get("site_group_id");
@@ -63,10 +67,11 @@ public class WeappVersionController {
     }
 
     /**
-     * 添加小程序版本
+     * 提交小程序审核
      *
      * @return
      */
+    @Description("提交小程序审核")
     @PostMapping("/site/weapp/commit")
     public Result siteWeappCommit(){
         weappVersionService.siteWeappCommit();
@@ -83,5 +88,23 @@ public class WeappVersionController {
     @GetMapping("/sitegroup/commit")
     public Result<PageResult<SiteGroupWeappVersionVo>> getSiteGroupCommitRecord(@Validated PageParam pageParam){
         return Result.success(weappVersionService.getSiteGroupCommitRecord(pageParam));
+    }
+
+    /**
+     * 撤销审核
+     * @return
+     */
+    @Description("撤销审核")
+    @PutMapping("/undo/weappaudit")
+    public Result undoAudit(@RequestBody UndoAuditParam param) {
+        weappVersionService.undoAudit(param);
+        return Result.success();
+    }
+
+    @Description("同步套餐下站点小程序")
+    @PostMapping("/async/siteweapp")
+    public Result syncSiteWeapp(@RequestBody SyncSiteGroupAuthWeappParam param) {
+        weappVersionService.syncSiteGroupAuthWeapp(param);
+        return Result.success();
     }
 }

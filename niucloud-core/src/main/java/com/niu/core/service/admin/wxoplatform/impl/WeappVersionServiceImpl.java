@@ -31,6 +31,8 @@ import com.niu.core.mapper.weapp.WeappVersionMapper;
 import com.niu.core.service.admin.pay.vo.PayListVo;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.wxoplatform.IWeappVersionService;
+import com.niu.core.service.admin.wxoplatform.param.SyncSiteGroupAuthWeappParam;
+import com.niu.core.service.admin.wxoplatform.param.UndoAuditParam;
 import com.niu.core.service.admin.wxoplatform.vo.OplatformConfigVo;
 import com.niu.core.service.admin.wxoplatform.vo.SiteGroupWeappVersionVo;
 import com.niu.core.service.admin.wxoplatform.vo.WxOplatfromWeappVersionVo;
@@ -57,6 +59,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.Assert;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -247,8 +250,6 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
                                 version.setTemplateId(template.getTemplateId().toString());
                                 wxOplatfromWeappVersionMapper.updateById(version);
 
-                                siteGroupAuthWeappCommit(version.getSiteGroupId(), version);
-
                                 // 删除之前的模板
                                 WxOplatfromWeappVersion prev = wxOplatfromWeappVersionMapper.selectOne(new QueryWrapper<WxOplatfromWeappVersion>()
                                     .select("template_id")
@@ -281,20 +282,6 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
             if (siteGroup != null) {
                 weappVersionService.add(siteGroup.getGroupId(), true);
             }
-        }
-    }
-
-    private void siteGroupAuthWeappCommit(Integer siteGroupId, WxOplatfromWeappVersion version) {
-        List<Site> siteList = siteMapper.selectList(new QueryWrapper<Site>().select("site_id").eq("group_id", siteGroupId));
-        if (ObjectUtil.isNotEmpty(siteList)) {
-            Integer[] siteIds = siteList.stream().map(Site::getSiteId).toArray(Integer[]::new);
-
-            sysConfigMapper.selectList(new QueryWrapper<SysConfig>().in("site_id", siteIds).eq("config_key", ConfigKeyEnum.WEAPP_AUTHORIZATION_INFO.getName())).forEach(item -> {
-                try {
-                    weappVersionService.weappCommit(item.getSiteId(), siteGroupId, version);
-                } catch (Exception e) {
-                }
-            });
         }
     }
 
@@ -440,5 +427,49 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
         }
 
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+    }
+
+    /**
+     * 撤销审核
+     * */
+    @Override
+    public void undoAudit(UndoAuditParam param) {
+        WeappVersion version = weappVersionMapper.selectOne(new QueryWrapper<WeappVersion>().eq("id", param.getId()).eq("site_id", RequestUtils.siteId()));
+        Assert.notNull(version, "未获取到小程序版本提交记录");
+        if (!version.getStatus().equals(WeappVersionStatusEnum.APPLET_AUDITING.getStatus())) throw new CommonException("只有审核中的才可以撤回");
+
+        WeappConfigVo weappCofig = coreWeappConfigService.getWeappConfig(RequestUtils.siteId());
+
+        try {
+            WxOpenResult commitResult = WechatUtils.WxOpen().getWxOpenComponentService()
+                .getWxMaServiceByAppid(weappCofig.getAppId()).undoCodeAudit();
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+
+        version.setStatus(WeappVersionStatusEnum.APPLET_AUDIT_UNDO.getStatus());
+        version.setUpdateTime(System.currentTimeMillis() / 1000);
+        weappVersionMapper.updateById(version);
+    }
+
+    @Override
+    public void syncSiteGroupAuthWeapp(SyncSiteGroupAuthWeappParam param) {
+        WxOplatfromWeappVersion version = wxOplatfromWeappVersionMapper.selectOne(new QueryWrapper<WxOplatfromWeappVersion>()
+            .eq("site_group_id", param.getSiteGroupId())
+            .ne("template_id", "")
+            .orderByDesc("id")
+            .last("limit 1")
+        );
+        Assert.notNull(version, "平台尚未上传小程序到模板库");
+
+        List<Integer> siteIds = siteMapper.selectList(new QueryWrapper<Site>().select("site_id").eq("group_id", param.getSiteGroupId())).stream().map(Site::getSiteId).toList();
+        if (ObjectUtil.isNotEmpty(siteIds)) {
+            List<SysConfig> authSite = sysConfigMapper.selectList(new QueryWrapper<SysConfig>().in("site_id", siteIds).eq("config_key", ConfigKeyEnum.WEAPP_AUTHORIZATION_INFO.getName()));
+            if (ObjectUtil.isNotEmpty(authSite)) {
+                authSite.forEach(item -> {
+                    weappCommit(item.getSiteId(), param.getSiteGroupId(), version);
+                });
+            }
+        }
     }
 }

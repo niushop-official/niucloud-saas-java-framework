@@ -12,6 +12,7 @@ import com.niu.core.service.admin.addon.param.AddonLogSearchParam;
 import com.niu.core.service.admin.addon.param.AddonSearchParam;
 import com.niu.core.service.admin.addon.vo.AddonLogInfoVo;
 import com.niu.core.service.admin.addon.vo.AddonLogListVo;
+import com.niu.core.service.admin.addon.vo.IndexAddonListParam;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +20,15 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
- * 插件日志管理
+ * 应用管理
  */
 @RestController
 @RequestMapping("/adminapi")
 @SaCheckLogin
+@Description("应用管理")
 public class AppController {
 
     @Resource
@@ -35,6 +38,7 @@ public class AppController {
      * 获取安装的应用
      */
     @GetMapping("/app/getAddonList")
+    @Description("获取安装的应用")
     public Result<Map<String, InstallAddonListVo>> getInstallList() {
         Map<String, InstallAddonListVo> appList = new HashMap<>();
         Map<String, InstallAddonListVo> addonList = addonService.getInstallList();
@@ -44,5 +48,14 @@ public class AppController {
             }
         }
         return Result.success(appList);
+    }
+
+    /**
+     * 获取首页应用
+     */
+    @GetMapping("/app/index")
+    @Description("获取首页应用")
+    public Result<?> getIndexAddonList(IndexAddonListParam param){
+        return Result.success(addonService.getIndexAddonList(param));
     }
 }

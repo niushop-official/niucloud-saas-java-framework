@@ -71,6 +71,8 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
         model.setGoodsCategory(JSONUtil.parseArray(intArrToStrArr(addParam.getGoodsCategory())).toString());
         model.setLabelIds(JSONUtil.parseArray(intArrToStrArr(addParam.getLabelIds())).toString());
         model.setServiceIds(JSONUtil.parseArray(intArrToStrArr(addParam.getServiceIds())).toString());
+        model.setAttrFormat(JSONUtil.parseArray(addParam.getAttrFormat()).toString());
+        model.setAttrIds(addParam.getAttrIds().toString());
         shopGoodsMapper.insert(model);
 
         // 规格数据
@@ -199,6 +201,8 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
         model.setGoodsCategory(JSONUtil.parseArray(intArrToStrArr(editParam.getGoodsCategory())).toString());
         model.setLabelIds(JSONUtil.parseArray(intArrToStrArr(editParam.getLabelIds())).toString());
         model.setServiceIds(JSONUtil.parseArray(intArrToStrArr(editParam.getServiceIds())).toString());
+        model.setAttrFormat(JSONUtil.parseArray(editParam.getAttrFormat()).toString());
+        model.setAttrIds(editParam.getAttrIds().toString());
         shopGoodsMapper.updateById(model);
 
         // 规格数据
@@ -434,8 +438,9 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
 
             if (model.getBrandId().equals(0)) goodsInfo.setBrandId("");
             if (model.getSupplierId().equals(0)) goodsInfo.setSupplierId("");
-            if (model.getAttrId().equals(0)) goodsInfo.setAttrId("");
             if (model.getPosterId().equals(0)) goodsInfo.setPosterId("");
+            if (model.getDiyDetailId().equals(0)) goodsInfo.setDiyDetailId("");
+            if (model.getFormId().equals(0)) goodsInfo.setFormId("");
 
             goodsInfo.setActiveGoodsCount(shopGoodsService.getActiveGoodsCount(goodsId));
 

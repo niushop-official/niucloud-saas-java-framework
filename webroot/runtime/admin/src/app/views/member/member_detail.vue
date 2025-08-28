@@ -13,7 +13,7 @@
                         <span class="text-[14px] min-w-[110px] text-right mr-[20px]">{{ t('headimg') }}</span>
                         <span class="flex items-end text-[14px]">
                             <img class="w-[50px] h-[50px] inline-block" v-if="formData.headimg" :src="img(formData.headimg)" alt="">
-                            <img class="w-[50px] h-[50px] inline-block" v-else src="@/app/assets/images/default_headimg.png" alt="">
+                            <img class="w-[50px] h-[50px] inline-block rounded-full" v-else src="@/app/assets/images/member_head.png" alt="">
                             <el-icon @click="editMemberInfo('headimg')" class="-bottom-[2px] -right-[4px] cursor-pointer">
                                 <EditPen color="#273CE2" />
                             </el-icon>
@@ -33,9 +33,7 @@
                                 <el-statistic :value="formData.point">
                                     <template #title>
                                         <div style="display: inline-flex; align-items: center">
-                                            <span class="text-[14px]">
-                                                {{ t('point') }}
-                                            </span>
+                                            <span class="text-[14px]">{{ t('point') }}</span>
                                             <el-tooltip effect="dark" :content="t('adjust')" placement="top">
                                                 <el-icon @click="adjustPoint(formData)" class="ml-2 cursor-pointer" :size="12">
                                                     <EditPen color="#273CE2" />
@@ -64,9 +62,7 @@
                                 <el-statistic :value="formData.balance">
                                     <template #title>
                                         <div style="display: inline-flex; align-items: center">
-                                            <span class="text-[14px]">
-                                                {{ t('balance') }}
-                                            </span>
+                                            <span class="text-[14px]">{{ t('balance') }}</span>
                                             <el-tooltip effect="dark" :content="t('adjust')" placement="top">
                                                 <el-icon @click="adjustBalance(formData)" class="ml-2 cursor-pointer" :size="12">
                                                     <EditPen color="#273CE2" />
@@ -83,9 +79,7 @@
                                 <div class="statistic-footer">
                                     <div class="footer-item text-[14px] text-secondary">
                                         <span>{{ t('accumulative') }}</span>
-                                        <span class="red ml-1">
-                                            {{ formData.balance_get }}
-                                        </span>
+                                        <span class="red ml-1">{{ formData.balance_get }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -95,9 +89,7 @@
                                 <el-statistic :value="formData.growth">
                                     <template #title>
                                         <div style="display: inline-flex; align-items: center">
-                                            <span class="text-[14px]">
-                                                {{ t('growth') }}
-                                            </span>
+                                            <span class="text-[14px]">{{ t('growth') }}</span>
 <!--                                            <el-tooltip effect="dark" :content="t('adjust')" placement="top">-->
 <!--                                                <el-icon @click="adjustGrowth(formData)" class="ml-2 cursor-pointer" :size="12">-->
 <!--                                                    <EditPen color="#273CE2" />-->
@@ -118,9 +110,7 @@
                                 <el-statistic :value="formData.money" title="New transactions today">
                                     <template #title>
                                         <div style="display: inline-flex; align-items: center">
-                                            <span class="text-[14px]">
-                                                {{ t("money") }}
-                                            </span>
+                                            <span class="text-[14px]">{{ t("money") }}</span>
                                             <el-tooltip effect="dark" :content="t('detail')" placement="top">
                                                 <el-icon @click="infoBalance(formData)" class="ml-2 cursor-pointer" :size="12">
                                                     <View />
@@ -132,9 +122,7 @@
                                 <div class="statistic-footer">
                                     <div class="footer-item text-[14px] text-secondary">
                                         <span>{{ t('accumulative') }}</span>
-                                        <span class="green ml-1">
-                                            {{ formData.money_get }}
-                                        </span>
+                                        <span class="green ml-1">{{ formData.money_get }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -144,9 +132,7 @@
                                 <el-statistic :value="formData.commission" title="New transactions today">
                                     <template #title>
                                         <div style="display: inline-flex; align-items: center ">
-                                            <span class="text-[14px]">
-                                                {{ t("commission") }}
-                                            </span>
+                                            <span class="text-[14px]">{{ t("commission") }}</span>
                                             <el-tooltip effect="dark" :content="t('detail')" placement="top">
                                                 <el-icon @click="infoCommission(formData)" class="ml-2 cursor-pointer" :size="12">
                                                     <View />
@@ -158,9 +144,7 @@
                                 <div class="statistic-footer">
                                     <div class="footer-item text-[14px] text-secondary">
                                         <span>{{ t('accumulative') }}</span>
-                                        <span class="green ml-1">
-                                            {{ formData.commission_get }}
-                                        </span>
+                                        <span class="green ml-1">{{ formData.commission_get }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -172,22 +156,16 @@
         <el-card class="box-card !border-none" shadow="never">
             <div class="flex items-center mt-[15px]">
                 <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('urserName') }}</span>
-                <span class="text-[14px] text-[#666666]">
-                    {{ formData.username || t('notAvailable') }}
-                </span>
+                <span class="text-[14px] text-[#666666]">{{ formData.username || t('notAvailable') }}</span>
             </div>
             <div class="flex items-center mt-[15px]">
                 <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('nickname') }}</span>
-                <span class="text-[14px] text-[#666666]">
-                    {{ formData.nickname || t('notAvailable') }}
-                </span>
+                <span class="text-[14px] text-[#666666]">{{ formData.nickname || t('notAvailable') }}</span>
             </div>
 
             <div class="flex items-center mt-[15px]">
                 <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('mobile') }}</span>
-                <span class="text-[14px] text-[#666666]">
-                    {{ formData.mobile || t('notAvailable') }}
-                </span>
+                <span class="text-[14px] text-[#666666]">{{ formData.mobile || t('notAvailable') }}</span>
             </div>
             <div class="flex items-center mt-[15px]">
                 <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('memberLevel') }}</span>
@@ -217,6 +195,22 @@
                 <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('sex') }}</span>
                 <span class="text-[14px] text-[#666666]">
                     {{ formData.sex == 1 && t('manSex') || formData.sex == 2 && t('girlSex') || t('secrecySex') }}<el-icon @click="editMemberInfo('sex')" class="-bottom-[2px] -right-[4px] cursor-pointer">
+                        <EditPen color="#273CE2" />
+                    </el-icon>
+                </span>
+            </div>
+            <div class="flex items-center mt-[15px]">
+                <span class="text-[14px] w-[130px] text-right flex-shrink-0 mr-[20px]">{{ t('身份证') }}</span>
+                <span class="text-[14px] text-[#666666]">
+                    {{ formData.id_card || t('notAvailable') }}<el-icon @click="editMemberInfo('id_card')" class="-bottom-[2px] -right-[4px] cursor-pointer">
+                        <EditPen color="#273CE2" />
+                    </el-icon>
+                </span>
+            </div>
+            <div class="flex items-center mt-[15px]">
+                <span class="text-[14px] w-[130px] text-right flex-shrink-0 mr-[20px]">{{ t('备注') }}</span>
+                <span class="text-[14px] text-[#666666]">
+                    {{ formData.remark || t('notAvailable') }}<el-icon @click="editMemberInfo('remark')" class="-bottom-[2px] -right-[4px] cursor-pointer">
                         <EditPen color="#273CE2" />
                     </el-icon>
                 </span>
@@ -276,12 +270,10 @@ import { img } from '@/utils/common'
 import PointEdit from '@/app/views/member/components/member-point-edit.vue'
 import BalanceEdit from '@/app/views/member/components/member-balance-edit.vue'
 import EditMember from '@/app/views/member/components/edit-member.vue'
-import useAppStore from '@/stores/modules/app'
 
 const route = useRoute()
 const pageName = route.meta.title
 
-const appStore = useAppStore()
 const loading = ref(true)
 
 // 获取会员信息
@@ -384,17 +376,17 @@ const infoCommission = () => {
 }
 
 const back = () => {
-    if (window.history.length > 1){
+    if (window.history.length > 1) {
         router.go(-1)
-    }else{
+    } else {
         router.push(`/member/member`)
     }
-        }
+}
 </script>
 
 <style lang="scss" scoped>
     .member-info {
-        left: 0px
+        left: 0
     }
 
     .member-info-item {

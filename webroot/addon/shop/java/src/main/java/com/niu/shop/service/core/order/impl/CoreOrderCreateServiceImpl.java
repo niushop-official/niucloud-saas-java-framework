@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.entity.diy_form.DiyForm;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberAddress;
@@ -33,7 +34,10 @@ import com.niu.shop.mapper.exchange.ShopPointExchangeMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.api.goods.IGoodsService;
+import com.niu.shop.service.core.goods.ICoreGoodsActivePriceService;
 import com.niu.shop.service.core.goods.ICoreGoodsLimitBuyService;
+import com.niu.shop.service.core.goods.param.GetShowPriceParam;
+import com.niu.shop.service.core.goods.vo.ShowPriceVo;
 import com.niu.shop.service.core.order.ICoreOrderConfigService;
 import com.niu.shop.service.core.order.ICoreOrderCreateService;
 import com.niu.shop.service.core.order.helper.OrderCreateHelper;
@@ -91,6 +95,9 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
     @Resource
     DiyFormMapper diyFormMapper;
+
+    @Resource
+    ICoreGoodsActivePriceService coreGoodsActivePriceService;
 
     /**
      * 计算
@@ -169,6 +176,9 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         order.setHasGoodsTypes(JSONUtil.parseArray(vo.getBasic().getHasGoodsTypes()).toString());
         order.setDeliveryType(vo.getDelivery().getDeliveryType());
         order.setMemberRemark(vo.getMemberRemark());
+        order.setTakerName(param.getDelivery().getTakerName());
+        order.setTakerMobile(param.getDelivery().getTakerMobile());
+
         if (ObjectUtil.isNotEmpty(vo.getDelivery().getTakeAddress())) {
             MemberAddress address = JSONUtil.toBean(JSONUtil.parseObj(vo.getDelivery().getTakeAddress()), MemberAddress.class);
             order.setTakerName(address.getName());
@@ -180,6 +190,11 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             order.setTakerFullAddress(address.getFullAddress());
             order.setTakerLatitude(address.getLat());
             order.setTakerLongitude(address.getLng());
+        }
+        if (ObjectUtil.defaultIfNull(param.getDelivery().getLocalDeliveryType(), "").equals("now")) {
+            order.setBuyerAskDeliveryTime("");
+        } else {
+            order.setBuyerAskDeliveryTime(ObjectUtil.defaultIfNull(param.getDelivery().getBuyerAskDeliveryTime(), ""));
         }
         if (ObjectUtil.isNotEmpty(vo.getDelivery().getTakeStore())) {
             order.setTakeStoreId(vo.getDelivery().getTakeStore().getStoreId());
@@ -349,8 +364,19 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 if (ObjectUtil.isNotEmpty(vo.getBuyer().getMemberLevel())) {
                     JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(memberPrice) ? JSONUtil.parseObj(memberPrice) : new JSONObject();
                     skuVo.setMemberPrice(goodsService.calculateMemberPrice(vo.getBuyer().getMemberLevel(), goods.getMemberDiscount(), memberPriceConfig, sku.getPrice()));
-                    skuVo.setPrice(skuVo.getMemberPrice());
                 }
+
+                ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                    .skuId(sku.getSkuId())
+                    .price(sku.getPrice())
+                    .memberDiscount(goods.getMemberDiscount())
+                    .memberPrice(memberPrice)
+                    .memberId(RequestUtils.memberId())
+                    .build());
+                skuVo.setShowPrice(skuShowPrice.getShowPrice());
+                skuVo.setShowType(skuShowPrice.getShowType());
+                skuVo.setPrice(skuShowPrice.getShowPrice());
+                skuVo.setActiveId(skuShowPrice.getActiveId());
 
                 // 小计
                 skuVo.setGoodsMoney(skuVo.getPrice().multiply(new BigDecimal(item.getNum())));

@@ -18,6 +18,16 @@ export function getGoodsInfo(goods_id: number) {
     return request.get(`shop/goods/${ goods_id }`);
 }
 
+
+/**
+ * 获取商品详情模板
+ * @param goods_id 商品goods_id
+ * @returns
+ */
+export function getGoodsInfoTemplate(params: any) {
+    return request.get(`diy/list`, { params });
+}
+
 /**
  * 添加实物商品
  * @param params
@@ -331,6 +341,14 @@ export function modifyLabelGroupSort(params: Record<string, any>) {
 }
 
 /**
+ * 复制标签
+ * @param params
+ */
+export function copyLabel(params: Record<string, any>) {
+    return request.post(`shop/goods/label/copy/${ params.label_id }`, params, { showSuccessMessage: true })
+}
+
+/**
  * 获取商品品牌分页列表
  * @param params
  * @returns
@@ -639,6 +657,51 @@ export function cancelToppingEvaluate(evaluate_id: number) {
 }
 
 /**
+ * 获取商品评价状态
+ * @param params
+ * @returns
+ */
+export function getEvaluateStatus() {
+    return request.get(`shop/goods/evaluate/status`)
+}
+
+/**
+ * 批量删除商品评价
+ * @param params
+ * @returns
+ */
+export function batchDelEvaluate(params: Record<string, any>) {
+    return request.post(`shop/goods/evaluate/batch/del`,params, {
+        showErrorMessage: true,
+        showSuccessMessage: true
+    })
+}
+
+/**
+ * 商品评价 批量通过
+ * @param params
+ * @returns
+ */
+export function batchAdoptEvaluate(params: Record<string, any>) {
+    return request.post(`shop/goods/evaluate/batch/adopt`,params, {
+        showErrorMessage: true,
+        showSuccessMessage: true
+    })
+}
+
+/**
+ * 商品评价 批量拒绝
+ * @param params
+ * @returns
+ */
+export function batchRefuseEvaluate(params: Record<string, any>) {
+    return request.post(`shop/goods/evaluate/batch/refuse`,params, {
+        showErrorMessage: true,
+        showSuccessMessage: true
+    })
+}
+
+/**
  * 获取商品参数分页列表
  * @param params
  * @returns
@@ -733,4 +796,67 @@ export function getGoodsBatchSetDict() {
  */
 export function goodsBatchSet(params: Record<string, any>) {
     return request.put(`shop/goods/batchSet`, params, { showSuccessMessage: true })
+}
+
+/**
+ * 获取商品搜索配置
+ * @returns
+ */
+export function getGoodsConfigSearch() {
+    return request.get(`shop/goods/config/search`)
+}
+
+/**
+ * 编辑商品搜索配置
+ * @returns
+ */
+export function setGoodsConfigSearch(param: any) {
+    return request.post('shop/goods/config/search', param, { showSuccessMessage: true })
+}
+
+
+/**
+ * 获取商品唯一编码配置
+ * @returns
+ */
+export function getGoodsConfigUnique() {
+    return request.get(`shop/goods/config/unique`)
+}
+
+/**
+ * 编辑商品唯一编码配置
+ * @returns
+ */
+export function setGoodsConfigUnique(param: any) {
+    return request.post('shop/goods/config/unique', param, { showSuccessMessage: true })
+}
+
+/**
+ * 校验商品唯一编码
+
+ * @returns
+ */
+export function goodsVerify(param: any) {
+    return request.post('shop/goods/verify/skuno', param)
+}
+
+/**
+ * 获取商品排序配置
+ * @returns
+ */
+export function getGoodsConfigSort() {
+    return request.get(`shop/goods/config/sort`)
+}
+
+/**
+ * 设置商品排序配置
+ * @returns
+ */
+export function setGoodsConfigSort(param: any) {
+    return request.post('shop/goods/config/sort', param, { showSuccessMessage: true })
+}
+// 上下架
+
+export function editGoodssingleStatus(params: Record<string, any>) {
+    return request.put(`shop/goods/single/status`, params, { showSuccessMessage: true })
 }

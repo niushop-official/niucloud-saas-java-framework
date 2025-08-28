@@ -6,6 +6,10 @@ import com.niu.shop.service.admin.delivery.param.ShopDeliveryLocalDeliverySearch
 import com.niu.core.common.domain.PageParam;
 import com.niu.shop.service.admin.delivery.vo.ShopDeliveryLocalDeliveryInfoVo;
 import com.niu.shop.service.admin.delivery.vo.ShopDeliveryLocalDeliveryListVo;
+import com.niu.shop.service.admin.delivery.vo.ThirdTypeVo;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 同城配送服务接口
@@ -24,6 +28,9 @@ public interface IShopDeliveryLocalDeliveryService {
      */
     void setLocal(ShopDeliveryLocalDeliveryParam param);
 
-    
-
+    /**
+     * 查看三方配送初始化信息
+     * @return
+     */
+    List<ThirdTypeVo> getThirdTypeConfig();
 }

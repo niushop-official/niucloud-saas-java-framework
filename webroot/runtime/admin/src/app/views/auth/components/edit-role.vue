@@ -64,7 +64,7 @@ watch(selectAll, () => {
         if (selectAll.value) {
             treeRef.value.setCheckedNodes(toRaw(menus.value))
         } else {
-            treeRef.value.setCheckedKeys([])    
+            treeRef.value.setCheckedNodes([])
         }
     })
 })
@@ -97,6 +97,7 @@ const collapseAll = (data:any) => {
         if (data[key].children && data[key].children.length > 0) collapseAll(data[key].children)
     })
 }
+
 /**
  * 表单数据
  */

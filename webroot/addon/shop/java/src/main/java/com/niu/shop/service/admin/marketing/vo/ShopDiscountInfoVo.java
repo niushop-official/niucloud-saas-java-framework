@@ -38,6 +38,19 @@ public class ShopDiscountInfoVo implements Serializable {
     private Integer activeMemberNum;  // 活动参与会员数
     private Integer activeSuccessNum;  // 活动成功参与会员数
 
+    //新表
+    private Integer discountId;
+    private String name;
+    private String remark;
+    private String status;
+    private String statusName;
+    private BigDecimal orderMoney;
+    private Integer orderNum;
+    private Integer memberNum;
+    private Integer successNum;
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long createTime;
+
     /**
      * 获取活动类型
      * @return
@@ -62,4 +75,8 @@ public class ShopDiscountInfoVo implements Serializable {
         return ActiveStatusEnum.getNameByStatus(this.activeStatus);
     }
 
+
+    public String getStatusName() {
+        return ActiveStatusEnum.getNameByStatus(this.status);
+    }
 }

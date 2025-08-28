@@ -12,4 +12,6 @@ public class ShopGoodsEvaluateSearchParam implements Serializable {
 
     private String goodsName;
 
+    private Integer status;
+
 }

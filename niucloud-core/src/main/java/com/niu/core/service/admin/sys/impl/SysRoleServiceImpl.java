@@ -4,16 +4,19 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.sys.RoleStatusEnum;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
+import com.niu.core.service.admin.auth.IAuthService;
 import com.niu.core.service.admin.sys.param.SysRoleParam;
 import com.niu.core.service.admin.sys.param.SysRoleSearchParam;
 import com.niu.core.service.admin.sys.ISysRoleService;
@@ -23,13 +26,14 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.entity.sys.SysRole;
 import com.niu.core.mapper.sys.SysRoleMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -42,6 +46,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
     SysRoleMapper sysRoleMapper;
     @Resource
     SysUserRoleMapper sysUserRoleMapper;
+    @Lazy
+    @Resource
+    private IAuthService authService;
 
     /**
      * 角色列表
@@ -176,11 +183,13 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public List<String> getMenuIdsByRoleIds(Integer siteId, List<String> roleIds) {
-        List<SysRole> roleList=sysRoleMapper.selectList(
-                new QueryWrapper<SysRole>()
-                        .eq("status", RoleStatusEnum.ON.getCode())
-                        .in("role_id", roleIds)
-                    );
+        QueryWrapper queryWrapper = new QueryWrapper<SysRole>();
+        queryWrapper.eq("status", RoleStatusEnum.ON.getCode());
+        // 判断roleIds不能为空
+        if(ObjectUtil.isNotNull(roleIds) && roleIds.size()>0){
+            queryWrapper.in("role_id", roleIds);
+        }
+        List<SysRole> roleList=sysRoleMapper.selectList(queryWrapper);
         JSONArray roleMenuJson = new JSONArray();
         for (SysRole sysRole:roleList) {
             JSONArray ruleJson = JSONUtil.parseArray(sysRole.getRules());
@@ -208,6 +217,32 @@ public class SysRoleServiceImpl implements ISysRoleService {
             BeanUtils.copyProperties(sysRole, vo);
             sysRoleListVoList.add(vo);
         }
+        SysUserRole sysUserRole = null;
+        Boolean isAdmin=false;
+        if (authService.isSuperAdmin()){
+            isAdmin=true;
+        }else {
+            sysUserRole = sysUserRoleMapper.selectOne(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getSiteId, RequestUtils.siteId()).eq(SysUserRole::getUid, RequestUtils.uid()));
+            if (ObjectUtil.isEmpty(sysUserRole)){
+                return List.of();
+            }
+            isAdmin = sysUserRole.getIsAdmin() == 1 ? true : false;
+        }
+        if (!isAdmin){
+            if (StringUtils.isNotEmpty(sysUserRole.getRoleIds()) && "[]".equals(sysUserRole.getRoleIds())){
+                String roleIdsStr = sysUserRole.getRoleIds().replaceAll("[\\[\\]\"]", "");
+                List<String> menuIdsByRoleIds = getMenuIdsByRoleIds(RequestUtils.siteId(), Arrays.stream(roleIdsStr.split(",")).collect(Collectors.toList()));
+                for (SysRoleListVo sysRoleListVo : sysRoleListVoList) {
+                    List<String> diff  = new ArrayList<>(Collections.singleton(sysRoleListVo.getRules()));
+                    diff.removeAll(menuIdsByRoleIds);
+                    if (!diff.isEmpty()){
+                        sysRoleListVo.setDisabled(true);
+                    }
+                }
+            }
+
+        }
+        sysRoleListVoList.forEach(sysRoleListVo -> sysRoleListVo.setRules(null));
         return sysRoleListVoList;
     }
 

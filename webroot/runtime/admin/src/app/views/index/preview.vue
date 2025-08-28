@@ -7,7 +7,7 @@
                 <div class="font-bold text-xl mb-[40px]">{{ t('developTitle') }}</div>
                 <div class="mb-[20px] flex flex-col">
                     <text class="mb-[10px]">{{ t('wapDomain') }}</text>
-                    <el-input v-model="wapDomain" :placeholder="t('wapDomainPlaceholder')" clearable />
+                    <el-input v-model.trim="wapDomain" :placeholder="t('wapDomainPlaceholder')" clearable />
                 </div>
                 <el-button type="primary" @click="save">{{ t('confirm') }}</el-button>
             </div>
@@ -22,8 +22,7 @@
                         <el-form-item :label="t('link')" v-show="wapPreview">
                             <el-input readonly :value="wapPreview">
                                 <template #append>
-                                    <el-button @click="copyEvent(wapPreview)" class="bg-primary copy">{{ t('copy') }}
-                                    </el-button>
+                                    <el-button @click="copyEvent(wapPreview)" class="bg-primary copy">{{ t('copy') }}</el-button>
                                 </template>
                             </el-input>
                         </el-form-item>
@@ -37,7 +36,7 @@
                     <div class="px-[20px] pb-[10px] font-bold mt-[40px]">{{ t('weapp') }}</div>
                     <el-form label-width="40px" class="px-[20px]">
                         <el-form-item label=" " v-if="weappConfig.qr_code">
-                            <el-image class="w-[100px] h-[100px]" :src="img(weappConfig.qr_code)" />
+                            <el-image class="w-[150px] h-[150px]" :src="img(weappConfig.qr_code)" />
                         </el-form-item>
                         <el-form-item label=" " v-else>
                             <span class="text-gray-400">{{ t('weappNotSet') }}</span>
@@ -84,11 +83,10 @@ setLayout('decorate')
 getUrl().then((res: any) => {
     wapUrl.value = res.data.wap_url
 
-    let repeat = true; // 防重复执行
+    let repeat = true // 防重复执行
 
     // 开发模式下执行
     if (import.meta.env.MODE == 'development') {
-
         wapDomain.value = res.data.wap_domain
 
         // env文件配置过wap域名
@@ -106,10 +104,9 @@ getUrl().then((res: any) => {
         }
     }
 
-    if(repeat) {
+    if (repeat) {
         setDomain()
     }
-
 })
 
 const save = () => {
@@ -135,7 +132,7 @@ const setDomain = () => {
             wapImage.value = url
         })
 
-        const send = ()=>{
+        const send = () => {
             timeIframe.value = new Date().getTime()
             postMessage()
         }
@@ -144,17 +141,17 @@ const setDomain = () => {
         send()
 
         // 如果同步发送消息的 uni-app没有接收到回应，则定时发送消息
-        let sendCount = 0;
-        let timeInterVal = setInterval(()=>{
+        let sendCount = 0
+        const timeInterVal = setInterval(() => {
             // 接收 uni-app 发送的消息 或者 发送50次后未响应，则停止发送
-            if(uniAppLoadStatus.value || sendCount >= 50){
+            if (uniAppLoadStatus.value || sendCount >= 50) {
                 clearInterval(timeInterVal)
                 return
             }
 
             send()
-            sendCount++;
-        },200)
+            sendCount++
+        }, 200)
 
         // 如果10秒内加载不出来，则需要配置域名
         setTimeout(() => {
@@ -169,17 +166,17 @@ const uniAppLoadStatus = ref(false) // uni-app 加载状态，true：加载完�
 window.addEventListener('message', (event) => {
     try {
         let data = {
-            type :''
-        };
-        if(typeof event.data == 'string') {
+            type: ''
+        }
+        if (typeof event.data == 'string') {
             data = JSON.parse(event.data)
-        }else if(typeof event.data == 'object') {
+        } else if (typeof event.data == 'object') {
             data = event.data
         }
         if (data.type && ['appOnLaunch', 'appOnReady'].indexOf(data.type) != -1) {
             loadingDev.value = false
             loadingIframe.value = true
-            let loadTime = new Date().getTime()
+            const loadTime = new Date().getTime()
             uniAppLoadStatus.value = true // 加载完成
             difference.value = loadTime - timeIframe.value
         }

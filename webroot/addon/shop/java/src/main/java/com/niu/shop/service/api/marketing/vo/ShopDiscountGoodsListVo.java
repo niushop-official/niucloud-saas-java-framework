@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.enums.active.ActiveGoodsTypeEnum;
@@ -87,16 +88,13 @@ public class ShopDiscountGoodsListVo implements Serializable {
         return GoodsTypeEnum.getNameByType(this.goodsType);
     }
 
-    private ICoreUploadService coreUploadService() {
-        return SpringContext.bean(ICoreUploadService.class);
-    }
 
     public String getGoodsCoverThumbSmall() {
-        return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+        return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsCover());
     }
 
     public String getGoodsCoverThumbMid() {
-        return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+        return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover());
     }
 
 

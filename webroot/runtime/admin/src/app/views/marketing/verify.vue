@@ -10,7 +10,7 @@
             <el-card class="box-card mt-[10px] !border-none table-search-wrap" shadow="never">
                 <el-form :inline="true" :model="recordTable.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('verifyCode')" prop="code">
-                        <el-input v-model="recordTable.searchParam.code" :placeholder="t('verifyCodePlaceholder')" />
+                        <el-input v-model.trim="recordTable.searchParam.code" :placeholder="t('verifyCodePlaceholder')" />
                     </el-form-item>
                     <el-form-item :label="t('verifyType')" prop="type">
                         <el-select v-model="recordTable.searchParam.type" clearable :placeholder="t('verifyTypePlaceholder')" class="input-width">
@@ -64,6 +64,8 @@
                         @size-change="loadRecordList()" @current-change="loadRecordList" />
                 </div>
             </div>
+
+            <verify-detail ref="verifyDetailDialog" />
         </el-card>
     </div>
 </template>
@@ -71,13 +73,12 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { FormInstance } from 'element-plus'
 import { getVerifyRecord, getVerifyTypeList, getVerifierSelect } from '@/app/api/verify'
-import { img } from '@/utils/common'
+import verifyDetail from '@/app/views/marketing/components/verify-detail.vue'
 
 const route = useRoute()
-const router = useRouter()
 const pageName = route.meta.title
 
 const recordTable = reactive({
@@ -147,8 +148,10 @@ const resetForm = (formEl: FormInstance | undefined) => {
 }
 
 // 详情
+let verifyDetailDialog: Record<string, any> | null = ref(null)
 const detailEvent = (data: any) => {
-    router.push(`/marketing/verify/detail?code=${data.code}`)
+    verifyDetailDialog.value.setFormData({code: data.code})
+    verifyDetailDialog.value.showDialog = true
 }
 </script>
 

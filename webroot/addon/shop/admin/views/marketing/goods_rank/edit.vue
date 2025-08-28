@@ -132,15 +132,15 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, reactive, ref} from "vue";
-import {t} from "@/lang";
-import {useRoute, useRouter} from "vue-router";
-import {ArrowLeft} from "@element-plus/icons-vue";
-import {ElMessage, FormInstance} from "element-plus";
-import {addGoodRank, editGoodRank, getRankInfo, optionData,} from "@/addon/shop/api/marketing";
+import { ref, computed, reactive } from "vue";
+import { t } from "@/lang";
+import { useRoute, useRouter } from "vue-router";
+import { ArrowLeft } from "@element-plus/icons-vue";
+import { FormInstance, ElMessage } from "element-plus";
+import {optionData,getRankInfo,addGoodRank,editGoodRank,} from "@/addon/shop/api/marketing";
 import goodsSelectPopup from "@/addon/shop/views/goods/components/goods-select-popup.vue";
-import {getBrandList, getCategoryTree, getLabelList} from "@/addon/shop/api/goods";
-import {deepClone, filterNumber, img} from '@/utils/common'
+import {getBrandList,getLabelList,getCategoryTree} from "@/addon/shop/api/goods";
+import {img, deepClone ,filterNumber} from '@/utils/common'
 
 const router = useRouter();
 const route = useRoute();
@@ -324,37 +324,37 @@ const refreshGoodsCategory = (bool = false) => {
     getCategoryTree().then((res) => {
         const data = res.data;
         if (data) {
-        const goodsCategoryTree: any = [];
-        data.forEach((item: any) => {
-            const children: any = [];
-            if (item.child_list) {
-            item.child_list.forEach((childItem: any) => {
-                children.push({
-                value: childItem.category_id,
-                label: childItem.category_name,
+            const goodsCategoryTree: any = [];
+            data.forEach((item: any) => {
+                const children: any = [];
+                if (item.child_list) {
+                    item.child_list.forEach((childItem: any) => {
+                        children.push({
+                            value: childItem.category_id,
+                            label: childItem.category_name,
+                        });
+                    });
+                }
+                goodsCategoryTree.push({
+                    value: item.category_id,
+                    label: item.category_name,
+                    children,
                 });
             });
+            goodsCategoryOptions.splice(
+                0,
+                goodsCategoryOptions.length,
+                ...goodsCategoryTree
+            );
+            if (bool) {
+                ElMessage({
+                    message: t("refreshSuccess"),
+                    type: "success",
+                });
             }
-            goodsCategoryTree.push({
-            value: item.category_id,
-            label: item.category_name,
-            children,
-            });
-        });
-        goodsCategoryOptions.splice(
-            0,
-            goodsCategoryOptions.length,
-            ...goodsCategoryTree
-        );
-        if (bool) {
-            ElMessage({
-            message: t("refreshSuccess"),
-            type: "success",
-            });
-        }
         }
     });
-};
+}
 
 refreshGoodsCategory();
 
@@ -374,16 +374,16 @@ const refreshGoodsBrand = (bool = false) => {
     getBrandList({}).then((res) => {
         const data = res.data;
         if (data) {
-        brandOptions.splice(0, brandOptions.length, ...data);
-        if (bool) {
-            ElMessage({
-            message: t("refreshSuccess"),
-            type: "success",
-            });
-        }
+            brandOptions.splice(0, brandOptions.length, ...data);
+            if (bool) {
+                ElMessage({
+                    message: t("refreshSuccess"),
+                    type: "success",
+                });
+            }
         }
     });
-};
+}
 
 refreshGoodsBrand();
 
@@ -403,16 +403,16 @@ const refreshGoodsLabel = (bool = false) => {
     getLabelList({}).then((res) => {
         const data = res.data;
         if (data) {
-        labelOptions.splice(0, labelOptions.length, ...data);
-        if (bool) {
-            ElMessage({
-            message: t("refreshSuccess"),
-            type: "success",
-            });
-        }
+            labelOptions.splice(0, labelOptions.length, ...data);
+            if (bool) {
+                ElMessage({
+                    message: t("refreshSuccess"),
+                    type: "success",
+                });
+            }
         }
     });
-};
+}
 
 refreshGoodsLabel();
 
@@ -428,17 +428,17 @@ const goodsSelect = (value: any) => {
             goods_image: goods_sku.goods_cover,
             goods_name: goods_sku.goods_name,
         };
-    if (goods_json.value.length) {
-        goods_json.value.forEach((el: any) => {
-            if (el.goods_id == sku.goods_id) {
-                sku = Object.assign(sku, el)
-            }
-        })
-    }
+        if (goods_json.value.length) {
+            goods_json.value.forEach((el: any) => {
+                if (el.goods_id == sku.goods_id) {
+                    sku = Object.assign(sku, el)
+                }
+            })
+        }
         arr.push(deepClone(sku))
     }
     goods_json.value = arr;
-};
+}
 
 // 删除商品
 const deleteGoodsEvent = (row: any, index: any) => {
@@ -454,53 +454,53 @@ const save = async () => {
     await formRef.value?.validate(async (valid) => {
         if (valid) {
             loading.value = true
-        formData.goods_json = goods_json.value.map((item: any) => {
-            return {
-            goods_id: item.goods_id,  // 保留 goods_id
-            sort: item.sort,          // 保留 sort 排序号
-            };
-        });
+            formData.goods_json = goods_json.value.map((item: any) => {
+                return {
+                    goods_id: item.goods_id,  // 保留 goods_id
+                    sort: item.sort,          // 保留 sort 排序号
+                };
+            });
 
-        const goodsCategory:any = []
-        formData.category_ids.forEach((item: any) => {
-        if (Array.isArray(item) && item.length === 2) {
-            goodsCategory.push(item[1]);
-        } else if(Array.isArray(item) && item.length === 1) {
-            goodsCategory.push(item[0]);
-        }else{
-            goodsCategory.push(item);
+            const goodsCategory: any = []
+            formData.category_ids.forEach((item: any) => {
+                if (Array.isArray(item) && item.length === 2) {
+                    goodsCategory.push(item[1]);
+                } else if (Array.isArray(item) && item.length === 1) {
+                    goodsCategory.push(item[0]);
+                } else {
+                    goodsCategory.push(item);
+                }
+            });
+            formData.category_ids = goodsCategory
+            if (rank_id) {
+                formData.id = rank_id; // 将 rank_id 拼接到 dataToSubmit 中
+                editGoodRank(formData).then((res) => {
+                    loading.value = false
+                    preventDuplication.value = false;
+                    if (res.data) {
+                        router.push("/shop/marketing/goods_rank/list");
+                    }
+                }).catch(() => {
+                    loading.value = false;
+                    preventDuplication.value = false;
+                });
+            } else {
+                addGoodRank(formData).then((res) => {
+                    loading.value = false
+                    preventDuplication.value = false;
+                    if (res.data) {
+                        router.push("/shop/marketing/goods_rank/list");
+                    }
+                }).catch(() => {
+                    loading.value = false;
+                    preventDuplication.value = false;
+                });
+            }
+        } else {
+            preventDuplication.value = false;
         }
     });
-        formData.category_ids = goodsCategory
-        if (rank_id) {
-            formData.id = rank_id; // 将 rank_id 拼接到 dataToSubmit 中
-            editGoodRank(formData).then((res) => {
-                loading.value = false
-                preventDuplication.value = false;
-                if (res.data) {
-                    router.push("/shop/marketing/goods_rank/list");
-                }
-            }).catch(() => {
-                loading.value = false;
-                preventDuplication.value = false;
-            });
-        } else {
-            addGoodRank(formData).then((res) => {
-                loading.value = false
-                preventDuplication.value = false;
-                if (res.data) {
-                    router.push("/shop/marketing/goods_rank/list");
-                }
-            }).catch(() => {
-                loading.value = false;
-                preventDuplication.value = false;
-            });
-        }
-        } else {
-        preventDuplication.value = false;
-        }
-    });
-};
+}
 
 const back = () => {
   router.push('/shop/marketing/goods_rank/list')

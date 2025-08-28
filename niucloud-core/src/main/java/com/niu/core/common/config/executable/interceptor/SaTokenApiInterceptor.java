@@ -42,7 +42,7 @@ public class SaTokenApiInterceptor extends SaInterceptor {
         Boolean isCheckLogin=PermissionAuthorizer.getInstance().existAnnotation(request, SaCheckLogin.class);
 
         /** 验证是否登录 */
-        String token= RequestUtils.adminToken();
+        String token= RequestUtils.apiToken();
         if((ObjectUtil.isEmpty(token) || ObjectUtil.isNull(token)) && isCheckLogin){
                 throw new AuthException("MUST_LOGIN", 401);
         }

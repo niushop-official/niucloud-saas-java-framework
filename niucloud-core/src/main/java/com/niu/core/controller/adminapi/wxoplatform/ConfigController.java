@@ -10,6 +10,7 @@ import com.niu.core.service.admin.site.param.SiteSearchParam;
 import com.niu.core.service.admin.wxoplatform.IOplatformConfigService;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import jakarta.annotation.Resource;
 @RestController
 @RequestMapping("adminapi/wxoplatform")
 @SaCheckLogin
+@Description("微信开放平台")
 public class ConfigController {
 
     @Resource
@@ -29,6 +31,7 @@ public class ConfigController {
      * @return
      */
     @GetMapping("/static")
+    @Description("获取微信开放平台静态资源")
     public Result<CoreOplatformStaticConfigVo> getStaticInfo(){
         return Result.success(oplatformConfigService.getOplatformStaticInfo());
     }
@@ -39,6 +42,7 @@ public class ConfigController {
      * @return
      */
     @GetMapping("/config")
+    @Description("获取微信开放平台配置信息")
     public Result<JSONObject> getConfig(){
         return Result.success(oplatformConfigService.getWxOplatformConfig());
     }
@@ -50,6 +54,7 @@ public class ConfigController {
      * @return
      */
     @PutMapping("/config")
+    @Description("更新微信开放平台配置信息")
     public Result setConfig(@Validated @RequestBody OplatformConfigParam oplatformConfigParam){
         oplatformConfigService.setWxOplatformConfig(oplatformConfigParam);
         return Result.success();

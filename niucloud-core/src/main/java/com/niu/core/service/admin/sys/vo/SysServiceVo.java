@@ -9,4 +9,8 @@ public class SysServiceVo {
     private String wechatCode = "";
     private String enterpriseWechat = "";
     private String tel = "";
+
+    private String siteLoginLogo = "";
+
+    private String siteLoginBgImg = "";
 }

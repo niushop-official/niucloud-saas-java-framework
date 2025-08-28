@@ -9,6 +9,7 @@ import com.niu.core.service.admin.sys.param.SysNoticeSmsLogSearchParam;
 import com.niu.core.service.admin.sys.vo.SysNoticeSmsLogInfoVo;
 import com.niu.core.service.admin.sys.vo.SysNoticeSmsLogListVo;
 import com.niu.core.common.domain.PageParam;
+import jdk.jfr.Description;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
@@ -17,6 +18,7 @@ import jakarta.annotation.Resource;
  * 短信发送控制器
  */
 
+@Description("短信发送记录管理")
 @RestController
 @RequestMapping("adminapi/notice/sms/log")
 @SaCheckLogin
@@ -31,6 +33,7 @@ public class NoticeSmsLogController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<SysNoticeSmsLogListVo>>
      */
+    @Description("短信发送记录列表")
     @GetMapping("")
     public Result<PageResult<SysNoticeSmsLogListVo>> list(@Validated PageParam pageParam,
                                                      @Validated SysNoticeSmsLogSearchParam searchParam) {
@@ -43,6 +46,7 @@ public class NoticeSmsLogController {
      * @param id 主键ID
      * @return Result<SysNoticeSmsLogInfoVo>
      */
+    @Description("短信发送记录详情")
     @GetMapping("/{id}")
     public Result<SysNoticeSmsLogInfoVo> info(@Validated @RequestParam("id") Integer id) {
         SysNoticeSmsLogInfoVo info = sysNoticeSmsLogService.info(id);

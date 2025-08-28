@@ -9,10 +9,14 @@ import com.niu.shop.service.api.goods.param.GoodsBrowseDeleteParam;
 import com.niu.shop.service.api.goods.param.GoodsBrowseParam;
 import com.niu.shop.service.api.goods.param.GoodsBrowseSearchParam;
 import com.niu.shop.service.api.goods.vo.GoodsBrowseListVo;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 @RestController
@@ -47,15 +51,29 @@ public class GoodsBrowseController {
     }
 
     /**
-     * 商品足迹删除
-     *
-     * @param param
+     * 商品足迹删除 解决参数是?goods_ids%5B0%5D=41格式的问题
+     * @param request
      * @return
      */
     @SaCheckLogin
     @DeleteMapping("")
-    public Result<?> deleteGoodsBrowse(@Validated @RequestBody GoodsBrowseDeleteParam param) {
-        browseService.del(param);
+    public Result<?> deleteGoodsBrowse(HttpServletRequest request) {
+        List<Integer> goodsIds = new ArrayList<>();
+        Enumeration<String> parameterNames = request.getParameterNames();
+
+        while (parameterNames.hasMoreElements()) {
+            String paramName = parameterNames.nextElement();
+            // 匹配所有以 "goods_ids[" 开头的参数
+            if (paramName.startsWith("goods_ids[")) {
+                String value = request.getParameter(paramName);
+                goodsIds.add(Integer.parseInt(value));
+            }
+        }
+        if(goodsIds.size() >0 ){
+            GoodsBrowseDeleteParam goodsBrowseDeleteParam = new GoodsBrowseDeleteParam();
+            goodsBrowseDeleteParam.setGoodsIds(goodsIds);
+            browseService.del(goodsBrowseDeleteParam);
+        }
         return Result.success();
     }
 }

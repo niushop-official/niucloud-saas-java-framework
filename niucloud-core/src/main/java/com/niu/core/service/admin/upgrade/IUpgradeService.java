@@ -1,6 +1,8 @@
 package com.niu.core.service.admin.upgrade;
 
 import cn.hutool.json.JSONObject;
+import com.niu.core.service.admin.upgrade.param.UpgradeParam;
+import com.niu.core.service.admin.upgrade.vo.UpgradeContentVo;
 import com.niu.core.service.admin.upgrade.vo.UpgradeTaskVo;
 
 public interface IUpgradeService {
@@ -18,13 +20,13 @@ public interface IUpgradeService {
      * @param addon
      * @return
      */
-    JSONObject getUpgradeContent(String addon);
+    UpgradeContentVo getUpgradeContent(String addon);
 
     /**
      * 升级
-     * @param addon
+     * @param upgradeParam
      */
-    UpgradeTaskVo upgrade(String addon);
+    UpgradeTaskVo upgrade(UpgradeParam upgradeParam);
 
     /**
      * 获取正在进行的升级任务
@@ -43,6 +45,8 @@ public interface IUpgradeService {
      */
     void clearUpgradeTask(int delayed);
 
+    void clearUpgradeTask();
+
     /**
      * 执行升级步骤
      *
@@ -54,4 +58,10 @@ public interface IUpgradeService {
      * @param vo
      */
     void upgradeErrorHandle(UpgradeTaskVo vo);
+
+    /**
+     * 用户操作
+     * @param operate
+     */
+    void operate(String operate);
 }

@@ -1,4 +1,5 @@
 package com.niu.shop.service.admin.delivery.vo;
+import cn.hutool.json.JSONArray;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * ShopDeliveryLocalDelivery视图
@@ -36,5 +38,23 @@ public class ShopDeliveryLocalDeliveryInfoVo implements Serializable {
     private String area;  // 配送区域
     @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String center;  // 发货地址中心点
+    private Integer timeIsOpen = 0;
 
+    private Integer timeType = 0;
+
+    private String timeWeek;
+
+    private Integer timeInterval = 30;
+
+    private Integer advanceDay = 0;
+
+    private Integer mostDay = 7;
+
+    private Long startTime;
+
+    private Long endTime;
+    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+    private String deliveryTime;
+
+    private Map<String, Object> thirdPartyConfig;
 }

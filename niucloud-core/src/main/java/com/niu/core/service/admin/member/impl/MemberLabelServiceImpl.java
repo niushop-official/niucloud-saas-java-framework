@@ -67,7 +67,9 @@ public class MemberLabelServiceImpl implements IMemberLabelService {
             Integer labelId = item.getLabelId();
             QueryWrapper<Member> wrapper = new QueryWrapper<>();
             wrapper.eq("site_id",siteId);
-            wrapper.apply("JSON_CONTAINS(member_label, {0})", String.valueOf(labelId));
+            String canshu = String.valueOf(labelId);
+            //添加如果是空值判断
+            wrapper.apply("JSON_VALID(member_label) = 1 AND JSON_SEARCH(member_label, 'one', {0}) IS NOT NULL",canshu);
             List<Member> members = memberMapper.selectList(wrapper);
             BeanUtils.copyProperties(item, vo);
             vo.setMemberNum(members.size());

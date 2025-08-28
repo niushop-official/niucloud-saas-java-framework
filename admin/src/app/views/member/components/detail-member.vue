@@ -164,7 +164,9 @@
                 <div class="flex mt-[15px] w-[33.3%] break-all leading-[21px]">
                     <span class="text-[14px] w-[130px] text-right flex-shrink-0 mr-[20px]">{{ t('mobile') }}</span>
                     <span class="text-[14px] text-[#666666]">
-                        {{ formData.mobile || t('notAvailable') }}
+                        {{ formData.mobile || t('notAvailable') }}<el-icon @click="editMemberInfo('mobile')" class="-bottom-[2px] -right-[4px] cursor-pointer">
+                            <EditPen color="#273CE2" />
+                        </el-icon>
                     </span>
                 </div>
                 <div class="flex mt-[15px] w-[33.3%] break-all leading-[21px]">
@@ -195,6 +197,22 @@
                     <span class="text-[14px] w-[130px] text-right flex-shrink-0 mr-[20px]">{{ t('sex') }}</span>
                     <span class="text-[14px] text-[#666666]">
                         {{ formData.sex == 1 && t('manSex') || formData.sex == 2 && t('girlSex') || t('secrecySex') }}<el-icon @click="editMemberInfo('sex')" class="-bottom-[2px] -right-[4px] cursor-pointer">
+                            <EditPen color="#273CE2" />
+                        </el-icon>
+                    </span>
+                </div>
+                <div class="flex mt-[15px] w-[33.3%] break-all leading-[21px]">
+                    <span class="text-[14px] w-[130px] text-right flex-shrink-0 mr-[20px]">{{ t('身份证') }}</span>
+                    <span class="text-[14px] text-[#666666]">
+                        {{ formData.id_card || t('notAvailable') }}<el-icon @click="editMemberInfo('id_card')" class="-bottom-[2px] -right-[4px] cursor-pointer">
+                            <EditPen color="#273CE2" />
+                        </el-icon>
+                    </span>
+                </div>
+                <div class="flex mt-[15px] w-[33.3%] break-all leading-[21px]">
+                    <span class="text-[14px] w-[130px] text-right flex-shrink-0 mr-[20px]">{{ t('备注') }}</span>
+                    <span class="text-[14px] text-[#666666]">
+                        {{ formData.remark || t('notAvailable') }}<el-icon @click="editMemberInfo('remark')" class="-bottom-[2px] -right-[4px] cursor-pointer">
                             <EditPen color="#273CE2" />
                         </el-icon>
                     </span>
@@ -237,7 +255,7 @@
                 </div>
             </div>
         </div>
-        
+
         <point-edit ref="pointDialog" @complete="getMemberInfoFn" />
         <balance-edit ref="balanceDialog" @complete="getMemberInfoFn" />
         <edit-member ref="editMemberDialog" @complete="getMemberInfoFn()" />
@@ -245,32 +263,23 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref } from 'vue'
 import { t } from '@/lang'
-import { addMember, getMemberList, getMemberNo, getMemberInfo } from '@/app/api/member'
-import { FormInstance, ElMessage } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
-import { useRouter, useRoute } from 'vue-router'
-import { img, filterNumber } from '@/utils/common'
+import { getMemberInfo } from '@/app/api/member'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { img } from '@/utils/common'
 import PointEdit from '@/app/views/member/components/member-point-edit.vue'
 import BalanceEdit from '@/app/views/member/components/member-balance-edit.vue'
 import EditMember from '@/app/views/member/components/edit-member.vue'
-import useAppStore from '@/stores/modules/app'
 
 const showDialog = ref(false)
 const loading = ref(false)
-const repeat = ref(false)
 let popTitle: string = '会员详情'
-let memberNo: string = ''
 let id = '';
 
-const route = useRoute()
 const router = useRouter()
 const emit = defineEmits(['load'])
-
-const nickname_name_input = ref(true)
-const password_input = ref(true)
-const password_copy_input = ref(true)
 
 const handleClose = (done: () => void) => {
     showDialog.value = false;
@@ -289,8 +298,6 @@ const initialFormData = {
     password_copy: ''
 }
 const formData: Record<string, any> = reactive({ ...initialFormData })
-
-const formRef = ref<FormInstance>()
 
 const pointDialog: Record<string, any> | null = ref(null)
 const balanceDialog: Record<string, any> | null = ref(null)
@@ -390,7 +397,7 @@ const getMemberInfoFn = async (bool=false) => {
 const setFormData = async (row: any = null) => {
     id = row.id;
     Object.assign(formData, initialFormData)
-    getMemberInfoFn(true);
+    await getMemberInfoFn(true);
 }
 
 defineExpose({
@@ -401,6 +408,6 @@ defineExpose({
 
 <style lang="scss">
 .member-detail-drawer{
-    width: 1000px !important;
+    width: 1300px !important;
 }
 </style>

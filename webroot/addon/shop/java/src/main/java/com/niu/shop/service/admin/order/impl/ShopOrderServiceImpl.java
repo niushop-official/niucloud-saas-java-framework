@@ -2,6 +2,10 @@ package com.niu.shop.service.admin.order.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,27 +15,30 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
+import com.niu.core.common.utils.DistanceCalculateUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.pay.Pay;
+import com.niu.core.entity.verify.Verify;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.mapper.pay.PayMapper;
+import com.niu.core.mapper.verify.VerifyMapper;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
+import com.niu.core.service.admin.verify.vo.VerifyInfoVo;
+import com.niu.core.service.admin.verify.vo.VerifyOrderVo;
 import com.niu.core.service.core.pay.ICorePayService;
+import com.niu.shop.entity.delivery.ShopDeliveryLocalDelivery;
 import com.niu.shop.entity.delivery.ShopStore;
 import com.niu.shop.entity.goods.ShopGoods;
-import com.niu.shop.entity.order.ShopOrder;
-import com.niu.shop.entity.order.ShopOrderDelivery;
-import com.niu.shop.entity.order.ShopOrderGoods;
-import com.niu.shop.entity.order.ShopOrderLog;
+import com.niu.shop.entity.order.*;
 import com.niu.shop.enums.order.*;
+import com.niu.shop.mapper.delivery.ShopDeliveryLocalDeliveryMapper;
 import com.niu.shop.mapper.delivery.ShopStoreMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
-import com.niu.shop.mapper.order.ShopOrderDeliveryMapper;
-import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
-import com.niu.shop.mapper.order.ShopOrderLogMapper;
-import com.niu.shop.mapper.order.ShopOrderMapper;
+import com.niu.shop.mapper.order.*;
+import com.niu.shop.service.admin.delivery.IDeliveryService;
 import com.niu.shop.service.admin.order.IShopOrderService;
 import com.niu.shop.service.admin.order.param.EditDeliveryParam;
 import com.niu.shop.service.admin.order.param.EditPriceParam;
@@ -41,20 +48,29 @@ import com.niu.shop.service.admin.order.vo.EditDeliveryVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderListVo;
 import com.niu.shop.service.admin.order.vo.ShopOrderLogListVo;
+import com.niu.shop.service.core.delivery.ICoreStoreService;
+import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
+import com.niu.shop.service.core.delivery.vo.LocalInfoVo;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.order.ICoreOrderLogService;
 import com.niu.shop.service.core.order.ICoreOrderService;
 import com.niu.shop.service.core.order.param.AddOrderLogParam;
 import com.niu.shop.service.core.order.param.OrderCloseParam;
 import com.niu.shop.service.core.order.param.OrderPayParam;
+import org.locationtech.jts.geom.Coordinate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -99,15 +115,31 @@ public class ShopOrderServiceImpl implements IShopOrderService {
     @Resource
     ICoreManjianService coreManjianService;
 
+    @Resource
+    private IDeliveryService deliveryService;
+
+    @Resource
+    private ShopDeliveryLocalDeliveryMapper shopDeliveryLocalDeliveryMapper;
+
+    @Resource
+    private ICoreStoreService coreStoreService;
+
+    @Resource
+    private ShopOrderDiscountMapper shopOrderDiscountMapper;
+
+    @Resource
+    private VerifyMapper verifyMapper;
+
     /**
      * 订单列表
-     * @param pageParam 分页参数
+     *
+     * @param pageParam   分页参数
      * @param searchParam 搜索参数
      * @return PageResult<ShopOrderListVo>
      */
     @Override
     public PageResult<ShopOrderListVo> page(PageParam pageParam, ShopOrderSearchParam searchParam) {
-        Integer page  = pageParam.getPage();
+        Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
         MPJQueryWrapper<ShopOrder> queryWrapper = new MPJQueryWrapper<>();
@@ -122,12 +154,17 @@ public class ShopOrderServiceImpl implements IShopOrderService {
             queryWrapper.like("o." + searchParam.getSearchType(), searchParam.getSearchName());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getStatus())) queryWrapper.eq("o.status", searchParam.getStatus());
-        if (ObjectUtil.isNotEmpty(searchParam.getOrderFrom())) queryWrapper.eq("o.order_from", searchParam.getOrderFrom());
+        if (ObjectUtil.isNotEmpty(searchParam.getOrderFrom()))
+            queryWrapper.eq("o.order_from", searchParam.getOrderFrom());
         if (ObjectUtil.isNotEmpty(searchParam.getPayType())) queryWrapper.eq("p.type", searchParam.getPayType());
-        if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "o.create_time", searchParam.getCreateTime());
-        if (ObjectUtil.isNotEmpty(searchParam.getPayTime())) QueryMapperUtils.buildByTime(queryWrapper, "p.pay_time", searchParam.getPayTime());
-        if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) queryWrapper.and(i -> i.eq("taker_name", searchParam.getKeyword()).or().eq("taker_mobile", searchParam.getKeyword()));
-        if (ObjectUtil.isNotEmpty(searchParam.getActivityType())) queryWrapper.eq("o.activity_type", searchParam.getActivityType());
+        if (ObjectUtil.isNotEmpty(searchParam.getCreateTime()))
+            QueryMapperUtils.buildByTime(queryWrapper, "o.create_time", searchParam.getCreateTime());
+        if (ObjectUtil.isNotEmpty(searchParam.getPayTime()))
+            QueryMapperUtils.buildByTime(queryWrapper, "p.pay_time", searchParam.getPayTime());
+        if (ObjectUtil.isNotEmpty(searchParam.getKeyword()))
+            queryWrapper.and(i -> i.eq("taker_name", searchParam.getKeyword()).or().eq("taker_mobile", searchParam.getKeyword()));
+        if (ObjectUtil.isNotEmpty(searchParam.getActivityType()))
+            queryWrapper.eq("o.activity_type", searchParam.getActivityType());
 
         IPage<ShopOrderListVo> iPage = shopOrderMapper.selectJoinPage(new Page<>(page, limit), ShopOrderListVo.class, queryWrapper);
         for (ShopOrderListVo vo : iPage.getRecords()) {
@@ -153,6 +190,7 @@ public class ShopOrderServiceImpl implements IShopOrderService {
 
     /**
      * 订单详情
+     *
      * @param id 主键
      * @return ShopOrderInfoVo
      */
@@ -162,7 +200,7 @@ public class ShopOrderServiceImpl implements IShopOrderService {
                 new QueryWrapper<ShopOrder>()
                         .eq("order_id", id)
                         .eq("site_id", RequestUtils.siteId())
-                        .select("relate_id,activity_type,point,order_id,site_id,order_no,order_type,order_from,out_trade_no,status,member_id,ip,goods_money,delivery_money,order_money,invoice_id,create_time,pay_time,delivery_time,take_time,finish_time,close_time,delivery_type,taker_name,taker_mobile,taker_province,taker_city,taker_district,taker_address,taker_full_address,taker_longitude,taker_latitude,take_store_id,is_enable_refund,member_remark,shop_remark,close_remark,discount_money,is_evaluate,form_record_id"));
+                        .select("relate_id,activity_type,point,order_id,site_id,order_no,order_type,order_from,out_trade_no,status,member_id,ip,goods_money,delivery_money,order_money,invoice_id,create_time,pay_time,delivery_time,take_time,finish_time,close_time,delivery_type,taker_name,taker_mobile,taker_province,taker_city,taker_district,taker_address,taker_full_address,taker_longitude,taker_latitude,take_store_id,is_enable_refund,member_remark,shop_remark,close_remark,discount_money,is_evaluate,form_record_id,buyer_ask_delivery_time"));
 
         Assert.notNull(model, "订单不存在");
 
@@ -177,15 +215,39 @@ public class ShopOrderServiceImpl implements IShopOrderService {
         // 查询订单项
         List<ShopOrderInfoVo.OrderGoods> orderGoods = CollectUtils.convert(shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", vo.getOrderId())), ShopOrderInfoVo.OrderGoods.class);
 
-        for(ShopOrderInfoVo.OrderGoods orderGoodsVo : orderGoods){
+        for (ShopOrderInfoVo.OrderGoods orderGoodsVo : orderGoods) {
             ShopGoods goodsInfo = shopGoodsMapper.selectById(orderGoodsVo.getGoodsId());
-            orderGoodsVo.setUnit(goodsInfo.getUnit().equals("") ? "件"  : goodsInfo.getUnit() );
+            orderGoodsVo.setUnit(goodsInfo.getUnit().equals("") ? "件" : goodsInfo.getUnit());
             coreManjianService.getOrderGoodsGiveInfo(orderGoodsVo, orderGoods, orderGoodsVo.getSiteId(), orderGoodsVo.getMemberId());
         }
 
         vo.setOrderGoods(orderGoods);
 
-
+        //orderDiscount 订单优惠表
+        List<ShopOrderDiscount> shopOrderDiscountList = shopOrderDiscountMapper.selectList(new QueryWrapper<ShopOrderDiscount>()
+                .eq("order_id", id)
+                .eq("site_id", RequestUtils.siteId()).select("order_id,discount_type,money,content"));
+        if(ObjectUtil.isNotNull(shopOrderDiscountList) && shopOrderDiscountList.size()>0){
+            vo.setOrderDiscount(shopOrderDiscountList);
+            double couponMoney = 0.0;
+            double manjianDiscountMoney = 0.0;
+            for (ShopOrderDiscount item : shopOrderDiscountList) {
+                String discountType = item.getDiscountType();
+                Double money = item.getMoney().doubleValue();
+                // 判断优惠券类型
+                if ("coupon".equals(discountType)) {
+                    couponMoney += money;
+                }
+                // 判断满减类型
+                else if ("manjian".equals(discountType)) {
+                    manjianDiscountMoney += money;
+                }
+            }
+            vo.setCouponMoney(Double.toString(couponMoney));
+            vo.setManjianDiscountMoney(Double.toString(manjianDiscountMoney));
+        }else{
+            vo.setOrderDiscount(new ArrayList<>());
+        }
 
         // 查询订单支付信息
         if (!vo.getOutTradeNo().isEmpty()) {
@@ -205,6 +267,18 @@ public class ShopOrderServiceImpl implements IShopOrderService {
                 BeanUtil.copyProperties(store, storeVo);
                 vo.setStore(storeVo);
             }
+
+            MPJQueryWrapper<Verify> verifyQueryWrapper = new MPJQueryWrapper<>();
+            verifyQueryWrapper.setAlias("v").leftJoin("?_member m ON m.member_id = v.verifier_member_id".replace("?_", GlobalConfig.tablePrefix));
+            verifyQueryWrapper.select("v.id, v.code, v.verifier_member_id, m.member_id, m.nickname");
+            verifyQueryWrapper.eq("v.site_id", RequestUtils.siteId());
+            verifyQueryWrapper.eq("v.relate_tag", id);
+            verifyQueryWrapper.eq("type","shopPickUpOrder");
+            VerifyOrderVo verifyOrderVo = verifyMapper.selectJoinOne(VerifyOrderVo.class,verifyQueryWrapper);
+            if(ObjectUtil.isNotNull(verifyOrderVo)){
+                vo.setVerifyCode(verifyOrderVo.getCode());
+                vo.setVerifierMember(StringUtils.toUnderScoreCase(JSONUtil.toJsonStr(verifyOrderVo)));
+            }
         }
 
         // 查询订单包裹信息
@@ -212,7 +286,6 @@ public class ShopOrderServiceImpl implements IShopOrderService {
             List<ShopOrderInfoVo.OrderDelivery> orderDelivery = CollectUtils.convert(shopOrderDeliveryMapper.selectList(new QueryWrapper<ShopOrderDelivery>().eq("order_id", vo.getOrderId())), ShopOrderInfoVo.OrderDelivery.class);
             vo.setOrderDelivery(orderDelivery);
         }
-
 
 
         List<ShopOrderLogListVo> orderLog = CollectUtils.convert(shopOrderLogMapper.selectList(new QueryWrapper<ShopOrderLog>().eq("order_id", vo.getOrderId()).orderByDesc("create_time")), ShopOrderLogListVo.class);
@@ -279,7 +352,8 @@ public class ShopOrderServiceImpl implements IShopOrderService {
                         .eq("site_id", RequestUtils.siteId()));
 
         Assert.notNull(order, "订单不存在");
-        if (!order.getStatus().equals(OrderStatusEnum.WAIT_PAY.getStatus().toString())) throw new CommonException("只有待支付的订单可以改价");
+        if (!order.getStatus().equals(OrderStatusEnum.WAIT_PAY.getStatus().toString()))
+            throw new CommonException("只有待支付的订单可以改价");
 
         // 关闭已经发起的支付单据
         corePayService.closeByTrade(order.getSiteId(), order.getOrderType(), order.getOrderId());
@@ -287,7 +361,7 @@ public class ShopOrderServiceImpl implements IShopOrderService {
         BigDecimal goodsMoney = new BigDecimal(0);
         List<ShopOrderGoods> orderGoods = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", order.getOrderId()).select("order_goods_id,order_goods_money,goods_money,price,discount_money,num"));
 
-        for (ShopOrderGoods item: orderGoods) {
+        for (ShopOrderGoods item : orderGoods) {
             if (ObjectUtil.isNotEmpty(param.getOrderGoodsData().get(item.getOrderGoodsId()))) {
                 BigDecimal money = param.getOrderGoodsData().get(item.getOrderGoodsId()).getMoney();
                 if (money.compareTo(BigDecimal.ZERO) != 0) {
@@ -343,20 +417,159 @@ public class ShopOrderServiceImpl implements IShopOrderService {
      */
     @Override
     public EditDeliveryVo getEditDeliveryData(EditDeliveryParam param) {
+        Integer siteId = RequestUtils.siteId();
         ShopOrder order = shopOrderMapper.selectOne(
-                new QueryWrapper<ShopOrder>()
-                        .eq("order_id", param.getOrderId())
-                        .eq("site_id", RequestUtils.siteId()));
+                new LambdaQueryWrapper<ShopOrder>()
+                        .eq(ShopOrder::getOrderId, param.getOrderId())
+                        .eq(ShopOrder::getSiteId, siteId));
 
         Assert.notNull(order, "订单不存在");
-        if (!order.getStatus().equals(OrderStatusEnum.WAIT_PAY.getStatus().toString())) throw new CommonException("只有待支付的订单可以修改");
-        if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.VIRTUAL.getType())) throw new CommonException("虚拟商品订单不可以修改配送地址");
 
-        EditDeliveryVo vo = new EditDeliveryVo();
-        BeanUtil.copyProperties(order, vo);
+        List<String> errorLtatusList = List.of(OrderStatusEnum.WAIT_PAY.getStatus().toString(),
+                OrderStatusEnum.WAIT_DELIVERY.getStatus().toString());
+        if (!errorLtatusList.contains(order.getStatus())) {
+            throw new CommonException("只有待支付或待发货的订单可以修改配送地址");
+        }
+        if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.VIRTUAL.getType())) {
+            throw new CommonException("虚拟商品订单不可以修改配送地址");
+        }
+        
+        List<DeliveryConfigVo> deliveryList = deliveryService.getDeliveryList();
+        DeliveryConfigVo selectedDelivery = deliveryList.stream().filter(item -> item.getKey().equals(param.getDeliveryType())).findFirst().orElse(null);
 
-        return vo;
+        EditDeliveryVo result = new EditDeliveryVo();
+        result.setDeliveryData(param);
+        BeanUtils.copyProperties(order, result);
+        result.setErrorCode(1);
+        result.setErrorMsg("");
+
+        if (selectedDelivery == null) {
+            result.setErrorCode(-1);
+            result.setErrorMsg("不支持选择的配送方式");
+            return result;
+        } else if (selectedDelivery.getStatus() > 1) {
+            result.setErrorCode(-1);
+            result.setErrorMsg("商家未开启该配送方式");
+            return result;
+        }
+
+        List<ShopOrderGoods> goodsList = shopOrderGoodsMapper.selectList(new LambdaQueryWrapper<ShopOrderGoods>()
+                .eq(ShopOrderGoods::getSiteId, siteId)
+                .eq(ShopOrderGoods::getGoodsType, "real")
+                .eq(ShopOrderGoods::getOrderId, param.getOrderId()));
+        Set<Integer> goodsIds = goodsList.stream().map(ShopOrderGoods::getGoodsId).collect(Collectors.toSet());
+        List<ShopGoods> shopGoods = shopGoodsMapper.selectList(new LambdaQueryWrapper<ShopGoods>().in(ShopGoods::getGoodsId, goodsIds));
+
+        List<ShopOrderGoods> orderGoods = shopGoods.stream().map(goods -> {
+            ShopOrderGoods vo = new ShopOrderGoods();
+            BeanUtils.copyProperties(goods, vo);
+
+            // 检查商品是否支持该配送方式
+            if (!goods.getDeliveryType().contains(param.getDeliveryType())) {
+                result.setErrorCode(-1);
+                result.setErrorMsg("当前商品不支持该配送方式");
+            }
+            return vo;
+        }).collect(Collectors.toList());
+        result.setOrderGoods(orderGoods);
+
+        String unsupportedGoodsNames = "";
+        if (result.getErrorCode() < 0) {
+            unsupportedGoodsNames = orderGoods.stream()
+                    .map(ShopOrderGoods::getGoodsName)
+                    .collect(Collectors.joining(","));
+        }
+        if (!unsupportedGoodsNames.isEmpty()) {
+            result.setErrorCode(-1);
+            result.setErrorMsg(unsupportedGoodsNames + "当前商品不支持该配送方式");
+            return result;
+        }
+
+
+        switch (selectedDelivery.getKey()) {
+            case "express":
+                if (StringUtils.isAnyBlank(
+                        param.getTakerName(),
+                        param.getTakerMobile(),
+                        String.valueOf(param.getTakerProvince()),
+                        String.valueOf(param.getTakerCity()),
+                        String.valueOf(param.getTakerDistrict()),
+                        param.getTakerAddress(),
+                        param.getTakerFullAddress())) {
+                    result.setErrorCode(-1);
+                    result.setErrorMsg("地址信息有误");
+                }
+                break;
+
+            case "local_delivery":
+                if (StringUtils.isAnyBlank(
+                        param.getTakerName(),
+                        param.getTakerMobile(),
+                        String.valueOf(param.getTakerProvince()),
+                        String.valueOf(param.getTakerCity()),
+                        String.valueOf(param.getTakerDistrict()),
+                        param.getTakerAddress(),
+                        param.getTakerFullAddress(),
+                        param.getTakerLongitude(),
+                        param.getTakerLatitude())) {
+                    result.setErrorCode(-1);
+                    result.setErrorMsg("地址信息有误");
+                } else {
+                    checkLocationInArea(result, param);
+                }
+                break;
+
+            case "store":
+                if (param.getTakeStoreId() == null) {
+                    result.setErrorCode(-1);
+                    result.setErrorMsg("地址信息有误");
+                }
+                break;
+
+        }
+        return result;
     }
+
+    private void checkLocationInArea(EditDeliveryVo result, EditDeliveryParam param) {
+        List<ShopDeliveryLocalDelivery> localConfig = shopDeliveryLocalDeliveryMapper.selectList(new LambdaQueryWrapper<ShopDeliveryLocalDelivery>().eq(ShopDeliveryLocalDelivery::getSiteId, RequestUtils.siteId()));
+        if (localConfig.isEmpty()){
+            result.setErrorCode(-1);
+            result.setErrorMsg("商家未配置同城配送");
+            return;
+        }
+
+        // 判断所在区域
+        LocalInfoVo.Area locatedInArea = null;
+        List<LocalInfoVo.Area> areaList = JSONUtil.toList(JSONUtil.parseArray(localConfig.get(0).getArea()), LocalInfoVo.Area.class);
+        for (LocalInfoVo.Area area : areaList) {
+            if ("radius".equals(area.getAreaType())) {
+                // 圆形区域判断
+                Double distance = DistanceCalculateUtils.calculateDistance(Double.parseDouble(param.getTakerLatitude()),
+                        Double.parseDouble(param.getTakerLongitude()),
+                        area.getAreaJson().getCenter().getLat().doubleValue(),
+                        area.getAreaJson().getCenter().getLng().doubleValue());
+                if (distance <= area.getAreaJson().getRadius()) {
+                    locatedInArea = area;
+                    break;
+                }
+            } else {
+                // 多边形区域判断
+                double[] polyLats = area.getAreaJson().getPaths().stream().mapToDouble(latlng -> latlng.getLat().doubleValue()).toArray();
+                double[] polyLngs = area.getAreaJson().getPaths().stream().mapToDouble(latlng -> latlng.getLng().doubleValue()).toArray();
+                if (DistanceCalculateUtils.isPointInPolygon(Double.parseDouble(param.getTakerLatitude()), Double.parseDouble(param.getTakerLongitude()), polyLats, polyLngs)) {
+                    locatedInArea = area;
+                    break;
+                }
+            }
+        }
+
+        if (locatedInArea == null) {
+            result.setErrorCode(-1);
+            result.setErrorMsg("不支持配送地址");
+        }
+    }
+
+
 
     /**
      * 修改订单配送
@@ -365,47 +578,15 @@ public class ShopOrderServiceImpl implements IShopOrderService {
      */
     @Override
     public void editDelivery(EditDeliveryParam param) {
-        ShopOrder order = shopOrderMapper.selectOne(
-                new QueryWrapper<ShopOrder>()
-                        .eq("order_id", param.getOrderId())
-                        .eq("site_id", RequestUtils.siteId()));
-
-        Assert.notNull(order, "订单不存在");
-        if (!order.getStatus().equals(OrderStatusEnum.WAIT_PAY.getStatus().toString())) throw new CommonException("只有待支付的订单可以修改");
-        if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.VIRTUAL.getType())) throw new CommonException("虚拟商品订单不可以修改配送地址");
-
-        if (param.getDeliveryType().equals(OrderDeliveryTypeEnum.EXPRESS.getType())) {
-            if (ObjectUtil.isEmpty(param.getTakerName())
-                    || ObjectUtil.isEmpty(param.getTakerMobile())
-                    || ObjectUtil.isEmpty(param.getTakerProvince())
-                    || ObjectUtil.isEmpty(param.getTakerCity())
-                    || ObjectUtil.isEmpty(param.getTakerDistrict())
-                    || ObjectUtil.isEmpty(param.getTakerAddress())
-                    || ObjectUtil.isEmpty(param.getTakerFullAddress())
-            ) {
-                throw new CommonException("地址信息有误");
-            }
-        } else if (param.getDeliveryType().equals(OrderDeliveryTypeEnum.LOCAL_DELIVERY.getType())) {
-            if (ObjectUtil.isEmpty(param.getTakerName())
-                    || ObjectUtil.isEmpty(param.getTakerMobile())
-                    || ObjectUtil.isEmpty(param.getTakerProvince())
-                    || ObjectUtil.isEmpty(param.getTakerCity())
-                    || ObjectUtil.isEmpty(param.getTakerDistrict())
-                    || ObjectUtil.isEmpty(param.getTakerAddress())
-                    || ObjectUtil.isEmpty(param.getTakerFullAddress())
-                    || ObjectUtil.isEmpty(param.getTakerLatitude())
-                    || ObjectUtil.isEmpty(param.getTakerLongitude())
-            ) {
-                throw new CommonException("地址信息有误");
-            }
-        } else if (param.getDeliveryType().equals(OrderDeliveryTypeEnum.STORE.getType())) {
-            if (ObjectUtil.isEmpty(param.getTakeStoreId())) throw new CommonException("地址信息有误");
-        } else {
-            throw new CommonException("不支持的配送方式");
+        EditDeliveryVo editDeliveryData = getEditDeliveryData(param);
+        if (editDeliveryData.getErrorCode() < 0){
+            throw new CommonException(editDeliveryData.getErrorMsg());
         }
+        EditDeliveryParam deliveryData = editDeliveryData.getDeliveryData();
+
 
         ShopOrder model = new ShopOrder();
-        BeanUtil.copyProperties(param, model);
+        BeanUtil.copyProperties(deliveryData, model);
 
         shopOrderMapper.updateById(model);
     }

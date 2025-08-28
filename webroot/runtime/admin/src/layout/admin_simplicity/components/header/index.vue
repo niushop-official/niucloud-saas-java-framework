@@ -2,8 +2,8 @@
     <el-container class="h-[64px] layout-admin  flex items-center justify-between px-[15px]" >
         <!-- :class="['h-full px-[10px]',{'layout-header border-b border-color': !dark}]"  -->
         <div class="flex items-center">
-            <div class="w-[120px] flex justify-center items-center flex-shrink-0">
-                <div class="w-[120px] h-[40px] overflow-hidden">
+            <div class="max-w-[120px] flex justify-center items-center flex-shrink-0">
+                <div class="max-w-[120px] h-[40px] overflow-hidden">
                     <el-image class="w-full h-full" :src="img(website.icon)" fit="contain">
                         <template #error>
                             <div class="flex justify-center items-center w-full h-full"><img class="max-w-[120px]" src="@/app/assets/images/logo.default.png" alt=""  object-fit="contain"></div>
@@ -30,6 +30,13 @@
         </div>
         <div>
             <div class="right-panel h-full flex items-center justify-end">
+                <div class="border-primary border-[1px] h-[30px] px-[15px] flex items-center rounded-[6px] mr-[10px] cursor-pointer" @click="toHome()">
+                    <span class="iconfont iconguanliduan !text-primary mr-1"></span>
+                    <span class="text-[14px] text-primary">客户端</span>
+                </div>
+                <div class="navbar-item flex items-center h-full cursor-pointer">
+                    <message />
+                </div>
                 <div class="navbar-item flex items-center h-full cursor-pointer">
                     <layout-setting />
                 </div>
@@ -39,8 +46,6 @@
                 </div>
             </div>
         </div>
-         
-       
         <input type="hidden" v-model="comparisonToken">
         <input type="hidden" v-model="comparisonSiteId">
 
@@ -79,18 +84,20 @@
 import { ref, computed } from 'vue'
 import useUserStore from '@/stores/modules/user'
 import useAppStore from '@/stores/modules/app'
-import { useRoute } from 'vue-router'
+import { useRoute,useRouter } from 'vue-router'
 import { t } from '@/lang'
-import { img, isUrl } from '@/utils/common'
+import { img, getToken } from '@/utils/common'
 
 import storage from '@/utils/storage'
 import userInfo from './user-info.vue'
 import layoutSetting from './layout-setting.vue'
+import message from './message.vue'
 import useSystemStore from "@/stores/modules/system";
 
+const showDialog = ref<boolean>(false)
 const route = useRoute()
+const router = useRouter()
 const appStore = useAppStore()
-const userStore = useUserStore()
 const systemStore = useSystemStore()
 const website = computed(() => {
     return systemStore.website
@@ -137,6 +144,16 @@ storage.set({ key: 'currHeadMenuName', data: "" })
 
 const toggleMenuCollapse = () => {
     systemStore.toggleMenuCollapse(!systemStore.menuIsCollapse)
+}
+const toHome = () => {
+    if (!window.localStorage.getItem('site.token')) {
+        window.localStorage.setItem('site.token', getToken())
+        window.localStorage.setItem('site.comparisonTokenStorage', getToken())
+    }
+    if (!window.localStorage.getItem('site.userinfo')) {
+        window.localStorage.setItem('site.userinfo', JSON.stringify(useUserStore().userInfo))
+    }
+    router.push({ path: '/home/index'})
 }
 </script>
 

@@ -104,4 +104,16 @@ public class Site implements Serializable {
 
     private Integer isinit;
 
+    /**
+     * Meta 描述
+     */
+    private String metaDesc;
+    /**
+     * Meta 关键字
+     */
+    private String metaKeyword;
+    /**
+     * Meta 标题
+     */
+    private String metaTitle;
 }

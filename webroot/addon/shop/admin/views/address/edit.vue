@@ -23,7 +23,7 @@
 				</el-form-item>
 
 				<el-form-item :label="t('mobile')" prop="mobile">
-					<el-input v-model.trim="formData.mobile" clearable :placeholder="t('mobilePlaceholder')" class="input-width"  @keyup="filterNumber($event)" @blur="formData.mobile = $event.target.value"/>
+					<el-input v-model.trim="formData.mobile" clearable :placeholder="t('mobilePlaceholder')" maxlength="11" class="input-width"  @keyup="filterNumber($event)" @blur="formData.mobile = $event.target.value"/>
 				</el-form-item>
 
 				<el-form-item :label="t('fullAddress')" prop="address_area">
@@ -63,6 +63,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { t } from '@/lang'
 import type { FormInstance } from 'element-plus'
+import { ArrowLeft } from "@element-plus/icons-vue"
 import { getShopAddressInfo, addShopAddress, editShopAddress } from '@/addon/shop/api/shop_address'
 import { getMap, getAreaListByPid, getAreaByCode } from '@/app/api/sys'
 import { useRoute } from 'vue-router'
@@ -323,10 +324,14 @@ watch(() => formData.district_id, (nval) => {
 
 const areaChange = debounce(() => {
     setTimeout(() => {
+        let province = areaList.province.map((item) => { if (item.id == formData.province_id) { return item.name } })
+        let city = areaList.city.map((item) => { if (item.id == formData.city_id) { return item.name } })
+        let district = areaList.district.map((item) => { if (item.id == formData.district_id) { return item.name } })
+
         const address = [
-            formData.province_id ? provinceRef.value.states.selectedLabel : '',
-            formData.city_id ? cityRef.value.states.selectedLabel : '',
-            formData.district_id ? districtRef.value.states.selectedLabel : '',
+            formData.province_id ? (provinceRef.value.selectedLabel || province) : '',
+            formData.city_id ? (cityRef.value.selectedLabel || city) : '',
+            formData.district_id ? (districtRef.value.selectedLabel || district) : '',
             formData.address
         ]
 
@@ -390,9 +395,9 @@ const onSave = async (formEl: FormInstance | undefined) => {
 
             const data = formData
             const address = [
-                data.province_id ? provinceRef.value.states.selectedLabel : '',
-                data.city_id ? cityRef.value.states.selectedLabel : '',
-                data.district_id ? districtRef.value.states.selectedLabel : '',
+                data.province_id ? provinceRef.value.selectedLabel : '',
+                data.city_id ? cityRef.value.selectedLabel : '',
+                data.district_id ? districtRef.value.selectedLabel : '',
                 data.address
             ]
             data.full_address = address.join('')

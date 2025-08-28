@@ -1,14 +1,21 @@
 package com.niu.core.service.admin.diy.param;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 
 /**
  * 自定义页面参数
 */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class DiyPageParam implements Serializable {
 
@@ -41,5 +48,7 @@ public class DiyPageParam implements Serializable {
 
     @NotNull(message = "isChange参数缺失")
     private Integer isChange = 0;
+
+    private Integer siteId;
 
 }

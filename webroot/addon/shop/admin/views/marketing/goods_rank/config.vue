@@ -72,7 +72,7 @@ const formData = ref({
     select_bg_color_start: "#FFFFFF",
     select_bg_color_end: "#FFEBD7",
     rank_images: "",
-});
+})
 
 const formRef = ref<FormInstance>();
 
@@ -115,7 +115,6 @@ const onSave = async () => {
     await formRef.value?.validate(async(valid) => {
         if (valid) {
             preventDuplication.value = true;
-            console.log(formData.value);
 
             setRankConfig(formData.value).then(() => {
                 getRankConfigFn();

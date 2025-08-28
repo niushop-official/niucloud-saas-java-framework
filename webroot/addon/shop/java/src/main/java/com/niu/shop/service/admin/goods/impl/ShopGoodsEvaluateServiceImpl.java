@@ -1,9 +1,12 @@
 package com.niu.shop.service.admin.goods.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
@@ -11,14 +14,18 @@ import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsEvaluate;
 import com.niu.shop.enums.goods.GoodsEvaluateEnum;
 import com.niu.shop.mapper.goods.ShopGoodsEvaluateMapper;
+import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.service.admin.goods.IShopGoodsEvaluateService;
+import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateBatchParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateSearchParam;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsEvaluateInfoVo;
@@ -31,6 +38,7 @@ import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -45,6 +53,9 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
 
     @Resource
     ShopGoodsEvaluateMapper shopGoodsEvaluateMapper;
+
+    @Resource
+    ShopGoodsMapper shopGoodsMapper;
 
     private ICoreUploadService coreUploadService() {
         return SpringContext.bean(ICoreUploadService.class);
@@ -71,8 +82,11 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
         if (ObjectUtil.isNotEmpty(searchParam.getGoodsName()))
             queryWrapper.like("ng.goods_name", searchParam.getGoodsName());
         queryWrapper.eq("ge.site_id", RequestUtils.siteId());
+        if(ObjectUtil.isNotNull(searchParam.getStatus()) && ObjectUtil.isNotEmpty(searchParam.getStatus())){
+            queryWrapper.eq("ge.is_audit", searchParam.getStatus());
+        }
         queryWrapper.orderByDesc("ge.create_time");
-
+        queryWrapper.groupBy("ge.evaluate_id");
         IPage<ShopGoodsEvaluateListVo> iPage = shopGoodsEvaluateMapper.selectJoinPage(new Page<>(page, limit), ShopGoodsEvaluateListVo.class, queryWrapper);
 
         for (ShopGoodsEvaluateListVo item : iPage.getRecords()) {
@@ -81,16 +95,16 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
                 List<String> listImageSmall = new ArrayList<>();
                 List<String> listImageBig = new ArrayList<>();
                 for (String image : (String[]) item.getImages()) {
-                    listImageSmall.add(coreUploadService().thumb(item.getSiteId(), image, UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
-                    listImageBig.add(coreUploadService().thumb(item.getSiteId(), image, UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType()));
+                    listImageSmall.add(CommonUtils.thumbImageSmall(item.getSiteId(), image));
+                    listImageBig.add(CommonUtils.thumbImageBig(item.getSiteId(), image));
                 }
                 item.setImageSmall(listImageSmall);
                 item.setImageBig(listImageBig);
             }
 
             if (ObjectUtil.isNotEmpty(item.getGoodsCover())) {
-                item.setGoodsCoverThumbSmall(coreUploadService().thumb(item.getSiteId(), item.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType()));
-                item.setGoodsCoverThumbMid(coreUploadService().thumb(item.getSiteId(), item.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType()));
+                item.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(item.getSiteId(), item.getGoodsCover()));
+                item.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(item.getSiteId(), item.getGoodsCover()));
             }
 
             ShopGoodsEvaluateListVo.Goods goods = new ShopGoodsEvaluateListVo.Goods();
@@ -138,7 +152,12 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
         model.setMemberHead(addParam.getMemberHead());
         model.setMemberName(addParam.getMemberName());
         model.setContent(addParam.getContent());
-        model.setImages(JSONUtil.parseArray(addParam.getImages()).toString());
+        Object ceshi = addParam.getImages();
+        if(ceshi instanceof String){
+            model.setImages(JSONUtil.parseArray(new ArrayList<>()).toString());
+        }else{
+            model.setImages(JSONUtil.parseArray(addParam.getImages()).toString());
+        }
         model.setIsAnonymous(addParam.getIsAnonymous());
         model.setScores(addParam.getScores());
         model.setIsAudit(GoodsEvaluateEnum.AUDIT_NO.getStatus());
@@ -250,6 +269,146 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
                 new QueryWrapper<ShopGoodsEvaluate>()
                         .eq("evaluate_id", id)
                         .eq("site_id", RequestUtils.siteId()));
+    }
+
+    /**
+     * 批量通过
+     */
+    @Override
+    public void batchAdopt(ShopGoodsEvaluateBatchParam shopGoodsEvaluateBatchParam) {
+        // 站点
+        Integer siteId = RequestUtils.siteId();
+        // 提取goods_id数组
+        List<Integer> goodsIds = new ArrayList<>();
+        // 提取evaluate_id数组
+        List<Integer> resultEvaluateIds = new ArrayList<>();
+
+        // 查询数据库
+        QueryWrapper<ShopGoodsEvaluate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", siteId)
+                .eq("is_audit",1)
+                .select("evaluate_id", "goods_id");
+        if(shopGoodsEvaluateBatchParam.getEvaluateIds().size()>0){
+            queryWrapper.in("evaluate_id",shopGoodsEvaluateBatchParam.getEvaluateIds());
+        }
+        List<ShopGoodsEvaluate> evaluateList = shopGoodsEvaluateMapper.selectList(queryWrapper);
+
+        //判断数据是否为空
+        if(ObjectUtil.isNotNull(evaluateList) && evaluateList.size()>0){
+            for (ShopGoodsEvaluate item : evaluateList) {
+                goodsIds.add(item.getGoodsId());
+                resultEvaluateIds.add(item.getEvaluateId());
+            }
+
+            //更新数据
+            QueryWrapper<ShopGoodsEvaluate> ShopGoodsEvaluateUpdate = new QueryWrapper<>();
+            ShopGoodsEvaluateUpdate.eq("site_id",siteId)
+                    .in("evaluate_id",resultEvaluateIds);
+            ShopGoodsEvaluate shopGoodsEvaluate = new ShopGoodsEvaluate();
+            shopGoodsEvaluate.setIsAudit(2);
+            shopGoodsEvaluateMapper.update(shopGoodsEvaluate,ShopGoodsEvaluateUpdate);
+
+            for(int i=0; i<goodsIds.size(); i++){
+                GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
+                goodsAddStatParam.setSiteId(siteId);
+                goodsAddStatParam.setGoodsId(goodsIds.get(i));
+                goodsAddStatParam.setEvaluateNum(1);
+                //添加统计数据
+                coreGoodsStatService.addStat(goodsAddStatParam);
+                UpdateWrapper<ShopGoods> updateWrapper = new UpdateWrapper<>();
+                // 设置更新条件：goods_id = ?
+                updateWrapper.eq("goods_id", goodsIds.get(i));
+                // 设置自增操作：evaluate_num = evaluate_num + 1
+                updateWrapper.setSql("evaluate_num = evaluate_num + 1");
+                shopGoodsMapper.update(null,updateWrapper);
+            }
+        }
+
+    }
+
+    /**
+     * 批量拒绝
+     */
+    @Override
+    public void batchRefuse(ShopGoodsEvaluateBatchParam shopGoodsEvaluateBatchParam) {
+
+        //站点
+        Integer siteId = RequestUtils.siteId();
+        // 提取evaluate_id数组
+        List<Integer> resultEvaluateIds = new ArrayList<>();
+
+        // 查询数据库
+        QueryWrapper<ShopGoodsEvaluate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", siteId)
+                .eq("is_audit",1)
+                .select("evaluate_id", "is_audit");
+        if(shopGoodsEvaluateBatchParam.getEvaluateIds().size()>0){
+            queryWrapper.in("evaluate_id",shopGoodsEvaluateBatchParam.getEvaluateIds());
+        }
+        List<ShopGoodsEvaluate> evaluateList = shopGoodsEvaluateMapper.selectList(queryWrapper);
+
+        //判断数据是否为空
+        if(ObjectUtil.isNotNull(evaluateList) && evaluateList.size()>0){
+            for (ShopGoodsEvaluate item : evaluateList) {
+                resultEvaluateIds.add(item.getEvaluateId());
+            }
+            //更新操作
+            QueryWrapper<ShopGoodsEvaluate> ShopGoodsEvaluateUpdate = new QueryWrapper<>();
+            ShopGoodsEvaluateUpdate.eq("site_id",siteId)
+                    .in("evaluate_id",resultEvaluateIds);
+            ShopGoodsEvaluate shopGoodsEvaluate = new ShopGoodsEvaluate();
+            shopGoodsEvaluate.setIsAudit(3);
+            shopGoodsEvaluateMapper.update(shopGoodsEvaluate,ShopGoodsEvaluateUpdate);
+        }
+
+    }
+
+    /**
+     * 批量删除
+     */
+    @Override
+    public void batchDel(ShopGoodsEvaluateBatchParam shopGoodsEvaluateBatchParam) {
+
+        //站点
+        Integer siteId = RequestUtils.siteId();
+
+        // 查询数据库
+        QueryWrapper<ShopGoodsEvaluate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", siteId)
+                .select("evaluate_id", "is_audit", "goods_id");
+        if(shopGoodsEvaluateBatchParam.getEvaluateIds().size()>0){
+            queryWrapper.in("evaluate_id",shopGoodsEvaluateBatchParam.getEvaluateIds());
+        }
+        List<ShopGoodsEvaluate> evaluateList = shopGoodsEvaluateMapper.selectList(queryWrapper);
+
+        //判断数据是否为空
+        if(ObjectUtil.isNotNull(evaluateList) && evaluateList.size()>0){
+            //删除操作
+            QueryWrapper<ShopGoodsEvaluate> ShopGoodsEvaluateUpdate = new QueryWrapper<>();
+            ShopGoodsEvaluateUpdate.eq("site_id",siteId);
+            if(shopGoodsEvaluateBatchParam.getEvaluateIds().size()>0){
+                ShopGoodsEvaluateUpdate.in("evaluate_id",shopGoodsEvaluateBatchParam.getEvaluateIds());
+                shopGoodsEvaluateMapper.delete(ShopGoodsEvaluateUpdate);
+            }
+
+            for(int i=0; i<evaluateList.size(); i++){
+                GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
+                goodsAddStatParam.setSiteId(siteId);
+                goodsAddStatParam.setGoodsId(evaluateList.get(i).getGoodsId());
+                goodsAddStatParam.setEvaluateNum(-1);
+                //添加统计数据
+                coreGoodsStatService.addStat(goodsAddStatParam);
+                if(evaluateList.get(i).getIsAudit() == 2){
+                    UpdateWrapper<ShopGoods> updateWrapper = new UpdateWrapper<>();
+                    // 设置更新条件：goods_id = ?
+                    updateWrapper.eq("goods_id", evaluateList.get(i).getGoodsId());
+                    // 设置自增操作：evaluate_num = evaluate_num + 1
+                    updateWrapper.setSql("evaluate_num = evaluate_num - 1");
+                    shopGoodsMapper.update(null,updateWrapper);
+                }
+            }
+        }
+
     }
 
 }

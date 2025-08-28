@@ -249,6 +249,7 @@ public class ShopPointExchangeInfoVo {
         private String limitNum;
         @JsonProperty("point")
         private String point;
+        private Integer isJoinExchange;
     }
 
     @NoArgsConstructor

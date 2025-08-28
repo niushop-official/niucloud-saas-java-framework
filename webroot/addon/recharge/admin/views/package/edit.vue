@@ -64,7 +64,6 @@ const formData = reactive({
     status: 1,
     gift_json:{}
 });
-const gifts = ref({})
 const giftRef = ref(null)
 const formRef = ref<FormInstance>();
 

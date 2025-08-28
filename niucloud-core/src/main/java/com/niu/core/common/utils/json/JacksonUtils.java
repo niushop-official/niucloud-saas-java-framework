@@ -1,5 +1,8 @@
 package com.niu.core.common.utils.json;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONNull;
+import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -8,6 +11,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.niu.core.entity.sys.SysMenu;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class JacksonUtils {
@@ -71,6 +75,36 @@ public class JacksonUtils {
             beanList.add(target);
         });
         return beanList;
+    }
+
+    public static void removeNull(JSONObject object) {
+        object.keySet().forEach(key->{
+            Object o = object.get(key);
+            if (o instanceof JSONArray) {
+                removeNull((JSONArray) o);
+            }
+            if (o instanceof JSONObject) {
+                removeNull(object.getJSONObject(key));
+            }
+            if (o instanceof JSONNull) {
+                object.put(key, "");
+            }
+        });
+    }
+    public static void removeNull(JSONArray array) {
+        Iterator<Object> iterator = array.iterator();
+        while (iterator.hasNext()) {
+            Object o1 = iterator.next();
+            if (o1 instanceof JSONObject) {
+                removeNull((JSONObject) o1);
+            }
+            if(o1 instanceof JSONArray) {
+                removeNull((JSONArray) o1);
+            }
+            if(o1 instanceof JSONNull) {
+                iterator.remove();
+            }
+        }
     }
 
 }

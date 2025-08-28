@@ -14,6 +14,6 @@ public class SysVerifyRecordsParam implements ApiBaseParam {
 
     private String keyword;
 
-    private String createTime;
+    private String[] createTime;
 
 }

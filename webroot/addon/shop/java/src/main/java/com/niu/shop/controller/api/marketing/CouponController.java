@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
+import com.niu.shop.service.admin.marketing.param.ShopCouponDelParam;
 import com.niu.shop.service.api.marketing.ICouponService;
 import com.niu.shop.service.api.marketing.param.ShopCouponReceiveParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponSearchParam;
@@ -132,6 +133,19 @@ public class CouponController {
     @GetMapping("/coupon_type")
     public Result<Object> getCouponType() {
         return Result.success(couponService.getCouponType());
+    }
+
+
+    /**
+     * 作废优惠券
+     *
+     * @param shopCouponDelParam
+     * @return
+     */
+    @PutMapping("/goods/coupon/invalid")
+    public Result<Object> invalidCoupon(@RequestBody ShopCouponDelParam shopCouponDelParam) {
+        couponService.invalidCoupon(shopCouponDelParam);
+        return Result.success();
     }
 
 }

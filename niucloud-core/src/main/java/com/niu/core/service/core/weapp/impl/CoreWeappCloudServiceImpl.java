@@ -86,7 +86,7 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         query.put("timestamp", taskKey);
         query.put("token", actionToken == null ? "" : actionToken.getStr("token"));
 
-        HttpResponse response = new NiucloudUtils.Cloud().build("cloud/weapp").query(query)
+        HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/weapp").query(query)
             .func(i -> {
                 i.form("file", zipFile, "build.zip");
             })
@@ -183,7 +183,7 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         query.put("authorize_code", instance.getCode());
         query.put("timestamp", key);
 
-        HttpResponse response = new NiucloudUtils.Cloud().build("cloud/get_weapp_logs").query(query).method(Method.GET).execute();
+        HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/get_weapp_logs").query(query).method(Method.GET).execute();
         try {
             JSONObject res =  JSONUtil.parseObj(response.body());
             return res;
@@ -204,7 +204,7 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
             Map<String, Object> query = new HashMap<>();
             query.put("authorize_code", instance.getCode());
 
-            HttpResponse response = new NiucloudUtils.Cloud().build("cloud/get_weapp_preview").query(query).execute();
+            HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/get_weapp_preview").query(query).execute();
             if (JSONUtil.isJson(response.body()) && JSONUtil.parseObj(response.body()).getInt("code").equals("0")) return "";
             if (checkImageType(response.bodyStream()).equals("unknown")) return "";
             return "data:image/"+ checkImageType(response.bodyStream()) +";base64," + Base64.getEncoder().encodeToString(response.bodyBytes());

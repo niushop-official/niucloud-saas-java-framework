@@ -73,4 +73,5 @@ public class SysMenu implements Serializable {
     /** 菜单属性 common 公共 system 系统 */
     private String menuAttr;
 
+    private String parentSelectKey;
 }

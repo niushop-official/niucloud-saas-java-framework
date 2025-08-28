@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 插件开发
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/adminapi/addon_develop")
 @SaCheckLogin
+@Description("插件开发")
 public class AddonDevelopController {
 
     @Resource
@@ -40,6 +42,7 @@ public class AddonDevelopController {
      * @return Result<Object>
      */
     @PostMapping("/build/{key}")
+    @Description("插件打包")
     public Result build(@PathVariable("key") String key) {
         addonDevelopBuildService.build(key);
         return Result.success();
@@ -49,6 +52,7 @@ public class AddonDevelopController {
      * 开发插件列表
      */
     @GetMapping("")
+    @Description("开发插件列表")
     public Result<List<AddonDevelopListVo>> list(@Validated AddonDevelopSearchParam searchParam) {
         List<AddonDevelopListVo> list = addonDevelopService.list(searchParam);
         return Result.success(list);
@@ -58,6 +62,7 @@ public class AddonDevelopController {
      * 查询插件
      */
     @GetMapping("/{key}")
+    @Description("查询插件")
     public Result<AddonDevelopInfoVo> info(@PathVariable("key") String key) {
         return Result.success(addonDevelopService.info(key));
     }
@@ -66,6 +71,7 @@ public class AddonDevelopController {
      * 新增插件
      */
     @PostMapping("/{key}")
+    @Description("新增插件")
     public Result add(@PathVariable("key") String key, @Validated @RequestBody AddonDevelopAddParam param) {
         addonDevelopService.add(param);
         return Result.success();
@@ -75,6 +81,7 @@ public class AddonDevelopController {
      * 编辑插件
      */
     @PutMapping("/{key}")
+    @Description("编辑插件")
     public Result edit(@PathVariable("key") String key, @Validated @RequestBody AddonDevelopAddParam param) {
         addonDevelopService.edit(param);
         return Result.success();
@@ -84,6 +91,7 @@ public class AddonDevelopController {
      * 删除插件
      */
     @DeleteMapping("/{key}")
+    @Description("删除插件")
     public Result del(@PathVariable("key") String key) {
         addonDevelopService.del(key);
         return Result.success();
@@ -93,6 +101,7 @@ public class AddonDevelopController {
      * 查询插件key是否存在
      */
     @GetMapping("/check/{key}")
+    @Description("查询插件key是否存在")
     public Result checkKey(@PathVariable("key") String key) {
         return Result.success(niucloudService.checkKey(key));
     }
@@ -101,6 +110,7 @@ public class AddonDevelopController {
      * 查询插件名黑名单
      */
     @GetMapping("/key/blacklist")
+    @Description("查询插件名黑名单")
     public Result<String[]> keyBlackList() {
         String[] blackList = {"addon", "aliapp", "app"};
         return Result.success(blackList);
@@ -112,6 +122,7 @@ public class AddonDevelopController {
      * @return
      */
     @PostMapping("/download/{key}")
+    @Description("下载插件")
     public Result download(@PathVariable("key") String key) {
         return Result.success("", addonDevelopBuildService.download(key));
     }

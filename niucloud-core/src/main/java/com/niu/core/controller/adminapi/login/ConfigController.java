@@ -13,7 +13,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
+@Description("登录配置")
 @RestController
 @RequestMapping("adminapi/sys/config/")
 public class ConfigController {
@@ -26,6 +28,7 @@ public class ConfigController {
      *
      * @return
      */
+    @Description("获取登录配置")
     @GetMapping("/login")
     public Result<LoginConfigVo> getConfig(){
         LoginConfigVo loginConfigVo=configService.getLoginConfig();
@@ -38,6 +41,7 @@ public class ConfigController {
      * @param loginConfigParam
      * @return
      */
+    @Description("更新登录配置信息")
     @PutMapping("/login")
     public Result setConfig(@Validated @RequestBody LoginConfigParam loginConfigParam){
         configService.setLoginConfig(loginConfigParam);

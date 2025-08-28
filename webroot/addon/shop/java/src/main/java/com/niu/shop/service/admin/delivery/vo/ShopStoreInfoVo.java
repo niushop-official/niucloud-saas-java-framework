@@ -1,7 +1,10 @@
 package com.niu.shop.service.admin.delivery.vo;
+import cn.hutool.json.JSONObject;
+import com.niu.shop.service.admin.delivery.param.TradeTimeItemParam;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * ShopStore视图
@@ -28,4 +31,7 @@ public class ShopStoreInfoVo implements Serializable {
     private String provinceName;
     private String cityName;
     private String districtName;
+    private List<String> timeWeek; //自定义的营业时间["0","1","2","3","4","5","6"]周日-周六
+    private List<TradeTimeItemParam> tradeTimeJson; //营业时间JSON
+    private Integer timeInterval; //时段设置（分钟）
 }

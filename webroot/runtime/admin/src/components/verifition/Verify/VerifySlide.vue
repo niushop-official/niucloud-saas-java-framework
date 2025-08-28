@@ -1,50 +1,51 @@
 <template>
-    <div style="position: relative;">
-        <div v-if="type === '2'" class="verify-img-out"
-             :style="{height: (parseInt(setSize.imgHeight) + vSpace) + 'px'}"
-            >
-            <div class="verify-img-panel" :style="{width: setSize.imgWidth,
+	<div style="position: relative;">
+		<div v-if="type === '2'" class="verify-img-out"
+		     :style="{height: (parseInt(setSize.imgHeight) + vSpace) + 'px'}"
+		>
+			<div class="verify-img-panel" :style="{width: setSize.imgWidth,
                                                    height: setSize.imgHeight,}">
-                <img :src="'data:image/png;base64,'+backImgBase" alt="" style="width:100%;height:100%;display:block">
-                <div class="verify-refresh" @click="refresh" v-show="showRefresh"><i class="iconfont icon-refresh"></i>
-                </div>
-                <transition name="tips">
-                    <span class="verify-tips" v-if="tipWords" :class="passFlag ?'suc-bg':'err-bg'">{{tipWords}}</span>
-                </transition>
-            </div>
-        </div>
-        <!-- 公共部分 -->
-        <div class="verify-bar-area" :style="{width: setSize.imgWidth,
+				<img :src="'data:image/png;base64,'+backImgBase" alt="" style="width:100%;height:100%;display:block">
+				<div class="verify-refresh" @click="refresh" v-show="showRefresh"><i class="iconfont icon-refresh"></i>
+				</div>
+				<transition name="tips">
+					<span class="verify-tips" v-if="tipWords" :class="passFlag ?'suc-bg':'err-bg'">{{tipWords}}</span>
+				</transition>
+			</div>
+		</div>
+		<!-- 公共部分 -->
+		<div class="verify-bar-area" :style="{width: setSize.imgWidth,
                                               height: barSize.height,
                                               'line-height':barSize.height}">
-            <span class="verify-msg" v-text="text"></span>
-            <div class="verify-left-bar"
-                 :style="{width: (leftBarWidth!==undefined)?leftBarWidth: barSize.height, height: barSize.height, 'border-color': leftBarBorderColor, transaction: transitionWidth}">
-                <span class="verify-msg" v-text="finishText"></span>
-                <div class="verify-move-block"
-                     @touchstart="start"
-                     @mousedown="start"
-                     :style="{width: barSize.height, height: barSize.height, 'background-color': moveBlockBackgroundColor, left: moveBlockLeft, transition: transitionLeft}">
-                    <i :class="['verify-icon iconfont', iconClass]"
-                       :style="{color: iconColor}"></i>
-                    <div v-if="type === '2'" class="verify-sub-block"
-                        :style="{'width':Math.floor(parseInt(setSize.imgWidth)*47/310)+ 'px',
+			<span class="verify-msg" v-text="text"></span>
+			<div class="verify-left-bar"
+			     :style="{width: (leftBarWidth!==undefined)?leftBarWidth: barSize.height, height: barSize.height, 'border-color': leftBarBorderColor, transaction: transitionWidth}">
+				<span class="verify-msg" v-text="finishText"></span>
+				<div class="verify-move-block"
+				     @touchstart="start"
+				     @mousedown="start"
+				     :style="{width: barSize.height, height: barSize.height, 'background-color': moveBlockBackgroundColor, left: moveBlockLeft, transition: transitionLeft}">
+					<i :class="['verify-icon iconfont', iconClass]"
+					   :style="{color: iconColor}"></i>
+					<div v-if="type === '2'" class="verify-sub-block"
+					     :style="{'width':Math.floor(parseInt(setSize.imgWidth)*47/310)+ 'px',
                                   'height': setSize.imgHeight,
                                   'top':'-' + (parseInt(setSize.imgHeight) + vSpace) + 'px',
                                   'background-size': setSize.imgWidth + ' ' + setSize.imgHeight,
                                   }">
-                        <img :src="'data:image/png;base64,'+blockBackImgBase" alt=""  style="width:100%;height:100%;display:block;-webkit-user-drag:none;">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+						<img :src="'data:image/png;base64,'+blockBackImgBase" alt=""
+						     style="width:100%;height:100%;display:block;-webkit-user-drag:none;">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </template>
 <script type="text/babel">
 /**
- * VerifySlide
- * @description 滑块
- * */
+     * VerifySlide
+     * @description 滑块
+     * */
 import { aesEncrypt } from './../utils/ase'
 import { resetSize } from './../utils/util'
 import { reqGet, reqCheck } from './../api/index'
@@ -104,47 +105,48 @@ export default {
     setup (props, context) {
         const { mode, captchaType, vSpace, imgSize, barSize, type, blockSize, explain } = toRefs(props)
         const { proxy } = getCurrentInstance()
-        let secretKey = ref(''), // 后端返回的ase加密秘钥
-            passFlag = ref(''), // 是否通过的标识
-            backImgBase = ref(''), // 验证码背景图片
-            blockBackImgBase = ref(''), // 验证滑块的背景图片
-            backToken = ref(''), // 后端返回的唯一token值
-            startMoveTime = ref(''), // 移动开始的时间
-            endMovetime = ref(''), // 移动结束的时间
-            tipsBackColor = ref(''), // 提示词的背景颜色
-            tipWords = ref(''),
-            text = ref(''),
-            finishText = ref(''),
-            setSize = reactive({
-                imgHeight: 0,
-                imgWidth: 0,
-                barHeight: 0,
-                barWidth: 0
-            }),
-            top = ref(0),
-            left = ref(0),
-            moveBlockLeft = ref(undefined),
-            leftBarWidth = ref(undefined),
-            // 移动中样式
-            moveBlockBackgroundColor = ref(undefined),
-            leftBarBorderColor = ref('#ddd'),
-            iconColor = ref(undefined),
-            iconClass = ref('icon-right'),
-            status = ref(false), // 鼠标状态
-            isEnd = ref(false) ,		// 是够验证完成
-            showRefresh = ref(true),
-            transitionLeft = ref(''),
-            transitionWidth = ref(''),
-            startLeft = ref(0) 
+        const secretKey = ref('') // 后端返回的ase加密秘钥
+        const passFlag = ref('') // 是否通过的标识
+        const backImgBase = ref('') // 验证码背景图片
+        const blockBackImgBase = ref('') // 验证滑块的背景图片
+        const backToken = ref('') // 后端返回的唯一token值
+        const startMoveTime = ref('') // 移动开始的时间
+        const endMoveTime = ref('') // 移动结束的时间
+        const tipsBackColor = ref('') // 提示词的背景颜色
+        const tipWords = ref('')
+        const text = ref('')
+        const finishText = ref('')
+        const setSize = reactive({
+            imgHeight: 0,
+            imgWidth: 0,
+            barHeight: 0,
+            barWidth: 0
+        })
+        const top = ref(0)
+        const left = ref(0)
+        const moveBlockLeft = ref(undefined)
+        const leftBarWidth = ref(undefined)
+        // 移动中样式
+        const moveBlockBackgroundColor = ref(undefined)
+        const leftBarBorderColor = ref('#ddd')
+        const iconColor = ref(undefined)
+        const iconClass = ref('icon-right')
+        const status = ref(false) // 鼠标状态
+        const isEnd = ref(false)		// 是够验证完成
+        const showRefresh = ref(true)
+        const transitionLeft = ref('')
+        const transitionWidth = ref('')
+        const startLeft = ref(0)
 
-        const barArea = computed(()=>{
+        const barArea = computed(() => {
             return proxy.$el.querySelector('.verify-bar-area')
         })
-        function init() {
+
+        function init () {
             text.value = explain.value
             getPictrue()
             nextTick(() => {
-                let {imgHeight,imgWidth,barHeight,barWidth} = resetSize(proxy)
+                const { imgHeight, imgWidth, barHeight, barWidth } = resetSize(proxy)
                 setSize.imgHeight = imgHeight
                 setSize.imgWidth = imgWidth
                 setSize.barHeight = barHeight
@@ -182,6 +184,7 @@ export default {
                 end()
             })
         }
+
         watch(type, () => {
             init()
         })
@@ -192,15 +195,16 @@ export default {
                 return false
             }
         })
+
         // 鼠标按下
-        function start(e) {
+        function start (e) {
             e = e || window.event
-            if (!e.touches) { // 兼容PC端 
+            if (!e.touches) { // 兼容PC端
                 var x = e.clientX
             } else { // 兼容移动端
                 var x = e.touches[0].pageX
             }
-            startLeft.value =Math.floor(x - barArea.value.getBoundingClientRect().left)
+            startLeft.value = Math.floor(x - barArea.value.getBoundingClientRect().left)
             startMoveTime.value = +new Date() // 开始滑动的时间
             if (isEnd.value == false) {
                 text.value = ''
@@ -211,8 +215,9 @@ export default {
                 status.value = true
             }
         }
+
         // 鼠标移动
-        function move(e) {
+        function move (e) {
             e = e || window.event
             if (status.value && isEnd.value == false) {
                 if (!e.touches) { // 兼容PC端
@@ -220,8 +225,8 @@ export default {
                 } else { // 兼容移动端
                     var x = e.touches[0].pageX
                 }
-                var bar_area_left = barArea.value.getBoundingClientRect().left
-                var move_block_left = x - bar_area_left // 小方块相对于父元素的left值
+                const bar_area_left = barArea.value.getBoundingClientRect().left
+                let move_block_left = x - bar_area_left // 小方块相对于父元素的left值
                 if (move_block_left >= barArea.value.offsetWidth - parseInt(parseInt(blockSize.value.width) / 2) - 2) {
                     move_block_left = barArea.value.offsetWidth - parseInt(parseInt(blockSize.value.width) / 2) - 2
                 }
@@ -235,16 +240,21 @@ export default {
         }
 
         // 鼠标松开
-        function end() {
-            endMovetime.value = +new Date()
+        function end () {
+            endMoveTime.value = +new Date()
             // 判断是否重合
             if (status.value && isEnd.value == false) {
-                var moveLeftDistance = parseInt((moveBlockLeft.value || '').replace('px', ''))
+                let moveLeftDistance = parseInt((moveBlockLeft.value || '').replace('px', ''))
                 moveLeftDistance = moveLeftDistance * 310 / parseInt(setSize.imgWidth)
                 const data = {
                     captchaType: captchaType.value,
-                    'captcha_code':secretKey.value ? aesEncrypt(JSON.stringify({ x: moveLeftDistance, y: 5.0}), secretKey.value):JSON.stringify({x:moveLeftDistance,y:5.0}),
-                    'captcha_key':backToken.value
+                    captcha_code: secretKey.value
+                        ? aesEncrypt(JSON.stringify({
+                            x: moveLeftDistance,
+                            y: 5.0
+                        }), secretKey.value)
+                        : JSON.stringify({ x: moveLeftDistance, y: 5.0 }),
+                    captcha_key: backToken.value
                 }
                 reqCheck(data).then(res => {
                     if (res.code == 1) {
@@ -261,8 +271,16 @@ export default {
                             }, 1500)
                         }
                         passFlag.value = true
-                        tipWords.value = `${((endMovetime.value - startMoveTime.value) / 1000).toFixed(2)}s验证成功`
-                        var captchaVerification = secretKey.value ? aesEncrypt(backToken.value + '---' + JSON.stringify({ x: moveLeftDistance, y: 5.0 }), secretKey.value) : backToken.value + '---' + JSON.stringify({ x: moveLeftDistance, y: 5.0 })
+                        tipWords.value = `${((endMoveTime.value - startMoveTime.value) / 1000).toFixed(2)}s验证成功`
+                        const captchaVerification = secretKey.value
+                            ? aesEncrypt(backToken.value + '---' + JSON.stringify({
+                                x: moveLeftDistance,
+                                y: 5.0
+                            }), secretKey.value)
+                            : backToken.value + '---' + JSON.stringify({
+                                x: moveLeftDistance,
+                                y: 5.0
+                            })
                         setTimeout(() => {
                             tipWords.value = ''
                             proxy.$parent.closeBox()
@@ -313,7 +331,7 @@ export default {
         }
 
         // 请求背景图片和验证图片
-        function getPictrue() {
+        function getPictrue () {
             const data = {
                 captchaType: captchaType.value
             }
@@ -328,6 +346,7 @@ export default {
                 }
             })
         }
+
         return {
             secretKey, // 后端返回的ase加密秘钥
             passFlag, // 是否通过的标识
@@ -335,7 +354,7 @@ export default {
             blockBackImgBase, // 验证滑块的背景图片
             backToken, // 后端返回的唯一token值
             startMoveTime, // 移动开始的时间
-            endMovetime, // 移动结束的时间
+            endMoveTime, // 移动结束的时间
             tipsBackColor, // 提示词的背景颜色
             tipWords,
             text,

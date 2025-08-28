@@ -3,6 +3,7 @@ package com.niu.core.service.admin.site.vo;
 import cn.hutool.json.JSONArray;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.entity.addon.Addon;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -47,5 +48,15 @@ public class SiteGroupListVo implements Serializable {
 
     /**站点数量 */
     private Long siteNum;
+
+    private List<IconAndTitle> appList;
+
+    private List<IconAndTitle> addonList;
+
+    @Data
+    public static class IconAndTitle{
+        private String icon;
+        private String title;
+    }
 
 }

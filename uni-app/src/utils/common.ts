@@ -26,14 +26,12 @@ export const redirect = (redirect: any) => {
         if (config.login.is_username && !config.login.is_mobile && !config.login.is_auth_register) {
             url = '/app/pages/auth/login'
             param = { type: 'username' }
-            mode = 'redirectTo'
             newLogin = true
         } else if (systemStore.initStatus == 'finish' && !config.login.is_username && !config.login.is_mobile && !config.login.is_auth_register) {
             uni.showToast({ title: '商家未开启登录注册', icon: 'none' })
             return;
         } else {
             url = '/app/pages/auth/index'
-            mode = 'redirectTo'
             newLogin = true
         }
         // #endif
@@ -44,14 +42,12 @@ export const redirect = (redirect: any) => {
             if (config.login.is_username && !config.login.is_mobile && !config.login.is_auth_register) {
                 url = '/app/pages/auth/login'
                 param = { type: 'username' }
-                mode = 'redirectTo'
                 newLogin = true
             } else if (systemStore.initStatus == 'finish' && !config.login.is_username && !config.login.is_mobile && !config.login.is_auth_register) {
                 uni.showToast({ title: '商家未开启登录注册', icon: 'none' })
                 return;
             } else {
                 url = '/app/pages/auth/index'
-                mode = 'redirectTo'
                 newLogin = true
             }
         } else {
@@ -59,14 +55,12 @@ export const redirect = (redirect: any) => {
             if (config.login.is_username && !config.login.is_mobile) {
                 url = '/app/pages/auth/login'
                 param = { type: 'username' }
-                mode = 'redirectTo'
                 newLogin = true
             } else if (systemStore.initStatus == 'finish' && !config.login.is_username && !config.login.is_mobile) {
                 uni.showToast({ title: '商家未开启登录注册', icon: 'none' })
                 return;
             } else {
                 url = '/app/pages/auth/index'
-                mode = 'redirectTo'
                 newLogin = true
             }
         }
@@ -291,14 +285,14 @@ export function img(path: string): string {
     // #ifdef H5
     let imgDomain = import.meta.env.VITE_IMG_DOMAIN || location.origin
     // #endif
-    
+
     // #ifndef H5
     let imgDomain = import.meta.env.VITE_IMG_DOMAIN
     // #endif
-    
+
     if (typeof path == 'string' && path.startsWith('/')) path = path.replace(/^\//, '')
     if (typeof imgDomain == 'string' && imgDomain.endsWith('/')) imgDomain = imgDomain.slice(0, -1)
-    
+
     return isUrl(path) ? path : `${imgDomain}/${path}`
 }
 
@@ -375,17 +369,17 @@ export function getSiteId(siteId: number | string) {
  */
 export function timeStampTurnTime(timeStamp: any, type = "") {
     if (timeStamp != undefined && timeStamp != "" && timeStamp > 0) {
-        var date = new Date();
+        const date = new Date();
         date.setTime(timeStamp * 1000);
-        var y = date.getFullYear();
-        var m: any = date.getMonth() + 1;
+        const y = date.getFullYear();
+        let m: any = date.getMonth() + 1;
         m = m < 10 ? ('0' + m) : m;
-        var d: any = date.getDate();
+        let d: any = date.getDate();
         d = d < 10 ? ('0' + d) : d;
-        var h: any = date.getHours();
+        let h: any = date.getHours();
         h = h < 10 ? ('0' + h) : h;
-        var minute: any = date.getMinutes();
-        var second: any = date.getSeconds();
+        let minute: any = date.getMinutes();
+        let second: any = date.getSeconds();
         minute = minute < 10 ? ('0' + minute) : minute;
         second = second < 10 ? ('0' + second) : second;
         if (type) {
@@ -404,7 +398,7 @@ export function timeStampTurnTime(timeStamp: any, type = "") {
 
 /**
  * 日期格式转时间戳
- * @param {Object} date
+ * @param dateStr
  */
 export function timeTurnTimeStamp(dateStr: string) {
     let timestamp;
@@ -461,7 +455,7 @@ export function timeTurnTimeStamp(dateStr: string) {
  */
 export function copy(value: any, callback: any) {
     // #ifdef H5
-    var oInput = document.createElement('input'); //创建一个隐藏input（重要！）
+    const oInput = document.createElement('input'); //创建一个隐藏input（重要！）
     oInput.value = value; //赋值
     oInput.setAttribute("readonly", "readonly");
     document.body.appendChild(oInput);
@@ -511,7 +505,7 @@ export function handleOnloadParams(option: any) {
 
     // 处理小程序扫码进入的场景值参数
     if (option.scene) {
-        var sceneParams = decodeURIComponent(option.scene).split('&');
+        const sceneParams = decodeURIComponent(option.scene).split('&');
         if (sceneParams.length) {
             sceneParams.forEach(item => {
                 let arr = item.split('-');
@@ -577,7 +571,8 @@ const isArray = (value: any) => {
 
 // px转rpx
 export function pxToRpx(px: any) {
-    const screenWidth = uni.getSystemInfoSync().screenWidth;
+    const systemStore = useSystemStore()
+    const screenWidth = systemStore.systemInfo.screenWidth;
     return (750 * Number.parseInt(px)) / screenWidth;
 }
 
@@ -623,7 +618,7 @@ export function getWinxinOpenId() {
 
 // 获取有效期
 export function getValidTime(minutes: any = 1) {
-    var date = new Date();
+    const date = new Date();
     date.setSeconds(60 * minutes);
     let validTime: any = parseInt(date.getTime() / 1000); // 定位信息 5分钟内有效，过期后将重新获取定位信息
     return validTime;
@@ -645,38 +640,72 @@ export function setThemeColor (path: string) {
     if (configStore.addon != route) {
         configStore.addon = route;
     }
-	
+
     // 设置插件应用的主色调，排除系统
 	const theme_color_list = uni.getStorageSync('theme_color_list');
 	const current_theme_color = uni.getStorageSync('current_theme_color');
-	let theme = '';
+	let currTheme = {};
     if (route != 'app') {
         try {
-			theme = theme_color_list[route];
-			if(theme && theme.value){
-				configStore.themeColor = theme.value
-				uni.setStorageSync('current_theme_color', JSON.stringify(theme.value));
-			}else if( !theme && current_theme_color){
+			currTheme = theme_color_list[route];
+			if(currTheme && currTheme.theme){
+				configStore.themeColor = themeColorToHex(currTheme.theme)
+				uni.setStorageSync('current_theme_color', JSON.stringify(themeColorToHex(currTheme.theme)));
+			}else if( !currTheme && current_theme_color){
 				configStore.themeColor = ''
 			}else{
-				theme = theme_color_list.app || Object.values(theme_color_list)[0];
-				configStore.themeColor = theme.value
-				uni.setStorageSync('current_theme_color', JSON.stringify(theme.value));
+				currTheme = theme_color_list.app || Object.values(theme_color_list)[0];
+				configStore.themeColor = themeColorToHex(currTheme.theme)
+				uni.setStorageSync('current_theme_color', JSON.stringify(themeColorToHex(currTheme.theme)));
 			}
         } catch (e) {
             // 设置插件应用的主色调发生错误，若不存在则使用最后有效的主色调
-			if(!current_theme_color && theme_color_list){
-				theme = theme_color_list.app || Object.values(theme_color_list)[0];
-				configStore.themeColor = theme.value
-				uni.setStorageSync('current_theme_color', JSON.stringify(theme.value));
+			if(!current_theme_color && theme_color_list  && Object.keys(theme_color_list).length > 0){
+				currTheme = theme_color_list.app || Object.values(theme_color_list)[0];
+				configStore.themeColor = themeColorToHex(currTheme.theme)
+				uni.setStorageSync('current_theme_color', JSON.stringify(themeColorToHex(currTheme.theme)));
 			}else{
 				configStore.themeColor = '';
 			}
         }
 
-    }else if(!current_theme_color && theme_color_list){
-		theme = theme_color_list.app || Object.values(theme_color_list)[0];
-		configStore.themeColor = theme.value
-		uni.setStorageSync('current_theme_color', JSON.stringify(theme.value));
-	}
+    }else if (!current_theme_color && theme_color_list && Object.keys(theme_color_list).length > 0) {
+      currTheme = theme_color_list.app || Object.values(theme_color_list)[0]
+      configStore.themeColor = themeColorToHex(currTheme.theme)
+      uni.setStorageSync("current_theme_color", JSON.stringify(themeColorToHex(currTheme.theme)))
+    }
+}
+
+export function themeColorToHex (param: any) {
+    const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+    const rgbaRegex = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(,\s*\d*\.?\d+)?\)$/
+    for(let key in param){
+        if (rgbaRegex.test(param[key])) {
+            const values = param[key].replace('rgba(', '').replace(')', '').split(',');
+            // 提取 r, g, b, a 值，并将它们转换为合适的类型
+            const r = parseInt(values[0].trim(), 10); // Red 分量
+            const g = parseInt(values[1].trim(), 10); // Green 分量
+            const b = parseInt(values[2].trim(), 10); // Blue 分量
+            const a = parseFloat(values[3].trim());   // Alpha 分量
+            param[key] = rgbaToHex(r,g,b,a)
+        }
+    }
+    return param
+}
+
+// rgba转十六进制颜色
+export function rgbaToHex (r, g, b, a) {
+    // 计算混合后的RGB值，假设背景是白色 (255, 255, 255)
+    let rBlend = Math.round((1 - a) * 255 + a * r)
+    let gBlend = Math.round((1 - a) * 255 + a * g)
+    let bBlend = Math.round((1 - a) * 255 + a * b)
+
+    // 将RGB值转换为十六进制
+    let componentToHex = function (c) {
+        let hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    let hex = "#" + componentToHex(rBlend) + componentToHex(gBlend) + componentToHex(bBlend)
+    return hex.toUpperCase()
 }

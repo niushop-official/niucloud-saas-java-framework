@@ -3,7 +3,6 @@ package com.niu.shop.listener.member;
 import com.niu.core.common.annotation.EventListen;
 import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.event.member.MemberLoginEvent;
-import com.niu.core.event.member.MemberRegisterEvent;
 import com.niu.shop.service.core.marketing.ICoreShopNewcomerService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;

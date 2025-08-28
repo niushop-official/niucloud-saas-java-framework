@@ -103,7 +103,7 @@ public class ShopGoods implements Serializable {
     private Integer supplierId;
 
     /** 商品参数id */
-    private Integer attrId;
+    private String attrIds;
 
     /** 商品参数内容，json格式 */
     private String attrFormat;
@@ -166,4 +166,7 @@ public class ShopGoods implements Serializable {
 
     /** 删除时间 */
     private Long deleteTime;
+
+    private Integer diyDetailId;
+
 }

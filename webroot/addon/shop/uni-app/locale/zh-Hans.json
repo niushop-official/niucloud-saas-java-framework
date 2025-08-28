@@ -1,17 +1,17 @@
 {
-    "pages.webview.index": "",
     "pages.goods.search": "搜索",
     "pages.goods.cart": "购物车",
+    "pages.goods.collect": "商品收藏",
+    "pages.goods.browse": "我的足迹",
     "pages.goods.category": "商品分类",
     "pages.goods.detail": "商品详情",
     "pages.goods.list": "商品列表",
+    "pages.goods.rank": "排行榜",
     "pages.member.index": "个人中心",
     "pages.member.my_coupon": "我的优惠券",
     "pages.order.list": "订单列表",
     "pages.order.detail": "订单详情",
     "pages.order.payment": "待付款订单",
-    "pages.pay.index": "待支付",
-    "pages.pay.result": "支付成功",
     "pages.evaluate.order_evaluate": "商品评价",
     "pages.evaluate.order_evaluate_view": "商品评价",
     "pages.evaluate.list": "评价列表",
@@ -28,5 +28,7 @@
     "pages.point.detail": "积分商品详情",
     "pages.point.payment": "待付款订单",
     "pages.point.order_list": "积分兑换记录",
-    "pages.newcomer.list": "新人专享"
+    "pages.newcomer.list": "新人专享",
+    "pages.pay.index": "待支付",
+    "pages.pay.result": ""
 }

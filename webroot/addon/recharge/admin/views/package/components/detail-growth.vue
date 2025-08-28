@@ -1,7 +1,7 @@
 <template>
     <el-form ref="formRef" label-width="120px" :model="formData" :rules="formRules" label-position="left">
         <el-form-item :label="t('growth')" prop="value">
-            <span>{{ formData.value }}</span>        
+            <span>{{ formData.value }}</span>
         </el-form-item>
     </el-form>
 </template>
@@ -9,7 +9,6 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { FormRules } from 'element-plus'
-import Test from '@/utils/test'
 import { t } from "@/lang";
 
 const props = defineProps({

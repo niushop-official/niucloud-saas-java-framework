@@ -40,6 +40,8 @@ public class SysUserLog implements Serializable {
     private String type; 
     
     /** 操作时间 */
-    private Long createTime; 
+    private Long createTime;
+
+    private String operation;
 
 }

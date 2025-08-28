@@ -325,7 +325,7 @@
 						"value": "style-1"
 					},
 					"text": "超值爆款",
-					"textImg": "static\/resource\/images\/diy\/active_cube\/active_cube_text1.png",
+					"textImg": "static/resource/images/diy/active_cube/active_cube_text1.png",
 					"textLink": {
 						"name": ""
 					},
@@ -369,7 +369,7 @@
 							"link": {
 								"name": ""
 							},
-							"imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods1.png"
+							"imageUrl": "static/resource/images/diy/active_cube/active_cube_goods1.png"
 						},
 						{
 							"title": {
@@ -394,7 +394,7 @@
 							"link": {
 								"name": ""
 							},
-							"imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods2.png"
+							"imageUrl": "static/resource/images/diy/active_cube/active_cube_goods2.png"
 						},
 						{
 							"title": {
@@ -419,7 +419,7 @@
 							"link": {
 								"name": ""
 							},
-							"imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods3.png"
+							"imageUrl": "static/resource/images/diy/active_cube/active_cube_goods3.png"
 						},
 						{
 							"title": {
@@ -444,7 +444,7 @@
 							"link": {
 								"name": ""
 							},
-							"imageUrl": "static\/resource\/images\/diy\/active_cube\/active_cube_goods4.png"
+							"imageUrl": "static/resource/images/diy/active_cube/active_cube_goods4.png"
 						}
 					],
 					"template": {
@@ -585,7 +585,8 @@
 							}
 						}
 					],
-					"offset": 0
+					"offset": 0,
+					"lateralOffset": 15
 				}
 			},
 			"HorzBlank": {
@@ -622,7 +623,7 @@
 				"value": {
 					"moduleOne": {
 						"head": {
-							"textImg": "static\/resource\/images\/diy\/picture_show\/picture_show_head_text3.png",
+							"textImg": "static/resource/images/diy/picture_show/picture_show_head_text3.png",
 							"subText": "最高补1200元",
 							"subTextColor": "#666666"
 						},
@@ -637,7 +638,7 @@
 								"link": {
 									"name": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/picture_show\/picture_05.png"
+								"imageUrl": "static/resource/images/diy/picture_show/picture_05.png"
 							},
 							{
 								"btnTitle": {
@@ -649,7 +650,7 @@
 								"link": {
 									"name": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/picture_show\/picture_06.png"
+								"imageUrl": "static/resource/images/diy/picture_show/picture_06.png"
 							}
 						],
 						"listFrame": {
@@ -659,7 +660,7 @@
 					},
 					"moduleTwo": {
 						"head": {
-							"textImg": "static\/resource\/images\/diy\/picture_show\/picture_show_head_text4.png",
+							"textImg": "static/resource/images/diy/picture_show/picture_show_head_text4.png",
 							"subText": "每日上新",
 							"subTextColor": "#666666"
 						},
@@ -674,7 +675,7 @@
 								"link": {
 									"name": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/picture_show\/picture_07.png"
+								"imageUrl": "static/resource/images/diy/picture_show/picture_07.png"
 							},
 							{
 								"btnTitle": {
@@ -686,7 +687,7 @@
 								"link": {
 									"name": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/picture_show\/picture_08.png"
+								"imageUrl": "static/resource/images/diy/picture_show/picture_08.png"
 							}
 						],
 						"listFrame": {

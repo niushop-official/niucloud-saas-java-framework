@@ -104,20 +104,19 @@ const router = useRouter()
 const pageName = route.meta.title
 
 const activeName = ref('/channel/wechat')
-const active = ref(2)
 const qrcode = ref('')
 const wechatConfig = ref({})
 const oplatformConfig = ref({})
 
 const onShowGetWechatConfig = async () => {
-    await getWechatConfig().then(({data}) => {
+    await getWechatConfig().then(({ data }) => {
         wechatConfig.value = data
         qrcode.value = data.qr_code
     })
 }
 
 onMounted(async () => {
-    onShowGetWechatConfig()
+    await onShowGetWechatConfig()
 
     await getWxoplatform().then(({ data }) => {
         oplatformConfig.value = data

@@ -2,6 +2,7 @@ package com.niu.core.service.admin.home;
 
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.service.admin.addon.vo.AddonInfoVo;
 import com.niu.core.service.admin.home.param.HomeSiteAddParam;
 import com.niu.core.service.admin.home.param.SiteParam;
 import com.niu.core.service.admin.home.param.SiteSearchParam;
@@ -9,6 +10,7 @@ import com.niu.core.service.admin.home.vo.SiteInfoVo;
 import com.niu.core.service.admin.home.vo.SiteListVo;
 import com.niu.core.service.admin.home.vo.UserCreateSiteVo;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -94,4 +96,9 @@ public interface IAuthSiteService {
      */
     void createSite(HomeSiteAddParam homeSiteAddParam);
 
+    /**
+     * 获取站点分组应用列表
+     * @return
+     */
+    List<AddonInfoVo> getSiteGroupAppList();
 }

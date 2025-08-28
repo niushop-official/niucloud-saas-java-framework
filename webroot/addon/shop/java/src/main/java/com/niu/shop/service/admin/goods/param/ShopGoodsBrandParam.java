@@ -1,4 +1,5 @@
 package com.niu.shop.service.admin.goods.param;
+import cn.hutool.json.JSONObject;
 import lombok.Data;
 import java.io.Serializable;
 import jakarta.validation.constraints.*;
@@ -23,5 +24,7 @@ public class ShopGoodsBrandParam implements Serializable {
 
     @NotNull(message = "sort参数缺失")
     private String sort;
+
+    private JSONObject colorJson;
 
 }

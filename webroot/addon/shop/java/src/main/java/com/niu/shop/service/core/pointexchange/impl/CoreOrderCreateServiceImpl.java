@@ -170,6 +170,10 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 OrderCreateDataVo.Sku skuVo = new OrderCreateDataVo.Sku();
                 ShopGoodsSku sku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().eq("site_id", param.getSiteId()).eq("sku_id", item.getSkuId()));
                 Assert.notNull(sku, "购物车数据已过期");
+
+                String memberPrice = sku.getMemberPrice();
+                sku.setMemberPrice(null);
+
                 BeanUtil.copyProperties(sku, skuVo);
                 skuVo.setNum(item.getNum());
                 skuVo.setOriginalPrice(skuVo.getPrice());
@@ -276,6 +280,9 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         order.setHasGoodsTypes(JSONUtil.parseArray(vo.getBasic().getHasGoodsTypes()).toString());
         order.setDeliveryType(vo.getDelivery().getDeliveryType());
         order.setMemberRemark(vo.getMemberRemark());
+        order.setTakerName(param.getDelivery().getTakerName());
+        order.setTakerMobile(param.getDelivery().getTakerMobile());
+
         if (ObjectUtil.isNotEmpty(vo.getDelivery().getTakeAddress())) {
             MemberAddress address = JSONUtil.toBean(JSONUtil.parseObj(vo.getDelivery().getTakeAddress()), MemberAddress.class);
             order.setTakerName(address.getName());
@@ -287,6 +294,11 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             order.setTakerFullAddress(address.getFullAddress());
             order.setTakerLatitude(address.getLat());
             order.setTakerLongitude(address.getLng());
+        }
+        if (ObjectUtil.defaultIfNull(param.getDelivery().getLocalDeliveryType(), "").equals("now")) {
+            order.setBuyerAskDeliveryTime("");
+        } else {
+            order.setBuyerAskDeliveryTime(ObjectUtil.defaultIfNull(param.getDelivery().getBuyerAskDeliveryTime(), ""));
         }
         if (ObjectUtil.isNotEmpty(vo.getDelivery().getTakeStore())) {
             order.setTakeStoreId(vo.getDelivery().getTakeStore().getStoreId());

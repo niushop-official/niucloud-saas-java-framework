@@ -1,6 +1,7 @@
 package com.niu.shop.service.admin.delivery.param;
 import lombok.Data;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 【请填写功能名称】参数
@@ -13,5 +14,9 @@ public class ShopDeliveryCompanySearchParam implements Serializable {
     private String companyName;
 
     private String electronicSheetSwitch = "";
+
+    private Integer siteId;
+
+    private List<String> expressNoElectronicSheet;
 
 }

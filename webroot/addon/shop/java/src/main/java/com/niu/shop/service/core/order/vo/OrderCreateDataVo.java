@@ -4,14 +4,17 @@ import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.common.utils.CommonUtils;
+import com.niu.core.entity.member.MemberAddress;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.api.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.delivery.ShopStore;
 import com.niu.shop.entity.manjian.ShopManjian;
+import com.niu.shop.service.admin.delivery.vo.ShopStoreInfoVo;
 import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
+import com.niu.shop.service.core.marketing.vo.ShopManjianInfoVo;
 import com.niu.shop.service.core.order.param.InvoiceCreateParam;
-import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -132,7 +135,7 @@ public class OrderCreateDataVo implements Serializable {
         protected BigDecimal volume; // 体积（单位立方米）
         protected BigDecimal memberPrice;
         protected BigDecimal discountMoney = new BigDecimal(0);
-        protected ShopManjian manjianInfo;
+        protected ShopManjianInfoVo manjianInfo;
         protected BigDecimal goodsMoney;
         protected Goods goods;
         protected Integer notSupportDelivery = 0;
@@ -142,6 +145,9 @@ public class OrderCreateDataVo implements Serializable {
         protected int isNewcomer;
         protected JSONObject extend;
         protected Integer isGift = 0;
+        protected BigDecimal showPrice;
+        protected String showType;
+        protected Integer activeId;
     }
 
     @Data
@@ -190,20 +196,17 @@ public class OrderCreateDataVo implements Serializable {
         private Integer minBuy;
         private Integer formId;
 
-        protected ICoreUploadService coreUploadService() {
-            return SpringContext.bean(ICoreUploadService.class);
-        }
 
         public String getGoodsCoverThumbSmall() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.SMALL.getType()).getDataMap().get(UploadThumbTypeEnum.SMALL.getType());
+            return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsCover());
         }
 
         public String getGoodsCoverThumbMid() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.MID.getType()).getDataMap().get(UploadThumbTypeEnum.MID.getType());
+            return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover());
         }
 
         public String getGoodsCoverThumbBig() {
-            return coreUploadService().thumb(this.siteId, this.getGoodsCover(), UploadThumbTypeEnum.BIG.getType()).getDataMap().get(UploadThumbTypeEnum.BIG.getType());
+            return CommonUtils.thumbImageBig(this.siteId, this.getGoodsCover());
         }
     }
 
@@ -213,13 +216,15 @@ public class OrderCreateDataVo implements Serializable {
 
         protected String deliveryType = "";
 
-        protected ShopStore takeStore;
+        protected ShopStoreInfoVo takeStore;
 
         protected Object takeAddress;
 
         private Integer takeAddressId = 0;
 
         private Integer takeStoreId = 0;
+
+        private String localDeliveryType;
     }
 
     @Data

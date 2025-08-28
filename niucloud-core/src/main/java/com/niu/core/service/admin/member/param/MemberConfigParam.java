@@ -19,4 +19,6 @@ public class MemberConfigParam implements Serializable {
     @NotNull(message = "length参数缺失")
     private Integer length;  // 会员编码长度
 
+    private Integer formId;
+
 }

@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 管理员操作记录管理
@@ -20,6 +21,7 @@ import jakarta.annotation.Resource;
 @RestController
 @RequestMapping("/adminapi/site/")
 @SaCheckLogin
+@Description("管理员操作记录管理")
 public class UserLogController {
 
     @Resource
@@ -33,6 +35,7 @@ public class UserLogController {
      * @return Result<Object>
      */
     @GetMapping("/log")
+    @Description("管理员操作记录列表")
     public Result<PageResult<SysUserLogListVo>> list(@Validated PageParam pageParam,
                                                          @Validated SysUserLogSearchParam searchParam) {
         PageResult<SysUserLogListVo> list = sysUserLogService.list(pageParam, searchParam);
@@ -46,9 +49,16 @@ public class UserLogController {
      * @return Result<SysUserLogInfoVo>
      */
     @GetMapping("/log/{id}")
+    @Description("管理员操作记录详情")
     public Result<SysUserLogInfoVo> info(@Validated @PathVariable("id") Integer id) {
         SysUserLogInfoVo info = sysUserLogService.info(id);
         return Result.success(info);
     }
 
+    @DeleteMapping("/log/destroy")
+    @Description("清空操作记录")
+    public Result<Object> destroy() {
+        sysUserLogService.destroy();
+        return Result.success();
+    }
 }

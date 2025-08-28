@@ -11,6 +11,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.entity.diy.DiyPage;
 import com.niu.core.enums.diy.ComponentEnum;
 import com.niu.core.enums.diy.LinkEnum;
@@ -27,6 +28,9 @@ import com.niu.core.service.admin.diy.vo.DiyRouteListVo;
 import com.niu.core.service.core.diy.ICoreDiyConfigService;
 import com.niu.core.service.core.diy.param.StartUpPageConfigParam;
 import com.niu.core.service.core.diy.vo.StartUpPageConfigVo;
+import com.niu.core.service.core.notice.ICoreNoticeService;
+import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
+import com.niu.core.service.core.notice.vo.NoticeInfoVo;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 import org.springframework.beans.BeanUtils;
@@ -77,7 +81,7 @@ public class DiyServiceImpl implements IDiyService {
         if (ObjectUtil.isNotEmpty(searchParam.getType())) queryWrapper.eq("type", searchParam.getType());
 
         JSONObject template = TemplateEnum.getTemplate();
-
+        List<Map<String, Object>> templateAddon = TemplateEnum.getTemplateAddons((RequestUtils.siteId()));
         IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
         for (DiyPage item : iPage.getRecords()) {
@@ -85,6 +89,12 @@ public class DiyServiceImpl implements IDiyService {
             BeanUtils.copyProperties(item, vo);
             vo.setTypeName(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".title", String.class), ""));
             vo.setTypePage(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".page", String.class), ""));
+            String addonName = templateAddon.stream()
+                    .filter(temp -> vo.getType() != null && vo.getType().equals(temp.get("type")))
+                    .findFirst()
+                    .map(addon -> ObjectUtil.defaultIfNull(addon.get("title"), "").toString())
+                    .orElse("");
+                vo.setAddonName(addonName);
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -162,7 +172,7 @@ public class DiyServiceImpl implements IDiyService {
     public void add(DiyPageParam addParam) {
         DiyPage model = new DiyPage();
         BeanUtils.copyProperties(addParam, model);
-        model.setSiteId(RequestUtils.siteId());
+        model.setSiteId(addParam.getSiteId() == null ? RequestUtils.siteId() : addParam.getSiteId());
         model.setCreateTime(System.currentTimeMillis() / 1000);
         diyPageMapper.insert(model);
     }
@@ -219,27 +229,42 @@ public class DiyServiceImpl implements IDiyService {
     public JSONObject getLink() {
         JSONObject linkEnum = LinkEnum.getLink();
         for (String key : linkEnum.keySet()) {
-            if (key.equals("DIY_PAGE")) {
-                List<DiyPage> pageList = this.diyPageMapper.selectList(new QueryWrapper<DiyPage>()
-                        .eq("site_id", RequestUtils.siteId())
-                        .eq("type", "DIY_PAGE")
-                        .or()
-                        .ne("type", "DIY_PAGE")
-                        .eq("site_id", RequestUtils.siteId())
-                        .eq("is_default", 0));
+            JSONObject item = linkEnum.getJSONObject(key);
 
-                List<JSONObject> childList = new LinkedList<>();
-                for (DiyPage item : pageList) {
-                    JSONObject page = new JSONObject();
-                    page.put("name", item.getName());
-                    page.put("title", item.getTitle());
-                    page.put("url", "/app/pages/index/diy?id=" + item.getId());
-                    childList.add(page);
+            item.put("name", key);
+
+            if (!"DIY_PAGE".equals(key) && item.containsKey("child_list")) {
+                JSONArray childList = item.getJSONArray("child_list");
+                for (int i = 0; i < childList.size(); i++) {
+                    JSONObject child = childList.getJSONObject(i);
+                    child.put("parent", key);
                 }
-                linkEnum.putByPath("DIY_PAGE.child_list", childList);
+            }
+
+            if (key.equals("DIY_PAGE")) {
+                QueryWrapper<DiyPage> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("site_id", RequestUtils.siteId())
+                        .and(wrapper -> wrapper
+                                .eq("type", "DIY_PAGE")
+                                .or()
+                                .ne("type", "DIY_PAGE")
+                                .eq("is_default", 0)
+                        )
+                        .orderByDesc("update_time");
+
+                List<DiyPage> pageList = diyPageMapper.selectList(queryWrapper);
+                JSONArray newChildList = new JSONArray();
+                for (DiyPage diyPage : pageList) {
+                    JSONObject child = new JSONObject();
+                    child.put("name", diyPage.getName());
+                    child.put("title", diyPage.getPageTitle());
+                    child.put("url", "/app/pages/index/diy?id=" + diyPage.getId());
+                    newChildList.add(child);
+                }
+                item.put("child_list", newChildList);
             }
             if (key.equals("DIY_LINK")) {
-                linkEnum.putByPath("DIY_LINK.parent", "DIY_LINK");
+                item.put("parent", "DIY_LINK");
             }
         }
         return linkEnum;
@@ -306,7 +331,7 @@ public class DiyServiceImpl implements IDiyService {
             JSONObject page = null;
             if (template.getJSONObject(param.getName()) != null) {
                 page = template.getJSONObject(param.getName());
-                type = name = page.getStr("name");
+                type = name = param.getName();
                 pageTitle = typeName = page.getStr("title");
                 pageRoute = page.getStr("page");
                 JSONObject pageData = this.getFirstPageData(type, "");
@@ -340,59 +365,68 @@ public class DiyServiceImpl implements IDiyService {
         return info;
     }
 
-    public JSONObject getComponentList(String type) {
+    public JSONObject getComponentList(String name) {
+        JSONObject data = ComponentEnum.getComponent();
 
-        JSONObject ComponentList = ComponentEnum.getComponent();
-        for (String formComponentObj : ComponentList.keySet()) {
-            JSONObject formComponent = ComponentList.getJSONObject(formComponentObj);;
-            JSONObject list = formComponent.getJSONObject("list");
-            Iterator<Map.Entry<String, Object>> iterator = list.entrySet().iterator();
-            while (iterator.hasNext()) {
-                JSONObject cv = JSONUtil.parseObj(iterator.next());
-                if (cv.containsKey("support")) {
-                    JSONArray support = cv.getJSONArray("support");
-                    if(ObjectUtil.isNotEmpty(type))
-                    {
-                        if (support != null && support.size() > 0 && !support.contains(type)) {
-                            iterator.remove();
-                            continue;
-                        }
-                    }
+        // 安全遍历顶层数据
+        Iterator<String> categoryIterator = data.keySet().iterator();
+        List<String> categoryToRemove = new ArrayList<>();
 
+        while (categoryIterator.hasNext()) {
+            String categoryKey = categoryIterator.next();
+            JSONObject category = data.getJSONObject(categoryKey);
+            JSONObject componentList = category.getJSONObject("list");
+
+            // 用于存储排序值的映射
+            JSONObject sortMap = new JSONObject();
+
+            // 安全遍历组件列表
+            List<String> keysToRemove = new ArrayList<>();
+            for (String componentKey : new ArrayList<>(componentList.keySet())) {
+                JSONObject component = componentList.getJSONObject(componentKey);
+                JSONArray supportPage = component.getJSONArray("support_page");
+
+                if (supportPage == null) supportPage = new JSONArray();
+
+                if (supportPage.isEmpty() || supportPage.contains(name)) {
+                    sortMap.put(componentKey, component.getInt("sort", 0));
+                    component.remove("sort");
+                    component.remove("support_page");
+                } else {
+                    keysToRemove.add(componentKey);
                 }
-                cv.remove("sort");
-                cv.remove("support");
             }
-            // 根据 sort 排序
-            formComponent.put("list", sortJSONObjectBySortField(list));
+
+            // 批量移除组件
+            for (String key : keysToRemove) {
+                componentList.remove(key);
+            }
+            if (componentList.isEmpty()) {
+                categoryToRemove.add(categoryKey);
+            } else {
+                sortComponentsBySortValues(componentList, sortMap);
+            }
+        }
+        for (String key : categoryToRemove) {
+            data.remove(key);
         }
 
-        return ComponentList;
+        return data;
     }
 
-    private JSONObject sortJSONObjectBySortField(JSONObject originalJsonObject) {
-        // 提取所有内部 JSONObject 到一个 List 中
-        List<Map.Entry<String, Object>> entryList = new ArrayList<>(originalJsonObject.entrySet());
+    private void sortComponentsBySortValues(JSONObject components, JSONObject sortMap) {
+        List<String> sortedKeys = new ArrayList<>(sortMap.keySet());
+        sortedKeys.sort((k1, k2) -> sortMap.getInt(k1).compareTo(sortMap.getInt(k2)));
 
-        // 对 List 进行排序
-        Collections.sort(entryList, new Comparator<Map.Entry<String, Object>>() {
-            public int compare(Map.Entry<String, Object> o1, Map.Entry<String, Object> o2) {
-                JSONObject jsonObj1 = (JSONObject) o1.getValue();
-                JSONObject jsonObj2 = (JSONObject) o2.getValue();
-                int sort1 = jsonObj1.getInt("sort");
-                int sort2 = jsonObj2.getInt("sort");
-                return Integer.compare(sort1, sort2);
-            }
-        });
-
-        // 创建一个新的 JSONObject 来存放排序后的结果
-        JSONObject sortedJsonObject = new JSONObject();
-        for (Map.Entry<String, Object> entry : entryList) {
-            sortedJsonObject.put(entry.getKey(), entry.getValue());
+        JSONObject sortedComponents = new JSONObject();
+        for (String key : sortedKeys) {
+            sortedComponents.put(key, components.get(key));
         }
 
-        return sortedJsonObject;
+        components.clear();
+        components.putAll(sortedComponents);
     }
+
     /**
      * 获取默认页面数据
      *
@@ -424,7 +458,8 @@ public class DiyServiceImpl implements IDiyService {
             JSONObject pages = ObjectUtil.defaultIfNull(PagesEnum.getPages(key, param.getMode()), new JSONObject());
             template.putByPath(key + ".template", pages);
         }
-
+        //删除null值 防止序列化报错
+        JacksonUtils.removeNull(template);
         return template;
     }
 

@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.delivery;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.delivery.param.ShopDeliveryDeliverParam;
@@ -18,6 +19,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/delivery/staff")
+@Description("配送员管理")
 public class DeliverController {
 
     @Resource
@@ -30,6 +32,7 @@ public class DeliverController {
      * @return Result<PageResult<ShopDeliveryDeliverListVo>>
      */
     @GetMapping("")
+    @Description("配送员分页列表")
     public Result<PageResult<ShopDeliveryDeliverListVo>> list(@Validated PageParam pageParam, @Validated ShopDeliveryDeliverSearchParam searchParam) {
         PageResult<ShopDeliveryDeliverListVo> list = iShopDeliveryDeliverService.list(pageParam, searchParam);
         return Result.success(list);
@@ -41,6 +44,7 @@ public class DeliverController {
      * @return Result<ShopDeliveryDeliverInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("配送员详情")
     public Result<ShopDeliveryDeliverInfoVo> info(@PathVariable("id") Integer id) {
         ShopDeliveryDeliverInfoVo info = iShopDeliveryDeliverService.info(id);
         return Result.success(info);
@@ -52,6 +56,7 @@ public class DeliverController {
      * @return AjaxResult<Object>
      */
     @PostMapping("")
+    @Description("添加配送员")
     public Result<Object> add(@Validated @RequestBody ShopDeliveryDeliverParam addParam) {
         iShopDeliveryDeliverService.add(addParam);
         return Result.success();
@@ -63,6 +68,7 @@ public class DeliverController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("编辑配送员")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopDeliveryDeliverParam editParam) {
         iShopDeliveryDeliverService.edit(id, editParam);
         return Result.success();
@@ -74,6 +80,7 @@ public class DeliverController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("删除配送员")
     public Result<Object> del(@PathVariable("id") Integer id) {
         iShopDeliveryDeliverService.del(id);
         return Result.success();

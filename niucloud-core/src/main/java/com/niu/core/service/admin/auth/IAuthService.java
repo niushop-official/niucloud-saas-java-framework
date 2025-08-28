@@ -4,6 +4,7 @@ import cn.hutool.json.JSONArray;
 import com.niu.core.service.admin.auth.param.EditAuthUserParam;
 import com.niu.core.service.admin.auth.vo.AuthUserInfoVo;
 
+import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ public interface IAuthService {
      */
     JSONArray getAuthMenuTreeList(String addon);
 
+    JSONArray getAuthMenuTreeList(Integer isTree, String addon);
+
     /**
      * 获取授权用户信息
      * @return
@@ -62,4 +65,21 @@ public interface IAuthService {
      */
     void editAuth(EditAuthUserParam editAuthUserParam);
 
+    /**
+     * 获取是否允许切换站点
+     * @return
+     */
+    Map<String, Integer> getIsAllowChangeSite();
+
+    /**
+     * 添加用户操作日志
+     * @param request
+     */
+    void addUserLog(HttpServletRequest request);
+
+    /**
+     * 设置是否允许切换站点
+     * @param
+     */
+    void setIsAllowChangeSite(Map<String, Integer> param);
 }

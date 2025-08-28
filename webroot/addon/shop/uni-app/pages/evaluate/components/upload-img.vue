@@ -53,7 +53,7 @@ const value: any = computed({
 const maxCount = computed(() => {
     return prop.maxCount
 })
-const afterRead = (event:any) => {
+const afterRead = (event: any) => {
     if (prop.multiple) {
         event.file.forEach((file: any) => {
             upload({ file })
@@ -63,9 +63,9 @@ const afterRead = (event:any) => {
     }
 }
 
-const upload = (event:any) => {
+const upload = (event: any) => {
     if (value.value?.length >= maxCount.value) {
-        uni.showToast({ title: `最多允许上传${maxCount.value}张图片`, icon: 'none' })
+        uni.showToast({ title: `最多允许上传${ maxCount.value }张图片`, icon: 'none' })
         return false
     }
 
@@ -78,14 +78,14 @@ const upload = (event:any) => {
     })
 }
 
-const deleteImg = (index:number)=>{
-    value.value.splice(index,1)
+const deleteImg = (index: number) => {
+    value.value.splice(index, 1)
 }
 
 //预览图片
-const imgListPreview = (item:any) => {
+const imgListPreview = (item: any) => {
     if (item === '') return false
-    var urlList = []
+    const urlList = [];
     urlList.push(img(item))  //push中的参数为 :src="item.img_url" 中的图片地址
     uni.previewImage({
         indicator: "number",

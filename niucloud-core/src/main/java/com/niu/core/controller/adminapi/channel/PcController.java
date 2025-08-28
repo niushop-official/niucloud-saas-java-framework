@@ -10,10 +10,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * pc端
  */
+@Description("pc端")
 @RestController
 @RequestMapping("/adminapi/channel/pc")
 @SaCheckLogin
@@ -23,9 +25,10 @@ public class PcController {
     ICorePcService corePcService;
 
     /**
-     * 获取h5端配置
+     * 获取pc端配置
      * @return Result<H5ConfigVo>
      */
+    @Description("获取pc端配置")
     @GetMapping("/config")
     public Result<PcConfigVo> getPc() {
         Integer siteId= RequestUtils.siteId();
@@ -33,9 +36,10 @@ public class PcController {
     }
 
     /**
-     * 设置h5端配置
+     * 设置pc端配置
      * @return Result
      */
+    @Description("设置pc端配置")
     @PutMapping("/config")
     public Result<Object> setH5(@Validated @RequestBody SetPcParam param) {
         corePcService.setPc(param);

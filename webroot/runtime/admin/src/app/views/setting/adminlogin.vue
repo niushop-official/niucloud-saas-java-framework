@@ -3,27 +3,27 @@
 
         <el-form class="page-form" :model="formData" label-width="150px" ref="ruleFormRef" v-loading="loading">
             <el-card class="box-card !border-none" shadow="never">
-                <h3 class="panel-title !text-sm">{{ t('admin') }}</h3>
-
-                <el-form-item :label="t('isCaptcha')" prop="formData.is_auth_register">
-                    <el-switch v-model="formData.is_captcha"/>
+                <h3 class="text-[16px] text-[#1D1F3A] font-bold mb-4">{{ pageName }}</h3>
+                <h3 class="panel-title !text-[14px] bg-[#F4F5F7] p-3 border-[#E6E6E6] border-solid border-b-[1px]">{{ t('admin') }}</h3>
+                <el-form-item :label="t('isCaptcha')">
+                    <el-switch v-model="formData.is_captcha" :active-value="1" :inactive-value="0" />
                 </el-form-item>
                 <el-form-item :label="t('bgImg')">
                     <upload-image v-model="formData.bg" />
                     <div class="form-tip">{{t('adminBgImgTip')}}</div>
                 </el-form-item>
-            </el-card>
 
-            <el-card class="box-card mt-[15px] !border-none" shadow="never">
-                <h3 class="panel-title !text-sm">{{ t('site') }}</h3>
+                <div class="box-card mt-[20px] !border-none">
+                    <h3 class="panel-title !text-[14px] bg-[#F4F5F7] p-3 border-[#E6E6E6] border-solid border-b-[1px]">{{ t('site') }}</h3>
 
-                <el-form-item :label="t('isCaptcha')" prop="formData.is_auth_register">
-                    <el-switch v-model="formData.is_site_captcha"/>
-                </el-form-item>
-                <el-form-item :label="t('bgImg')">
-                    <upload-image v-model="formData.site_bg" />
-                    <div class="form-tip">{{t('siteBgImgTip')}}</div>
-                </el-form-item>
+                    <el-form-item :label="t('isCaptcha')">
+                        <el-switch v-model="formData.is_site_captcha" :active-value="1" :inactive-value="0" />
+                    </el-form-item>
+                    <el-form-item :label="t('bgImg')">
+                        <upload-image v-model="formData.site_bg" />
+                        <div class="form-tip">{{t('siteBgImgTip')}}</div>
+                    </el-form-item>
+                </div>
             </el-card>
         </el-form>
 
@@ -40,11 +40,11 @@ import { reactive, ref } from 'vue'
 import { t } from '@/lang'
 import { getConfigLogin, setConfigLogin } from '@/app/api/sys'
 import { FormInstance } from 'element-plus'
+import { cloneDeep } from 'lodash-es'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const pageName = route.meta.title
-
 const loading = ref(true)
 const ruleFormRef = ref<FormInstance>()
 const formData = reactive<Record<string, number | string>>({
@@ -54,11 +54,10 @@ const formData = reactive<Record<string, number | string>>({
     site_bg: ''
 })
 
-const getFormData = async (id: number = 0) => {
+const getFormData = async () => {
     const data = await (await getConfigLogin()).data
     Object.keys(formData).forEach((key: string) => {
-        if (['is_captcha', 'is_site_captcha'].includes(key)) formData[key] = Boolean(Number(data[key]))
-        else formData[key] = data[key]
+        formData[key] = data[key]
     })
     loading.value = false
 }
@@ -68,10 +67,7 @@ const onSave = async (formEl: FormInstance | undefined) => {
     if (loading.value || !formEl) return
     await formEl.validate((valid) => {
         if (valid) {
-            const save = JSON.parse(JSON.stringify(formData))
-            Object.keys(save).forEach((key) => {
-                if (['is_captcha', 'is_site_captcha'].includes(key)) save[key] = Number(save[key])
-            })
+            const save = cloneDeep(formData)
 
             setConfigLogin(save).then(() => {
                 loading.value = false

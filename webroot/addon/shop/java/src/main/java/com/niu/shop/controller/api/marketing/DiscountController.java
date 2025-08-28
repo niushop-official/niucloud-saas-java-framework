@@ -11,10 +11,7 @@ import com.niu.shop.service.api.marketing.param.DiscountGoodsSearchParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponReceiveParam;
 import com.niu.shop.service.api.marketing.param.ShopCouponSearchParam;
 import com.niu.shop.service.api.marketing.param.ShopDiscountListParam;
-import com.niu.shop.service.api.marketing.vo.ShopCouponInfoVo;
-import com.niu.shop.service.api.marketing.vo.ShopCouponListVo;
-import com.niu.shop.service.api.marketing.vo.ShopDiscountGoodsListVo;
-import com.niu.shop.service.api.marketing.vo.ShopDiscountListVo;
+import com.niu.shop.service.api.marketing.vo.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +45,7 @@ public class DiscountController {
      * @return
      */
     @GetMapping("/discount")
-    public Result<List<ShopDiscountListVo>> lists(ShopDiscountListParam listParam)  {
+    public Result<List<ShopDiscountVo>> lists(ShopDiscountListParam listParam)  {
         return Result.success(shopDiscountService.getList(listParam));
     }
 
@@ -57,7 +54,7 @@ public class DiscountController {
      * @return
      */
     @GetMapping("/discount/goods")
-    public Result<PageResult<ShopDiscountGoodsListVo>> goods(@Validated PageParam pageParam, DiscountGoodsSearchParam searchParam) {
+    public Result<PageResult<ShopDiscountGoodsListNewVo>> goods(@Validated PageParam pageParam, DiscountGoodsSearchParam searchParam) {
         return Result.success(shopDiscountService.getGoodsPage(pageParam, searchParam));
     }
 }

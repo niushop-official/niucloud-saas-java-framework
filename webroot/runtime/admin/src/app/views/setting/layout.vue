@@ -18,7 +18,7 @@
                                 <el-image class="w-[40px] h-[40px] rounded-md overflow-hidden" :src="row.icon" fit="contain">
                                     <template #error>
                                         <div class="flex items-center w-full h-full">
-                                            <img class="w-full h-full" src="@/app/assets/images/icon-addon.png" alt="">
+                                            <img class="w-full h-full" src="@/app/assets/images/icon-addon-one.png" alt="">
                                         </div>
                                     </template>
                                 </el-image>
@@ -46,9 +46,7 @@
                         <span class="iconfont iconwenhao text-[#999] !text-[14px]"></span>
                         <div class="ml-[2px] text-[12px] text-[#999]">如何开发自定义布局</div>
                     </div>
-                    
                 </div>
-               
                 <div class="flex justify-items-stretch">
                     <div class="w-[180px] h-[130px] mr-[10px] mb-[10px] border hover:border-primary cursor-pointer"
                          :class="{'border-primary': ((!layoutConfig[currAddon] && item.layout == 'default') || (layoutConfig[currAddon] == item.layout)) }"
@@ -63,11 +61,11 @@
                         <img :src="img(addonLayout.cover)" class="w-full h-full" />
                     </div>
                 </div>
-                <h3 class="panel-title !text-sm">{{ t('themeColor') }}</h3>
-                <div class="">
+                <!-- <h3 class="panel-title !text-sm">{{ t('themeColor') }}</h3>
+                <div>
                     <el-color-picker v-model="themeColor[currAddon]" size="large" />
                     <div class="form-tip text-[#999] mt-2">设置的色调会在前端站点列表体现[home/index]，用于区分不同的应用</div>
-                </div>
+                </div> -->
             </el-scrollbar>
         </div>
         <template #footer>
@@ -120,11 +118,9 @@ getInstalledAddonList().then(({ data }) => {
 const getLayoutConfig = () => {
     getLayout().then(({ data }) => {
         layoutConfig.value = data
-        console.log('getLayoutConfig - layoutConfig', layoutConfig.value)
     })
     getThemecolor().then(({ data }) => {
         themeColor.value = data
-        console.log('getLayoutConfig - themeColor', themeColor.value)
     })
 }
 getLayoutConfig()
@@ -153,7 +149,6 @@ const confirm = () => {
     })
     showDialog.value = false
 }
-
 
 // 跳转自定义布局
 const toDiyLayout = () => {

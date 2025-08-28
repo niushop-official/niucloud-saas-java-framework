@@ -31,7 +31,7 @@
 
                 <div class="w-[700px]">
                     <div class="flex flex-wrap">
-                        <diy-link v-model="link" :ignore="['DIY_LINK','DIY_JUMP_OTHER_APPLET','DIY_MAKE_PHONE_CALL']" @success="changePage">
+                        <diy-link v-model="link" :ignore="['OTHER_LINK']" @success="changePage">
                             <el-button type="primary">{{ t('changePage') }}</el-button>
                         </diy-link>
                         <el-button type="primary" @click="toDecorate()" v-show="page.use_template.action == 'decorate'" class="ml-[12px]">{{ t('decorate') }}</el-button>
@@ -122,7 +122,7 @@ const refreshData = () => {
 
             if (import.meta.env.MODE == 'development') {
                 // 开发模式情况下，并且未配置wap域名，则获取缓存域名
-                if (wapDomain.value) {
+                if (wapDomain.value && wapDomain.value.indexOf('localhost') != -1) {
                     page.wapUrl = wapDomain.value + '/wap'
                     repeat = false
                     setDomain()

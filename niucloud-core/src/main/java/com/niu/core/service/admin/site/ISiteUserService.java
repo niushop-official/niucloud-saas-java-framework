@@ -51,4 +51,9 @@ public interface ISiteUserService {
      */
     void unlock(Integer uid);
 
+    /**
+     * 删除用户
+     * @param uid
+     */
+    void delete(Integer uid);
 }

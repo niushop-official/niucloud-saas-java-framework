@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.generator;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.admin.generator.param.GenerateCodeParam;
@@ -105,4 +106,9 @@ public interface IGenerateService {
      */
     Map<String, Map<String, Object>> getTableColumnByMapper(String mapper);
 
+    /**
+     * 获取Mapper
+     * @return
+     */
+    List<Class<? extends BaseMapper<?>>> getMappers(String addon);
 }

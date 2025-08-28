@@ -1,4 +1,14 @@
 {
+  "niuyun": {
+    "sms_type": "niuyun",
+    "is_use": 0,
+    "name": "牛云短信",
+    "driver": "com/niu/core/service/core/sms/driver/Nuiyun",
+    "component": "",
+    "params":{},
+    "view": "/src/app/views/setting/sms_niu.vue"
+  },
+
   "aliyun": {
     "name": "阿里云短信",
     "driver": "com.niu.core.service.core.sms.driver.Aliyun",

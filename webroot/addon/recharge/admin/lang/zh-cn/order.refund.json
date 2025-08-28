@@ -13,7 +13,7 @@
   "refundStatus": "退款状态",
   "accumulateRefundMoney": "累计退款金额（元）",
   "haveRefundMoney": "退款中金额（元）",
-  "refundSuccessMonry": "退款成功金额（元）",
+  "refundSuccessMoney": "退款成功金额（元）",
   "refundFailMoney": "退款失败金额（元）",
   "memberInfoPlaceholder": "请输入会员编号/昵称/手机号",
   "refundNumberPlaceholder": "请输入退款单号",

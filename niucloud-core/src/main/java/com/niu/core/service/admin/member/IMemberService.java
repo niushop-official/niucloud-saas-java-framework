@@ -92,4 +92,10 @@ public interface IMemberService {
      * @return
      */
     JSONObject getMemberBenefitsContent(JSONObject param);
+
+    /**
+     * 批量修改
+     * @param param
+     */
+    void batchModify(BatchModifyParam param);
 }

@@ -173,4 +173,8 @@ public class Member implements Serializable {
 
     @TableField(exist = false)
     private String memberLevelName;
+
+    private String idCard;
+
+    private String remark;
 }

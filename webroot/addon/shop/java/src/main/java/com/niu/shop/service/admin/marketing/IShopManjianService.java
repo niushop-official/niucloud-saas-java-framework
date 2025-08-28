@@ -14,7 +14,6 @@ import com.niu.shop.service.core.marketing.param.ShopManjianParam;
 import com.niu.shop.service.core.marketing.param.ShopManjianSearchParam;
 import com.niu.shop.service.core.marketing.vo.ShopManjianInfoVo;
 import com.niu.shop.service.core.marketing.vo.ShopManjianListVo;
-import io.swagger.models.auth.In;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;

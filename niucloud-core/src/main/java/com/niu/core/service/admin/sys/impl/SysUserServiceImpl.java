@@ -11,8 +11,11 @@ import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
+import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.IpUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.sys.SysUserRole;
@@ -39,9 +42,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 后台管理员实现类
@@ -58,7 +63,9 @@ public class SysUserServiceImpl implements ISysUserService {
     @Resource
     ISysUserRoleService sysUserRoleService;
 
-    IAuthService authService;
+    @Resource
+    @Lazy
+    private IAuthService authService;
 
     @Resource
     Cached cached;
@@ -67,23 +74,17 @@ public class SysUserServiceImpl implements ISysUserService {
         return (ILoginService) SpringContext.getBean(LoginServiceImpl.class);
     }
 
-
-    @Resource
-    public void setAuthService(@Lazy IAuthService authService) {
-        this.authService = authService;
-    }
-
     /**
      * 后台管理员列表
      *
-     * @param pageParam 分页参数
-     * @param searchParam  搜索参数
+     * @param pageParam   分页参数
+     * @param searchParam 搜索参数
      * @return PageResult<SysUserListVo>
      */
     @Override
     public PageResult<SysUserListVo> list(PageParam pageParam, SysUserSearchParam searchParam) {
         authService.isSuperAdmin();
-        Integer superAdminUid=(Integer) cached.tag("adminAuth").get("superAdminUid");
+        Integer superAdminUid = (Integer) cached.tag("adminAuth").get("superAdminUid");
 
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
@@ -91,23 +92,23 @@ public class SysUserServiceImpl implements ISysUserService {
         QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("uid");
 
-        if(ObjectUtil.isNotNull(searchParam.getUsername()) && ObjectUtil.isNotEmpty(searchParam.getUsername())){
+        if (ObjectUtil.isNotNull(searchParam.getUsername()) && ObjectUtil.isNotEmpty(searchParam.getUsername())) {
             queryWrapper.like("username", searchParam.getUsername()).or().like("real_name", searchParam.getUsername());
         }
-        if(ObjectUtil.isNotNull(searchParam.getLastTime()) && ObjectUtil.isNotEmpty(searchParam.getLastTime())){
-            long startTime=0;
-            long endTime=0;
-            if(ObjectUtil.isNotNull(searchParam.getLastTime()[0])){
-                startTime=DateUtils.StringToTimestamp(searchParam.getLastTime()[0]);
+        if (ObjectUtil.isNotNull(searchParam.getLastTime()) && ObjectUtil.isNotEmpty(searchParam.getLastTime())) {
+            long startTime = 0;
+            long endTime = 0;
+            if (ObjectUtil.isNotNull(searchParam.getLastTime()[0])) {
+                startTime = DateUtils.StringToTimestamp(searchParam.getLastTime()[0]);
             }
-            if(ObjectUtil.isNotNull(searchParam.getLastTime()[1])){
-                endTime=DateUtils.StringToTimestamp(searchParam.getLastTime()[1]);
+            if (ObjectUtil.isNotNull(searchParam.getLastTime()[1])) {
+                endTime = DateUtils.StringToTimestamp(searchParam.getLastTime()[1]);
             }
-            if(startTime>0 && endTime>0){
+            if (startTime > 0 && endTime > 0) {
                 queryWrapper.between("last_time", startTime, endTime);
-            }else if (startTime>0){
+            } else if (startTime > 0) {
                 queryWrapper.ge("last_time", startTime);
-            }else if (endTime>0){
+            } else if (endTime > 0) {
                 queryWrapper.le("last_time", endTime);
             }
         }
@@ -118,9 +119,9 @@ public class SysUserServiceImpl implements ISysUserService {
         for (SysUser item : iPage.getRecords()) {
             SysUserListVo vo = new SysUserListVo();
             BeanUtils.copyProperties(item, vo);
-            Long siteNum=sysUserRoleMapper.selectCount(new QueryWrapper<SysUserRole>().eq("uid", item.getUid()).ne("site_id", RequestUtils.defaultSiteId()));
+            Long siteNum = sysUserRoleMapper.selectCount(new QueryWrapper<SysUserRole>().eq("uid", item.getUid()).ne("site_id", RequestUtils.defaultSiteId()));
             vo.setSiteNum(siteNum.intValue());
-            vo.setIsSuperAdmin(superAdminUid==item.getUid());
+            vo.setIsSuperAdmin(superAdminUid == item.getUid());
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -136,7 +137,7 @@ public class SysUserServiceImpl implements ISysUserService {
     public SysUserDetailVo info(Integer id) {
 
         authService.isSuperAdmin();
-        Integer superAdminUid=(Integer) cached.tag("adminAuth").get("superAdminUid");
+        Integer superAdminUid = (Integer) cached.tag("adminAuth").get("superAdminUid");
 
         SysUser model = sysUserMapper.selectOne(
                 new QueryWrapper<SysUser>()
@@ -152,8 +153,8 @@ public class SysUserServiceImpl implements ISysUserService {
                 .setAlias("sur")
                 .leftJoin("?_site s ON sur.site_id = s.site_id".replace("?_", GlobalConfig.tablePrefix));
         userRoleMPJQueryWrapper.eq("sur.uid", vo.getUid());
-        List<SysUserSiteRoleVo> userSiteRoleVoList=sysUserRoleMapper.selectJoinList(SysUserSiteRoleVo.class,userRoleMPJQueryWrapper);
-        vo.setIsSuperAdmin(superAdminUid==id);
+        List<SysUserSiteRoleVo> userSiteRoleVoList = sysUserRoleMapper.selectJoinList(SysUserSiteRoleVo.class, userRoleMPJQueryWrapper);
+        vo.setIsSuperAdmin(superAdminUid == id);
         vo.setRoles(userSiteRoleVoList);
         return vo;
     }
@@ -166,7 +167,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Transactional
     @Override
     public Integer add(SysUserParam addParam) {
-        if(checkUserName(addParam.getUsername())){
+        if (checkUserName(addParam.getUsername())) {
             throw new AdminException("该用户名已被占用，请更换");
         }
         SysUser sysUser = new SysUser();
@@ -175,19 +176,21 @@ public class SysUserServiceImpl implements ISysUserService {
         sysUser.setUpdateTime(DateUtils.currTime());
         sysUser.setPassword(PasswordEncipher.encode(addParam.getPassword()));
         sysUserMapper.insert(sysUser);
-        Integer uid=sysUser.getUid();
+        Integer uid = sysUser.getUid();
 
         //添加用户建站限制
-        List<SysCreateSiteLimitParam> createSiteLimitParamList=addParam.getCreateSiteLimitParamList();
-        if(ObjectUtil.isNotNull(createSiteLimitParamList) && createSiteLimitParamList.size()>0){
-            for (SysCreateSiteLimitParam sysCreateSiteLimitParam:createSiteLimitParamList) {
-                UserCreateSiteLimit userCreateSiteLimit=new UserCreateSiteLimit();
+        List<SysCreateSiteLimitParam> createSiteLimitParamList = addParam.getCreateSiteLimit();
+        List<UserCreateSiteLimit> addList = new ArrayList<>();
+        if (ObjectUtil.isNotNull(createSiteLimitParamList) && createSiteLimitParamList.size() > 0) {
+            for (SysCreateSiteLimitParam sysCreateSiteLimitParam : createSiteLimitParamList) {
+                UserCreateSiteLimit userCreateSiteLimit = new UserCreateSiteLimit();
                 userCreateSiteLimit.setUid(uid);
                 userCreateSiteLimit.setGroupId(sysCreateSiteLimitParam.getGroupId());
                 userCreateSiteLimit.setMonth(sysCreateSiteLimitParam.getMonth());
                 userCreateSiteLimit.setNum(sysCreateSiteLimitParam.getNum());
-                userCreateSiteLimitMapper.insert(userCreateSiteLimit);
+                addList.add(userCreateSiteLimit);
             }
+            userCreateSiteLimitMapper.insert(addList);
         }
         return uid;
     }
@@ -205,30 +208,30 @@ public class SysUserServiceImpl implements ISysUserService {
                         .eq("uid", uid)
                         .last("limit 1"));
         Assert.notNull(model, "数据不存在!");
-        Boolean isOffStatus=false;
-        if(ObjectUtil.isNotNull(editParam.getStatus())){
+        Boolean isOffStatus = false;
+        if (ObjectUtil.isNotNull(editParam.getStatus())) {
             model.setStatus(editParam.getStatus());
-            if(editParam.getStatus()== StatusEnum.OFF.getStatus()){
-                isOffStatus=true;
+            if (editParam.getStatus() == StatusEnum.OFF.getStatus()) {
+                isOffStatus = true;
             }
         }
-        if(ObjectUtil.isNotNull(editParam.getHeadImg())){
+        if (ObjectUtil.isNotNull(editParam.getHeadImg())) {
             model.setHeadImg(editParam.getHeadImg());
         }
-        if(ObjectUtil.isNotNull(editParam.getRealName())){
+        if (ObjectUtil.isNotNull(editParam.getRealName())) {
             model.setRealName(editParam.getRealName());
         }
-        Boolean isChangePassword=false;
-        if(ObjectUtil.isNotNull(editParam.getPassword()) && ObjectUtil.isNotEmpty(editParam.getPassword())){
+        Boolean isChangePassword = false;
+        if (ObjectUtil.isNotNull(editParam.getPassword()) && ObjectUtil.isNotEmpty(editParam.getPassword())) {
             model.setPassword(PasswordEncipher.encode(editParam.getPassword()));
-            isChangePassword=true;
+            isChangePassword = true;
         }
         /**
          * 更新用戶信息
          */
         model.setUpdateTime(DateUtils.currTime());
         sysUserMapper.updateById(model);
-        if(isOffStatus || isChangePassword){
+        if (isOffStatus || isChangePassword) {
             getLoginService().clearToken(uid, RequestUtils.appType(), "");
         }
     }
@@ -240,6 +243,16 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public void del(Integer id) {
+        authService.isSuperAdmin();
+        Integer superAdminUid = (Integer) cached.tag("adminAuth").get("superAdminUid");
+        if (superAdminUid.equals(id)) {
+            throw new CommonException("超级管理员不允许删除");
+        }
+        Long count = sysUserRoleMapper.selectCount(new QueryWrapper<SysUserRole>().eq("uid", id).ne("site_id", RequestUtils.defaultSiteId()));
+        if (count > 0) {
+            throw new CommonException("该用户是一些站点的管理员不允许删除");
+        }
+
         SysUser model = sysUserMapper.selectOne(
                 new QueryWrapper<SysUser>()
                         .eq("uid", id)
@@ -258,7 +271,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUserInfoVo getUserInfoByUserName(String userName) {
-        SysUser model=sysUserMapper.selectOne(new QueryWrapper<SysUser>().eq("username", userName).last("limit 1"));
+        SysUser model = sysUserMapper.selectOne(new QueryWrapper<SysUser>().eq("username", userName).last("limit 1"));
         Assert.notNull(model, "账号或密码错误");
         SysUserInfoVo vo = new SysUserInfoVo();
         BeanUtils.copyProperties(model, vo);
@@ -280,7 +293,7 @@ public class SysUserServiceImpl implements ISysUserService {
         Assert.notNull(model, "数据不存在!");
         model.setLastTime(DateUtils.currTime());
         model.setLastIp(IpUtils.getIpAddr(RequestUtils.handler()));
-        model.setLoginCount(model.getLoginCount()+1);
+        model.setLoginCount(model.getLoginCount() + 1);
         sysUserMapper.updateById(model);
     }
 
@@ -293,18 +306,18 @@ public class SysUserServiceImpl implements ISysUserService {
     @Transactional
     @Override
     public Integer addSiteUser(SiteUserParam siteUserParam, Integer siteId) {
-        Integer uid=0;
+        Integer uid = 0;
         try {
-            if(ObjectUtil.isNotNull(siteUserParam.getUid()) && siteUserParam.getUid()>0){
-                QueryWrapper<SysUser> queryWrapper=new QueryWrapper<>();
+            if (ObjectUtil.isNotNull(siteUserParam.getUid()) && siteUserParam.getUid() > 0) {
+                QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("uid", siteUserParam.getUid());
-                SysUser sysUser=sysUserMapper.selectOne(queryWrapper);
-                uid=siteUserParam.getUid();
-                if(ObjectUtil.isNull(sysUser)){
+                SysUser sysUser = sysUserMapper.selectOne(queryWrapper);
+                uid = siteUserParam.getUid();
+                if (ObjectUtil.isNull(sysUser)) {
                     throw new AdminException("USER_NOT_EXIST");
                 }
-            }else{
-                SysUserParam sysUserParam=new SysUserParam();
+            } else {
+                SysUserParam sysUserParam = new SysUserParam();
                 sysUserParam.setHeadImg(siteUserParam.getHeadImg());
                 sysUserParam.setPassword(siteUserParam.getPassword());
                 sysUserParam.setLastIp("");
@@ -315,21 +328,21 @@ public class SysUserServiceImpl implements ISysUserService {
                 sysUserParam.setStatus(siteUserParam.getStatus());
                 sysUserParam.setRealName(siteUserParam.getRealName());
                 //添加用户
-                uid=this.add(sysUserParam);
+                uid = this.add(sysUserParam);
             }
-            List<String> roleIds=siteUserParam.getRoleIds();
-            Integer isAdmin=siteUserParam.getIsAdmin()==null?0:siteUserParam.getIsAdmin();
+            List<String> roleIds = siteUserParam.getRoleIds();
+            Integer isAdmin = siteUserParam.getIsAdmin() == null ? 0 : siteUserParam.getIsAdmin();
             /**
              * 创建用户站点管理权限
              */
-            SysUserRoleParam sysUserRoleParam=new SysUserRoleParam();
+            SysUserRoleParam sysUserRoleParam = new SysUserRoleParam();
             sysUserRoleParam.setRoleIds(JSONUtil.toJsonStr(roleIds));
             sysUserRoleParam.setSiteId(siteId);
             sysUserRoleParam.setUid(uid);
             sysUserRoleParam.setStatus(siteUserParam.getStatus());
             sysUserRoleParam.setIsAdmin(isAdmin);
             sysUserRoleService.add(sysUserRoleParam);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new AdminException(e.getMessage());
         }
         return uid;
@@ -343,10 +356,10 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean checkUserName(String userName) {
-        QueryWrapper<SysUser> queryWrapper=new QueryWrapper<>();
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", userName);
-        long count=sysUserMapper.selectCount(queryWrapper);
-        if(count>0){
+        long count = sysUserMapper.selectCount(queryWrapper);
+        if (count > 0) {
             return true;
         }
         return false;
@@ -355,6 +368,7 @@ public class SysUserServiceImpl implements ISysUserService {
 
     /**
      * 获取所有用户数据
+     *
      * @return
      */
     @Override
@@ -372,10 +386,10 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public List<SysUserCreateSiteLimitVo> getUserCreateSiteLimit(Integer uid) {
-        List<UserCreateSiteLimit> userCreateSiteLimitList=userCreateSiteLimitMapper.selectList(new QueryWrapper<UserCreateSiteLimit>().eq("uid", uid));
-        List<SysUserCreateSiteLimitVo> userCreateSiteLimitVoList=new ArrayList<>();
-        for (UserCreateSiteLimit item:userCreateSiteLimitList) {
-            SysUserCreateSiteLimitVo userCreateSiteLimitVo=new SysUserCreateSiteLimitVo();
+        List<UserCreateSiteLimit> userCreateSiteLimitList = userCreateSiteLimitMapper.selectList(new QueryWrapper<UserCreateSiteLimit>().eq("uid", uid));
+        List<SysUserCreateSiteLimitVo> userCreateSiteLimitVoList = new ArrayList<>();
+        for (UserCreateSiteLimit item : userCreateSiteLimitList) {
+            SysUserCreateSiteLimitVo userCreateSiteLimitVo = new SysUserCreateSiteLimitVo();
             BeanUtil.copyProperties(item, userCreateSiteLimitVo);
             userCreateSiteLimitVoList.add(userCreateSiteLimitVo);
         }
@@ -390,9 +404,9 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUserCreateSiteLimitVo getUserCreateSiteLimitInfo(Integer id) {
-        UserCreateSiteLimit userCreateSiteLimit=userCreateSiteLimitMapper.selectById(id);
-        SysUserCreateSiteLimitVo sysUserCreateSiteLimitVo=new SysUserCreateSiteLimitVo();
-        if(ObjectUtil.isNotNull(userCreateSiteLimit)){
+        UserCreateSiteLimit userCreateSiteLimit = userCreateSiteLimitMapper.selectById(id);
+        SysUserCreateSiteLimitVo sysUserCreateSiteLimitVo = new SysUserCreateSiteLimitVo();
+        if (ObjectUtil.isNotNull(userCreateSiteLimit)) {
             BeanUtil.copyProperties(userCreateSiteLimit, sysUserCreateSiteLimitVo);
         }
         return sysUserCreateSiteLimitVo;
@@ -407,7 +421,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public void addUserCreateSiteLimit(SysUserCreateSiteLimitAddParam userCreateSiteLimitAddParam) {
         userCreateSiteLimitMapper.delete(new QueryWrapper<UserCreateSiteLimit>().eq("uid", userCreateSiteLimitAddParam.getUid()).eq("group_id", userCreateSiteLimitAddParam.getGroupId()));
-        UserCreateSiteLimit userCreateSiteLimit=new UserCreateSiteLimit();
+        UserCreateSiteLimit userCreateSiteLimit = new UserCreateSiteLimit();
         userCreateSiteLimit.setNum(userCreateSiteLimitAddParam.getNum());
         userCreateSiteLimit.setUid(userCreateSiteLimitAddParam.getUid());
         userCreateSiteLimit.setMonth(userCreateSiteLimitAddParam.getMonth());
@@ -423,7 +437,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Transactional
     @Override
     public void editUserCreateSiteLimit(SysUserCreateSiteLimitEditParam userCreateSiteLimitEditParam) {
-        UserCreateSiteLimit userCreateSiteLimit=userCreateSiteLimitMapper.selectById(userCreateSiteLimitEditParam.getId());
+        UserCreateSiteLimit userCreateSiteLimit = userCreateSiteLimitMapper.selectById(userCreateSiteLimitEditParam.getId());
         userCreateSiteLimit.setNum(userCreateSiteLimitEditParam.getNum());
         userCreateSiteLimit.setMonth(userCreateSiteLimitEditParam.getMonth());
         userCreateSiteLimitMapper.updateById(userCreateSiteLimit);
@@ -448,9 +462,74 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public SysUser find(Integer uid) {
-        SysUser sysuser=sysUserMapper.selectById(uid);
+        SysUser sysuser = sysUserMapper.selectById(uid);
         Assert.notNull(sysuser, "用户数据不存在!");
         return sysuser;
+    }
+
+    @Override
+    public List<SysUserInfoVo> getUserSelect(String username) {
+        // 1. 构建查询条件
+        MPJQueryWrapper<SysUser> qw = new MPJQueryWrapper<>();
+        qw.setAlias("u")
+                .leftJoin("?_sys_user_role ur on u.uid = ur.uid".replace("?_", GlobalConfig.tablePrefix))
+                .select("u.uid, u.username, u.head_img")
+                .and(wrapper -> wrapper.eq("ur.is_admin", 1))
+                .or()
+                .eq("ur.site_id", 0);
+
+        // 2. 获取并过滤用户
+        List<SysUser> userAll = StringUtils.isNotEmpty(username)
+                ? getUserAll().stream()
+                .filter(item -> item.getUsername().equals(username))
+                .collect(Collectors.toList())
+                : getUserAll();
+
+        if (CollectionUtils.isEmpty(userAll)) {
+            return List.of();
+        }
+
+        // 3. 获取有角色的用户ID集合
+        Set<Integer> allRoleUserIds = sysUserRoleMapper.selectList(
+                        new QueryWrapper<SysUserRole>().select("uid").orderByDesc("id"))
+                .stream()
+                .map(SysUserRole::getUid)
+                .collect(Collectors.toSet());
+
+        // 4. 查询管理员用户
+        qw.orderByDesc("uid");
+        List<SysUser> adminUsers = sysUserMapper.selectList(qw);
+
+        // 5. 查询无角色用户
+        List<SysUser> noRoleUsers = new ArrayList<>();
+        List<Integer> noRoleUserIds = userAll.stream()
+                .map(SysUser::getUid)
+                .filter(uid -> !allRoleUserIds.contains(uid))
+                .collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(noRoleUserIds)) {
+            noRoleUsers = sysUserMapper.selectList(
+                    new QueryWrapper<SysUser>()
+                            .select("uid, username, head_img")
+                            .in("uid", noRoleUserIds)
+                            .orderByDesc("uid"));
+        }
+
+        // 6. 合并结果并去重
+        Map<Integer, SysUserInfoVo> resultMap = new LinkedHashMap<>();
+
+        adminUsers.forEach(user -> {
+            SysUserInfoVo vo = new SysUserInfoVo();
+            BeanUtils.copyProperties(user, vo);
+            resultMap.put(user.getUid(), vo);
+        });
+        noRoleUsers.forEach(user -> {
+            SysUserInfoVo vo = new SysUserInfoVo();
+            BeanUtils.copyProperties(user, vo);
+            resultMap.put(user.getUid(), vo);
+        });
+
+        return new ArrayList<>(resultMap.values());
     }
 
 }

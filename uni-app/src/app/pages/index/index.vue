@@ -1,97 +1,95 @@
 <template>
-	<view :style="themeColor()">
+    <view :style="themeColor()">
 
-		<loading-page :loading="diy.getLoading()"></loading-page>
+        <loading-page :loading="diy.getLoading()"></loading-page>
 
-		<view v-show="!diy.getLoading()">
+        <view v-show="!diy.getLoading()">
 
-			<!-- 自定义模板渲染 -->
-			<view class="diy-template-wrap bg-index" v-if="diy.data.pageMode != 'fixed'" :style="diy.pageStyle()">
+            <!-- 自定义模板渲染 -->
+            <view class="diy-template-wrap bg-index" :style="diy.pageStyle()">
 
-				<diy-group ref="diyGroupRef" :data="diy.data" :pullDownRefreshCount="diy.pullDownRefreshCount" />
+                <diy-group ref="diyGroupRef" :data="diy.data" />
 
-			</view>
+            </view>
 
-			<!-- 固定模板渲染 -->
-			<view class="fixed-template-wrap" v-if="diy.data.pageMode == 'fixed'">
+        </view>
 
-				<fixed-group :data="diy.data" :pullDownRefreshCount="diy.pullDownRefreshCount" />
+        <!-- #ifdef MP-WEIXIN -->
+        <collect-tip ref="collectTipRef" ></collect-tip>
+        <!-- 小程序隐私协议 -->
+        <wx-privacy-popup ref="wxPrivacyPopupRef"></wx-privacy-popup>
+        <!-- #endif -->
 
-			</view>
-
-		</view>
-
-		<!-- #ifdef MP-WEIXIN -->
-		<!-- 小程序隐私协议 -->
-		<wx-privacy-popup ref="wxPrivacyPopupRef"></wx-privacy-popup>
-		<!-- #endif -->
-
-	</view>
+    </view>
 </template>
 
 <script setup lang="ts">
-    import {ref,nextTick} from 'vue';
-    import {useDiy} from '@/hooks/useDiy'
-    import {redirect} from '@/utils/common';
-    import diyGroup from '@/addon/components/diy/group/index.vue'
-    import fixedGroup from '@/addon/components/fixed/group/index.vue'
+import { ref, nextTick } from 'vue';
+import { useDiy } from '@/hooks/useDiy'
+import { redirect } from '@/utils/common';
+import { useShare } from '@/hooks/useShare'
+import diyGroup from '@/addon/components/diy/group/index.vue'
 
-    uni.hideTabBar() // 隐藏tabbar
+const { setShare } = useShare()
 
-    const diy = useDiy({
-        name: 'DIY_INDEX'
+uni.hideTabBar() // 隐藏tabbar
+
+const diy = useDiy({
+    name: 'DIY_INDEX'
+})
+
+const diyGroupRef = ref(null)
+
+const wxPrivacyPopupRef: any = ref(null)
+const collectTipRef: any = ref(null)
+// 监听页面加载
+diy.onLoad();
+
+// 监听页面显示
+diy.onShow((data: any) => {
+    if (data.value) {
+        // uni.setNavigationBarTitle({
+        // 	title: diyData.title
+        // })
+    } else if (data.page) {
+        // 跳转到设置的启动页
+        redirect({ url: data.page, mode: 'reLaunch' })
+    }
+    let share = data.share ? JSON.parse(data.share) : null;
+    setShare(share);
+    diyGroupRef.value?.refresh();
+
+    // #ifdef MP
+    nextTick(() => {
+        if (wxPrivacyPopupRef.value) wxPrivacyPopupRef.value.proactive();
+        if (collectTipRef.value) collectTipRef.value.show();
     })
+    // #endif
+});
 
-    const diyGroupRef = ref(null)
+// 监听页面隐藏
+diy.onHide();
 
-    const wxPrivacyPopupRef:any = ref(null)
+// 监听页面卸载
+diy.onUnload();
 
-    // 监听页面加载
-    diy.onLoad();
-
-    // 监听页面显示
-    diy.onShow((data: any) => {
-        if (data.value) {
-            // uni.setNavigationBarTitle({
-            // 	title: diyData.title
-            // })
-        } else if (data.page) {
-            // 跳转到设置的启动页
-            redirect({url: data.page, mode: 'reLaunch'})
-        }
-        diyGroupRef.value?.refresh();
-	    // #ifdef MP
-	    nextTick(()=>{
-		    if(wxPrivacyPopupRef.value) wxPrivacyPopupRef.value.proactive();
-	    })
-	    // #endif
-    });
-
-    // 监听页面隐藏
-    diy.onHide();
-
-	// 监听页面卸载
-	diy.onUnload();
-
-    // 监听下拉刷新事件
-    diy.onPullDownRefresh()
-
-    // 监听滚动事件
-    diy.onPageScroll()
+// 监听滚动事件
+diy.onPageScroll()
 </script>
 <style lang="scss" scoped>
-	@import '@/styles/diy.scss';
+@import '@/styles/diy.scss';
 </style>
 <style lang="scss">
 .diy-template-wrap {
-  /* #ifdef MP */
-  .child-diy-template-wrap {
-    ::v-deep .diy-group {
-      > .draggable-element.top-fixed-diy {
-        display: block !important;
-      }
+    /* #ifdef MP */
+    .child-diy-template-wrap {
+        ::v-deep .diy-group {
+            > .draggable-element.top-fixed-diy {
+                display: block !important;
+            }
+        }
     }
-  }
-  /* #endif */
+
+    /* #endif */
 }
 </style>

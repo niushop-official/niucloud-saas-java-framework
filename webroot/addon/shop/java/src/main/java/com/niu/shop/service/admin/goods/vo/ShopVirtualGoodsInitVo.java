@@ -60,7 +60,8 @@ public class ShopVirtualGoodsInitVo implements Serializable {
         private Long activeGoodsCount;
         private Long orderGoodsCount = 0L;
         private Integer isGift;
-        private Integer formId = 0;
+        private Object formId;
+        private Object diyDetailId;
     }
 
     @Data

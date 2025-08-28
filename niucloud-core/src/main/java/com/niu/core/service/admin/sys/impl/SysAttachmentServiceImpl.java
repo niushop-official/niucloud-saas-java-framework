@@ -9,10 +9,12 @@ import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateFormatUtils;
 import com.niu.core.entity.sys.SysAttachment;
 import com.niu.core.entity.sys.SysAttachmentCategory;
+import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.mapper.sys.SysAttachmentCategoryMapper;
 import com.niu.core.mapper.sys.SysAttachmentMapper;
 import com.niu.core.service.admin.sys.ISysAttachmentService;
@@ -68,6 +70,7 @@ public class SysAttachmentServiceImpl implements ISysAttachmentService {
         for (SysAttachment item : iPage.getRecords()) {
             SysAttachmentListVo vo = new SysAttachmentListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setThumb(CommonUtils.thumbImageSmall(item.getSiteId(), item.getPath()));
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);

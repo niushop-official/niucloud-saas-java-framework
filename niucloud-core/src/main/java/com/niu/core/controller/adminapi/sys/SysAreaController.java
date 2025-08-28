@@ -7,6 +7,7 @@ import com.niu.core.entity.sys.SysArea;
 import com.niu.core.service.admin.sys.ISysAreaService;
 import com.niu.core.service.admin.sys.vo.SysAreaByCodeVo;
 import org.springframework.web.bind.annotation.*;
+import jdk.jfr.Description;
 
 import jakarta.annotation.Resource;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("adminapi/sys/area")
 @SaCheckLogin
+@Description("地址管理")
 public class SysAreaController {
 
     @Resource
@@ -31,6 +33,7 @@ public class SysAreaController {
      * @return
      */
     @GetMapping("/list_by_pid/{pid}")
+    @Description("获取pid的子项列表")
     public Result<List<SysArea>> getListByPid(@PathVariable("pid") Integer pid) {
         return Result.success(sysAreaService.getListByPid(pid));
     }
@@ -42,16 +45,19 @@ public class SysAreaController {
      * @return
      */
     @GetMapping("/tree/{level}")
+    @Description("获取地区树")
     public Result<JSONArray> getAreaTree(@PathVariable("level") Integer level) {
         return Result.success(sysAreaService.getAreaTree(level));
     }
 
     /**
+     * 根据编码获取地区
      *
      * @param code
      * @return
      */
     @GetMapping("/code/{code}")
+    @Description("根据编码获取地区")
     public Result<Map<String, SysAreaByCodeVo>> getAreaByAreaCode(@PathVariable("code") Integer code) {
         return Result.success(sysAreaService.getAreaByAreaCode(code));
     }
@@ -63,16 +69,19 @@ public class SysAreaController {
      * @return
      */
     @GetMapping("/contrary")
+    @Description("逆地址解析")
     public Result contraryAddress(@RequestParam("location") String location) {
         return Result.success(sysAreaService.getAddressInfo(location));
     }
 
+    /**
     /**
      * 地址解析
      * @param address
      * @return
      */
     @GetMapping("/get_info")
+    @Description("地址解析")
     public Result addressInfo(@RequestParam("address") String address) {
         return Result.success(sysAreaService.getAddress(address));
     }

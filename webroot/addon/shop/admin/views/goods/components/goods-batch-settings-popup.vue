@@ -5,7 +5,7 @@
             <el-row>
                 <!-- 左侧菜单栏 -->
                 <el-col :span="4" class="menu-column">
-                    <el-menu :default-active="activeMenu"  @select="handleMenuSelect">
+                    <el-menu :default-active="activeMenu" @select="handleMenuSelect">
                         <el-menu-item v-for="([key, value]) in Object.entries(setTypeList)" :key="key" :index="key">{{ value }}</el-menu-item>
                     </el-menu>
                 </el-col>
@@ -15,7 +15,7 @@
                     <!-- 商品标签 -->
                     <el-form-item v-if="activeMenu === 'label'" :label="t('label')">
                         <el-checkbox-group v-model="formData.label_ids">
-                            <el-checkbox :label="item.label_id" v-for="(item, index) in labelOptions" :key="index" >{{ item.label_name }}</el-checkbox>
+                            <el-checkbox :label="item.label_id" v-for="(item, index) in labelOptions" :key="index">{{ item.label_name }}</el-checkbox>
                         </el-checkbox-group>
                         <div class="ml-[10px]">
                             <span class="cursor-pointer text-primary mr-[10px]" @click="refreshGoodsLabel">{{ t('refresh') }}</span>
@@ -25,7 +25,7 @@
                     <!-- 商品服务 -->
                     <el-form-item v-if="activeMenu === 'service'" :label="t('label')">
                         <el-checkbox-group v-model="formData.service_ids">
-                            <el-checkbox :label="item.service_id" v-for="(item, index) in serviceOptions" :key="index" >{{ item.service_name }}</el-checkbox>
+                            <el-checkbox :label="item.service_id" v-for="(item, index) in serviceOptions" :key="index">{{ item.service_name }}</el-checkbox>
                         </el-checkbox-group>
                         <div class="ml-[10px]">
                             <span class="cursor-pointer text-primary mr-[10px]" @click="refreshGoodsService">{{ t('refresh') }}</span>
@@ -35,7 +35,10 @@
                     <!-- 虚拟销量 -->
                     <el-form-item v-if="activeMenu === 'virtual_sale_num'" :label="t('virtualSaleNum')" prop="virtual_sale_num">
                         <div>
-                            <el-input v-model.trim="formData.virtual_sale_num"  :placeholder="t('virtualSaleNumPlaceholder')" class="input-width" show-word-limit maxlength="8" clearable @keyup="filterNumber($event)" @blur="formData.virtual_sale_num = $event.target.value">
+                            <el-input v-model.trim="formData.virtual_sale_num"
+                                :placeholder="t('virtualSaleNumPlaceholder')" class="input-width" show-word-limit
+                                maxlength="8" clearable @keyup="filterNumber($event)"
+                                @blur="formData.virtual_sale_num = $event.target.value">
                                 <template #append>{{ formData.unit ? formData.unit : '件' }}</template>
                             </el-input>
                             <div class="mt-[10px] text-[12px] text-[#999] leading-[20px]">{{ t('virtualSaleNumDesc') }}</div>
@@ -43,11 +46,13 @@
                     </el-form-item>
                     <!-- 商品分类 -->
                     <el-form-item v-if="activeMenu === 'category'" prop="goods_category" :label="t('goodsCategory')">
-                        <el-cascader v-model="formData.goods_category" :options="goodsCategoryOptions" :props="goodsCategoryProps" clearable filterable @change="categoryHandleChange" />
-                            <div class="ml-[10px]">
-                                <span class="cursor-pointer text-primary mr-[10px]" @click="refreshGoodsCategory(true)">{{ t('refresh') }}</span>
-                                <span class="cursor-pointer text-primary" @click="toGoodsCategoryEvent">{{ t('addGoodsCategory') }}</span>
-                            </div>
+                        <el-cascader v-model="formData.goods_category" :options="goodsCategoryOptions"
+                            :placeholder="t('productClassificationPlaceholder')" :props="goodsCategoryProps" clearable
+                            filterable @change="categoryHandleChange" />
+                        <div class="ml-[10px]">
+                            <span class="cursor-pointer text-primary mr-[10px]" @click="refreshGoodsCategory(true)">{{ t('refresh') }}</span>
+                            <span class="cursor-pointer text-primary" @click="toGoodsCategoryEvent">{{ t('addGoodsCategory') }}</span>
+                        </div>
                     </el-form-item>
                     <!-- 商品品牌 -->
                     <el-form-item v-if="activeMenu === 'brand'" :label="t('goodsBrand')">
@@ -73,8 +78,8 @@
                     <el-form-item v-if="activeMenu === 'gift'" :label="t('isGift')">
                         <div>
                             <el-radio-group v-model="formData.is_gift">
-                                <el-radio :label= "1">{{ t('yes') }}</el-radio>
-                                <el-radio :label= "0">{{ t('no') }}</el-radio>
+                                <el-radio :label="1">{{ t('yes') }}</el-radio>
+                                <el-radio :label="0">{{ t('no') }}</el-radio>
                             </el-radio-group>
                             <div class="mt-[10px] text-[12px] text-[#999] leading-[20px]">{{ t('giftTips') }}</div>
                         </div>
@@ -101,12 +106,14 @@
                                 <el-radio label="fixed">{{ t('fixedShipping') }}</el-radio>
                             </el-radio-group>
                         </el-form-item>
-                        <el-form-item :label="t('deliveryMoney')" prop="delivery_money" v-show="formData.delivery_type.indexOf('express') != -1 && formData.is_free_shipping == 0 && formData.fee_type == 'fixed'">
+                        <el-form-item :label="t('deliveryMoney')" prop="delivery_money"
+                            v-show="formData.delivery_type.indexOf('express') != -1 && formData.is_free_shipping == 0 && formData.fee_type == 'fixed'">
                             <el-input v-model.trim="formData.delivery_money" clearable placeholder="0.00" class="input-width-short" maxlength="8">
                                 <template #append>{{ t('yuan') }}</template>
                             </el-input>
                         </el-form-item>
-                        <el-form-item :label="t('deliveryTemplateId')" prop="delivery_template_id" v-show="formData.delivery_type.indexOf('express') != -1 && formData.is_free_shipping == 0 && formData.fee_type == 'template'">
+                        <el-form-item :label="t('deliveryTemplateId')" prop="delivery_template_id"
+                            v-show="formData.delivery_type.indexOf('express') != -1 && formData.is_free_shipping == 0 && formData.fee_type == 'template'">
                             <el-select v-model="formData.delivery_template_id" :placeholder="t('deliveryTemplateIdPlaceholder')" filterable autocomplete="off" clearable>
                                 <el-option v-for="item in deliveryTemplateOptions" :key="item.template_id" :label="item.template_name" :value="item.template_id" />
                             </el-select>
@@ -125,10 +132,20 @@
                             </el-radio-group>
                         </el-form-item>
                         <el-form-item :label="t('stockNum')" prop="">
-                            <el-input v-model.trim="formData.stock" clearable placeholder="0" class="input-width-short" show-word-limit maxlength="8" @keyup="filterNumber($event)" @blur="formData.stock = $event.target.value" />
+                            <el-input v-model.trim="formData.stock" clearable placeholder="0" class="input-width-short"
+                                show-word-limit maxlength="8" @keyup="filterNumber($event)"
+                                @blur="formData.stock = $event.target.value" />
                         </el-form-item>
-                        <div class="mt-[10px] ml-[120px] text-[12px] text-[#999] leading-[20px]">{{ t('stockNumTips') }}</div>
+                        <div class="mt-[10px] ml-[120px] text-[12px] text-[#999] leading-[20px]">{{ t('stockNumTips') }}
+                        </div>
                     </div>
+                    <!-- 会员折扣 -->
+                    <el-form-item v-if="activeMenu === 'member_discount'" label="是否参与">
+                        <el-radio-group v-model="formData.member_discount">
+                            <el-radio label="">{{ t('不参与') }}</el-radio>
+                            <el-radio label="discount">{{ t('参与') }}</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
                     <!-- 万能表单 -->
                     <el-form-item v-if="activeMenu === 'diy_form'" :label="t('diyForm')">
                         <el-select v-model="formData.form_id" :placeholder="t('diyFormPlaceholder')" clearable>
@@ -137,6 +154,16 @@
                         <div class="ml-[10px]">
                             <span class="cursor-pointer text-primary mr-[10px]" @click="refreshDiyForm(true)">{{ t('refresh') }}</span>
                             <span class="cursor-pointer text-primary" @click="toDiyFormEvent">{{ t('addDiyForm') }}</span>
+                        </div>
+                    </el-form-item>
+                    <!-- 商品详情模板 -->
+                    <el-form-item v-if="activeMenu === 'diy_detail'" label="商品详情模板">
+                        <el-select v-model="formData.diy_detail_id" placeholder="请选择商品详情模板" clearable>
+                            <el-option v-for="item in detailTemplateOptions" :key="item.id" :label="item.page_title" :value="item.id" />
+                        </el-select>
+                        <div class="ml-[10px]">
+                            <span class="cursor-pointer text-primary mr-[10px]" @click="refreshDetailTemplate(true)">{{ t('refresh') }}</span>
+                            <span class="cursor-pointer text-primary" @click="toDetailTemplateEvent">添加模板</span>
                         </div>
                     </el-form-item>
                 </el-col>
@@ -156,7 +183,7 @@
 import { ref, reactive } from 'vue'
 import { t } from '@/lang'
 import { ElMessage, FormInstance } from 'element-plus'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { filterNumber } from '@/utils/common'
 import {
     getBrandList,
@@ -164,17 +191,17 @@ import {
     getServeList,
     getCategoryTree,
     getGoodsBatchSetDict,
-    goodsBatchSet
+    goodsBatchSet,
+    getGoodsInfoTemplate
 } from '@/addon/shop/api/goods'
 import { getPosterList } from '@/app/api/poster'
 import { getDiyFormList } from '@/app/api/diy_form'
-import {getShopDeliveryList,getShippingTemplateList} from '@/addon/shop/api/delivery'
+import { getShopDeliveryList, getShippingTemplateList } from '@/addon/shop/api/delivery'
 
 const emit = defineEmits(['load'])
 const showDialog = ref(false)
 const loading = ref(false)
 const activeMenu = ref('label')
-const route = useRoute()
 const router = useRouter()
 
 /**
@@ -185,6 +212,7 @@ const initialFormData = {
     service_ids: [],
     poster_id: '',
     form_id: '',
+    diy_detail_id: '',
     brand_id: '',
     goods_category: [],
     virtual_sale_num: 0,
@@ -193,6 +221,7 @@ const initialFormData = {
     fee_type: 'template',
     delivery_type: [],
     stock_type: 'inc',
+    member_discount: '',
     is_free_shipping: 1,
     is_gift: 0,
     stock: ''
@@ -278,17 +307,19 @@ const formRules = reactive({
     ]
 })
 
-const goods_ids: any = [];
-const show = (multipleSelection: any) => {
-    multipleSelection.forEach((item: any) => {
-        goods_ids.push(item.goods_id);
-    });
+const goods_ids = ref([])
+const is_all = ref(null)
+const where = ref({})
+const show = (info: any) => {
+    goods_ids.value = info.ids
+    is_all.value = info.is_all
+    where.value = info.where
     showDialog.value = true
 }
 
 const confirm = async (formEl: FormInstance | undefined) => {
     if (loading.value || !formEl) return
-    await formEl.validate(async(valid) => {
+    await formEl.validate(async (valid) => {
         if (valid) {
             loading.value = true
             const goodsCategory: any = []
@@ -307,21 +338,24 @@ const confirm = async (formEl: FormInstance | undefined) => {
             })
 
             formData.goods_category = goodsCategory
-            let data = {
-                goods_ids: goods_ids,
+            const data = {
+                is_all: is_all.value,
+                where: where.value,
+                goods_ids: goods_ids.value,
                 set_type: activeMenu.value,
                 set_value: formData
             }
             goodsBatchSet(data).then((res) => {
                 if (['stock'].indexOf(activeMenu.value) != -1) {
-                    activeMenu.value = 'label';
+                    activeMenu.value = 'label'
                     showDialog.value = false
-                    goods_ids.splice(0, goods_ids.length);
+                    goods_ids.value.splice(0, goods_ids.value.length)
                     Object.assign(formData, {
                         label_ids: [],
                         service_ids: [],
                         poster_id: '',
                         form_id: '',
+                        diy_detail_id: '',
                         brand_id: '',
                         goods_category: [],
                         virtual_sale_num: '',
@@ -330,10 +364,11 @@ const confirm = async (formEl: FormInstance | undefined) => {
                         fee_type: 'template',
                         delivery_type: [],
                         is_free_shipping: 1,
-                        is_gift: 0,
-                    });
-                    emit('load')
+                        is_gift: 0
+                    })
+                   
                 }
+                emit('load')
                 loading.value = false
             }).catch(err => {
                 loading.value = false
@@ -343,13 +378,13 @@ const confirm = async (formEl: FormInstance | undefined) => {
 }
 
 const handleMenuSelect = (index: string) => {
-  activeMenu.value = index
+    activeMenu.value = index
 }
 
 const setTypeList = reactive([])
 const getGoodsTypeList = () => {
     getGoodsBatchSetDict().then((res) => {
-        Object.assign(setTypeList, res.data);
+        Object.assign(setTypeList, res.data)
     })
 }
 getGoodsTypeList()
@@ -530,7 +565,6 @@ const refreshGoodsPoster = (bool = false) => {
 refreshGoodsPoster()
 /** *****************商品海报-end *************************/
 
-
 // 配送方式复选框
 const deliveryTypeCheckBox = reactive([])
 
@@ -607,6 +641,38 @@ const refreshDiyForm = (bool = false) => {
 
 refreshDiyForm()
 /** *****************万能表单-end *************************/
+
+/** ***************** 商品详情模板-start *************************/
+// 商品详情模板列表下拉框
+const detailTemplateOptions = reactive([])
+// 跳转到微页面，添加详情模板
+const toDetailTemplateEvent = () => {
+    const url = router.resolve({
+        path: '/diy/list'
+    })
+    window.open(url.href)
+}
+
+// 刷新微页面
+const refreshDetailTemplate = (bool = false) => {
+    getGoodsInfoTemplate({
+        type: 'DIY_SHOP_GOODS_DETAIL'
+    }).then((res) => {
+        const data = res.data
+        if (data) {
+            detailTemplateOptions.splice(0, detailTemplateOptions.length, ...data)
+            if (bool) {
+                ElMessage({
+                    message: t('refreshSuccess'),
+                    type: 'success'
+                })
+            }
+        }
+    })
+}
+
+refreshDetailTemplate()
+/** *****************商品详情模板-end *************************/
 
 defineExpose({
     showDialog,

@@ -3,7 +3,7 @@
     <div class="main-container" v-loading="loading">
 
        <el-card class="card !border-none" shadow="never">
-           <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+           <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
        </el-card>
 
         <el-card class="box-card mt-[15px] !border-none" shadow="never">
@@ -54,7 +54,7 @@
         </el-card>
 
         <el-card class="box-card mt-[15px] !border-none" shadow="never">
-            <el-tabs v-model="currTab" @tab-click="handleClick">
+            <el-tabs v-model="currTab">
                 <el-tab-pane :label="t('siteInfo')" name="siteInfo">
                     <el-table :data="detail.roles" size="large">
                         <el-table-column prop="site_id" :label="t('siteId')" width="100px" />
@@ -66,19 +66,24 @@
                         </el-table-column>
                         <el-table-column :label="t('status')" min-width="80" align="center">
                             <template #default="{ row }">
-                                <el-tag class="ml-2" type="success" v-if="row.status == 1">{{ row.site_status_name }}</el-tag>
-                                <el-tag class="ml-2" type="error" v-else-if="row.status == 3">
-                                    {{ row.site_status_name }}
-                                </el-tag>
+                                <template v-if="row.site_status_name">
+                                    <el-tag class="ml-2" type="success" v-if="row.site_status == 1">{{ row.site_status_name }}</el-tag>
+                                    <el-tag class="ml-2" type="error" v-else-if="row.site_status == 3">
+                                        {{ row.site_status_name }}
+                                    </el-tag>
+                                    <el-tag class="ml-2" type="error" v-else>
+                                        {{ row.site_status_name }}
+                                    </el-tag>
+                                </template>
                                 <el-tag class="ml-2" type="error" v-else>
-                                    {{ row.site_status_name }}
+                                    {{ t('siteEmpty') }}
                                 </el-tag>
                             </template>
                         </el-table-column>
                         <el-table-column prop="expire_time" :label="t('expireTime')" />
                         <el-table-column :label="t('operation')" align="right" fixed="right">
                             <template #default="{ row }">
-                                <el-button type="primary" link @click="siteInfo(row)">{{ t('info') }}</el-button>
+                                <el-button type="primary" link @click="siteInfo(row)" v-if="row.site_status_name">{{ t('info') }}</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -132,6 +137,10 @@ import { ElMessageBox } from 'element-plus'
 const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
+
+const back = () => {
+    router.push('/admin/site/user')
+}
 const uid: number = parseInt(route.query.uid || 0)
 const loading = ref(true)
 const detail = ref({})

@@ -18,6 +18,8 @@ public class ShopGoodsSelectSearchParam implements Serializable {
 
     private Integer goodsCategory;
 
+    private String goodsName;
+
     private String goodsType;
 
     private String selectType = "all";

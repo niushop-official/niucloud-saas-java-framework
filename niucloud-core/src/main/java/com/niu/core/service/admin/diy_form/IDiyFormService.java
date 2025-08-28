@@ -8,7 +8,6 @@ import com.niu.core.service.admin.diy_form.vo.*;
 import com.niu.core.service.core.diy_form.param.DiyFormRecordsSearchParam;
 import com.niu.core.service.core.diy_form.vo.DiyFormRecordsInfoVo;
 import com.niu.core.service.core.diy_form.vo.DiyFormRecordsListVo;
-import io.swagger.models.auth.In;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -154,4 +153,11 @@ public interface IDiyFormService {
      */
     Map<String, Object> getQrcode(int formId);
 
+    /**
+     * 万能表单分页列表（用于弹框选择）
+     * @param pageParam
+     * @param searchParam
+     * @return
+     */
+    PageResult<DiyFormInfoVo> getSelectPage(PageParam pageParam, DiyFormSelectParam searchParam);
 }

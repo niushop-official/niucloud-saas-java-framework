@@ -4,7 +4,7 @@
             <el-checkbox v-model="formData.is_use" :true-label="1" :false-label="0" label="" size="large" />
             <span class="ml-[10px] el-form-item__label">送</span>
             <div class="w-[70px]">
-                <el-input v-model.trim="formData.num" clearable />
+                <el-input v-model.trim="formData.num" clearable :disabled="formData.is_use == 0" />
             </div>
             <span class="ml-[15px] el-form-item__label">积分</span>
         </el-form-item>
@@ -14,7 +14,6 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { FormRules } from 'element-plus'
-import Test from '@/utils/test'
 
 const props = defineProps({
     modelValue: {
@@ -32,26 +31,32 @@ const formData = ref({
 })
 
 const formRef = ref(null)
-
+// 正则表达式
+const regExp = {
+    required: /[\S]+/,
+    number: /^\d{0,10}$/,
+    digit: /^\d{0,10}(.?\d{0,2})$/,
+    special: /^\d{0,10}(.?\d{0,3})$/
+}
 const formRules = reactive<FormRules>({
     num: [
         {
-            validator: (rule: any, value: any, callback: Function) => {
+            validator: (rule: any, value: any, callback: any) => {
                 if (formData.value.is_use) {
-                    if (Test.empty(formData.value.num)) {
-                        callback('请输入发放积分数量')
-                    }
-                    if (!Test.digits(formData.value.num)) {
+                    if (value.length == 0) {
+                        callback('请输入积分数量')
+                    } else if (isNaN(value) || !regExp.number.test(value)) {
                         callback('积分数量格式错误')
-                    }
-                    if (formData.value.num <= 0) {
+                    } else if (value <=0) {
                         callback('积分数量不能小于等于0')
+                    } else{
+                        callback();
                     }
-                    callback()
                 } else {
                     callback()
                 }
-            }
+            },
+            trigger: 'blur'
         }
     ]
 })

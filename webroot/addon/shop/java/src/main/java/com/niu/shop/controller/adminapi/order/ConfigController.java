@@ -1,6 +1,7 @@
 package com.niu.shop.controller.adminapi.order;
 
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.order.IOrderConfigService;
 import com.niu.shop.service.core.order.param.OrderConfigParam;
@@ -16,6 +17,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/order/config")
+@Description("订单配置管理")
 public class ConfigController {
 
     @Resource
@@ -25,6 +27,7 @@ public class ConfigController {
      * 获取订单设置
      */
     @GetMapping("")
+    @Description("获取订单设置")
     public Result<OrderConfigVo> get() {
         return Result.success(orderConfigService.getConfig());
     }
@@ -34,6 +37,7 @@ public class ConfigController {
      * @return Result<Object>
      */
     @PostMapping("")
+    @Description("设置订单配置")
     public Result<Object> set(@Validated @RequestBody OrderConfigParam orderConfigParam) {
         orderConfigService.setConfig(orderConfigParam);
         return Result.success();

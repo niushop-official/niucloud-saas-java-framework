@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 小时统计控制器
@@ -22,6 +23,7 @@ import jakarta.annotation.Resource;
 @RestController
 @RequestMapping("adminapi/stat")
 @SaCheckLogin
+@Description("小时统计控制器")
 public class StatController {
 
     @Resource
@@ -29,6 +31,7 @@ public class StatController {
 
 
     @GetMapping("/index")
+    @Description("首页统计数据")
     public Result index() {
         return Result.success(statService.getIndexData());
     }

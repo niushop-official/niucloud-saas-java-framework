@@ -4,7 +4,7 @@
       "key": "verify_code",
       "receiver_type": 0,
       "name": "手机验证码",
-      "title": "管理端验证码登录",
+      "title": "管理端手机验证码",
       "async": false,
       "variable": {
         "code": "验证码"
@@ -15,7 +15,7 @@
       "addon": "system",
       "key": "member_verify_code",
       "receiver_type": 1,
-      "name": "手机验证码",
+      "name": "客户端手机验证码",
       "title": "前端验证码登录，注册，手机验证",
       "async": false,
       "variable": {

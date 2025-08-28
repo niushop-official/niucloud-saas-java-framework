@@ -3,6 +3,7 @@ package com.niu.shop.entity.order;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -14,7 +15,7 @@ public class ShopOrderDiscount implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value="id", type= IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id; // 
     private Integer siteId; // 站点id
     private Integer orderId; // 订单id
@@ -27,5 +28,8 @@ public class ShopOrderDiscount implements Serializable {
     private String content; // 订单优惠说明
     private Long createTime; // 创建时间
     private Integer status; // 状态
+    private Integer memberId; // 会员id
+    private Integer goodsId; // 商品id
+    private Integer skuId; // 商品sku id
 
 }

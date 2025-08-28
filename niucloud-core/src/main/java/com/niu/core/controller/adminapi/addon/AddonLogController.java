@@ -13,10 +13,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+import jdk.jfr.Description;
 
 /**
  * 插件日志管理
  */
+@Description("插件日志管理")
 @RestController
 @RequestMapping("/api/addon_log")
 @SaCheckLogin
@@ -32,6 +34,7 @@ public class AddonLogController {
      * @param addonLogSearchParam 搜索参数
      * @return Result<Object>
      */
+    @Description("插件日志列表")
     @GetMapping("/list")
     public Result<PageResult<AddonLogListVo>> list(@Validated PageParam pageParam,
                                                    @Validated AddonLogSearchParam addonLogSearchParam) {
@@ -45,6 +48,7 @@ public class AddonLogController {
      * @param id 主键ID
      * @return Result<AddonLogDetailVo>
      */
+    @Description("插件日志详情")
     @GetMapping("/detail")
     public Result<AddonLogInfoVo> info(@Validated @RequestParam("id") Integer id) {
         AddonLogInfoVo detail = addonLogService.detail(id);
@@ -57,6 +61,7 @@ public class AddonLogController {
      * @param addonLogParam 参数
      * @return Result<Object>
      */
+    @Description("插件日志新增")
     @PostMapping("/add")
     public Result<Object> add(@Validated @RequestBody AddonLogParam addonLogParam) {
         addonLogService.add(addonLogParam);
@@ -69,6 +74,7 @@ public class AddonLogController {
      * @param id 参数
      * @return Result<Object>
      */
+    @Description("插件日志删除")
     @PostMapping("/del")
     public Result<Object> del(@Validated @RequestBody Integer id) {
         addonLogService.del(id);

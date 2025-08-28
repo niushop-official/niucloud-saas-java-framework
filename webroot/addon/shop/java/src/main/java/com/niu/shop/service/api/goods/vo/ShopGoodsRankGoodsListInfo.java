@@ -22,6 +22,6 @@ public class ShopGoodsRankGoodsListInfo {
     private Integer sort;
     private String goodsCoverThumbMid;
     @JsonProperty("goodsSku")
-    private ShopGoodsSku goodsSku;
+    private ShopGoodsSkuPaihangVo goodsSku;
     private Integer rankNum;
 }

@@ -1,16 +1,15 @@
 package com.niu.core.service.admin.niucloud.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.service.admin.niucloud.INiucloudService;
+import com.niu.core.service.admin.niucloud.param.GetAppVersionListParam;
+import com.niu.core.service.admin.niucloud.vo.*;
 import com.niu.core.service.core.niucloud.param.SetAuthorizeParam;
-import com.niu.core.service.admin.niucloud.vo.AuthInfoVo;
-import com.niu.core.service.admin.niucloud.vo.FrameWorkVersion;
-import com.niu.core.service.admin.niucloud.vo.FrameworkVersionListVo;
-import com.niu.core.service.admin.niucloud.vo.ModuleListVo;
 import com.niu.core.service.core.niucloud.ICoreNiucloudConfigService;
 import org.springframework.stereotype.Service;
 
@@ -149,5 +148,29 @@ public class NiuCloudServiceImpl implements INiucloudService {
         query.put("product_key", instance.getProductKey());
 
         return NiucloudUtils.Niucloud.get("store/app_check/" + key, query).get("data", Boolean.class);
+    }
+
+    /**
+     * 获取应用/插件的版本更新记录
+     *
+     * @param param
+     * @return
+     */
+    @Override
+    public List<AppVersionListVo> getAppVersionList(GetAppVersionListParam param) {
+        NiucloudUtils instance = NiucloudUtils.getInstance();
+
+        Map<String, Object> query = new HashMap<>();
+        query.put("product_key", instance.getProductKey());
+        query.put("app_key", param.getAppKey());
+
+        JSONArray data = ObjectUtil.defaultIfNull(NiucloudUtils.Niucloud.get("store/app_version/list", query).get("data", JSONArray.class), new JSONArray());
+
+        List<AppVersionListVo> list = new LinkedList<>();
+
+        for (int i = 0; i < data.size(); i++) {
+            list.add(JSONUtil.toBean(data.getJSONObject(i), AppVersionListVo.class));
+        }
+        return list;
     }
 }

@@ -1,9 +1,12 @@
 package com.niu.shop.service.admin.order.vo;
 
+import com.niu.shop.entity.order.ShopOrderGoods;
+import com.niu.shop.service.admin.order.param.EditDeliveryParam;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class EditDeliveryVo implements Serializable {
@@ -33,4 +36,12 @@ public class EditDeliveryVo implements Serializable {
     private String takerLongitude; // 收货地址经度
 
     private String takerLatitude; // 收货详细纬度
+
+    private Integer errorCode;
+
+    private String errorMsg;
+
+    private List<ShopOrderGoods> orderGoods;
+
+    private EditDeliveryParam DeliveryData;
 }

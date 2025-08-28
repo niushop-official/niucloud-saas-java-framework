@@ -1,6 +1,5 @@
 package com.niu.shop.enums.coupon;
 
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

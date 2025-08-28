@@ -7,6 +7,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.shop.service.admin.delivery.vo.ShopStoreInfoVo;
 import com.niu.shop.service.admin.delivery.vo.ShopStoreListVo;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -14,6 +15,11 @@ import java.util.List;
  */
 public interface IShopStoreService {
 
+
+    /**
+     * 获取展示用信息
+     */
+    HashMap initInfo();
 
     /**
      * 自提门店列表

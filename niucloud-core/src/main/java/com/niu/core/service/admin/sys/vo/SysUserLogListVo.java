@@ -22,6 +22,7 @@ public class SysUserLogListVo implements Serializable {
     private String url;  // 链接
     private String params;  // 参数
     private String type;  // 请求方式
+    private String operation;
 
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime; // 操作时间

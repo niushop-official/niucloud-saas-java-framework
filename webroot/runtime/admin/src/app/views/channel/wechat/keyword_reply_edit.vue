@@ -3,7 +3,7 @@
     <div class="main-container">
 
         <el-card class="card !border-none" shadow="never">
-            <el-page-header :content="pageName" :icon="ArrowLeft" @back="$router.back()" />
+            <el-page-header :content="pageName" :icon="ArrowLeft" @back="back()" />
         </el-card>
 
         <el-form class="page-form mt-[15px]" :model="formData" label-width="150px" ref="formRef" :rules="formRules" v-loading="loading">
@@ -83,7 +83,7 @@
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
 import { getKeywordsReplyInfo, editKeywordsReply, addKeywordsReply } from '@/app/api/wechat'
-import { ElMessage, FormInstance, FormRules } from 'element-plus'
+import { FormInstance, FormRules } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import ReplyForm from '@/app/views/channel/wechat/components/reply-form.vue'
@@ -92,9 +92,13 @@ import NewsCard from '@/app/views/channel/wechat/components/news-card.vue'
 const route = useRoute()
 const router = useRouter()
 const pageName = route.meta.title
+const back = () => {
+    router.push('/channel/wechat/reply')
+}
+
 const showDialog = ref(false)
 
-const formData = reactive<Record<string, string>>({
+const formData: any = reactive({
     id: 0,
     name: '',
     keyword: '',
@@ -135,7 +139,8 @@ const formRules = reactive<FormRules>({
             validator: (rule: any, value: any, callback: any) => {
                 if (!formData.content.length) callback(new Error(t('contentPlaceholder')))
                 callback()
-            }, trigger: 'blur'
+            },
+            trigger: 'blur'
         }
     ]
 })

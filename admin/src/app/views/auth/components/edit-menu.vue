@@ -32,17 +32,17 @@
             </el-form-item>
 
             <el-form-item :label="t('routePath')" prop="router_path" v-show="formData.menu_type == 1">
-                <el-input v-model="formData.router_path" :placeholder="t('routePathPlaceholder')" class="input-width" />
+                <el-input v-model.trim="formData.router_path" :placeholder="t('routePathPlaceholder')" class="input-width" />
             </el-form-item>
 
             <el-form-item :label="t('viewPath')" prop="view_path" v-show="formData.menu_type == 1">
-                <el-input v-model="formData.view_path" :placeholder="t('viewPathPlaceholder')" class="input-width" />
+                <el-input v-model.trim="formData.view_path" :placeholder="t('viewPathPlaceholder')" class="input-width" />
             </el-form-item>
 
             <el-form-item :label="t('authId')" prop="api_url" v-show="formData.menu_type != 0">
-                <el-input v-model="formData.api_url" :placeholder="t('authIdPlaceholder')" class="input-width">
+                <el-input v-model.trim="formData.api_url" :placeholder="t('authIdPlaceholder')" class="input-width">
                     <template #append>
-                        <el-select class="w-[90px] border-none" v-model="formData.methods">
+                        <el-select class="border-none" style="width: 100px" v-model="formData.methods">
                             <el-option label="POST" value="post" />
                             <el-option label="GET" value="get" />
                             <el-option label="PUT" value="put" />
@@ -73,11 +73,11 @@
             </el-form-item>
 
             <el-form-item :label="t('menuShortName')">
-                <el-input v-model="formData.menu_short_name" :placeholder="t('menuShortNamePlaceholder')" class="input-width" />
+                <el-input v-model.trim="formData.menu_short_name" :placeholder="t('menuShortNamePlaceholder')" class="input-width" />
             </el-form-item>
 
             <el-form-item :label="t('sort')">
-                <el-input-number v-model="formData.sort" :min="0" max="99999999" />
+                <el-input-number v-model="formData.sort" :min="0"/>
             </el-form-item>
         </el-form>
 

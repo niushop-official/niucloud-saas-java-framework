@@ -6,6 +6,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.batch.MybatisBatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,6 +15,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.QrcodeUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.diy_form.*;
 import com.niu.core.enums.diy.PagesEnum;
 import com.niu.core.enums.diy_form.DiyFormComponentEnum;
@@ -21,6 +23,7 @@ import com.niu.core.enums.diy_form.DiyFormTemplateEnum;
 import com.niu.core.enums.diy_form.DiyFormTypeEnum;
 import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.event.diy.DiyFormDelBeforeEventDefiner;
+import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.diy_form.*;
 import com.niu.core.service.admin.diy.IDiyService;
 import com.niu.core.service.admin.diy_form.IDiyFormService;
@@ -37,7 +40,6 @@ import com.niu.core.service.core.diy_form.vo.DiyFormRecordsInfoVo;
 import com.niu.core.service.core.diy_form.vo.DiyFormRecordsListVo;
 import com.niu.core.service.core.sys.ICoreScanService;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.poi.poifs.filesystem.Entry;
@@ -47,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,6 +94,9 @@ public class DiyFormServiceImpl implements IDiyFormService {
 
     @Resource
     SqlSessionFactory sqlSessionFactory;
+
+    @Resource
+    private AddonMapper addonMapper;
 
 
     @Override
@@ -294,6 +300,9 @@ public class DiyFormServiceImpl implements IDiyFormService {
                         .eq("site_id", RequestUtils.siteId()));
 
         Assert.notNull(model, "万能表单不存在");
+        model.setTitle(editParam.getTitle());
+        model.setPageTitle(editParam.getPageTitle());
+        model.setTemplate(editParam.getTemplate());
         model.setValue(editParam.getValue());
         model.setUpdateTime(System.currentTimeMillis() / 1000);
         diyFormMapper.updateById(model);
@@ -715,6 +724,63 @@ public class DiyFormServiceImpl implements IDiyFormService {
         Map<String, Object> result = new HashMap<>();
         result.put("path", path);
         return result;
+    }
+
+    @Override
+    public PageResult<DiyFormInfoVo> getSelectPage(PageParam pageParam, DiyFormSelectParam param) {
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
+        // 验证表单ID集合
+        List<Integer> verifyFormIds = new ArrayList<>();
+        if (param.getVerifyFormIds() != null && !param.getVerifyFormIds().isEmpty()) {
+            // 查询存在的表单ID
+            List<DiyForm> existForms = diyFormMapper.selectList(
+                    new QueryWrapper<DiyForm>()
+                            .select("form_id")
+                            .in("form_id", param.getVerifyFormIds())
+            );
+
+            verifyFormIds = existForms.stream()
+                    .map(DiyForm::getFormId)
+                    .collect(Collectors.toList());
+        }
+
+        // 构建查询条件
+        LambdaQueryWrapper<DiyForm> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DiyForm::getSiteId, RequestUtils.siteId())
+                .eq(DiyForm::getStatus, 1)
+                .orderByDesc(DiyForm::getFormId);
+
+        // 添加搜索条件
+        if (StringUtils.hasText(param.getTitle())) {
+            queryWrapper.like(DiyForm::getTitle, param.getTitle());
+        }
+        if (StringUtils.hasText(param.getType())) {
+            queryWrapper.eq(DiyForm::getType, param.getType());
+        }
+        if (StringUtils.hasText(param.getAddon())) {
+            queryWrapper.eq(DiyForm::getAddon, param.getAddon());
+        }
+
+        // 分页查询
+        IPage<DiyForm> formPage = diyFormMapper.selectPage(new Page<>(page, limit), queryWrapper);
+
+        if (formPage.getTotal() == 0){
+            return PageResult.build(page, limit, 0, new ArrayList<>());
+        }
+        List<DiyFormInfoVo> resultList = new ArrayList<>();
+        formPage.getRecords().forEach(item -> {
+            DiyFormInfoVo diyFormInfoVo = new DiyFormInfoVo();
+            BeanUtils.copyProperties(item, diyFormInfoVo);
+            JSONObject currentType = new DiyFormTypeEnum().getType(item.getType());
+            String typeName = currentType.getStr("title");
+            diyFormInfoVo.setTypeName(typeName);
+            Addon addon = addonMapper.selectOne(new LambdaQueryWrapper<Addon>().eq(Addon::getKey, item.getAddon()));
+            String addonName =ObjectUtil.isNotEmpty(addon) ? addon.getTitle() : "";
+            diyFormInfoVo.setAddonName(addonName);
+            resultList.add(diyFormInfoVo);
+        });
+        return PageResult.build(page, limit, formPage.getTotal(), resultList);
     }
 
 

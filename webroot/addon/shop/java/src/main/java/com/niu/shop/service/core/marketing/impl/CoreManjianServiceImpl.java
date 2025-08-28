@@ -7,6 +7,8 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.yulichang.interfaces.MPJBaseJoin;
+import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.entity.member.Member;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
@@ -41,6 +43,8 @@ import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.marketing.ICoreManjianStatService;
 import com.niu.shop.service.core.marketing.ICoreShopManjianGiveRecordsService;
 import com.niu.shop.service.core.marketing.param.GetManjianInfoParam;
+import com.niu.shop.service.core.marketing.vo.ShopManjianAllInfoVo;
+import com.niu.shop.service.core.marketing.vo.ShopManjianInfoVo;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -101,7 +105,9 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
 
     @Override
     public void calculate(final OrderCreateDataVo order) {
-        List<ShopManjian> manjianList = shopManjianMapper.selectList(new QueryWrapper<ShopManjian>().eq("site_id", order.getSiteId()).eq("status", ShopManjianStatusEnum.ACTIVE.getValue()));
+        MPJQueryWrapper queryWrapper = new MPJQueryWrapper<ShopManjian>().eq("site_id", order.getSiteId()).eq("status", ShopManjianStatusEnum.ACTIVE.getValue());
+        queryWrapper.select("*");
+        List<ShopManjianInfoVo> manjianList = shopManjianMapper.selectJoinList(ShopManjianInfoVo.class, queryWrapper);
         Member memberInfo = memberMapper.selectById(order.getMemberId());
         if (ObjectUtil.isEmpty(manjianList) || ObjectUtil.isEmpty(memberInfo)) return;
 
@@ -112,7 +118,7 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
         BigDecimal manjianDiscountMoney = BigDecimal.ZERO;
         //OrderCreateDataVo.Discount discount = new OrderCreateDataVo.Discount();
         Map<Integer, OrderCreateDataVo.Discount> manjianDiscountMap = new HashMap<>();
-        for (ShopManjian manjianInfo : manjianList) {
+        for (ShopManjianInfoVo manjianInfo : manjianList) {
             joinMemberType = manjianInfo.getJoinMemberType();
             levelIds = ObjectUtil.isNotEmpty(manjianInfo.getLevelIds()) ? JSONUtil.parseArray(manjianInfo.getLevelIds()) : new JSONArray();
             labelIds = ObjectUtil.isNotEmpty(manjianInfo.getLabelIds()) ? JSONUtil.parseArray(manjianInfo.getLabelIds()) : new JSONArray();
@@ -335,9 +341,14 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
             }
 
             manjianInfo.setRuleJson(ruleJson.toString());
+            if(level>=0){
+                manjianInfo.setRule(ruleJson.get(level).toString());
+            }
             BigDecimal manjianOneDiscountMoney = BigDecimal.ZERO;
             if (level >= 0) {
-                manjianOneDiscountMoney = manjianGoodsCalculate(order, manjianInfo, isFreeShipping, level, discountMoney, matchSkuIds, matchOrderGoodsMoney, manjianOneDiscountMoney);
+                ShopManjianInfoVo shopManjianInfoVo = new ShopManjianInfoVo();
+                BeanUtil.copyProperties(manjianInfo,shopManjianInfoVo);
+                manjianOneDiscountMoney = manjianGoodsCalculate(order, shopManjianInfoVo, isFreeShipping, level, discountMoney, matchSkuIds, matchOrderGoodsMoney, manjianOneDiscountMoney);
             }
             if (manjianOneDiscountMoney.compareTo(BigDecimal.ZERO) > 0) {
 
@@ -379,7 +390,7 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
     }
 
     @Override
-    public BigDecimal manjianGoodsCalculate(OrderCreateDataVo order, ShopManjian manjianInfo, boolean isFreeShipping, int level, BigDecimal discountMoney, List<Integer> matchSkuIds, BigDecimal matchOrderGoodsMoney, BigDecimal manjianOneDiscountMoney) {
+    public BigDecimal manjianGoodsCalculate(OrderCreateDataVo order, ShopManjianInfoVo manjianInfo, boolean isFreeShipping, int level, BigDecimal discountMoney, List<Integer> matchSkuIds, BigDecimal matchOrderGoodsMoney, BigDecimal manjianOneDiscountMoney) {
 
         if (discountMoney.compareTo(matchOrderGoodsMoney) > 0) {
             discountMoney = matchOrderGoodsMoney;
@@ -1178,12 +1189,15 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
             if (canJoin) {
                 // 获取折扣价格
                 Map<String, String> discountArray = getManjianDiscountMoney(allInfo, data);
+                ShopManjianAllInfoVo shopManjianAllInfoVo = new ShopManjianAllInfoVo();
+                BeanUtil.copyProperties(allInfo, shopManjianAllInfoVo);
+                shopManjianAllInfoVo.setDiscountArray(discountArray);
                 BigDecimal discountMoney = new BigDecimal(discountArray.get("discount_money"));
                 promotionMoney = promotionMoney.add(discountMoney);
                 if (discountArray.containsKey("rule")) {
                     goodsList = goodsList.stream().map(item -> {
                         manjianInfo.clear();
-                        manjianInfo.put("manjian", allInfo);
+                        manjianInfo.put("manjian", shopManjianAllInfoVo);
                         if (ObjectUtil.isNotEmpty(item.getPromotion())) {
                             item.getPromotion().put("manjian", manjianInfo);
                         } else {

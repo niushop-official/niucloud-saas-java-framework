@@ -23,14 +23,17 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
  * 插件管理
  */
 @RestController
-@RequestMapping("adminapi/addon")
+@RequestMapping("adminapi")
 @SaCheckLogin
+@Description("插件管理")
 public class AddonController {
 
     @Resource
@@ -41,7 +44,8 @@ public class AddonController {
      *
      * @return
      */
-    @GetMapping("/local")
+    @GetMapping("/addon/local")
+    @Description("本地插件列表")
     public Result<LocalAddonListVo> getLocalAddonList() {
         return Result.success(addonService.getLocalAddonList());
     }
@@ -52,7 +56,8 @@ public class AddonController {
      * @param addonSearchParam 搜索参数
      * @return Result<PageResult < Addon>>
      */
-    @GetMapping("/list")
+    @GetMapping("/addon/list")
+    @Description("插件列表")
     public Result<PageResult<AddonListVo>> list(@Validated PageParam pageParam, @Validated AddonSearchParam addonSearchParam) {
         PageResult<AddonListVo> list = addonService.list(pageParam, addonSearchParam);
         System.out.println(RequestUtils.adminSiteId());
@@ -64,8 +69,9 @@ public class AddonController {
      *
      * @return Result<PageResult < Addon>>
      */
-    @GetMapping("/list/install")
+    @GetMapping("/addon/list/install")
     @SaIgnore
+    @Description("获取已安装插件列表")
     public Result<Map<String, InstallAddonListVo>> getInstallList() {
         return Result.success(addonService.getInstallList());
     }
@@ -76,7 +82,8 @@ public class AddonController {
      * @param id 主键ID
      * @return Result<AddonInfoVo>
      */
-    @GetMapping("/:id")
+    @GetMapping("/addon/:id")
+    @Description("插件详情")
     public Result<AddonInfoVo> info(@Validated @PathVariable("id") Integer id) {
         AddonInfoVo info = addonService.info(id);
         return Result.success(info);
@@ -88,7 +95,8 @@ public class AddonController {
      * @param addonParam 参数
      * @return Result<Object>
      */
-    @PostMapping("/add")
+    @PostMapping("/addon/add")
+    @Description("插件新增")
     public Result<Object> add(@Validated @RequestBody AddonParam addonParam) {
         addonService.add(addonParam);
         return Result.success();
@@ -100,7 +108,8 @@ public class AddonController {
      * @param id 参数
      * @return Result<Object>
      */
-    @PostMapping("/del")
+    @PostMapping("/addon/del")
+    @Description("插件删除")
     public Result<Object> del(@Validated @RequestBody Integer id) {
         addonService.del(id);
         return Result.success();
@@ -112,7 +121,8 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @PostMapping("/install/{addon}")
+    @PostMapping("/addon/install/{addon}")
+    @Description("安装插件")
     public Result<JSONObject> install(@PathVariable("addon") String addon) {
         return Result.success(addonService.install(addon, "local"));
     }
@@ -123,7 +133,8 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @PostMapping("/cloudinstall/{addon}")
+    @PostMapping("/addon/cloudinstall/{addon}")
+    @Description("云安装插件")
     public Result<JSONObject> cloudInstall(@PathVariable("addon") String addon) {
         return Result.success(addonService.install(addon, "cloud"));
     }
@@ -134,7 +145,8 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @GetMapping("/cloudinstall/{addon}")
+    @GetMapping("/addon/cloudinstall/{addon}")
+    @Description("云安装进度")
     public Result<JSONObject> cloudInstallLog(@PathVariable("addon") String addon) {
         return Result.success(addonService.cloudInstallLog(addon));
     }
@@ -145,18 +157,20 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @GetMapping("/install/check/{addon}")
+    @GetMapping("/addon/install/check/{addon}")
+    @Description("插件安装检测安装环境")
     public Result<JSONObject> installCheck(@PathVariable("addon") String addon) {
         return Result.success(addonService.installCheck(addon));
     }
 
     /**
-     * 插件安装检测安装环境
+     * 取消安装任务
      *
      * @param addon
      * @return
      */
-    @PutMapping("/install/cancel/{addon}")
+    @PutMapping("/addon/install/cancel/{addon}")
+    @Description("取消安装任务")
     public Result cancleInstall(@PathVariable("addon") String addon) {
         addonService.cancleInstall();
         return Result.success();
@@ -167,7 +181,8 @@ public class AddonController {
      *
      * @return
      */
-    @GetMapping("/installtask")
+    @GetMapping("/addon/installtask")
+    @Description("查询安装任务")
     public Result<JSONObject> getInstallTask() {
         return Result.success(addonService.getInstallTask());
     }
@@ -178,8 +193,9 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @PostMapping("/uninstall/{addon}")
-    public Result<JSONObject> unnstall(@PathVariable("addon") String addon) {
+    @PostMapping("/addon/uninstall/{addon}")
+    @Description("卸载插件")
+    public Result<JSONObject> uninstall(@PathVariable("addon") String addon) {
         return Result.success(addonService.uninstall(addon));
     }
 
@@ -189,7 +205,8 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @GetMapping("/uninstall/check/{addon}")
+    @GetMapping("/addon/uninstall/check/{addon}")
+    @Description("卸载插件环境检测")
     public Result<JSONObject> uninstallCheck(@PathVariable("addon") String addon) {
         return Result.success(addonService.uninstallCheck(addon));
     }
@@ -199,9 +216,18 @@ public class AddonController {
      *
      * @return
      */
-    @GetMapping("/type")
+    @GetMapping("/addontype")
+    @Description("插件类型")
     public Result<Map<String, String>> addonType() {
         return Result.success(AddonTypeEnum.getMap());
+    }
+
+    @GetMapping("/addon/init")
+    @Description("插件初始化")
+    public Result<?> init() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("type_list", AddonTypeEnum.getMap());
+        return Result.success(data);
     }
 
     /**
@@ -210,7 +236,8 @@ public class AddonController {
      * @param addon
      * @return
      */
-    @PostMapping("/download/{addon}")
+    @PostMapping("/addon/download/{addon}")
+    @Description("下载插件")
     public Result<?> download(@PathVariable("addon") String addon, @RequestBody AddonDownloadParam param) {
         addonService.download(addon, param.getVersion());
         return Result.success();

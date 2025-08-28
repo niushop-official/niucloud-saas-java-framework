@@ -3,6 +3,8 @@ package com.niu.core.service.admin.diy_form.vo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import java.io.Serializable;
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -71,5 +73,8 @@ private static final long serialVersionUID = 1L;
 
     /** 更新时间 */
     private Long updateTime;
+
+    private String addonName;
+
 
 }

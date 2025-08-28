@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 会员收货地址控制器
  */
-
+@Description("会员收货地址控制器")
 @RestController
 @RequestMapping("adminapi/member/address")
 @SaCheckLogin
@@ -32,6 +33,7 @@ public class MemberAddressController {
      * @param searchParam 搜索条件
      * @return Result<PageResult < MemberAddressListVo>>
      */
+    @Description("会员收货地址列表")
     @GetMapping("")
     public Result<List<MemberAddressListVo>> list(MemberAddressSearchParam searchParam) {
         return Result.success(memberAddressService.list(searchParam));
@@ -43,6 +45,7 @@ public class MemberAddressController {
      * @param id 主键ID
      * @return Result<MemberAddressInfoVo>
      */
+    @Description("会员收货地址详情")
     @GetMapping("/{id}")
     public Result<MemberAddressInfoVo> info(@PathVariable("id") Integer id) {
         MemberAddressInfoVo info = memberAddressService.info(id);
@@ -55,6 +58,7 @@ public class MemberAddressController {
      * @param addParam 添加参数
      * @return Result<Object>
      */
+    @Description("会员收货地址添加")
     @PostMapping("")
     public Result<Object> add(@Validated @RequestBody MemberAddressParam addParam) {
         memberAddressService.add(addParam);
@@ -67,6 +71,7 @@ public class MemberAddressController {
      * @param editParam 编辑参数
      * @return Result<Object>
      */
+    @Description("会员收货地址编辑")
     @PutMapping("/{id}")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody MemberAddressParam editParam) {
         memberAddressService.edit(id, editParam);
@@ -79,6 +84,7 @@ public class MemberAddressController {
      * @param id 参数
      * @return Result<Object>
      */
+    @Description("会员收货地址删除")
     @DeleteMapping("/{id}")
     public Result<Object> del(@PathVariable("id") Integer id) {
         memberAddressService.del(id);

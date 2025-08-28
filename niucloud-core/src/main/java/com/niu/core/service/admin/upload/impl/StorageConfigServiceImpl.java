@@ -6,6 +6,7 @@ import cn.hutool.json.JSONUtil;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.loader.upload.UploadLoader;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.enums.sys.FileEnum;
 import com.niu.core.enums.sys.StorageEnum;
 import com.niu.core.service.admin.upload.IStorageConfigService;
@@ -71,7 +72,11 @@ public class StorageConfigServiceImpl implements IStorageConfigService {
                 JSONObject itemParam=new JSONObject();
                 String paramsValues=valuesParams.get(paramsKey).toString();
                 itemParam.set("name", paramsValues);
-                itemParam.set("value", configParams.get(paramsKey));
+                String value = configParams.getStr(paramsKey);
+                if("secret_key".equals(paramsKey) && ObjectUtil.isNotEmpty(value)){
+                    value = StringUtils.hide(value, 0, value.length());
+                }
+                itemParam.set("value", value);
                 params.set(paramsKey, itemParam);
             }
         }
@@ -89,12 +94,12 @@ public class StorageConfigServiceImpl implements IStorageConfigService {
     public void setStorageConfig(String storageType, JSONObject storageData) {
         JSONObject storageTypeList= UploadLoader.getType();
         if(ObjectUtil.isNull(storageTypeList.get(storageType))){
-            throw new AdminException("OSS_TYPE_NOT_EXIST");
+            throw new AdminException("云存储类型不存在");
         }
         if(!storageType.equals(FileEnum.LOCAL.getCode())){
             String domain=storageData.getStr("domain");
             if(domain.indexOf("http://")<0 && domain.indexOf("https://")<0){
-                throw new AdminException("STORAGE_NOT_HAS_HTTP_OR_HTTPS");
+                throw new AdminException("空间域名请补全http://或https://");
             }
         }
         /**
@@ -105,6 +110,10 @@ public class StorageConfigServiceImpl implements IStorageConfigService {
         JSONObject storageValues= JSONUtil.parseObj(storageTypeList.get(storageType));
         if(storageData.getInt("is_use")==1){
             storageConfig.set("default", storageType);
+        }else{
+            if(storageData.getStr("storage_type").equals(storageConfig.get("default"))){
+                storageConfig.set("default", "");
+            }
         }
 
         JSONObject configParams=new JSONObject();

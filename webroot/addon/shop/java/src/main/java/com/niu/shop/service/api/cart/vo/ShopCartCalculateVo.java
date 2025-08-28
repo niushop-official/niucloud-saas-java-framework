@@ -40,8 +40,7 @@ public class ShopCartCalculateVo implements Serializable {
         private Integer goodsId; // 商品id
         private Integer cartId;
         private Integer num;
-        private BigDecimal memberPrice;
-        private String memberPriceDesc;
+        private String memberPrice;
         private String memberDiscount;
         private BigDecimal goodsMoney;
         private BigDecimal realGoodsMoney;
@@ -49,6 +48,7 @@ public class ShopCartCalculateVo implements Serializable {
         private BigDecimal promotionMoney;
         private Map<String, Object> promotion;
         private Integer hasBuy;
-
+        private String showType;
+        private BigDecimal showPrice;
     }
 }

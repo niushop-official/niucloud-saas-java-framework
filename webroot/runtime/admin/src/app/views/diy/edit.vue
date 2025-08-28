@@ -215,6 +215,7 @@
 <script lang="ts" setup>
 import { ref, reactive, toRaw, watch, inject } from 'vue'
 import { t } from '@/lang'
+import { ArrowLeft } from "@element-plus/icons-vue"
 import { img } from '@/utils/common'
 import { getDiyTemplatePages, addDiyPage, editDiyPage, initPage } from '@/app/api/diy'
 import { useRoute, useRouter } from 'vue-router'
@@ -237,11 +238,9 @@ route.query.type = route.query.type || '' // 页面模板，新页面传入
 route.query.title = route.query.title || ''
 route.query.back = route.query.back || '/site/diy/list'
 
-console.log('route',route.path)
-
 const backPath = route.query.back
-const template = ref('');
-const oldTemplate = ref('');
+const template = ref('')
+const oldTemplate = ref('')
 const wapUrl = ref('')
 const wapDomain = ref('')
 const wapPreview = ref('')
@@ -275,7 +274,7 @@ const originData = reactive({
 const isChange = ref(true) // 数据是否发生变化，true：没变化，false：变化了
 const goBack = () => {
     if (isChange.value) {
-        location.href = `${location.origin}${backPath}`;
+        location.href = `${location.origin}${backPath}`
         router.push(backPath)
     } else {
         // 数据发生变化，弹框提示：确定离开此页面
@@ -289,7 +288,7 @@ const goBack = () => {
                 autofocus: false
             }
         ).then(() => {
-            location.href = `${location.origin}${backPath}`;
+            location.href = `${location.origin}${backPath}`
         }).catch(() => {
         })
     }
@@ -330,7 +329,7 @@ watch(
 )
 
 // 切换模板页面
-const changeTemplatePage = (value:any)=> {
+const changeTemplatePage = (value: any) => {
     // 存在数据则弹框提示确认
     if (diyStore.value.length) {
         ElMessageBox.confirm(t('changeTemplatePageTips'), t('warning'), {
@@ -339,7 +338,7 @@ const changeTemplatePage = (value:any)=> {
             type: 'warning'
         }).then(() => {
             diyStore.changeCurrentIndex(-99)
-            diyStore.init(); // 清空
+            diyStore.init() // 清空
             if (value) {
                 let data = cloneDeep(templatePages[value].data);
                 diyStore.global = data.global;
@@ -351,13 +350,13 @@ const changeTemplatePage = (value:any)=> {
             }
         }).catch(() => {
             // 还原
-            template.value = oldTemplate.value;
+            template.value = oldTemplate.value
         });
     } else {
-        diyStore.init(); // 清空
+        diyStore.init() // 清空
         if (value) {
-            let data = cloneDeep(templatePages[value].data);
-            diyStore.global = data.global;
+            let data = cloneDeep(templatePages[value].data)
+            diyStore.global = data.global
             if (data.value.length) {
                 diyStore.value = data.value
             }
@@ -407,6 +406,17 @@ initPage({
     template.value = data.template;
     diyStore.isDefault = data.is_default
     diyStore.pageMode = data.mode
+    if (data.global) {
+        for (const key in data.global) {
+            if(data.global[key]) {
+                for (const childKey in data.global[key]) {
+                    diyStore.global[key][childKey] = data.global[key][childKey]
+                }
+            }else{
+                diyStore.global[key] = data.global[key]
+            }
+        }
+    }
     if (data.value) {
         const sources = JSON.parse(data.value)
         diyStore.global = sources.global
@@ -446,7 +456,7 @@ initPage({
         }
     }
 
-    loadDiyTemplatePages(data.type);
+    loadDiyTemplatePages(data.type)
 
     // 加载预览
     wapDomain.value = data.domain_url.wap_domain
@@ -473,7 +483,7 @@ initPage({
         }
     }
 
-    if(repeat) {
+    if (repeat) {
         setDomain()
     }
 

@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.delivery;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.delivery.param.ShopDeliveryCompanyParam;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("adminapi/shop/delivery/company")
+@Description("物流公司管理")
 public class CompanyController {
 
     @Resource
@@ -31,6 +33,7 @@ public class CompanyController {
      * @return Result<PageResult<ShopDeliveryCompanyListVo>>
      */
     @GetMapping("")
+    @Description("物流公司分页列表")
     public Result<PageResult<ShopDeliveryCompanyListVo>> page(@Validated PageParam pageParam, @Validated ShopDeliveryCompanySearchParam searchParam) {
         PageResult<ShopDeliveryCompanyListVo> list = deliveryCompanyService.page(pageParam, searchParam);
         return Result.success(list);
@@ -42,6 +45,7 @@ public class CompanyController {
      * @return Result<List<ShopDeliveryCompanyListVo>>
      */
     @GetMapping("/list")
+    @Description("物流公司列表")
     public Result<List<ShopDeliveryCompanyListVo>> list(@Validated ShopDeliveryCompanySearchParam searchParam) {
         List<ShopDeliveryCompanyListVo> list = deliveryCompanyService.list(searchParam);
         return Result.success(list);
@@ -53,6 +57,7 @@ public class CompanyController {
      * @return Result<ShopDeliveryCompanyInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("物流公司详情")
     public Result<ShopDeliveryCompanyInfoVo> info(@PathVariable("id") Integer id) {
         ShopDeliveryCompanyInfoVo info = deliveryCompanyService.info(id);
         return Result.success(info);
@@ -64,6 +69,7 @@ public class CompanyController {
      * @return AjaxResult<Object>
      */
     @PostMapping("")
+    @Description("添加物流公司")
     public Result<Object> add(@Validated @RequestBody ShopDeliveryCompanyParam addParam) {
         deliveryCompanyService.add(addParam);
         return Result.success();
@@ -75,6 +81,7 @@ public class CompanyController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("编辑物流公司")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopDeliveryCompanyParam editParam) {
         deliveryCompanyService.edit(id, editParam);
         return Result.success();
@@ -86,6 +93,7 @@ public class CompanyController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("删除物流公司")
     public Result<Object> del(@PathVariable("id") Integer id) {
         deliveryCompanyService.del(id);
         return Result.success();

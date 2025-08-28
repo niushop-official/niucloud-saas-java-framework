@@ -5,42 +5,37 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.niu.core.common.domain.PageResult;
-import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.entity.pay.PayChannel;
 import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.mapper.pay.PayChannelMapper;
-import com.niu.core.service.admin.pay.param.PayChannelAllSetParam;
-import com.niu.core.service.admin.pay.param.PayChannelParam;
-import com.niu.core.service.admin.pay.param.PayChannelSearchParam;
 import com.niu.core.service.admin.pay.IPayChannelService;
-import com.niu.core.service.admin.pay.vo.PayChannelInfoVo;
+import com.niu.core.service.admin.pay.param.PayChannelAllSetParam;
 import com.niu.core.service.admin.pay.vo.PayChannelListVo;
 import com.niu.core.service.admin.pay.vo.PayChanneltemVo;
+import jakarta.annotation.Resource;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import jakarta.annotation.Resource;
 import java.util.*;
 
 
 /**
  * 支付渠道配置实现
  */
+@Log4j2
 @Service
 public class PayChannelServiceImpl implements IPayChannelService {
-        
+
     @Resource
     PayChannelMapper payChannelMapper;
 
     /**
      * 支付渠道配置列表
+     *
      * @return PageResult<PayChannelListVo>
      */
     @Override
@@ -55,7 +50,7 @@ public class PayChannelServiceImpl implements IPayChannelService {
                 payTypeList.set(item.getType(), item);
             } else {
                 payTypeList = new JSONObject();
-                payTypeList.set(item.getType(),  JSONUtil.parse(item));
+                payTypeList.set(item.getType(), JSONUtil.parse(item));
             }
             payChannelList.set(item.getChannel(), payTypeList);
         }
@@ -64,13 +59,13 @@ public class PayChannelServiceImpl implements IPayChannelService {
 
         Map<String, PayChanneltemVo> list = new HashMap<String, PayChanneltemVo>();
 
-        for (ChannelEnum item: ChannelEnum.values()) {
+        for (ChannelEnum item : ChannelEnum.values()) {
             PayChanneltemVo vo = new PayChanneltemVo();
             vo.setKey(item.getCode());
             vo.setName(item.getName());
 
             JSONArray payType = new JSONArray();
-            for (String key: payTypeEnum.keySet()) {
+            for (String key : payTypeEnum.keySet()) {
                 JSONObject type = JSONUtil.parseObj(payTypeEnum.getJSONObject(key).toString());
                 if (payChannelList.getJSONObject(item.getCode()) == null || payChannelList.getJSONObject(item.getCode()).getJSONObject(key) == null) {
                     type.set("status", 0);
@@ -110,10 +105,11 @@ public class PayChannelServiceImpl implements IPayChannelService {
 
     /**
      * 多渠道设置
+     *
      * @param param
      */
     public void setAll(PayChannelAllSetParam param) {
-        for (String channelKey: param.getConfig().keySet()) {
+        for (String channelKey : param.getConfig().keySet()) {
             JSONObject channel = param.getConfig().getJSONObject(channelKey);
             JSONArray payTypeList = channel.getJSONArray("pay_type");
             for (int i = 0; i < payTypeList.size(); i++) {
@@ -125,6 +121,7 @@ public class PayChannelServiceImpl implements IPayChannelService {
 
     /**
      * 设置
+     *
      * @param channel
      * @param type
      * @param data
@@ -154,6 +151,7 @@ public class PayChannelServiceImpl implements IPayChannelService {
 
     /**
      * 通过渠道获取配置
+     *
      * @param channel
      * @return
      */
@@ -164,9 +162,32 @@ public class PayChannelServiceImpl implements IPayChannelService {
         );
 
         List<PayChannelListVo> list = new LinkedList<>();
-        for (PayChannel item: payChannel) {
+        for (PayChannel item : payChannel) {
             PayChannelListVo vo = new PayChannelListVo();
             BeanUtils.copyProperties(item, vo);
+            if (ObjectUtil.isNotEmpty(item.getConfig()) && "transfer".equals(channel)) {
+                JSONObject config = JSONUtil.parseObj(item.getConfig());
+                // 定义需要隐藏的配置项列表
+                String[] keysToHide = {
+                        "mch_secret_key",
+                        "mch_secret_cert",
+                        "mch_public_cert_path",
+                        "wechat_public_cert_path",
+                        "wechat_public_cert_id"
+                };
+
+                for (String key : keysToHide) {
+                    String value = config.getStr(key);
+                    if (ObjectUtil.isNotEmpty(value)) {
+                        try {
+                            config.set(key, StringUtils.hide(value, 0, value.length()));
+                        } catch (Exception e) {
+                            log.error("字段:{},值:{},支付设置脱敏失败{}", key, value, e.getMessage());
+                        }
+                    }
+                }
+                vo.setConfig(config.toString());
+            }
             list.add(vo);
         }
 
@@ -175,11 +196,12 @@ public class PayChannelServiceImpl implements IPayChannelService {
 
     /**
      * 设置转账设置
+     *
      * @param param
      */
     public void setTransfer(JSONObject param) {
-        JSONObject wechatpayConfig = param.getJSONObject("wechatpay_config");
         JSONObject alipayConfig = param.getJSONObject("alipay_config");
+        JSONObject wechatpayConfig = param.getJSONObject("wechatpay_config");
 
         if (wechatpayConfig != null) {
             this.set("transfer", "wechatpay", new JSONObject()

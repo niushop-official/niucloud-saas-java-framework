@@ -34,49 +34,87 @@ public class DiyRouteServiceImpl implements IDiyRouteService {
     /**
      * 自定义路由列表
      *
-     * @param pageParam 分页参数
      * @param searchParam 搜索参数
      * @return PageResult<DiyRouteListVo>
      */
     @Override
     public List<DiyRouteListVo> list(DiyRouteSearchParam searchParam) {
         JSONObject linkEnum = LinkEnum.getLink();
-
         List<DiyRouteListVo> routerList = new LinkedList<>();
         int sort = 0;
+
         for (String key : linkEnum.keySet()) {
+            JSONObject parentItem = linkEnum.getJSONObject(key);
+            JSONObject addonInfo = parentItem.getJSONObject("addon_info");
+            JSONArray childArray = ObjectUtil.defaultIfNull(parentItem.getJSONArray("child_list"), new JSONArray());
 
-            if (ObjectUtil.isNotEmpty(searchParam.getAddonName())) {
-                String addonName = ObjectUtil.defaultIfNull(linkEnum.getByPath(key + ".addon_info.title", String.class), "");
-                if (!addonName.equals(searchParam.getAddonName())) continue;
-            }
-
-            JSONArray linkArray = ObjectUtil.defaultIfNull(linkEnum.getByPath(key + ".child_list", JSONArray.class), new JSONArray());
-            for (int i = 0; i < linkArray.size(); i++) {
-                JSONObject link = linkArray.getJSONObject(i);
-
-                if (ObjectUtil.isNotEmpty(searchParam.getUrl()) && !link.getStr("url").equals(searchParam.getUrl())) {
-                    continue;
-                }
-                if (ObjectUtil.isNotEmpty(searchParam.getTitle()) && link.getStr("title").indexOf(searchParam.getTitle()) == -1) {
-                    continue;
-                }
-
-                DiyRouteListVo vo = new DiyRouteListVo();
-                vo.setName(link.getStr("name"));
-                vo.setTitle(link.getStr("title"));
-                vo.setAddonInfo(ObjectUtil.defaultIfNull(linkEnum.getByPath(key + ".addon_info", JSONObject.class), new JSONObject()));
-                vo.setParent(key);
-                vo.setPage(link.getStr("url"));
-                vo.setIsShare(link.getInt("is_share"));
-                vo.setAction(link.getStr("action"));
-                vo.setSort(sort);
-                routerList.add(vo);
-                sort++;
-            }
+            sort = processChildItems(childArray, key, addonInfo, searchParam, routerList, sort);
         }
 
         return routerList;
+    }
+
+    /**
+     * 递归处理子项
+     */
+    private int processChildItems(JSONArray childArray, String parentKey, JSONObject addonInfo,
+                                  DiyRouteSearchParam searchParam, List<DiyRouteListVo> routerList, int sort) {
+        for (int i = 0; i < childArray.size(); i++) {
+            JSONObject item = childArray.getJSONObject(i);
+
+            JSONArray nestedChildren = ObjectUtil.defaultIfNull(item.getJSONArray("child_list"), new JSONArray());
+            if (nestedChildren.size() > 0) {
+                sort = processChildItems(nestedChildren, parentKey, addonInfo, searchParam, routerList, sort);
+                continue;
+            }
+
+            if (!passesFilter(item, addonInfo, searchParam)) {
+                continue;
+            }
+
+            DiyRouteListVo vo = createDiyRouteVo(parentKey, item, addonInfo, sort);
+            routerList.add(vo);
+            sort++;
+        }
+        return sort;
+    }
+
+    /**
+     * 检查是否通过过滤条件
+     */
+    private boolean passesFilter(JSONObject link, JSONObject addonInfo, DiyRouteSearchParam searchParam) {
+        // URL过滤
+        if (ObjectUtil.isNotEmpty(searchParam.getUrl()) && !searchParam.getUrl().equals(link.getStr("url"))) {
+            return false;
+        }
+
+        // 标题过滤
+        if (ObjectUtil.isNotEmpty(searchParam.getTitle()) && !link.getStr("title").contains(searchParam.getTitle())) {
+            return false;
+        }
+
+        // 插件名称过滤
+        if (ObjectUtil.isNotEmpty(searchParam.getAddonName()) && !searchParam.getAddonName().equals(addonInfo.getStr("key"))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 创建Vo对象
+     */
+    private DiyRouteListVo createDiyRouteVo(String parentKey, JSONObject link, JSONObject addonInfo, int sort) {
+        DiyRouteListVo vo = new DiyRouteListVo();
+        vo.setName(link.getStr("name"));
+        vo.setTitle(link.getStr("title"));
+        vo.setAddonInfo(ObjectUtil.defaultIfNull(addonInfo, new JSONObject()));
+        vo.setParent(parentKey);
+        vo.setPage(link.getStr("url"));
+        vo.setIsShare(link.getInt("is_share"));
+        vo.setAction(link.getStr("action"));
+        vo.setSort(sort);
+        return vo;
     }
 
     /**

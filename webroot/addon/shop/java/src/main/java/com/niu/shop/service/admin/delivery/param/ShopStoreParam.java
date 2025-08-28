@@ -1,6 +1,8 @@
 package com.niu.shop.service.admin.delivery.param;
 import lombok.Data;
 import java.io.Serializable;
+import java.util.List;
+
 import jakarta.validation.constraints.*;
 
 /**
@@ -52,5 +54,11 @@ public class ShopStoreParam implements Serializable {
     @NotNull(message = "trade_time参数缺失")
     @NotEmpty(message = "营业时间不能为空")
     private String tradeTime;
+
+    private List<String> timeWeek; //自定义的营业时间["0","1","2","3","4","5","6"]周日-周六
+
+    private List<TradeTimeItemParam> tradeTimeJson; //营业时间JSON
+
+    private Integer timeInterval; //时段设置（分钟）
 
 }

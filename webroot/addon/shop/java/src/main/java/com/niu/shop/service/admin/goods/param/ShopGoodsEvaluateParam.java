@@ -24,7 +24,7 @@ public class ShopGoodsEvaluateParam implements Serializable {
     @NotNull(message = "content参数缺失")
     private String content;
 
-    private String[] images;
+    private Object images;
 
     private Integer isAnonymous;
 

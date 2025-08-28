@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import jdk.jfr.Description;
 
 /**
  * 自定义页面配置
  */
+@Description("自定义页面配置")
 @RestController
 @RequestMapping("/adminapi/diy")
 @SaCheckLogin
@@ -26,6 +28,7 @@ public class ConfigController {
      *
      * @return
      */
+    @Description("底部导航配置列表")
     @GetMapping("/bottom")
     public Result<List<BottomConfigVo>> getBottomList() {
         return Result.success(diyConfigService.getBottomList());
@@ -36,6 +39,7 @@ public class ConfigController {
      *
      * @return
      */
+    @Description("获取底部导航配置")
     @GetMapping("/bottom/config")
     public Result<BottomConfigVo> getBottomConfig(@RequestParam("key") String key) {
         if(key == null|| key.equals("")) key = "app";
@@ -47,6 +51,7 @@ public class ConfigController {
      *
      * @return
      */
+    @Description("设置底部导航配置")
     @PostMapping("/bottom")
     public Result setBottomConfig(@RequestBody SetBottomConfigParam param){
         diyConfigService.setBottomConfig(param);

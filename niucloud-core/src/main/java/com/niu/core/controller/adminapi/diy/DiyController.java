@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import jdk.jfr.Description;
 
 /**
  * 自定义页面管理
@@ -30,6 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/adminapi/diy")
 @SaCheckLogin
+@Description("自定义页面管理")
 public class DiyController {
 
     @Resource
@@ -46,6 +48,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @GetMapping("/diy")
+    @Description("自定义页面分页列表")
     public Result<PageResult<DiyPageListVo>> list(@Validated PageParam pageParam, @Validated DiyPageSearchParam searchParam) {
         PageResult<DiyPageListVo> list = diyPageService.list(pageParam, searchParam);
         return Result.success(list);
@@ -57,6 +60,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/list")
+    @Description("获取自定义页面列表")
     public Result<List<DiyPageListVo>> allList(DiyPageSearchParam searchParam) {
         return Result.success(diyPageService.allList(searchParam));
     }
@@ -68,6 +72,7 @@ public class DiyController {
      * @return Result<DiyPageInfoVo>
      */
     @GetMapping("/diy/{id}")
+    @Description("自定义页面详情")
     public Result<DiyPageInfoVo> info(@PathVariable("id") Integer id) {
         DiyPageInfoVo info = diyPageService.info(id);
         return Result.success(info);
@@ -80,6 +85,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @PostMapping("/diy")
+    @Description("自定义页面添加")
     public Result<Object> add(@Validated @RequestBody DiyPageParam addParam) {
         diyPageService.add(addParam);
         return Result.success();
@@ -92,6 +98,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @PutMapping("/diy/{id}")
+    @Description("自定义页面编辑")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody DiyPageParam editParam) {
         diyPageService.edit(id, editParam);
         return Result.success();
@@ -104,6 +111,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @DeleteMapping("/diy/{id}")
+    @Description("自定义页面删除")
     public Result<Object> del(@PathVariable("id") Integer id) {
         diyPageService.del(id);
         return Result.success();
@@ -115,6 +123,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/init")
+    @Description("页面初始化数据")
     public Result<DiyPageInfoVo> getPageInit(@Validated DiyPageInitParam param) {
         return Result.success(diyPageService.getPageInit(param));
     }
@@ -125,6 +134,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/apps")
+    @Description("存在的应用插件列表")
     public Result<Map<String, InstallAddonListVo>> info() {
         return Result.success(coreAddonService.getInstallAddonList());
     }
@@ -134,6 +144,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/link")
+    @Description("获取自定义链接列表")
     public Result<JSONObject> getLink() {
         return Result.success(diyPageService.getLink());
     }
@@ -149,6 +160,7 @@ public class DiyController {
      * @return Result<Object>
      */
     @PutMapping("/use/{id}")
+    @Description("设置为使用")
     public Result<Object> setUse(@PathVariable("id") Integer id) {
         diyPageService.setUse(id);
         return Result.success();
@@ -159,6 +171,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/template")
+    @Description("获取页面模板")
     public Result<JSONObject> getTemplate(TemplateParam param) {
         return Result.success(diyPageService.getTemplate(param));
     }
@@ -170,6 +183,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/template/pages")
+    @Description("获取模板页面")
     public Result<JSONObject> getTemplatePages(@RequestParam(name = "type", defaultValue = "") String type, @RequestParam(name = "mode", defaultValue = "") String mode) {
         return Result.success(PagesEnum.getPages(type, mode));
     }
@@ -180,6 +194,7 @@ public class DiyController {
      * @return
      */
     @PutMapping("/change")
+    @Description("切换模板")
     public Result<Object> changeTemplate(@Validated @RequestBody StartUpPageConfigParam param) {
         diyPageService.changeTemplate(param);
         return Result.success();
@@ -191,6 +206,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/decorate")
+    @Description("获取页面装修列表")
     public Result<JSONObject> getDecoratePage(DiyPageSearchParam searchParam) {
         return Result.success(diyPageService.getDecoratePage(searchParam));
     }
@@ -200,6 +216,7 @@ public class DiyController {
      * @return
      */
     @GetMapping("/carousel_search")
+    @Description("自定义页面分页列表，轮播搜索组件用")
     public Result<PageResult<DiyPageListVo>> getPageByCarouselSearch(@Validated PageParam pageParam) {
         return Result.success(diyPageService.getPageByCarouselSearch(pageParam));
     }
@@ -210,6 +227,7 @@ public class DiyController {
      * @return
      */
     @PostMapping("/copy")
+    @Description("复制")
     public Result<Object> copy(@RequestBody Id id) {
         diyPageService.copy(id.getId());
         return Result.success();

@@ -1,5 +1,7 @@
 {
-    "pages": [{
+    "pages": [
+        // pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+        {
             "path": "app/pages/index/index",
             "style": {
                 // #ifndef H5
@@ -7,12 +9,10 @@
                 // #endif
                 "navigationBarTitleText": "%pages.index.index%",
                 "usingComponents": {
-                    "diy-group": "../../../../addon/components/diy/group/index",
-                    "fixed-group": "../../../../addon/components/fixed/group/index"
+                    "diy-group": "../../../../addon/components/diy/group/index"
                 },
                 "componentPlaceholder": {
-                    "diy-group": "view",
-                    "fixed-group": "view"
+                    "diy-group": "view"
                 }
             }
         },
@@ -75,12 +75,10 @@
                 // #endif
                 "navigationBarTitleText": "%pages.index.diy%",
                 "usingComponents": {
-                    "diy-group": "../../../../addon/components/diy/group/index",
-                    "fixed-group": "../../../../addon/components/fixed/group/index"
+                    "diy-group": "../../../../addon/components/diy/group/index"
                 },
                 "componentPlaceholder": {
-                    "diy-group": "view",
-                    "fixed-group": "view"
+                    "diy-group": "view"
                 }
             }
         },
@@ -220,8 +218,13 @@
         // {{ PAGE_BEGAIN }}
 // {{ PAGE_END }}
         {
+            "root": "app/components",
+            "pages": []
+        },
+        {
             "root": "app/pages/member",
-            "pages": [{
+            "pages": [
+                {
                     "path": "apply_cash_out",
                     "style": {
                         "navigationBarTitleText": "%pages.member.apply_cash_out%"
@@ -284,12 +287,10 @@
                         // #endif
                         "navigationBarTitleText": "%pages.member.index%",
                         "usingComponents": {
-                            "diy-group": "../../../../addon/components/diy/group/index",
-                            "fixed-group": "../../../../addon/components/fixed/group/index"
+                            "diy-group": "../../../../addon/components/diy/group/index"
                         },
                         "componentPlaceholder": {
-                            "diy-group": "view",
-                            "fixed-group": "view"
+                            "diy-group": "view"
                         }
                     }
                 },
@@ -297,6 +298,16 @@
                     "path": "personal",
                     "style": {
                         "navigationBarTitleText": "%pages.member.personal%"
+                    },
+                    "needLogin": true
+                },
+                {
+                    "path": "personal_form",
+                    "style": {
+                        // #ifndef H5
+                        "navigationStyle": "custom",
+                        // #endif
+                        "navigationBarTitleText": "%pages.member.personal_form%"
                     },
                     "needLogin": true
                 },
@@ -362,19 +373,15 @@
                     }
                 }
             ]
-        },
-        {
-            "root": "app/components",
-            "pages": []
         }
     ],
     "globalStyle": {
         "navigationBarTextStyle": "black",
         "navigationBarTitleText": "",
         "navigationBarBackgroundColor": "#ffffff",
-        "backgroundColor": "#F8F8F8",
-        "backgroundColorTop": "#F8F8F8",
-        "backgroundColorBottom": "#F8F8F8"
+        "backgroundColor": "#F6F6F6",
+        "backgroundColorTop": "#F6F6F6",
+        "backgroundColorBottom": "#F6F6F6"
     },
     "tabBar": {
         "list": [{
@@ -389,12 +396,10 @@
     "easycom": {
         "custom": {
             "diy-group": "@/addon/components/diy/group/index.vue",
-            "fixed-group": "@/addon/components/fixed/group/index.vue",
             "^u-(.*)": "uview-plus/components/u-$1/u-$1.vue",
             "^up-(.*)": "uview-plus/components/u-$1/u-$1.vue",
             "^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue",
-            "diy-(\W.*)": "@/app/components/diy/$1/index.vue",
-            "fixed-(\W.*)": "@/app/components/fixed/$1/index.vue"
+            "diy-(\W.*)": "@/app/components/diy/$1/index.vue"
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.delivery;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.shop.service.admin.delivery.IDeliveryService;
 import com.niu.shop.service.admin.delivery.param.DeliveryConfigParam;
@@ -18,6 +19,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("adminapi/shop/delivery")
+@Description("配送方式管理")
 public class DeliveryController {
 
     @Resource
@@ -28,6 +30,7 @@ public class DeliveryController {
      * @return Result<PageResult<ShopDeliveryDeliverListVo>>
      */
     @GetMapping("/deliveryList")
+    @Description("获取配送方式列表")
     public Result<List<DeliveryConfigVo>> getDeliveryList() {
         return Result.success(deliveryService.getDeliveryList());
     }
@@ -37,6 +40,7 @@ public class DeliveryController {
      * @return
      */
     @PutMapping("/setConfig")
+    @Description("设置配送配置")
     public Result<Object> setDeliveryConfig(@Validated @RequestBody DeliveryConfigParam param) {
         deliveryService.setConfig(param.getValue());
         return Result.success();
@@ -47,6 +51,7 @@ public class DeliveryController {
      * @return Result<PageResult<ShopDeliveryDeliverListVo>>
      */
     @GetMapping("/search")
+    @Description("获取物流查询接口配置")
     public Result<DeliverySearchConfigVo> getDeliverySearchConfig() {
         return Result.success(deliveryService.getDeliverySearchConfig());
     }
@@ -56,6 +61,7 @@ public class DeliveryController {
      * @return Result
      */
     @PostMapping("/search")
+    @Description("设置物流查询接口配置")
     public Result<Object> setDeliverySearchConfig(@Validated @RequestBody DeliverySearchConfigParam param) {
         deliveryService.setDeliverySearchConfig(param);
         return Result.success();

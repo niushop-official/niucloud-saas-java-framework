@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.marketing;
 
+import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.marketing.param.ShopPointExchangeEditStatusParam;
@@ -19,6 +20,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/shop/active/exchange")
+@Description("积分兑换管理")
 public class ShopPointExchangeController {
 
     @Resource
@@ -31,6 +33,7 @@ public class ShopPointExchangeController {
      * @return Result<PageResult<ShopPointExchangeListVo>>
      */
     @GetMapping
+    @Description("获取积分兑换分页列表")
     public Result<PageResult<ShopPointExchangeListVo>> list(@Validated PageParam pageParam,
                                                      @Validated ShopPointExchangeSearchParam searchParam) {
         PageResult<ShopPointExchangeListVo> list = iShopPointExchangeService.list(pageParam, searchParam);
@@ -43,6 +46,7 @@ public class ShopPointExchangeController {
      * @return Result<ShopPointExchangeInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("获取积分兑换详情")
     public Result<ShopPointExchangeInfoVo> info(@Validated @PathVariable("id") Integer id) {
         ShopPointExchangeInfoVo info = iShopPointExchangeService.info(id);
         return Result.success(info);
@@ -54,6 +58,7 @@ public class ShopPointExchangeController {
      * @return AjaxResult<Object>
      */
     @PostMapping
+    @Description("添加积分兑换")
     public Result<Object> add(@Validated @RequestBody ShopPointExchangeParam addParam) {
         iShopPointExchangeService.add(addParam);
         return Result.success();
@@ -65,7 +70,8 @@ public class ShopPointExchangeController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
-    public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeParam editParam) {
+    @Description("编辑积分兑换")
+    public Result<Object> edit(@Validated @PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeParam editParam) {
         iShopPointExchangeService.edit(id, editParam);
         return Result.success();
     }
@@ -76,30 +82,35 @@ public class ShopPointExchangeController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("删除积分兑换")
     public Result<Object> del(@Validated @PathVariable("id") Integer id) {
         iShopPointExchangeService.del(id);
         return Result.success();
     }
 
     @GetMapping("/type")
+    @Description("获取积分兑换类型")
     public Result<?> type() {
         return Result.success(iShopPointExchangeService.type());
     }
 
     @GetMapping("/status")
+    @Description("获取积分兑换状态")
     public Result<?> status() {
         return Result.success(iShopPointExchangeService.status());
     }
 
     @PutMapping("/status/{id}")
-    public Result<?> editStatus(@PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
+    @Description("编辑积分兑换状态")
+    public Result<?> editStatus(@Validated @PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
         editStatusParam.setId(id);
         iShopPointExchangeService.editStatus(editStatusParam);
         return Result.success();
     }
 
     @PutMapping("/sort/{id}")
-    public Result<?> modifySort(@PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
+    @Description("修改积分兑换排序")
+    public Result<?> modifySort(@Validated @PathVariable("id") Integer id, @Validated @RequestBody ShopPointExchangeEditStatusParam editStatusParam) {
         editStatusParam.setId(id);
         iShopPointExchangeService.editStatus(editStatusParam);
         return Result.success();

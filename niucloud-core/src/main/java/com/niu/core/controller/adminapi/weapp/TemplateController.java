@@ -5,10 +5,8 @@ import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.weapp.IWeappTemplateService;
 import com.niu.core.service.admin.weapp.param.WeappTemplateSyncParam;
 import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jdk.jfr.Description;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 import java.util.List;
@@ -20,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("adminapi/weapp/template")
 @SaCheckLogin
+@Description("小程序订阅消息")
 public class TemplateController {
 
     @Resource
@@ -30,6 +29,7 @@ public class TemplateController {
      * @return Result<PageResult<WechatReplyListVo>>
      */
     @GetMapping("")
+    @Description("获取模板消息")
     public Result<List<AddonNoticeListVo>> list() {
         return Result.success(weappTemplateService.list());
     }
@@ -39,7 +39,8 @@ public class TemplateController {
      * @return Result
      */
     @PutMapping("/sync")
-    public Result editKeyword(WeappTemplateSyncParam param) {
+    @Description("同步模板消息")
+    public Result editKeyword(@RequestBody WeappTemplateSyncParam param) {
         weappTemplateService.sync(param);
         return Result.success();
     }

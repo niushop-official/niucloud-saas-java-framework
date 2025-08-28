@@ -5,11 +5,18 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
 * 万能表单填写字段表实体
 */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class DiyFormRecordsFields implements Serializable {
 

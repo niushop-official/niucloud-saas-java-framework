@@ -16,4 +16,6 @@ public class DeliverySearchParam implements Serializable {
 
     /** 寄件人or收件人 手机号后四位 */
     private String mobile;
+
+    private Integer companyId;
 }

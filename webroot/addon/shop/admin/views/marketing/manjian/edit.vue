@@ -37,7 +37,7 @@
                 <div v-if="formData.rule_type === 'cycle'" class="ml-[120px] mb-[10px] mt-[-10px] text-[12px] text-[#999] leading-[20px]">{{ t('ruleTypeTipsTwo') }}</div>
 
                 <!-- 优惠设置 -->
-                <el-form-item :label="t('ruleJson')" prop="rule_json" class="" required>
+                <el-form-item :label="t('ruleJson')" prop="rule_json" required>
                 <!-- 活动层级 -->
                 <div class="el-form-item__content">
                     <div v-for="(level, index) in (formData.rule_type === 'cycle' ? [formData.rule_json[0]] : formData.rule_json)"  :key="index" class="activity-level">
@@ -257,7 +257,7 @@
                                                                     <el-image v-if="row.sku_image" class="w-[60px] h-[60px]" :src="img(row.sku_image)" fit="contain">
                                                                     <template #error>
                                                                         <div class="image-slot">
-                                                                        <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
+                                                                            <img class="w-[60px] h-[60px]" src="@/addon/shop/assets/goods_default.png" />
                                                                         </div>
                                                                     </template>
                                                                     </el-image>
@@ -423,7 +423,6 @@ import {deepClone, img} from '@/utils/common'
 
 const router = useRouter()
 const route = useRoute()
-const pageName = route.meta.title
 const id = route.query.id;
 const start_time = new Date()
 const end_time = new Date(new Date().setMinutes(new Date().getMinutes() + 10));
@@ -508,8 +507,8 @@ const receiveTime = (rule: any, value: any, callback: any) => {
 // 添加优惠设置
 const addSetting = () => {
     if (formData.rule_json.length >= 5) {
-    ElMessage.error(t("addLevelLimit"));
-    return;
+        ElMessage.error(t("addLevelLimit"));
+        return;
     }
     formData.rule_json.push({
         limit: "", // 优惠门槛
@@ -519,7 +518,7 @@ const addSetting = () => {
         is_give_coupon: false,       // 是否送优惠券
         is_give_goods: false,        // 是否送赠品
         is_give_balance: false,        // 是否送余额
-        discount_type:1,
+        discount_type: 1,
         discount_money: '', // 优惠金额
         point: "", // 积分
         balance: "", // 余额
@@ -528,7 +527,7 @@ const addSetting = () => {
         couponIds: [],
         coupon: [],
     });
-};
+}
 
 // 正则表达式
 const regExp: any = {
@@ -556,19 +555,19 @@ const getInfo = () => {
         levelSelectData.value = data
     })
 
-    if(id){
+    if (id) {
         disableSubmit.value = true
         loading.value = true
         const data = {
             manjian_id: id
         }
-        getManjianInfo(data).then((res)=>{
+        getManjianInfo(data).then((res) => {
             const data = res.data.manjian_info;
-            formData.goods_data =res.data.manjian_goods;
+            formData.goods_data = res.data.manjian_goods;
             formData.goods_ids.splice(0, formData.goods_ids.length);
             formData.goods_data.forEach((item: any) => {
-                formData.goods_ids.push( item.sku_id)
-             })
+                formData.goods_ids.push(item.sku_id)
+            })
             Object.assign(formData, data);
             formData.manjian_time = [data.start_time, data.end_time]
             loading.value = false;
@@ -707,15 +706,15 @@ const couponSelect = (selectedCoupons: any, levelIndex: number) => {
             title: coupons.title,
             type_name: coupons.type_name,
             coupon_id: coupons.id,
-            num:1
+            num: 1
         };
 
         if (rule.coupon.length) {
             rule.coupon.forEach((el: any) => {
-            if (el.coupon_id == coupon.coupon_id) {
-                coupon = Object.assign(coupon, el)
-            }
-        })
+                if (el.coupon_id == coupon.coupon_id) {
+                    coupon = Object.assign(coupon, el)
+                }
+            })
         }
         arr.push(deepClone(coupon))
     }
@@ -747,7 +746,7 @@ const onSave = async () => {
     if (hasInvalidRule) {
         return;
     }
-    await formRef.value?.validate(async(valid) => {
+    await formRef.value?.validate(async (valid) => {
         if (valid) {
             loading.value = true
             formData.start_time = formData.manjian_time[0];
@@ -814,12 +813,12 @@ const onSave = async () => {
                     loading.value = false;
                 });
             }
-        }else{
-            var iserror = document.getElementsByClassName('is-error')[0]
+        } else {
+            const iserror = document.getElementsByClassName('is-error')[0];
             iserror.scrollIntoView()
         }
     });
-};
+}
 
 const back = () => {
     router.push('/shop/marketing/manjian/list')

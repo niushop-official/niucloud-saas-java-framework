@@ -6,7 +6,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.utils.RequestUtils;
 import org.springframework.stereotype.Component;
-import springfox.documentation.spring.web.json.Json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.List;
 public class DiyFormDriver {
 
     public Object convert(String fieldValue, String scene) {
-        if(ObjectUtil.isEmpty(fieldValue))  return new Json("");
+        if(ObjectUtil.isEmpty(fieldValue))  return new JSONObject();
         switch (scene) {
             case "FormRadio" -> {
                 return JSONUtil.parseArray(fieldValue);

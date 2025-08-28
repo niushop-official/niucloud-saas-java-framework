@@ -49,11 +49,11 @@
                                         <text class="w-[14.28%] leading-[36rpx] text-center">周日</text>
                                     </view>
                                     <view class="flex flex-wrap items-center justify-start" v-if="!flag">
-                                        <block v-for="(item,index) in state.weekCount" :key="index">
+                                        <template v-for="(item,index) in state.weekCount" :key="index">
                                             <view class="w-[14.28%] flex flex-col justify-center items-center">
                                                 <view v-if="filteredDate(item)"
                                                       class="w-[74rpx] h-[92rpx] bg-[#f4f4f4] text-[var(--text-color-light6)] box-border py-[10rpx] rounded-[8rpx] flex flex-col  items-center"
-                                                      :class="{'sigin-bg !text-[#fff]': isVerDate(item),'!bg-[#f9f9f9] border-[1rpx] !text-[var(--text-color-light9)] border-[#f5f5f5] border-solid': !isVerDate(item) && item < state.curDate && (state.curMonth + 1) == (new Date().getMonth() + 1) ,'mb-[20rpx]':isCurrentDate(item),'mb-[30rpx]':!isCurrentDate(item)}"
+                                                      :class="{'sign-bg !text-[#fff]': isVerDate(item),'!bg-[#f9f9f9] border-[1rpx] !text-[var(--text-color-light9)] border-[#f5f5f5] border-solid': !isVerDate(item) && item < state.curDate && (state.curMonth + 1) == (new Date().getMonth() + 1) ,'mb-[20rpx]':isCurrentDate(item),'mb-[30rpx]':!isCurrentDate(item)}"
                                                       @click="getDayPackFn(item)">
                                                     <text class="text-[24rpx] leading-[28rpx] mb-[6rpx]">{{ filteredDate(item) }}</text>
                                                     <view v-if="filteredDate(item)" class="flex items-center justufy-center">
@@ -69,14 +69,14 @@
                                                 </view>
                                                 <view class="w-[10rpx] h-[10rpx] rounded-[50%] bg-[var(--primary-color)]" v-if="isCurrentDate(item)"></view>
                                             </view>
-                                        </block>
+                                        </template>
                                     </view>
                                     <view class="flex flex-wrap items-center justify-start" v-else>
-                                        <block v-for="(item,index) in state.dataCount">
+                                        <template v-for="(item,index) in state.dataCount">
                                             <view class="w-[14.28%] flex flex-col justify-center items-center mb-[30rpx]">
                                                 <view v-if="filteredDate(item)"
                                                       class="w-[74rpx] h-[92rpx] bg-[#F6FAFF] text-[var(--text-color-light6)] box-border py-[10rpx] rounded-[8rpx] flex flex-col  items-center"
-                                                      :class="{'sigin-bg !text-[#fff]': isVerDate(item) && active ,'!bg-[#FDFDFD] border-[1rpx] border-[#F0F4FA] border-solid': !isVerDate(item) && item < state.curDate && (state.curMonth + 1) == (new Date().getMonth() + 1) && state.curYear == new Date().getFullYear() ,'mb-[20rpx]':isCurrentDate(item),'mb-[30rpx]':!isCurrentDate(item)}"
+                                                      :class="{'sign-bg !text-[#fff]': isVerDate(item) && active ,'!bg-[#FDFDFD] border-[1rpx] border-[#F0F4FA] border-solid': !isVerDate(item) && item < state.curDate && (state.curMonth + 1) == (new Date().getMonth() + 1) && state.curYear == new Date().getFullYear() ,'mb-[20rpx]':isCurrentDate(item),'mb-[30rpx]':!isCurrentDate(item)}"
                                                       @click="getDayPackFn(item)">
                                                     <text class="text-[24rpx] leading-[28rpx] mb-[6rpx]">{{ filteredDate(item) }}</text>
                                                     <view v-if="filteredDate(item)" class="flex items-center justufy-center">
@@ -91,7 +91,7 @@
                                                 </view>
                                                 <view class="w-[10rpx] h-[10rpx] rounded-[50%] bg-[var(--primary-color)]" v-if="isCurrentDate(item)"></view>
                                             </view>
-                                        </block>
+                                        </template>
                                     </view>
                                     <view class="mt-[40rpx] flex justify-center" v-if="state.curMonth + 1 == (new Date().getMonth() + 1) && state.curYear == new Date().getFullYear() ">
                                         <button v-if="!info.is_sign"
@@ -137,7 +137,7 @@
                                 </view>
                                 <view class="flex-1 mx-[20rpx]">
                                     <view class="font-400 text-[28rpx] text-[#303133] leading-[38rpx] mb-[10rpx]">连续签到{{ item.continue_sign }}天</view>
-                                    <view class="flex flex-wrap" v-if="item.gift">
+                                    <view class="flex flex-wrap" v-if="item.gift && item.gift.total">
                                         <view class="flex">
                                             <image :src="img(item.gift.total.icon)" class="w-[30rpx] h-[30rpx] flex-shrink-0"/>
                                             <view class="text-[24rpx] ml-[8rpx] text-[#FF9000] leading-[34rpx] max-w-[330rpx]">{{ item.gift.total.text }}</view>
@@ -164,9 +164,9 @@
                 <view class="popup-common">
                     <view class="title">签到规则</view>
                     <scroll-view :scroll-y="true" class="px-[30rpx] box-border h-[360rpx] overflow-auto">
-                        <block v-for="(item) in info.rule_explain.split('\n')">
+                        <template v-for="(item) in info.rule_explain.split('\n')">
                             <view class="text-[28rpx] leading-[40rpx] mb-[20rpx]">{{ item }}</view>
-                        </block>
+                        </template>
                     </scroll-view>
                     <view class="btn-wrap">
                         <button class="primary-btn-bg btn" @click="signPopup = false">知道了</button>
@@ -186,14 +186,14 @@
                             <view class="text-[36rpx] text-[#EF000C] font-500 mb-[10rpx] text-center">{{ signAward.title }}</view>
                             <view class="text-[24rpx] text-[#333] leading-[34rpx] text-center mb-[60rpx]" v-if="signAward.info">{{ signAward.info }}</view>
                             <view class="px-[68rpx] mb-[100rpx]">
-                                <block v-for="(item,index) in signAward.awards">
+                                <template v-for="(item,index) in signAward.awards">
                                     <template v-if="item.content" v-for="(subItem,subIndex) in item.content">
                                         <view class="flex items-center mb-[30rpx]">
                                             <image :src="img(subItem.icon)" class="w-[42rpx] h-[42rpx]" />
                                             <view class="ml-[20rpx] text-[28rpx] text-[#303133] leading-[38rpx]">{{ subItem.text }}</view>
                                         </view>
                                     </template>
-                                </block>
+                                </template>
                             </view>
                             <view class="flex justify-center relative z-30">
                                 <view class="w-[370rpx] h-[80rpx] primary-btn-bg font-500 rounded-[100rpx] text-[#ffffff] text-center leading-[80rpx] text-[26rpx]" @click="awardShow = false">我知道了</view>
@@ -216,14 +216,14 @@
                             <view class="text-[36rpx] text-[#303133] font-500 mb-[10rpx] text-center relative z-20">{{ packInfo.title }}</view>
                             <view class="text-[24rpx] text-[#333] leading-[34rpx] text-center mb-[60rpx]">{{ packInfo.info }}</view>
                             <view class="px-[68rpx] mb-[100rpx]">
-                                <block v-for="(item,index) in packInfo.awards">
+                                <template v-for="(item,index) in packInfo.awards">
                                     <template v-if="item.content">
                                         <view class="flex items-center mb-[32rpx]" v-for="(subItem,subIndex)  in item.content" :key="subIndex">
                                             <image :src="img(subItem.icon)" class="w-[42rpx] h-[42rpx]" />
                                             <view class="ml-[20rpx] text-[28rpx] text-[#303133] leading-[38rpx]">{{ subItem.text }}</view>
                                         </view>
                                     </template>
-                                </block>
+                                </template>
                             </view>
                             <view class="flex justify-center  relative z-30">
                                 <view class="w-[370rpx] h-[80rpx] border-[2rpx] text-[var(--primary-color)] border-solid rounded-[40rpx] border-[var(--primary-color)] text-center flex-center text-[26rpx] box-border" @click="packShow = false">我知道了</view>
@@ -247,6 +247,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import { getSignInfo, getSignConfig, setSign, getDayPack } from '@/app/api/member'
 import useMemberStore from '@/stores/member'
 import { topTabar } from '@/utils/topTabbar'
+import useSystemStore from "@/stores/system";
 
 const state = reactive({
     dataCount: [], //当月所有天数
@@ -462,23 +463,18 @@ const filteredDate = (date: any) => {
     return date > 0 ? date : ''
 }
 
-// 获取系统状态栏的高度
-let menuButtonInfo: any = {};
-// 如果是小程序，获取右上角胶囊的尺寸信息，避免导航栏右侧内容与胶囊重叠(支付宝小程序非本API，尚未兼容)
-// #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
-menuButtonInfo = uni.getMenuButtonBoundingClientRect();
-// #endif
+const systemStore = useSystemStore()
 /********* 自定义头部 - start ***********/
 const topTabarObj = topTabar()
 let topTabbarData = topTabarObj.setTopTabbarParam({ title: '我的签到' })
 /********* 自定义头部 - end ***********/
 
 const headStyle = computed(() => {
-    let style = pxToRpx(Number(menuButtonInfo.height) + menuButtonInfo.top + 8) + 382 + 'rpx;'
+    let style = pxToRpx(Number(systemStore.menuButtonInfo.height) + systemStore.menuButtonInfo.top + 8) + 382 + 'rpx;'
     return style
 })
 const topStyle = computed(() => {
-    let style = pxToRpx(Number(menuButtonInfo.height) + menuButtonInfo.top + 8) + 50 + 'rpx;'
+    let style = pxToRpx(Number(systemStore.menuButtonInfo.height) + systemStore.menuButtonInfo.top + 8) + 50 + 'rpx;'
     return style
 })
 </script>
@@ -488,7 +484,7 @@ const topStyle = computed(() => {
     background-color: rgba(102, 102, 102, 0.4);
 }
 
-.sigin-bg {
+.sign-bg {
     background: linear-gradient(90deg, #FFA359 0%, #FF5426 100%), #F2F2F2;
 }
 

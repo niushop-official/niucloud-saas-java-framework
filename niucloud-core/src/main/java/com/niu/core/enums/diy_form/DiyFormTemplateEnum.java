@@ -2,6 +2,7 @@ package com.niu.core.enums.diy_form;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 
 public class DiyFormTemplateEnum {
@@ -22,14 +23,12 @@ public class DiyFormTemplateEnum {
     public JSONObject getTemplate(String type, String templateKey){
         JSONObject all = getTemplate();
 
-        for (String key : all.keySet()) {
-            JSONObject temp = all.getJSONObject(key);
-            if (key.equals(type)) {
-                if(ObjectUtil.isNotEmpty(templateKey) && temp.containsKey(templateKey))
-                {
-                    return temp.getJSONObject(templateKey);
-                }
+        if (StringUtils.isNotEmpty(type) && all.containsKey(type)){
+            JSONObject temp = all.getJSONObject(type);
+            if (StringUtils.isNotEmpty(templateKey) && temp.containsKey(templateKey)){
+                return temp.getJSONObject(templateKey);
             }
+            return temp;
         }
         return all;
     }

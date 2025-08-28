@@ -27,8 +27,11 @@ import com.niu.shop.service.api.goods.param.GoodsBrowseDeleteParam;
 import com.niu.shop.service.api.goods.param.GoodsBrowseParam;
 import com.niu.shop.service.api.goods.param.GoodsBrowseSearchParam;
 import com.niu.shop.service.api.goods.vo.GoodsBrowseListVo;
+import com.niu.shop.service.core.goods.ICoreGoodsActivePriceService;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
+import com.niu.shop.service.core.goods.param.GetShowPriceParam;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
+import com.niu.shop.service.core.goods.vo.ShowPriceVo;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -56,18 +59,19 @@ public class GoodsBrowseServiceImpl implements IGoodsBrowseService {
     @Resource
     ICoreGoodsStatService coreGoodsStatService;
 
+    @Resource
+    ICoreGoodsActivePriceService coreGoodsActivePriceService;
+
     @Override
     public PageResult<GoodsBrowseListVo> page(PageParam pageParam, GoodsBrowseSearchParam searchParam) {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
-        MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
-
         MPJQueryWrapper<ShopGoodsBrowse> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("b")
                 .leftJoin("?_shop_goods g ON b.goods_id = g.goods_id".replace("?_", GlobalConfig.tablePrefix))
                 .leftJoin("?_shop_goods_sku gs ON b.sku_id = gs.sku_id".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("b.*,gs.price,gs.price,gs.market_price,gs.member_price,g.member_discount");
+        queryWrapper.select("b.*,gs.price,gs.market_price,gs.member_price,g.member_discount");
         queryWrapper.eq("b.site_id", RequestUtils.siteId());
         queryWrapper.eq("b.member_id", RequestUtils.memberId());
         if (ObjectUtil.isNotEmpty(searchParam.getDate()))
@@ -76,10 +80,15 @@ public class GoodsBrowseServiceImpl implements IGoodsBrowseService {
         IPage<GoodsBrowseListVo> iPage = shopGoodsBrowseMapper.selectJoinPage(new Page<>(page, limit), GoodsBrowseListVo.class, queryWrapper);
 
         for (GoodsBrowseListVo vo : iPage.getRecords()) {
-            if (memberLevel != null) {
-                JSONObject memberPriceConfig = ObjectUtil.isNotEmpty(vo.getMemberPrice()) ? JSONUtil.parseObj(vo.getMemberPrice()) : new JSONObject();
-                vo.setMemberPrice(goodsService.calculateMemberPrice(memberLevel, vo.getMemberDiscount(), memberPriceConfig, vo.getPrice()));
-            }
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                .skuId(vo.getSkuId())
+                .price(vo.getPrice())
+                .memberDiscount(vo.getMemberDiscount())
+                .memberPrice(vo.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
+            vo.setShowPrice(skuShowPrice.getShowPrice());
+            vo.setShowType(skuShowPrice.getShowType());
         }
 
         return PageResult.build(page, limit, iPage.getTotal()).setData(iPage.getRecords());

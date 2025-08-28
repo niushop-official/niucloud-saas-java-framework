@@ -1,5 +1,6 @@
 package com.niu.cms.controller.adminapi.article;
 
+import jdk.jfr.Description;
 import com.niu.cms.service.admin.article.IArticleService;
 import com.niu.cms.service.admin.article.param.ArticleParam;
 import com.niu.cms.service.admin.article.param.ArticleSearchParam;
@@ -19,6 +20,7 @@ import jakarta.annotation.Resource;
 
 @RestController
 @RequestMapping("adminapi/cms/article")
+@Description("文章管理")
 public class ArticleController {
 
     @Resource
@@ -31,6 +33,7 @@ public class ArticleController {
      * @return Result<PageResult<ArticleListVo>>
      */
     @GetMapping("")
+    @Description("文章列表")
     public Result<PageResult<ArticleListVo>> list(@Validated PageParam pageParam, @Validated ArticleSearchParam searchParam) {
         PageResult<ArticleListVo> list = articleService.list(pageParam, searchParam);
         return Result.success(list);
@@ -42,6 +45,7 @@ public class ArticleController {
      * @return Result<ArticleInfoVo>
      */
     @GetMapping("/{id}")
+    @Description("文章详情")
     public Result<ArticleInfoVo> info(@PathVariable("id") Integer id) {
         ArticleInfoVo info = articleService.info(id);
         return Result.success(info);
@@ -53,6 +57,7 @@ public class ArticleController {
      * @return Result<Object>
      */
     @PostMapping("")
+    @Description("文章添加")
     public Result<Object> add(@Validated @RequestBody ArticleParam addParam) {
         articleService.add(addParam);
         return Result.success();
@@ -64,6 +69,7 @@ public class ArticleController {
      * @return Result<Object>
      */
     @PutMapping("/{id}")
+    @Description("文章编辑")
     public Result<Object> edit(@PathVariable("id") Integer id, @Validated @RequestBody ArticleParam editParam) {
         articleService.edit(id, editParam);
         return Result.success();
@@ -75,6 +81,7 @@ public class ArticleController {
      * @return Result<Object>
      */
     @DeleteMapping("/{id}")
+    @Description("文章删除")
     public Result<Object> del(@PathVariable("id") Integer id) {
         articleService.del(id);
         return Result.success();

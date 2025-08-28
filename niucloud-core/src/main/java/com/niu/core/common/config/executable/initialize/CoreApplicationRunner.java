@@ -73,8 +73,9 @@ class CoreApplicationRunner implements ApplicationListener<ApplicationReadyEvent
             // 初始化国际化文件
             AddonModuleBundleMessageSource.init();
 
-            // 业务资源初始化
-            List<? extends Class<?>> list = scanner()
+            try {
+                // 业务资源初始化
+                List<? extends Class<?>> list = scanner()
                     .findCandidateComponents("com.niu")
                     .stream()
                     .map(bd -> {
@@ -85,15 +86,19 @@ class CoreApplicationRunner implements ApplicationListener<ApplicationReadyEvent
                         }
                     })
                     .toList();
-            initialize(list);
+                initialize(list);
 
-            if (!isDev) {
-                // 从管道中获取命令
-                PipeCommandHelper.doPipeCommand();
+                if (!isDev) {
+                    // 从管道中获取命令
+                    PipeCommandHelper.doPipeCommand();
+                }
+
+                // 钩子输出
+                System.out.println("Service started successfully.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("init error.");
             }
-
-            // 钩子输出
-            System.out.println("Service started successfully.");
         }, delaySeconds, TimeUnit.SECONDS);
 
         executorService.shutdown();

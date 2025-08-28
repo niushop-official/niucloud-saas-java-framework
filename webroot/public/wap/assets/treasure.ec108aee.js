@@ -1,1 +1,0 @@
-import{ak as t}from"./index-cae4d329.js";function e(){return t.get("sow_community/treasure/type")}function n(e){return t.get("sow_community/treasure",e)}function r(e){return t.get("sow_community/treasure/content",e)}export{n as a,r as b,e as g};

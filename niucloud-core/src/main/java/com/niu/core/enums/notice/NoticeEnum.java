@@ -71,6 +71,7 @@ public class NoticeEnum {
             }
         }
         return noticeMap;
-
     }
+
+//    getNotice
 }

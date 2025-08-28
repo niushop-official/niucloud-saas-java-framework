@@ -198,6 +198,10 @@ public class MemberInfoVo {
      */
     private String memberLevelName;
 
+    private String formId;
+
+    private String formRecordId;
+
     /**
      * 性别 0保密 1男 2女
      *

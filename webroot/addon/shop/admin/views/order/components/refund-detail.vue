@@ -69,7 +69,7 @@
                     <div class="text-[14px] min-w-[110px] border-solid border-l-[3px] border-[var(--el-color-primary)] pl-[5px]">{{ t('afterSales') }}</div>
                     <div class="px-[30px] mt-[20px] mb-[20px]">
                         <el-row class="row-bg px-[30px] mb-[20px]" :gutter="20">
-                            <el-col :span="8">
+                            <el-col :span="12">
                                 <el-form-item :label="t('orderRefundNo')">
                                     <div class="input-width">{{ formData.order_refund_no }}</div>
                                 </el-form-item>
@@ -80,7 +80,7 @@
                                     <div class="input-width">{{ formData.create_time }}</div>
                                 </el-form-item>
                             </el-col>
-                            <el-col :span="8">
+                            <el-col :span="12">
                                 <el-form-item :label="t('refundMoney')">
                                     <div class="input-width" v-if="formData.status == 8">￥{{ formData.money }}</div>
                                     <div class="input-width" v-else>￥{{ formData.apply_money }}</div>
@@ -91,7 +91,7 @@
                             </el-col>
                         </el-row>
                         <el-row class="row-bg px-[30px] mb-[20px]" :gutter="20">
-                            <el-col :span="8">
+                            <el-col :span="24">
                                 <el-form-item :label="t('refundVoucher')">
                                     <div class="input-width flex" v-if="formData.voucher">
                                         <div class="mr-3" v-for="(voucherItem, voucherIndex) in formData.voucher" :key="voucherIndex">
@@ -137,9 +137,9 @@
                             <span class="ml-[30px] text-[14px] mr-[20px]">{{ t('refundStatus') }}：</span>
                             <span class="text-[14px]">{{ formData.status_name }}</span>
                         </p>
-                        <div class="mt-[20px]" v-if="formData.shop_reason">
-                            <span class="ml-[30px] text-[14px] mr-[20px]">{{ t('refuseReason') }}：</span>
-                            <span class="text-[14px]">{{ formData.shop_reason }}</span>
+                        <div class="mt-[20px] flex " v-if="formData.shop_reason">
+                            <span class="ml-[30px] text-[14px] mr-[20px] flex-shrink-0">{{ t('refuseReason') }}：</span>
+                            <div class="text-[14px] break-all">{{ formData.shop_reason }}</div>
                         </div>
                         <div class="flex mt-[10px]">
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" v-if="formData.status == 1" @click="agreeEvent">{{ t('agree') }}</span>
@@ -147,6 +147,7 @@
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" v-if="formData.status == 4 && formData.refund_type == 2" @click="deliverEvent">{{ t('confirmDelivery') }}</span>
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" v-if="formData.status == 4 && formData.refund_type == 2" @click="deliveryRefuseEvent">{{ t('refuse') }}</span>
                             <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" v-if="formData.status == 6" @click="transferEvent">{{ t('transferAccounts') }}</span>
+                            <span class="text-[14px] px-[15px] py-[5px] ml-[30px] text-[#5c96fc] bg-[#ebf3ff] cursor-pointer" v-if="formData.status != 8 && formData.status != -3"  @click="closeEvent">{{ t('closeRefund') }}</span>
                         </div>
                         <div class="flex ml-[30px] mt-[15px]">
                             <span class="text-[14px] text-[#ff7f5b]">{{ t('remind') }}：</span>
@@ -182,10 +183,10 @@
                         <template v-if="formData.refund_log.length > 0">
                             <div class="flex" v-for="(items, index) in formData.refund_log" :key="index">
                                 <div class="mr-[20px] min-w-[71px]">
-                                    <div class="leading-[1] w-full text-[14px] w-[100px] flex justify-end">
+                                    <div class="leading-[1] text-[14px] w-[100px] flex justify-end">
                                         {{ items.create_time.split(' ')[0] }}
                                     </div>
-                                    <div class="leading-[1] w-full text-[14px]  w-[100px] flex justify-end mt-[15px]">
+                                    <div class="leading-[1] text-[14px]  w-[100px] flex justify-end mt-[15px]">
                                         {{ items.create_time.split(' ')[1] }}
                                     </div>
                                 </div>
@@ -211,12 +212,12 @@
             </el-form>
 
             <el-card class="box-card !border-none relative" shadow="never" v-if="!loading && !formData">
-				<el-empty :description="t('orderInfoEmpty')" />
-			</el-card>
+                <el-empty :description="t('orderInfoEmpty')" />
+            </el-card>
 
             <!-- 拒绝退款弹框 -->
             <el-dialog v-model="refuseShowDialog" :title="t('orderRefundRefuse')" width="460px" class="diy-dialog-wrap" :destroy-on-close="true">
-                <el-form :model="refuseFormData" label-width="90px" ref="refuseFormRef" :rules="refundFormRules" class="page-form">
+                <el-form :model="refuseFormData" label-width="90px" ref="refuseFormRef" :rules="refundFormRules">
                     <el-form-item :label="t('refuseReason')" prop="shop_reason">
                         <el-input v-model.trim="refuseFormData.shop_reason" type="textarea" rows="4" clearable class="input-width" maxlength="200" show-word-limit />
                     </el-form-item>
@@ -257,7 +258,7 @@
             </el-dialog>
             <!-- 拒绝收货 -->
             <el-dialog v-model="deliveryRefuseDialog" :title="t('orderRefundRefuse')" width="460px" class="diy-dialog-wrap" :destroy-on-close="true">
-                <el-form :model="deliveryRefuseFormData" label-width="90px" ref="deliveryRefuseFormRef" :rules="deliveryRefundFormRules" class="page-form">
+                <el-form :model="deliveryRefuseFormData" label-width="90px" ref="deliveryRefuseFormRef" :rules="deliveryRefundFormRules">
                     <el-form-item :label="t('refuseReason')" prop="shop_reason">
                         <el-input v-model.trim="deliveryRefuseFormData.shop_reason" type="textarea" rows="4" clearable class="input-width" maxlength="200" show-word-limit />
                     </el-form-item>
@@ -276,13 +277,12 @@
 <script lang="ts" setup>
 import { ref, reactive, computed } from 'vue'
 import { t } from '@/lang'
-import { orderRefundDetail, auditRefund, refundDelivery } from '@/addon/shop/api/order'
+import { orderRefundDetail, auditRefund, refundDelivery ,closeRefund} from '@/addon/shop/api/order'
 import { getOrderRefundAddress } from '@/addon/shop/api/shop_address'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { img } from '@/utils/common'
 import { ElMessageBox, FormInstance } from 'element-plus'
 
-const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 let popTitle: string = '订单详情'
@@ -298,7 +298,6 @@ const activeName = ref('order')
 let refundId = '';
 const emit = defineEmits(['load'])
 
-
 const getOrderInfoFn = async () => {
     loading.value = true
     if (refundId) {
@@ -313,8 +312,6 @@ const getOrderInfoFn = async () => {
         loading.value = false
     }
 }
-
-
 
 // 退款参数
 const refuseShowDialog = ref(false)
@@ -337,7 +334,7 @@ const formRules = computed(() => {
             { required: true, message: t('moneyPlaceholder'), trigger: 'blur' }
         ],
         refund_address_id: [
-            { required: true, message: t('refundaddressPlaceholder'), trigger: 'blur' }
+            { required: true, message: t('refundAddressPlaceholder'), trigger: 'blur' }
         ]
     }
 })
@@ -502,6 +499,21 @@ const toOrderDetail = (id:number) => {
     window.open(routeUrl.href, '_blank')
 }
 
+// 关闭售后
+const closeEvent = () => {
+    ElMessageBox.confirm(t('closeRefundTips'), t('warning'),
+        {
+            confirmButtonText: t('confirm'),
+            cancelButtonText: t('cancel'),
+            type: 'warning'
+        }
+    ).then(() => {
+        closeRefund(formData.value.order_refund_no).then(() => {
+            resetFn();
+        })
+    })
+}
+
 
 const setFormData = async (row: any = null) => {
     refundId = row.id;
@@ -523,7 +535,7 @@ defineExpose({
 
 <style lang="scss">
 .member-detail-drawer{
-    width: 1000px !important;
+    width: 1300px !important;
 }
 .page-form .input-width{
     width: 170px;

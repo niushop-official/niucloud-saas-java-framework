@@ -65,11 +65,11 @@ public class WebSiteResourceFilter implements Filter {
             request.getRequestDispatcher("/admin/index.html").forward(request, response);
             return;
         }
-        if (requestUri.startsWith("/wap")) {
+        if (requestUri.startsWith("/wap/")) {
             request.getRequestDispatcher("/wap/index.html").forward(request, response);
             return;
         }
-        if (requestUri.startsWith("/web")) {
+        if (requestUri.startsWith("/web/")) {
             request.getRequestDispatcher("/web/index.html").forward(request, response);
             return;
         }

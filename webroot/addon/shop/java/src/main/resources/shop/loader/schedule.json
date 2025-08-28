@@ -52,5 +52,17 @@
 		"name": "优惠券到期自动过期",
 		"desc": "",
 		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
+		"key": "DiscountStartJob",
+		"name": "限时折扣自动开启",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
+	},
+	{
+		"key": "DiscountEndJob",
+		"name": "限时折扣自动关闭",
+		"desc": "",
+		"time": "{\"type\":\"min\",\"week\":\"\",\"day\":\"\",\"hour\":\"\",\"min\":\"1\"}"
 	}
 ]

@@ -1,0 +1,1 @@
+import{bL as o,i as c,u as i,Y as u,W as _,__tla as m}from"./entry.6da055c7.js";let t,l,d=Promise.all([(()=>{try{return m}catch{}})()]).then(async()=>{let a,r;a={prefix:Math.floor(Math.random()*1e4),current:0},r=Symbol("elIdInjection"),t=()=>u()?_(r,a):a,l=s=>{const e=t(),n=o();return c(()=>i(s)||`${n.value}-id-${e.prefix}-${e.current++}`)}});export{d as __tla,t as a,l as u};

@@ -7,17 +7,17 @@
                 <span class="text-page-title">{{ pageName }}</span>
             </div>
 
-            <div class="flex justify-between items-center mt-[20px]">
+            <div class="flex justify-between items-start mt-[20px]">
                 <el-form :inline="true" :model="sysUserLogTableData.searchParam" ref="searchFormRef">
                     <el-form-item :label="t('ip')" prop="ip">
-                        <el-input v-model="sysUserLogTableData.searchParam.ip" :placeholder="t('ipPlaceholder')" />
+                        <el-input v-model.trim="sysUserLogTableData.searchParam.ip" :placeholder="t('ipPlaceholder')" />
                     </el-form-item>
                     <el-form-item :label="t('username')" prop="username">
-                        <el-input v-model="sysUserLogTableData.searchParam.username" :placeholder="t('usernamePlaceholder')" />
+                        <el-input v-model.trim="sysUserLogTableData.searchParam.username" :placeholder="t('usernamePlaceholder')" />
                     </el-form-item>
 
                     <el-form-item :label="t('url')" prop="url">
-                        <el-input v-model="sysUserLogTableData.searchParam.url" :placeholder="t('urlPlaceholder')" />
+                        <el-input v-model.trim="sysUserLogTableData.searchParam.url" :placeholder="t('urlPlaceholder')" />
                     </el-form-item>
 
                     <el-form-item>
@@ -25,6 +25,11 @@
                         <el-button @click="resetForm(searchFormRef)">{{ t('reset') }}</el-button>
                     </el-form-item>
                 </el-form>
+                <div class="flex justify-end items-center w-[20%]">
+                    <div>
+                        <el-button type="primary" class="w-[100px]" @click="clearEvent()">{{ t('清空日志') }}</el-button>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -34,6 +39,7 @@
                     </template>
                     <el-table-column prop="username" :label="t('username')" min-width="120" />
                     <el-table-column prop="ip" :label="t('ip')" min-width="100" align="left"/>
+                    <el-table-column prop="operation" :label="t('operationLog')" min-width="200" align="left"/>
                     <el-table-column prop="url" :label="t('url')" min-width="180" />
                     <el-table-column prop="type" :label="t('type')" min-width="100" align="center"/>
                      <el-table-column :label="t('createTime')" min-width="180" align="center">
@@ -61,7 +67,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
-import { getLogList } from '@/app/api/site'
+import { getLogList, logDestroy } from '@/app/api/site'
 import UserLogDetail from '@/app/views/auth/components/user-log-detail.vue'
 import { FormInstance } from 'element-plus'
 import { useRoute } from 'vue-router'
@@ -117,6 +123,20 @@ const detailEvent = (data: any) => {
     userLogDetailDialog.value.setFormData(data)
     userLogDetailDialog.value.showDialog = true
 }
+
+const clearEvent = () => {
+    ElMessageBox.confirm(t('确定要全部清空操作日志吗?'), t('提示'), {
+        confirmButtonText: t('confirm'),
+        cancelButtonText: t('cancel'),
+        type: 'warning'
+    }).then(() => {
+        logDestroy().then(() => {
+            loadSysUserLogList()
+        })
+    }).catch(() => {
+    })
+}
+
 </script>
 
 <style lang="scss" scoped></style>

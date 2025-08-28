@@ -165,7 +165,7 @@ public class SystemServiceImpl implements ISystemService {
             for (SpreadQrcodeParam.Param qrcodeParam : param.getParams()) {
                 data.put(qrcodeParam.getColumnName(), qrcodeParam.getColumnValue());
             }
-            String dir = "upload/qrcode/" + RequestUtils.siteId() + "/" + param.getFolder() + "/";
+            String dir = "upload/qrcode/" + RequestUtils.siteId() + "/" + param.getFolder();
             vo.setWeappPath(QrcodeUtils.qrcodeToFile(RequestUtils.siteId(), "weapp", "", param.getPage(), data, dir));
         } catch (Exception e) {
 

@@ -11,7 +11,7 @@ ALTER TABLE `{{prefix}}shop_store`
 ALTER TABLE `{{prefix}}shop_store` 
   ADD COLUMN time_interval INT NOT NULL DEFAULT 0 COMMENT '时段设置（分钟）';
   
-ALTER TABLE `{{prefix}}shop_stor`e
+ALTER TABLE `{{prefix}}shop_store`
    MODIFY create_time INT NOT NULL DEFAULT 0 COMMENT '添加时间' AFTER time_interval;
    
 ALTER TABLE `{{prefix}}shop_store` 
@@ -23,10 +23,10 @@ ALTER TABLE `{{prefix}}shop_point_exchange_order`
 ALTER TABLE `{{prefix}}shop_point_exchange_order` 
   MODIFY COLUMN order_money DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '订单金额';
 
-ALTER TABLE `{{prefix}}shop_order_refund_lo`g
+ALTER TABLE `{{prefix}}shop_order_refund_log`
   CHANGE COLUMN main_type main_type VARCHAR(255) NOT NULL DEFAULT '' COMMENT '操作人类型';
   
-ALTER TABLE `{{prefix}}shop_order_refun`d
+ALTER TABLE `{{prefix}}shop_order_refund`
   ADD COLUMN delete_time INT NOT NULL DEFAULT 0 COMMENT '是否删除(针对后台)';
   
 ALTER TABLE `{{prefix}}shop_order_goods` 
@@ -53,7 +53,7 @@ ALTER TABLE `{{prefix}}shop_order_delivery`
 ALTER TABLE `{{prefix}}shop_order_delivery` 
  MODIFY create_time INT NOT NULL DEFAULT 0 COMMENT '创建时间' AFTER remark;
  
-ALTER TABLE `{{prefix}}shop_order_batch_deliver`y
+ALTER TABLE `{{prefix}}shop_order_batch_delivery`
    CHANGE COLUMN type type VARCHAR(255) NOT NULL DEFAULT '' COMMENT '操作类型 批量发货  批量打单 ....';
    
 ALTER TABLE `{{prefix}}shop_order_batch_delivery` 

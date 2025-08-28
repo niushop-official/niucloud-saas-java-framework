@@ -62,13 +62,13 @@ ALTER TABLE `{{prefix}}shop_order_batch_delivery`
 ALTER TABLE `{{prefix}}shop_order` 
   ADD COLUMN buyer_ask_delivery_time VARCHAR(255) NOT NULL DEFAULT '' COMMENT '购买人要求的配送/发货/自提时间（文本）';
   
-ALTER TABLE `{{prefix}}shop_orde`r
+ALTER TABLE `{{prefix}}shop_order`
     ADD COLUMN relate_order_id INT NOT NULL DEFAULT 0 COMMENT '关联活动来源订单id';
     
 ALTER TABLE `{{prefix}}shop_order` 
   ADD COLUMN relate_source VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'seckill 秒杀系统 ';
   
-ALTER TABLE `{{prefix}}shop_goods_ran`k
+ALTER TABLE `{{prefix}}shop_goods_rank`
 MODIFY COLUMN brand_ids VARCHAR(255) NOT NULL DEFAULT '' COMMENT '商品品牌id';
   
 ALTER TABLE `{{prefix}}shop_goods_evaluate` 
@@ -77,7 +77,7 @@ ALTER TABLE `{{prefix}}shop_goods_evaluate`
 ALTER TABLE `{{prefix}}shop_goods_brand` 
   CHANGE COLUMN color_json color_json TEXT DEFAULT NULL;
 
- ALTER TABLE `{{prefix}}shop_goods_bran`d
+ ALTER TABLE `{{prefix}}shop_goods_brand`
   MODIFY color_json TEXT DEFAULT NULL AFTER delete_time;
   
 ALTER TABLE `{{prefix}}shop_goods` 

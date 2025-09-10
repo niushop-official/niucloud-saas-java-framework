@@ -151,6 +151,23 @@ niucloud-admin-java
 
 
 ### 界面截图
+![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj1.png)
+![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj2.png)
+![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj3.png)
+![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj4.png)
+
+
+### 商城插件  :point_right:   SHOP
+![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_shop1.png)
+|![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop3.jpg)| ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop9.jpg) |
+| :---: | :---: |
+| ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop7.jpg) | ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop6.jpg) |
+| ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop10.jpg) | ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop11.jpg) |
+| ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop12.jpg) | ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas_shop13.jpg) |
+
+
+
+
 
 ![输入图片说明](https://media.niucloud.com/172431244911349b7ff1e9608035bb6957850ec96d_aliyun.png)
 ![输入图片说明](https://media.niucloud.com/172431267682a7be77c2c9e61520be08b080cc8ac2_aliyun.png)

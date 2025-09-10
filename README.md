@@ -32,14 +32,13 @@ niucloud-admin框架，目前已经实现有JAVA, PHP两大版本功能实现。
 ### 设计理念
 
 强大的多应用+插件组合设计理念，低耦合，高内聚
-
 全新生态设计，多应用聚合+多插件组合运营模式全新升级，支持共同会员体系下多种应用+插件组合，DIY装修出最强的软件系统
-![输入图片说明](https://www.niushop.com/app/web/view/public/img/product/b2cv6/low-play.mp4?v=4)
+
 
 ### 插件化，完全为开发者二次开发而生
 niucloud-admin-java框架采用插件化模式设计，可以做到多种插件共存，组合使用。一切皆为插件（应用）！比如您有一个项目是旅游的项目，这个项目的要求是，既有商城的功能，又有旅游项目的销售，还需要进行会员的管理，甚至于还要客服系统。传统的实现方式是，找多个源码，东拼西凑，二次开发，或者部署多套独立的系统，配合起来。而今天，使用niucloud-admin-java，可以通过组装的方式，在一套体系中实现，随着发展，会有越来越多的各行各业的插件和应用上架。您对于项目的定制，可能只需要简单组装，装修页面，就可以最终实现功能交付。
 <br>
-![输入图片说明](https://media.niucloud.com/17243126765cd61a78df7867dc6dcafe4d5c705be9_aliyun.png)
+![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj1.png)
 ![输入图片说明](https://media.niucloud.com/1724314998d5372ae6ddd97e604ec8ba1bef7acce8_aliyun.png)
 
 ### 首创强大的一键云安装，云编译，云发布,升级引擎
@@ -151,7 +150,6 @@ niucloud-admin-java
 
 
 ### 界面截图
-![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj1.png)
 ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj2.png)
 ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj3.png)
 ![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj4.png)

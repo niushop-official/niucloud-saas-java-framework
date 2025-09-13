@@ -122,7 +122,7 @@ niucloud-admin-java
   |  |  |-application.yml == 应用程序配置文件 
   |  |  |-application-prod.yml == 生产环境应用程序配置文件 
   |  |  |-web-app.jar == niucloud-web-app打包后的jar文件    
-  |  |-public == 前台各端口编译后的代码目录，这里是nigix执行目录
+  |  |-public == 前台各端口编译后的代码目录，这里是nginx执行目录
   |  |  |-admin   
   |  |  |-h5  == 要注意！uniapp编译的目录，会变成h5(wap端)
   |  |  |-web    

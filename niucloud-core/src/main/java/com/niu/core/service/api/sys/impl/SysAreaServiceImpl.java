@@ -201,11 +201,13 @@ public class SysAreaServiceImpl implements ISysAreaService {
         String addressJsonString = TencentGeocoder.getAddress(key, param.getLatlng(), param.getGetPoi());
         JSONObject jsonObjectResult = TencentGeocoder.formatData(addressJsonString);
         String province = jsonObjectResult.getStr("province");
-        jsonObjectResult.putOpt("province_id", this.queryCodeByNameAndLevel(province, 1));
+        Integer province_id = this.queryCodeByNameAndLevel(province, 1, 0);
+        jsonObjectResult.putOpt("province_id", province_id );
         String city = jsonObjectResult.getStr("city");
-        jsonObjectResult.putOpt("city_id", this.queryCodeByNameAndLevel(city, 2));
+        Integer city_id = this.queryCodeByNameAndLevel(city, 2, province_id);
+        jsonObjectResult.putOpt("city_id", city_id );
         String district = jsonObjectResult.getStr("district");
-        jsonObjectResult.putOpt("district_id", this.queryCodeByNameAndLevel(district, 3));
+        jsonObjectResult.putOpt("district_id", this.queryCodeByNameAndLevel(district, 3, city_id));
         return jsonObjectResult;
     }
 
@@ -214,11 +216,12 @@ public class SysAreaServiceImpl implements ISysAreaService {
      * @param level
      * @return
      */
-    private Integer queryCodeByNameAndLevel(String areaName, int level) {
+    private Integer queryCodeByNameAndLevel(String areaName, int level, Integer pid) {
         QueryWrapper<SysArea> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("id");
         queryWrapper.eq("name", areaName);
         queryWrapper.eq("level", level);
+        queryWrapper.eq( pid > 0 && level > 1 , "pid", pid);
         SysArea sysArea = this.sysAreaMapper.selectOne(queryWrapper);
         if (sysArea != null) {
             return sysArea.getId();

@@ -1,5 +1,6 @@
 package com.niu.core.service.core.schedule.impl;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -7,7 +8,9 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.job.quartz.QuartzJobManager;
+import com.niu.core.common.config.dataization.AddonModuleContext;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.addon.Addon;
@@ -15,11 +18,13 @@ import com.niu.core.entity.sys.SysSchedule;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.sys.SysScheduleMapper;
 import com.niu.core.service.core.schedule.ICoreScheduleService;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,13 +58,20 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
                 String key = item.getStr("key");
                 if (scheduleMap.get(key) == null) {
                     SysSchedule sysScheduleVo = JSONUtil.toBean(item, SysSchedule.class);
-                    sysScheduleVo.setAddon("core");
+                    sysScheduleVo.setAddon("");
                     sysScheduleVo.setStatus(1);
                     list.add(sysScheduleVo);
                 }
             }
 
             if (list.size() > 0) {
+                for (SysSchedule sysScheduleVo : list) {
+                    try {
+                        QuartzJobManager.stopJob(sysScheduleVo.getKey());
+                        QuartzJobManager.startJob(sysScheduleVo);
+                    } catch (Exception e) {
+                    }
+                }
                 super.saveBatch(list);
             }
         }
@@ -78,8 +90,23 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
      */
     @Override
     public void installAddonSchedule(String addon) {
-        JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-        JSONArray schedule = jsonModuleLoader.getResultSet(addon, "schedule.json");
+        Map<String, Class<?>> addonModule =  AddonModuleContext.getAddonModuleMap();
+        JSONArray schedule = null;
+        if (addonModule.get(addon) != null) {
+            JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+            schedule = jsonModuleLoader.getResultSet(addon, "schedule.json");
+        } else {
+            File file = new File(WebAppEnvs.get().webRootDownAddon + addon + "/java/src/main/resources/"+ addon +"/loader/schedule.json");
+            if (file.exists()) {
+                try {
+                    String content = FileUtils.readFileToString(file);
+                    if (ObjectUtil.isNotEmpty(content)) {
+                        schedule = JSONUtil.parseArray(content);
+                    }
+                } catch (Exception e) {
+                }
+            }
+        }
 
         if (ObjectUtil.isNotEmpty(schedule)) {
             List<SysSchedule> scheduleList = sysScheduleMapper.selectList(new QueryWrapper<SysSchedule>().eq("addon", addon).select("id,`key`"));
@@ -99,6 +126,13 @@ public class CoreScheduleServiceImpl extends ServiceImpl<SysScheduleMapper, SysS
             }
 
             if (list.size() > 0) {
+                for (SysSchedule sysScheduleVo : list) {
+                    try {
+                        QuartzJobManager.stopJob(sysScheduleVo.getKey());
+                        QuartzJobManager.startJob(sysScheduleVo);
+                    } catch (Exception e) {
+                    }
+                }
                 super.saveBatch(list);
             }
         }

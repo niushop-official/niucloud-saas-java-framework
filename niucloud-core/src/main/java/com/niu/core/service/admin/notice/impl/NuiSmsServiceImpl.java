@@ -10,6 +10,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.pagehelper.util.StringUtil;
 import com.niu.core.common.domain.PageParam;
@@ -101,6 +102,8 @@ public class NuiSmsServiceImpl implements INuiSmsService {
     private final String SIGN_DEL = "https://api-shss.zthysms.com/sms/v1/sign/delete";
 
     private final String TEMPLATE_DELETE = "https://api-shss.zthysms.com/sms/v2/template/delete";
+
+    private final String TEMPLATE_INFO_URL = "/niusms/template/%s/info";
 
 
     @Resource
@@ -307,7 +310,7 @@ public class NuiSmsServiceImpl implements INuiSmsService {
             map = list.stream().collect(Collectors.toMap(SysNotice::getKey, item -> item));
         }
         List<TemplateListVo> notice = new ArrayList<>();
-        for (Map.Entry<String, NoticeEnumListVo> noticeMap : NoticeEnum.getNotice().entrySet()) {
+        for (Map.Entry<String, NoticeEnumListVo> noticeMap : NoticeEnum.getNiuyunNotice().entrySet()) {
             TemplateListVo noticeInfoVo = new TemplateListVo();
             BeanUtil.copyProperties(noticeMap.getValue(), noticeInfoVo);
             if (map.containsKey(noticeMap.getKey())) {
@@ -805,6 +808,35 @@ public class NuiSmsServiceImpl implements INuiSmsService {
         } catch (Exception e) {
             log.error("删除模版失败异常信息:{}，", e.getMessage());
             throw new AdminException("删除模版失败");
+        }
+    }
+
+    @Override
+    public NiuSmsTemplate templateInfo(String username, String smsType, String templateKey) {
+        NiuSmsTemplate niuSmsTemplate = niuSmsTemplateMapper.selectOne(new LambdaQueryWrapper<NiuSmsTemplate>()
+                .eq(NiuSmsTemplate::getSiteId, RequestUtils.siteId())
+                .eq(NiuSmsTemplate::getSmsType, smsType)
+                .eq(NiuSmsTemplate::getUsername, username)
+                .eq(NiuSmsTemplate::getTemplateKey, templateKey));
+        if (ObjectUtil.isEmpty(niuSmsTemplate)){
+            throw new AdminException("短信模版暂未报备");
+        }
+        String orderCreateUrl = String.format(TEMPLATE_INFO_URL, username);
+        Map<String, Object> templateInfoParam = new HashMap<>();
+        templateInfoParam.put("tem_id", niuSmsTemplate.getTemplateId());
+        try {
+            JSONObject jsonObject = NiucloudUtils.Niucloud.get(orderCreateUrl, templateInfoParam);
+            JSONObject result = jsonObject.getJSONObject("data");
+            //删除null值 防止序列化报错
+            JacksonUtils.removeNull(result);
+            String auditStatus = result.containsKey("auditResult") && ObjectUtil.isNotEmpty(result.getJSONObject("auditResult"))
+                    ? result.getStr("auditResult") : niuSmsTemplate.getAuditStatus();
+            niuSmsTemplate.setAuditStatus(auditStatus);
+            niuSmsTemplateMapper.updateById(niuSmsTemplate);
+            return niuSmsTemplate;
+        } catch (Exception e) {
+            log.error("获取模版信息失败异常信息:{}", e.getMessage());
+            throw new AdminException("获取模版信息失败");
         }
     }
 

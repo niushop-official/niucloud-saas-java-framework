@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -357,7 +358,7 @@ public class AddonServiceImpl implements IAddonService {
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(response.bodyBytes());
-            ZipUtil.unzip(file.getPath(), WebAppEnvs.get().webRootDownAddon, CharsetUtil.CHARSET_UTF_8);
+            ZipUtil.unzip(file.getPath(), WebAppEnvs.get().webRootDownAddon, Charset.forName(System.getProperty("sun.jnu.encoding")));
         }  catch (Exception e) {
             e.printStackTrace();
             throw new CommonException(e.getMessage());

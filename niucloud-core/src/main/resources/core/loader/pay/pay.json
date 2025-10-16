@@ -4,14 +4,16 @@
     "key": "wechatpay",
     "icon": "static/resource/icon/pay_icon/wechatpay.png",
     "setting_component": "/src/app/views/setting/components/pay-wechatpay.vue",
-    "driver": "com.niu.core.service.core.pay.driver.Wechatpay"
+    "driver": "com.niu.core.service.core.pay.driver.Wechatpay",
+    "encrypt_params": ["mch_public_cert_path", "mch_secret_cert", "mch_secret_key", "wechat_public_cert_path"]
   },
   "alipay": {
     "name": "支付宝支付",
     "key": "alipay",
     "icon": "static/resource/icon/pay_icon/alipay.png",
     "setting_component": "/src/app/views/setting/components/pay-alipay.vue",
-    "driver": "com.niu.core.service.core.pay.driver.Alipay"
+    "driver": "com.niu.core.service.core.pay.driver.Alipay",
+    "encrypt_params": ["app_secret_cert", "app_public_cert_path", "alipay_public_cert_path", "alipay_root_cert_path"]
   },
   "balancepay": {
     "name": "余额支付",

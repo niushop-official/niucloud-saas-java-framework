@@ -11,6 +11,8 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.enums.channel.WechatEncryptionTypeEnum;
 import com.niu.core.service.admin.wxoplatform.vo.OplatformConfigVo;
+import com.niu.core.service.core.channel.ICoreAppService;
+import com.niu.core.service.core.channel.vo.AppConfigVo;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import com.niu.core.service.core.wechat.ICoreWechatConfigService;
@@ -129,6 +131,25 @@ public class WechatUtils {
 
             return service;
         }
+    }
+
+    /**
+     * App
+     * @param siteId
+     * @return
+     */
+    public static WxMpService app(Integer siteId) {
+        ICoreAppService coreAppService = (ICoreAppService) SpringContext.getBean(ICoreAppService.class);
+        AppConfigVo appConfigVo = coreAppService.getConfig(siteId);
+
+        WxMpDefaultConfigImpl wxMpDefaultConfig = new WxMpDefaultConfigImpl();
+        wxMpDefaultConfig.setAppId(appConfigVo.getWechatAppId());
+        wxMpDefaultConfig.setSecret(appConfigVo.getWechatAppSecret());
+        wxMpDefaultConfig.setToken("");
+
+        WxMpService service = new WxMpServiceImpl();
+        service.setWxMpConfigStorage(wxMpDefaultConfig);
+        return service;
     }
 
     /**

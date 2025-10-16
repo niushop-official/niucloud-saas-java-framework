@@ -21,11 +21,11 @@
                                             :class="{'mb-[20rpx]': goodsIndex != (item.goods.length-1)}"
                                             v-for="(goodsItem,goodsIndex) in item.goods" :key="goodsIndex"
                                             @click="goodsEvent(goodsItem.goods_id)">
-                                            <u--image radius="var(--goods-rounded-mid)" width="120rpx" height="120rpx" :src="img(goodsItem.sku_image)" model="aspectFill">
+                                            <up-image radius="var(--goods-rounded-mid)" width="120rpx" height="120rpx" :src="img(goodsItem.sku_image)" model="aspectFill">
                                                 <template #error>
                                                     <image class="w-[120rpx] h-[120rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                                 </template>
-                                            </u--image>
+                                            </up-image>
                                             <view
                                                 class="flex flex-1 w-0 flex-col justify-between ml-[20rpx] pt-[6rpx] pb-[10rpx]">
                                                 <view class="truncate text-[#303133] text-[24rpx] leading-[32rpx]">{{ goodsItem.goods_name }}</view>

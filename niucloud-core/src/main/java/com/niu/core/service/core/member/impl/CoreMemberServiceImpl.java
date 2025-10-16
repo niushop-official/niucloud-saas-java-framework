@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import cn.hutool.core.util.ClassLoaderUtil;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.member.Member;
@@ -11,17 +12,27 @@ import com.niu.core.entity.site.Site;
 import com.niu.core.enums.member.*;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.mapper.site.SiteMapper;
+import com.niu.core.service.admin.member.IMemberLabelService;
+import com.niu.core.service.admin.member.IMemberLevelService;
 import com.niu.core.service.admin.member.vo.MemberConfigVo;
+import com.niu.core.service.admin.member.vo.MemberLabelInfoVo;
+import com.niu.core.service.admin.member.vo.MemberLevelInfoVo;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.member.ICoreMemberService;
+import com.niu.core.service.core.member.dto.MemberInfoDto;
 import com.niu.core.service.core.member.param.MemberStatSearchParam;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+
 import java.lang.reflect.Method;
 import java.util.Map;
 
+@Log4j2
 @Service
 public class CoreMemberServiceImpl implements ICoreMemberService {
 
@@ -36,6 +47,13 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
 
     @Resource
     ICoreMemberAccountService coreMemberAccountService;
+
+    @Resource
+    private IMemberLabelService memberLabelService;
+
+    @Lazy
+    @Resource
+    private IMemberLevelService memberLevelService;
 
     @Override
     public Member getMember(Integer siteId, Integer memberId) {
@@ -57,7 +75,7 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
         MemberConfigVo memberConfig = coreMemberConfigService.getMemberConfig(siteId);
 
         String no = (site.getMemberNo() + 1) + "";
-        String memberNo = memberConfig.getPrefix() + (memberConfig.getPrefix().length() > memberConfig.getLength() ? no : StringUtils.leftPad(no, memberConfig.getLength()-memberConfig.getPrefix().length(), "0"));
+        String memberNo = memberConfig.getPrefix() + (memberConfig.getPrefix().length() > memberConfig.getLength() ? no : StringUtils.leftPad(no, memberConfig.getLength() - memberConfig.getPrefix().length(), "0"));
 
         Member member = memberMapper.selectOne(new QueryWrapper<Member>()
                 .eq("site_id", siteId).eq("member_no", memberNo).last("limit 1"));
@@ -375,5 +393,36 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
             e.printStackTrace();
             System.out.println("会员礼包发放失败");
         }
+    }
+
+    @Override
+    public Member getInfoByMemberId(Integer siteId, Integer memberId) {
+
+        Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("site_id", siteId).eq("member_id", memberId));
+        return member;
+    }
+
+    @Override
+    public MemberInfoDto getMemberInfo(Integer memberId) {
+        Member member = memberMapper.selectById(memberId);
+        MemberInfoDto result = new MemberInfoDto();
+        BeanUtils.copyProperties(member, result);
+        if(StringUtils.isNotEmpty(member.getHeadimg())){
+            result.setHeadimgSmall(CommonUtils.thumbImageSmall(member.getSiteId(), member.getHeadimg()));
+            result.setHeadimgMiddle(CommonUtils.thumbImageMiddle(member.getSiteId(), member.getHeadimg()));
+            result.setHeadimgBig(CommonUtils.thumbImageBig(member.getSiteId(), member.getHeadimg()));
+        }
+        MemberLabelInfoVo label = new MemberLabelInfoVo();
+        MemberLevelInfoVo level = new MemberLevelInfoVo();
+        try {
+            label = memberLabelService.info(memberId);
+            level = memberLevelService.info(memberId);
+        } catch (Exception e) {
+            log.error("获取会员标签或会员等级失败:{}", e.getMessage());
+        } finally {
+            result.setLabelInfo(label);
+            result.setLevelInfo(level);
+        }
+        return result;
     }
 }

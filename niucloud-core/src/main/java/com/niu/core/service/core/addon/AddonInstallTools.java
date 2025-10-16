@@ -539,6 +539,26 @@ public class AddonInstallTools extends CoreAddonBaseService {
             throw new CommonException(e.getMessage());
         }
     }
+
+    public void mergeUniappManifest(String dir, JSONObject data) {
+        try {
+            File manifest = new File(dir + "src/manifest.json");
+            JSONObject manifestJson = JSONUtil.parseObj(removeComments(FileUtil.readUtf8String(manifest)));
+            manifestJson = JsonModuleLoader.deepMerge(manifestJson, data);
+            FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(manifestJson), manifest);
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    private String removeComments(String json) {
+        // 匹配多行注释的正则表达式
+        Pattern pattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(json);
+        // 将匹配到的注释替换为空字符串
+        String result = matcher.replaceAll("");
+        return result;
+    }
 }
 
 

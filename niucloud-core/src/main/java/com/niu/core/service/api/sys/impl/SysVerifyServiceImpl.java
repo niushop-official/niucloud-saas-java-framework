@@ -10,16 +10,17 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
-import com.niu.core.common.utils.CollectUtils;
-import com.niu.core.common.utils.QrcodeUtils;
-import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.*;
 import com.niu.core.common.utils.date.DateUtils;
+import com.niu.core.common.utils.image.ImageUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.common.utils.object.CollectBuildUtils;
 import com.niu.core.common.utils.object.ObjectGroupUtils;
@@ -41,10 +42,12 @@ import com.niu.core.service.api.sys.vo.SysVerifyGetCodeVo;
 import com.niu.core.service.api.sys.vo.SysVerifyRecordsVo;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import lombok.extern.slf4j.Slf4j;
+import org.krysalis.barcode4j.BarcodeUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -74,6 +77,18 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
             SysVerifyGetCodeVo sysVerifyGetCodeVo = new SysVerifyGetCodeVo();
             sysVerifyGetCodeVo.setCode(verifyCode);
             sysVerifyGetCodeVo.setQrcode(QrcodeUtils.qrcode(param.siteId(), "h5", verifyCode, "", null));
+            if (param.getNeedBarcode() == 1){
+                String barcode = null;
+                try {
+                    String qrcodeDir = WebAppEnvs.get().webRootDownResource + "upload/temp/";
+                    String barcodePath = BarcodeUtils.generateBarcode(verifyCode, qrcodeDir);
+                    barcode = ImageUtils.imageToBase64(barcodePath);
+                } catch (Exception e) {
+                    log.error("条形码生成失败:{}", e.getMessage(), e);
+                    throw new CommonException("条形码生成失败");
+                }
+                sysVerifyGetCodeVo.setBarcode(barcode);
+            }
             sysVerifyGetCodeVoList.add(sysVerifyGetCodeVo);
         }
         return sysVerifyGetCodeVoList;
@@ -103,7 +118,7 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
     private List<String> createVerifyCode(Integer siteId, Integer memberId, String type, Map<String, Object> data) {
         if (ObjectUtil.isEmpty(VerifyTypeEnum.getTypeByName(type))) {
             // 核销类型错误
-            throw new RuntimeException("VERIFY_TYPE_ERROR");
+            throw new CommonException("核销类型错误");
         }
         // 2、通过事件获取核销创建，取第一条
         VerifyCreateEventDefiner.VerifyCreateEvent verifyCreateEvent = new VerifyCreateEventDefiner.VerifyCreateEvent();
@@ -114,7 +129,12 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         List<VerifyCreateEventDefiner.VerifyCreateEventResult> verifyCreateJsonObjectList = EventAndSubscribeOfPublisher.publishAndCallback(verifyCreateEvent);
         VerifyCreateEventDefiner.VerifyCreateEventResult verifyCreateEventResult = null;
         if (verifyCreateJsonObjectList != null && verifyCreateJsonObjectList.size() > 0) {
-            verifyCreateEventResult = verifyCreateJsonObjectList.get(0);
+            for (VerifyCreateEventDefiner.VerifyCreateEventResult createEventResult : verifyCreateJsonObjectList) {
+                if (createEventResult != null){
+                    verifyCreateEventResult = createEventResult;
+                    break;
+                }
+            }
         }
         // 3、 生成核销码的数据组装
         int count = 1;
@@ -340,8 +360,13 @@ public class SysVerifyServiceImpl implements ISysVerifyService {
         verifyCheckEvent.setData(codeMap);
         verifyCheckEvent.setSiteId(RequestUtils.siteId());
         List<VerifyCheckEventDefiner.VerifyCheckEventResult> list = EventAndSubscribeOfPublisher.publishAndCallback(verifyCheckEvent);
-        if (list != null && list.size() > 0) {
-            codeMap = list.get(0).getData();
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (VerifyCheckEventDefiner.VerifyCheckEventResult checkEventResult : list) {
+                if (checkEventResult != null && checkEventResult.getData() != null && !checkEventResult.getData().isEmpty()){
+                    codeMap = checkEventResult.getData();
+                    break;
+                }
+            }
         }
         LambdaQueryWrapper<Verifier> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(Verifier::getMemberId, RequestUtils.memberId());

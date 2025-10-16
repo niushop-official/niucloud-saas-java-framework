@@ -51,7 +51,7 @@ public class UpgradeTaskVo implements Serializable {
         steps.put("backupSql", new Step("backupSql", "备份数据库"));
         steps.put("coverCode", new Step("coverCode", "合并更新文件"));
         steps.put("handleUpgrade", new Step("coverCode", "执行升级sql和升级方法"));
-        steps.put("handleVue", new Step("handleUniapp", "处理前端源码"));
+        steps.put("handleVue", new Step("handleVue", "处理前端源码"));
         steps.put("refreshMenu", new Step("refreshMenu", "刷新菜单"));
         steps.put("installSchedule", new Step("installSchedule", "安装计划任务"));
         steps.put("cloudBuild", new Step("cloudBuild", "开始云编译"));

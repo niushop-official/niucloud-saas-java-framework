@@ -48,7 +48,7 @@ public class PosterDrawListener extends AbstractListener {
             case "text":
                 String testStr = poster.getStr("value");
                 if (testStr.isEmpty() && !poster.getStr("relate").isEmpty()) {
-                    testStr = (String) posterData.getOrDefault(poster.getStr("relate"), "");
+                    testStr = posterData.getOrDefault(poster.getStr("relate"), "").toString();
                 }
 
                 int fontStyle = poster.getBool("weight") ? Font.BOLD : Font.PLAIN;

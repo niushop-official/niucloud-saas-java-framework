@@ -4,11 +4,15 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.niu.core.common.utils.date.DateUtils;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.function.Function;
 
 public class QueryMapperUtils {
@@ -36,38 +40,75 @@ public class QueryMapperUtils {
         return queryWrapper;
     }
 
-    public static LambdaQueryWrapper buildByTime(LambdaQueryWrapper queryWrapper, String fieldName, String[] stringTimes) {
-        Long startTime = (stringTimes[0] == null) ? 0 : DateUtils.StringToTimestamp(stringTimes[0]);
-        Long endTime = (stringTimes.length == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes[1]);
-        if (startTime == 0 && endTime == 0) {
+    public static QueryWrapper buildByTime(QueryWrapper queryWrapper, String fieldName, List<String> stringTimes) {
+
+        Long startTime = (stringTimes.get(0) == null) ? 0 : DateUtils.StringToTimestamp(stringTimes.get(0));
+        Long endTime = (stringTimes.size() == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes.get(1));
+        if(startTime == 0 && endTime == 0){
             return queryWrapper;
         }
         if (startTime > 0 && endTime > 0) {
-            queryWrapper.between(getField(fieldName), startTime, endTime);
+            queryWrapper.between(fieldName, startTime, endTime);
         } else if (startTime > 0 && endTime == 0) {
-            queryWrapper.ge(getField(fieldName), startTime);
+            queryWrapper.ge(fieldName, startTime);
         } else if (startTime == 0 && endTime > 0) {
-            queryWrapper.le(getField(fieldName), endTime);
+            queryWrapper.le(fieldName, startTime);
         }
         return queryWrapper;
     }
 
-    private static <T> Function<T, Object> getField(String fieldName) {
-        return t -> {
-            try {
-                Method method = t.getClass().getMethod("get" + capitalize(fieldName));
-                return method.invoke(t);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid field name: " + fieldName, e);
-            }
-        };
+    public static <T> LambdaQueryWrapper<T> buildByTime(LambdaQueryWrapper queryWrapper, SFunction<T, ?> column, List<String> stringTimes) {
+
+        Long startTime = (stringTimes.get(0) == null) ? 0 : DateUtils.StringToTimestamp(stringTimes.get(0));
+        Long endTime = (stringTimes.size() == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes.get(1));
+        if(startTime == 0 && endTime == 0){
+            return queryWrapper;
+        }
+        if (startTime > 0 && endTime > 0) {
+            queryWrapper.between(column, startTime, endTime);
+        } else if (startTime > 0 && endTime == 0) {
+            queryWrapper.ge(column, startTime);
+        } else if (startTime == 0 && endTime > 0) {
+            queryWrapper.le(column, startTime);
+        }
+        return queryWrapper;
     }
 
-    private static String capitalize(String s) {
-        if (s == null || s.length() == 0) {
-            return s;
+
+    public static <T> LambdaQueryWrapper<T> buildByTime(LambdaQueryWrapper<T> queryWrapper, SFunction<T, ?> column, String[] stringTimes) {
+        Long startTime = (stringTimes[0] == null) ? 0 : DateUtils.StringToTimestamp(stringTimes[0]);
+        Long endTime = (stringTimes.length == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes[1]);
+
+        if (startTime == 0 && endTime == 0) {
+            return queryWrapper;
         }
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
+
+        if (startTime > 0 && endTime > 0) {
+            queryWrapper.between(column, startTime, endTime);
+        } else if (startTime > 0 && endTime == 0) {
+            queryWrapper.ge(column, startTime);
+        } else if (startTime == 0 && endTime > 0) {
+            queryWrapper.le(column, endTime);
+        }
+        return queryWrapper;
+    }
+
+    public static <T> MPJLambdaWrapper<T> buildByTime(MPJLambdaWrapper<T> queryWrapper, SFunction<T, ?> column, String[] stringTimes) {
+        Long startTime = (stringTimes[0] == null) ? 0 : DateUtils.StringToTimestamp(stringTimes[0]);
+        Long endTime = (stringTimes.length == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes[1]);
+
+        if (startTime == 0 && endTime == 0) {
+            return queryWrapper;
+        }
+
+        if (startTime > 0 && endTime > 0) {
+            queryWrapper.between(column, startTime, endTime);
+        } else if (startTime > 0 && endTime == 0) {
+            queryWrapper.ge(column, startTime);
+        } else if (startTime == 0 && endTime > 0) {
+            queryWrapper.le(column, endTime);
+        }
+        return queryWrapper;
     }
 
     /**

@@ -165,17 +165,17 @@ public class SiteAddAfterListener extends AbstractListener {
                 .addon("core")
                 .build());
 
-        SetDiyDataParam setParam = new SetDiyDataParam();
-        setParam.setSiteId(event.getSiteId());
-        setParam.setType("index");
-        setParam.setKey("DIY_INDEX");
-        setParam.setIsStart(app.size() > 1 ? 1 : 0);
-        setParam.setMainApp(app);
-        diyService().setDiyData(setParam);
-
-        setParam.setType("member_index");
-        setParam.setKey("DIY_MEMBER_INDEX");
-        diyService().setDiyData(setParam);
+//        SetDiyDataParam setParam = new SetDiyDataParam();
+//        setParam.setSiteId(event.getSiteId());
+//        setParam.setType("index");
+//        setParam.setKey("DIY_INDEX");
+//        setParam.setIsStart(app.size() > 1 ? 1 : 0);
+//        setParam.setMainApp(app);
+//        diyService().setDiyData(setParam);
+//
+//        setParam.setType("member_index");
+//        setParam.setKey("DIY_MEMBER_INDEX");
+//        diyService().setDiyData(setParam);
 
         //创建主题色
         createThemeColor(siteId);

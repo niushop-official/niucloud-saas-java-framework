@@ -1,5 +1,6 @@
 package com.niu.shop.service.core.order.param;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;

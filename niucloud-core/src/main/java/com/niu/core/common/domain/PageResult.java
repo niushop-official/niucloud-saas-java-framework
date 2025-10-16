@@ -30,6 +30,18 @@ public class PageResult<E> {
     // 记录结果
     private List<E> data;
 
+    private Integer lastPage;
+
+    public Integer getLastPage() {
+        if (total <= 0) {
+            return 0;
+        }
+        if (perPage <= 0) {
+            return 1;
+        }
+        return (int) ((total + perPage - 1) / perPage);
+    }
+
     public PageResult() {
 
     }

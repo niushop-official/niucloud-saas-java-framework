@@ -232,4 +232,14 @@ public class DiyController {
         diyPageService.copy(id.getId());
         return Result.success();
     }
+
+    /**
+     *  获取自定义链接
+     * @param pageParam
+     * @return
+     */
+    @GetMapping("/page_link")
+    public Result<PageResult<DiyPageListVo>> getPageLink(PageParam pageParam) {
+        return Result.success(diyPageService.getPageLink(pageParam));
+    }
 }

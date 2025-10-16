@@ -3,6 +3,7 @@ package com.niu.core.service.core.member;
 import cn.hutool.json.JSONObject;
 import com.niu.core.entity.member.Member;
 import com.niu.core.service.admin.member.param.MemberAccountLogParam;
+import com.niu.core.service.core.member.dto.MemberInfoDto;
 import com.niu.core.service.core.member.param.MemberStatSearchParam;
 
 import java.util.Map;
@@ -111,4 +112,18 @@ public interface ICoreMemberService {
      * @param gifts
      */
     void memberGiftGrant(Integer siteId, Integer memberId, JSONObject gifts, Map<String, Object> vars);
+    /**
+     * 根据id查询会员信息
+     *
+     * @param siteId
+     * @param memberId
+     */
+    Member getInfoByMemberId(Integer siteId, Integer memberId);
+
+    /**
+     * 获取登录用户详情信息
+     * @param memberId
+     * @return
+     */
+    MemberInfoDto getMemberInfo(Integer memberId);
 }

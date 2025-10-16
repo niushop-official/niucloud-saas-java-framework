@@ -3,7 +3,7 @@
         <template v-if="Object.keys(configInfo).length &&configInfo.active_status =='active'">
             <mescroll-body ref="mescrollRef" @init="mescrollInit" :down="{ use: false }" @up="getGoodsListFn">
                 <view class="marketing-head" v-if="!pageLoading">
-                    <!-- #ifdef MP-WEIXIN -->
+                    <!-- #ifdef MP-WEIXIN || APP-PLUS -->
                     <top-tabbar :data="param" :isFill="false" class="top-header" />
                     <image v-if="configInfo.banner_list && configInfo.banner_list.length" class="w-[100%] h-[434rpx]"
                            :src="img(configInfo.banner_list[0].imageUrl)" mode="aspectFill"

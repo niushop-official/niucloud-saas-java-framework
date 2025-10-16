@@ -44,19 +44,19 @@ public class SaTokenApiInterceptor extends SaInterceptor {
         /** 验证是否登录 */
         String token= RequestUtils.apiToken();
         if((ObjectUtil.isEmpty(token) || ObjectUtil.isNull(token)) && isCheckLogin){
-                throw new AuthException("MUST_LOGIN", 401);
+                throw new AuthException("请登录", 401);
         }
 
         /** 检验当前登录是否有效 */
         Boolean islogin=StpUtil.isLogin();
         if(!islogin && isCheckLogin){
-            throw new AuthException("LOGIN_EXPIRE", 401);
+            throw new AuthException("'登录过期,请重新登录", 401);
         }
 
         /** 设置当前登录会员id */
         if(islogin){
             String[] loginId = ObjectUtil.defaultIfEmpty(StpUtil.getLoginId().toString(), "").split("-");
-            if (loginId[1] == null) throw new AuthException("LOGIN_EXPIRE", 401);
+            if (loginId[1] == null) throw new AuthException("登录过期,请重新登录", 401);
 
             Integer memberId=Integer.parseInt(loginId[1]);
             RequestUtils.setMemberId(memberId);

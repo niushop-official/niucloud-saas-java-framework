@@ -107,7 +107,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
     public OrderCreateDataVo calculate(OrderCalculateParam param) {
         OrderCreateDataVo vo = null;
 
-        if (param.getOrderKey().isEmpty()) {
+        if (param.getOrderKey().isEmpty() || param.getIsNeedRecalculate() == 1) {
             vo = this.confirm(param);
         } else {
             vo = this.loadOrderVo(param.getOrderKey(), OrderCreateDataVo.class);
@@ -125,7 +125,18 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
         // 计算订单金额
         OrderCreateDataVo.Basic basic = vo.getBasic();
-        basic.setOrderMoney(basic.getGoodsMoney().add(basic.getDeliveryMoney()).subtract(basic.getDiscountMoney()));
+
+        if (ObjectUtil.isNotEmpty(vo.getImpulseBuyList())) {
+            for (OrderCreateDataVo.Sku impulseBuyGoods : vo.getImpulseBuyList().values()) {
+                basic.setGoodsMoney(basic.getGoodsMoney().add(impulseBuyGoods.getGoodsMoney()));
+            }
+        }
+
+        BigDecimal orderMoney = basic.getGoodsMoney();
+        orderMoney = orderMoney.add(basic.getDeliveryMoney());
+        orderMoney = orderMoney.subtract(basic.getDiscountMoney());
+
+        basic.setOrderMoney(orderMoney);
         if (basic.getOrderMoney().compareTo(BigDecimal.ZERO) == -1) basic.setOrderMoney(BigDecimal.ZERO);
 
         cacheOrderVo(vo);
@@ -207,33 +218,6 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
         List<ShopOrderGoods> orderGoods = new LinkedList<>();
 
-        if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
-        {
-            vo.getGiftGoods().forEach( (Integer key, OrderCreateDataVo.Sku skuItem) -> {
-
-                ShopOrderGoods item = new ShopOrderGoods();
-                item.setSiteId(vo.getSiteId());
-                item.setMemberId(vo.getMemberId());
-                item.setSkuId(skuItem.getSkuId());
-                item.setGoodsId(skuItem.getGoodsId());
-                item.setGoodsName(skuItem.getGoods().getGoodsName());
-                item.setGoodsImage(skuItem.getGoods().getGoodsCover());
-                item.setSkuName(skuItem.getSkuName());
-                item.setSkuImage(skuItem.getSkuImage());
-                item.setPrice(skuItem.getPrice());
-                item.setOriginalPrice(skuItem.getOriginalPrice());
-                item.setNum(skuItem.getNum());
-                item.setGoodsMoney(skuItem.getGoodsMoney());
-                item.setGoodsType(skuItem.getGoods().getGoodsType());
-                item.setDiscountMoney(skuItem.getDiscountMoney());
-                item.setOrderGoodsMoney(skuItem.getGoodsMoney().subtract(skuItem.getDiscountMoney()));
-                item.setStatus(1);
-                item.setIsGift(1);
-                orderGoods.add(item);
-            });
-
-        }
-
         for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
             ShopOrderGoods item = new ShopOrderGoods();
             item.setSiteId(vo.getSiteId());
@@ -253,7 +237,60 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             item.setOrderGoodsMoney(sku.getGoodsMoney().subtract(sku.getDiscountMoney()));
             item.setStatus(1);
             item.setIsGift(0);
+            item.setExtend(sku.getExtend() != null ? sku.getExtend().toString() : "");
             orderGoods.add(item);
+        }
+
+        if(ObjectUtil.isNotEmpty(vo.getImpulseBuyList()))
+        {
+            vo.getImpulseBuyList().forEach( (Integer key, OrderCreateDataVo.Sku skuItem) -> {
+                ShopOrderGoods item = new ShopOrderGoods();
+                item.setSiteId(vo.getSiteId());
+                item.setMemberId(vo.getMemberId());
+                item.setSkuId(skuItem.getSkuId());
+                item.setGoodsId(skuItem.getGoodsId());
+                item.setGoodsName(skuItem.getGoods().getGoodsName());
+                item.setGoodsImage(skuItem.getGoods().getGoodsCover());
+                item.setSkuName(skuItem.getSkuName());
+                item.setSkuImage(skuItem.getSkuImage());
+                item.setPrice(skuItem.getPrice());
+                item.setOriginalPrice(skuItem.getOriginalPrice());
+                item.setNum(skuItem.getNum());
+                item.setGoodsMoney(skuItem.getGoodsMoney());
+                item.setGoodsType(skuItem.getGoods().getGoodsType());
+                item.setDiscountMoney(skuItem.getDiscountMoney());
+                item.setOrderGoodsMoney(skuItem.getGoodsMoney().subtract(skuItem.getDiscountMoney()));
+                item.setStatus(1);
+                item.setIsGift(0);
+                item.setExtend(skuItem.getExtend() != null ? skuItem.getExtend().toString() : "");
+                orderGoods.add(item);
+            });
+        }
+
+        if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
+        {
+            vo.getGiftGoods().forEach( (Integer key, OrderCreateDataVo.Sku skuItem) -> {
+                ShopOrderGoods item = new ShopOrderGoods();
+                item.setSiteId(vo.getSiteId());
+                item.setMemberId(vo.getMemberId());
+                item.setSkuId(skuItem.getSkuId());
+                item.setGoodsId(skuItem.getGoodsId());
+                item.setGoodsName(skuItem.getGoods().getGoodsName());
+                item.setGoodsImage(skuItem.getGoods().getGoodsCover());
+                item.setSkuName(skuItem.getSkuName());
+                item.setSkuImage(skuItem.getSkuImage());
+                item.setPrice(skuItem.getPrice());
+                item.setOriginalPrice(skuItem.getOriginalPrice());
+                item.setNum(skuItem.getNum());
+                item.setGoodsMoney(skuItem.getGoodsMoney());
+                item.setGoodsType(skuItem.getGoods().getGoodsType());
+                item.setDiscountMoney(skuItem.getDiscountMoney());
+                item.setOrderGoodsMoney(skuItem.getGoodsMoney().subtract(skuItem.getDiscountMoney()));
+                item.setStatus(1);
+                item.setIsGift(1);
+                item.setExtend(skuItem.getExtend() != null ? skuItem.getExtend().toString() : "");
+                orderGoods.add(item);
+            });
         }
 
         return this.createOrder(vo, order, orderGoods);

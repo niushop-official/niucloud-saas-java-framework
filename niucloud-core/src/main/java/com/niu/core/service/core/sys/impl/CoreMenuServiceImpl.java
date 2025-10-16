@@ -14,6 +14,7 @@ import com.niu.core.common.config.dataization.AddonModuleContext;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.sys.SysMenu;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.sys.SysMenuMapper;
 import com.niu.core.service.admin.sys.impl.SysMenuServiceImpl;
@@ -59,7 +60,7 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
         }
 
         //清理缓存
-        cached.tag(SysMenuServiceImpl.cacheTagName).clear();
+        cached.tag(CacheTagEnum.MENU_CACHE.getTagName()).clear();
     }
 
     /**
@@ -88,7 +89,7 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
         }
 
         //清理缓存
-        cached.tag(SysMenuServiceImpl.cacheTagName).clear();
+        cached.tag(CacheTagEnum.MENU_CACHE.getTagName()).clear();
     }
 
     private List<SysMenu> menuTreeToList(List<JSONObject> menuList, String addon, String appType) {

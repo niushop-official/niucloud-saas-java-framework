@@ -50,6 +50,7 @@
                                     <div class="flex flex-col mt-[10px]">
                                         <div class="text-[12px] text-[#999] leading-[20px]">{{ t('goodsVideoTipTile') }}</div>
                                         <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipOne') }}</div>
+                                        <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipTwo') }}</div>
                                         <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipThree') }}</div>
                                         <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipFour') }}</div>
                                         <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipFive') }}</div>
@@ -489,7 +490,7 @@
                     </el-form>
 
                 </el-tab-pane>
-                 <el-tab-pane :label="t('goodsArguments')" name="goods_arguments">
+                <el-tab-pane :label="t('goodsArguments')" name="goods_arguments">
                     <el-form :model="goodsEdit.formData" label-width="120px" ref="goodsArgumentsFormRef" :rules="goodsEdit.formRules" class="page-form">
 
                         <el-form-item :label="t('goodsArgumentsTemp')">

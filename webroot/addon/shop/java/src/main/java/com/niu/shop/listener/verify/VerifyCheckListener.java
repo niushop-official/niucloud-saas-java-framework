@@ -43,7 +43,7 @@ public class VerifyCheckListener extends VerifyCheckEventDefiner {
             case "shopPickUpOrder":
                 return handlePickUpOrder(siteId, data, result);
             default:
-                return result;
+                return null;
         }
     }
 

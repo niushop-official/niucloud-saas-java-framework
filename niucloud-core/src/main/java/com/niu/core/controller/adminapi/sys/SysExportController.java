@@ -1,6 +1,8 @@
 package com.niu.core.controller.adminapi.sys;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
@@ -8,10 +10,13 @@ import com.niu.core.enums.sys.ExportEnum;
 import com.niu.core.service.admin.sys.ISysExportService;
 import com.niu.core.service.admin.sys.param.SysExportSearchParam;
 import com.niu.core.service.admin.sys.vo.SysExportListVo;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -60,8 +65,17 @@ public class SysExportController {
      * 报表导出数据检查
      */
     @GetMapping("/export/check/{type}")
-    public Result<Object> check(@Validated @PathVariable("type") String type, @RequestParam Map<String, Object> objectMap) {
-        Boolean status = sysExportService.checkExportData(type, objectMap);
+    public Result<Object> check(@Validated @PathVariable("type") String type, @RequestParam MultiValueMap<String,Object> objectMap) {
+        JSONObject jsonObject = new JSONObject();
+        objectMap.forEach((key, valueList) -> {
+            key = key.replace("[]", "");
+            if (valueList.size() == 1) {
+                jsonObject.set(key, valueList.get(0));
+            } else {
+                jsonObject.set(key, valueList);
+            }
+        });
+        Boolean status = sysExportService.checkExportData(type, jsonObject);
         String msg = status ? "" : "暂无可导出数据";
         return Result.success(msg, status);
     }
@@ -70,7 +84,16 @@ public class SysExportController {
      * 报表导出
      */
     @GetMapping("/export/{type}")
-    public Result<Object> export(@Validated @PathVariable("type") String type, @RequestParam Map<String, Object> jsonObject) {
+    public Result<Object> export(@Validated @PathVariable("type") String type, @RequestParam MultiValueMap<String, Object> objectMap) {
+        JSONObject jsonObject = new JSONObject();
+        objectMap.forEach((key, valueList) -> {
+            key = key.replace("[]", "");
+            if (valueList.size() == 1) {
+                jsonObject.set(key, valueList.get(0));
+            } else {
+                jsonObject.set(key, valueList);
+            }
+        });
         sysExportService.exportData(type, jsonObject);
         return Result.success();
     }

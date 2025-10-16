@@ -33,6 +33,7 @@ public class DiyPageInfoVo implements Serializable {
     private String page;
     private JSONObject component;
     private SceneDomainVo domainUrl;
+    private Object global;
 
     public String getTypeName() {
         JSONObject template = TemplateEnum.getTemplate();

@@ -78,11 +78,11 @@
                         <view class="w-[536rpx] box-border bg-white w-full flex mx-[20rpx] py-[24rpx] px-[20rpx] rounded-[var(--rounded-small)]"
                             :class="{ 'mt-[20rpx]': index }" @click.stop="toLink(item.goods_id)">
                             <view class="w-[168rpx] h-[168rpx] flex items-center justify-center mr-[20rpx] rounded-[var(--goods-rounded-small)] overflow-hidden">
-                                <u--image width="168rpx" height="168rpx" :radius="'var(--goods-rounded-small)'" :src="img( item.goods_cover_thumb_mid || '')" model="aspectFill">
+                                <up-image width="168rpx" height="168rpx" :radius="'var(--goods-rounded-small)'" :src="img( item.goods_cover_thumb_mid || '')" model="aspectFill">
                                     <template #error>
                                         <image class="w-[168rpx] h-[168rpx]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                     </template>
-                                </u--image>
+                                </up-image>
                             </view>
                             <view class="flex flex-1 flex-wrap flex-col">
                                 <view class="max-h-[80rpx] text-[26rpx] leading-[40rpx] multi-hidden">{{ item.goods_name }}</view>
@@ -93,7 +93,7 @@
                                         <text class="text-[24rpx] font-500">.{{ parseFloat(goodsPrice(item)).toFixed(2).split('.')[1] }}</text>
                                         <image class="h-[24rpx] max-w-[46rpx] ml-[6rpx]" v-if="priceType(item) == 'member_price'" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 										<image class="h-[24rpx] max-w-[60rpx] ml-[6rpx]" v-if="priceType(item) == 'newcomer_price'" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
-										<image class="h-[24rpx] max-w-[80rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" /> 
+										<image class="h-[24rpx] max-w-[80rpx] ml-[6rpx]" v-if="priceType(item) == 'discount_price'" :src="img('addon/shop/discount.png')" mode="heightFix" />
                                     </view>
                                     <template v-if="!item.isMaxBuy">
                                         <view v-if="(item.goods_type == 'real' || (item.goods_type == 'virtual' && item.virtual_receive_type != 'verify')) && item.goodsSku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id] && config.cart.control && config.cart.event === 'cart'" class="flex items-center">

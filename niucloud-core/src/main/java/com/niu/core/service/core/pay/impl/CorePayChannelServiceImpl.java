@@ -105,6 +105,7 @@ public class CorePayChannelServiceImpl implements ICorePayChannelService {
             WeappConfigVo weappConfig = coreWeappConfigService.getWeappConfig(siteId);
             config.set("mp_app_id", ObjectUtil.defaultIfNull(wechatConfig.getAppId(), ""));
             config.set("mini_app_id", ObjectUtil.defaultIfNull(weappConfig.getAppId(), ""));
+            config.set("app_id", "");
         }
 
         return config;

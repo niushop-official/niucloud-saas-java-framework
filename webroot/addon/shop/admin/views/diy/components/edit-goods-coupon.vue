@@ -8,7 +8,7 @@
                 <el-form-item :label="t('selectStyle')" class="flex">
                     <span class="text-primary flex-1 cursor-pointer"
                           @click="showCouponStyle">{{ diyStore.editComponent.styleName }}</span>
-                    <el-icon>
+                    <el-icon @click="showCouponStyle" class="cursor-pointer">
                         <ArrowRight />
                     </el-icon>
                 </el-form-item>

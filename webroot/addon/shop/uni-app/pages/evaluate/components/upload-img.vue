@@ -1,11 +1,11 @@
 <template>
     <view class="flex flex-wrap">
         <view v-for="(item, index) in value" class="mb-[18rpx] relative" :class="{'mr-[18rpx]': (index + 1) % 4 != 0 }">
-            <u--image class="rounded-[10rpx] overflow-hidden" width="140rpx" height="140rpx" :src="img(item || '')" model="aspectFill" @click="imgListPreview(item)">
+            <up-image class="rounded-[10rpx] overflow-hidden" width="140rpx" height="140rpx" :src="img(item || '')" model="aspectFill" @click="imgListPreview(item)">
                 <template #error>
                     <u-icon name="photo" color="#999" size="50"></u-icon>
                 </template>
-            </u--image>
+            </up-image>
             <view class="absolute top-0 right-[0] bg-[#373737] flex justify-end h-[28rpx] w-[28rpx] rounded-bl-[40rpx]" @click.stop="deleteImg(index)">
                 <text class="nc-iconfont nc-icon-guanbiV6xx !text-[20rpx] mt-[2rpx] mr-[2rpx] text-[#fff]"></text>
             </view>

@@ -111,7 +111,39 @@ public class Wechatpay extends BasePay {
         if (RequestUtils.channel().equals(ChannelEnum.PC.getCode())) {
             return web(param);
         }
+        if (RequestUtils.channel().equals(ChannelEnum.APP.getCode())) {
+            return appPay(param);
+        }
         return null;
+    }
+
+    private Object appPay(PayParam param) {
+        try {
+            payConfig.setAppId(config.getStr("app_id", ""));
+
+            Pay pay = param.getPay();
+
+            WxPayUnifiedOrderV3Request request = new WxPayUnifiedOrderV3Request();
+            request.setOutTradeNo(pay.getOutTradeNo());
+//            request.setPayer(new WxPayUnifiedOrderV3Request.Payer().setOpenid(param.getOpenid()));
+            request.setDescription(pay.getBody());
+            request.setNotifyUrl(param.getNotifyUrl());
+            request.setAmount(new WxPayUnifiedOrderV3Request.Amount().setTotal(pay.getMoney().multiply(new BigDecimal(100)).intValue()));
+
+            WxPayUnifiedOrderV3Result.AppResult result = app().createOrderV3(TradeTypeEnum.APP, request);
+            Map<String, String> data = new HashMap<String, String>();
+            data.put("appId", result.getAppid());
+            data.put("partnerId", payConfig.getMchId());
+            data.put("prepayId", result.getPrepayId());
+            data.put("timeStamp", result.getTimestamp());
+            data.put("nonceStr", result.getNoncestr());
+            data.put("packageValue", result.getPackageValue());
+            data.put("sign", result.getSign());
+            return data;
+        }  catch (Exception e) {
+            log.error("微信移动应用支付异常:{}", e);
+            throw new CommonException(e.getMessage());
+        }
     }
 
     private Object mp(PayParam param) {

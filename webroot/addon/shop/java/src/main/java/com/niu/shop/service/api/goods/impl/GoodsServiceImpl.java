@@ -14,6 +14,7 @@ import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.image.ImageUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysConfig;
 import com.niu.core.mapper.member.MemberLevelMapper;
@@ -463,28 +464,31 @@ public class GoodsServiceImpl implements IGoodsService {
         vo.setDiyDetailInfo(diyService.info(diyInfoParam));
 
         // 获取商品主图第一张图片宽高
-        String[] goodsImage = goods.getGoodsImage().split(",");
-        if (ObjectUtil.isNotEmpty(goodsImage)) {
-            String image = goodsImage[0];
-            try {
-                if (CommonUtils.isUrl(image)) {
-                    URL url = new URL(image);
-                    BufferedImage bufferedImage = ImageIO.read(url);
-                    if (bufferedImage != null) {
-                        vo.getImageSize().setWidth(String.valueOf(bufferedImage.getWidth()));
-                        vo.getImageSize().setHeight(String.valueOf(bufferedImage.getHeight()));
-                    }
-                } else {
-                    File file = new File(WebAppEnvs.get().webRootDownResource, image);
-                    BufferedImage bufferedImage = ImageIO.read(file);
-                    if (bufferedImage != null) {
-                        vo.getImageSize().setWidth(String.valueOf(bufferedImage.getWidth()));
-                        vo.getImageSize().setHeight(String.valueOf(bufferedImage.getHeight()));
-                    }
-                }
-            } catch (Exception e) {
-            }
-        }
+        ImageUtils.ImageSize firstImageSize = ImageUtils.getFirstImageSize(goods.getGoodsImage());
+        vo.getImageSize().setWidth(firstImageSize.getWidth().toString());
+        vo.getImageSize().setHeight(firstImageSize.getHeight().toString());
+//        String[] goodsImage = goods.getGoodsImage().split(",");
+//        if (ObjectUtil.isNotEmpty(goodsImage)) {
+//            String image = goodsImage[0];
+//            try {
+//                if (CommonUtils.isUrl(image)) {
+//                    URL url = new URL(image);
+//                    BufferedImage bufferedImage = ImageIO.read(url);
+//                    if (bufferedImage != null) {
+//                        vo.getImageSize().setWidth(String.valueOf(bufferedImage.getWidth()));
+//                        vo.getImageSize().setHeight(String.valueOf(bufferedImage.getHeight()));
+//                    }
+//                } else {
+//                    File file = new File(WebAppEnvs.get().webRootDownResource, image);
+//                    BufferedImage bufferedImage = ImageIO.read(file);
+//                    if (bufferedImage != null) {
+//                        vo.getImageSize().setWidth(String.valueOf(bufferedImage.getWidth()));
+//                        vo.getImageSize().setHeight(String.valueOf(bufferedImage.getHeight()));
+//                    }
+//                }
+//            } catch (Exception e) {
+//            }
+//        }
 
         return vo;
     }

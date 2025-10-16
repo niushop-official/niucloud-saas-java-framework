@@ -14,7 +14,6 @@ public interface ICoreRefundActionService {
     /**
      * 退款关闭
      * @param param
-     * @param orderRefundNo
      */
     void close(ActiveRefundCloseParam param, Integer type);
 }

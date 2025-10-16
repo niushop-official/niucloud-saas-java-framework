@@ -11,7 +11,7 @@ ALTER TABLE `{{prefix}}shop_store`
 ALTER TABLE `{{prefix}}shop_store` 
   ADD COLUMN time_interval INT NOT NULL DEFAULT 0 COMMENT '时段设置（分钟）';
   
-ALTER TABLE `{{prefix}}shop_store`
+ALTER TABLE `{{prefix}}shop_stor`e
    MODIFY create_time INT NOT NULL DEFAULT 0 COMMENT '添加时间' AFTER time_interval;
    
 ALTER TABLE `{{prefix}}shop_store` 
@@ -23,10 +23,10 @@ ALTER TABLE `{{prefix}}shop_point_exchange_order`
 ALTER TABLE `{{prefix}}shop_point_exchange_order` 
   MODIFY COLUMN order_money DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT '订单金额';
 
-ALTER TABLE `{{prefix}}shop_order_refund_log`
+ALTER TABLE `{{prefix}}shop_order_refund_lo`g
   CHANGE COLUMN main_type main_type VARCHAR(255) NOT NULL DEFAULT '' COMMENT '操作人类型';
   
-ALTER TABLE `{{prefix}}shop_order_refund`
+ALTER TABLE `{{prefix}}shop_order_refun`d
   ADD COLUMN delete_time INT NOT NULL DEFAULT 0 COMMENT '是否删除(针对后台)';
   
 ALTER TABLE `{{prefix}}shop_order_goods` 
@@ -53,7 +53,7 @@ ALTER TABLE `{{prefix}}shop_order_delivery`
 ALTER TABLE `{{prefix}}shop_order_delivery` 
  MODIFY create_time INT NOT NULL DEFAULT 0 COMMENT '创建时间' AFTER remark;
  
-ALTER TABLE `{{prefix}}shop_order_batch_delivery`
+ALTER TABLE `{{prefix}}shop_order_batch_deliver`y
    CHANGE COLUMN type type VARCHAR(255) NOT NULL DEFAULT '' COMMENT '操作类型 批量发货  批量打单 ....';
    
 ALTER TABLE `{{prefix}}shop_order_batch_delivery` 
@@ -62,13 +62,13 @@ ALTER TABLE `{{prefix}}shop_order_batch_delivery`
 ALTER TABLE `{{prefix}}shop_order` 
   ADD COLUMN buyer_ask_delivery_time VARCHAR(255) NOT NULL DEFAULT '' COMMENT '购买人要求的配送/发货/自提时间（文本）';
   
-ALTER TABLE `{{prefix}}shop_order`
+ALTER TABLE `{{prefix}}shop_orde`r
     ADD COLUMN relate_order_id INT NOT NULL DEFAULT 0 COMMENT '关联活动来源订单id';
     
 ALTER TABLE `{{prefix}}shop_order` 
   ADD COLUMN relate_source VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'seckill 秒杀系统 ';
   
-ALTER TABLE `{{prefix}}shop_goods_rank`
+ALTER TABLE `{{prefix}}shop_goods_ran`k
 MODIFY COLUMN brand_ids VARCHAR(255) NOT NULL DEFAULT '' COMMENT '商品品牌id';
   
 ALTER TABLE `{{prefix}}shop_goods_evaluate` 
@@ -77,7 +77,7 @@ ALTER TABLE `{{prefix}}shop_goods_evaluate`
 ALTER TABLE `{{prefix}}shop_goods_brand` 
   CHANGE COLUMN color_json color_json TEXT DEFAULT NULL;
 
- ALTER TABLE `{{prefix}}shop_goods_brand`
+ ALTER TABLE `{{prefix}}shop_goods_bran`d
   MODIFY color_json TEXT DEFAULT NULL AFTER delete_time;
   
 ALTER TABLE `{{prefix}}shop_goods` 

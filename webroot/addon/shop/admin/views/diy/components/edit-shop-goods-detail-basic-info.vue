@@ -14,7 +14,7 @@
                         <el-checkbox label="商品列表" value="goods_list"/>
                         <el-checkbox label="商品分类" value="goods_category"/>
                     </el-checkbox-group>
-                    <div class="text-sm text-gray-400 mb-[10px]">{{ t('菜单内容最少选择2个') }}</div>
+                    <div class="text-sm text-gray-400">{{ t('菜单内容最少选择2个') }}</div>
                 </el-form-item>
             </el-form>
         </div>
@@ -25,7 +25,7 @@
                     <el-radio-group v-model="diyStore.editComponent.medium.type">
                         <el-radio label="square_img">{{ t('固定方图') }}</el-radio>
                         <el-radio label="height_adaptive">{{ t('高度自适应') }}</el-radio>
-                        <div class="text-sm text-gray-400 leading-[1.6] mb-[10px]">{{ t('注意：高度自适应指商品主图的高度与第一张商品图的高度保持一致') }}</div>
+                        <div class="text-sm text-gray-400 leading-[1.6]">{{ t('注意：高度自适应指商品主图的高度与第一张商品图的高度保持一致') }}</div>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item :label="t('轮播点')">
@@ -37,7 +37,7 @@
             </el-form>
         </div>
         <div class="edit-attr-item-wrap">
-            <h3 class="mb-[10px]">{{ t('普通价格') }}</h3>
+            <h3 class="mb-[10px]">{{ t('价格展示') }}</h3>
             <el-form label-width="100px" class="px-[10px]">
                 <el-form-item :label="t('展示方式')">
                     <el-radio-group v-model="diyStore.editComponent.priceRegion.showWay">
@@ -45,22 +45,25 @@
                         <el-radio label="fixed">{{ t('置顶') }}</el-radio>
                     </el-radio-group>
                 </el-form-item>
-                <template v-if="diyStore.editComponent.priceRegion.showWay == 'fixed'">
-                    <el-form-item :label="t('风格选择')" class="flex">
-                        <span class="text-primary flex-1 cursor-pointer" @click="showGoodsStyle">{{ diyStore.editComponent.priceRegion.goodsStyle.title }}</span>
-                        <el-icon>
-                            <ArrowRight />
-                        </el-icon>
-                    </el-form-item>
-                    <el-form-item :label="t('背景图片')">
-                        <upload-image v-model="diyStore.editComponent.priceRegion.bgImg" :limit="1" />
-                        <div class="text-sm text-gray-400 mb-[10px]">{{ t('背景图片推荐尺寸：750*148') }}</div>
-                    </el-form-item>
-                </template>
+            </el-form>
+        </div>
+        <div class="edit-attr-item-wrap" v-if="diyStore.editComponent.priceRegion.showWay == 'fixed'">
+            <h3 class="mb-[10px]">{{ t('普通价格背景图') }}</h3>
+            <el-form label-width="100px" class="px-[10px]">
+                <el-form-item :label="t('风格选择')" class="flex">
+                    <span class="text-primary flex-1 cursor-pointer" @click="showGoodsStyle">{{ diyStore.editComponent.priceRegion.goodsStyle.title }}</span>
+                    <el-icon>
+                        <ArrowRight />
+                    </el-icon>
+                </el-form-item>
+                <el-form-item :label="t('背景图片')">
+                    <upload-image v-model="diyStore.editComponent.priceRegion.bgImg" :limit="1" />
+                    <div class="text-sm text-gray-400">{{ t('背景图片推荐尺寸：750*148') }}</div>
+                </el-form-item>
             </el-form>
         </div>
         <div class="edit-attr-item-wrap">
-            <h3 class="mb-[10px]">{{ t('活动价格') }}</h3>
+            <h3 class="mb-[10px]">{{ t('活动价格背景图') }}</h3>
             <el-form label-width="100px" class="px-[10px]">
                 <div class="text-sm text-gray-400 mb-[10px]">{{ t('适用场景：限时折扣、新人专享、会员价') }}</div>
                 <el-form-item :label="t('风格选择')" class="flex">
@@ -90,7 +93,7 @@
         <!-- 普通商品风格 -->
         <el-dialog v-model="goodsStyleDialog" :title="t('selectStyle')" width="460px">
             <div class="flex flex-wrap">
-                <template v-for="(item,index) in goodsStyleList" :key="index">
+                <template v-for="(item,index) in Object.values(goodsStyleList)" :key="index">
                     <div :class="{ 'border-primary': selectGoodsStyle.value == item.value }"
                             @click="changeGoodsStyle(item)"
                             class="flex items-center justify-center overflow-hidden w-[200px] h-[100px] mr-[12px] mb-[12px] cursor-pointer border bg-[#eee]">
@@ -109,7 +112,7 @@
         <!-- 营销活动风格 -->
         <el-dialog v-model="marketingStyleDialog" :title="t('selectStyle')" width="460px">
             <div class="flex flex-wrap">
-                <template v-for="(item,index) in marketingGoodsStyleList" :key="index">
+                <template v-for="(item,index) in Object.values(marketingGoodsStyleList)" :key="index">
                     <div :class="{ 'border-primary': selectMarketingStyle.value == item.value }"
                             @click="changeMarketingStyle(item)"
                             class="flex items-center justify-center overflow-hidden w-[200px] h-[100px] mr-[12px] mb-[12px] cursor-pointer border bg-[#eee]">
@@ -164,7 +167,9 @@
                     <el-color-picker v-model="diyStore.editComponent.goodsInfo.saleInfoColor" />
                 </el-form-item>
                 <el-form-item :label="t('商品背景色')">
-                    <el-color-picker v-model="diyStore.editComponent.goodsInfo.bgColor" />
+                    <el-color-picker v-model="diyStore.editComponent.goodsInfo.startBgColor" show-alpha :predefine="diyStore.predefineColors" />
+                    <icon name="iconfont iconmap-connect" size="20px" class="block !text-gray-400 mx-[5px]" />
+                    <el-color-picker v-model="diyStore.editComponent.goodsInfo.endBgColor" show-alpha :predefine="diyStore.predefineColors" />
                 </el-form-item>
                 <el-form-item :label="t('商品上圆角')">
                     <el-slider v-model="diyStore.editComponent.goodsInfo.topRounded" show-input size="small" class="ml-[10px] diy-nav-slider" :min="0" :max="100" />
@@ -230,25 +235,28 @@ const saleInfoChange = (val: any) => {
 
 // 普通商品风格
 const goodsStyleDialog = ref(false)
-const goodsStyleList = reactive([
-    {
+const goodsStyleList = reactive({
+    'style-1': {
         url: 'addon/shop/diy/goods_detail/style_01.jpg',
         title: '风格1',
         value: 'style-1'
-    }, {
+    },
+    'style-2': {
         url: 'addon/shop/diy/goods_detail/style_02.jpg',
         title: '风格2',
         value: 'style-2'
-    }, {
+    },
+    'style-3': {
         url: 'addon/shop/diy/goods_detail/style_03.jpg',
         title: '风格3',
         value: 'style-3'
-    }, {
+    },
+    'style-4': {
         url: 'addon/shop/diy/goods_detail/style_04.jpg',
         title: '风格4',
         value: 'style-4'
     }
-])
+})
 const selectGoodsStyle = reactive({
     title: '风格1',
     url: 'addon/shop/diy/goods_detail/style_01.jpg',
@@ -271,23 +279,24 @@ const changeGoodsStyle = (item: any) => {
 const confirmGoodsStyle = () => {
     diyStore.editComponent.priceRegion.goodsStyle.title = selectGoodsStyle.title
     diyStore.editComponent.priceRegion.goodsStyle.value = selectGoodsStyle.value
-    diyStore.editComponent.priceRegion.bgImg = selectGoodsStyle.url
+    diyStore.editComponent.priceRegion.bgImg = selectGoodsStyle.url || goodsStyleList[selectGoodsStyle.value].url
     goodsStyleDialog.value = false
 }
 
 // 营销商品风格
 const marketingStyleDialog = ref(false)
-const marketingGoodsStyleList = reactive([
-    {
+const marketingGoodsStyleList = reactive({
+    'style-1': {
         url: 'addon/shop/diy/goods_detail/marketing_style_01.jpg',
         title: '风格1',
         value: 'style-1'
-    }, {
+    },
+    'style-2': {
         url: 'addon/shop/diy/goods_detail/marketing_style_02.jpg',
         title: '风格2',
         value: 'style-2'
     }
-])
+})
 const selectMarketingStyle = reactive({
     title: '风格1',
     url: 'addon/shop/diy/goods_detail/marketing_style_01.jpg',
@@ -310,7 +319,7 @@ const changeMarketingStyle = (item: any) => {
 const confirmMarketingStyle = () => {
     diyStore.editComponent.priceRegion.marketingStyle.title = selectMarketingStyle.title
     diyStore.editComponent.priceRegion.marketingStyle.value = selectMarketingStyle.value
-    diyStore.editComponent.priceRegion.marketingBgImg = selectMarketingStyle.url
+    diyStore.editComponent.priceRegion.marketingBgImg = selectMarketingStyle.url || marketingGoodsStyleList[selectMarketingStyle.value].url
     marketingStyleDialog.value = false
 }
 

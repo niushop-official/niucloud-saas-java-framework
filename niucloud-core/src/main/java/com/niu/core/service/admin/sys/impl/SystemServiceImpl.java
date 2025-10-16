@@ -1,6 +1,8 @@
 package com.niu.core.service.admin.sys.impl;
 
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
@@ -163,7 +165,9 @@ public class SystemServiceImpl implements ISystemService {
         try {
             Map<String, Object> data = new HashMap<>();
             for (SpreadQrcodeParam.Param qrcodeParam : param.getParams()) {
-                data.put(qrcodeParam.getColumnName(), qrcodeParam.getColumnValue());
+                JSONArray jsonArray = JSONUtil.parseArray(qrcodeParam);
+                JSONObject jsonObject = JSONUtil.parseObj(jsonArray);
+                data.put(jsonObject.getStr("name"), qrcodeParam.getColumnValue());
             }
             String dir = "upload/qrcode/" + RequestUtils.siteId() + "/" + param.getFolder();
             vo.setWeappPath(QrcodeUtils.qrcodeToFile(RequestUtils.siteId(), "weapp", "", param.getPage(), data, dir));

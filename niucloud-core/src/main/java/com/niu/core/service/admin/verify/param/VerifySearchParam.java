@@ -27,4 +27,6 @@ public class VerifySearchParam implements Serializable {
     private String relateTag;
 
     private String[] createTime;
+
+    private Integer orderId;
 }

@@ -6,6 +6,7 @@ import com.niu.core.service.api.sys.param.*;
 import com.niu.core.service.api.sys.vo.SysVerifyDetailVo;
 import com.niu.core.service.api.sys.vo.SysVerifyGetCodeVo;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public interface ISysVerifyService {
      * @param param
      * @return
      */
-    List<SysVerifyGetCodeVo> getVerifyCode(SysVerifyGetCodeParam param);
+    List<SysVerifyGetCodeVo> getVerifyCode(SysVerifyGetCodeParam param) ;
 
     /**
      * 校验当前会员是否是核销员

@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
+import com.alipay.easysdk.payment.app.models.AlipayTradeAppPayResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeRefundResponse;
 import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
@@ -35,6 +36,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -77,7 +80,25 @@ public class Alipay extends BasePay {
         if (RequestUtils.channel().equals(ChannelEnum.PC.getCode())) {
             return web(param);
         }
+        if (RequestUtils.channel().equals(ChannelEnum.APP.getCode())) {
+            return app(param);
+        }
         return null;
+    }
+
+    private Object app(PayParam param) {
+        try {
+            Pay pay = param.getPay();
+            AlipayTradeAppPayResponse response = Factory.Payment.App().asyncNotify(param.getNotifyUrl()).pay(
+                pay.getBody(),
+                pay.getOutTradeNo(),
+                pay.getMoney().toString()
+            );
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("支付宝App支付异常:{}", e);
+            throw new CommonException(e.getMessage());
+        }
     }
 
     private Object h5(PayParam param) {
@@ -91,7 +112,20 @@ public class Alipay extends BasePay {
                     param.getRefundUrl()
             );
             Map<String, String> data = new HashMap<>();
-            data.put("url", response.getBody());
+
+            String regex = "<form[^>]+action=\"([^\"]+)\"";
+
+            // 编译正则表达式
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(response.getBody());
+
+            // 查找匹配并提取URL
+            if (matcher.find()) {
+                String payUrl = matcher.group(1);
+                data.put("url", payUrl);
+            } else {
+                throw new CommonException("支付宝H5支付异常:未找到匹配的URL");
+            }
             return data;
         } catch (Exception e) {
             log.error("支付宝H5支付异常:{}", e);
@@ -140,21 +174,36 @@ public class Alipay extends BasePay {
      * @param response
      */
     public Object asyncNotify(PayAsyncNotifyParam param, HttpServletRequest request, HttpServletResponse response) {
-        Map<String, String> params = new HashMap<String, String>();
+        log.info("支付宝异步回调开始,param:{}", JSONUtil.toJsonStr(param));
+        log.info("原始请求URL: {}", request.getRequestURL());
+        log.info("原始请求参数Map: {}", JSONUtil.toJsonStr(request.getParameterMap()));
+
+        Map<String, String> params = new HashMap<>();
+        Map<String, String[]> requestParams = request.getParameterMap();
+
         try {
-            Map requestParams = request.getParameterMap();
-            for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext(); ) {
-                String name = (String) iter.next();
-                String[] values = (String[]) requestParams.get(name);
-                String valueStr = "";
-                for (int i = 0; i < values.length; i++) {
-                    valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
-                }
-                valueStr = new String(valueStr.getBytes("ISO-8859-1"), "utf-8");
+            request.setCharacterEncoding("UTF-8");
+
+            for (Map.Entry<String, String[]> entry : requestParams.entrySet()) {
+                String name = entry.getKey();
+                String[] values = entry.getValue();
+
+                String valueStr = String.join(",", values);
                 params.put(name, valueStr);
+
+                // 调试日志
+                log.debug("参数 - {}: {}", name, valueStr);
             }
-            if (!Factory.Payment.Common().verifyNotify(params)) {
+
+            log.info("处理后的验签参数: {}", JSONUtil.toJsonStr(params));
+
+            // 检查关键参数
+            boolean verifyResult = Factory.Payment.Common().verifyNotify(params);
+            log.info("支付宝验签结果: {}", verifyResult);
+
+            if (!verifyResult) {
                 log.error("支付宝异步回调验签失败");
+                log.error("失败参数详情: {}", JSONUtil.toJsonStr(params));
                 return "fail";
             }
         } catch (Exception e) {

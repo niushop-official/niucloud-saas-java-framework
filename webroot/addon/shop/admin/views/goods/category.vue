@@ -229,12 +229,12 @@ const spreadPopupRef = ref(null)
 
 const spreadEvent = (data: any) => {
     const pagePath = '/addon/shop/pages/goods/list'
-    const columnName = 'curr_goods_category'
-    const columnValue = data.category_id
+    const paramsArr = [
+        { name: 'curr_goods_category', value: data.category_id },
+    ];
     const title = '商品分类推广'
     const folder = 'goods_category'
-
-    spreadPopupRef.value?.show(pagePath, columnName, columnValue, title, folder)
+    spreadPopupRef.value?.show(pagePath, paramsArr, title, folder);
 }
 
 const router = useRouter()

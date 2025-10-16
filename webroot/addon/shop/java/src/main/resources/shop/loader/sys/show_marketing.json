@@ -1,6 +1,14 @@
 {
   "app": [],
-  "tool": [],
+  "tool": [
+    {
+      "title": "商品榜单",
+      "desc": "展示热销商品排行榜",
+      "icon": "static/resource/images/marketing/goods_rank.png",
+      "key": "pintuan_diy",
+      "url": "/site/decorate/edit?type=DIY_PINTUAN_ACTIVITY_GOODS_DETAIL&title=拼团活动详情&back=/site/app/marketing&is_target=true"
+    }
+  ],
   "marketing": [
     {
       "title": "优惠券",

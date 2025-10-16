@@ -3,6 +3,7 @@ package com.niu.core.common.domain;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -17,6 +18,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * JSON序列化
@@ -30,6 +33,12 @@ public final class BeanJsonSerializer {
 
         @Override
         public void serialize(Long value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            // 如果是Redis序列化上下文，直接写入字符串
+            if (isRedisSerializationContext()) {
+                jsonGenerator.writeNumber(value);
+                return;
+            }
+
             // 按照自定义格式转换
             String formatStr = "";
             if (value != null && value > 0) {
@@ -38,6 +47,17 @@ public final class BeanJsonSerializer {
             jsonGenerator.writeString(formatStr);
         }
 
+        private boolean isRedisSerializationContext() {
+            // 通过堆栈信息判断是否在Redis序列化过程中
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : stackTrace) {
+                if (element.getClassName().contains("Redis") ||
+                        element.getClassName().contains("Jackson2JsonRedisSerializer")) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     /**
@@ -76,14 +96,47 @@ public final class BeanJsonSerializer {
 
         @Override
         public void serialize(String value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            if (value == null || value.trim().isEmpty()) {
+                jsonGenerator.writeNull();
+                return;
+            }
+
+            // 如果是Redis序列化上下文，直接写入字符串
+            if (isRedisSerializationContext()) {
+                jsonGenerator.writeString(value);
+                return;
+            }
+
             try {
-                jsonGenerator.writeObject(JsonViewUtils.toJsonObject(value));
+                JSON json = JSONUtil.parse(value);
+
+                if (json instanceof JSONObject) {
+                    Map<String, Object> map = JSONUtil.toBean(value, Map.class);
+                    jsonGenerator.writeObject(map);
+                } else if (json instanceof JSONArray) {
+                    List<Object> list = JSONUtil.toList(value, Object.class);
+                    jsonGenerator.writeObject(list);
+                } else {
+                    jsonGenerator.writeString(value);
+                }
             } catch (Exception e) {
-                // ignore
+                jsonGenerator.writeString(value);
             }
         }
 
+        private boolean isRedisSerializationContext() {
+            // 通过堆栈信息判断是否在Redis序列化过程中
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : stackTrace) {
+                if (element.getClassName().contains("Redis") ||
+                        element.getClassName().contains("Jackson2JsonRedisSerializer")) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
+
 
     /**
      * BigDecimal，显示为带2个小数

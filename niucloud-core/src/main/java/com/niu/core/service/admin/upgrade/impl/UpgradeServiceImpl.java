@@ -2,7 +2,6 @@ package com.niu.core.service.admin.upgrade.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -33,6 +32,7 @@ import com.niu.core.enums.addon.AddonStatusEnum;
 import com.niu.core.enums.addon.AddonTypeEnum;
 import com.niu.core.enums.sys.UpgradeRecordStatusEnum;
 import com.niu.core.mapper.addon.AddonMapper;
+import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysBackupRecordsMapper;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
@@ -59,6 +59,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.*;
@@ -455,7 +456,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
                 return param;
             } else {
                 fos.close();
-                ZipUtil.unzip(file.getPath(), downloadDir.getPath(), CharsetUtil.CHARSET_UTF_8);
+                ZipUtil.unzip(file.getPath(), downloadDir.getPath(), Charset.forName(System.getProperty("sun.jnu.encoding")));
                 Thread.sleep(1000);
                 file.delete();
 
@@ -723,7 +724,9 @@ public class UpgradeServiceImpl implements IUpgradeService {
         UpgradeContentVo.VersionItem version = addon.getVersionList().get(versionIndex);
         String versionNo = version.getVersionNo();
 
-        String sql = AddonModuleContext.readResourceAsStreamToText(addon.getApp().getAppKey(), "upgrade/" + versionNo + ".sql");
+        String addonKey = addon.getApp().getAppKey().equals("niucloud-admin") ? "core" : addon.getApp().getAppKey();
+
+        String sql = AddonModuleContext.readResourceAsStreamToText(addonKey, "upgrade/" + versionNo + ".sql");
         if (!sql.isEmpty()) {
             sql = sql.replace("{{prefix}}", GlobalConfig.tablePrefix);
             try {
@@ -734,7 +737,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
         }
 
         try {
-            UpgradeProviderFactory.handle(addon.getApp().getAppKey(), versionNo);
+            UpgradeProviderFactory.handle(addonKey, versionNo);
         } catch (Exception e) {
             throw new CommonException("【" + addon.getApp().getAppName() + "】 " + versionNo + "版本升级方法执行出错，错误原因：" + e.getMessage());
         }
@@ -776,8 +779,8 @@ public class UpgradeServiceImpl implements IUpgradeService {
         List<String> addons = addonMapper.selectList(new MPJQueryWrapper<Addon>()
                 .select("`key`")
                 .eq("status", AddonStatusEnum.ON.getCode()))
-                .stream().map(i -> i.getKey()).collect(Collectors.toList())
-        ;
+            .stream().map(i -> i.getKey()).collect(Collectors.toList())
+            ;
 
         // 处理pages.json
         if (new File(envs.webRoot + "uni-app/").exists()) addonInstallTools.handlePagesJson(envs.webRoot + "/uni-app/", addons);
@@ -843,7 +846,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
         cloudBuildService.build("build");
     }
 
-    public Map<String, Object> gteCloudBuildLog(UpgradeTaskVo vo) throws InterruptedException {
+    public Map<String, Object> gteCloudBuildLog(UpgradeTaskVo vo) throws InterruptedException{
         JSONObject log = cloudBuildService.getBuildLog("build");
         if (log != null) {
             JSONArray data = log.getByPath("data.0", JSONArray.class);
@@ -872,6 +875,9 @@ public class UpgradeServiceImpl implements IUpgradeService {
                 coreAddonService.set(addon);
             }
         }
+
+        File backupDir = new File(upgradeDir(vo));
+        FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, DateUtil.now() + ".log"));
 
         // 变更升级记录
         SysUpgradeRecordsParam editParam = new SysUpgradeRecordsParam();
@@ -971,8 +977,10 @@ public class UpgradeServiceImpl implements IUpgradeService {
             vo.setStep("restoreCover");
             vo.setStatus("restarting");
             setUpgradeTaskCache(vo);
+
             PipeNameUtils.noticeBootRestartByUpgradeRollback(GlobalConfig.applicationName, backup.getBackupKey());
             Thread.sleep(3000);
+
             return null;
         }
     }

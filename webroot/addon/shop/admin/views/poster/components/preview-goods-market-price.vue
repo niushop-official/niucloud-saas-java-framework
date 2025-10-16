@@ -25,7 +25,7 @@ const componentStyle = computed(() => {
     if (prop.value.weight) {
         style += 'font-weight: bold;'
     }
-    if (!prop.value.fontFamily || prop.value.fontFamily == 'static/font/price.ttf') {
+    if (!prop.value.fontFamily || prop.value.fontFamily == 'static/font/OPLUSSANS3-REGULAR.ttf') {
         style += 'font-family: poster_price_font;'
     }
     const box: any = document.getElementById(prop.value.id)

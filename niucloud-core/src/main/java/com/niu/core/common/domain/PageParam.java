@@ -15,6 +15,4 @@ public class PageParam implements Serializable {
     private Integer page = 1;
     // 每页数量
     private Integer limit = 10;
-
-
 }

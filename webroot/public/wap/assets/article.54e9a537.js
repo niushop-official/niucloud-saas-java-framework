@@ -1,1 +1,0 @@
-import{am as t}from"./index-1b8848d8.js";function r(r){return t.get("cms/article",r)}function e(r){return t.get(`cms/article/${r}`)}function n(){return t.get("cms/category")}function c(r){return t.put(`cms/article/visit/${r}`)}export{r as a,e as b,n as g,c as v};

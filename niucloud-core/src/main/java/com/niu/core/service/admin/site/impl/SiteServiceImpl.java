@@ -1,11 +1,11 @@
 package com.niu.core.service.admin.site.impl;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.yulichang.base.MPJBaseMapper;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.google.gson.JsonArray;
 import com.niu.core.common.component.context.SpringContext;
@@ -33,6 +32,7 @@ import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.entity.sys.SysMenu;
 import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.addon.AddonTypeEnum;
+import com.niu.core.enums.site.AddonChildMenuEnum;
 import com.niu.core.enums.site.ShowMarketingEnum;
 import com.niu.core.enums.site.SiteInitEnum;
 import com.niu.core.enums.site.SiteStatusEnum;
@@ -40,11 +40,14 @@ import com.niu.core.enums.sys.AppTypeEnum;
 import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.event.site.SiteAddAfterEvent;
 import com.niu.core.event.site.SiteEditAfterEvent;
+import com.niu.core.event.sys.ShowCustomerEventDefiner;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysMenuMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
+import com.niu.core.service.admin.auth.IAuthService;
+import com.niu.core.service.admin.diy.IDiyService;
 import com.niu.core.service.admin.generator.IGenerateService;
 import com.niu.core.service.admin.site.ISiteGroupService;
 import com.niu.core.service.admin.site.ISiteService;
@@ -58,13 +61,14 @@ import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.site.ICoreSiteService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -127,6 +131,13 @@ public class SiteServiceImpl implements ISiteService {
     @Resource
     SysMenuMapper sysMenuMapper;
 
+    @Resource
+    private IDiyService diyService;
+
+    @Resource
+    @Lazy
+    private IAuthService authService;
+
     /**
      * 站点列表
      *
@@ -139,39 +150,49 @@ public class SiteServiceImpl implements ISiteService {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
-        LambdaQueryWrapper<Site> queryWrapper = new LambdaQueryWrapper<>();
+        MPJQueryWrapper<Site> queryWrapper = new MPJQueryWrapper();
+        queryWrapper.setAlias("se")
+                .selectAll(Site.class)
+                .select("sg.group_name")
+                .leftJoin("?_site_group sg on sg.group_id = se.group_id".replace("?_", GlobalConfig.tablePrefix));
+
+
         //查询条件判断组装
         if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) {
-            queryWrapper.like(Site::getSiteName, searchParam.getKeywords()).or().like(Site::getSiteId, searchParam.getKeywords());
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getStatus())) {
-            queryWrapper.eq(Site::getStatus, searchParam.getStatus());
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getGroupId())) {
-            queryWrapper.eq(Site::getGroupId, searchParam.getGroupId());
+            queryWrapper.like("se.siteName", searchParam.getKeywords()).or().like("se.siteName", searchParam.getKeywords());
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getApp())) {
-            queryWrapper.like(Site::getApp, searchParam.getApp()).or().like(Site::getInitalledAddon, searchParam.getApp());
+            queryWrapper.and(wrapper -> wrapper
+                    .like("sg.addon", searchParam.getApp())
+                    .or()
+                    .like("sg.app", searchParam.getApp())
+            );
+        }
+
+        if (ObjectUtil.isNotEmpty(searchParam.getStatus())) {
+            queryWrapper.eq("se.status", searchParam.getStatus());
+        }
+
+        if (ObjectUtil.isNotEmpty(searchParam.getGroupId())) {
+            queryWrapper.eq("se.group_id", searchParam.getGroupId());
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getSiteDomain())) {
-            queryWrapper.like(Site::getSiteDomain, searchParam.getSiteDomain());
+            queryWrapper.like("se.site_domain", searchParam.getSiteDomain());
         }
-        queryWrapper.ne(Site::getAppType, "admin");
+        queryWrapper.ne("se.app_type", "admin");
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
 
             String[] createTime = searchParam.getCreateTime();
             long startTime = (createTime[0] == null) ? 0L : DateUtils.StringToTimestamp(createTime[0]);
             long endTime = (createTime[1] == null) ? 0L : DateUtils.StringToTimestamp(createTime[1]);
             if (startTime > 0L && endTime > 0L) {
-                queryWrapper.between(Site::getCreateTime, startTime, endTime);
+                queryWrapper.between("se.create_time", startTime, endTime);
             } else if (startTime > 0L && endTime == 0L) {
-                queryWrapper.ge(Site::getCreateTime, startTime);
+                queryWrapper.ge("se.create_time", startTime);
             } else if (startTime == 0L && endTime > 0L) {
-                queryWrapper.le(Site::getCreateTime, startTime);
+                queryWrapper.le("se.create_time", startTime);
             }
         }
 
@@ -181,20 +202,20 @@ public class SiteServiceImpl implements ISiteService {
             long startTime = (expireTime[0] == null) ? 0 : DateUtils.StringToTimestamp(expireTime[0]);
             long endTime = (expireTime[1] == null) ? 0 : DateUtils.StringToTimestamp(expireTime[1]);
             if (startTime > 0 && endTime > 0) {
-                queryWrapper.between(Site::getExpireTime, startTime, endTime);
+                queryWrapper.between("se.expire_time", startTime, endTime);
             } else if (startTime > 0 && endTime == 0) {
-                queryWrapper.ge(Site::getExpireTime, startTime);
+                queryWrapper.ge("se.expire_time", startTime);
             } else if (startTime == 0 && endTime > 0) {
-                queryWrapper.le(Site::getExpireTime, startTime);
+                queryWrapper.le("se.expire_time", startTime);
             }
         }
 
+        queryWrapper.orderByDesc("se.create_time");
 
-        queryWrapper.orderByDesc(Site::getCreateTime);
+        IPage<SiteListVo> iPage = siteMapper.selectJoinPage(new Page<>(page, limit), SiteListVo.class, queryWrapper);
 
-        IPage<Site> iPage = siteMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<SiteListVo> list = new LinkedList<>();
-        for (Site item : iPage.getRecords()) {
+        for (SiteListVo item : iPage.getRecords()) {
             SiteListVo vo = new SiteListVo();
             BeanUtils.copyProperties(item, vo);
             MPJQueryWrapper<SysUserRole> userRoleMPJQueryWrapper = new MPJQueryWrapper<>();
@@ -204,11 +225,6 @@ public class SiteServiceImpl implements ISiteService {
             userRoleMPJQueryWrapper.eq("nsur.is_admin", 1);
             userRoleMPJQueryWrapper.eq("nsur.site_id", item.getSiteId());
             vo.setAdmin(sysUserRoleMapper.selectJoinOne(SiteAdminVo.class, userRoleMPJQueryWrapper));
-            SiteGroup siteGroup = siteGroupMapper.selectById(item.getGroupId());
-            if (ObjectUtil.isNotEmpty(siteGroup)) {
-                vo.setGroupName(siteGroup.getGroupName());
-            }
-
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal(), list);
@@ -274,6 +290,12 @@ public class SiteServiceImpl implements ISiteService {
         event.setSite(model);
         event.setSiteGroup(siteGroup);
         EventAndSubscribeOfPublisher.publishAll(event);
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("site_id", siteId);
+        param.put("main_app", siteGroup.getApp());
+        param.put("tag", "add");
+        diyService.loadDiyData(param);
     }
 
     /**
@@ -641,5 +663,243 @@ public class SiteServiceImpl implements ISiteService {
         return coreSiteService.siteInitBySiteId(siteId, tables);
     }
 
+    @Override
+    public SpecialMenuListVo getSpecialMenuList() {
+        JSONArray authMenuList = authService.getAuthMenuTreeList(1, "all");
+
+        // 将菜单列表转换为Map，便于通过menu_key查找
+        Map<String, JSONObject> authMenuMap = new HashMap<>();
+        for (int i = 0; i < authMenuList.size(); i++) {
+            JSONObject menu = authMenuList.getJSONObject(i);
+            authMenuMap.put(menu.get("menu_key").toString(), menu);
+        }
+
+        // 获取"addon"菜单
+        JSONObject addonMenu = authMenuMap.get("addon");
+        if (addonMenu == null) {
+            return new SpecialMenuListVo("addon", new ArrayList<>());
+        }
+
+        Map<String, Object> showList = showCustomer(false);
+        List<AddonChildMenuEnum.MenuConfig> addonChildMenus = AddonChildMenuEnum.getAll();
+
+        List<SpecialMenuListVo.MenuVo> menuList = new ArrayList<>();
+
+        // 遍历插件子菜单，构建菜单列表
+        for (AddonChildMenuEnum.MenuConfig item : addonChildMenus) {
+            String menuKey = item.getKey();
+            List<String> menuKeyList = new ArrayList<>();
+            if (showList.containsKey(menuKey) && showList.get(menuKey) instanceof Map) {
+                Map<String, Object> menuItem = (Map<String, Object>) showList.get(menuKey);
+                if (menuItem.containsKey("list") && menuItem.get("list") instanceof List) {
+                    List<Map<String, Object>> listItems = (List<Map<String, Object>>) menuItem.get("list");
+                    for (Map<String, Object> listItem : listItems) {
+                        if (listItem.containsKey("key")) {
+                            menuKeyList.add(listItem.get("key").toString());
+                        }
+                    }
+                }
+            }
+            SpecialMenuListVo.MenuVo tempMenu = new SpecialMenuListVo.MenuVo();
+            tempMenu.setMenuName(item.getName());
+            tempMenu.setMenuKey(item.getKey());
+            tempMenu.setMenuShortName(item.getShortName());
+            tempMenu.setParentKey("addon");
+            tempMenu.setMenuType("0");
+            tempMenu.setIcon("iconfont iconzhuangxiu3");
+            tempMenu.setApiUrl("");
+            tempMenu.setRouterPath("");
+            tempMenu.setViewPath("");
+            tempMenu.setMethods("");
+            tempMenu.setSort(item.getSort());
+            tempMenu.setStatus("1");
+            tempMenu.setIsShow("1");
+
+            List<SpecialMenuListVo.MenuVo> children = new ArrayList<>();
+            JSONArray authChildren = addonMenu.getJSONArray("children");
+            if (authChildren != null) {
+                for (int j = 0; j < authChildren.size(); j++) {
+                    JSONObject child = authChildren.getJSONObject(j);
+                    if (menuKeyList.contains(child.get("menu_key").toString())) {
+                        // 转换为MenuVo对象
+                        SpecialMenuListVo.MenuVo childMenu = convertToMenuVo(child);
+                        children.add(childMenu);
+                    }
+                }
+            }
+
+            tempMenu.setChildren(children);
+            menuList.add(tempMenu);
+        }
+        SpecialMenuListVo result = new SpecialMenuListVo();
+        result.setParentKey("addon");
+        result.setList(menuList);
+
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> showCustomer(boolean isSort) {
+        // 创建并设置事件
+        ShowCustomerEventDefiner.ShowCustomerEvent event = new ShowCustomerEventDefiner.ShowCustomerEvent();
+        event.setName("ShowCustomer");
+        event.setSiteId(RequestUtils.siteId());
+
+        // 发布事件并获取所有监听器的返回结果
+        List<ShowCustomerEventDefiner.ShowCustomerEventResult> eventResults =
+                EventAndSubscribeOfPublisher.publishAndCallback(event);
+
+        // 转换事件结果为统一格式
+        List<Map<String, List<ShowCustomerEventDefiner.MenuItem>>> showList = new ArrayList<>();
+        for (ShowCustomerEventDefiner.ShowCustomerEventResult result : eventResults) {
+            Map<String, List<ShowCustomerEventDefiner.MenuItem>> menuMap = result.getData();
+            showList.add(menuMap);
+        }
+
+        // 获取插件类型列表
+        List<AddonChildMenuEnum.MenuConfig> addonTypeList = AddonChildMenuEnum.getAll();
+        if (addonTypeList == null) {
+            addonTypeList = new ArrayList<>();
+        }
+
+        // 初始化返回结果并合并事件数据
+        Map<String, Object> result = new HashMap<>();
+        for (Map<String, List<ShowCustomerEventDefiner.MenuItem>> eventItem : showList) {
+            for (AddonChildMenuEnum.MenuConfig type : addonTypeList) {
+                String key = type.getKey();
+                // 初始化类型条目
+                if (!result.containsKey(key)) {
+                    Map<String, Object> typeItem = new HashMap<>();
+                    typeItem.put("title", type.getName());
+                    typeItem.put("sort", type.getSort());
+                    typeItem.put("list", new ArrayList<Map<String, Object>>());
+                    result.put(key, typeItem);
+                }
+
+                // 合并列表数据
+                Map<String, Object> typeItem = (Map<String, Object>) result.get(key);
+                List<Map<String, Object>> typeList = (List<Map<String, Object>>) typeItem.get("list");
+
+                // 将MenuItem转换为Map并添加到列表
+                List<ShowCustomerEventDefiner.MenuItem> menuItems = eventItem.getOrDefault(key, new ArrayList<>());
+                for (ShowCustomerEventDefiner.MenuItem item : menuItems) {
+                    Map<String, Object> itemMap = new HashMap<>();
+                    itemMap.put("title", item.getTitle());
+                    itemMap.put("desc", item.getDesc());
+                    itemMap.put("icon", item.getIcon());
+                    itemMap.put("key", item.getKey());
+                    itemMap.put("url", item.getUrl());
+                    typeList.add(itemMap);
+                }
+            }
+        }
+
+        // 收集已存在的key，用于处理未实现事件的插件
+        Set<String> existingKeys = new HashSet<>();
+        for (Object value : result.values()) {
+            Map<String, Object> typeItem = (Map<String, Object>) value;
+            List<Map<String, Object>> list = (List<Map<String, Object>>) typeItem.get("list");
+            for (Map<String, Object> item : list) {
+                if (item.containsKey("key")) {
+                    existingKeys.add(item.get("key").toString());
+                }
+            }
+        }
+
+        // 处理未实现事件的插件，添加到addon_tool
+        List<Addon> siteAddons = getSiteAddons();
+        if (siteAddons != null && !siteAddons.isEmpty()) {
+            // 查询菜单表获取路由路径
+            List<String> addonKeys = siteAddons.stream()
+                    .map(Addon::getKey)
+                    .collect(Collectors.toList());
+
+
+            List<SysMenu> menuList = sysMenuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
+                    .select(SysMenu::getAddon, SysMenu::getRouterPath)
+                    .in(!CollectionUtils.isEmpty(addonKeys),SysMenu::getAddon, addonKeys)
+                    .notIn(!CollectionUtils.isEmpty(existingKeys), SysMenu::getAddon, existingKeys)
+                    .eq(SysMenu::getMenuType, 1)
+                    .eq(SysMenu::getIsShow, 1)
+                    .orderByAsc(SysMenu::getId)
+                    .groupBy(SysMenu::getAddon));
+            Map<String, String> addonUrls = menuList.stream()
+                    .collect(Collectors.toMap(
+                            SysMenu::getAddon,
+                            SysMenu::getRouterPath,
+                            // 处理重复key的情况，保留第一个
+                            (existingValue, newValue) -> existingValue
+                    ));
+
+            // 初始化addon_tool条目
+            if (!result.containsKey("addon_tool")) {
+                Map<String, Object> toolItem = new HashMap<>();
+                toolItem.put("title", "附加工具");
+                toolItem.put("sort", 0);
+                toolItem.put("list", new ArrayList<Map<String, Object>>());
+                result.put("addon_tool", toolItem);
+            }
+
+            Map<String, Object> toolItem = (Map<String, Object>) result.get("addon_tool");
+            List<Map<String, Object>> toolList = (List<Map<String, Object>>) toolItem.get("list");
+
+            // 添加未处理的插件
+            for (Addon addon : siteAddons) {
+                String key = addon.getKey();
+                if (existingKeys.contains(key)) {
+                    continue;
+                }
+
+                Map<String, Object> item = new HashMap<>();
+                item.put("title", addon.getTitle());
+                item.put("desc", addon.getDesc());
+                item.put("icon", addon.getIcon());
+                item.put("key", key);
+
+                String url = addonUrls.getOrDefault(key, "");
+                item.put("url", url.startsWith("/") ? url : "/" + url);
+
+                toolList.add(item);
+            }
+        }
+
+        // 排序处理
+        if (isSort) {
+            List<Map.Entry<String, Object>> entryList = new ArrayList<>(result.entrySet());
+            entryList.sort((a, b) -> {
+                Map<String, Object> mapA = (Map<String, Object>) a.getValue();
+                Map<String, Object> mapB = (Map<String, Object>) b.getValue();
+
+                int sortA = mapA.containsKey("sort") ? Convert.toInt(mapA.get("sort"), 0) : 0;
+                int sortB = mapB.containsKey("sort") ? Convert.toInt(mapB.get("sort"), 0) : 0;
+
+                return Integer.compare(sortB, sortA);  // 降序排序
+            });
+
+            // 重建排序后的map
+            Map<String, Object> sortedResult = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : entryList) {
+                sortedResult.put(entry.getKey(), entry.getValue());
+            }
+            result = sortedResult;
+        }
+
+        return result;
+    }
+
+    private SpecialMenuListVo.MenuVo convertToMenuVo(JSONObject json) {
+        SpecialMenuListVo.MenuVo menuVo = JSONUtil.toBean(json, SpecialMenuListVo.MenuVo.class);
+
+        JSONArray children = json.getJSONArray("children");
+        if (children != null) {
+            List<SpecialMenuListVo.MenuVo> childList = new ArrayList<>();
+            for (int i = 0; i < children.size(); i++) {
+                childList.add(convertToMenuVo(children.getJSONObject(i)));
+            }
+            menuVo.setChildren(childList);
+        }
+
+        return menuVo;
+    }
 
 }

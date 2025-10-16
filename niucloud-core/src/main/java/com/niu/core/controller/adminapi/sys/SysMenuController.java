@@ -100,6 +100,7 @@ public class SysMenuController {
         installSystemService.install();
         return Result.success();
     }
+
     /**
      * 菜单树
      *
@@ -126,4 +127,8 @@ public class SysMenuController {
         return Result.success(sysMenuService.getAddonMenu(appKey, "all", 1, 0));
     }
 
+    @GetMapping("/menu/system_menu")
+    public Result getSystem() {
+        return Result.success(sysMenuService.getSystemMenu("all", 1, 0));
+    }
 }

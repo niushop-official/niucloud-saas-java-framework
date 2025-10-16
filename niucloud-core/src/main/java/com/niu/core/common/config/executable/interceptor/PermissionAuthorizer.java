@@ -110,12 +110,24 @@ public class PermissionAuthorizer {
             if (supportUrl.endsWith("]")) {
                 supportUrl = supportUrl.substring(0, supportUrl.length() - 1);
             }
-            HandlerMethod handlerMethod = methodMap.get(requestMappingInfo);
-            Authorizer authorizer = new Authorizer();
-            authorizer.setSourcePath(supportUrl);
-            authorizer.setMethod(supportMethods.toString());
-            authorizer.setHandlerMethod(handlerMethod);
-            authorizerMap.put(supportMethods.toString() + supportUrl, authorizer);
+
+            if (supportMethods.size() == 0) {
+                for (RequestMethod method : RequestMethod.values()) {
+                    HandlerMethod handlerMethod = methodMap.get(requestMappingInfo);
+                    Authorizer authorizer = new Authorizer();
+                    authorizer.setSourcePath(supportUrl);
+                    authorizer.setMethod(supportMethods.toString());
+                    authorizer.setHandlerMethod(handlerMethod);
+                    authorizerMap.put("[" + method.toString() + "]" + supportUrl, authorizer);
+                }
+            } else {
+                HandlerMethod handlerMethod = methodMap.get(requestMappingInfo);
+                Authorizer authorizer = new Authorizer();
+                authorizer.setSourcePath(supportUrl);
+                authorizer.setMethod(supportMethods.toString());
+                authorizer.setHandlerMethod(handlerMethod);
+                authorizerMap.put(supportMethods.toString() + supportUrl, authorizer);
+            }
         }
     }
 

@@ -25,16 +25,16 @@
                         v-if="tabsData[tabActive]?.child_list && !loading">
                         <template v-for="(item, index) in tabsData[tabActive]?.child_list" :key="item.category_id">
                             <view @click="toLink(item.category_id)" class=" flex items-center justify-center flex-col">
-                                <u--image radius="var(--goods-rounded-big)" width="120rpx" height="120rpx" :src="img(item.image ? item.image : '')" model="aspectFill">
+                                <up-image radius="var(--goods-rounded-big)" width="120rpx" height="120rpx" :src="img(item.image ? item.image : '')" model="aspectFill">
                                     <template #error>
                                         <image class="rounded-[var(--goods-rounded-big)] overflow-hidden w-[120rpx] h-[120rpx]" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                     </template>
-                                </u--image>
+                                </up-image>
                                 <view class="text-[24rpx] text-center mt-[16rpx] leading-[34rpx]">{{item.category_name }}</view>
                             </view>
                         </template>
                     </view>
-                    
+
                     <mescroll-empty class="part" v-if="!tabsData[tabActive]?.child_list && !loading" :option="{tip : '暂无商品分类'}"></mescroll-empty>
                 </view>
             </scroll-view>

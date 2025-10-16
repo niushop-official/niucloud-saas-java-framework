@@ -30,13 +30,13 @@
                         </el-form-item>
                         <template v-if="formData.delivery_type == 'store'">
                             <el-form-item :label="t('storeTakerName')">
-                                <div class="input-width">{{ formData.taker_name }}</div>
+                                <div class="input-width">{{ formData.taker_name || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('buyersReserveMobile')">
-                                <div class="input-width">{{ formData.taker_mobile }}</div>
+                                <div class="input-width">{{ formData.taker_mobile || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('verifyCode')" v-if="formData.verify_code">
-                                <div class="input-width">{{ formData.verify_code }}</div>
+                                <div class="input-width">{{ formData.verify_code || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('verifierMember')" v-if="formData.verifier_member">
                                 <div class="input-width text-primary cursor-pointer" @click="memberEvent(formData.verifier_member.member_id)">{{ formData.verifier_member.nickname }}</div>
@@ -56,13 +56,13 @@
                         </el-form-item>
                         <div v-if="formData.delivery_type == 'express' || formData.delivery_type == 'local_delivery'">
                             <el-form-item :label="t('takerName')">
-                                <div class="input-width">{{ formData.taker_name }}</div>
+                                <div class="input-width">{{ formData.taker_name || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('takerMobile')">
-                                <div class="input-width">{{ formData.taker_mobile }}</div>
+                                <div class="input-width">{{ formData.taker_mobile || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('takerFullAddress')">
-                                <div class="input-width">{{ formData.taker_full_address }}</div>
+                                <div class="input-width">{{ formData.taker_full_address || '--' }}</div>
                             </el-form-item>
                         </div>
                         <div v-if="formData.delivery_type == 'local_delivery' && formData.buyer_ask_delivery_time">
@@ -72,13 +72,13 @@
                         </div>
                         <div v-if="formData.delivery_type == 'store'">
                             <el-form-item :label="t('storeName')">
-                                <div class="input-width">{{ formData.store.store_name }}</div>
+                                <div class="input-width">{{ formData.store.store_name || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('storeAddress')">
-                                <div class="input-width">{{ formData.store.full_address }}</div>
+                                <div class="input-width">{{ formData.store.full_address || '--' }}</div>
                             </el-form-item>
                             <el-form-item :label="t('storeMobile')">
-                                <div class="input-width">{{ formData.store.store_mobile }}</div>
+                                <div class="input-width">{{ formData.store.store_mobile || '--'  }}</div>
                             </el-form-item>
                             <el-form-item :label="t('tradeTime')">
                                 <div class="input-width">{{ formData.store.trade_time }}</div>
@@ -164,7 +164,7 @@
                     </div>
                 </div>
 
-                <h3 class="panel-title mt-[30rpx]">{{ t('goodsDetail') }}</h3>
+                <h3 class="panel-title">{{ t('goodsDetail') }}</h3>
                 <el-table :data="formData.order_goods" size="large">
                     <el-table-column :label="t('goodsName')" align="left" width="300">
                         <template #default="{ row }">

@@ -138,4 +138,6 @@ public interface ISysMenuService {
      * @return
      */
     JSONArray getAddonMenu(String appKey, String status, Integer isTree, Integer isButton);
+
+    JSONArray getSystemMenu(String status, Integer isTree, Integer isButton);
 }

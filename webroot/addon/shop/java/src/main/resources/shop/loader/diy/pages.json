@@ -5209,15 +5209,16 @@
 							"titleColor": "#333333",
 							"subTitleColor": "#999999",
 							"saleInfoColor": "#999999",
-							"priceTopRounded": 20,
+							"priceTopRounded": 17,
 							"priceBottomRounded": 0,
-							"topRounded": 20,
+							"topRounded": 12,
 							"bottomRounded": 0,
 							"priceBgColor": "",
-							"bgColor": "#f6f6f6",
+							"startBgColor": "#ffffff",
+							"endBgColor": "rgba(254, 254, 254, 1)",
 							"priceAboutMargin": 0,
 							"priceTopMargin": -22,
-							"topMargin": -17,
+							"topMargin": -13,
 							"aboutMargin": 0
 						},
 						"saleInfo": [
@@ -5242,6 +5243,38 @@
 						"margin": {
 							"top": 0,
 							"bottom": 0,
+							"both": 0
+						},
+						"isHidden": false
+					},
+					{
+						"path": "edit-horz-blank",
+						"uses": 0,
+						"id": "7lc46dh86vw0",
+						"componentName": "HorzBlank",
+						"componentTitle": "辅助空白",
+						"ignore": [
+							"pageBgColor",
+							"componentBgUrl"
+						],
+						"height": 100,
+						"textColor": "#303133",
+						"pageStartBgColor": "",
+						"pageEndBgColor": "",
+						"pageGradientAngle": "to bottom",
+						"componentBgUrl": "",
+						"componentBgAlpha": 2,
+						"componentStartBgColor": "rgba(253, 253, 253, 1)",
+						"componentEndBgColor": "rgba(246, 246, 246, 1)",
+						"componentGradientAngle": "to bottom",
+						"topRounded": 0,
+						"bottomRounded": 0,
+						"elementBgColor": "",
+						"topElementRounded": 0,
+						"bottomElementRounded": 0,
+						"margin": {
+							"top": 0,
+							"bottom": -100,
 							"both": 0
 						},
 						"isHidden": false

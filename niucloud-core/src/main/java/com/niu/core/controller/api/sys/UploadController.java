@@ -28,6 +28,13 @@ public class UploadController {
         return Result.success(uploadService.image(param));
     }
 
+    @PostMapping("/video")
+    public Result video(@RequestParam("file") MultipartFile file) {
+        AttachmentUploadParam param = new AttachmentUploadParam();
+        param.setFile(file);
+        return Result.success(uploadService.video(param));
+    }
+
     @PostMapping("/image/fetch")
     public Result imageFetch() {
         return Result.success();

@@ -49,6 +49,7 @@
                                 <div class="flex flex-col mt-[10px]">
                                     <div class="text-[12px] text-[#999] leading-[20px]">{{ t('goodsVideoTipTile') }}</div>
                                     <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipOne') }}</div>
+                                    <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipTwo') }}</div>
                                     <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipThree') }}</div>
                                     <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipFour') }}</div>
                                     <div class="mt-[5px] text-[12px] text-[var(--el-color-primary)] leading-[20px]">{{ t('goodsVideoTipFive') }}</div>
@@ -64,7 +65,7 @@
                         </el-form-item>
 
                         <el-form-item :label="t('brand')">
-                            <el-select v-model="goodsEdit.formData.brand_id" :placeholder="t('brandPlaceholder')" clearable>
+                            <el-select v-model="goodsEdit.formData.brand_id" :placeholder="t('brandPlaceholder')" clearable filterable remote reserve-keyword :remote-method="goodsEdit.refreshGoodsBrand">
                                 <el-option v-for="item in goodsEdit.brandOptions" :key="item.brand_id" :label="item.brand_name" :value="item.brand_id" />
                             </el-select>
                             <div class="ml-[10px]">

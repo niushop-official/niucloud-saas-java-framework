@@ -51,12 +51,12 @@ public class ShopInvoiceExportDataListener extends ExportDataEventDefiner {
             if (ObjectUtil.isNotEmpty(headerName)) {
                 queryWrapper.like("header_name", headerName);
             }
-
-            if ((where.get("create_time") instanceof String[] createTimes) && ObjectUtil.isNotEmpty(createTimes)) {
+            if (ObjectUtil.isNotEmpty(where.get("create_time")) && where.get("create_time") instanceof List<?>) {
+                List<String> createTimes = (List<String>) where.get("create_time");
                 QueryMapperUtils.buildByTime(queryWrapper, "create_time", createTimes);
             }
-
-            if ((where.get("invoice_time") instanceof String[] invoiceTimes) && ObjectUtil.isNotEmpty(invoiceTimes)) {
+            if (ObjectUtil.isNotEmpty(where.get("invoice_time")) && where.get("invoice_time") instanceof List<?>) {
+                List<String> invoiceTimes = (List<String>) where.get("invoice_time");
                 QueryMapperUtils.buildByTime(queryWrapper, "invoice_time", invoiceTimes);
             }
         }

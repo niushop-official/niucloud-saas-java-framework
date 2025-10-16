@@ -48,18 +48,23 @@
         <view v-if="priceType != 'original_price'"
       class="relative flex items-center justify-between !bg-cover box-border pb-[26rpx] h-[136rpx] px-[30rpx]"
       :style="marketGoodCss">
-            <view class="text-[#fff]">
+            <view class="text-[#fff] leading-[normal]">
                 <text class="text-[26rpx] mr-[10rpx] font-500 leading-[36rpx]" v-if="priceType == 'newcomer_price'">新人价</text>
                 <text class="text-[26rpx] mr-[10rpx] font-500 leading-[36rpx]" v-else-if="priceType == 'discount_price'">折扣价</text>
                 <text class="text-[26rpx] mr-[10rpx] font-500 leading-[36rpx]" v-else-if="priceType == 'member_price'">会员价</text>
-                <view class="inline-block mr-[14rpx]">
+                <view class="inline-block mr-[14rpx] relative top-[2rpx]">
                     <text class="text-[32rpx] price-font mr-[4rpx]">￥</text>
                     <text class="text-[48rpx] -mb-[4rpx] price-font">{{ parseFloat(goodsPrice).toFixed(2).split('.')[0] }}</text>
                     <text class="text-[32rpx] price-font">.{{ parseFloat(goodsPrice).toFixed(2).split('.')[1] }}</text>
                 </view>
                 <view class="inline-block" v-if="priceType">
-                    <text class="text-[26rpx] mr-[6rpx]" v-if="diyComponent.price">售价:</text>
-                    <text class="text-[26rpx] price-font leading-[36rpx]">￥{{ diyComponent.price }}</text>
+                       <!--  #ifdef H5 -->
+                    <text class="text-[26rpx] leading-[36rpx] mr-[6rpx] relative -top-[1rpx]" v-if="diyComponent.price">售价</text>
+                       <!--  #endif -->
+                     <!--  #ifndef  H5 -->
+                     <text class="text-[26rpx] leading-[36rpx] mr-[6rpx]" v-if="diyComponent.price">售价</text>
+                        <!--  #endif -->
+                    <text class="text-[30rpx] relative top-[1rpx] price-font leading-[36rpx]">￥{{ diyComponent.price }}</text>
                 </view>
             </view>
             <view v-if="priceType == 'discount_price'" class="flex flex-col text-[#fff] items-end h-[59rpx] justify-between">
@@ -240,6 +245,14 @@ const navbarInnerStyle = computed(() => {
         style += 'font-size: 36rpx;';
     }
     // #endif
+    
+   // #ifdef APP-PLUS
+   style += 'height: 80rpx;';
+   style += 'padding-right: 30rpx;';
+   style += 'padding-left: 30rpx;';
+   style += 'padding-top:' + systemStore.systemInfo.statusBarHeight + 'px;';
+   // #endif
+    
     return style;
 })
 
@@ -269,6 +282,10 @@ const fixedInnerStyle = computed(() => {
     // #endif
     // #ifdef H5
     style += 'top: 100rpx;';
+    style += 'left: 30rpx;';
+    // #endif
+    // #ifdef APP-PLUS
+    style += 'top:' + (systemStore.systemInfo.statusBarHeight + uni.upx2px(100)) + 'px;';
     style += 'left: 30rpx;';
     // #endif
     return style;
@@ -388,7 +405,7 @@ const goodsPrice = computed(() => {
 const ordinaryGoodCss = computed(() => {
     let style = "";
     
-    if (diyComponent.value.goodsInfo.startBgColor && diyComponent.value.goodsInfo.endBgColor) style += `background:linear-gradient(180deg,${diyComponent.value.goodsInfo.startBgColor} 50% ,${diyComponent.value.goodsInfo.endBgColor} 100%);`;
+    if (diyComponent.value.goodsInfo.startBgColor && diyComponent.value.goodsInfo.endBgColor) style += `background:linear-gradient(180deg,${diyComponent.value.goodsInfo.startBgColor} 85% ,${diyComponent.value.goodsInfo.endBgColor} 100%);`;
     else style += 'background-color:' + (diyComponent.value.goodsInfo.startBgColor || diyComponent.value.goodsInfo.endBgColor) + ';';
 
     if (diyComponent.value.goodsInfo.topMargin) style += 'margin-top:' + diyComponent.value.goodsInfo.topMargin * 2 + 'rpx;';

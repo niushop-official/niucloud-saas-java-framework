@@ -37,6 +37,7 @@ public class CallbackPublisher {
             callbackMap = CallbackMediator.getInstance().handle(event);
         }
         callbackMap = CallbackMediator.getInstance().handleBySpring(event);
+        System.out.println("==============event==================>" + callbackMap);
         if (callbackMap != null) {
             return new ArrayList<>(callbackMap.values());
         }

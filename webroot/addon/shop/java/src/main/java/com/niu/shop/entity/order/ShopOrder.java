@@ -70,5 +70,7 @@ public class ShopOrder implements Serializable {
     private String activityType; // 营销类型
     private Integer formRecordId;
     private String buyerAskDeliveryTime;
+    private Integer relateOrderId;
+    private String relateSource;
 
 }

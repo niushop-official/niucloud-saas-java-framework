@@ -214,4 +214,16 @@ public class SiteController {
         CaptchaUtils.check(param.getCaptchaKey(), param.getCaptchaCode());
         return Result.success(siteService.siteInit(param.getSiteId()));
     }
+
+    @GetMapping("/special_menu")
+    @Description("生成菜单数据")
+    public Result<?> getSpecialMenuList() {
+        return Result.success(siteService.getSpecialMenuList());
+    }
+
+    @GetMapping("/showCustomer")
+    @Description("统一展示 安装的插件 应用 营销工具等。")
+    public Result<?> showCustomer() {
+        return Result.success(siteService.showCustomer(true));
+    }
 }

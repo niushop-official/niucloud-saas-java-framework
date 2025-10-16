@@ -11,7 +11,9 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.pay.Pay;
+import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.mapper.pay.PayMapper;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.delivery.ShopDeliveryCompany;
 import com.niu.shop.entity.delivery.ShopStore;
 import com.niu.shop.entity.order.*;
@@ -33,19 +35,22 @@ import com.niu.shop.service.core.order.param.DeliverySearchParam;
 import com.niu.shop.service.core.order.param.OrderCloseParam;
 import com.niu.shop.service.core.order.param.OrderFinishParam;
 import com.niu.shop.service.core.order.vo.OrderConfigVo;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
  * 订单实现
  */
+@Log4j2
 @Service
 public class OrderServiceImpl implements IOrderService {
         
@@ -126,7 +131,59 @@ public class OrderServiceImpl implements IOrderService {
 
             list.add(vo);
         }
+        list = getOrderRelateSourceInfo(list);
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+    }
+
+    private List<ShopOrderListVo> getOrderRelateSourceInfo(List<ShopOrderListVo> list) {
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+
+        log.info("开始获取订单关联源信息，订单数量: {}", list.size());
+        // 按relateSource分组订单信息
+        try {
+            Map<String, List<Map<String, Object>>> relateActivityList = list.stream()
+                    .collect(Collectors.groupingBy(
+                            ShopOrderListVo::getRelateSource,
+                            Collectors.mapping(order -> Map.of(
+                                    "order_id", order.getOrderId(),
+                                    "relate_order_id", order.getRelateOrderId()
+                            ), Collectors.toList())
+                    ));
+            CommonEventDefiner.CommonEvent sendEvent = new CommonEventDefiner.CommonEvent();
+            sendEvent.setEventName("ThirdAddonGetOrderActive");
+            sendEvent.setData(relateActivityList);
+            List<CommonEventDefiner.CommonEventResult> activeResList = EventAndSubscribeOfPublisher.publishAndCallback(sendEvent);
+            Map<String, Object> resultMap = new HashMap<>();
+            if (!CollectionUtils.isEmpty(activeResList)){
+                for (CommonEventDefiner.CommonEventResult result : activeResList) {
+                    resultMap.putAll(result.getDataMap());
+                }
+            }
+            log.info("获取到活动信息数量: {}", resultMap.size());
+            return list.stream()
+                    .map(order -> {
+                        String orderId = order.getOrderId().toString();
+                        if (resultMap.containsKey(orderId)) {
+                            Object activeInfo = resultMap.get(orderId);
+                            if (activeInfo instanceof Map) {
+                                order.setRelateActiveInfo(activeInfo);
+                            } else {
+                                order.setRelateActiveInfo(new HashMap<>());
+                            }
+                        } else {
+                            order.setRelateActiveInfo(new HashMap<>());
+                        }
+                        return order;
+                    }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("获取订单关联源信息失败", e);
+            // 发生异常时返回原列表，但设置空的活动信息
+            return list.stream()
+                    .peek(order -> order.setRelateActiveInfo(new HashMap<>()))
+                    .collect(Collectors.toList());
+        }
     }
 
     /**

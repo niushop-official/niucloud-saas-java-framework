@@ -7,4 +7,7 @@ import com.niu.core.service.admin.sys.vo.AttachmentUploadVo;
 public interface IUploadService {
 
     AttachmentUploadVo image(AttachmentUploadParam param);
+
+    AttachmentUploadVo video(AttachmentUploadParam param);
+
 }

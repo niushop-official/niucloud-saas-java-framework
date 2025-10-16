@@ -1,1 +1,0 @@
-import{am as e}from"./index-1b8848d8.js";function r(r){return e.get("shop_giftcard/member_records/give",r)}function t(r){return e.get(`shop_giftcard/member_records/give/${r}`)}function o(r){return e.get("shop_giftcard/member_records/receive",r)}export{r as a,t as b,o as g};

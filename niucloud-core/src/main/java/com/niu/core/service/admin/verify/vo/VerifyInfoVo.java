@@ -6,6 +6,7 @@ import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Verify视图
@@ -29,6 +30,7 @@ public class VerifyInfoVo implements Serializable {
     private String relateTag;  // 业务标识
     private MemberBriefInfoVo member; // 会员信息
     private String typeName;
+    private Map<String, Object> verifyInfo;
 
     public String getTypeName() {
         return VerifyTypeEnum.getTypeByName(this.type);

@@ -90,8 +90,8 @@ public class OplatformServerServiceImpl implements IOplatformServerService {
            if (inMessage.getEvent().equals(WxConsts.EventType.WEAPP_AUDIT_SUCCESS)) {
                weappAuditSuccess(inMessage);
            }
-           // 小程序审核成功
-           if (inMessage.getEvent().equals(WxConsts.EventType.WEAPP_AUDIT_SUCCESS)) {
+           // 小程序审核失败
+           if (inMessage.getEvent().equals(WxConsts.EventType.WEAPP_AUDIT_FAIL)) {
                 weappAuditFail(inMessage);
            }
        }

@@ -27,6 +27,9 @@ public class CommonEvent extends Event {
      */
     private Integer memberId;
 
-
+    /**
+     * 类型
+     */
+    private String source;
 
 }

@@ -2,6 +2,7 @@ package com.niu.core.service.admin.notice;
 
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageParam;
+import com.niu.core.entity.sys.NiuSmsTemplate;
 import com.niu.core.service.admin.notice.param.*;
 import com.niu.core.service.admin.notice.vo.TemplateListVo;
 import com.niu.core.service.api.login.param.SendMobileCodeParam;
@@ -201,4 +202,13 @@ public interface INuiSmsService {
      * @param templateId
      */
     void templateDelete(String username, String templateId);
+
+    /**
+     * 模板信息
+     * @param username
+     * @param smsType
+     * @param templateKey
+     * @return
+     */
+    NiuSmsTemplate templateInfo(String username, String smsType, String templateKey);
 }

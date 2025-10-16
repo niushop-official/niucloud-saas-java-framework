@@ -222,7 +222,7 @@ const closeFn = () => {
 /**
  * 发起充值
  */
-const recharge = debounce(() => {
+const recharge = () => {
     if (uni.$u.test.isEmpty(rechargeAmount.value)) {
         uni.showToast({ title: t('customRechargeAmount'), icon: 'none' })
         return
@@ -233,12 +233,12 @@ const recharge = debounce(() => {
     }
     if (rechargeLoading.value) return
     rechargeLoading.value = true
+    useSubscribeMessage().request('recharge_success')
     let data = {
         recharge_money: rechargeAmount.value,
         recharge_id: recharge_id.value ? recharge_id.value : ''
     }
     createRecharge(data).then((res: any) => {
-        useSubscribeMessage().request('recharge_success')
         payRef.value?.open(res.data.trade_type, res.data.trade_id, '/app/pages/member/index')
         loading.value = false
         rechargeLoading.value = false
@@ -246,7 +246,7 @@ const recharge = debounce(() => {
         rechargeLoading.value = false
         loading.value = false
     })
-})
+}
 
 // 充值成功后更新个人数据
 const rechargeSuccess = (() => {

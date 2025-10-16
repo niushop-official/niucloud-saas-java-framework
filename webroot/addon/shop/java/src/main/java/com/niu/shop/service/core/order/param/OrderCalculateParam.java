@@ -18,6 +18,8 @@ public class OrderCalculateParam implements Serializable {
     private Integer siteId;
     private Integer memberId;
     private String orderFrom;
+    private List<ImpulseBuyGoods> impulseBuyGoods;
+    private Integer isNeedRecalculate = 0;
 
     @Data
     public static class SkuItem {
@@ -35,5 +37,12 @@ public class OrderCalculateParam implements Serializable {
     @Data
     public static class Discount {
         private Integer couponId;
+    }
+
+    @Data
+    public static class ImpulseBuyGoods {
+        private Integer impulseBuyGoodsId;
+        private Integer skuId;
+        private Integer num;
     }
 }

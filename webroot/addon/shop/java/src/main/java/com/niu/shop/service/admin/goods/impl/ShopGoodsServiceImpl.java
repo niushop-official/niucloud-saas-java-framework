@@ -7,6 +7,7 @@ import cn.hutool.json.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.entity.sys.SysConfig;
+import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.mapper.sys.SysConfigMapper;
 import com.niu.shop.enums.goods.GoodsBatchSetEnum;
 import cn.hutool.json.JSONObject;
@@ -163,7 +164,109 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             vo.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), vo.getGoodsCover()));
             list.add(vo);
         }
+        list = formatGoodsJoinActive(list);
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+    }
+
+    /**
+     * 处理商品参与的活动数据
+     * @param list
+     * @return
+     */
+    private List<ShopGoodsListVo> formatGoodsJoinActive(List<ShopGoodsListVo> list) {
+        List<Integer> goodsIds = list.stream()
+                .map(ShopGoodsListVo::getGoodsId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (goodsIds.isEmpty()) {
+            return list;
+        }
+        CommonEventDefiner.CommonEvent event = new CommonEventDefiner.CommonEvent();
+        Map<String, Object> eventMap = new HashMap<>();
+        eventMap.put("goods_ids", goodsIds);
+        eventMap.put("site_id", RequestUtils.siteId());
+        event.setEventName("GetGoodsJoinInfo");
+        event.setData(eventMap);
+        event.setSiteId(RequestUtils.siteId());
+        List<CommonEventDefiner.CommonEventResult> joinList = EventAndSubscribeOfPublisher.publishAndCallback(event);
+
+        Map<Integer, List<Map<String, Object>>> goodsJoin = new HashMap<>();
+        if (joinList != null) {
+            for (CommonEventDefiner.CommonEventResult item : joinList) {
+                if (item == null || item.getResult() == null) {
+                    continue;
+                }
+                Map<Integer, Map<String, Map<String, Object>>> result =
+                        (Map<Integer, Map<String, Map<String, Object>>>) item.getResult();
+                // 合并每个商品的活动信息
+                for (Map.Entry<Integer, Map<String, Map<String, Object>>> entry : result.entrySet()) {
+                    Integer goodsId = entry.getKey();
+                    Map<String, Map<String, Object>> activities = entry.getValue();
+
+                    List<Map<String, Object>> activityList = new ArrayList<>(activities.values());
+
+                    if (goodsJoin.containsKey(goodsId)) {
+                        List<Map<String, Object>> existingList = goodsJoin.get(goodsId);
+                        existingList.addAll(activityList);
+                    } else {
+                        goodsJoin.put(goodsId, activityList);
+                    }
+                }
+            }
+        }
+
+        Map<Integer, Map<String, Map<String, Object>>> activeTips = new HashMap<>();
+        if (!goodsJoin.isEmpty()) {
+            for (Map.Entry<Integer, List<Map<String, Object>>> entry : goodsJoin.entrySet()) {
+                Integer goodsId = entry.getKey();
+                List<Map<String, Object>> joinActive = entry.getValue();
+
+                for (Map<String, Object> activity : joinActive) {
+                    String joinType = activity.get("join_type").toString();
+                    if (joinType == null) {
+                        continue;
+                    }
+
+                    // 初始化当前商品-活动类型的存储结构
+                    activeTips.computeIfAbsent(goodsId, k -> new HashMap<>())
+                            .computeIfAbsent(joinType, k -> {
+                                Map<String, Object> typeMap = new HashMap<>();
+                                typeMap.put("name", "");
+                                typeMap.put("short", null);
+                                typeMap.put("list", new ArrayList<>());
+                                return typeMap;
+                            });
+
+                    Map<String, Object> typeMap = activeTips.get(goodsId).get(joinType);
+
+                    // 处理short字段
+                    if (activity.containsKey("short")) {
+                        typeMap.put("short", activity.get("short"));
+
+                        // 移除short后添加到list
+                        Map<String, Object> activityCopy = new HashMap<>(activity);
+                        activityCopy.remove("short");
+                        ((List<Map<String, Object>>) typeMap.get("list")).add(activityCopy);
+
+                        // 拼接name（保留原PHP的换行逻辑）
+                        String name = activity.get("name") != null ? activity.get("name").toString() : "";
+                        String currentName = typeMap.get("name") != null ? typeMap.get("name").toString() : "";
+                        typeMap.put("name", currentName + name + System.lineSeparator());
+                    } else {
+                        // 没有short字段则移除该活动类型
+                        activeTips.get(goodsId).remove(joinType);
+                    }
+                }
+            }
+        }
+
+        for (ShopGoodsListVo goods : list) {
+            Integer goodsId = goods.getGoodsId();
+            Map<String, Map<String, Object>> goodsActive = activeTips.get(goodsId);
+            goods.setActive(goodsActive != null ? goodsActive : new HashMap<>());
+        }
+        return list;
     }
 
     /**

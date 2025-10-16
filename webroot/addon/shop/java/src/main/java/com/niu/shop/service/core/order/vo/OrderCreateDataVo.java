@@ -58,6 +58,8 @@ public class OrderCreateDataVo implements Serializable {
 
     protected Map<Integer, ? extends Sku> giftGoods;
 
+    protected Map<Integer, ? extends Sku> impulseBuyList;
+
     protected Delivery delivery = new Delivery();
 
     protected List<String> error = new LinkedList<>();

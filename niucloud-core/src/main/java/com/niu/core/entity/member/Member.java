@@ -59,6 +59,8 @@ public class Member implements Serializable {
     /** 微信unionid */
     private String wxUnionid;
 
+    private String wxappOpenid;
+
     /** 支付宝账户id */
     private String aliOpenid;
 
@@ -173,6 +175,9 @@ public class Member implements Serializable {
 
     @TableField(exist = false)
     private String memberLevelName;
+
+    @TableField(exist = false)
+    private String headimgSmall;
 
     private String idCard;
 

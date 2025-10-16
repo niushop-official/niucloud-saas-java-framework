@@ -86,7 +86,10 @@ public class ShopOrderListVo implements Serializable {
     private String activityType;  // 营销类型
     private Long nowTime = System.currentTimeMillis() / 1000;
     private Long expireTime;
+    private String relateSource;
+    private Integer relateOrderId;
     private Pay pay;
+    private Object relateActiveInfo;
 
     private List<OrderGoods> orderGoods;
 

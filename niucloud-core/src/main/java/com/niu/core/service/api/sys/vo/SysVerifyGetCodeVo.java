@@ -9,4 +9,6 @@ public class SysVerifyGetCodeVo {
 
     private String qrcode;
 
+    private String barcode;
+
 }

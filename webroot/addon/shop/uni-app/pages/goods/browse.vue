@@ -32,11 +32,11 @@
                     <view class="flex flex-wrap">
                         <view class="w-[230rpx] mb-[20rpx]" :class="{'mr-[10rpx]': (subIndex + 1) % 3 }" v-for="(subItem,subIndex) in item.list" :key="subIndex" @click="toDetail(subItem)">
                             <view class="relative w-[230rpx] h-[230rpx] rounded-[var(--goods-rounded-mid)] overflow-hidden mb-[10rpx]">
-                                <u--image width="230rpx" height="230rpx" :radius="'var(--goods-rounded-mid)'" :src="img(subItem.goods_cover_thumb_mid ? subItem.goods_cover_thumb_mid : '')" mode="aspectFill">
+                                <up-image width="230rpx" height="230rpx" :radius="'var(--goods-rounded-mid)'" :src="img(subItem.goods_cover_thumb_mid ? subItem.goods_cover_thumb_mid : '')" mode="aspectFill">
                                     <template #error>
                                         <image class="w-[230rpx] h-[230rpx] rounded-[var(--goods-rounded-mid)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                     </template>
-                                </u--image>
+                                </up-image>
                                 <view v-if="subItem.status == 0 " class="absolute left-0 top-0  w-[230rpx] h-[230rpx]  leading-[230rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
                                     <text class="text-[#fff] text-[28rpx]">已失效</text>
                                 </view>

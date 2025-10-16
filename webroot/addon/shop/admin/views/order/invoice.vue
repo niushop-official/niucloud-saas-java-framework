@@ -72,8 +72,8 @@
                         layout="total, sizes, prev, pager, next, jumper" :total="invoiceManagementTableData.total"
                         @size-change="loadInvoiceList()" @current-change="loadInvoiceList" />
                 </div>
-                <invoice-detail ref="invoiceDetailDialog" @complete="loadInvoiceList()" />
-                <invoice-dialog ref="invoiceListDialog" @complete="loadInvoiceList()" />
+                <invoice-detail ref="invoiceDetailDialog" @complete="loadInvoiceList(getTablePageStorage(invoiceManagementTableData.searchParam).page)" />
+                <invoice-dialog ref="invoiceListDialog" @complete="loadInvoiceList(getTablePageStorage(invoiceManagementTableData.searchParam).page)" />
                 <export-sure ref="exportSureDialog" :show="flag" type="shop_invoice" :searchParam="invoiceManagementTableData.searchParam" @close="handleClose" />
             </div>
         </el-card>

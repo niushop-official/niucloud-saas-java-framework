@@ -19,7 +19,7 @@ public class WechatQrcodeListener extends GetQrcodeOfChannelDefiner {
 
     @Override
     public GetQrcodeOfChannelResult handleCallback(GetQrcodeOfChannelEvent event) {
-        if (event.getChannel().equals("wechat") || event.getChannel().equals("h5")) {
+        if (event.getChannel().equals("wechat") || event.getChannel().equals("h5") ||  event.getChannel().equals("app")) {
             try {
                 String url = event.getUrl();
                 if (ObjectUtil.isNotEmpty(event.getPage())) url += "/" + event.getPage();

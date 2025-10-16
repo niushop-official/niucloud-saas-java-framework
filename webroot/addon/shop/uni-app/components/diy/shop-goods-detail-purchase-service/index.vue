@@ -243,8 +243,8 @@ const manjianOpenFn = () => {
 let manjianData = ref({})
 const getManjianInfo = () => {
     getManjian({
-        goods_id: props.global.goods_id || '',
-        sku_id: props.global.sku_id || ''
+        goods_id: diyComponent.value.goods_id || '',
+        sku_id: diyComponent.value.sku_id || ''
     }).then((res: any) => {
         if (Object.keys(res.data).length) {
             manjianData.value.condition_type = res.data.condition_type;

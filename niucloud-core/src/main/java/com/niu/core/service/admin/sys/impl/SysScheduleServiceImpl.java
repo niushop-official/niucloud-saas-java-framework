@@ -318,7 +318,7 @@ public class SysScheduleServiceImpl implements ISysScheduleService {
             qw.eq(SysScheduleLog::getStatus, searchParam.getStatus());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getExecuteTime())) {
-            QueryMapperUtils.buildByTime(qw, "execute_time", searchParam.getExecuteTime());
+            QueryMapperUtils.buildByTime(qw, SysScheduleLog::getExecuteTime, searchParam.getExecuteTime());
         }
         Page<SysScheduleLog> sysScheduleLogPage = sysScheduleLogMapper.selectPage(new Page<>(page, limit), qw);
         List<SysScheduleLogListVo> result = new ArrayList<>();

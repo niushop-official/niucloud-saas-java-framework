@@ -2,6 +2,7 @@ package com.niu.core.service.admin.notice.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
@@ -47,6 +48,7 @@ public class SmsService implements ISmsService {
                vo.setIsUse(isUse ? 1 : 0);
             }
             JSONObject params = (JSONObject) smsType.get("params");
+            JSONArray encryptParams = ObjectUtil.defaultIfNull(smsType.getJSONArray("encrypt_params"), new JSONArray());
 
             for (Map.Entry<String, Object> paramEntry : params.entrySet()) {
 
@@ -60,8 +62,8 @@ public class SmsService implements ISmsService {
                    JSONObject smsTypeParam = (JSONObject) smsTypeConfig.get(entry.getKey());
 
                    if(!ObjectUtil.isEmpty(smsTypeParam)){
-                       if ("secret_key".equals(paramEntry.getKey()) && ObjectUtil.isNotEmpty(paramEntry.getValue())){
-                           String secretValue = smsTypeParam.getStr("secret_key");
+                       if (encryptParams.contains(paramEntry.getKey()) && ObjectUtil.isNotEmpty(paramEntry.getValue())){
+                           String secretValue = smsTypeParam.getStr(paramEntry.getKey());
                            paramVo.setValue(StringUtils.hide(secretValue, 0, secretValue.length()));
                        }else {
                            paramVo.setValue(smsTypeParam.getStr(paramEntry.getKey()));
@@ -113,7 +115,10 @@ public class SmsService implements ISmsService {
 
         JSONObject smsTypeEnum = SmsTypeEnum.getType().getJSONObject(smsType);
         for (String key: smsTypeEnum.getJSONObject("params").keySet()) {
-            config.putByPath(smsType + "." + key, data.getStr(key, ""));
+            String value = data.getStr(key, "");
+            if (!value.contains("*")) {
+                config.putByPath(smsType + "." + key, value);
+            }
         }
 
         coreConfigService.setConfig(RequestUtils.siteId(), "SMS", config);

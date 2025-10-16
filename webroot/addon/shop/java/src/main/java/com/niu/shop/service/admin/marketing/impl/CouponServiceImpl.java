@@ -635,7 +635,7 @@ CouponServiceImpl implements ICouponService {
         }
         if (ObjectUtil.isNotEmpty(param.getCreateTime())){
             qw.between(ShopCouponSendRecords::getCreateTime, param.getCreateTime()[0], param.getCreateTime()[1]);
-            QueryMapperUtils.buildByTime(qw, "create_time", param.getCreateTime());
+            QueryMapperUtils.buildByTime(qw, ShopCouponSendRecords::getCreateTime, param.getCreateTime());
         }
         Page<ShopCouponSendRecords> shopCouponSendRecordsPage = shopCouponSendRecordsMapper.selectPage(new Page<>(page, limit), qw);
         List<ShopCouponSendRecordsVo> list = new ArrayList<>();

@@ -38,6 +38,7 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -376,6 +377,28 @@ public class CorePayServiceImpl implements ICorePayService {
     @Override
     public List<PayTypeVo> getPayTypeByTrade(Integer siteId, String tradeType, ChannelEnum channel) {
         return corePayChannelService.getAllowPayTypeByChannel(siteId, channel.getCode(), tradeType);
+    }
+
+    @Override
+    public Pay create(Integer siteId, String mainType, Integer mainId, BigDecimal money, String tradeType, Integer tradeId, String body) {
+        // 生成订单号
+        String outTradeNo = com.niu.core.common.utils.CommonUtils.createNo();
+        // 创建支付对象
+        Pay pay = new Pay();
+        pay.setSiteId(siteId);
+        pay.setMoney(money);
+        pay.setTradeType(tradeType);
+        pay.setTradeId(tradeId);
+        pay.setBody(body);
+        pay.setOutTradeNo(outTradeNo);
+        pay.setMainId(mainId);
+        pay.setFromMainId(mainId);
+        pay.setMainType(mainType);
+
+        // 保存到数据库
+        payMapper.insert(pay);
+
+        return pay;
     }
 
 }

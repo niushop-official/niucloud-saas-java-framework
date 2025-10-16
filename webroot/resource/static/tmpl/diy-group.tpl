@@ -1,17 +1,19 @@
 <template>
     <view class="diy-group" id="componentList">
-        <top-tabbar :scrollBool="diyGroup.componentsScrollBool.TopTabbar"
+        <top-tabbar
             v-if="data.global && Object.keys(data.global).length && data.global.topStatusBar && data.global.topStatusBar.isShow"
-            ref="topTabbarRef" :data="data.global" />
+            :scrollBool="diyGroup.componentsScrollBool.TopTabbar" ref="topTabbarRef" :data="data.global" />
         <pop-ads
             v-if="data.global && Object.keys(data.global).length && data.global.popWindow && data.global.popWindow.show"
             ref="popAbsRef" :data="data.global" />
         <template v-for="(component, index) in data.value" :key="component.id">
-            <view v-show="component.componentIsShow"
+            <view
+                v-show="component.componentIsShow"
                 @click="diyStore.changeCurrentIndex(index, component)"
                 :class="diyGroup.getComponentClass(index,component)" :style="component.pageStyle">
                 <view class="relative"
-                    :style="{ marginTop : component.margin.top < 0 ? (component.margin.top * 2) + 'rpx' : '0' }">
+                    :style="{ marginTop : component.margin.top < 0 ? (component.margin.top * 2) + 'rpx' : '0', marginBottom : component.margin.bottom < 0 ? (component.margin.bottom * 2) + 'rpx' : '0' }">
+
                     <!-- 装修模式下，设置负上边距后超出的内容，禁止选中设置 -->
                     <view v-if="diyGroup.isShowPlaceHolder(index,component)" class="absolute w-full z-1"
                         :style="{ height : (component.margin.top * 2 * -1) + 'rpx' }"
@@ -207,7 +209,7 @@
                             :scrollBool="diyGroup.componentsScrollBool.Text"
                             @update:componentIsShow="component.componentIsShow = $event" />
                     </template>
-{{ component }}
+                    {{ component }}
                 </view>
             </view>
         </template>
@@ -219,7 +221,7 @@
     </view>
 </template>
 <script lang="ts" setup>
-{{ componentImport }}
+    {{ componentImport }}
     import topTabbar from '@/components/top-tabbar/top-tabbar.vue'
     import popAds from '@/components/pop-ads/pop-ads.vue'
     import useDiyStore from '@/app/stores/diy';

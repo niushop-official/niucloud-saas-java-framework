@@ -151,7 +151,7 @@
                                     </div>
 
                                     <div class="text-[14px] text-[#374151] mb-[10px]">{{ t('upgrade.isNeedBackupTips') }}</div>
-                                    <div class="text-[14px] text-[#9699B6]">{{ t('上次备份时间：') }}{{ upgradeContent.last_backup.complete_time }}</div>
+                                    <div class="text-[14px] text-[#9699B6]">{{ t('上次备份时间：') }}{{ timeStampTurnTime(upgradeContent.last_backup.complete_time) }}</div>
                                 </div>
                             </div>
                         </el-scrollbar>
@@ -247,6 +247,7 @@ import { AnyObject } from '@/types/global'
 import { ElNotification, ElMessage, ElMessageBox } from 'element-plus'
 import Storage from '@/utils/storage'
 import { useRouter } from 'vue-router'
+import { timeStampTurnTime } from '@/utils/common'
 
 const router = useRouter()
 const terminalId = ref(Date.now()); 

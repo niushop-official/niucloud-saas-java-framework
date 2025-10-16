@@ -161,6 +161,10 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
                 siteInfoVo.setSiteAddons(new ArrayList<>());
                 siteInfoVo.setApps(new ArrayList<>());
             }
+            SysUserRole sysUserRole = sysUserRoleMapper.selectOne(new QueryWrapper<SysUserRole>().select("uid").eq("site_id", siteId).eq("is_admin", 1));
+            if (ObjectUtil.isNotEmpty(sysUserRole)) {
+                siteInfoVo.setUid(sysUserRole.getUid());
+            }
         }
         return siteInfoVo;
     }

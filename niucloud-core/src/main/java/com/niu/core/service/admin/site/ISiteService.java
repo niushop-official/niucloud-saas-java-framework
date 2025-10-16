@@ -6,10 +6,7 @@ import com.niu.core.entity.site.Site;
 import com.niu.core.entity.site.SiteGroup;
 import com.niu.core.service.admin.site.param.*;
 import com.niu.core.common.domain.PageParam;
-import com.niu.core.service.admin.site.vo.ShowAppListVo;
-import com.niu.core.service.admin.site.vo.ShowMarketingVo;
-import com.niu.core.service.admin.site.vo.SiteInfoVo;
-import com.niu.core.service.admin.site.vo.SiteListVo;
+import com.niu.core.service.admin.site.vo.*;
 
 import java.util.List;
 import java.util.Map;
@@ -112,4 +109,17 @@ public interface ISiteService {
      * @return
      */
     Boolean siteInit(Integer siteId);
+
+    /**
+     * 生成菜单数据
+     * @return
+     */
+    SpecialMenuListVo getSpecialMenuList();
+
+    /**
+     * 统一展示 安装的插件 应用 营销工具等。
+     * @param isSort
+     * @return
+     */
+    Map<String, Object> showCustomer(boolean isSort);
 }

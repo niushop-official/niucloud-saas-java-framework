@@ -1,6 +1,6 @@
 <template>
     <view :style="themeColor()">
-        <!-- #ifdef MP-WEIXIN -->
+        <!-- #ifdef MP-WEIXIN || APP-PLUS -->
         <top-tabbar :data="topTabbarData" scrollBool="1" :isBack="false" />
         <!-- #endif -->
         <view class="relative">

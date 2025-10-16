@@ -12,4 +12,6 @@ public class SysVerifyGetCodeParam implements ApiBaseParam {
 
     private Map<String,Object> data;
 
+    private Integer needBarcode = 0;
+
 }

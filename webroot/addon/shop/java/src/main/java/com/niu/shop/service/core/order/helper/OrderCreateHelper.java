@@ -33,6 +33,7 @@ import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderLogMainTypeEnum;
 import com.niu.shop.event.order.OrderCreateAfterEvent;
+import com.niu.shop.event.order.OrderDiscountCalculateEvent;
 import com.niu.shop.event.order.ShopOrderDiscountCreateEventDefiner;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.coupon.ShopCouponMemberMapper;
@@ -157,7 +158,7 @@ public abstract class OrderCreateHelper {
         if (vo.getOrderKey().isEmpty()) vo.setOrderKey(createOrderNo());
 
         Cached cache = CacheFactory.getCacheOperator();
-        cache.put(RequestUtils.memberId() + "_member_order_" + vo.getOrderKey(), JSONUtil.parseObj(vo).toString());
+        cache.put(RequestUtils.memberId() + "_member_order_" + vo.getOrderKey(), JSONUtil.parseObj(vo).toString(), 3600);
     }
 
     /**
@@ -305,7 +306,13 @@ public abstract class OrderCreateHelper {
         this.calculateManjian(vo);
         this.calculateCoupon(vo, param);
 
-
+        OrderDiscountCalculateEvent event = new OrderDiscountCalculateEvent();
+        event.setSiteId(vo.getSiteId());
+        event.addAppSign("shop");
+        event.setName("OrderDiscountCalculateEvent");
+        event.setVo(vo);
+        event.setParam(param);
+        EventAndSubscribeOfPublisher.publishAll(event);
     }
 
     /**

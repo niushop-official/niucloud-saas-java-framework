@@ -4,7 +4,7 @@
         <view class="diy-template-wrap bg-index" :style="diy.pageStyle()">
             <diy-group ref="diyGroupRef" :data="diy.data" />
         </view>
-        <ns-goods-sku ref="goodsSkuRef" v-if="Object.keys(useGoodsDetailStore().goodsDetail).length" :goods-detail="useGoodsDetailStore().goodsDetail" @change="specSelectFn"></ns-goods-sku>
+        <ns-goods-sku ref="goodsSkuRef" v-if="Object.keys(useGoodsDetailStore().goodsDetail).length" :goods-detail="nsGoodsSkuData" @change="specSelectFn"></ns-goods-sku>
         <share-poster ref="sharePosterRef" v-if="Object.keys(useGoodsDetailStore().goodsDetail).length" posterType="shop_goods" :posterId="useGoodsDetailStore().goodsDetail.goods?.poster_id" :posterParam="posterParam" :copyUrlParam="copyUrlParam" @close="posterClose" />
         <!-- #ifdef MP-WEIXIN -->
         <!-- 小程序隐私协议 -->
@@ -29,16 +29,19 @@ const goodsSkuRef: any = ref(null);
 const sharePosterRef: any = ref(null);
 const posterParam = ref({});
 const copyUrlParam = ref('');
+const nsGoodsSkuData = ref()
 const diy = useDiyGoodsDetail({
     name: 'DIY_SHOP_GOODS_DETAIL'
 })
 const memberStore = useMemberStore()
 const userInfo = computed(() => memberStore.info)
+nsGoodsSkuData.value = JSON.parse(JSON.stringify(useGoodsDetailStore().goodsDetail))
 
 watch(
     () => useGoodsDetailStore().goodsDetail.isOpenSkuBuy,
     (newValue, oldValue) => {
         if (newValue && goodsSkuRef.value) {
+			nsGoodsSkuData.value = JSON.parse(JSON.stringify(useGoodsDetailStore().goodsDetail))
             goodsSkuRef.value.open(useGoodsDetailStore().goodsDetail.skuBuyType)
         }
     }
@@ -60,6 +63,7 @@ const specSelectFn = (id: any) => {
     useGoodsDetailStore().goodsDetail.skuList.forEach((item: any, index: any) => {
         if (item.sku_id == id) {
             useGoodsDetailStore()?.setGoodsDetail(item);
+            nsGoodsSkuData.value = JSON.parse(JSON.stringify(useGoodsDetailStore().goodsDetail))
         }
     })
 }
@@ -90,9 +94,7 @@ diy.onShow((data: any) => {
             // 分享海报
             if (sharePosterRef.value) {
                 posterParam.value.sku_id = useGoodsDetailStore().goodsDetail.sku_id;
-                if (diy.data.
-            global.goodsParameter.type) posterParam.value.active = diy.data.
-            global.goodsParameter.type;
+                if (diy.data.global.goodsParameter.type) posterParam.value.active = diy.data.global.goodsParameter.type;
                 if (userInfo.value && userInfo.value.member_id) posterParam.value.member_id = userInfo.value.member_id;
                 sharePosterRef.value.loadPoster();
             }

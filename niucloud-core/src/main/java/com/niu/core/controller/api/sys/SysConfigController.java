@@ -7,6 +7,7 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.event.sys.InitWapEvent;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.diy.IDiyThemeService;
+import com.niu.core.service.api.channel.IAppService;
 import com.niu.core.service.api.diy.IDiyService;
 import com.niu.core.service.api.diy.param.DiyTabbarListParam;
 import com.niu.core.service.api.login.ILoginService;
@@ -49,6 +50,9 @@ public class SysConfigController {
 
     @Resource
     private MemberMapper memberMapper;
+
+    @Resource
+    private IAppService appService;
 
     /**
      * 版权信息
@@ -100,7 +104,7 @@ public class SysConfigController {
      * @return
      */
     @GetMapping("/init")
-    public Result init(@RequestParam(name = "url", defaultValue = "") String url) {
+    public Result init(@RequestParam(name = "url", defaultValue = "") String url, @RequestParam(value = "openid", defaultValue = "") String openid) {
         SysInitVo vo = new SysInitVo();
 
         vo.setTabbarList(diyService.tabbarList(new DiyTabbarListParam()));
@@ -109,12 +113,17 @@ public class SysConfigController {
         vo.setSiteInfo(coreSiteService.getSiteCache(RequestUtils.siteId()));
         vo.setMemberLevel(memberLevelService.list(new MemberLevelParam()));
         vo.setThemeList(diyThemeService.getDiyTheme());
+        vo.setAppConfig(appService.getAppConfig());
 
         if (ObjectUtil.isEmpty(vo.getSiteInfo().getSiteId())) {
             InitWapEvent event = new InitWapEvent();
             event.setSiteId(RequestUtils.siteId());
             EventAndSubscribeOfPublisher.publishAll(event);
         }
+
+        Map<String, Integer> checkRes = sysConfigService.getMemberMobileExist(openid, RequestUtils.channel());
+        vo.setMemberExist(checkRes.getOrDefault("member_exist", 0));
+        vo.setMemberMobileExist(checkRes.getOrDefault("member_mobile_exist", 0));
 
         return Result.success(vo);
     }

@@ -324,4 +324,13 @@ public class NiuSmsController {
         nuiSmsService.templateDelete(username, templateId);
         return Result.success();
     }
+
+    /**
+     * 模板信息
+     */
+    @Description("模板信息")
+    @GetMapping("/template/info/{smsType}/{username}")
+    public Result<?> templateInfo(@PathVariable("smsType") String smsType, @PathVariable("username") String username, @RequestParam("template_key") String templateKey) {
+        return Result.success(nuiSmsService.templateInfo(username, smsType, templateKey));
+    }
 }

@@ -163,6 +163,22 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
                 coreGoodsStatService.addStat(goodsAddStatParam);
             }
 
+            if(ObjectUtil.isNotEmpty(vo.getImpulseBuyList()))
+            {
+                for (OrderCreateDataVo.Sku item : vo.getImpulseBuyList().values()) {
+                    // 增加销量
+                    coreGoodsService.incSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+                    // 减少库存
+                    coreGoodsService.decStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+
+                    GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
+                    goodsAddStatParam.setSiteId(item.getSiteId());
+                    goodsAddStatParam.setGoodsId(item.getGoodsId());
+                    goodsAddStatParam.setSaleNum(item.getNum());
+                    coreGoodsStatService.addStat(goodsAddStatParam);
+                }
+            }
+
             //赠品同步增加销量减少库存
             if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
             {
@@ -179,7 +195,6 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
                     coreGoodsStatService.addStat(goodsAddStatParam);
                 }
             }
-
 
             // 清除购物车
             if (ObjectUtil.isNotEmpty(vo.getCartIds())) {
@@ -320,7 +335,7 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         } else {
             OrderConfigVo orderConfig = coreOrderConfigService.getConfig(order.getSiteId());
             if (orderConfig.getConfirm().getIsFinish() && orderConfig.getConfirm().getFinishLength() > 0) {
-                timeout = System.currentTimeMillis() / 1000 + orderConfig.getConfirm().getFinishLength() * 60;
+                timeout = System.currentTimeMillis() / 1000 + orderConfig.getConfirm().getFinishLength() * 86400;
             }
         }
         if (timeout > 0) {
@@ -368,7 +383,7 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
             if (orderConfig.getRefund().getRefundLength() > 0) {
                 ShopOrder orderUpdate = new ShopOrder();
                 orderUpdate.setOrderId(order.getOrderId());
-                orderUpdate.setTimeout(System.currentTimeMillis() / 1000 + orderConfig.getRefund().getRefundLength() * 60);
+                orderUpdate.setTimeout(System.currentTimeMillis() / 1000 + orderConfig.getRefund().getRefundLength() * 86400);
                 shopOrderMapper.updateById(orderUpdate);
             }
         }

@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ConfigKeyEnum {
+    PINGTUAN_ORDER_CONFIG("PINTUAN_ORDER_CONFIG"),//拼团配置
     NIUCLOUD_CONFIG("NIUCLOUD_CONFIG"),//牛云配置
     WECHAT("WECHAT"),//微信公众号
     WEAPP("weapp"),//微信小程序
@@ -21,7 +22,8 @@ public enum ConfigKeyEnum {
     WXOPLATFORM("WXOPLATFORM"), // 微信开放平台
     WEAPP_AUTHORIZATION_INFO("weapp_authorization_info"),
     WECHAT_AUTHORIZATION_INFO("wechat_authorization_info"),
-    WECHAT_TRANSFER_SCENE_CONFIG("WECHAT_TRANSFER_SCENE_CONFIG");
+    WECHAT_TRANSFER_SCENE_CONFIG("WECHAT_TRANSFER_SCENE_CONFIG"),
+    APP("app");
     
     private final String name;
 }

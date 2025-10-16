@@ -200,16 +200,16 @@
         </el-card>
 
         <!-- 商品库存编辑弹出框 -->
-        <goods-stock-edit-popup ref="goodsStockEditPopupRef" @load="loadGoodsList" />
+        <goods-stock-edit-popup ref="goodsStockEditPopupRef" @load="loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)" />
 
         <!-- 商品价格编辑弹出框 -->
-        <goods-price-edit-popup ref="goodsPriceEditPopupRef" @load="loadGoodsList" />
+        <goods-price-edit-popup ref="goodsPriceEditPopupRef" @load="loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)" />
 
         <!-- 商品推广弹出框 -->
         <spread-popup ref="spreadPopupRef" />
 
         <!-- 会员价弹出框 -->
-        <goods-member-price-popup ref="memberPricePopupRef" @load="loadGoodsList" />
+        <goods-member-price-popup ref="memberPricePopupRef" @load="loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)" />
 
         <!-- 批量设置弹出框 -->
         <goods-batch-settings-popup ref="goodsBatchSettingPopupRef" @load="loadGoodsListReset" />
@@ -552,7 +552,7 @@ const statusChange = (row: any, value: any) => {
             goods_id: row.goods_id,
             status: value
         }).then((res) => {
-            loadGoodsList()
+            loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
         })
     } else {
         ElMessageBox.confirm(t('statusChangeTips'), t('warning'),
@@ -566,7 +566,7 @@ const statusChange = (row: any, value: any) => {
                 goods_id: row.goods_id,
                 status: value
             }).then((res) => {
-                loadGoodsList()
+                loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
             })
         })
     }
@@ -593,7 +593,7 @@ const batchGoodsStatus = (status: any) => {
         status
     }).then((res) => {
         isReset.value = true
-        loadGoodsList()
+        loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
     })
 }
 
@@ -645,7 +645,7 @@ const batchDeleteGoods = () => {
             where: info.where
         }).then(() => {
             isReset.value = true
-            loadGoodsList()
+            loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
             repeat.value = false
         }).catch(() => {
             repeat.value = false
@@ -669,7 +669,7 @@ const sortInputListener = debounce((sort, row) => {
         goods_id: row.goods_id,
         sort
     }).then((res) => {
-        // loadGoodsList();
+        loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
     })
 })
 
@@ -806,12 +806,12 @@ const spreadPopupRef = ref(null)
 
 const spreadEvent = (data: any) => {
     const pagePath = '/addon/shop/pages/goods/detail'
-    const columnName = 'goods_id'
-    const columnValue = data.goods_id
+    const paramsArr = [
+        { name: 'goods_id', value: data.goods_id },
+    ];
     const title = '商品推广'
     const folder = 'goods'
-
-    spreadPopupRef.value?.show(pagePath, columnName, columnValue, title, folder)
+    spreadPopupRef.value?.show(pagePath, paramsArr, title, folder);
 }
 
 /** ***************** 会员价-start *************************/
@@ -846,7 +846,7 @@ const copyEvent = (data: any) => {
             goods_id: data.goods_id
         }).then((res: any) => {
             if (res.code == 1) {
-                loadGoodsList()
+                loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
             }
             repeat.value = false
         }).catch(() => {
@@ -869,7 +869,7 @@ const deleteEvent = (id: number) => {
         deleteGoods({
             goods_ids: id
         }).then(() => {
-            loadGoodsList()
+            loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
             repeat.value = false
         }).catch(() => {
             repeat.value = false
@@ -882,7 +882,7 @@ const loadGoodsListReset = () => {
     console.log('loadGoodsListReset')
     isReset.value = true
     goodsBatchSettingPopupRef.value.showDialog = false
-    loadGoodsList()
+    loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
 }
 
 const resetForm = (formEl: FormInstance | undefined) => {

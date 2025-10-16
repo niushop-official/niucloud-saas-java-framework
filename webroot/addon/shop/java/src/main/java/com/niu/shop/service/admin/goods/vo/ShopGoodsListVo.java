@@ -37,6 +37,7 @@ public class ShopGoodsListVo implements Serializable {
     private Integer isGift;
     @JsonProperty("goodsSku")
     private GoodsSku goodsSku;
+    private Map<String, Map<String, Object>> active;
 
     @Data
     public static class GoodsSku {

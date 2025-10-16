@@ -11,6 +11,8 @@ import com.niu.core.service.core.pay.vo.PayTypeVo;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -39,4 +41,4 @@ public interface ICorePayService {
     void closeByTrade(Integer siteId, String tradeType, Integer tradeId);
 
     List<PayTypeVo> getPayTypeByTrade(Integer siteId, String tradeType, ChannelEnum channel);
-}
+    Pay create (Integer siteId, String mainType, Integer mainId, BigDecimal money, String tradeType, Integer tradeId, String body);}

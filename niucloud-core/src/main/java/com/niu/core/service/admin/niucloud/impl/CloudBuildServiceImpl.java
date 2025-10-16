@@ -37,6 +37,7 @@ import java.io.FileOutputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -263,7 +264,6 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
                 cached.put("cloud_build_task", this.buildTask);
             } else {
                 File file = new File(tempDir + "download.zip");
-                FileOutputStream fos = new FileOutputStream(file, true);
 
                 Integer index = this.buildTask.getInt("index");
                 Integer step = this.buildTask.getInt("step");
@@ -273,7 +273,9 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
                     if (end > this.buildTask.getInt("length")) end = this.buildTask.getInt("length");
 
                     HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build_download").query(query).header("Range", "bytes=" + start + "-" + end).method(Method.GET).execute();
-                    fos.write(response.bodyBytes());
+                    try (FileOutputStream fos = new FileOutputStream(file, true)) {
+                        fos.write(response.bodyBytes());
+                    }
 
                     this.buildTask.set("index", index + 1);
                     cached.put("cloud_build_task", this.buildTask);
@@ -291,7 +293,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
                     logArray.put(log);
 
                     FileTools.createDirs(tempDir + "download");
-                    File unzipFile = ZipUtil.unzip(file.getPath(), tempDir + "download", CharsetUtil.CHARSET_UTF_8);
+                    File unzipFile = ZipUtil.unzip(file.getPath(), tempDir + "download", Charset.forName(System.getProperty("sun.jnu.encoding")));
                     FileUtils.copyDirectory(unzipFile, new File(WebAppEnvs.get().webRoot));
                     this.clearBuildTask();
                 }

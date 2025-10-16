@@ -26,4 +26,6 @@ public class AuthRegisterParam implements Serializable {
 
     private Integer pid;
 
+    private String registerType;
+
 }

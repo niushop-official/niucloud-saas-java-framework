@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,6 +12,7 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.entity.diy.DiyPage;
 import com.niu.core.enums.diy.ComponentEnum;
@@ -40,6 +42,7 @@ import org.springframework.util.Assert;
 import jakarta.annotation.Resource;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -113,7 +116,10 @@ public class DiyServiceImpl implements IDiyService {
 
         if (ObjectUtil.isNotEmpty(searchParam.getTitle())) queryWrapper.like("title", searchParam.getTitle());
         if (ObjectUtil.isNotEmpty(searchParam.getMode())) queryWrapper.eq("mode", searchParam.getMode());
-        if (ObjectUtil.isNotEmpty(searchParam.getType())) queryWrapper.eq("type", searchParam.getType());
+        if (ObjectUtil.isNotEmpty(searchParam.getType())) {
+            List<String> type = Arrays.stream(searchParam.getType()).collect(Collectors.toList());
+            queryWrapper.in("type", type);
+        }
 
         List<DiyPage> pages = diyPageMapper.selectList(queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
@@ -285,11 +291,12 @@ public class DiyServiceImpl implements IDiyService {
             info = this.infoByName(param.getName());
         }
 
-        if (!param.getName().isEmpty()) {
+        if (StringUtils.isNotBlank(param.getName())) {
             StartUpPageConfigVo startConfig = coreDiyConfigService.getStartUpPageConfig(RequestUtils.siteId(), param.getName());
             if (startConfig != null) {
-                if (startConfig.getParent().equals("DIY_PAGE")) {
-                    Integer id = Integer.parseInt(startConfig.getPage().replace("/app/pages/index/diy?id=", ""));
+                if ("DIY_PAGE".equals(startConfig.getParent())) {
+                    String page = startConfig.getPage();
+                    Integer id = Integer.parseInt(page.replace("/app/pages/index/diy?id=", ""));
                     info = this.info(id);
                     if (info != null) {
                         param.setType(info.getType());
@@ -297,7 +304,9 @@ public class DiyServiceImpl implements IDiyService {
                     }
                 } else {
                     for (String key : template.keySet()) {
-                        if (ObjectUtil.defaultIfNull(template.getByPath(key + ".page", String.class), "").equals(startConfig.getPage())) {
+                        JSONObject templateItem = template.getJSONObject(key);
+                        String templatePage = templateItem != null ? templateItem.getStr("page") : "";
+                        if (startConfig.getPage().equals(templatePage)) {
                             info = this.infoByName(key);
                             if (info != null) {
                                 param.setType(key);
@@ -328,28 +337,45 @@ public class DiyServiceImpl implements IDiyService {
             Integer isDefault = 0;
             String value = "";
 
-            JSONObject page = null;
-            if (template.getJSONObject(param.getName()) != null) {
-                page = template.getJSONObject(param.getName());
+            JSONObject pageObj = null;
+            if (StringUtils.isNotBlank(param.getName()) && template.getJSONObject(param.getName()) != null) {
+                pageObj = template.getJSONObject(param.getName());
                 type = name = param.getName();
-                pageTitle = typeName = page.getStr("title");
-                pageRoute = page.getStr("page");
+                pageTitle = typeName = pageObj.getStr("title");
+                pageRoute = pageObj.getStr("page");
+
                 JSONObject pageData = this.getFirstPageData(type, "");
                 if (pageData != null) {
-                    mode = pageData.getByPath("template.mode", String.class);
-                    value = pageData.getJSONObject("template").toString();
-                    isDefault = 1;
+                    JSONObject templateObj = pageData.getJSONObject("template");
+                    if (templateObj != null) {
+                        mode = templateObj.getStr("mode");
+                        value = templateObj.toString();
+                        isDefault = 1;
+                    }
                 }
             } else if (template.getJSONObject(param.getType()) != null) {
-                page = template.getJSONObject(param.getType());
-                typeName = page.getStr("title");
-                pageRoute = page.getStr("page");
+                pageObj = template.getJSONObject(param.getType());
+                typeName = pageObj.getStr("title");
+                pageRoute = pageObj.getStr("page");
+
+                Long count = diyPageMapper.selectCount(new LambdaQueryWrapper<DiyPage>()
+                        .eq(DiyPage::getSiteId, RequestUtils.siteId())
+                        .eq(DiyPage::getType, param.getType()));
+                if (count == 0) {
+                    isDefault = 1;
+                }
+            }
+
+            // 页面标题（用于前台展示）
+            String title = pageTitle;
+            if (!"DIY_PAGE".equals(type)) {
+                title = typeName;
             }
 
             info = new DiyPageInfoVo();
             info.setName(name);
-            info.setPageTitle(pageTitle);
-            info.setTitle(pageTitle);
+            info.setPageTitle(pageTitle); // 页面名称（用于后台展示）
+            info.setTitle(title); // 页面标题（用于前台展示）
             info.setType(type);
             info.setTypeName(typeName);
             info.setTemplate(templateName);
@@ -361,6 +387,19 @@ public class DiyServiceImpl implements IDiyService {
 
         info.setComponent(getComponentList(info.getType()));
         info.setDomainUrl(coreSysConfigService.getSceneDomain(RequestUtils.siteId()));
+
+        // 处理全局模板数据
+        JSONObject diyTemplate = new JSONObject();
+        if (StringUtils.isNotBlank(info.getName())) {
+            TemplateParam templateParam = new TemplateParam();
+            String[] key = {info.getName()};
+            templateParam.setKey(key);
+            diyTemplate = getTemplate(templateParam);
+            if (diyTemplate != null && diyTemplate.containsKey(info.getName())) {
+                JSONObject templateInfo = diyTemplate.getJSONObject(info.getName());
+                info.setGlobal(templateInfo.getJSONObject("global"));
+            }
+        }
 
         return info;
     }
@@ -479,12 +518,13 @@ public class DiyServiceImpl implements IDiyService {
      */
     public JSONObject getDecoratePage(DiyPageSearchParam searchParam) {
         TemplateParam templateParam = new TemplateParam();
-        String[] key = {searchParam.getType()};
+        String oneType = searchParam.getType()[0];
+        String[] key = searchParam.getType();
         templateParam.setKey(key);
-        JSONObject template = this.getTemplate(templateParam).getJSONObject(searchParam.getType());
+        JSONObject template = this.getTemplate(templateParam).getJSONObject(oneType);
         if (template == null) throw new CommonException("模板不存在");
 
-        JSONObject defaultPage = getFirstPageData(searchParam.getType(), "");
+        JSONObject defaultPage = getFirstPageData(oneType, "");
 
         JSONObject useTemplate = new JSONObject();
         useTemplate.put("type", searchParam.getType());
@@ -496,9 +536,9 @@ public class DiyServiceImpl implements IDiyService {
         useTemplate.put("url", "");
         useTemplate.put("parent", "");
 
-        DiyPageInfoVo info = infoByName(searchParam.getType());
+        DiyPageInfoVo info = infoByName(oneType);
 
-        StartUpPageConfigVo startConfig = coreDiyConfigService.getStartUpPageConfig(RequestUtils.siteId(), searchParam.getType());
+        StartUpPageConfigVo startConfig = coreDiyConfigService.getStartUpPageConfig(RequestUtils.siteId(), oneType);
         if (startConfig != null) {
             useTemplate.set("title", startConfig.getTitle());
             useTemplate.set("name", startConfig.getName());
@@ -587,7 +627,7 @@ public class DiyServiceImpl implements IDiyService {
             addonTemplateParam.setAddon(param.getAddon());
             addonTemplateParam.setType(param.getType());
             JSONObject addonTemplate = getTemplate(addonTemplateParam);
-            if (addonTemplate != null) {
+            if (addonTemplate != null && !addonTemplate.isEmpty()) {
                 addonFlag = addonTemplate.keySet().iterator().next();
                 template = addonTemplate.getJSONObject(addonFlag);
             }
@@ -654,5 +694,81 @@ public class DiyServiceImpl implements IDiyService {
         page.setShare("");
         page.setCreateTime(System.currentTimeMillis() / 1000);
         diyPageMapper.insert(page);
+    }
+
+    @Override
+    public void loadDiyData(Map<String, Object> params) {
+        // 获取参数
+        String mainAppStr = params.get("main_app").toString();
+        JSONArray mainApp = JSONUtil.parseArray(mainAppStr);
+        int count = mainApp.size();
+        String tag = (String) params.getOrDefault("tag", "add");
+        Integer siteId = (Integer) params.get("site_id");
+
+        // 创建addon数组，在开头添加空字符串
+        JSONArray addon = new JSONArray();
+        addon.add("");
+        addon.addAll(mainApp);
+
+        // 遍历处理
+        for (int k = 0; k < addon.size(); k++) {
+            String v = addon.get(k).toString();
+            int isStart;
+
+            if ("add".equals(tag)) {
+                if (count > 1) {
+                    // 站点多应用，使用系统的页面
+                    isStart = (k == 0) ? 1 : 0;
+                } else {
+                    // 站点单应用，将应用的设为使用中
+                    isStart = (k == 0) ? 0 : 1;
+                }
+            } else {
+                // 编辑站点套餐的情况
+                if (count > 1) {
+                    // 站点多应用，将不更新启动页
+                    isStart = 0;
+                } else {
+                    // 站点单应用，将应用的设为使用中
+                    isStart = (k == 0) ? 0 : 1;
+                }
+            }
+
+            SetDiyDataParam setParam = new SetDiyDataParam();
+            setParam.setSiteId(siteId);
+            setParam.setType("index");
+            setParam.setKey("DIY_INDEX");
+            setParam.setIsStart(isStart);
+            setParam.setMainApp(addon);
+            setParam.setAddon(v);
+            setDiyData(setParam);
+
+            setParam.setType("member_index");
+            setParam.setKey("DIY_MEMBER_INDEX");
+            setDiyData(setParam);
+        }
+    }
+
+    @Override
+    public PageResult<DiyPageListVo> getPageLink(PageParam pageParam) {
+        Integer page = pageParam.getPage();
+        Integer limit = pageParam.getLimit();
+
+        QueryWrapper<DiyPage> queryWrapper = new QueryWrapper<DiyPage>()
+            .eq("site_id", RequestUtils.siteId())
+            .and(i -> i.eq("type", "DIY_PAGE").or().ne("type", "DIY_PAGE").eq("is_default", 0))
+            .orderByDesc("update_time");
+
+        JSONObject templates = TemplateEnum.getTemplate(new TemplateParam());
+
+        IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
+        List<DiyPageListVo> list = new LinkedList<>();
+        for (DiyPage item : iPage.getRecords()) {
+            DiyPageListVo vo = new DiyPageListVo();
+            BeanUtils.copyProperties(item, vo);
+            vo.setTypeName(templates.getByPath(item.getType() + ".title", String.class));
+            list.add(vo);
+        }
+        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 }

@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.entity.pay.PayRefund;
 import com.niu.core.enums.pay.RefundTypeEnum;
+import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.pay.param.PayRefundCreateParam;
 import com.niu.core.service.core.pay.param.PayRefundTransferParam;
@@ -39,9 +41,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CoreRefundServiceImpl implements ICoreRefundService {
@@ -166,6 +166,29 @@ public class CoreRefundServiceImpl implements ICoreRefundService {
         AddStatParam statParam = new AddStatParam();
         statParam.setRefundMoney(refund.getMoney());
         coreStatService.addStat(order.getSiteId(), statParam);
+
+        //通知三方应用更新订单状态
+        if (StringUtils.isNotEmpty(order.getRelateSource())) {
+            CommonEventDefiner.CommonEvent sendEvent = new CommonEventDefiner.CommonEvent();
+            Map<String, Object> data = new HashMap<>();
+            data.put("source_order_id", refund.getOrderId());
+            data.put("source_order_item_id", refund.getOrderGoodsId());
+            data.put("relate_source", order.getRelateSource());
+            data.put("relate_order_id", order.getRelateOrderId());
+            data.put("refund_type", refund.getRefundType());
+            data.put("reason", refund.getReason());
+            data.put("apply_time", refund.getCreateTime());
+            data.put("apply_money", refund.getApplyMoney());
+            data.put("is_refund_third_cost", refund.getIsRefundDelivery());
+            data.put("money", refund.getMoney());
+            data.put("refund_no", refund.getRefundNo());
+            data.put("order_refund_no", refund.getOrderRefundNo());
+            sendEvent.setSource("shop");
+            sendEvent.setEventName("ThirdOrderRefundFinishNotice");
+            sendEvent.setData(data);
+            sendEvent.setSiteId(refund.getSiteId());
+            EventAndSubscribeOfPublisher.publishAll(sendEvent);
+        }
     }
 
 

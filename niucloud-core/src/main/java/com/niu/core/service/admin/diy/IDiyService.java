@@ -10,6 +10,7 @@ import com.niu.core.service.core.diy.param.StartUpPageConfigParam;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 自定义页面服务接口类
@@ -134,4 +135,16 @@ public interface IDiyService {
      * @param id
      */
     void copy(Integer id);
+
+    /**
+     * 更新微页面数据
+     * @param param
+     */
+    void loadDiyData(Map<String, Object> param);
+
+    /**
+     * 获取自定义链接
+     * @return
+     */
+    PageResult<DiyPageListVo> getPageLink(PageParam pageParam);
 }

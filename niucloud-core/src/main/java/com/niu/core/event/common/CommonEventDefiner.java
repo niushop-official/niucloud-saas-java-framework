@@ -32,6 +32,11 @@ public abstract class CommonEventDefiner extends CallbackListener<CommonEventDef
          * 关联会员id
          */
         private Integer memberId = 0;
+
+        /**
+         * 类型
+         */
+        private String source;
     }
 
     /**

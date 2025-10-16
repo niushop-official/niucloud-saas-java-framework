@@ -73,5 +73,55 @@ public class NoticeEnum {
         return noticeMap;
     }
 
-//    getNotice
+    public static Map<String, NoticeEnumListVo> getNiuyunNotice(){
+        JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+        JSONObject notice = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "notice/notice.json");
+        Map<String, NoticeEnumListVo> noticeMap = new HashMap<>();
+
+        for (Map.Entry<String, Object> noticeItem : notice.entrySet()) {
+            NoticeEnumListVo vo = new NoticeEnumListVo();
+            BeanUtil.copyProperties(noticeItem.getValue(), vo);
+            noticeMap.put(noticeItem.getKey(), vo);
+        }
+
+        Map<String, String> noticeTypeName = NoticeTypeEnum.getMap();
+
+        for (String type : noticeTypeName.keySet()) {
+            JSONObject defaultConfig = jsonModuleLoader.mergeResultElement("notice/" + type + ".json");
+            //加载牛云配置
+            JSONObject niuyunConfig = jsonModuleLoader.mergeResultElement("notice/niuyun/" + type + ".json");
+
+            for (Map.Entry<String, NoticeEnumListVo> entry : noticeMap.entrySet()) {
+                String noticeKey = entry.getKey();
+                NoticeEnumListVo vo = entry.getValue();
+
+                // 优先使用niuyun目录的配置（如果存在）
+                if (niuyunConfig != null && niuyunConfig.containsKey(noticeKey)) {
+                    addOrUpdateSupportType(vo, type, niuyunConfig.getJSONObject(noticeKey));
+                }
+
+                // 如果没有niuyun配置，使用默认配置
+                else if (defaultConfig != null && defaultConfig.containsKey(noticeKey)) {
+                    addOrUpdateSupportType(vo, type, defaultConfig.getJSONObject(noticeKey));
+                }
+            }
+        }
+
+        return noticeMap;
+    }
+
+    private static void addOrUpdateSupportType(NoticeEnumListVo vo, String type, JSONObject config) {
+        if (vo.getSupport_type() == null) {
+            vo.setSupport_type(new ArrayList<>());
+        }
+        if (!vo.getSupport_type().contains(type)) {
+            vo.getSupport_type().add(type);
+        }
+
+        if (vo.getSupport_type_map() == null) {
+            vo.setSupport_type_map(new HashMap<>());
+        }
+        // 设置或更新配置（niuyun的配置会覆盖默认配置）
+        vo.getSupport_type_map().put(type, config);
+    }
 }

@@ -46,6 +46,7 @@ diy.onShow((data: any) => {
     let share = data.share ? JSON.parse(data.share) : null;
     setShare(share);
     diyGroupRef.value?.refresh();
+
     // #ifdef MP
     nextTick(() => {
         if (wxPrivacyPopupRef.value) wxPrivacyPopupRef.value.proactive();

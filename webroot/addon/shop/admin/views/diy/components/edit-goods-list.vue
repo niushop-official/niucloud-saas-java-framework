@@ -361,8 +361,6 @@ const setRowSelection = () => {
 defineExpose({})
 
 </script>
-
-<style lang="scss" scoped></style>
 <style lang="scss">
 .goods-list-slider {
     .el-slider__input {

@@ -523,4 +523,26 @@ public class SysMenuServiceImpl implements ISysMenuService {
             return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
         });
     }
+
+    @Override
+    public JSONArray getSystemMenu(String status, Integer isTree, Integer isButton) {
+        return cached.rememberObject(useCache, cacheTagName, Arrays.asList("getSystemMenu", status, isTree.toString(), isButton.toString()), uniqueKey ->{
+            QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("app_type", "site");
+            queryWrapper.eq("addon", "");
+            queryWrapper.orderByDesc(Arrays.asList("sort", "id"));
+            if (!status.equals("all")) {
+                queryWrapper.eq("status", status);
+            }
+            if (isButton == 0) {
+                queryWrapper.in("menu_type", new Integer[]{0, 1});
+            }
+            List<SysMenu> sysMenuList = sysMenuMapper.selectList(queryWrapper);
+            JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(sysMenuList));
+            if (isTree == 0) {
+                return jsonArray;
+            }
+            return TreeUtils.listToTree(jsonArray, "menu_key", "parent_key", "children");
+        });
+    }
 }

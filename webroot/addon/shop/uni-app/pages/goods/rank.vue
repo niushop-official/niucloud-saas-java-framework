@@ -1,6 +1,6 @@
 <template>
     <view class="min-h-[100vh]" :style="themeColor()">
-        <!-- #ifdef MP-WEIXIN -->
+        <!-- #ifdef MP-WEIXIN || APP-PLUS -->
         <top-tabbar :data="param" :isFill="false" />
         <!-- #endif -->
         <!-- 顶部图片 -->
@@ -70,7 +70,7 @@
                             </view>
 							<image v-if="diyGoods.priceType(item) == 'member_price'" class="max-w-[50rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/VIP.png')" mode="heightFix" />
 							<image v-else-if="diyGoods.priceType(item) == 'newcomer_price'"  class="max-w-[60rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/newcomer.png')" mode="heightFix" />
-							<image v-else-if="diyGoods.priceType(item) == 'discount_price'" class="max-w-[80rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/discount.png')" mode="heightFix" />	
+							<image v-else-if="diyGoods.priceType(item) == 'discount_price'" class="max-w-[80rpx] h-[28rpx] ml-[6rpx]" :src="img('addon/shop/discount.png')" mode="heightFix" />
                             <view :id="'itemCart' + index" class="w-[102rpx] box-border ml-auto text-center text-[#fff] primary-btn-bg h-[46rpx] text-[22rpx] leading-[46rpx] rounded-[100rpx]">去购买</view>
                         </view>
                     </view>

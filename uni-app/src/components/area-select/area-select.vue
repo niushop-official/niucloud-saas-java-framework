@@ -17,16 +17,16 @@
                 </view>
                 <view class="flex-1 pr-[10rpx]" v-else></view>
             </view>
-            <scroll-view scroll-y="true" class="h-[50vh]">
+            <scroll-view scroll-y="true" class="h-[700rpx] overflow-y-auto" :scroll-top="scrollTop" scroll-with-animation @touchmove.stop>
                 <view class="flex p-[30rpx] pt-[0] text-sm font-500">
-                    <view v-if="areaList.province.length" class="flex-1 pr-[10rpx]" :style="{ opacity: currSelect == 'province' ? 1 : 0, pointerEvents: currSelect == 'province' ? 'auto' : 'none' }">
-                        <view v-for="item in areaList.province" class="h-[80rpx] flex items-center" :class="{'text-[var(--primary-color)]': selected.province && selected.province.id == item.id }" @click="selected.province = item">{{ item.name }}</view>
+                    <view v-if="areaList.province.length" class="flex-1 pr-[10rpx]" :style="{ opacity: currSelect == 'province' ? 1 : 0, pointerEvents: currSelect == 'province' ? 'auto' : 'none',height: currSelect == 'province' ? 'auto' : '0',overflow: currSelect == 'province' ? 'auto' : 'hidden' }">
+                        <view v-for="(item, index) in areaList.province" :key="item.id" class="h-[80rpx] flex items-center" :class="{'text-[var(--primary-color)]': selected.province && selected.province.id == item.id }" @click="handleProvinceClick(item)">{{ item.name }}</view>
                     </view>
-                    <view v-if="areaList.city.length" class="flex-1 pr-[10rpx]" :style="{ opacity: currSelect == 'city' ? 1 : 0, pointerEvents: currSelect == 'city' ? 'auto' : 'none' }">
-                        <view v-for="item in areaList.city" class="h-[80rpx] flex items-center" :class="{'text-[var(--primary-color)]': selected.city && selected.city.id == item.id }" @click="selected.city = item">{{ item.name }}</view>
+                    <view v-if="areaList.city.length" class="flex-1 pr-[10rpx]" :style="{ opacity: currSelect == 'city' ? 1 : 0, pointerEvents: currSelect == 'city' ? 'auto' : 'none',height: currSelect == 'city' ? 'auto' : '0',overflow: currSelect == 'city' ? 'auto' : 'hidden' }">
+                        <view v-for="(item, index) in areaList.city" :key="item.id" class="h-[80rpx] flex items-center" :class="{'text-[var(--primary-color)]': selected.city && selected.city.id == item.id }" @click="handleCityClick(item)">{{ item.name }}</view>
                     </view>
-                    <view v-if="areaList.district.length" class="flex-1 pr-[10rpx]" :style="{ opacity: currSelect == 'district' ? 1 : 0, pointerEvents: currSelect == 'district' ? 'auto' : 'none' }">
-                        <view v-for="item in areaList.district" class="h-[80rpx] flex items-center " :class="{'text-[var(--primary-color)]': selected.district && selected.district.id == item.id }" @click="selected.district = item">{{ item.name }}</view>
+                    <view v-if="areaList.district.length" class="flex-1 pr-[10rpx]" :style="{ opacity: currSelect == 'district' ? 1 : 0, pointerEvents: currSelect == 'district' ? 'auto' : 'none',height: currSelect == 'district' ? 'auto' : '0',overflow: currSelect == 'district' ? 'auto' : 'hidden' }">
+                        <view v-for="(item, index) in areaList.district" :key="item.id" class="h-[80rpx] flex items-center " :class="{'text-[var(--primary-color)]': selected.district && selected.district.id == item.id }" @click="selected.district = item">{{ item.name }}</view>
                     </view>
                     <view class="flex-1 pr-[10rpx]" v-else></view>
                 </view>
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, nextTick } from 'vue'
 import { getAreaListByPid, getAreaByCode } from '@/app/api/system'
 
 const prop = defineProps({
@@ -59,6 +59,9 @@ const selected = reactive({
     city: null,
     district: null
 })
+
+// 滚动控制
+const scrollTop = ref(0)
 
 getAreaListByPid(0).then(({ data }) => {
     areaList.province = data
@@ -86,14 +89,21 @@ watch(() => selected.province, () => {
 
         if (selected.city) {
             let isExist = false
+            let selectedIndex = -1
             for (let i = 0; i < data.length; i++) {
                 if (selected.city.id == data[i].id) {
                     isExist = true
+                    selectedIndex = i
                     break
                 }
             }
             if (!isExist) {
                 selected.city = null
+            } else {
+                // 滚动到选中的城市位置
+                setTimeout(() => {
+                    scrollToSelected('city', selectedIndex)
+                }, 100)
             }
         }
     }).catch()
@@ -110,17 +120,25 @@ watch(() => selected.city, (nval) => {
 
             if (selected.district) {
                 let isExist = false
+                let selectedIndex = -1
                 for (let i = 0; i < data.length; i++) {
                     if (selected.district.id == data[i].id) {
                         isExist = true
+                        selectedIndex = i
                         break
                     }
                 }
                 if (!isExist) {
                     selected.district = null
+                } else {
+                    // 滚动到选中的区县位置
+                    setTimeout(() => {
+                        scrollToSelected('district', selectedIndex)
+                    }, 100)
                 }
             }
 			if (!data.length) {
+                currSelect.value = 'city'
 			    emits('complete', selected)
 			    show.value = false
 			}
@@ -135,6 +153,44 @@ watch(() => selected.city, (nval) => {
 
 const emits = defineEmits(['complete'])
 
+// 滚动到选中项位置
+const scrollToSelected = (type: string, selectedIndex: number) => {
+    // 计算目标位置，让选中项显示在列表的下半部分
+    const itemHeight = 40 // 每项高度 80rpx
+    const targetScrollTop = Math.max(0, (selectedIndex - 2) * itemHeight) // 让选中项显示在第3个位置左右
+    scrollTop.value = targetScrollTop
+}
+
+// 重置滚动位置
+const resetScrollTop = () => {
+    scrollTop.value = 1;
+    nextTick(() => {
+        scrollTop.value = 0;
+    });
+}
+
+// 监听currSelect变化，触发滚动（改用nextTick确保DOM更新）
+watch(() => currSelect.value, (newVal) => {
+  nextTick(() => { // 等待DOM更新后再执行滚动
+    if (newVal === 'province' && selected.province) {
+      const index = areaList.province.findIndex((item: any) => item.id === selected.province.id);
+      if (index >= 0) {
+        scrollToSelected('province', index); // 调用滚动函数
+      }
+    } else if (newVal === 'city' && selected.city) {
+      const index = areaList.city.findIndex((item: any) => item.id === selected.city.id);
+      if (index >= 0) {
+        scrollToSelected('city', index); // 调用滚动函数
+      }
+    } else if (newVal === 'district' && selected.district) {
+      const index = areaList.district.findIndex((item: any) => item.id === selected.district.id);
+      if (index >= 0) {
+        scrollToSelected('district', index); // 调用滚动函数
+      }
+    }
+  });
+}, { immediate: true }); // 增加immediate，初始化时也触发
+
 /**
  * 监听区县变更
  */
@@ -145,6 +201,22 @@ watch(() => selected.district, (nval) => {
         show.value = false
     }
 }, { deep: true })
+
+// 处理省份点击
+const handleProvinceClick = (item: any) => {
+    selected.province = item
+    nextTick(() => {
+        resetScrollTop()
+    })
+}
+
+// 处理城市点击
+const handleCityClick = (item: any) => {
+    selected.city = item
+    nextTick(() => {
+        resetScrollTop()
+    })
+}
 
 const open = () => {
     show.value = true

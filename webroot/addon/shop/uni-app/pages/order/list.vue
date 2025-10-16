@@ -16,18 +16,18 @@
                             <view class="flex justify-between items-center">
                                 <view class="text-[#303133] text-[24rpx] font-400 leading-[36rpx] flex items-center">
                                     <view v-if="item.activity_type_name" class="text-primary text-[18rpx] border-primary border-[2rpx] border-solid rounded-[4rpx] leading-[24rpx] px-[3rpx]">{{ item.activity_type_name }}</view>
-                                    <view class="ml-[10rpx] text-[24rpx] font-400 text-[#303133]">{{ item.create_time }}</view> 
+                                    <view class="ml-[10rpx] text-[24rpx] font-400 text-[#303133]">{{ item.create_time }}</view>
                                 </view>
 								<view v-if="item.status  == -1" class="text-[#303133] text-[26rpx] max-w-[150px] leading-[34rpx] truncate" :class="{'text-primary': item.status  == 1,'!text-[var(--text-color-light9)]' :item.status  == 5 || item.status  == -1}">{{ item.close_type_name }}</view>
                                 <view v-else class="text-[#303133] text-[26rpx] leading-[34rpx]" :class="{'text-primary': item.status  == 1,'!text-[var(--text-color-light9)]' :item.status  == 5 || item.status  == -1}">{{ item.status_name.name }}</view>
                             </view>
                             <template v-for="(subItem, index) in item.order_goods" :key="index">
                                 <view class="flex box-border mt-[20rpx]">
-                                    <u--image width="150rpx" height="150rpx" :radius="'var(--goods-rounded-big)'" :src="img(subItem.goods_image_thumb_small ? subItem.goods_image_thumb_small : '')" mode="aspectFill">
+                                    <up-image width="150rpx" height="150rpx" :radius="'var(--goods-rounded-big)'" :src="img(subItem.goods_image_thumb_small ? subItem.goods_image_thumb_small : '')" mode="aspectFill">
                                         <template #error>
                                             <image class="w-[150rpx] h-[150rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                         </template>
-                                    </u--image>
+                                    </up-image>
                                     <view class="ml-[20rpx] flex flex-1 flex-col box-border">
                                         <view class="flex justify-between items-baseline">
                                             <view class="max-w-[322rpx] text-[28rpx] leading-[40rpx] font-400 truncate text-[#303133]">{{ subItem.goods_name }}</view>

@@ -14,12 +14,14 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.ShopOrderRefund;
 import com.niu.shop.entity.order.ShopOrderRefundLog;
 import com.niu.shop.entity.shop_address.ShopAddress;
 import com.niu.shop.enums.order.*;
+import com.niu.shop.event.refund.AfterShopOrderRefundApplyEvent;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.mapper.order.ShopOrderRefundLogMapper;
@@ -196,6 +198,11 @@ public class RefundActionServiceImpl implements IRefundActionService {
         logParam.setStatus(Integer.valueOf(model.getStatus()));
         logParam.setType(OrderRefundActionTypeEnum.APPLY_ACTION.getType());
         coreRefundService.addLog(logParam);
+
+        AfterShopOrderRefundApplyEvent sendApplyEvent = new AfterShopOrderRefundApplyEvent();
+        sendApplyEvent.setOrderRefundNo(model.getOrderRefundNo());
+        sendApplyEvent.setOrderRefund(model);
+        EventAndSubscribeOfPublisher.publishAll(sendApplyEvent);
     }
 
     /**

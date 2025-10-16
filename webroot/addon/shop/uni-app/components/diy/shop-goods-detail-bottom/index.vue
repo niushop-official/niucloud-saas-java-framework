@@ -275,6 +275,7 @@ onMounted(() => {
 
 const menuContent = ref([])
 const initFn = () => {
+    isCollect.value = diyComponent.value.goods.is_collect;
     sendMessageTitle.value = diyComponent.value.goods.goods_name
     sendMessagePath.value = '/addon/shop/pages/goods/detail?sku_id=' + diyComponent.value.sku_id;
     if (diyComponent.value.type) {

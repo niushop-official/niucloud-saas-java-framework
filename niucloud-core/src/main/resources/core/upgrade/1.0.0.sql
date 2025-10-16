@@ -43,7 +43,7 @@ COMMENT = '计划任务执行记录';
 ALTER TABLE `{{prefix}}sys_schedule` 
   ADD COLUMN name VARCHAR(255) NOT NULL DEFAULT '' COMMENT '任务名称';
   
-ALTER TABLE `{{prefix}}sys_menu`
+ALTER TABLE `{{prefix}}sys_men`u
   ADD COLUMN parent_select_key VARCHAR(255) NOT NULL DEFAULT '' COMMENT '上级key';
  
 DROP TABLE IF EXISTS `{{prefix}}sys_backup_records`;

@@ -4,7 +4,9 @@ import {
     updateWeappOpenid,
     updateWechatOpenid,
     wechatUser,
-    wechatUserLogin, updateWechatOpenidByH5
+    wechatUserLogin, 
+    updateWechatOpenidByH5,
+    wxappLogin
 } from '@/app/api/auth'
 import { getWechatAuthCode } from '@/app/api/system'
 import useMemberStore from '@/stores/member'
@@ -21,21 +23,21 @@ export function useLogin() {
             const config = useConfigStore()
             const systemStore = useSystemStore()
 
-            // #ifdef MP-WEIXIN
-            if (!uni.getStorageSync('autoLoginLock') && uni.getStorageSync('openid') && config.login.is_bind_mobile) {
+            // #ifdef MP
+            if (!uni.getStorageSync('autoLoginLock')  && config.login.is_bind_mobile) {
                 uni.setStorageSync('isBindMobile', true) // 强制绑定手机号标识
             }
             // #endif
 
             // #ifdef H5
-            if (!uni.getStorageSync('autoLoginLock') && isWeixinBrowser() && uni.getStorageSync('openid') && config.login.is_bind_mobile) {
+            if (!uni.getStorageSync('autoLoginLock') && isWeixinBrowser() && config.login.is_bind_mobile) {
                 uni.setStorageSync('isBindMobile', true) // 强制绑定手机号标识
             }
             // #endif
 
             // 如果只开启了账号密码登录，就不需要跳转到登录中间页了，直接进入普通账号密码登录页面
 
-            // #ifdef MP-WEIXIN
+            // #ifdef MP
             if (config.login.is_username && !config.login.is_mobile && !config.login.is_auth_register) {
                 redirect({ url: '/app/pages/auth/login', param: { type: 'username' } })
             } else if (systemStore.initStatus == 'finish' && !config.login.is_username && !config.login.is_mobile && !config.login.is_auth_register) {
@@ -64,6 +66,16 @@ export function useLogin() {
                 } else {
                     redirect({ url: '/app/pages/auth/index' })
                 }
+            }
+            // #endif
+            
+            // #ifdef APP-PLUS
+            if (config.login.is_username && !config.login.is_mobile) {
+                redirect({ url: '/app/pages/auth/login', param: { type: 'username' } })
+            } else if (systemStore.initStatus == 'finish' && !config.login.is_username && !config.login.is_mobile) {
+                uni.showToast({ title: '商家未开启登录注册', icon: 'none' })
+            } else {
+                redirect({ url: '/app/pages/auth/index' })
             }
             // #endif
         })
@@ -102,9 +114,9 @@ export function useLogin() {
             mobile: params.mobile,
             mobile_code: params.mobile_code
         };
+        uni.getStorageSync('pid') && (Object.assign(obj, { pid: uni.getStorageSync('pid') }))
 
         // #ifdef MP-WEIXIN
-        uni.getStorageSync('pid') && (Object.assign(obj, { pid: uni.getStorageSync('pid') }))
         weappLogin(obj).then((res: any) => {
             if (res.data.token) {
                 useMemberStore().setToken(res.data.token, () => {
@@ -151,7 +163,6 @@ export function useLogin() {
         // #endif
 
         // #ifdef H5
-        uni.getStorageSync('pid') && (Object.assign(obj, { pid: uni.getStorageSync('pid') }))
         wechatUser(obj).then((user_res: any) => {
             if (user_res.data) {
                 wechatUserLogin(user_res.data).then((res: any) => {
@@ -213,14 +224,34 @@ export function useLogin() {
                 })
             }
         }).catch((err) => {
-            if (err.msg == -1) {
+            if (err.code == -1) {
                 getAuthCode({ scopes: 'snsapi_userinfo' })
             } else {
                 uni.showToast({ title: err.msg, icon: 'none' })
             }
         })
         // #endif
+        
+        // #ifdef APP-PLUS
+        wxappLogin(obj).then((res) => {
+            if (res.data.token) {
+                useMemberStore().setToken(res.data.token, () => {
+                    handleLoginBack();
+                })
+            } else {
+                uni.setStorageSync('openid', res.data.openid)
+                uni.setStorageSync('unionid', res.data.unionid)
+                if(res.data.nickname) uni.setStorageSync('nickname', res.data.nickname)
+                if(res.data.avatar) uni.setStorageSync('avatar', res.data.avatar)
+            }
+            
+            if (params.successCallback) params.successCallback(res.data)
+        }).catch((err) => {
+            uni.showToast({ title: err.msg, icon: 'none' })
+        })
+        // #endif
     }
+    
     /**
      * 登录普通账号后修改openid
      * @param code
@@ -335,6 +366,20 @@ export function useLogin() {
             location.href = res.data.url
         })
 
+        // #endif
+        
+        // #ifdef APP-PLUS
+        uni.login({
+        	"provider": "weixin",
+        	"onlyAuthorize": true, // 微信登录仅请求授权认证
+        	success: function(event){
+        		const { code } = event
+                authLogin({ code })
+        	},
+        	fail: function (err) {
+                uni.showToast({ title: err.msg, icon: 'none' })
+            }
+        })
         // #endif
     }
 

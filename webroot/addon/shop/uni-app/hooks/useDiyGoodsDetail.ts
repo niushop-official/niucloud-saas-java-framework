@@ -3,7 +3,7 @@ import { onHide, onLoad, onPageScroll, onShow, onUnload } from '@dcloudio/uni-ap
 import { deepClone, goback, handleOnloadParams, img, getToken } from '@/utils/common';
 import useDiyStore from '@/app/stores/diy';
 import { getDiyInfo } from '@/app/api/diy';
-import { getGoodsDetail,browse  } from '@/addon/shop/api/goods';
+import { getGoodsDetail, browse } from '@/addon/shop/api/goods';
 import useGoodsDetailStore from '@/addon/shop/stores/goodsDetail'
 
 export function useDiyGoodsDetail(params: any = {}) {
@@ -279,6 +279,10 @@ export function useDiyGoodsDetail(params: any = {}) {
             // 我的足迹
             myBrowseFn(data.goods.goods_id);
         }
+        
+        uni.setNavigationBarTitle({
+            title: data.goods.goods_name
+        })
 
         // 弹窗开启
         data.isOpenSkuBuy = false
@@ -288,13 +292,13 @@ export function useDiyGoodsDetail(params: any = {}) {
         data.isOpenSharePoster = false
         useGoodsDetailStore().setGoodsDetail(data,true)
     }
-
-
+    
     // 我的足迹
     const myBrowseFn = (goods_id: any) => {
         browse({
             goods_id
-        }).then((res: any) => { })
+        }).then((res: any) => {
+        })
     }
 
     return {

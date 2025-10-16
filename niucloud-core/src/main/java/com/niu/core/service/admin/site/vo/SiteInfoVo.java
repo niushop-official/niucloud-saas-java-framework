@@ -57,5 +57,5 @@ public class SiteInfoVo implements Serializable {
     public String getStatusName() {
         return SiteStatusEnum.getNameByCode(this.status);
     }
-
+    private Integer uid;
 }

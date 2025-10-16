@@ -11,14 +11,14 @@
                         <el-checkbox label="收藏" value="collect"/>
                         <el-checkbox label="分享" value="share" />
                     </el-checkbox-group>
-                    <div class="text-sm text-gray-400 mb-[10px]">{{ t('菜单内容最多选择3个，最少选择1个') }}</div>
+                    <div class="text-sm text-gray-400">{{ t('菜单内容最多选择3个，最少选择1个') }}</div>
                 </el-form-item>
                 <el-form-item :label="t('购物车按钮')">
                     <el-radio-group v-model="diyStore.editComponent.cartIsShow">
                         <el-radio :label="true">{{ t('显示') }}</el-radio>
                         <el-radio :label="false">{{ t('隐藏') }}</el-radio>
                     </el-radio-group>
-                    <div class="text-sm text-gray-400 mb-[10px]">{{ t('注意：该设置在实物商品或虚拟商品且不核销的情况下生效') }}</div>
+                    <div class="text-sm text-gray-400">{{ t('注意：该设置在实物商品或虚拟商品且不核销的情况下生效') }}</div>
                 </el-form-item>
                 <el-form-item :label="t('购物车名称')" v-show="diyStore.editComponent.cartIsShow">
                     <el-input v-model.trim="diyStore.editComponent.cartName"

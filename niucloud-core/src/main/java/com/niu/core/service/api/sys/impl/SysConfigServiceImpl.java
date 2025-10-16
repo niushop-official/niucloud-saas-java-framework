@@ -1,6 +1,7 @@
 package com.niu.core.service.api.sys.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
@@ -59,6 +60,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
     public Map<String, Integer> getMemberMobileExist(String openid, String channel) {
         Map<String, Integer> result = new HashMap<>();
         result.put("member_mobile_exist", 0);
+        result.put("member_exist", 0);
 
         if (!openid.isEmpty()) {
             String openidField = switch (channel.toLowerCase()) {
@@ -68,8 +70,12 @@ public class SysConfigServiceImpl implements ISysConfigService {
             };
 
             if (!openidField.isEmpty()) {
-                Long count = memberMapper.selectCount(new QueryWrapper<Member>().eq(openidField, openid));
-                result.put("member_mobile_exist", count > 0 ? 1 : 0);
+                Member member = memberMapper.selectOne(new QueryWrapper<Member>()
+                    .select("member_id, mobile")
+                    .eq("site_id", RequestUtils.siteId())
+                    .eq(openidField, openid));
+                result.put("member_exist", member == null ? 0 : 1);
+                result.put("member_mobile_exist", member != null && !member.getMobile().isBlank() ? 1 : 0);
             }
         }
 

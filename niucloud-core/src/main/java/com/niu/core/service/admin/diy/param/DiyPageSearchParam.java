@@ -15,7 +15,7 @@ public class DiyPageSearchParam implements Serializable {
 
     private String title;
 
-    private String type;
+    private String[] type;
 
     private String mode;
 

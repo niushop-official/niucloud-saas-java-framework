@@ -1,6 +1,6 @@
 <template>
     <view class="w-screen h-screen flex flex-col  " :style="themeColor()" v-if="type">
-        <!-- #ifdef MP-WEIXIN -->
+        <!-- #ifdef MP-WEIXIN || APP-PLUS -->
         <view :style="{'height':headerHeight}">
             <top-tabbar :data="param" :scrollBool="topTabarObj.getScrollBool()" class="top-header" />
         </view>
@@ -18,7 +18,7 @@
                             <u-input v-model="formData.username" border="none" maxlength="40"
                                      :placeholder="t('usernamePlaceholder')" autocomplete="off" class="!bg-transparent"
                                      :disabled="real_name_input" fontSize="26rpx"
-                                     placeholderClass="!text-[var(--text-color-light6)] text-[26rpx]" />
+                                     placeholderClass="!text-[var(--text-color-light9)] text-[26rpx]" />
                         </u-form-item>
                     </view>
                     <view class="h-[88rpx] flex w-full items-center px-[30rpx] rounded-[40rpx] box-border bg-[#F6F6F6] mt-[40rpx]">
@@ -26,11 +26,14 @@
                             <u-input v-model="formData.password" border="none" :password="isPassword" maxlength="40"
                                      :placeholder="t('passwordPlaceholder')" autocomplete="new-password"
                                      class="!bg-transparent" :disabled="real_name_input" fontSize="26rpx"
-                                     placeholderClass="!text-[var(--text-color-light6)] text-[26rpx]">
+                                     placeholderClass="!text-[var(--text-color-light9)] text-[26rpx]">
                                 <template #suffix>
+                                    <!-- #ifndef APP-PLUS -->
                                     <view @click="changePassword" v-if="formData.password">
-                                        <u-icon :name="isPassword?'eye-off':'eye-fill'" color="#b9b9b9" size="20"></u-icon>
+                                        <u-icon name="eye-off" color="#b9b9b9" size="20" v-if="isPassword"></u-icon>
+                                        <u-icon name="eye-fill" color="#b9b9b9" size="20" v-else></u-icon>
                                     </view>
+                                    <!-- #endif -->
                                 </template>
                             </u-input>
                         </u-form-item>
@@ -42,15 +45,15 @@
                             <u-input v-model="formData.mobile" type="number" maxlength="11" border="none"
                                      :placeholder="t('mobilePlaceholder')" autocomplete="off" class="!bg-transparent"
                                      :disabled="real_name_input" fontSize="26rpx"
-                                     placeholderClass="!text-[var(--text-color-light6)] text-[26rpx]" />
+                                     placeholderClass="!text-[var(--text-color-light9)] text-[26rpx]" />
                         </u-form-item>
                     </view>
-                    <view class="h-[88rpx] flex w-full items-center px-[30rpx] rounded-[40rpx] box-border bg-[#F6F6F6] mt-[40rpx] text-[26rpx]">
+                    <view class="h-[88rpx] flex w-full items-center px-[30rpx] rounded-[40rpx] box-border bg-[#F6F6F6] mt-[40rpx]">
                         <u-form-item label="" prop="mobile_code" :border-bottom="false">
                             <u-input v-model="formData.mobile_code" type="number" maxlength="4" border="none"
                                      class="!bg-transparent" fontSize="26rpx" :disabled="real_name_input"
                                      :placeholder="t('codePlaceholder')"
-                                     placeholderClass="!text-[var(--text-color-light6)] text-[26rpx]">
+                                     placeholderClass="!text-[var(--text-color-light9)] text-[26rpx]">
                                 <template #suffix>
                                     <sms-code v-if="configStore.login.agreement_show" :mobile="formData.mobile" type="login" v-model="formData.mobile_key" :isAgree="isAgree"></sms-code>
                                     <sms-code v-else :mobile="formData.mobile" type="login" v-model="formData.mobile_key"></sms-code>
@@ -163,7 +166,7 @@ onLoad(async(option: any) => {
     // #ifdef MP-WEIXIN
     uni.getStorageSync('openid') && (Object.assign(formData, { weapp_openid: uni.getStorageSync('openid') }))
     // #endif
-	
+
     if (option.type) {
         if (option.type == 'mobile') {
             if (configStore.login.is_mobile) {
@@ -203,6 +206,12 @@ onLoad(async(option: any) => {
     } else {
         // 普通浏览器
         isShowQuickLogin.value = false;
+    }
+    // #endif
+
+    // #ifdef APP-PLUS
+    if (systemStore.appConfig.wechat_app_id) {
+        isShowQuickLogin.value = true;
     }
     // #endif
 })
@@ -300,6 +309,7 @@ const handleLogin = () => {
 }
 
 const toLink = () => {
+    // #ifndef APP-PLUS
     const pages = getCurrentPages(); // 获取页面栈
     if (pages.length > 1) {
         const currentPage = pages[pages.length - 2].route;
@@ -314,7 +324,17 @@ const toLink = () => {
     } else {
         redirect({ url: '/app/pages/auth/index', mode: 'redirectTo' })
     }
+    // #endif
 
+    // #ifdef APP-PLUS
+    useLogin().getAuthCode({
+        successCallback: () => {
+            if (!getToken()) {
+                redirect({ url: '/app/pages/auth/bind', param: { 'register_type': 'wechat' }, mode: 'redirectTo' })
+            }
+        }
+    })
+    // #endif
 }
 
 const toResetpwd = () =>{

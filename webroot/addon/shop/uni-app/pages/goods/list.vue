@@ -266,7 +266,7 @@ interface mescrollStructure {
     size: number,
     endSuccess: Function,
     [propName: string]: any
-}
+} 
 
 const getAllAppListFn = (mescroll: mescrollStructure) => {
     loading.value = false;

@@ -1,7 +1,7 @@
 <template>
     <view class="bg-[var(--page-bg-color)] min-h-[100vh] overflow-hidden" :style="themeColor()">
         <view class="coupon-header fixed  left-0 right-0 top-0 z-10080">
-            <!-- #ifdef MP-WEIXIN -->
+            <!-- #ifdef MP-WEIXIN || APP-PLUS -->
             <view :style="{height: headStyle, backgroundImage: 'url(' + img('addon/shop/coupon/coupon_uniapp.png') + ')',backgroundSize: '100%', backgroundPosition: 'bottom', backgroundRepeat: 'no-repeat'}">
                 <top-tabbar :data="param" class="top-header" />
             </view>
@@ -146,7 +146,12 @@ let param = topTabarObj.setTopTabbarParam({ title: '优惠券列表' })
 
 // 头部图片的高度
 const headStyle = computed(() => {
+    // #ifdef MP
     let style = (pxToRpx(Number(systemStore.menuButtonInfo.height)) + pxToRpx(systemStore.menuButtonInfo.top) + pxToRpx(8) + 364) + 'rpx'
+    // #endif
+    // #ifdef APP-PLUS
+    let style = (pxToRpx(Number(systemStore.systemInfo.statusBarHeight)) + pxToRpx(8) + 364) + 'rpx'
+    // #endif
     return style
 })
 

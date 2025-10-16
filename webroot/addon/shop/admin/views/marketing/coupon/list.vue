@@ -249,12 +249,12 @@ const spreadPopupRef = ref(null)
 
 const spreadEvent = (data: any) => {
     const pagePath = '/addon/shop/pages/coupon/detail'
-    const columnName = 'coupon_id'
-    const columnValue = data.id
+    const paramsArr = [
+        { name: 'coupon_id', value: data.id },
+    ];
     const title = '优惠券推广'
     const folder = 'coupon'
-
-    spreadPopupRef.value?.show(pagePath, columnName, columnValue, title, folder)
+    spreadPopupRef.value?.show(pagePath, paramsArr, title, folder);
 }
 
 // 添加优惠券
@@ -300,7 +300,7 @@ const deleteEvent = (data: any) => {
         }
     ).then(() => {
         deleteCoupon({ ids: [data.id] }).then(() => {
-            loadCouponList()
+            loadCouponList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -316,7 +316,7 @@ const closeEvent = (data: any) => {
         }
     ).then(() => {
         closeCoupon({ ids: [data.id] }).then(() => {
-            loadCouponList()
+            loadCouponList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -345,7 +345,7 @@ const batchDeleteEvent = () => {
         deleteCoupon({
             ids: coupon_ids
         }).then(() => {
-            loadCouponList()
+            loadCouponList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -374,7 +374,7 @@ const batchcloseEvent = () => {
         closeCoupon({
             ids: coupon_ids
         }).then(() => {
-            loadCouponList()
+            loadCouponList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })

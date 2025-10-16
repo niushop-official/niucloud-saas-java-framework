@@ -3,6 +3,13 @@ package com.niu.core.common.utils;
 import cn.hutool.core.util.ObjectUtil;
 import com.niu.core.common.component.base.ThreadLocalHolder;
 import com.niu.core.enums.common.ChannelEnum;
+import com.niu.core.service.core.member.ICoreMemberService;
+import com.niu.core.service.core.member.dto.MemberInfoDto;
+import com.niu.core.service.core.user.ICoreUserService;
+import com.niu.core.service.core.user.dto.UserInfoDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
@@ -12,7 +19,89 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * 系统请求工具类
  */
+@Component
 public class RequestUtils {
+
+    private static ApplicationContext applicationContext;
+
+    @Autowired
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        RequestUtils.applicationContext = applicationContext;
+    }
+
+    private static ICoreUserService getUserService() {
+        return applicationContext.getBean(ICoreUserService.class);
+    }
+
+    private static ICoreMemberService getMemberService() {
+        return applicationContext.getBean(ICoreMemberService.class);
+    }
+
+    /**
+     * 获取当前登录用户信息（带缓存）
+     * @return 用户信息，若uid无效则返回null
+     */
+    public static UserInfoDto getCurrentUser() {
+        // 先从缓存获取
+        UserInfoDto user = ThreadLocalHolder.get("current-user", UserInfoDto.class);
+        if (ObjectUtil.isNotNull(user)) {
+            return user;
+        }
+
+        // 缓存不存在，查询数据库
+        Integer uid = uid();
+        if (ObjectUtil.isNotNull(uid) && uid > 0) {
+            user = getUserService().getUserInfo(uid);
+            // 存入缓存
+            ThreadLocalHolder.put("current-user", user);
+        }
+
+        return user;
+    }
+
+    /**
+     * 获取当前登录会员信息（带缓存）
+     * @return 会员信息，若memberId无效则返回null
+     */
+    public static MemberInfoDto getCurrentMember() {
+        // 先从缓存获取
+        MemberInfoDto member = ThreadLocalHolder.get("current-member", MemberInfoDto.class);
+        if (ObjectUtil.isNotNull(member)) {
+            return member;
+        }
+
+        // 缓存不存在，查询数据库
+        Integer memberId = memberId();
+        if (ObjectUtil.isNotNull(memberId) && memberId > 0) {
+            member = getMemberService().getMemberInfo(memberId);
+            // 存入缓存
+            ThreadLocalHolder.put("current-member", member);
+        }
+
+        return member;
+    }
+
+    /**
+     * 清除用户信息缓存
+     */
+    public static void clearUserCache() {
+        ThreadLocalHolder.remove("current-user");
+    }
+
+    /**
+     * 清除会员信息缓存
+     */
+    public static void clearMemberCache() {
+        ThreadLocalHolder.remove("current-member");
+    }
+
+    /**
+     * 清除所有用户相关缓存
+     */
+    public static void clearAllUserRelatedCache() {
+        clearUserCache();
+        clearMemberCache();
+    }
 
     /**
      * 获取默认站点id

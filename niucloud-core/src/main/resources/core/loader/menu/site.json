@@ -1564,6 +1564,64 @@
 				"sort": "0",
 				"status": "1",
 				"is_show": "0"
+			},
+			{
+				"menu_name": "App端",
+				"menu_key": "channel_app",
+				"menu_short_name": "App端",
+				"menu_type": "1",
+				"icon": "",
+				"api_url": "",
+				"router_path": "channel/app",
+				"view_path": "channel/app/access",
+				"methods": "",
+				"sort": "50",
+				"status": "1",
+				"is_show": "1"
+			},
+			{
+				"menu_name": "App端配置",
+				"menu_key": "channel_app_config",
+				"menu_short_name": "app端配置",
+				"menu_type": "1",
+				"icon": "",
+				"api_url": "channel/app/config",
+				"router_path": "channel/app/config",
+				"view_path": "channel/app/config",
+				"methods": "get",
+				"sort": "100",
+				"status": "1",
+				"is_show": "0",
+				"children": [
+					{
+						"menu_name": "设置app端配置",
+						"menu_key": "set_channel_app_config",
+						"menu_short_name": "设置app端配置",
+						"menu_type": "2",
+						"icon": "",
+						"api_url": "channel/app/config",
+						"router_path": "",
+						"view_path": "",
+						"methods": "put",
+						"sort": "100",
+						"status": "1",
+						"is_show": "1"
+					}
+				]
+			},
+			{
+				"menu_name": "APP版本管理",
+				"menu_key": "app_version_list",
+				"menu_short_name": "版本管理",
+				"menu_type": "1",
+				"icon": "",
+				"api_url": "channel/app/version",
+				"router_path": "channel/app/version",
+				"view_path": "channel/app/version",
+				"methods": "get",
+				"sort": "100",
+				"status": "1",
+				"is_show": "0"
 			}
 		]
 	},

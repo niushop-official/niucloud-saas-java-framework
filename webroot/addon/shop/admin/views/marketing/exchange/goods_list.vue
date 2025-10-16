@@ -221,11 +221,12 @@ const spreadPopupRef = ref(null)
 
 const spreadEvent = (data: any) => {
     const pagePath = '/addon/shop/pages/point/detail'
-    const columnName = 'id'
-    const columnValue = data.id
+    const paramsArr = [
+        { name: 'id', value: data.id },
+    ];
     const title = '积分商品推广'
     const folder = 'goods'
-    spreadPopupRef.value?.show(pagePath, columnName, columnValue, title, folder)
+    spreadPopupRef.value?.show(pagePath, paramsArr, title, folder);
 }
 // 上下架
 const statusEvent = (id: number, status: number) => {
@@ -237,7 +238,7 @@ const statusEvent = (id: number, status: number) => {
         }
     ).then(() => {
         editActiveExchangeStatus({ id, status }).then(() => {
-            loadExchangeGoodsList()
+            loadExchangeGoodsList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -252,7 +253,7 @@ const deleteEvent = (id: number) => {
         }
     ).then(() => {
         deleteActiveExchange(id).then(() => {
-            loadExchangeGoodsList()
+            loadExchangeGoodsList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -281,7 +282,7 @@ const batchDeleteEvent = () => {
         batchDeleteActiveExchange({
             ids: exchange_ids
         }).then(() => {
-            loadExchangeGoodsList()
+            loadExchangeGoodsList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -310,7 +311,7 @@ const batchDownEvent = () => {
         batchDownActiveExchange({
             ids: exchange_ids
         }).then(() => {
-            loadExchangeGoodsList()
+            loadExchangeGoodsList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })
@@ -339,7 +340,7 @@ const batchUpEvent = () => {
         batchUpActiveExchange({
             ids: exchange_ids
         }).then(() => {
-            loadExchangeGoodsList()
+            loadExchangeGoodsList(getTablePageStorage(tableData.searchParam).page)
         }).catch(() => {
         })
     })

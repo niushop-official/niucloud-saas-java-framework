@@ -10,6 +10,7 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.entity.verify.Verify;
+import com.niu.core.event.sys.VerifyInfoEventDefiner;
 import com.niu.core.mapper.verify.VerifyMapper;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.admin.verify.param.VerifySearchParam;
@@ -17,10 +18,13 @@ import com.niu.core.service.admin.verify.IVerifyService;
 import com.niu.core.service.admin.verify.vo.VerifyInfoVo;
 import com.niu.core.service.admin.verify.vo.VerifyListVo;
 import com.niu.core.service.admin.verify.vo.VerifyVo;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import jakarta.annotation.Resource;
+import org.springframework.util.CollectionUtils;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -55,6 +59,9 @@ public class VerifyServiceImpl implements IVerifyService {
         if (ObjectUtil.isNotEmpty(searchParam.getType())) queryWrapper.eq("type", searchParam.getType());
         if (ObjectUtil.isNotEmpty(searchParam.getVerifierMemberId())) queryWrapper.eq("verifier_member_id", searchParam.getVerifierMemberId());
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) QueryMapperUtils.buildByTime(queryWrapper, "v.create_time", searchParam.getCreateTime());
+        if (ObjectUtil.isNotEmpty(searchParam.getOrderId())){
+            queryWrapper.like("data", searchParam.getOrderId());
+        }
 
         IPage<VerifyVo> iPage = verifyMapper.selectJoinPage(new Page<>(page, limit), VerifyVo.class, queryWrapper);
         List<VerifyListVo> list = new LinkedList<>();
@@ -93,6 +100,17 @@ public class VerifyServiceImpl implements IVerifyService {
         BeanUtils.copyProperties(model, memberInfoVo);
         vo.setMember(memberInfoVo);
 
+        VerifyInfoEventDefiner.VerifyInfoEvent event = new VerifyInfoEventDefiner.VerifyInfoEvent();
+        event.setData(vo);
+        List<VerifyInfoEventDefiner.VerifyInfoEventResult> list = EventAndSubscribeOfPublisher.publishAndCallback(event);
+        if (!CollectionUtils.isEmpty(list)){
+            for (VerifyInfoEventDefiner.VerifyInfoEventResult verifyInfoEventResult : list) {
+                if (verifyInfoEventResult != null && verifyInfoEventResult.getDataMap() != null && !verifyInfoEventResult.getDataMap().isEmpty()){
+                    vo.setVerifyInfo(verifyInfoEventResult.getDataMap());
+                    break;
+                }
+            }
+        }
         return vo;
     }
 }

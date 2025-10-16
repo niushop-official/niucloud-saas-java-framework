@@ -1,6 +1,6 @@
 <template>
     <view :style="themeColor()">
-        <!-- #ifdef MP-WEIXIN -->
+        <!-- #ifdef MP-WEIXIN || APP-PLUS -->
         <top-tabbar :data="topTabbarData" scrollBool="1" :isBack="false"/>
         <!-- #endif -->
         <view class="bg-page min-h-[100vh] overflow-hidden flex flex-col" v-if="!loading">
@@ -46,11 +46,11 @@
                                                     </view>
                                                     <view class="w-[200rpx] h-[200rpx] flex items-center justify-center rounded-[var(--goods-rounded-big)] overflow-hidden"
                                                         @click="toDetail(item)">
-                                                        <u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goodsSku.sku_image_thumb_mid||'')" model="aspectFill">
+                                                        <up-image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goodsSku.sku_image_thumb_mid||'')" model="aspectFill">
                                                             <template #error>
                                                                 <image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                                             </template>
-                                                        </u--image>
+                                                        </up-image>
                                                     </view>
                                                     <view class="flex flex-1 flex-col justify-between ml-[20rpx]">
                                                         <view class="w-[100%] flex flex-col items-baseline">
@@ -126,11 +126,11 @@
                                     <view class="flex px-[var(--pad-sidebar-m)]">
                                         <text class="self-center iconfont iconxuanze1 text-[34rpx] mr-[32rpx] text-[#F5F5F5] rounded-[50%] overflow-hidden shrink-0"></text>
                                         <view class="relative w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden">
-                                            <u--image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goodsSku.sku_image_thumb_mid)" model="aspectFill">
+                                            <up-image radius="var(--goods-rounded-big)" width="200rpx" height="200rpx" :src="img(item.goodsSku.sku_image_thumb_mid)" model="aspectFill">
                                                 <template #error>
                                                     <image class="w-[200rpx] h-[200rpx] rounded-[var(--goods-rounded-big)] overflow-hidden" :src="img('static/resource/images/diy/shop_default.jpg')" mode="aspectFill" />
                                                 </template>
-                                            </u--image>
+                                            </up-image>
                                             <view v-if="item.goodsSku.stock == 0 " class="absolute left-0 top-0  w-[200rpx] h-[200rpx]  leading-[200rpx] text-center " style="background-color: rgba(0,0,0,0.3);">
                                                 <text class="text-[#fff] text-[28rpx]">已售罄</text>
                                             </view>
@@ -238,7 +238,7 @@
                         @click="settlement">结算</button>
                     <!-- #endif -->
 
-                    <!-- #ifdef MP-WEIXIN -->
+                    <!-- #ifndef H5 -->
                     <!--                    <button v-if="isBindMobile && info && !info.mobile" class="w-[180rpx] h-[70rpx] font-500 text-[26rpx] leading-[70rpx] !text-[#fff] m-0 rounded-full primary-btn-bg remove-border" open-type="getPhoneNumber" @getphonenumber="memberStore.bindMobile">结算</button>-->
                     <!--                    <button v-else class="w-[180rpx] h-[70rpx] font-500 text-[26rpx] leading-[70rpx] !text-[#fff] m-0 rounded-full primary-btn-bg remove-border" @click="settlement">结算</button>-->
                     <button class="w-[180rpx] h-[70rpx] font-500 text-[26rpx] leading-[70rpx] !text-[#fff] m-0 rounded-full primary-btn-bg remove-border"
@@ -337,7 +337,7 @@ const getCartGoodsListFn = () => {
 
 onShow(() => {
     console.log('购物车')
-       
+
        setTimeout(() => {
             let share = {
                 title: '购物车',

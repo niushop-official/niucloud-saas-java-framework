@@ -808,6 +808,7 @@ const getInstallTask = (first: boolean = true) => {
                         restarting = false
                         break;
                     case "installing":
+                        restarting = true
                         getCloudInstallLog()
                         setTimeout(() => {
                             getInstallTask(false)
@@ -858,6 +859,8 @@ const formatUpgradeDuration = computed(() => {
 const checkInstallTask = () => {
     installShowDialog.value = true
     installStep.value = 1
+    getInstallTask(false)
+    notificationEl && notificationEl.close()
 }
 
 const localInstalling = ref(false)

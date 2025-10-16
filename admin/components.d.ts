@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Attachment: typeof import('./src/components/upload-attachment/attachment.vue')['default']
     DiyLink: typeof import('./src/components/diy-link/index.vue')['default']
+    DiyPage: typeof import('./src/components/diy-page/index.vue')['default']
     Editor: typeof import('./src/components/editor/index.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']

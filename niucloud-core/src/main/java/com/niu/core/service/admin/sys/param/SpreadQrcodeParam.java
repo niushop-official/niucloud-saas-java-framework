@@ -16,7 +16,7 @@ public class SpreadQrcodeParam {
 
     @Data
     public static class Param {
-        private String columnName;
+        private Object columnName;
         private String columnValue;
     }
 }

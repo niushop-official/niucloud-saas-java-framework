@@ -75,7 +75,13 @@ public class PayChannelServiceImpl implements IPayChannelService {
                     JSONObject config = payChannelList.getJSONObject(item.getCode()).getJSONObject(key);
                     type.set("status", config.getInt("status"));
                     try {
-                        type.set("config", JSONUtil.parseObj(config.getStr("config")));
+                        JSONObject payConfig = JSONUtil.parseObj(config.getStr("config"));
+                        JSONArray encryptParams = ObjectUtil.defaultIfNull(type.getJSONArray("encrypt_params"), new JSONArray());
+                        for (String payConfigkey : payConfig.keySet()) {
+                            String value = payConfig.getStr(payConfigkey, "");
+                            if (encryptParams.contains(payConfigkey)) payConfig.set(payConfigkey, StringUtils.hide(value, 0, value.length()));
+                        }
+                        type.set("config", payConfig);
                     } catch (Exception e) {
                         type.set("config", new JSONObject().set("name", ""));
                     }
@@ -132,8 +138,14 @@ public class PayChannelServiceImpl implements IPayChannelService {
                 .eq("channel", channel)
                 .eq("type", type)
         );
+
         if (ObjectUtil.isNotEmpty(payChannel)) {
-            payChannel.setConfig(data.getJSONObject("config").toString());
+            JSONObject config = JSONUtil.parseObj(payChannel.getConfig());
+            for (String key : data.getJSONObject("config").keySet()) {
+                String value = data.getJSONObject("config").getStr(key, "");
+                if (!value.contains("*")) config.set(key, value);
+            }
+            payChannel.setConfig(config.toString());
             payChannel.setSort(data.getInt("sort"));
             payChannel.setStatus(data.getInt("status"));
             payChannelMapper.updateById(payChannel);

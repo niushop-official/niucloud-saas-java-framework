@@ -1,5 +1,5 @@
 <template>
-    <el-drawer v-model="showDialog" :title="t('detailTitle')" direction="rtl" :before-close="handleClose" class="member-detail-drawer">
+    <el-drawer v-model="showDialog" :title="t('detailTitle')" direction="rtl" :before-close="handleClose" size="1300px">
         <div class="main-container" v-loading="loading">
             <el-tabs v-model="activeName" class="pb-[10px]" @tab-change="handleClick">
                 <el-tab-pane :label="t('basicInfo')" name="basicInfo" />
@@ -278,11 +278,7 @@ defineExpose({
     setFormData
 })
 </script>
-<style lang="scss">
-.member-detail-drawer{
-    width: 1300px !important;
-}
-
+<style lang="scss" scoped>
 .goods-name {
   max-width: 150px;
   white-space: nowrap;

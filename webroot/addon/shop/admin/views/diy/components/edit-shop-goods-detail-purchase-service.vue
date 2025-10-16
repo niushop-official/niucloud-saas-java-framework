@@ -11,7 +11,7 @@
                         <el-checkbox label="领券（领取优惠券）" value="coupons"/>
                         <el-checkbox label="优惠活动展示" value="activity" />
                     </el-checkbox-group>
-                    <div class="text-sm text-gray-400 mb-[10px]">{{ t('商品服务最少选择2个') }}</div>
+                    <div class="text-sm text-gray-400">{{ t('商品服务最少选择2个') }}</div>
                 </el-form-item>
             </el-form>
         </div>
@@ -51,4 +51,3 @@ defineExpose({})
 </script>
 
 <style lang="scss" scoped></style>
-<style lang="scss"></style>

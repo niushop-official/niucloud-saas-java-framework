@@ -36,4 +36,13 @@ public class UploadServiceImpl implements IUploadService {
         param.setDir("attachment/image/" + param.getSiteId() + "/" + DateFormatUtils.getUploadFormat() + "/");
         return coreUploadService.upload(param);
     }
+
+    @Override
+    public AttachmentUploadVo video(AttachmentUploadParam param) {
+        param.setSiteId(RequestUtils.siteId());
+        param.setIsAttachment(0);
+        param.setAttType("video");
+        param.setDir("attachment/video/" + param.getSiteId() + "/" + DateFormatUtils.getUploadFormat() + "/");
+        return coreUploadService.upload(param);
+    }
 }

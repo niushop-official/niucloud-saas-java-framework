@@ -48,10 +48,10 @@ public class SaTokenInterceptor extends SaInterceptor {
         try{
             boolean checkToken = super.preHandle(request, response, handler);
             if(!checkToken){
-                throw new AuthException("MUST_LOGIN", 401);
+                throw new AuthException("请登录", 401);
             }
         }catch (Exception e){
-            throw new AuthException("MUST_LOGIN", 401);
+            throw new AuthException("请登录", 401);
         }
 
 

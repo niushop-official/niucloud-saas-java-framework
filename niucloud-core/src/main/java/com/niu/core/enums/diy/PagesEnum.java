@@ -2,6 +2,7 @@ package com.niu.core.enums.diy;
 
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.json.JacksonUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 
 public class PagesEnum {
@@ -38,7 +39,6 @@ public class PagesEnum {
             }
             return modePages;
         }
-
         return pages;
     }
 }

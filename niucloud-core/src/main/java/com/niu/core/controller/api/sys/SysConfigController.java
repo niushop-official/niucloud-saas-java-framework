@@ -1,5 +1,6 @@
 package com.niu.core.controller.api.sys;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.domain.Result;
@@ -110,7 +111,12 @@ public class SysConfigController {
         vo.setTabbarList(diyService.tabbarList(new DiyTabbarListParam()));
         vo.setMapConfig(sysConfigService.map(new SysConfigMapParam()));
         vo.setLoginConfig(loginService.getLoginConfig());
-        vo.setSiteInfo(coreSiteService.getSiteCache(RequestUtils.siteId()));
+
+        SysInitVo.SiteInfoVo siteInfoVo = new SysInitVo.SiteInfoVo();
+        BeanUtil.copyProperties(coreSiteService.getSiteCache(RequestUtils.siteId()), siteInfoVo);
+        siteInfoVo.setWapUrl(sysConfigService.sceneDomain(new SysConfigSceneDomainParam()).getWapUrl());
+
+        vo.setSiteInfo(siteInfoVo);
         vo.setMemberLevel(memberLevelService.list(new MemberLevelParam()));
         vo.setThemeList(diyThemeService.getDiyTheme());
         vo.setAppConfig(appService.getAppConfig());

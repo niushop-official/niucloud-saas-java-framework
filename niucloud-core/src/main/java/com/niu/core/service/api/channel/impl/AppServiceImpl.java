@@ -14,6 +14,7 @@ import com.niu.core.mapper.sys.AppVersionMapper;
 import com.niu.core.service.admin.member.vo.LoginConfigVo;
 import com.niu.core.service.api.channel.IAppService;
 import com.niu.core.service.api.channel.param.GetNewVersionParam;
+import com.niu.core.service.api.channel.vo.ApiAppConfigVo;
 import com.niu.core.service.api.channel.vo.NewVersionVo;
 import com.niu.core.service.api.login.ILoginService;
 import com.niu.core.service.api.login.IRegisterService;
@@ -23,6 +24,8 @@ import com.niu.core.service.api.wechat.param.WechatAuthParam;
 import com.niu.core.service.core.channel.ICoreAppService;
 import com.niu.core.service.core.channel.vo.AppConfigVo;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
+import com.niu.core.service.core.weapp.ICoreWeappConfigService;
+import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import jakarta.annotation.Resource;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
@@ -49,6 +52,9 @@ public class AppServiceImpl implements IAppService {
 
     @Resource
     ICoreAppService coreAppService;
+
+    @Resource
+    ICoreWeappConfigService coreWeappConfigService;
 
     @Override
     public LoginVo wechatLogin(WechatAuthParam param) {
@@ -161,8 +167,14 @@ public class AppServiceImpl implements IAppService {
     }
 
     @Override
-    public AppConfigVo getAppConfig() {
-        return coreAppService.getConfig(RequestUtils.siteId());
+    public ApiAppConfigVo getAppConfig() {
+        ApiAppConfigVo vo = new ApiAppConfigVo();
+        AppConfigVo config = coreAppService.getConfig(RequestUtils.siteId());
+        BeanUtil.copyProperties(config, vo);
+
+        WeappConfigVo weappConfig = coreWeappConfigService.getWeappConfig(RequestUtils.siteId());
+        vo.setWeappOriginal(weappConfig.getWeappOriginal());
+        return vo;
     }
 
     public LoginVo wechatRegister(AuthRegisterParam param) {

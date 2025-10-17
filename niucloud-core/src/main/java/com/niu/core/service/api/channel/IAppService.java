@@ -1,11 +1,11 @@
 package com.niu.core.service.api.channel;
 
 import com.niu.core.service.api.channel.param.GetNewVersionParam;
+import com.niu.core.service.api.channel.vo.ApiAppConfigVo;
 import com.niu.core.service.api.channel.vo.NewVersionVo;
 import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.wechat.param.AuthRegisterParam;
 import com.niu.core.service.api.wechat.param.WechatAuthParam;
-import com.niu.core.service.core.channel.vo.AppConfigVo;
 
 public interface IAppService {
 
@@ -30,5 +30,5 @@ public interface IAppService {
      */
     LoginVo register(AuthRegisterParam param);
 
-    AppConfigVo getAppConfig();
+    ApiAppConfigVo getAppConfig();
 }

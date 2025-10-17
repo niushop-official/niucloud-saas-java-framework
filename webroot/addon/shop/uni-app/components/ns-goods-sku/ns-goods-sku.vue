@@ -242,6 +242,7 @@ const goodsDetail = computed(() => {
                 if (idItem.sku_id == currSpec.value.skuId) {
                     idItem.sku_image = idItem.sku_image ? idItem.sku_image : data.goods.goods_cover
                     data.detail = idItem;
+                    Object.assign(data, idItem)
                 }
             })
         }
@@ -284,6 +285,7 @@ const goodsDetail = computed(() => {
         // 仅用于展示
         minBuyShow.value = data.goods.min_buy;
     }
+    console.log('sku',data)
     return data;
 })
 

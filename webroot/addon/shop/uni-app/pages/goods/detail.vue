@@ -63,7 +63,6 @@ const specSelectFn = (id: any) => {
     useGoodsDetailStore().goodsDetail.skuList.forEach((item: any, index: any) => {
         if (item.sku_id == id) {
             useGoodsDetailStore()?.setGoodsDetail(item);
-            nsGoodsSkuData.value = JSON.parse(JSON.stringify(useGoodsDetailStore().goodsDetail))
         }
     })
 }

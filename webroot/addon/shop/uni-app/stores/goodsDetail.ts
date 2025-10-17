@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { t } from '@/locale'
-import { redirect, getToken } from '@/utils/common'
+import { redirect, getToken, deepClone } from '@/utils/common'
 
 interface GoodsDetail {
     goodsDetail: AnyObject

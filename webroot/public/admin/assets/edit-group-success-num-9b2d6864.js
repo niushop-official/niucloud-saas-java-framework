@@ -1,0 +1,1 @@
+import{u as t}from"./poster-a8ed4502.js";import{d as r,h as s,c as n,b as _}from"./index-3c779d75.js";const c={class:"content-wrap"},a=r({__name:"edit-group-success-num",setup(l,{expose:e}){return t(),e({}),(o,m)=>(s(),n("div",c,[_(o.$slots,"common")]))}}),i=Object.freeze(Object.defineProperty({__proto__:null,default:a},Symbol.toStringTag,{value:"Module"}));export{i as _};

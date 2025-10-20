@@ -1,0 +1,1 @@
+import{u as o}from"./poster-a8ed4502.js";import{d as r,h as n,c as s,b as _}from"./index-3c779d75.js";const a={class:"content-wrap"},c=r({__name:"edit-active-time",setup(l,{expose:e}){return o(),e({}),(t,i)=>(n(),s("div",a,[_(t.$slots,"common")]))}}),d=Object.freeze(Object.defineProperty({__proto__:null,default:c},Symbol.toStringTag,{value:"Module"}));export{d as _};

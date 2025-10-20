@@ -1,0 +1,1 @@
+import{ao as t}from"./index-66b34642.js";function r(r){return t.get("shop_giftcard/giftcard",r)}function n(r){return t.get("shop_giftcard/giftcard/components",r)}function o(r){return t.get(`shop_giftcard/giftcard/${r}`)}function a(){return t.get("shop_giftcard/config")}export{r as a,o as b,a as c,n as g};

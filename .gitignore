@@ -42,11 +42,4 @@ webroot/runtime/upgrade
 webroot/runtime/cloud_build
 webroot/runtime/weapp_build
 webroot/runtime/app_build
-webroot/public
 webroot/resource/upload
-webroot/public/admin
-webroot/public/wap
-webroot/public/web
-webroot/runtime/uni-app
-webroot/runtime/admin
-webroot/runtime/wap

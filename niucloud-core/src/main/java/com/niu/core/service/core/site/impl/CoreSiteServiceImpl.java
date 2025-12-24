@@ -12,6 +12,7 @@ import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.component.context.cache.CachedServiceImpl;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.addon.Addon;
 import com.niu.core.entity.site.Site;
@@ -97,38 +98,40 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
     public List<String> getAddonKeysBySiteId(Integer siteId) {
 
         return cached.rememberObject(useCache, cacheTagName + "_" + siteId, Arrays.asList("getAddonKeysBySiteId", siteId), uniqueKey -> {
-
-            Site siteInfo = siteMapper.selectById(siteId);
-            if (ObjectUtil.isNull(siteInfo)) {
-                return new ArrayList<String>();
-            }
-            //查询站点分组
-            SiteGroup siteGroup = siteGroupMapper.selectById(siteInfo.getGroupId());
-            JSONArray siteAddonJson = new JSONArray();
-            if (!siteInfo.getAddons().equals("")) {
-                JSONArray addonJson = JSONUtil.parseArray(siteInfo.getAddons());
-                siteAddonJson.addAll(addonJson);
-            }
-            if (!siteInfo.getApp().equals("")) {
-                JSONArray appJson = JSONUtil.parseArray(siteInfo.getApp());
-                siteAddonJson.addAll(appJson);
-            }
-            if (ObjectUtil.isNotNull(siteGroup)) {
-                if (!siteGroup.getApp().equals("")) {
-                    JSONArray groupAppJson = JSONUtil.parseArray(siteGroup.getApp());
-                    siteAddonJson.addAll(groupAppJson);
+            if (RequestUtils.defaultSiteId().equals(siteId)) {
+                return CollectionUtil.distinct(addonMapper.selectList(new QueryWrapper<Addon>().gt("id", 0))
+                    .stream().map(addon -> addon.getKey()).toList());
+            } else {
+                Site siteInfo = siteMapper.selectById(siteId);
+                if (ObjectUtil.isNull(siteInfo)) {
+                    return new ArrayList<String>();
                 }
-                if (!siteGroup.getAddon().equals("")) {
-                    JSONArray groupAddonJson = JSONUtil.parseArray(siteGroup.getAddon());
-                    siteAddonJson.addAll(groupAddonJson);
+                //查询站点分组
+                SiteGroup siteGroup = siteGroupMapper.selectById(siteInfo.getGroupId());
+                JSONArray siteAddonJson = new JSONArray();
+                if (!siteInfo.getAddons().equals("")) {
+                    JSONArray addonJson = JSONUtil.parseArray(siteInfo.getAddons());
+                    siteAddonJson.addAll(addonJson);
                 }
+                if (!siteInfo.getApp().equals("")) {
+                    JSONArray appJson = JSONUtil.parseArray(siteInfo.getApp());
+                    siteAddonJson.addAll(appJson);
+                }
+                if (ObjectUtil.isNotNull(siteGroup)) {
+                    if (!siteGroup.getApp().equals("")) {
+                        JSONArray groupAppJson = JSONUtil.parseArray(siteGroup.getApp());
+                        siteAddonJson.addAll(groupAppJson);
+                    }
+                    if (!siteGroup.getAddon().equals("")) {
+                        JSONArray groupAddonJson = JSONUtil.parseArray(siteGroup.getAddon());
+                        siteAddonJson.addAll(groupAddonJson);
+                    }
+                }
+                //去重
+                List<String> list = JSONUtil.toList(siteAddonJson, String.class);
+                return CollectionUtil.distinct(list);
             }
-            //去重
-            List<String> list = JSONUtil.toList(siteAddonJson, String.class);
-            return CollectionUtil.distinct(list);
         });
-
-
     }
 
     /**
@@ -142,7 +145,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
 
         SiteInfoCacheVo siteCache = cached.rememberObject(useCache, cacheTagName + "_" + siteId, Arrays.asList("getSiteCache", siteId), uniqueKey -> {
             MPJQueryWrapper<Site> siteMPJQueryWrapper = new MPJQueryWrapper<>();
-            siteMPJQueryWrapper.select("ns.site_id, ns.site_name, ns.group_id, ns.keywords, ns.app_type, ns.logo, ns.`desc`, ns.status, ns.latitude, ns.longitude, ns.province_id, ns.city_id, ns.district_id, ns.address, ns.full_address, ns.phone, ns.business_hours, ns.create_time, ns.expire_time, ns.front_end_name, ns.front_end_logo, ns.front_end_icon, ns.icon, ns.member_no, ns.app, ns.addons, ns.initalled_addon, ns.site_domain, nsg.group_name")
+            siteMPJQueryWrapper.select("ns.site_id, ns.site_name, ns.group_id, ns.keywords, ns.app_type, ns.logo, ns.`desc`, ns.status, ns.latitude, ns.longitude, ns.province_id, ns.city_id, ns.district_id, ns.address, ns.full_address, ns.phone, ns.business_hours, ns.create_time, ns.expire_time, ns.front_end_name, ns.front_end_logo, ns.front_end_icon, ns.icon, ns.member_no, ns.app, ns.addons, ns.initalled_addon, ns.site_domain, nsg.group_name, ns.meta_title, ns.meta_desc, ns.meta_keyword")
                     .setAlias("ns")
                     .leftJoin("?_site_group nsg ON ns.group_id = nsg.group_id".replace("?_", GlobalConfig.tablePrefix));
             siteMPJQueryWrapper.eq("ns.site_id", siteId);
@@ -155,7 +158,7 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
             BeanUtil.copyProperties(siteCache, siteInfoVo);
             siteInfoVo.setAddonKeys(getAddonKeysBySiteId(siteInfoVo.getSiteId()));
             if (siteInfoVo.getAddonKeys().size() != 0) {
-                siteInfoVo.setSiteAddons(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), ""));
+                siteInfoVo.setSiteAddons(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), AddonActionEnum.ADDON.getCode()));
                 siteInfoVo.setApps(addonService.getAddonListByKeys(siteInfoVo.getAddonKeys(), AddonActionEnum.APP.getCode()));
             }else{
                 siteInfoVo.setSiteAddons(new ArrayList<>());
@@ -245,13 +248,11 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
                     if (!userIds.isEmpty()) {
                         sysUserRoleMapper.delete(queryWrapper);
                     }
-                }
-                else if ("nc_sys_user".equals(table)) {
+                } else if ("nc_sys_user".equals(table)) {
                     if (!userIds.isEmpty()) {
                         sysUserMapper.deleteByIds(userIds);
                     }
-                }
-                else {
+                } else {
                     jdbcTemplate.update("DELETE FROM " + table + " WHERE site_id = ?", siteId);
                 }
             }
@@ -273,6 +274,18 @@ public class CoreSiteServiceImpl extends CachedServiceImpl<SiteMapper, Site> imp
         } catch (Exception e) {
             throw new CommonException("站点初始化失败: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Integer getSiteIdByDomain(String siteDomain) {
+        return cached.rememberObject(useCache, Arrays.asList("site_domain_" + siteDomain), uniqueKey -> {
+            Integer siteId = 0;
+            Site site = siteMapper.selectOne(new QueryWrapper<Site>().select("site_id").eq("site_domain", RequestUtils.getRequestDomain()));
+            if (site != null) {
+                siteId = site.getSiteId();
+            }
+            return siteId;
+        });
     }
 
     private boolean isTableExists(String tableName) {

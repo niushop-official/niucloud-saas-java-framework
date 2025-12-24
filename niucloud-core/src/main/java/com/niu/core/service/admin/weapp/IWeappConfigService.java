@@ -5,6 +5,7 @@ import com.niu.core.service.admin.weapp.param.SetDomainParam;
 import com.niu.core.service.admin.weapp.vo.WeappStaticInfoVo;
 import com.niu.core.service.admin.wechat.vo.WechatStaticInfoVo;
 import com.niu.core.service.core.weapp.param.WeappConfigParam;
+import com.niu.core.service.core.weapp.vo.IsTradeManagedVo;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import com.niu.core.service.core.wechat.param.WechatConfigParam;
 import com.niu.core.service.core.wechat.vo.WechatConfigVo;
@@ -32,4 +33,11 @@ public interface IWeappConfigService {
      * @return
      */
     GetPrivacySettingResult getPrivacySetting();
+
+    /**
+     * 查询小程序是否已开通发货信息管理服务
+     *
+     * @return
+     */
+    IsTradeManagedVo getIsTradeManaged();
 }

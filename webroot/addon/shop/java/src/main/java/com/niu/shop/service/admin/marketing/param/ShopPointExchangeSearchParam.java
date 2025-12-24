@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 积分兑换参数
@@ -48,5 +49,7 @@ public class ShopPointExchangeSearchParam implements Serializable {
     private Integer totalExchangeNum;
 
     private String[] createTime;
+
+    private List<Integer> verifyIds;
 
 }

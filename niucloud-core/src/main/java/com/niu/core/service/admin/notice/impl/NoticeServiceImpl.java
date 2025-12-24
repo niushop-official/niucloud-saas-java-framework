@@ -15,6 +15,7 @@ import com.niu.core.enums.notice.NoticeTypeEnum;
 import com.niu.core.enums.notice.vo.NoticeEnumListVo;
 import com.niu.core.mapper.pay.PayMapper;
 import com.niu.core.service.admin.notice.INoticeService;
+import com.niu.core.service.admin.notice.INuiSmsService;
 import com.niu.core.service.admin.notice.param.EditMessageStatusParam;
 import com.niu.core.service.admin.pay.IPayService;
 import com.niu.core.service.admin.pay.param.PayParam;
@@ -43,6 +44,9 @@ public class NoticeServiceImpl implements INoticeService {
     @Resource
     ICoreNoticeService coreNoticeService;
 
+    @Resource
+    INuiSmsService nuiSmsService;
+
     @Override
     public Map<String, NoticeInfoVo> getList(String[] keys) {
         return coreNoticeService.getList(RequestUtils.siteId(), keys);
@@ -55,12 +59,15 @@ public class NoticeServiceImpl implements INoticeService {
 
     @Override
     public NoticeInfoVo getInfo(String key) {
-//        return coreNoticeService.getInfo(RequestUtils.siteId(), key);
-        return null;
+        return coreNoticeService.getInfo(RequestUtils.siteId(), key);
     }
 
     @Override
     public void edit(String key, JSONObject data) {
+        String type = data.getStr("type", "");
+        if (type.equals(NoticeTypeEnum.SMS.getCode()) && data.getInt("status") == 1) {
+            nuiSmsService.checkTemplateAudit(data.getStr("key"), data.getStr("sms_id"));
+        }
         coreNoticeService.edit(RequestUtils.siteId(), key, data);
     }
 

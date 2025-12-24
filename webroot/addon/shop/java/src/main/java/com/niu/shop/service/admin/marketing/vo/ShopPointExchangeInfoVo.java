@@ -51,10 +51,10 @@ public class ShopPointExchangeInfoVo implements Serializable {
         private Integer goodsStock;
         private Integer isEnabled;
         private Integer goodsId;
-        private String point;
-        private String price;
-        private String limitNum;
-        private String stock;
+        private Integer point;
+        private BigDecimal price;
+        private Integer limitNum;
+        private Integer stock;
     }
 
     @Data

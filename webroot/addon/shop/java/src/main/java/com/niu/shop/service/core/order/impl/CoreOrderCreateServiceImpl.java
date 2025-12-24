@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.RequestUtils;
@@ -41,6 +42,7 @@ import com.niu.shop.service.core.goods.vo.ShowPriceVo;
 import com.niu.shop.service.core.order.ICoreOrderConfigService;
 import com.niu.shop.service.core.order.ICoreOrderCreateService;
 import com.niu.shop.service.core.order.helper.OrderCreateHelper;
+import com.niu.shop.service.core.order.param.CheckStockParam;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
 import com.niu.shop.service.core.order.param.OrderCreateParam;
 import com.niu.shop.service.core.order.vo.OrderConfigVo;
@@ -52,6 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -107,7 +110,8 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
     public OrderCreateDataVo calculate(OrderCalculateParam param) {
         OrderCreateDataVo vo = null;
 
-        if (param.getOrderKey().isEmpty() || param.getIsNeedRecalculate() == 1) {
+        //如果有顺手买一件需要重构
+        if (param.getOrderKey().isEmpty() || param.getIsNeedRecalculate() == 1 || CollectionUtils.isNotEmpty(param.getImpulseBuyGoods())) {
             vo = this.confirm(param);
         } else {
             vo = this.loadOrderVo(param.getOrderKey(), OrderCreateDataVo.class);
@@ -160,10 +164,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         vo.setOrderType("shop");
 
         // 检测库存
-        for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
-            ShopGoodsSku goodsSku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().select("stock").eq("sku_id", sku.getSkuId()));
-            if (goodsSku.getStock().compareTo(sku.getNum()) == -1) throw new CommonException("商品库存不足");
-        }
+        createCheckStock(vo);
 
         vo.setInvoice(param.getInvoice());
         vo.setMemberRemark(param.getMemberRemark());
@@ -202,7 +203,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             order.setTakerLatitude(address.getLat());
             order.setTakerLongitude(address.getLng());
         }
-        if (ObjectUtil.defaultIfNull(param.getDelivery().getLocalDeliveryType(), "").equals("now")) {
+        if (vo.getDelivery().getDeliveryType().equals("local_delivery") && ObjectUtil.defaultIfNull(param.getDelivery().getLocalDeliveryType(), "").equals("now")) {
             order.setBuyerAskDeliveryTime("");
         } else {
             order.setBuyerAskDeliveryTime(ObjectUtil.defaultIfNull(param.getDelivery().getBuyerAskDeliveryTime(), ""));
@@ -233,7 +234,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             item.setNum(sku.getNum());
             item.setGoodsMoney(sku.getGoodsMoney());
             item.setGoodsType(sku.getGoods().getGoodsType());
-            item.setDiscountMoney(sku.getDiscountMoney());
+            item.setDiscountMoney(sku.getDiscountMoney().compareTo(sku.getGoodsMoney()) == 1 ? sku.getGoodsMoney() : sku.getDiscountMoney());
             item.setOrderGoodsMoney(sku.getGoodsMoney().subtract(sku.getDiscountMoney()));
             item.setStatus(1);
             item.setIsGift(0);
@@ -241,9 +242,8 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             orderGoods.add(item);
         }
 
-        if(ObjectUtil.isNotEmpty(vo.getImpulseBuyList()))
-        {
-            vo.getImpulseBuyList().forEach( (Integer key, OrderCreateDataVo.Sku skuItem) -> {
+        if (ObjectUtil.isNotEmpty(vo.getImpulseBuyList())) {
+            vo.getImpulseBuyList().forEach((Integer key, OrderCreateDataVo.Sku skuItem) -> {
                 ShopOrderGoods item = new ShopOrderGoods();
                 item.setSiteId(vo.getSiteId());
                 item.setMemberId(vo.getMemberId());
@@ -267,9 +267,8 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             });
         }
 
-        if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
-        {
-            vo.getGiftGoods().forEach( (Integer key, OrderCreateDataVo.Sku skuItem) -> {
+        if (ObjectUtil.isNotEmpty(vo.getGiftGoods())) {
+            vo.getGiftGoods().forEach((Integer key, OrderCreateDataVo.Sku skuItem) -> {
                 ShopOrderGoods item = new ShopOrderGoods();
                 item.setSiteId(vo.getSiteId());
                 item.setMemberId(vo.getMemberId());
@@ -296,6 +295,50 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         return this.createOrder(vo, order, orderGoods);
     }
 
+    private void createCheckStock(OrderCreateDataVo vo) {
+        Map<Integer, CheckStockParam> skuNumData = new HashMap<>();
+        for (OrderCreateDataVo.Sku sku : vo.getGoodsData().values()) {
+            skuNumData.put(sku.getSkuId(), CheckStockParam
+                .builder()
+                .goodsId(sku.getGoodsId())
+                .skuId(sku.getSkuId())
+                .num(sku.getNum())
+                .goodsName(sku.getGoods().getGoodsName() + sku.getSkuName())
+                .build());
+        }
+        if (ObjectUtil.isNotEmpty(vo.getGiftGoods())) {
+            for (OrderCreateDataVo.Sku sku : vo.getGiftGoods().values()) {
+                if (skuNumData.get(sku.getSkuId()) == null) {
+                    skuNumData.put(sku.getSkuId(), CheckStockParam
+                        .builder()
+                        .goodsId(sku.getGoodsId())
+                        .skuId(sku.getSkuId())
+                        .num(sku.getNum())
+                        .goodsName(sku.getGoods().getGoodsName() + sku.getSkuName())
+                        .build());
+                } else {
+                    skuNumData.get(sku.getSkuId()).setNum(skuNumData.get(sku.getSkuId()).getNum() + sku.getNum());
+                }
+            }
+        }
+        if (ObjectUtil.isNotEmpty(vo.getImpulseBuyList())) {
+            for (OrderCreateDataVo.Sku sku : vo.getImpulseBuyList().values()) {
+                if (skuNumData.get(sku.getSkuId()) == null) {
+                    skuNumData.put(sku.getSkuId(), CheckStockParam
+                        .builder()
+                        .goodsId(sku.getGoodsId())
+                        .skuId(sku.getSkuId())
+                        .num(sku.getNum())
+                        .goodsName(sku.getGoods().getGoodsName() + sku.getSkuName())
+                        .build());
+                } else {
+                    skuNumData.get(sku.getSkuId()).setNum(skuNumData.get(sku.getSkuId()).getNum() + sku.getNum());
+                }
+            }
+        }
+        checkStock(skuNumData);
+    }
+
     /**
      * 订单确认
      *
@@ -315,8 +358,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
         vo.setBuyer(buyer);
         //查询系统表单信息
         OrderConfigVo orderConfig = coreOrderConfigService.getConfig(param.getSiteId());
-        if(ObjectUtil.isNotEmpty(orderConfig.getFormId()))
-        {
+        if (ObjectUtil.isNotEmpty(orderConfig.getFormId())) {
             DiyForm diyForm = diyFormMapper.selectOne(new QueryWrapper<DiyForm>().select("form_id").eq("form_id", orderConfig.getFormId()).eq("status", 1));
             if (diyForm != null) vo.setFormId(orderConfig.getFormId());
         }
@@ -331,11 +373,12 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
     /**
      * 检测限购
+     *
      * @param vo
      */
-    private void checkGoodsLimitBuy(OrderCreateDataVo vo){
+    private void checkGoodsLimitBuy(OrderCreateDataVo vo) {
         String res = coreGoodsLimitBuyService.checkGoodsLimitBuy(vo.getMemberId(), vo.getLimitBuy());
-        if(!res.equals("")) throw new CommonException(res);
+        if (!res.equals("")) throw new CommonException(res);
     }
 
     /**
@@ -360,7 +403,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             for (OrderCalculateParam.SkuItem item : param.getSkuData()) {
                 // 查询规格数据
                 OrderCreateDataVo.Sku skuVo = new OrderCreateDataVo.Sku();
-                ShopGoodsSku sku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().eq("site_id", param.getSiteId()).eq("sku_id", item.getSkuId()));
+                ShopGoodsSku sku = shopGoodsSkuMapper.selectById(item.getSkuId());
                 Assert.notNull(sku, "购物车数据已过期");
 
                 String memberPrice = sku.getMemberPrice();
@@ -376,6 +419,11 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 Assert.notNull(goods, "购物车数据已过期");
                 BeanUtil.copyProperties(goods, goodsVo);
                 skuVo.setGoods(goodsVo);
+                if (StringUtils.isEmpty(sku.getSkuImage()) && StringUtils.isNotEmpty(goods.getGoodsCover())){
+                    skuVo.setSkuImage(goods.getGoodsCover());
+                }
+                skuVo.setMemberDiscount(goodsVo.getMemberDiscount());
+                skuVo.setShowType("original_price");
 
                 //查询商品限购信息
                 OrderCreateDataVo.LimitBuy limitBuy = new OrderCreateDataVo.LimitBuy();
@@ -388,12 +436,10 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 limitBuy.setLimitType(skuVo.getGoods().getLimitType());
                 limitBuy.setMaxBuy(skuVo.getGoods().getMaxBuy());
                 limitBuy.setMinBuy(skuVo.getGoods().getMinBuy());
-                if(ObjectUtil.isEmpty(vo.getLimitBuy()))
-                {
+                if (ObjectUtil.isEmpty(vo.getLimitBuy())) {
                     vo.setLimitBuy(new HashMap<>());
                 }
-                if(vo.getLimitBuy().containsKey("goods_" + skuVo.getGoodsId().toString()))
-                {
+                if (vo.getLimitBuy().containsKey("goods_" + skuVo.getGoodsId().toString())) {
                     limitBuy.setNum(limitBuy.getNum() + skuVo.getNum());
                 }
                 vo.getLimitBuy().put("goods_" + skuVo.getGoodsId().toString(), limitBuy);
@@ -404,12 +450,12 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 }
 
                 ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
-                    .skuId(sku.getSkuId())
-                    .price(sku.getPrice())
-                    .memberDiscount(goods.getMemberDiscount())
-                    .memberPrice(memberPrice)
-                    .memberId(RequestUtils.memberId())
-                    .build());
+                        .skuId(sku.getSkuId())
+                        .price(sku.getPrice())
+                        .memberDiscount(goods.getMemberDiscount())
+                        .memberPrice(memberPrice)
+                        .memberId(RequestUtils.memberId())
+                        .build());
                 skuVo.setShowPrice(skuShowPrice.getShowPrice());
                 skuVo.setShowType(skuShowPrice.getShowType());
                 skuVo.setPrice(skuShowPrice.getShowPrice());
@@ -418,14 +464,28 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
                 // 小计
                 skuVo.setGoodsMoney(skuVo.getPrice().multiply(new BigDecimal(item.getNum())));
 
-                // 计算优惠信息
-                GoodsMarketCalculateEventDefiner.GoodsMarketCalculateEvent event = new GoodsMarketCalculateEventDefiner.GoodsMarketCalculateEvent();
-                event.addAppSign("shop");
-                event.setSiteId(vo.getSiteId());
-                event.setVo(vo);
-                event.setSkuInfo(skuVo);
-                event.setSkuData(param.getSkuData());
-                List<GoodsMarketCalculateEventDefiner.GoodsMarketCalculateResult> marketData = EventAndSubscribeOfPublisher.publishAndCallback(event);
+                if (item.getImpulseBuyGoodsId() == null){
+                    GoodsMarketCalculateEventDefiner.GoodsMarketCalculateResult temp = null;
+                            // 计算优惠信息
+                    GoodsMarketCalculateEventDefiner.GoodsMarketCalculateEvent event = new GoodsMarketCalculateEventDefiner.GoodsMarketCalculateEvent();
+                    event.addAppSign("shop");
+                    event.setSiteId(vo.getSiteId());
+                    event.setVo(vo);
+                    event.setSkuInfo(skuVo);
+                    event.setSkuData(param.getSkuData());
+                    List<GoodsMarketCalculateEventDefiner.GoodsMarketCalculateResult> marketData = EventAndSubscribeOfPublisher.publishAndCallback(event);
+                    if (CollectionUtils.isNotEmpty(marketData)){
+                        temp = marketData.stream().filter(calculateResult -> ObjectUtil.isNotEmpty(calculateResult.getSkuInfo())).findFirst().orElse(null);
+                    }
+                    if (temp != null){
+                        skuVo = temp.getSkuInfo();
+                        skuVo.setRelateId(temp.getRelateId());
+                        if (ObjectUtil.isNotEmpty(vo.getExtendData())){
+                            vo.getExtendData().set("relate_id", temp.getRelateId());
+                            vo.getExtendData().set("activity_type", temp.getActiveType());
+                        }
+                    }
+                }
 
                 // 累加商品总价
                 basic.setGoodsMoney(basic.getGoodsMoney().add(skuVo.getGoodsMoney()));

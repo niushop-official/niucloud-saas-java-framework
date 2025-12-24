@@ -31,4 +31,8 @@ public class ShopDeliveryCompanyParam implements Serializable {
 
     private JSONArray expType = new JSONArray();
 
+    private String kd100ExpressNo = ""; // 快递100:物流公司编号(用于物流跟踪)
+
+    private String kd100ExpressNoElectronicSheet = ""; // 快递100:物流公司编号(用于电子面单)
+
 }

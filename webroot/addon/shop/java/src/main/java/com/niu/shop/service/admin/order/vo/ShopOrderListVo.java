@@ -10,6 +10,7 @@ import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
 import com.niu.shop.enums.order.*;
 import lombok.Data;
 
@@ -89,6 +90,13 @@ public class ShopOrderListVo implements Serializable {
     private Pay pay;
     private List<OrderGoods> orderGoods;
     private MemberBriefInfoVo member;
+    private String relateSource;
+    private Integer relateOrderId;
+    private Object relateActiveInfo;
+    private String activityTypeName;
+    public String getActivityTypeName() {
+        return MarketingActivityTypeEnum.getNameByTypeDefaultShop(this.activityType);
+    }
 
     @Data
     public static class OrderGoods {
@@ -121,7 +129,9 @@ public class ShopOrderListVo implements Serializable {
         private Integer isGift;
         @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
         private String extend;
-
+        private String expressCompanyName;
+        private String expressNumber;
+        private DeliveryInfo deliveryInfo;
 
         public String getGoodsImageThumbSmall() {
             return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsImage());
@@ -140,6 +150,13 @@ public class ShopOrderListVo implements Serializable {
             }
             return "";
         }
+    }
+
+    @Data
+    public static class DeliveryInfo {
+        private Integer deliveryId;
+        private String expressCompanyName;
+        private String expressNumber;
     }
 
     @Data

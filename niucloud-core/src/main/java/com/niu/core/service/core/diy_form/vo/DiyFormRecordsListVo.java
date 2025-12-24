@@ -57,8 +57,11 @@ private static final long serialVersionUID = 1L;
         @JsonProperty("recordsFieldList")
         private Map< String, DiyFormRecordsFieldsListVo> recordsFieldList;
 
+        private String pageTitle;
 
+        private String title;
 
+        private String type;
 
 
 

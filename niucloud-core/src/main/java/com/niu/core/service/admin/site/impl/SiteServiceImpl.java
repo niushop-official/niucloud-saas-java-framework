@@ -56,6 +56,7 @@ import com.niu.core.service.admin.site.vo.*;
 import com.niu.core.service.admin.sys.ISysMenuService;
 import com.niu.core.service.admin.sys.ISysUserRoleService;
 import com.niu.core.service.admin.sys.ISysUserService;
+import com.niu.core.service.admin.sys.param.SysUserParam;
 import com.niu.core.service.admin.sys.param.SysUserRoleParam;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.site.ICoreSiteService;
@@ -159,7 +160,7 @@ public class SiteServiceImpl implements ISiteService {
 
         //查询条件判断组装
         if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) {
-            queryWrapper.like("se.siteName", searchParam.getKeywords()).or().like("se.siteName", searchParam.getKeywords());
+            queryWrapper.eq("se.site_id", searchParam.getKeywords()).or().like("se.site_name", searchParam.getKeywords());
         }
 
         if (ObjectUtil.isNotEmpty(searchParam.getApp())) {
@@ -262,6 +263,9 @@ public class SiteServiceImpl implements ISiteService {
         model.setApp(siteGroup.getApp());
         model.setAddons("");
         model.setSiteDomain(addParam.getSiteDomain());
+        model.setExpireTime(DateUtils.StringToTimestamp(addParam.getExpireTime()));
+        model.setStatus(model.getExpireTime() > DateUtils.currTime() ? SiteStatusEnum.ON.getCode() : SiteStatusEnum.EXPIRE.getCode());
+        model.setIcon("static/resource/images/site/site_icon.jpg");
         siteMapper.insert(model);
         Integer siteId = model.getSiteId();
         if (ObjectUtil.isNull(addParam.getUid()) || addParam.getUid() == 0) {
@@ -273,7 +277,7 @@ public class SiteServiceImpl implements ISiteService {
             siteUserParam.setRealName(addParam.getRealName());
             siteUserParam.setPassword(addParam.getPassword());
             siteUserParam.setIsAdmin(1);
-            sysUserService.addSiteUser(siteUserParam, siteId);
+            addParam.setUid(sysUserService.addSiteUser(siteUserParam, siteId));
         } else {
             SysUserRoleParam sysUserRoleParam = new SysUserRoleParam();
             sysUserRoleParam.setUid(addParam.getUid());
@@ -282,6 +286,8 @@ public class SiteServiceImpl implements ISiteService {
             sysUserRoleParam.setSiteId(siteId);
             userRoleService.add(sysUserRoleParam);
         }
+
+        cached.remove("user_role_list_" + addParam.getUid());
 
         SiteAddAfterEvent event = new SiteAddAfterEvent();
         event.setSiteId(siteId);
@@ -312,6 +318,11 @@ public class SiteServiceImpl implements ISiteService {
                         .last("limit 1"));
 
         Assert.notNull(model, "数据不存在!");
+
+        if (ObjectUtil.isNotEmpty(model.getSiteDomain()) && model.getSiteDomain().equals(editParam.getSiteDomain())) {
+            cached.remove("site_domain_" + model.getSiteDomain());
+        }
+
         if (ObjectUtil.isNotNull(editParam.getGroupId()) && ObjectUtil.isNotEmpty(editParam.getGroupId()) && !editParam.getGroupId().equals(model.getGroupId())) {
             model.setGroupId(editParam.getGroupId());
         }
@@ -334,11 +345,38 @@ public class SiteServiceImpl implements ISiteService {
         initallJsonArray.addAll(JSONUtil.parseArray(siteGroup.getApp()));
         initallJsonArray.addAll(JSONUtil.parseArray(siteGroup.getAddon()));
 
+        model.setApp(siteGroup.getApp());
         model.setInitalledAddon(JSONUtil.toJsonStr(initallJsonArray));
         model.setSiteDomain(editParam.getSiteDomain());
-        model.setExpireTime(new DateTime(editParam.getExpireTime()).getTime() / 1000);
+        model.setExpireTime(DateUtils.StringToTimestamp(editParam.getExpireTime()));
         model.setStatus(model.getExpireTime() > DateUtils.currTime() ? SiteStatusEnum.ON.getCode() : SiteStatusEnum.EXPIRE.getCode());
         siteMapper.updateById(model);
+
+        if (ObjectUtil.isNull(editParam.getUid()) || editParam.getUid() == 0) {
+            //添加用户
+            SysUserParam sysUserParam = new SysUserParam();
+            sysUserParam.setUsername(editParam.getUsername());
+            sysUserParam.setHeadImg("");
+            sysUserParam.setStatus(1);
+            sysUserParam.setRealName(editParam.getRealName());
+            sysUserParam.setPassword(editParam.getPassword());
+            editParam.setUid(sysUserService.add(sysUserParam));
+        }
+        SysUserRoleParam sysUserRoleParam = new SysUserRoleParam();
+        sysUserRoleParam.setUid(editParam.getUid());
+        sysUserRoleParam.setRoleIds(new JsonArray().toString());
+        sysUserRoleParam.setIsAdmin(1);
+        sysUserRoleParam.setSiteId(id);
+        userRoleService.editAdmin(sysUserRoleParam);
+
+        cached.remove("user_role_list_" + editParam.getUid());
+
+        // 更新微页面数据
+        Map<String, Object> param = new HashMap<>();
+        param.put("site_id", id);
+        param.put("main_app", siteGroup.getApp());
+        param.put("tag", "update");
+        diyService.loadDiyData(param);
 
         coreSiteService.clearSiteCache(id);
 
@@ -660,7 +698,17 @@ public class SiteServiceImpl implements ISiteService {
             throw new AdminException("站点不存在");
         }
         List<String> tables = SiteInitEnum.getSiteInitTables(siteId);
-        return coreSiteService.siteInitBySiteId(siteId, tables);
+        Boolean result = coreSiteService.siteInitBySiteId(siteId, tables);
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("site_id", siteId);
+        param.put("main_app", siteInfo.getApp());
+        param.put("tag", "add");
+        diyService.loadDiyData(param);
+
+        coreSiteService.clearSiteCache(siteId);
+
+        return result;
     }
 
     @Override
@@ -701,6 +749,7 @@ public class SiteServiceImpl implements ISiteService {
                 }
             }
             SpecialMenuListVo.MenuVo tempMenu = new SpecialMenuListVo.MenuVo();
+            tempMenu.setAppType("site");
             tempMenu.setMenuName(item.getName());
             tempMenu.setMenuKey(item.getKey());
             tempMenu.setMenuShortName(item.getShortName());
@@ -708,12 +757,12 @@ public class SiteServiceImpl implements ISiteService {
             tempMenu.setMenuType("0");
             tempMenu.setIcon("iconfont iconzhuangxiu3");
             tempMenu.setApiUrl("");
-            tempMenu.setRouterPath("");
-            tempMenu.setViewPath("");
-            tempMenu.setMethods("");
+            tempMenu.setRouterPath("app/index");
+            tempMenu.setViewPath("app/index");
+            tempMenu.setMethods("get");
             tempMenu.setSort(item.getSort());
             tempMenu.setStatus("1");
-            tempMenu.setIsShow("1");
+            tempMenu.setIsShow(1);
 
             List<SpecialMenuListVo.MenuVo> children = new ArrayList<>();
             JSONArray authChildren = addonMenu.getJSONArray("children");
@@ -747,7 +796,7 @@ public class SiteServiceImpl implements ISiteService {
 
         // 发布事件并获取所有监听器的返回结果
         List<ShowCustomerEventDefiner.ShowCustomerEventResult> eventResults =
-                EventAndSubscribeOfPublisher.publishAndCallback(event);
+                EventAndSubscribeOfPublisher.publishAndCallbackBySite(event);
 
         // 转换事件结果为统一格式
         List<Map<String, List<ShowCustomerEventDefiner.MenuItem>>> showList = new ArrayList<>();

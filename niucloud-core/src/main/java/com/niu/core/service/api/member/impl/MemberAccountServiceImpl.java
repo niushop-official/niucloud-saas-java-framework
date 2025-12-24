@@ -72,7 +72,7 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
 
         List<AccountPointFlowVo> dataList = new LinkedList<>();
         if (iPage.getRecords().size() > 0) {
-            Map<String, List<AccountPointFlowVo.Record>> month = new HashMap<String, List<AccountPointFlowVo.Record>>();
+            Map<String, List<AccountPointFlowVo.Record>> month = new LinkedHashMap<String, List<AccountPointFlowVo.Record>>();
 
             for (MemberAccountLog item : iPage.getRecords()) {
                 String time = DateUtil.format(new Date(item.getCreateTime() * 1000), "yyyy-MM");

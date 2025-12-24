@@ -34,7 +34,7 @@ public class ShopCartGoodsListVo implements Serializable {
     @JsonProperty("goodsSku")
     private GoodsSku goodsSku;
     private List<GoodsSpec> goodsSpec;
-    private ShopManjianInfoVo manjianInfo;
+    private List<ShopManjianInfoVo> manjianInfo;
 
     private BigDecimal showPrice;
 

@@ -61,9 +61,7 @@ public class ConfigController {
     @GetMapping("/delivery/getIsTradeManaged")
     @Description("查询小程序是否已开通发货信息管理服务")
     public Result getIsTradeManaged() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("is_trade_managed", false);
-        return Result.success(data);
+        return Result.success(weappConfigService.getIsTradeManaged());
     }
 
     /**

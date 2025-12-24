@@ -33,7 +33,7 @@
                           v-if="goodsDetail.is_newcomer && goodsDetail.newcomer_price != goodsDetail.price && (Object.keys(cartSkuList).length?parseInt(cartSkuList.num)+buyNum:buyNum)>1">
                         <image class="h-[24rpx] w-[56rpx]" :src="img('addon/shop/newcomer.png')" mode="aspectFit" />
                         <view class="text-[24rpx] text-[#FFB000] leading-[34rpx] ml-[8rpx]">
-                            第1{{ goodsDetail.goods.unit }}，￥{{ parseFloat(goodsDetail.newcomer_price).toFixed(2) }}/{{ goodsDetail.goods.unit }}；第{{ (parseInt(cartSkuList.num || 0) + buyNum) > 2 ? '2~' + (parseInt(cartSkuList.num || 0) + buyNum) : '2' }}{{ goodsDetail.goods.unit }}，￥{{ parseFloat(parseFloat(goodsDetail.show_price)).toFixed(2) }}/{{ goodsDetail.goods.unit }}
+                            第1{{ goodsDetail.goods.unit }}，￥{{ parseFloat(goodsDetail.detail.newcomer_price).toFixed(2) }}/{{ goodsDetail.goods.unit }}；第{{ (parseInt(cartSkuList.num || 0) + buyNum) > 2 ? '2~' + (parseInt(cartSkuList.num || 0) + buyNum) : '2' }}{{ goodsDetail.goods.unit }}，￥{{ parseFloat(parseFloat(goodsDetail.detail.show_price)).toFixed(2) }}/{{ goodsDetail.goods.unit }}
                         </view>
                     </view>
                     <scroll-view class="h-[500rpx] px-[32rpx] box-border mb-[60rpx]" scroll-y="true">
@@ -242,7 +242,6 @@ const goodsDetail = computed(() => {
                 if (idItem.sku_id == currSpec.value.skuId) {
                     idItem.sku_image = idItem.sku_image ? idItem.sku_image : data.goods.goods_cover
                     data.detail = idItem;
-                    Object.assign(data, idItem)
                 }
             })
         }
@@ -285,7 +284,6 @@ const goodsDetail = computed(() => {
         // 仅用于展示
         minBuyShow.value = data.goods.min_buy;
     }
-    console.log('sku',data)
     return data;
 })
 
@@ -379,9 +377,9 @@ const confirm = () => {
         let limitNum = 0;
         let cartId = "";
 
-        if (cartList.value['goods_' + goodsDetail.value.goods_id] && cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id]) {
-            num = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id].num);
-            cartId = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + goodsDetail.value.sku_id].id)
+        if (cartList.value['goods_' + goodsDetail.value.goods_id] && cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + currSpec.value.skuId]) {
+            num = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + currSpec.value.skuId].num);
+            cartId = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id]['sku_' + currSpec.value.skuId].id)
         }
         if (cartList.value['goods_' + goodsDetail.value.goods_id] && cartList.value['goods_' + goodsDetail.value.goods_id]) {
             limitNum = toRaw(cartList.value['goods_' + goodsDetail.value.goods_id].totalNum);
@@ -407,7 +405,7 @@ const confirm = () => {
         cartStore.increase({
             id: cartId || '',
             goods_id: goodsDetail.value.goods_id,
-            sku_id: goodsDetail.value.sku_id,
+            sku_id: currSpec.value.skuId,
             stock: goodsDetail.value.stock,
             sale_price: goodsDetail.value.sale_price,
             num: num
@@ -421,7 +419,7 @@ const confirm = () => {
     } else if (openType.value == 'buy_now') {
         // 立即购买
         const data = {
-            sku_id: goodsDetail.value.sku_id,
+            sku_id: currSpec.value.skuId,
             num: buyNum.value
         };
 

@@ -112,7 +112,8 @@ public class AddonDevelopController {
     @GetMapping("/key/blacklist")
     @Description("查询插件名黑名单")
     public Result<String[]> keyBlackList() {
-        String[] blackList = {"addon", "aliapp", "app"};
+        String[] blackList = {"addon", "aliapp", "app", "applet", "auth", "channel", "dict", "diy", "generator", "home", "member", "niucloud",
+            "notice", "pay", "site", "sys", "upload", "home", "user", "weapp", "wechat"};
         return Result.success(blackList);
     }
 

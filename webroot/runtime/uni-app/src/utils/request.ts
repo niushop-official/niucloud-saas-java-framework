@@ -118,8 +118,8 @@ class Request {
             method
         })
 
-        if (params.method.toUpperCase() == 'GET' || params.method.toUpperCase() == 'DELETE') {
-            params.url += '?' + qs.stringify(data);
+        if ((params.method.toUpperCase() == 'GET' || params.method.toUpperCase() == 'DELETE') && !uni.$u.test.empty(data)) {
+            params.url += '?' + this.queryParams(data);
         } else {
             params.data = data;
         }
@@ -149,6 +149,28 @@ class Request {
                 }
             })
         })
+    }
+    
+    private queryParams(data: AnyObject) {
+        const _result = []
+        for (const key in data) {
+            const value = data[key]
+            if (value != undefined) {
+                if (value.constructor === Array) {
+                    value.forEach((_value) => {
+                        _result.push(`${key}[]=${_value}`)
+                    })
+                } else if (value.constructor === Object) {
+                    for (const _key in value) {
+                        const _value = value[_key]
+                        _result.push(`${key}[${_key}]=${_value}`)
+                    }
+                } else {
+                    _result.push(`${key}=${value}`)
+                }
+            } 
+        }
+        return _result.length ? _result.join('&') : ''
     }
 
     private handleAuthError(code: number) {

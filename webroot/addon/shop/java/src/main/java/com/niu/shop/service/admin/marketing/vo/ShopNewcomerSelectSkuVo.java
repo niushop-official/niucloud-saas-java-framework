@@ -1,5 +1,6 @@
 package com.niu.shop.service.admin.marketing.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -42,6 +43,7 @@ public class ShopNewcomerSelectSkuVo {
     private Integer posterId; // 海报id
     private Long createTime; // 创建时间
     private Long updateTime; // 修改时间
+    @JsonProperty("skuList")
     private List<Sku> skuList;
     private Sku goodsSku;
     

@@ -1,5 +1,6 @@
 package com.niu.shop.controller.adminapi.order;
 
+import com.niu.shop.enums.order.OrderFromTypeEnum;
 import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
@@ -34,9 +35,10 @@ public class ShopOrderController {
 
     /**
      * 订单列表
-     * @param pageParam 分页
+     *
+     * @param pageParam   分页
      * @param searchParam 搜索条件
-     * @return Result<PageResult<ShopOrderListVo>>
+     * @return Result<PageResult < ShopOrderListVo>>
      */
     @GetMapping("/list")
     @Description("获取订单分页列表")
@@ -47,6 +49,7 @@ public class ShopOrderController {
 
     /**
      * 订单详情
+     *
      * @param id 主键ID
      * @return Result<ShopOrderInfoVo>
      */
@@ -115,7 +118,7 @@ public class ShopOrderController {
     @GetMapping("/from")
     @Description("获取订单来源")
     public Result getOrderFrom() {
-        return Result.success(ChannelEnum.getMap());
+        return Result.success(OrderFromTypeEnum.getOrderFrom());
     }
 
     /**
@@ -163,4 +166,12 @@ public class ShopOrderController {
         shopOrderService.editDelivery(param);
         return Result.success();
     }
+
+    @PostMapping("/delete")
+    @Description("删除订单")
+    public Result delete(@Validated @RequestBody DeleteOrderParam param) {
+        shopOrderService.delete(param);
+        return Result.success();
+    }
+
 }

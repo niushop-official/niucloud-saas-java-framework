@@ -25,5 +25,7 @@ public class ShopDeliveryCompanyInfoVo implements Serializable {
     private String printStyle;  // 电子面单打印模板样式，json字符串
     @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
     private String expType;  // 物流公司业务类型，json字符串
+    private String kd100ExpressNo; // 快递100:物流公司编号(用于物流跟踪)
+    private String kd100ExpressNoElectronicSheet; // 快递100:物流公司编号(用于电子面单)
 
 }

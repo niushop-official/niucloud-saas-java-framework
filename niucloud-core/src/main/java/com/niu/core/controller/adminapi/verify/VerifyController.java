@@ -19,7 +19,7 @@ import jdk.jfr.Description;
  */
 
 @RestController
-@RequestMapping("adminapi/verify/verify")
+@RequestMapping("adminapi/verify")
 @SaCheckLogin
 @Description("核销")
 public class VerifyController {
@@ -33,7 +33,7 @@ public class VerifyController {
      * @param searchParam 搜索条件
      * @return Result<PageResult<VerifyListVo>>
      */
-    @GetMapping("/record")
+    @GetMapping("/verify/record")
     @Description("核销记录列表")
     public Result<PageResult<VerifyListVo>> list(@Validated PageParam pageParam, @Validated VerifySearchParam searchParam) {
         PageResult<VerifyListVo> list = verifyService.list(pageParam, searchParam);
@@ -43,11 +43,31 @@ public class VerifyController {
     /**
      * 核销记录详情
      */
-    @GetMapping("/{verify_code}")
+    @GetMapping("/verify/{verify_code}")
     @Description("核销记录详情")
     public Result<VerifyInfoVo> info(@PathVariable("verify_code") String code) {
         VerifyInfoVo info = verifyService.detail(code);
         return Result.success(info);
     }
 
+    /**
+     * 核销记录详情
+     */
+    @GetMapping("/detail/{verify_code}")
+    @Description("核销详情")
+    public Result getInfoByCode(@PathVariable("verify_code") String code) {
+        return Result.success(verifyService.getInfoByCode(code));
+    }
+
+    /**
+     * 核销
+     * @param code
+     * @return
+     */
+    @Description("核销")
+    @PostMapping("/verify/{verify_code}")
+    public Result verify(@PathVariable("verify_code") String code) {
+        verifyService.verify(code);
+        return Result.success("核销成功");
+    }
 }

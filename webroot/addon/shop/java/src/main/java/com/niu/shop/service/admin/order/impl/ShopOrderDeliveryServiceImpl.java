@@ -51,6 +51,8 @@ public class ShopOrderDeliveryServiceImpl implements IShopOrderDeliveryService {
     @Override
     public void delivery(OrderDeliveryParam orderDeliveryParam) {
         orderDeliveryParam.setSiteId(RequestUtils.siteId());
+        orderDeliveryParam.setMainId(RequestUtils.uid());
+        orderDeliveryParam.setMainType("store");
         coreOrderDeliveryService.delivery(orderDeliveryParam);
     }
 
@@ -87,6 +89,7 @@ public class ShopOrderDeliveryServiceImpl implements IShopOrderDeliveryService {
             deliverySearchParam.setExpressNo(vo.getCompany().getExpressNo());
             deliverySearchParam.setLogisticNo(vo.getExpressNumber());
             deliverySearchParam.setMobile(mobile);
+            deliverySearchParam.setCompanyId(vo.getCompany().getCompanyId());
             vo.setTraces(coreOrderService.deliverySearch(RequestUtils.siteId(), deliverySearchParam));
         }
         return vo;

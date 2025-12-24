@@ -1,5 +1,6 @@
 package com.niu.shop.listener.coupon;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,12 +93,12 @@ public class SendCouponListener extends AbstractListener {
 
         ShopCouponSendRecords shopCouponSendRecords = shopCouponSendRecordsMapper.selectById(event.getRecordId());
         List<Integer> memberIds = getMemberIds(shopCouponSendRecords.getRangeType(), JSONUtil.parseObj(shopCouponSendRecords.getRangeParam()), event.getSiteId());
-        if (memberIds == null || memberIds.isEmpty()){
-            log.warn("CouponSend 优惠券没有查到发卷对象 结束");
-            return;
+
+        Integer successNum = 0;
+        if (ObjectUtil.isNotEmpty(memberIds)){
+            successNum = coreCouponMemberService.sendCouponBatch(shopCouponSendRecords, memberIds);
+            log.info("CouponSend 优惠券开始发放，发放会员id为：{}", memberIds.stream().map(Object::toString).collect(Collectors.joining(",")));
         }
-        log.info("CouponSend 优惠券开始发放，发放会员id为：{}", memberIds.stream().map(Object::toString).collect(Collectors.joining(",")));
-        Integer successNum = coreCouponMemberService.sendCouponBatch(shopCouponSendRecords, memberIds);
         shopCouponSendRecords.setSuccessNum(successNum);
         shopCouponSendRecords.setStatus("success");
         shopCouponSendRecords.setUpdateTime(System.currentTimeMillis() / 1000);
@@ -129,16 +131,19 @@ public class SendCouponListener extends AbstractListener {
             JSONArray memberLabels = jsonObject.getJSONArray("member_label");
             if (memberLabels != null && !memberLabels.isEmpty()) {
                 // 查询符合条件的会员
-                List<Member> memberAll = memberMapper.selectList(new QueryWrapper<Member>().eq("site_id", siteId));
-                members = memberAll.stream()
-                        .filter(member -> {
-                            // 解析 member_label JSON 数组
-                            JSONArray labels = JSONUtil.parseArray(member.getMemberLabel());
-                            // 判断是否有交集
-                            return !labels.isEmpty() &&
-                                    labels.stream().anyMatch(memberLabels::contains);
-                        })
-                        .collect(Collectors.toList());
+                QueryWrapper labelQuery = new QueryWrapper<Member>()
+                    .eq("site_id", siteId)
+                    .and(i -> {
+                    for (int index = 0; index < memberLabels.size(); index++) {
+                        Integer categoryId = memberLabels.getInt(index);
+                        if (index == 0) {
+                            i.like("member_label", "\"" + categoryId + "\"");
+                        } else {
+                            i.or().like("member_label", "\"" + categoryId + "\"");
+                        }
+                    }
+                });
+                members = memberMapper.selectList(labelQuery);
             }
         }
         if (members != null && !members.isEmpty()) {

@@ -27,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+
 import java.awt.*;
 import java.io.File;
 import java.util.List;
@@ -104,8 +105,7 @@ public class CorePosterServiceImpl implements ICorePosterService {
      * @param poster
      * @param posterData
      */
-    private void create(Integer siteId, JSONObject poster, Map<String, Object> posterData, String dir, String posterName) throws Exception
-    {
+    private void create(Integer siteId, JSONObject poster, Map<String, Object> posterData, String dir, String posterName) throws Exception {
         ImageCombiner combiner = null;
         if (poster.getByPath("global.bgType", String.class).equals("color")) {
             int width = poster.getByPath("global.width", int.class);

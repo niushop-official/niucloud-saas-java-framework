@@ -17,21 +17,22 @@ public enum InvoiceHeaderTypeEnum {
     private final Integer type;
 
 
-    public static String getNameByType(Integer type){
-        for (InvoiceHeaderTypeEnum item: InvoiceHeaderTypeEnum.values()) {
-            if(item.getType().equals(type))
-            {
+    public static String getNameByType(Integer type) {
+        if (type == null){
+            return "";
+        }
+        for (InvoiceHeaderTypeEnum item : InvoiceHeaderTypeEnum.values()) {
+            if (item.getType().equals(type)) {
                 return item.getName();
             }
         }
         return "";
     }
 
-    public static Map<String, Object> getMapByType(Integer type){
+    public static Map<String, Object> getMapByType(Integer type) {
         Map<String, Object> map = new HashMap<>();
-        for (InvoiceHeaderTypeEnum item: InvoiceHeaderTypeEnum.values()) {
-            if(item.getType().equals(type))
-            {
+        for (InvoiceHeaderTypeEnum item : InvoiceHeaderTypeEnum.values()) {
+            if (item.getType().equals(type)) {
                 map.put("name", item.getName());
                 map.put("type", item.getType());
             }

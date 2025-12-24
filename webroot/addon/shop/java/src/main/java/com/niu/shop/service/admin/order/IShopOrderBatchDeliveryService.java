@@ -31,4 +31,6 @@ public interface IShopOrderBatchDeliveryService {
     ShopOrderBatchDeliveryInfoVo info(Integer id);
 
     void addBatchOrderDelivery(ShopOrderAddBatchDeliveryParam param);
+
+    void execute(Integer id);
 }

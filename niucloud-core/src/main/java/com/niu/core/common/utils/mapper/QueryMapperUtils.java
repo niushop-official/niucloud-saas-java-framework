@@ -12,8 +12,10 @@ import org.apache.poi.ss.formula.functions.T;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class QueryMapperUtils {
 
@@ -194,5 +196,42 @@ public class QueryMapperUtils {
                 inner.like(columns[i], keyword);
             }
         });
+    }
+
+    /**
+     * 查json数据
+     * @param queryWrapper
+     * @param value
+     * @param column
+     */
+    public static void buildJsonArraySearchCondition(MPJQueryWrapper<?> queryWrapper, Object value, String column) {
+        if (value != null) {
+            List<String> values;
+
+            if (value instanceof Object[]) {
+                values = Arrays.stream((Object[]) value)
+                        .map(Object::toString)
+                        .collect(Collectors.toList());
+            } else if (value instanceof List) {
+                values = ((List<?>) value).stream()
+                        .map(Object::toString)
+                        .collect(Collectors.toList());
+            } else {
+                values = Arrays.asList(value.toString());
+            }
+
+            if (values.size() == 1) {
+                queryWrapper.apply(column + " LIKE '%\"" + values.get(0) + "\"%'");
+            } else {
+                StringBuilder sqlBuilder = new StringBuilder();
+                for (int i = 0; i < values.size(); i++) {
+                    if (i > 0) {
+                        sqlBuilder.append(" OR ");
+                    }
+                    sqlBuilder.append(column).append(" LIKE '%\"").append(values.get(i)).append("\"%'");
+                }
+                queryWrapper.apply(sqlBuilder.toString());
+            }
+        }
     }
 }

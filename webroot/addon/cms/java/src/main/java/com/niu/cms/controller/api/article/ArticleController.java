@@ -53,4 +53,15 @@ public class ArticleController {
     public Result<List<ArticleListVo>> all(AllArticleSearchParam searchParam) {
         return Result.success(articleService.all(searchParam));
     }
+
+    /**
+     * 自增文章浏览量
+     * @param id 文章ID
+     * @return Result<Object>
+     */
+    @PutMapping("/visit/{id}")
+    public Result<?> visit(@PathVariable("id") Integer id) {
+        articleService.incrVisit(id);
+        return Result.success("SUCCESS");
+    }
 }

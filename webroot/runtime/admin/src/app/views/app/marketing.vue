@@ -6,19 +6,19 @@
             <template v-if="Object.keys(marketingList).length">
 
                 <template v-for="(item, index) in marketingList" :key="index + 'b'">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center" v-if="item.list.length > 0">
                         <span class="text-page-title">{{ item.title }}</span>
                     </div>
 
                     <div class="flex flex-wrap plug-list pb-10 plug-large">
                         <div class="cursor-pointer mt-[20px] mr-4 bg-[#f7f7f7]" v-for="(childItem,childIndex) in item.list" :key="childIndex" @click="toLink(childItem)">
                             <div class="w-[264px] flex py-[20px] px-[17px] app-item relative">
-                                <el-image class="w-[40px] h-[40px] mr-[10px]" :src="img(childItem.icon)" fit="contain">
+                                <el-image class="w-[40px] h-[40px] mr-[10px] rounded-[6px] overflow-hidden" :src="img(childItem.icon)" fit="contain">
                                     <template #error>
                                         <div class="image-slot">
                                             <img class="w-[40px] h-[40px]" src="@/app/assets/images/index/app_default.png" />
                                         </div>
-                                    </template>
+                                    </template> 
                                 </el-image>
                                 <div class="flex flex-col justify-between w-[180px]">
                                     <div class="text-[14px] flex items-center">
@@ -45,7 +45,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { getShowMarketing } from '@/app/api/site'
+// import { getShowMarketing } from '@/app/api/site'
 import { img } from '@/utils/common'
 import useUserStore from '@/stores/modules/user'
 import { useRouter } from 'vue-router'
@@ -57,15 +57,21 @@ const marketingList = ref<Record<string, any>[]>([])
 
 const loading = ref(true)
 const getMarketingList = async () => {
-    const res = await getShowMarketing()
-    marketingList.value = res.data
+    // const res = await getShowMarketing()
+    // marketingList.value = res.data
     loading.value = false
 }
-getMarketingList()
+// getMarketingList()
 
 const toLink = (item: any) => {
     if (item.url) {
-        router.push(item.url)
+        // 判断如果携带is_target=true就通过新窗口打开
+        if (item.url.indexOf('is_target=true') != -1) {
+            const url = router.resolve(item.url)
+            window.open(url.href)
+        } else {
+            router.push(item.url)
+        }
     } else {
         addonIndexRoute[item.key] && router.push({ name: addonIndexRoute[item.key] })
     }

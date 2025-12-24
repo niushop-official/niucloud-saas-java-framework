@@ -130,12 +130,13 @@
                                         <view class="text-[22rpx] mt-[14rpx] text-[var(--text-color-light9)] truncate max-w-[490rpx] leading-[28rpx]">{{ goodsItem.sku_name }}</view>
                                     </view>
                                 </view>
-                                <view v-if="goodsItem.manjian_info && Object.keys(goodsItem.manjian_info).length"
-                                      class="flex items-center mt-[10rpx] mb-[auto]"
+                                <view v-if="goodsItem.manjian_info &&goodsItem.manjian_info.length>0"
+                                      class="flex items-center mt-[10rpx] mb-[auto] flex-nowrap overflow-hidden"
                                       @click.stop="manjianOpenFn(goodsItem.manjian_info)">
                                     <view class="bg-[var(--primary-color-light)] text-[var(--primary-color)] rounded-[6rpx] text-[20rpx] flex items-center justify-center w-[88rpx] h-[36rpx] mr-[6rpx]">满减送</view>
-                                    <text class="text-[22rpx] text-[#999]">{{ goodsItem.manjian_info.manjian_name }}
-                                    </text>
+                                    <view class="text-[22rpx] text-[#999] truncate max-w-[320rpx]" >
+                                        <text v-for="(cItem,cIndex) in goodsItem.manjian_info" :key="cIndex" class="whitespace-nowrap" :class="{'ml-[6rpx]':cIndex>0}">{{ cItem.manjian_name }}</text>
+                                    </view>
                                 </view>
                                 <view class="flex justify-between items-baseline leading-[28rpx] text-[#333]">
                                     <view class="price-font">
@@ -537,11 +538,11 @@ const orderDetailFn = (id: any) => {
 
 // 满减
 const manjianOpenFn = (data: any) => {
-    let obj = {};
-    obj.condition_type = cloneDeep(data).condition_type;
-    obj.rule_json = [cloneDeep(data).rule];
-    obj.name = cloneDeep(data).manjian_name;
-    manjianShowRef.value.open(obj);
+    // let obj = {};
+    // obj.condition_type = cloneDeep(data).condition_type;
+    // obj.rule_json = [cloneDeep(data).rule];
+    // obj.name = cloneDeep(data).manjian_name;
+    manjianShowRef.value.open(data,'rule');
 }
 
 //关闭订单

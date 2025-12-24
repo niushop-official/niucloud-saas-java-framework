@@ -19,4 +19,6 @@ public class GoodsOutPutParam {
     private Integer goodsCategory;
 
     private List<Integer> labelIds;
+
+    private Integer goodsId;
 }

@@ -62,14 +62,31 @@ public interface IShopDeliveryElectronicSheetService {
      */
     void del(Integer id);
 
+    /**
+     * 获取支付方式
+     * @return
+     */
     Map<Integer, String> getPayType();
 
     @Transactional
     void setDefault(Integer id);
 
+    /**
+     * 获取电子面单配置
+     * @return
+     */
     ElectronicSheetConfigValueVo getElectronicSheetConfig();
 
+    /**
+     * 设置电子面单配置
+     * @param config
+     */
     void setElectronicSheetConfig(Object config);
 
+    /**
+     * 打印电子面单
+     * @param param
+     * @return
+     */
     List<ElectronicSheetPrintVo> printElectronicSheet(ShopDeliveryPrintElectronicSheetParam param);
 }

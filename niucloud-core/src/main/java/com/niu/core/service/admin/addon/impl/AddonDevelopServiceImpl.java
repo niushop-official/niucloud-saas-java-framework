@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.WebAppEnvs;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.file.FileTools;
@@ -123,6 +124,7 @@ public class AddonDevelopServiceImpl implements IAddonDevelopService {
             replacements.put("{author}", param.getAuthor());
             replacements.put("{type}", param.getType());
             replacements.put("{supportApp}", param.getSupportApp());
+            replacements.put("{support_version}", GlobalConfig.version);
 
             for (File file : files) {
                 if (file.isDirectory()) {

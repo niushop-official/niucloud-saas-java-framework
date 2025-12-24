@@ -3,6 +3,10 @@ package com.niu.core.common.component.context.cache;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.data.redis.core.script.RedisScript;
 
 import java.util.*;
 
@@ -99,5 +103,16 @@ public final class Ehcached implements Cached {
             }
         }
     }
+
+    @Override
+    public Integer atomicDecrement(String key, Integer reduceAmount) {
+        return null;
+    }
+
+    @Override
+    public Integer atomicDecrement(String group, String key, Integer reduceAmount) {
+        return null;
+    }
+
 
 }

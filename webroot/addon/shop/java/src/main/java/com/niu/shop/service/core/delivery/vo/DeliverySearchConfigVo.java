@@ -22,5 +22,5 @@ public class DeliverySearchConfigVo implements Serializable {
 
     private String kd100AppKey = "";
 
-    private Integer kd100Customer = 0;
+    private String kd100Customer = "";
 }

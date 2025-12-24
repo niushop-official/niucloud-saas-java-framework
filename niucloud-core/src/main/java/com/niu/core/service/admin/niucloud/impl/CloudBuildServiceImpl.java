@@ -14,6 +14,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
@@ -55,13 +56,11 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
     @Resource
     ICoreAddonService coreAddonService;
 
-    private JSONObject buildTask;
-
     @Resource
     private ICoreConfigService coreConfigService;
 
     private boolean isConnected = false;
-    private String baseUrl = "http://oss.niucloud.com/";
+    private String baseUrl = "http://java.oss.niucloud.com/";
 
 
     /**
@@ -70,9 +69,9 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      */
     public JSONObject getBuildTask(String mode) {
         if (cached.get("cloud_build_task") == null) return null;
-        this.buildTask = (JSONObject) cached.get("cloud_build_task");
-        if (!this.buildTask.getStr("mode").equals(mode)) return null;
-        return this.buildTask;
+        JSONObject buildTask = (JSONObject) cached.get("cloud_build_task");
+        if (!buildTask.getStr("mode").equals(mode)) return null;
+        return buildTask;
     }
 
     /**
@@ -93,15 +92,15 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      * @return
      */
     public JSONObject build(String mode) {
-        getBuildTask(mode);
+        JSONObject buildTask = getBuildTask(mode);
 
-        if (this.buildTask != null) throw new CommonException("已有正在执行中的编译任务");
+        if (buildTask != null) throw new CommonException("已有正在执行中的编译任务");
 
         String taskKey = RandomUtil.randomString(10);
 
-        this.buildTask = new JSONObject();
-        this.buildTask.set("mode", mode);
-        this.buildTask.set("task_key", taskKey);
+        buildTask = new JSONObject();
+        buildTask.set("mode", mode);
+        buildTask.set("task_key", taskKey);
 
         String tempDir = WebAppEnvs.get().webRootDownRuntime + "cloud_build/" + taskKey + "/";
         String packageDir = tempDir + "package/";
@@ -114,7 +113,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> actionQuery = new HashMap<>();
-        actionQuery.put("data[product_key]", instance.getProductKey());
+        actionQuery.put("data[product_key]", GlobalConfig.productKey);
         JSONObject actionToken = niucloudService.getActionToken("cloudbuild", actionQuery);
 
         Map<String, Object> query = new HashMap<>();
@@ -125,6 +124,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
         HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build").query(query)
                 .func(i -> {
                     i.form("file", zipFile, "build.zip");
+                    i.timeout(300000);
                 })
                 .method(Method.POST).execute();
 
@@ -132,10 +132,10 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
 
         if (!res.getInt("code", 0).equals(1)) throw new CommonException(res.getStr("msg"));
 
-        this.buildTask.set("timestamp", query.get("timestamp"));
-        cached.put("cloud_build_task", this.buildTask);
+        buildTask.set("timestamp", query.get("timestamp"));
+        cached.put("cloud_build_task", buildTask);
 
-        return this.buildTask;
+        return buildTask;
     }
 
     /**
@@ -144,24 +144,24 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      * @return
      */
     public JSONObject getBuildLog(String mode) {
-        getBuildTask(mode);
-
-        if (this.buildTask == null) return null;
-        if (!this.buildTask.getStr("mode").equals(mode)) return null;
+        JSONObject buildTask = getBuildTask(mode);
+        if (buildTask == null) return null;
 
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> query = new HashMap<>();
         query.put("authorize_code", instance.getCode());
-        query.put("timestamp", this.buildTask.getStr("timestamp"));
+        query.put("timestamp", buildTask.getStr("timestamp"));
 
         HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/get_build_logs").query(query).method(Method.GET).execute();
         if (!JSONUtil.isJson(response.body())) return null;
 
         JSONObject res =  JSONUtil.parseObj(response.body());
+        JSONArray resData = res.getJSONArray("data");
+        if (ObjectUtil.isEmpty(resData)) return res;
 
-        JSONArray data = res.getByPath("data.0", JSONArray.class);
-        if (data.size() > 0) {
+        JSONArray data = resData.getJSONArray(0);
+        if (ObjectUtil.isNotEmpty(data)) {
             JSONObject last = data.getJSONObject(data.size() - 1);
             if (last.getInt("percent", 0).equals(100) && last.getInt("code", 0).equals(1)) {
                 res = buildSuccess(res);
@@ -197,7 +197,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
         try {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("http://")
-                    .append(InetAddress.getByName("oss.niucloud.com").getHostAddress())
+                    .append(InetAddress.getByName("java.oss.niucloud.com").getHostAddress())
                     .append(":8000/");
             baseUrl = stringBuilder.toString();
             if (checkLocal){
@@ -242,43 +242,46 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      * @return
      */
     private JSONObject buildSuccess(JSONObject buildLog) {
+        if (cached.get("cloud_build_task") == null) return buildLog;
+        JSONObject buildTask = (JSONObject) cached.get("cloud_build_task");
+
         JSONArray logArray = buildLog.getByPath("data.0", JSONArray.class);
         try {
             NiucloudUtils instance = NiucloudUtils.getInstance();
 
             Map<String, Object> query = new HashMap<>();
             query.put("authorize_code", instance.getCode());
-            query.put("timestamp", this.buildTask.getStr("timestamp"));
+            query.put("timestamp", buildTask.getStr("timestamp"));
 
-            String tempDir = WebAppEnvs.get().webRootDownRuntime + "cloud_build/" + this.buildTask.getStr("task_key") + "/";
+            String tempDir = WebAppEnvs.get().webRootDownRuntime + "cloud_build/" + buildTask.getStr("task_key") + "/";
             Integer chunkSize = 1 * 1024 * 1024;
 
-            if (this.buildTask.getInt("index") == null) {
+            if (buildTask.getInt("index") == null) {
                 HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build_download").query(query).header("Range", "bytes=0-").method(Method.HEAD).execute();
                 String totalLength = response.header("Content-range");
                 String length = ObjectUtil.defaultIfNull(totalLength.split("/")[1], "");
                 Double step = Math.ceil(Double.valueOf(length) / chunkSize);
-                this.buildTask.set("index", 0);
-                this.buildTask.set("step", step.intValue());
-                this.buildTask.set("length", length);
-                cached.put("cloud_build_task", this.buildTask);
+                buildTask.set("index", 0);
+                buildTask.set("step", step.intValue());
+                buildTask.set("length", length);
+                cached.put("cloud_build_task", buildTask);
             } else {
                 File file = new File(tempDir + "download.zip");
 
-                Integer index = this.buildTask.getInt("index");
-                Integer step = this.buildTask.getInt("step");
+                Integer index = buildTask.getInt("index");
+                Integer step = buildTask.getInt("step");
                 if (index + 1 <= step) {
                     Integer start = index * chunkSize;
                     Integer end = (index + 1) * chunkSize;
-                    if (end > this.buildTask.getInt("length")) end = this.buildTask.getInt("length");
+                    if (end > buildTask.getInt("length")) end = buildTask.getInt("length");
 
                     HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/build_download").query(query).header("Range", "bytes=" + start + "-" + end).method(Method.GET).execute();
                     try (FileOutputStream fos = new FileOutputStream(file, true)) {
                         fos.write(response.bodyBytes());
                     }
 
-                    this.buildTask.set("index", index + 1);
-                    cached.put("cloud_build_task", this.buildTask);
+                    buildTask.set("index", index + 1);
+                    cached.put("cloud_build_task", buildTask);
 
                     JSONObject log = new JSONObject();
                     log.set("code", 1);
@@ -295,6 +298,11 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
                     FileTools.createDirs(tempDir + "download");
                     File unzipFile = ZipUtil.unzip(file.getPath(), tempDir + "download", Charset.forName(System.getProperty("sun.jnu.encoding")));
                     FileUtils.copyDirectory(unzipFile, new File(WebAppEnvs.get().webRoot));
+
+                    try {
+                       FileUtils.deleteDirectory(new File(tempDir));
+                    } catch (Exception e) {
+                    }
                     this.clearBuildTask();
                 }
             }
@@ -369,13 +377,7 @@ public class CloudBuildServiceImpl implements ICloudBuildService {
      * 清除编译任务
      */
     public void clearBuildTask() {
-        if (this.buildTask == null) return;
-        File tempDir = new File(WebAppEnvs.get().webRootDownRuntime + "cloud_build/" + this.buildTask.getStr("task_key"));
-        try {
-            if (tempDir.exists()) FileUtils.deleteDirectory(tempDir);
-        } catch (Exception e) {
-        }
+        if (cached.get("cloud_build_task") == null) return;
         cached.remove("cloud_build_task");
-        this.buildTask = null;
     }
 }

@@ -24,4 +24,8 @@ public class LoginConfigParam implements Serializable {
 
     @NotNull(message = "site_bg参数缺失")
     private String siteBg;
+
+    private String siteLoginLogo;
+
+    private String siteLoginBgImg;
 }

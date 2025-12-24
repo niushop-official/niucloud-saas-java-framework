@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
-public class WechatAuthParam implements Serializable {
+public class    WechatAuthParam implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotNull(message = "code参数缺失")

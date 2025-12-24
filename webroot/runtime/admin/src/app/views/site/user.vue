@@ -46,6 +46,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="username" :label="t('accountNumber')" min-width="120" show-overflow-tooltip />
+                    <el-table-column prop="mobile" :label="t('手机号')" min-width="120" show-overflow-tooltip />
                     <el-table-column prop="real_name" :label="t('userRealName')" min-width="120" show-overflow-tooltip />
                     <el-table-column prop="site_num" :label="t('siteNum')" min-width="120" show-overflow-tooltip align="center" />
                     <!-- <el-table-column prop="create_time" :label="t('createTime')" min-width="180" align="center">

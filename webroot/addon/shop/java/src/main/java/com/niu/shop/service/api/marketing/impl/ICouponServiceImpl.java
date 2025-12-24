@@ -58,7 +58,8 @@ public class ICouponServiceImpl implements ICouponService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.eq("status", CouponStatusEnum.NORMAL.getStatus());
         queryWrapper.eq("receive_type", CouponReceiveTypeEnum.USER.getType());
-
+        //剩余数量
+        queryWrapper.and(i->i.eq("remain_count", -1).or().gt("remain_count", 0));
         //根据时间查询
         Long nowTime = System.currentTimeMillis() / 1000;
         queryWrapper.and(i -> i.and(j -> j.le("start_time", nowTime).ge("end_time", nowTime))
@@ -127,7 +128,8 @@ public class ICouponServiceImpl implements ICouponService {
                 Long couponMemberCount = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
                         .eq("site_id", RequestUtils.siteId())
                         .eq("member_id", RequestUtils.memberId())
-                        .eq("coupon_id", item.getId()));
+                        .eq("coupon_id", item.getId())
+                        .eq("receive_type", "receive"));
                 if (couponMemberCount > 0) {
                     vo.setIsReceive(1);
                     vo.setMemberReceiveCount(couponMemberCount);
@@ -183,7 +185,7 @@ public class ICouponServiceImpl implements ICouponService {
 
         if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) {
             Long couponMemberCount = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
-                    .eq("member_id", RequestUtils.memberId()).eq("coupon_id", couponId));
+                    .eq("member_id", RequestUtils.memberId()).eq("coupon_id", couponId).eq("receive_type", "receive"));
 
             if (couponMemberCount > 0) {
                 vo.setIsReceive(1);
@@ -215,7 +217,8 @@ public class ICouponServiceImpl implements ICouponService {
         ShopCoupon shopCoupon = shopCouponMapper.selectOne(new QueryWrapper<ShopCoupon>().eq("site_id", RequestUtils.siteId()).eq("id", shopCouponReceiveParam.getCouponId()));
 
         if (ObjectUtil.isEmpty(shopCoupon)) throw new ApiException("优惠券已领完");
-        if (shopCoupon.getStatus() == -1) throw new ApiException("优惠券已失效");
+        if (shopCoupon.getStatus() != 1) throw new ApiException("优惠券已失效");
+        if(shopCoupon.getReceiveType() != 1) throw new ApiException("该优惠券不可手动领取");
         if (count.intValue() >= shopCoupon.getLimitCount()) throw new ApiException("领用次数已达到上限");
         if (shopCoupon.getRemainCount() == 0) throw new ApiException("优惠券已领完");
         Long time = System.currentTimeMillis() / 1000;
@@ -365,7 +368,7 @@ public class ICouponServiceImpl implements ICouponService {
         queryWrapper.and(i -> i.and(j -> j.le("start_time", nowTime).ge("end_time", nowTime))
                 .or(j -> j.eq("start_time", 0).eq("end_time", 0)));
         queryWrapper.orderByDesc("id");
-        queryWrapper.last("limit " + num);
+        if (ObjectUtil.isEmpty(couponIds)) queryWrapper.last("limit " + num);
         List<ShopCoupon> shopCouponList = shopCouponMapper.selectList(queryWrapper);
         List<ShopCouponListVo> list = new LinkedList<>();
         for (ShopCoupon shopCoupon : shopCouponList) {

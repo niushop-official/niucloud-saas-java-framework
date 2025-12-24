@@ -39,7 +39,7 @@ public class RefundController {
      * @return
      */
     @GetMapping("/{id}")
-    public Result page(@PathVariable("id") Integer id) {
+    public Result detail(@PathVariable("id") Integer id) {
         return Result.success(refundActionService.detail(id));
     }
 

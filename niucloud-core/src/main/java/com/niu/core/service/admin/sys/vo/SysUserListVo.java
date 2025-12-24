@@ -26,6 +26,8 @@ public class SysUserListVo implements Serializable {
     /**用户密码 */
     private String password;
 
+    private String mobile;
+
     /**实际姓名 */
     private String realName;
 

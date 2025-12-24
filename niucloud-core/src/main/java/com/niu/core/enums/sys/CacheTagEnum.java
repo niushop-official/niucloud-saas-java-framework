@@ -11,7 +11,8 @@ public enum CacheTagEnum {
     ADDON_CACHE("插件缓存", "addon_cache"),
     USER_ROLE_CACHE("用户组缓存", "user_role_cache"),
     SYS_CONFIG_CACHE("配置缓存", "sys_config_cache"),
-    MENU_CACHE("菜单缓存", "menu_cache");
+    MENU_CACHE("菜单缓存", "menu_cache"),
+    AREA_CACHE("地区缓存", "area_cache");
 
     private final String name;
 

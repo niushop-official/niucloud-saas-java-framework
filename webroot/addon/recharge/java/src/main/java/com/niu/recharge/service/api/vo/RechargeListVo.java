@@ -5,6 +5,7 @@ import com.niu.recharge.service.core.vo.RechargeGiftContentVo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -24,4 +25,8 @@ public class RechargeListVo {
     private Integer growth;
     @JsonProperty("gift_content")
     private List<RechargeGiftContentVo> giftContent;
+
+    public List<RechargeGiftContentVo> getGiftContent() {
+        return giftContent == null ? new ArrayList<>() : giftContent;
+    }
 }

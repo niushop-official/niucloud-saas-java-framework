@@ -36,14 +36,14 @@
 
                         <el-form-item prop="create_time" v-if="isShow">
                             <el-date-picker v-model="siteTableData.searchParam.create_time" type="datetimerange"
-                                value-format="YYYY-MM-DD HH:mm:ss" :start-placeholder="t('startDate')"
-                                :end-placeholder="t('endDate')" />
+                                value-format="YYYY-MM-DD HH:mm:ss" :start-placeholder="t('createTimeStartDate')"
+                                :end-placeholder="t('createTimeEndDate')" />
                         </el-form-item>
 
                         <el-form-item prop="expire_time" v-if="isShow">
                             <el-date-picker v-model="siteTableData.searchParam.expire_time" type="datetimerange"
-                                value-format="YYYY-MM-DD HH:mm:ss" :start-placeholder="t('startDate')"
-                                :end-placeholder="t('endDate')" />
+                                value-format="YYYY-MM-DD HH:mm:ss" :start-placeholder="t('expireTimeStartDate')"
+                                :end-placeholder="t('expireTimeEndDate')" />
                         </el-form-item>
 
                         <el-form-item>
@@ -475,8 +475,6 @@ const addEvent = (data: any) => {
 const infoEvent = (data: any) => {
     router.push({ path: '/admin/site/info', query: { id: data.site_id } })
 }
-
-
 
 /**
  * 编辑站点详情

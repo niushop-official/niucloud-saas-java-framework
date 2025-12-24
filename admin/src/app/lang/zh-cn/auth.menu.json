@@ -7,7 +7,7 @@
     "menuTypeButton": "按钮",
     "menuDeleteTips": "删除菜单会删除当前菜单以及该菜单下所有子菜单，是否确认删除？",
     "initializeMenu":"重置菜单",
-    "initializeMenuTipsOne":"重置菜单会将应用或插件的dict目录下的菜单配置文件中，菜单配置更新到数据库一般用做开发者修改了dict菜单配置文件后，同步到数据库操作。",
+    "initializeMenuTipsOne":"重置菜单会将应用或插件的resources/**/loader/menu/目录下的菜单配置文件中的菜单配置更新到数据库。一般用做开发者修改了菜单配置文件后，同步到数据库操作。",
     "initializeMenuTipsTwo":"如果用户手动调整过以下菜单项，通常允许进行本项操作，操作会重置为原始菜单。 请谨慎使用!",
     "addMenu": "添加菜单",
     "updateMenu": "编辑菜单",

@@ -95,9 +95,6 @@ aj:
     # verify接口一分钟内请求数限制
     req-verify-minute-limit: 60
 
-openapi: "3.0.0"
-info:
-  version: "1.0.0"
 
 #系统基础配置
 system:
@@ -107,5 +104,5 @@ system:
   api-site-id-name: site-id
   channel-name: channel
   admin-domain:
-  wap-domain: "http://localhost:5174"
+  wap-domain:
   web-domain:

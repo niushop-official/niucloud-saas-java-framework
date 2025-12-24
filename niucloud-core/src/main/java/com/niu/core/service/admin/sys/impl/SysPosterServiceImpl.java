@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
 import com.niu.core.entity.sys.SysPoster;
@@ -242,9 +243,14 @@ public class SysPosterServiceImpl implements ISysPosterService {
      */
     @Override
     public void modifyStatus(Integer id, Integer status) {
+        QueryWrapper queryWrapper = new QueryWrapper<SysPoster>().eq("id", id).eq("site_id", RequestUtils.siteId());
+        SysPoster poster = sysPosterMapper.selectOne(queryWrapper);
+        Assert.notNull(poster, "海报不存在!");
+        if (poster.getIsDefault() == 1) throw new CommonException("海报使用中禁止修改状态");
+
         SysPoster model = new SysPoster();
         model.setStatus(status);
-        sysPosterMapper.update(model, new QueryWrapper<SysPoster>().eq("id", id).eq("site_id", RequestUtils.siteId()));
+        sysPosterMapper.update(model, queryWrapper);
     }
 
     /**
@@ -271,6 +277,7 @@ public class SysPosterServiceImpl implements ISysPosterService {
         SysPoster updateModel = new SysPoster();
         updateModel.setIsDefault(1);
         updateModel.setId(id);
+        updateModel.setStatus(1);
         sysPosterMapper.updateById(updateModel);
     }
 

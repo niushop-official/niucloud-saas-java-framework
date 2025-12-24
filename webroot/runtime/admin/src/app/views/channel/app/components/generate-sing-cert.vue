@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import type { FormInstance } from 'element-plus'
-import { generateSignCert } from '@/app/api/app'
+import { generateSingCert } from '@/app/api/app'
 import { img } from '@/utils/common'
 
 const showDialog = ref(false)
@@ -135,7 +135,7 @@ const confirm = async (formEl: FormInstance | undefined) => {
         await formEl.validate()
         loading.value = true
 
-        generateSignCert(formData).then(res => {
+        generateSingCert(formData).then(res => {
             loading.value = false
             showDialog.value = false
             window.open(img(res.data), '_blank')

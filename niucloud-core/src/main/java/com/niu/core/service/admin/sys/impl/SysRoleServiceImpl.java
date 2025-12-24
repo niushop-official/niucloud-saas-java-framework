@@ -17,6 +17,7 @@ import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.enums.sys.RoleStatusEnum;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
 import com.niu.core.service.admin.auth.IAuthService;
+import com.niu.core.service.admin.sys.param.SysRoleModifyStatusParam;
 import com.niu.core.service.admin.sys.param.SysRoleParam;
 import com.niu.core.service.admin.sys.param.SysRoleSearchParam;
 import com.niu.core.service.admin.sys.ISysRoleService;
@@ -90,6 +91,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
         SysRole model = sysRoleMapper.selectOne(
                 new QueryWrapper<SysRole>()
                         .eq("role_id", id)
+                        .eq("site_id", RequestUtils.siteId())
                         .last("limit 1"));
 
         Assert.notNull(model, "数据不存在");
@@ -163,13 +165,14 @@ public class SysRoleServiceImpl implements ISysRoleService {
     public void del(Integer id) {
         SysRole model = sysRoleMapper.selectOne(
                 new QueryWrapper<SysRole>()
+                        .eq("site_id", RequestUtils.siteId())
                         .eq("role_id", id)
                         .last("limit 1"));
 
         Assert.notNull(model, "数据不存在!");
-        Long userRoleCount=sysUserRoleMapper.selectCount(new QueryWrapper<SysUserRole>().like("role_ids", id));
+        Long userRoleCount=sysUserRoleMapper.selectCount(new QueryWrapper<SysUserRole>().eq("site_id", RequestUtils.siteId()).like("role_ids", "\"+id+\""));
         if(userRoleCount>0){
-            throw new AdminException("USER_ROLE_NOT_ALLOW_DELETE");
+            throw new AdminException("存在管理员使用当前角色,不允许删除");
         }
         sysRoleMapper.delete(new QueryWrapper<SysRole>().eq("role_id", id));
     }
@@ -244,6 +247,22 @@ public class SysRoleServiceImpl implements ISysRoleService {
         }
         sysRoleListVoList.forEach(sysRoleListVo -> sysRoleListVo.setRules(null));
         return sysRoleListVoList;
+    }
+
+    /**
+     * 修改角色状态
+     * @param editParam
+     */
+    @Override
+    public void modifyStatus(SysRoleModifyStatusParam editParam) {
+        SysRole model = sysRoleMapper.selectOne(
+            new QueryWrapper<SysRole>()
+                .eq("site_id", RequestUtils.siteId())
+                .eq("role_id", editParam.getRoleId())
+                .last("limit 1"));
+        Assert.notNull(model, "角色不存在!");
+        model.setStatus(editParam.getStatus());
+        sysRoleMapper.updateById(model);
     }
 
 }

@@ -12,4 +12,8 @@ public class ShopGoodsBrandSearchParam implements Serializable {
 
     private String brandName;
 
+    private String order;
+
+    private String sort = "asc";
+
 }

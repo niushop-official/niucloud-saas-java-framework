@@ -22,10 +22,9 @@ public interface ICoreSysConfigService {
 
     /**
      * 获取服务信息
-     * @param siteId
      * @return
      */
-    SysServiceVo getService(Integer siteId);
+    SysServiceVo getService();
 
     /**
      * 获取版权信息

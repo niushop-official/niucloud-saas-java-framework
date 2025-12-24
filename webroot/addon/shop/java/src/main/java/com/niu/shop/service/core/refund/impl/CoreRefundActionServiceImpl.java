@@ -116,7 +116,8 @@ public class CoreRefundActionServiceImpl implements ICoreRefundActionService {
                 OrderRefundStatusEnum.STORE_AGREE_REFUND_WAIT_TRANSFER.getStatus(),
                 OrderRefundStatusEnum.STORE_REFUND_TRANSFERING.getStatus(),
                 OrderRefundStatusEnum.FINISH.getStatus(),
-                OrderRefundStatusEnum.CLOSE.getStatus()
+                OrderRefundStatusEnum.CLOSE.getStatus(),
+                OrderRefundStatusEnum.SHOP_ACTIVE_CLOSE_REFUND.getStatus()
         ).contains(orderRefund.getStatus())) {
             throw new CommonException("退款已完成或已关闭");
         }

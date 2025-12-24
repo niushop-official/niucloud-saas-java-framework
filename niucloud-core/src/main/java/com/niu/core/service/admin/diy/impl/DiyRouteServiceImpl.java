@@ -72,6 +72,10 @@ public class DiyRouteServiceImpl implements IDiyRouteService {
                 continue;
             }
 
+            if (ObjectUtil.isEmpty(item.getStr("url"))) {
+                continue;
+            }
+
             DiyRouteListVo vo = createDiyRouteVo(parentKey, item, addonInfo, sort);
             routerList.add(vo);
             sort++;
@@ -157,6 +161,11 @@ public class DiyRouteServiceImpl implements IDiyRouteService {
             insertModel.setSiteId(RequestUtils.siteId());
             diyRouteMapper.insert(insertModel);
         }
+    }
+
+    @Override
+    public JSONObject getApps() {
+        return LinkEnum.getAddonLink();
     }
 
 }

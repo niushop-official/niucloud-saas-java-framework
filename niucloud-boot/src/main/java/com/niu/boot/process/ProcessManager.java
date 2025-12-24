@@ -264,7 +264,16 @@ public class ProcessManager {
                             for (String line : change) {
                                 String[] content = line.split(" ");
                                 if (content[0].equals("-")) {
-                                    (new File(rootDir, content[2])).deleteOnExit();
+                                    try {
+                                        File file = new File(rootDir, content[2]);
+                                        if (file.exists()) {
+                                            file.delete();
+                                        } else {
+                                            System.out.println("升级删除文件不存在" + file.getPath());
+                                        }
+                                    } catch (Exception e) {
+                                        System.out.println("升级删除文件删除失败" + e.getMessage());
+                                    }
                                 }
                             }
                         }

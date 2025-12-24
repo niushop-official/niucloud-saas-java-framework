@@ -197,8 +197,11 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
         System.out.println("checkVersionUploadResult ++++++++++ " + log.toString());
 
         if (log != null) {
-            JSONArray data = ObjectUtil.defaultIfNull(log.getByPath("data.0", JSONArray.class), new JSONArray());
-            if (data.size() > 0) {
+            JSONArray resData = log.getJSONArray("data");
+            if (ObjectUtil.isEmpty(resData)) return;
+
+            JSONArray data = resData.getJSONArray(0);
+            if (ObjectUtil.isNotEmpty(data)) {
                 JSONObject last = data.getJSONObject(data.size() - 1);
                 if (last.getInt("code", -1).equals(0)) {
                     WxOplatfromWeappVersion model = new WxOplatfromWeappVersion();

@@ -18,10 +18,9 @@ public interface ISysConfigService {
     /**
      * 版权信息
      *
-     * @param param
      * @return
      */
-    SysCopyRightVo copyright(SysConfigCopyrightParam param);
+    SysCopyRightVo copyright();
 
     /**
      * 站点信息

@@ -31,7 +31,21 @@ public class DateUtils {
             "dd/MM/yyyy HH:mm:ss",
             "dd-MM-yyyy HH:mm:ss"
     );
-
+    public static final String STANDARD_DATETIME = "yyyy-MM-dd HH:mm:ss";
+    public static final String STANDARD_DATETIME_HM = "yyyy-MM-dd HH:mm";
+    public static final String STANDARD_DATETIME_SLASH = "yyyy/MM/dd HH:mm:ss";
+    public static final String STANDARD_DATE = "yyyy-MM-dd";
+    public static final String STANDARD_DATE_SLASH = "yyyy/MM/dd";
+    public static final String STANDARD_TIME = "HH:mm:ss";
+    public static final String CHINESE_DATETIME = "yyyy年MM月dd日 HH时mm分ss秒";
+    public static final String CHINESE_DATETIME_1 = "yyyy年MM月dd日HH时mm分";
+    public static final String CHINESE_DATE = "yyyy年MM月dd日";
+    public static final String CHINESE_TIME = "HH时mm分ss秒";
+    public static final String TIME_HM = "HH:mm";
+    public static final String TIME_MS = "mm:ss";
+    public static final String TIME_H = "HH";
+    public static final String TIME_M = "mm";
+    public static final String TIME_S = "ss";
     /**
      * 时间戳转化成时间格式
      *
@@ -46,7 +60,7 @@ public class DateUtils {
         }
         long minTimestamp = timestamp * 1000;
         Date date = DateUtil.date(minTimestamp);
-        return DateUtil.format(date, "yyyy-MM-dd HH:mm:ss");
+        return DateUtil.format(date, STANDARD_DATETIME);
     }
 
     public static String timestampToString(long timestamp, String format) {
@@ -93,7 +107,7 @@ public class DateUtils {
      */
     public static String currDate() {
         Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STANDARD_DATETIME);
         return simpleDateFormat.format(date);
     }
 
@@ -104,7 +118,7 @@ public class DateUtils {
      */
     public static long currInitTime() {
         Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STANDARD_DATE);
         String today = simpleDateFormat.format(date.getTime());
         return StringToTimestamp(today);
     }
@@ -116,7 +130,7 @@ public class DateUtils {
      */
     public static String currInitDate() {
         Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STANDARD_DATE);
         String today = simpleDateFormat.format(date.getTime());
         return today;
     }
@@ -133,7 +147,7 @@ public class DateUtils {
         calendar.setTime(date);
         calendar.add(Calendar.DATE, dayNum);
         Date resultDate = calendar.getTime();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STANDARD_DATETIME);
         return simpleDateFormat.format(resultDate);
     }
 
@@ -149,7 +163,7 @@ public class DateUtils {
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, month);
         Date resultDate = calendar.getTime();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STANDARD_DATETIME);
         return simpleDateFormat.format(resultDate);
     }
 
@@ -162,14 +176,14 @@ public class DateUtils {
      */
     public static String[] getStartEndByDay(String currDate) {
         String[] dates = new String[2];
-        Date startDate = DateUtil.parse(currDate, "yyyy-MM-dd");
+        Date startDate = DateUtil.parse(currDate, STANDARD_DATE);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(startDate);
         calendar.add(Calendar.DATE, 1);
         Date endDate = calendar.getTime();
-        dates[0] = DateUtil.format(startDate, "yyyy-MM-dd");
-        dates[1] = DateUtil.format(endDate, "yyyy-MM-dd HH:mm:ss");
+        dates[0] = DateUtil.format(startDate, STANDARD_DATE);
+        dates[1] = DateUtil.format(endDate, STANDARD_DATETIME);
         return dates;
     }
 
@@ -179,7 +193,7 @@ public class DateUtils {
      * @return
      */
     public static String getFormatTodayString() {
-        return DateUtil.format(new Date(), "yyyy-MM-dd");
+        return DateUtil.format(new Date(), STANDARD_DATE);
     }
 
     /**
@@ -209,7 +223,7 @@ public class DateUtils {
      */
     public static String getFormatYesterdayString() {
         long timestamp = System.currentTimeMillis() - 24 * 60 * 60 * 1000;
-        return DateUtil.format(new Date(timestamp), "yyyy-MM-dd");
+        return DateUtil.format(new Date(timestamp), STANDARD_DATE);
     }
 
     /**
@@ -218,7 +232,7 @@ public class DateUtils {
     public static String formatTimestamp(long timestamp) {
         Instant instant = Instant.ofEpochSecond(timestamp);
         LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日HH时mm分");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CHINESE_DATETIME_1);
         return dateTime.format(formatter);
     }
 
@@ -231,7 +245,7 @@ public class DateUtils {
             return Long.parseLong(timeStr);
         } catch (NumberFormatException e) {
             // 作为日期字符串解析
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(STANDARD_DATETIME);
             LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatter);
             return dateTime.atZone(ZoneId.systemDefault()).toEpochSecond();
         }
@@ -242,7 +256,7 @@ public class DateUtils {
      * @return
      */
     public static String timestampToNoHMS(long timestamp) {
-        return DateUtil.format(new Date(timestamp * 1000), "yyyy-MM-dd");
+        return DateUtil.format(new Date(timestamp * 1000), STANDARD_DATE);
     }
 
 
@@ -281,7 +295,7 @@ public class DateUtils {
             try {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
-                if (pattern.contains("HH:mm:ss") || pattern.contains("HH时mm分ss秒")) {
+                if (pattern.contains(STANDARD_DATE) || pattern.contains(CHINESE_TIME)) {
                     // 对于没有时区的时间，明确指定时区策略
                     LocalDateTime dateTime = LocalDateTime.parse(cleanedStr, formatter);
                     // 使用系统时区，但建议明确文档说明
@@ -299,4 +313,29 @@ public class DateUtils {
         return 0L;
     }
 
+    /**
+     * 将秒数转换为时分格式 (HH:mm)
+     * @param seconds 秒数
+     * @return 格式化后的时间字符串 (HH:mm)
+     */
+    public static String formatSecondsToHHMM(Long seconds) {
+        if (seconds < 0) {
+            return "00:00";
+        }
+
+        Long hours = seconds / 3600l;
+        Long minutes = (seconds % 3600) / 60l;
+
+        return String.format("%02d:%02d", hours, minutes);
+    }
+
+    /**
+     * 将时分秒转成时间戳(HH:mm:ss)
+     */
+    public static Long timeToSeconds(String timeStr) {
+        String[] startTimeParts = timeStr.split(":");
+        return Long.parseLong(startTimeParts[0]) * 3600 +
+                Long.parseLong(startTimeParts[1]) * 60 +
+                Long.parseLong(startTimeParts[2]);
+    }
 }

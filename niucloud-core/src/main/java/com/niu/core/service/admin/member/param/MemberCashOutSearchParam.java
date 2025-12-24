@@ -14,53 +14,20 @@ public class MemberCashOutSearchParam implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer siteId;
-
-    private String cashOutNo;
-
     private Integer memberId;
-
-    private String accountType;
 
     private String transferType;
 
-    private String transferRealname;
+    private Integer status;
 
-    private String transferMobile;
+    private String[] createTime;
 
-    private String transferBank;
-
-    private String transferAccount;
-
-    private String transferFailReason;
-
-    private String transferStatus;
+    private String[] auditTime;
 
     private String[] transferTime;
 
-    private BigDecimal applyMoney;
-
-    private BigDecimal rate;
-
-    private BigDecimal serviceMoney;
-
-    private BigDecimal money;
-
-    private Integer auditTime;
-
-    private Integer status;
-
-    private String remark;
-
-    private String refuseReason;
-
-    private String transferNo;
-
-    private Integer cancelTime;
-
-    private String finalTransferType;
+    private String cashOutNo;
 
     private String keywords;
 
-    private String[] createTime;
 }

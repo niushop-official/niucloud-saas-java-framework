@@ -3,6 +3,7 @@ package com.niu.shop.listener.refund;
 import com.niu.core.common.annotation.EventListen;
 import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.common.utils.StringUtils;
+import com.niu.core.event.common.CommonEvent;
 import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.order.ShopOrder;
@@ -43,7 +44,7 @@ public class AfterShopOrderRefundApplyListener extends AbstractListener {
         ShopOrder order = shopOrderMapper.selectById(orderRefund.getOrderId());
         //通知三方应用更新订单状态
         if (StringUtils.isNotEmpty(order.getRelateSource())) {
-            CommonEventDefiner.CommonEvent sendEvent = new CommonEventDefiner.CommonEvent();
+            CommonEvent sendEvent = new CommonEvent();
             Map<String, Object> data = new HashMap<>();
             data.put("source_order_id", orderRefund.getOrderId());
             data.put("relate_source", order.getRelateSource());

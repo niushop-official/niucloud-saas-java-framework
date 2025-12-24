@@ -62,12 +62,19 @@ public class RuleContentListener extends CommonEventDefiner {
             return commonResult;
         }else if(commonEvent.getEventName().equals("SettleRewardListener")){
             JSONObject dataParam = JSONUtil.parseObj(commonEvent.getData());
-            if (ObjectUtil.isNotEmpty(dataParam.getStr("key")) && dataParam.getStr("key").equals("coupon")) {
-                Integer couponId = dataParam.getInt("coupon_id");
-                Integer num = dataParam.getInt("num");
-                Integer memberId = dataParam.getInt("member_id");
-                Integer siteId = dataParam.getInt("site_id");
-                coreCouponMemberService.sendCoupon(siteId,memberId,couponId,num);
+            Integer memberId = dataParam.getInt("member_id");
+            Integer siteId = dataParam.getInt("site_id");
+            JSONArray couponArray = dataParam.getJSONArray("coupon");
+            if (ObjectUtil.isNotNull(couponArray) && couponArray.size() > 0) {
+                for (int i = 0; i < couponArray.size(); i++) {
+                    JSONObject couponItem = couponArray.getJSONObject(i);
+                    Integer couponId = couponItem.getInt("coupon_id");
+                    Integer num = couponItem.getInt("num");
+                    try {
+                        coreCouponMemberService.sendCoupon(siteId, memberId, couponId, num);
+                    } catch (Exception e) {
+                    }
+                }
             }
         }
         return null;

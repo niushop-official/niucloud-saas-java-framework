@@ -7,11 +7,13 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.entity.sys.SysArea;
+import com.niu.core.enums.sys.CacheTagEnum;
 import com.niu.core.mapper.sys.SysAreaMapper;
 import com.niu.core.service.admin.sys.ISysAreaService;
 import com.niu.core.service.admin.sys.param.SysAreaSearchParam;
@@ -37,65 +39,79 @@ public class SysAreaServiceImpl implements ISysAreaService {
     @Resource
     ICoreSysConfigService coreSysConfigService;
 
+    @Resource
+    Cached cached;
+
+    private static final String AREA_CACHE_TAG = CacheTagEnum.AREA_CACHE.getTagName();
+
     @Override
     public List<SysArea> getListByPid(Integer pid) {
-
-        QueryWrapper<SysArea> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("pid", pid);
-        return sysAreaMapper.selectList(queryWrapper);
+        return cached.rememberObject(AREA_CACHE_TAG, Arrays.asList("getListByPid", pid), uniqueKey -> {
+            QueryWrapper<SysArea> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("pid", pid);
+            return sysAreaMapper.selectList(queryWrapper);
+        });
     }
 
     @Override
     public JSONArray getAreaTree(Integer level) {
-        QueryWrapper<SysArea> queryWrapper = new QueryWrapper<>();
-        queryWrapper.le("level", level);
-        List<SysArea> list = sysAreaMapper.selectList(queryWrapper);
-        JSONArray jsonArray = JSONUtil.parseArray(JSONUtil.toJsonStr(list));
-        return TreeUtils.listToTree(jsonArray, "id", "pid", "child");
+        return cached.rememberObject(AREA_CACHE_TAG, Arrays.asList("getAreaTree", level), uniqueKey -> {
+            QueryWrapper<SysArea> queryWrapper = new QueryWrapper<>();
+            queryWrapper.le("level", level);
+            List<SysArea> list = sysAreaMapper.selectList(queryWrapper);
+            JSONArray jsonArray = JSONUtil.parseArray(JSONUtil.toJsonStr(list));
+            return TreeUtils.listToTree(jsonArray, "id", "pid", "child");
+        });
     }
 
     @Override
     public Map<String, SysAreaByCodeVo> getAreaByAreaCode(Integer id) {
-        Map<String, SysAreaByCodeVo> area = new HashMap<>();
-        String[] keys = { "", "province", "city", "district" };
-        SysArea areaInfo = null;
-        SysAreaByCodeVo vo = null;
+        return cached.rememberObject(AREA_CACHE_TAG, Arrays.asList("getAreaByAreaCode", id), uniqueKey -> {
+            Map<String, SysAreaByCodeVo> area = new HashMap<>();
+            String[] keys = {"", "province", "city", "district"};
+            SysArea areaInfo = null;
+            SysAreaByCodeVo vo = null;
 
-        areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", id).select("id,level,pid,name"));
-        if (areaInfo != null) {
-            vo = new SysAreaByCodeVo();
-            BeanUtils.copyProperties(areaInfo, vo);
-            area.put(keys[areaInfo.getLevel()], vo);
+            areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", id).select("id,level,pid,name"));
+            if (areaInfo != null) {
+                vo = new SysAreaByCodeVo();
+                BeanUtils.copyProperties(areaInfo, vo);
+                area.put(keys[areaInfo.getLevel()], vo);
 
-            while (areaInfo.getLevel() > 1) {
-                areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", areaInfo.getPid()).select("id,level,pid,name"));
-                if (areaInfo != null) {
-                    vo = new SysAreaByCodeVo();
-                    BeanUtils.copyProperties(areaInfo, vo);
-                    area.put(keys[areaInfo.getLevel()], vo);
+                while (areaInfo.getLevel() > 1) {
+                    areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", areaInfo.getPid()).select("id,level,pid,name"));
+                    if (areaInfo != null) {
+                        vo = new SysAreaByCodeVo();
+                        BeanUtils.copyProperties(areaInfo, vo);
+                        area.put(keys[areaInfo.getLevel()], vo);
+                    }
                 }
             }
-        }
 
-        return area;
+            return area;
+        });
     }
 
     @Override
     public Integer getAreaId(String name, Integer level) {
-        SysArea areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().like("name", name).eq("level", level).last("limit 1"));
-        if (areaInfo != null) {
-            return areaInfo.getId();
-        }
-        return null;
+        return cached.rememberObject(AREA_CACHE_TAG, Arrays.asList("getAreaId", name, level), uniqueKey -> {
+            SysArea areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().like("name", name).eq("level", level).last("limit 1"));
+            if (areaInfo != null) {
+                return areaInfo.getId();
+            }
+            return null;
+        });
     }
 
     @Override
     public String getAreaName(Integer id) {
-        SysArea areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", id).last("limit 1"));
-        if (areaInfo != null) {
-            return areaInfo.getName();
-        }
-        return null;
+        return cached.rememberObject(AREA_CACHE_TAG, Arrays.asList("getAreaName", id), uniqueKey -> {
+            SysArea areaInfo = sysAreaMapper.selectOne(new QueryWrapper<SysArea>().eq("id", id).last("limit 1"));
+            if (areaInfo != null) {
+                return areaInfo.getName();
+            }
+            return null;
+        });
     }
 
     /**

@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.utils.CollectUtils;
@@ -89,6 +90,102 @@ public class ShopCartServiceImpl implements IShopCartService {
     @Resource
     ICoreGoodsActivePriceService coreGoodsActivePriceService;
 
+
+    /**
+     * 购物车添加
+     *
+     * @param addParam 参数
+     */
+    @Override
+    public void add(ShopCartParam addParam) {
+        ShopCart cart = shopCartMapper.selectOne(new QueryWrapper<ShopCart>()
+                .eq("site_id", RequestUtils.siteId())
+                .eq("member_id", RequestUtils.memberId())
+                .eq("sku_id", addParam.getSkuId())
+        );
+
+        GoodsAddStatParam param = new GoodsAddStatParam();
+        param.setSiteId(RequestUtils.siteId());
+        param.setGoodsId(addParam.getGoodsId());
+        param.setCartNum(addParam.getNum());
+        coreGoodsStatService.addStat(param);
+
+        if (cart != null) {
+            cart.setNum(cart.getNum() + addParam.getNum());
+            shopCartMapper.updateById(cart);
+        } else {
+            ShopCart model = new ShopCart();
+            BeanUtils.copyProperties(addParam, model);
+            model.setSiteId(RequestUtils.siteId());
+            model.setMemberId(RequestUtils.memberId());
+            model.setCreateTime(System.currentTimeMillis() / 1000);
+            shopCartMapper.insert(model);
+        }
+    }
+
+    /**
+     * 购物车编辑
+     *
+     * @param editParam 参数
+     */
+    @Override
+    public void edit(ShopCartParam editParam) {
+        ShopCart model = shopCartMapper.selectOne(
+                new QueryWrapper<ShopCart>()
+                        .eq("id", editParam.getId())
+                        .eq("site_id", RequestUtils.siteId())
+                        .eq("member_id", RequestUtils.memberId()));
+
+        Assert.notNull(model, "数据不存在!");
+        model.setNum(editParam.getNum());
+
+        if (!model.getSkuId().equals(editParam.getSkuId())) {
+            model.setSkuId(editParam.getSkuId());
+
+            shopCartMapper.delete(new QueryWrapper<ShopCart>()
+                    .eq("sku_id", editParam.getSkuId())
+                    .eq("site_id", RequestUtils.siteId())
+                    .eq("member_id", RequestUtils.memberId()));
+        }
+
+        shopCartMapper.updateById(model);
+
+        GoodsAddStatParam param = new GoodsAddStatParam();
+        param.setSiteId(model.getSiteId());
+        param.setGoodsId(model.getGoodsId());
+        param.setCartNum(editParam.getNum() - model.getNum());
+        coreGoodsStatService.addStat(param);
+    }
+
+    /**
+     * 购物车删除
+     *
+     * @param param 主键ID
+     */
+    @Override
+    public void del(ShopCartDeleteParam param) {
+        QueryWrapper queryWrapper = new QueryWrapper<ShopCart>()
+                .eq("site_id", RequestUtils.siteId())
+                .eq("member_id", RequestUtils.memberId());
+
+        if (param.getIds() instanceof Integer) {
+            queryWrapper.eq("id", param.getIds());
+        } else if (param.getIds() instanceof ArrayList) {
+            Integer[] ids = ((ArrayList<?>) param.getIds()).toArray(new Integer[0]);
+            queryWrapper.in("id", ids);
+        }
+
+        shopCartMapper.delete(queryWrapper);
+    }
+
+    /**
+     * 清空购物车
+     */
+    @Override
+    public void clear() {
+        shopCartMapper.delete(new QueryWrapper<ShopCart>().eq("site_id", RequestUtils.siteId()).eq("member_id", RequestUtils.memberId()));
+    }
+
     /**
      * 购物车列表
      *
@@ -102,9 +199,6 @@ public class ShopCartServiceImpl implements IShopCartService {
         queryWrapper.orderByDesc("id");
 
         List<ShopCart> record = shopCartMapper.selectList(queryWrapper);
-
-        MemberLevelInfoVo memberLevel = memberLevelService.findMemberLevel(RequestUtils.memberId());
-
         List<ShopCartListVo> list = new LinkedList<>();
         for (ShopCart item : record) {
             ShopCartListVo vo = new ShopCartListVo();
@@ -159,10 +253,7 @@ public class ShopCartServiceImpl implements IShopCartService {
             ShopManjianInfoParam shopManjianInfoParam = new ShopManjianInfoParam();
             shopManjianInfoParam.setGoodsId(item.getGoodsId());
             shopManjianInfoParam.setSkuId(item.getSkuId());
-            ShopManjianInfoVo manjianInfo = shopManjianService.getManjianInfo(shopManjianInfoParam);
-            if (ObjectUtil.isNotEmpty(manjianInfo)) {
-                vo.setManjianInfo(manjianInfo);
-            }
+            vo.setManjianInfo(shopManjianService.getManjianInfo(shopManjianInfoParam));
 
             ShopCartGoodsListVo.Goods goodsVo = new ShopCartGoodsListVo.Goods();
             ShopGoods goods = shopGoodsMapper.selectOne(new QueryWrapper<ShopGoods>().eq("goods_id", item.getGoodsId()));
@@ -286,101 +377,6 @@ public class ShopCartServiceImpl implements IShopCartService {
         }
 
         return null;
-    }
-
-    /**
-     * 购物车添加
-     *
-     * @param addParam 参数
-     */
-    @Override
-    public void add(ShopCartParam addParam) {
-        ShopCart cart = shopCartMapper.selectOne(new QueryWrapper<ShopCart>()
-                .eq("site_id", RequestUtils.siteId())
-                .eq("member_id", RequestUtils.memberId())
-                .eq("sku_id", addParam.getSkuId())
-        );
-
-        GoodsAddStatParam param = new GoodsAddStatParam();
-        param.setSiteId(RequestUtils.siteId());
-        param.setGoodsId(addParam.getGoodsId());
-        param.setCartNum(addParam.getNum());
-        coreGoodsStatService.addStat(param);
-
-        if (cart != null) {
-            cart.setNum(cart.getNum() + addParam.getNum());
-            shopCartMapper.updateById(cart);
-        } else {
-            ShopCart model = new ShopCart();
-            BeanUtils.copyProperties(addParam, model);
-            model.setSiteId(RequestUtils.siteId());
-            model.setMemberId(RequestUtils.memberId());
-            model.setCreateTime(System.currentTimeMillis() / 1000);
-            shopCartMapper.insert(model);
-        }
-    }
-
-    /**
-     * 购物车编辑
-     *
-     * @param editParam 参数
-     */
-    @Override
-    public void edit(ShopCartParam editParam) {
-        ShopCart model = shopCartMapper.selectOne(
-                new QueryWrapper<ShopCart>()
-                        .eq("id", editParam.getId())
-                        .eq("site_id", RequestUtils.siteId())
-                        .eq("member_id", RequestUtils.memberId()));
-
-        Assert.notNull(model, "数据不存在!");
-        model.setNum(editParam.getNum());
-
-        if (!model.getSkuId().equals(editParam.getSkuId())) {
-            model.setSkuId(editParam.getSkuId());
-
-            shopCartMapper.delete(new QueryWrapper<ShopCart>()
-                    .eq("sku_id", editParam.getSkuId())
-                    .eq("site_id", RequestUtils.siteId())
-                    .eq("member_id", RequestUtils.memberId()));
-        }
-
-        shopCartMapper.updateById(model);
-
-        GoodsAddStatParam param = new GoodsAddStatParam();
-        param.setSiteId(model.getSiteId());
-        param.setGoodsId(model.getGoodsId());
-        param.setCartNum(editParam.getNum() - model.getNum());
-        coreGoodsStatService.addStat(param);
-    }
-
-    /**
-     * 购物车删除
-     *
-     * @param param 主键ID
-     */
-    @Override
-    public void del(ShopCartDeleteParam param) {
-        QueryWrapper queryWrapper = new QueryWrapper<ShopCart>()
-                .eq("site_id", RequestUtils.siteId())
-                .eq("member_id", RequestUtils.memberId());
-
-        if (param.getIds() instanceof Integer) {
-            queryWrapper.eq("id", param.getIds());
-        } else if (param.getIds() instanceof ArrayList) {
-            Integer[] ids = ((ArrayList<?>) param.getIds()).toArray(new Integer[0]);
-            queryWrapper.in("id", ids);
-        }
-
-        shopCartMapper.delete(queryWrapper);
-    }
-
-    /**
-     * 清空购物车
-     */
-    @Override
-    public void clear() {
-        shopCartMapper.delete(new QueryWrapper<ShopCart>().eq("site_id", RequestUtils.siteId()).eq("member_id", RequestUtils.memberId()));
     }
 
     /**

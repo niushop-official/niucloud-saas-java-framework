@@ -8,6 +8,8 @@ import com.niu.shop.service.admin.goods.vo.ShopGoodsEvaluateInfoVo;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsEvaluateListVo;
 import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateSearchParam;
 
+import java.util.List;
+
 /**
  * 商品评价服务接口
  */
@@ -77,6 +79,13 @@ public interface IShopGoodsEvaluateService {
      * @param id
      */
     void cancelTopping(Integer id);
+
+    /**
+     * 批量修改
+     */
+    void auditEditBatch();
+
+    void updateGoodsEvaluateNumBach(List<Integer> ids);
 
     /**
      * 批量通过

@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import cn.hutool.core.util.ClassLoaderUtil;
+import com.niu.core.common.component.context.task.ThreadPoolManager;
 import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.date.DateUtils;
@@ -31,6 +32,7 @@ import jakarta.annotation.Resource;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Log4j2
 @Service
@@ -55,6 +57,8 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
     @Resource
     private IMemberLevelService memberLevelService;
 
+    private static final ReentrantLock lock = new ReentrantLock();
+
     @Override
     public Member getMember(Integer siteId, Integer memberId) {
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
@@ -71,23 +75,28 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
      */
     @Override
     public String createMemberNo(Integer siteId) {
-        Site site = siteMapper.selectById(siteId);
-        MemberConfigVo memberConfig = coreMemberConfigService.getMemberConfig(siteId);
+        lock.lock();
+        try {
+            Site site = siteMapper.selectById(siteId);
+            MemberConfigVo memberConfig = coreMemberConfigService.getMemberConfig(siteId);
 
-        String no = (site.getMemberNo() + 1) + "";
-        String memberNo = memberConfig.getPrefix() + (memberConfig.getPrefix().length() > memberConfig.getLength() ? no : StringUtils.leftPad(no, memberConfig.getLength() - memberConfig.getPrefix().length(), "0"));
+            String no = (site.getMemberNo() + 1) + "";
+            String memberNo = memberConfig.getPrefix() + (memberConfig.getPrefix().length() > memberConfig.getLength() ? no : StringUtils.leftPad(no, memberConfig.getLength() - memberConfig.getPrefix().length(), "0"));
 
-        Member member = memberMapper.selectOne(new QueryWrapper<Member>()
+            Member member = memberMapper.selectOne(new QueryWrapper<Member>()
                 .eq("site_id", siteId).eq("member_no", memberNo).last("limit 1"));
 
-        if (member == null) {
-            return memberNo;
+            if (member == null) {
+                return memberNo;
+            }
+
+            site.setMemberNo(Integer.parseInt(no));
+            siteMapper.updateById(site);
+
+            return this.createMemberNo(siteId);
+        } finally {
+            lock.unlock();
         }
-
-        site.setMemberNo(Integer.parseInt(no));
-        siteMapper.updateById(site);
-
-        return this.createMemberNo(siteId);
     }
 
     /**
@@ -397,7 +406,6 @@ public class CoreMemberServiceImpl implements ICoreMemberService {
 
     @Override
     public Member getInfoByMemberId(Integer siteId, Integer memberId) {
-
         Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("site_id", siteId).eq("member_id", memberId));
         return member;
     }

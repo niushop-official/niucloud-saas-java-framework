@@ -189,7 +189,7 @@ public class SysConfigController {
      * @return
      */
     @GetMapping("/wxoplatform/config")
-    public Result<JSONObject> getConfig(){
+    public Result getConfig(){
         return Result.success(oplatformConfigService.getWxOplatformConfig());
     }
 

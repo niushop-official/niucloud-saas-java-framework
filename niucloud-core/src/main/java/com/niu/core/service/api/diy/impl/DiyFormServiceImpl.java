@@ -533,7 +533,12 @@ public class DiyFormServiceImpl implements IDiyFormService {
 
     @Override
     public void editRecord(DiyFormRecordsParam param) {
-        DiyFormRecords diyFormRecords = diyFormRecordsMapper.selectById(param.getRecordId());
+        DiyFormRecords diyFormRecords = diyFormRecordsMapper.selectOne(
+            new QueryWrapper<DiyFormRecords>()
+            .eq("record_id", param.getRecordId())
+            .eq("site_id", RequestUtils.siteId())
+            .eq("member_id", RequestUtils.memberId())
+        );
         if (ObjectUtil.isEmpty(diyFormRecords)) {
             throw new ApiException("表单记录不存在");
         }

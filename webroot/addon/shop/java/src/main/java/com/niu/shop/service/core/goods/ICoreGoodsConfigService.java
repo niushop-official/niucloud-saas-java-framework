@@ -1,6 +1,7 @@
 package com.niu.shop.service.core.goods;
 
 import cn.hutool.json.JSONObject;
+import com.niu.shop.service.admin.goods.param.ShopGoodsVerifySkuNoParam;
 import com.niu.shop.service.core.goods.param.SortConfigParam;
 import com.niu.shop.service.core.goods.param.ShopConfigParam;
 import com.niu.shop.service.core.goods.vo.SortConfigVo;
@@ -37,9 +38,13 @@ public interface ICoreGoodsConfigService {
      */
     SortConfigVo getSortConfig();
 
+
+
     /**
      * 设置商品排序配置
      * @param sortConfigParam
      */
     void setSortConfig(SortConfigParam sortConfigParam);
+
+    Boolean verifySkuNo(ShopGoodsVerifySkuNoParam verifySkuNoParam);
 }

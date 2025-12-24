@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.common.utils.StringUtils;
+import com.niu.core.enums.sys.VerifyTypeEnum;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import lombok.Data;
 
@@ -42,6 +44,16 @@ public class SysVerifyRecordsVo {
     /** 业务标识 */
     private String relateTag;
 
+    private String typeName;
+
     private MemberBriefInfoVo member;
+    private Integer isAdmin;
+
+    public String getTypeName(){
+        if (StringUtils.isEmpty(this.type)){
+            return "";
+        }
+        return VerifyTypeEnum.getTypeByName(this.type);
+    }
 
 }

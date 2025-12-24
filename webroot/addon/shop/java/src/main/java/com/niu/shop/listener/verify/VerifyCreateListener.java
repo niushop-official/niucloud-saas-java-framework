@@ -202,13 +202,6 @@ public class VerifyCreateListener extends VerifyCreateEventDefiner {
             JSONObject data = new JSONObject();
             data.putOpt("list", goodsList);
 
-            // 添加自提人信息
-            JSONObject takerInfo = new JSONObject();
-            takerInfo.putOpt("taker_name", order.getTakerName() != null ? order.getTakerName() : "");
-            takerInfo.putOpt("taker_mobile", order.getTakerMobile() != null ? order.getTakerMobile() : "");
-            takerInfo.putOpt("buyer_ask_delivery_time", order.getBuyerAskDeliveryTime() != null ? order.getBuyerAskDeliveryTime() : "");
-            data.putOpt("taker_info", takerInfo);
-
             // 构建 content 部分
             JSONObject content = new JSONObject();
             content.putOpt("fixed", new JSONArray());
@@ -230,6 +223,22 @@ public class VerifyCreateListener extends VerifyCreateEventDefiner {
 
             orderInfoItem.putOpt("list", orderInfoList);
             diyArray.add(orderInfoItem);
+
+            JSONObject takerInfo = new JSONObject();
+            takerInfo.set("title", "提货人信息");
+            JSONArray takerInfoItem = new JSONArray();
+            takerInfoItem.add(new JSONObject()
+                    .putOpt("title", "提货人")
+                    .putOpt("value", order.getTakerName()));
+            takerInfoItem.add(new JSONObject()
+                    .putOpt("title", "预留手机")
+                    .putOpt("value", order.getTakerMobile()));
+            takerInfoItem.add(new JSONObject()
+                    .putOpt("title", "预约提货时间")
+                    .putOpt("value", order.getBuyerAskDeliveryTime()));
+            takerInfo.set("list", takerInfoItem);
+            diyArray.add(takerInfo);
+
             content.putOpt("diy", diyArray);
 
             data.putOpt("content", content);

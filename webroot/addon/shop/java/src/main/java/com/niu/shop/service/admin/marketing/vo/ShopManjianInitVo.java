@@ -30,6 +30,7 @@ public class ShopManjianInitVo implements Serializable {
         private String subTitle; // 副标题
         private String goodsCover; // 商品封面
         private String goodsImage; // 商品图片
+        private Integer skuId;
         private String skuImage;
         private String skuName;
         private String goodsCategory; // 商品分类
@@ -76,9 +77,6 @@ public class ShopManjianInitVo implements Serializable {
 
         @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
         private Long endTime;
-
-        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
-        private String goodsIds;
 
         private String goodsType;
         private String goodsTypeName;

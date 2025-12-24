@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-         xmlns="http://maven.apache.org/POM/4.0.0">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.niu</groupId>
-        <artifactId>niucloud-admin-java</artifactId>
-        <version>1.0</version>
-    </parent>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
     <groupId>com.niu</groupId>
-    <artifactId>niucloud-addon</artifactId>
+    <artifactId>niucloud-admin-java</artifactId>
     <version>1.0</version>
-    <packaging>pom</packaging>
-    <name>niucloud-addon</name>
-    <description>niucloud 应用管理模块</description>
-    <modules>
-    </modules>
-    <dependencies>
-        <dependency>
-            <groupId>com.niu</groupId>
-            <artifactId>niucloud-core</artifactId>
-            <version>1.0</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+  </parent>
+  <groupId>com.niu</groupId>
+  <artifactId>niucloud-addon</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <name>niucloud-addon</name>
+  <description>niucloud 应用管理模块</description>
+  <modules>
+  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>com.niu</groupId>
+      <artifactId>niucloud-core</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

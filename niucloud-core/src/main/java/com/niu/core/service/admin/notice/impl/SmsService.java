@@ -63,8 +63,7 @@ public class SmsService implements ISmsService {
 
                    if(!ObjectUtil.isEmpty(smsTypeParam)){
                        if (encryptParams.contains(paramEntry.getKey()) && ObjectUtil.isNotEmpty(paramEntry.getValue())){
-                           String secretValue = smsTypeParam.getStr(paramEntry.getKey());
-                           paramVo.setValue(StringUtils.hide(secretValue, 0, secretValue.length()));
+                           paramVo.setValue(StringUtils.ENCRYPTSTR);
                        }else {
                            paramVo.setValue(smsTypeParam.getStr(paramEntry.getKey()));
                        }
@@ -116,7 +115,7 @@ public class SmsService implements ISmsService {
         JSONObject smsTypeEnum = SmsTypeEnum.getType().getJSONObject(smsType);
         for (String key: smsTypeEnum.getJSONObject("params").keySet()) {
             String value = data.getStr(key, "");
-            if (!value.contains("*")) {
+            if (!value.equals(StringUtils.ENCRYPTSTR)) {
                 config.putByPath(smsType + "." + key, value);
             }
         }

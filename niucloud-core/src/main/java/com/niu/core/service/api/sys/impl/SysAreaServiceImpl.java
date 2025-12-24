@@ -1,9 +1,11 @@
 package com.niu.core.service.api.sys.impl;
 
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.exception.BaseException;
+import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.object.ObjectGroupUtils;
 import com.niu.core.entity.sys.SysArea;
@@ -197,16 +199,101 @@ public class SysAreaServiceImpl implements ISysAreaService {
     @Override
     public JSONObject getAddressByLatlng(SysAreaAddressByLatlngParam param) {
         SysMapVo sysMapVo = coreSysConfigService.getMap(param.siteId());
-        String key = sysMapVo.getKey();
-        String addressJsonString = TencentGeocoder.getAddress(key, param.getLatlng(), param.getGetPoi());
-        JSONObject jsonObjectResult = TencentGeocoder.formatData(addressJsonString);
-        String province = jsonObjectResult.getStr("province");
-        jsonObjectResult.putOpt("province_id", this.queryCodeByNameAndLevel(province, 1));
-        String city = jsonObjectResult.getStr("city");
-        jsonObjectResult.putOpt("city_id", this.queryCodeByNameAndLevel(city, 2));
-        String district = jsonObjectResult.getStr("district");
-        jsonObjectResult.putOpt("district_id", this.queryCodeByNameAndLevel(district, 3));
-        return jsonObjectResult;
+        if (sysMapVo.getKey().isEmpty()) {
+            throw new CommonException("缺少地图配置");
+        }
+
+        String responseBody;
+        try {
+            responseBody = TencentGeocoder.getAddress(sysMapVo.getKey(), param.getLatlng(), param.getGetPoi());
+        } catch (Exception e) {
+            throw new CommonException("请求腾讯地图服务失败: " + e.getMessage());
+        }
+
+        JSONObject root = JSONUtil.parseObj(responseBody);
+        int status = root.getInt("status", -1);
+        if (status != 0) {
+            String message = root.getStr("message", "未知错误");
+            throw new CommonException("请检查地图配置：" + message);
+        }
+
+        JSONObject result = root.getJSONObject("result");
+        JSONObject addressComponent = result.getJSONObject("address_component");
+        JSONObject addressReference = result.getJSONObject("address_reference");
+
+        // 5. 提取地址字段
+        String streetNumber = addressComponent.getStr("street_number", "");
+        String street = addressComponent.getStr("street", "");
+        String address = !streetNumber.isEmpty() ? streetNumber : street;
+
+        String community = "";
+        if (addressReference != null) {
+            JSONObject landmarkL2 = addressReference.getJSONObject("landmark_l2");
+            if (landmarkL2 != null && !landmarkL2.getStr("title", "").isEmpty()) {
+                community = landmarkL2.getStr("title");
+            } else {
+                JSONObject landmarkL1 = addressReference.getJSONObject("landmark_l1");
+                if (landmarkL1 != null && !landmarkL1.getStr("title", "").isEmpty()) {
+                    community = landmarkL1.getStr("title");
+                } else {
+                    JSONObject town = addressReference.getJSONObject("town");
+                    if (town != null && !town.getStr("title", "").isEmpty()) {
+                        community = town.getStr("title");
+                    }
+                }
+            }
+        }
+
+        String provinceRaw = addressComponent.getStr("province", "");
+        String cityRaw = addressComponent.getStr("city", "");
+        String districtRaw = addressComponent.getStr("district", "");
+
+        // 清理“省”、“市”后缀
+        String provinceClean = provinceRaw.replaceAll("省|市$", "");
+        String cityClean = cityRaw;
+        String districtClean = districtRaw;
+
+        // 6. 查询数据库获取 ID 和标准化名称
+        Integer provinceId = 0;
+        String provinceName = provinceRaw;
+        SysArea provinceOpt = queryCodeByNameAndLevel(provinceClean, 1);
+        if (provinceOpt != null) {
+            provinceId = provinceOpt.getId();
+            provinceName = provinceOpt.getName();
+        }
+
+        Integer cityId = 0;
+        String cityName = cityRaw;
+        if (provinceId > 0) {
+            SysArea cityOpt = queryCodeByNameAndLevel(cityClean, 2);
+            if (cityOpt != null) {
+                cityId = cityOpt.getId();
+                cityName = cityOpt.getName();
+            }
+        }
+
+        Integer districtId = 0;
+        String districtName = districtRaw;
+        if (cityId > 0) {
+            SysArea districtOpt = queryCodeByNameAndLevel(districtClean, 3);
+            if (districtOpt != null) {
+                districtId = districtOpt.getId();
+                districtName = districtOpt.getName();
+            }
+        }
+
+        JSONObject resultJson = new JSONObject();
+        resultJson.set("province_id", provinceId);
+        resultJson.set("province", provinceName);
+        resultJson.set("city_id", cityId);
+        resultJson.set("city", cityName);
+        resultJson.set("district_id", districtId);
+        resultJson.set("district", districtName);
+        resultJson.set("community", community);
+        resultJson.set("full_address", result.getStr("address", ""));
+        resultJson.set("formatted_addresses", result.get("formatted_addresses")); // 保留原始结构
+
+        return resultJson;
     }
 
     /**
@@ -214,16 +301,12 @@ public class SysAreaServiceImpl implements ISysAreaService {
      * @param level
      * @return
      */
-    private Integer queryCodeByNameAndLevel(String areaName, int level) {
+    private SysArea queryCodeByNameAndLevel(String areaName, int level) {
         QueryWrapper<SysArea> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("id");
         queryWrapper.eq("name", areaName);
         queryWrapper.eq("level", level);
-        SysArea sysArea = this.sysAreaMapper.selectOne(queryWrapper);
-        if (sysArea != null) {
-            return sysArea.getId();
-        }
-        return null;
+        return this.sysAreaMapper.selectOne(queryWrapper);
     }
 
 }

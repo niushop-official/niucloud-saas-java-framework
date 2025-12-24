@@ -5,6 +5,8 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.entity.site.Site;
 import lombok.Data;
 
@@ -20,7 +22,8 @@ public class OplatformRecordVo implements Serializable {
     private String siteName; // 站点名称
     private Site site; // 站点名称
     private String configKey; // 配置项关键字
-    private JSON value; // 配置项json
+    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+    private String value; // 配置项json
     private JSON valueJson; //配置json对象
     private Integer status; // 是否启用 1启用 0不启用
     private Long createTime; // 添加时间

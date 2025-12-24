@@ -37,8 +37,8 @@ public class SysConfigServiceImpl implements ISysConfigService {
     private MemberMapper memberMapper;
 
     @Override
-    public SysCopyRightVo copyright(SysConfigCopyrightParam param) {
-        return coreSysConfigService.getCopyRight(param.siteId());
+    public SysCopyRightVo copyright() {
+        return coreSysConfigService.getCopyRight(RequestUtils.siteId());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.addon.impl;
 
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.Method;
@@ -12,6 +13,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
@@ -142,6 +144,18 @@ public class AddonServiceImpl implements IAddonService {
                     }
                 }
             }
+            //已安装但是文件没有的
+            for (InstallAddonListVo item : installAddonList.values()) {
+                if (list.get(item.getKey()) == null){
+                    LocalAddonInfoVo addonInfoVo = new LocalAddonInfoVo();
+                    BeanUtils.copyProperties(item, addonInfoVo);
+                    addonInfoVo.setKey(item.getKey());
+                    addonInfoVo.setIsLocal(false);
+                    addonInfoVo.setIsDownload(false);
+                    addonInfoVo.setInstallInfo(item);
+                    list.put(item.getKey(), addonInfoVo);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
             vo.setError(e.getMessage());
@@ -165,6 +179,8 @@ public class AddonServiceImpl implements IAddonService {
 
         QueryWrapper<Addon> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("id");
+        if (ObjectUtil.isNotEmpty(addonSearchParam.getTitle())) queryWrapper.like("title", addonSearchParam.getTitle());
+
         IPage<Addon> iPage = addonMapper.selectPage(new Page<Addon>(page, limit), queryWrapper);
         List<AddonListVo> list = new LinkedList<>();
         for (Addon item : iPage.getRecords()) {
@@ -335,7 +351,7 @@ public class AddonServiceImpl implements IAddonService {
         Map<String, Object> actionQuery = new HashMap<>();
         actionQuery.put("data[app_key]", addon);
         actionQuery.put("data[version]", version);
-        actionQuery.put("data[product_key]", instance.getProductKey());
+        actionQuery.put("data[product_key]", GlobalConfig.productKey);
         JSONObject actionToken = niucloudService.getActionToken("download", actionQuery);
 
         Map<String, Object> query = new HashMap<>();
@@ -371,13 +387,13 @@ public class AddonServiceImpl implements IAddonService {
         NiucloudConfigVo config = coreNiucloudConfigService.getNiucloudConfig();
         params.put("code", config.getAuthCode());
         params.put("secret", config.getAuthSecret());
-        params.put("labels", param.getLabelId());
-        params.put("product_key", "sass");
+        params.put("labels", Arrays.asList(ObjectUtil.isEmpty(param.getLabelId()) ? new String[]{} : new String[] { param.getLabelId() }));
+        params.put("product_key", GlobalConfig.productKey);
         params.put("is_recommend", 1);
+        params.put("recommend_type", "JAVA");
         params.put("order_field", "sale_num desc, visit_num desc");
-        JSONObject jsonObject = NiucloudUtils.Niucloud.get("store/app", params);
-        JSONObject data = jsonObject.getJSONObject("data");
-        return data.getJSONArray("data");
+        JSONObject jsonObject = NiucloudUtils.Niucloud.get("store/saas/app", params);
+        return jsonObject.getJSONArray("data");
     }
 
     /**

@@ -1,54 +1,64 @@
 {
-  "point": {
-
-    "account_point_exchange_close": {
-      "name": "兑换订单关闭",
-      "inc": 0,
-      "dec": 1
-    },
-    "account_point_exchange_order": {
-      "name": "兑换订单消费",
-      "inc": 1,
-      "dec": 0
-    },
-    "account_point_exchange_refund": {
-      "name": "兑换订单维权",
-      "inc": 1,
-      "dec": 0
-    },
-    "consume_reward": {
-      "name": "消费奖励",
-      "inc": 1,
-      "dec": 0
-    },
-    "manjian_gift_give": {
-      "name": "满减活动赠品发放",
-      "inc": 1,
-      "dec": 0
-    },
-    "manjian_gift_back": {
-      "name": "满减活动赠品退还",
-      "inc": 0,
-      "dec": 1
-    }
-  },
-  "balance": {
-    "manjian_gift_give": {
-      "name": "满减活动赠品发放",
-      "inc": 1,
-      "dec": 0
-    },
-    "manjian_gift_back": {
-      "name": "满减活动赠品退还",
-      "inc": 0,
-      "dec": 1
-    }
-  },
-  "growth": {
-    "consume_reward": {
-      "name": "消费奖励",
-      "inc": 1,
-      "dec": 0
-    }
-  }
+	"point": {
+		"account_point_exchange_close": {
+			"name": "兑换订单关闭",
+			"inc": 0,
+			"dec": 1
+		},
+		"account_point_exchange_order": {
+			"name": "兑换订单消费",
+			"inc": 1,
+			"dec": 0
+		},
+		"account_point_exchange_refund": {
+			"name": "兑换订单售后",
+			"inc": 1,
+			"dec": 0
+		},
+		"consume_reward": {
+			"name": "下单奖励",
+			"inc": 1,
+			"dec": 0
+		},
+		"manjian_gift_give": {
+			"name": "满减送活动赠品发放",
+			"inc": 1,
+			"dec": 0
+		},
+		"manjian_gift_back": {
+			"name": "满减送活动赠品退还",
+			"inc": 0,
+			"dec": 1
+		},
+		"recharge": {
+			"name": "会员充值积分发放",
+			"inc": 1,
+			"dec": 0,
+			"is_change_get": 1
+		},
+		"sow_community": {
+			"name": "种草奖励发放",
+			"inc": 1,
+			"dec": 0,
+			"is_change_get": 1
+		}
+	},
+	"balance": {
+		"manjian_gift_give": {
+			"name": "满减送活动赠品发放",
+			"inc": 1,
+			"dec": 0
+		},
+		"manjian_gift_back": {
+			"name": "满减送活动赠品退还",
+			"inc": 0,
+			"dec": 1
+		},
+		"sow_community": {
+			"name": "种草奖励发放",
+			"inc": 1,
+			"dec": 0,
+			"is_change_get": 1
+		}
+	}
 }

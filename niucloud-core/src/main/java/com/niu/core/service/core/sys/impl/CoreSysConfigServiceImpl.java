@@ -55,7 +55,7 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
         SysWebsiteVo vo = new SysWebsiteVo();
         BeanUtils.copyProperties(model, vo);
 
-        SysServiceVo sysService = getService(siteId);
+        SysServiceVo sysService = getService();
         if (sysService != null) BeanUtils.copyProperties(sysService, vo);
 
         return vo;
@@ -80,18 +80,17 @@ public class CoreSysConfigServiceImpl implements ICoreSysConfigService {
         service.set("tel", configParam.getTel());
         service.set("site_login_logo", configParam.getSiteLoginLogo());
         service.set("site_login_bg_img", configParam.getSiteLoginBgImg());
-        coreConfigService.setConfig(siteId, "SERVICE_INFO", service);
+        coreConfigService.setConfig(RequestUtils.defaultSiteId(), "SERVICE_INFO", service);
     }
 
     /**
      * 获取服务信息
      *
-     * @param siteId
      * @return
      */
     @Override
-    public SysServiceVo getService(Integer siteId) {
-        JSONObject config = coreConfigService.getConfigValue(siteId, "SERVICE_INFO");
+    public SysServiceVo getService() {
+        JSONObject config = coreConfigService.getConfigValue(RequestUtils.defaultSiteId(), "SERVICE_INFO");
         return JSONUtil.toBean(config, SysServiceVo.class);
     }
 

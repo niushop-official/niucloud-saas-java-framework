@@ -20,6 +20,7 @@ import com.niu.shop.service.admin.delivery.IShopDeliveryLocalDeliveryService;
 import com.niu.shop.service.admin.delivery.vo.ShopDeliveryLocalDeliveryInfoVo;
 import com.niu.shop.service.admin.delivery.vo.ShopDeliveryLocalDeliveryListVo;
 import com.niu.shop.service.admin.delivery.vo.ThirdTypeVo;
+import com.niu.shop.service.core.delivery.ICoreLocalDeliveryService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -42,6 +43,9 @@ public class ShopDeliveryLocalDeliveryServiceImpl implements IShopDeliveryLocalD
     @Resource
     private ICoreConfigService coreConfigService;
 
+    @Resource
+    private ICoreLocalDeliveryService coreLocalDeliveryService;
+
     private final String ENCRYPT_STR = "*****************************";
 
     /**
@@ -61,7 +65,7 @@ public class ShopDeliveryLocalDeliveryServiceImpl implements IShopDeliveryLocalD
 
             ShopDeliveryLocalDeliveryInfoVo vo = new ShopDeliveryLocalDeliveryInfoVo();
             BeanUtils.copyProperties(model, vo);
-            JSONObject config = getConfig();
+            JSONObject config = coreLocalDeliveryService.getConfig(RequestUtils.siteId());
 
             // 遍历ThirdTypeEnum中的每个条目
             for (Map.Entry<String, ThirdTypeEnum.ThirdTypeValue> entry : ThirdTypeEnum.getThirdType("").entrySet()) {
@@ -124,7 +128,7 @@ public class ShopDeliveryLocalDeliveryServiceImpl implements IShopDeliveryLocalD
         if (data.isEmpty()) {
             return;
         }
-        JSONObject config = getConfig();
+        JSONObject config = coreLocalDeliveryService.getConfig(RequestUtils.siteId());
         if (data.containsKey("default")) {
             config.set("default", data.get("default"));
         }
@@ -155,7 +159,7 @@ public class ShopDeliveryLocalDeliveryServiceImpl implements IShopDeliveryLocalD
             }
             config.put(type, typeConfig);
         }
-        setConfig(config);
+        coreLocalDeliveryService.setConfig(config, RequestUtils.siteId());
     }
 
     @Override
@@ -171,24 +175,5 @@ public class ShopDeliveryLocalDeliveryServiceImpl implements IShopDeliveryLocalD
                 .collect(Collectors.toList());
     }
 
-    public JSONObject getConfig() {
-        JSONObject data = coreConfigService.getConfigValue(RequestUtils.siteId(), "SHOP_THREE_PARTY_DELIVERY_CONFIG");
-        for (Map.Entry<String, ThirdTypeEnum.ThirdTypeValue> entry : ThirdTypeEnum.getThirdType("").entrySet()) {
-            String type = entry.getKey();
-            ThirdTypeEnum.ThirdTypeValue item = entry.getValue();
-            if (JSONUtil.isNull(data) || !JSONUtil.toJsonStr(data).contains(type)) {
-                Map<String, String> temp = new HashMap<>();
-                for (String column : item.getColumn()) {
-                    temp.put(column, "");
-                }
-                data.put(type, temp);
-            }
-        }
-        return data;
-    }
-
-    public void setConfig(JSONObject data) {
-        coreConfigService.setConfig(RequestUtils.siteId(), "SHOP_THREE_PARTY_DELIVERY_CONFIG", data);
-    }
 
 }

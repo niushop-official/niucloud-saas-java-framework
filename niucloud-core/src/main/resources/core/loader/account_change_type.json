@@ -1,101 +1,108 @@
 {
-  "point": {
-    "adjust": {
-      "name": "调整",
-      "inc": 1,
-      "dec": 1
-    },
-    "member_register": {
-      "name": "会员注册",
-      "inc": 1,
-      "dec": 0
-    },
-    "recharge_give": {
-      "name": "充值赠送",
-      "inc": 1,
-      "dec": 0
-    },
-    "level_upgrade": {
-      "name": "会员升级礼包",
-      "inc": 1,
-      "dec": 0
-    },
-    "day_sign_award": {
-      "name": "日签奖励",
-      "inc": 1,
-      "dec": 1
-    },
-    "continue_sign_award": {
-      "name": "连签奖励",
-      "inc": 1,
-      "dec": 0
-    }
-  },
-  "balance": {
-
-    "adjust": {
-      "name": "调整",
-      "inc": 1,
-      "dec": 1
-    },
-    "member_register": {
-      "name": "会员注册",
-      "inc": 1,
-      "dec": 0
-    },
-    "order": {
-      "name": "订单消费",
-      "inc": 0,
-      "dec": 1
-    },
-    "order_refund": {
-      "name": "订单退款",
-      "inc": 0,
-      "dec": 1
-    },
-    "recharge_refund": {
-      "name": "充值退款",
-      "inc": 0,
-      "dec": 1
-    },
-    "level_upgrade": {
-      "name": "会员升级礼包",
-      "inc": 1,
-      "dec": 0
-    },
-    "day_sign_award": {
-      "name": "日签奖励",
-      "inc": 1,
-      "dec": 1
-    },
-    "continue_sign_award": {
-      "name": "连签奖励",
-      "inc": 1,
-      "dec": 0
-    }
-  },
-  "money": {
-    "award": {
-      "name": "活动奖励",
-      "inc": 1,
-      "dec": 0
-    },
-    "cash_out": {
-      "name": "提现",
-      "inc": 0,
-      "dec": 1
-    }
-  },
-  "commission": {
-    "award": {
-      "name": "活动奖励",
-      "inc": 1,
-      "dec": 0
-    },
-    "cash_out": {
-      "name": "提现",
-      "inc": 0,
-      "dec": 1
-    }
-  }
+	"point": {
+		"adjust": {
+			"name": "账户调整",
+			"inc": 1,
+			"dec": 1
+		},
+		"member_register": {
+			"name": "会员注册",
+			"inc": 1,
+			"dec": 0
+		},
+		"recharge_give": {
+			"name": "充值赠送",
+			"inc": 1,
+			"dec": 0
+		},
+		"level_upgrade": {
+			"name": "升级礼包",
+			"inc": 1,
+			"dec": 0
+		},
+		"day_sign_award": {
+			"name": "日签奖励",
+			"inc": 1,
+			"dec": 0
+		},
+		"continue_sign_award": {
+			"name": "连签奖励",
+			"inc": 1,
+			"dec": 0
+		}
+	},
+	"balance": {
+		"adjust": {
+			"name": "账户调整",
+			"inc": 1,
+			"dec": 1
+		},
+		"member_register": {
+			"name": "会员注册",
+			"inc": 1,
+			"dec": 0
+		},
+		"recharge": {
+			"name": "余额充值",
+			"inc": 1,
+			"dec": 0
+		},
+		"recharge_refund": {
+			"name": "充值订单退款",
+			"inc": 0,
+			"dec": 1
+		},
+		"order": {
+			"name": "订单消费",
+			"inc": 0,
+			"dec": 1
+		},
+		"order_refund": {
+			"name": "订单退款",
+			"inc": 1,
+			"dec": 0,
+			"is_change_get": 0
+		},
+		"level_upgrade": {
+			"name": "升级礼包",
+			"inc": 1,
+			"dec": 0
+		},
+		"day_sign_award": {
+			"name": "日签奖励",
+			"inc": 1,
+			"dec": 0
+		},
+		"continue_sign_award": {
+			"name": "连签奖励",
+			"inc": 1,
+			"dec": 0
+		}
+	},
+	"money": {
+		"award": {
+			"name": "活动奖励",
+			"inc": 1,
+			"dec": 0
+		},
+		"cash_out": {
+			"name": "账户提现",
+			"inc": 0,
+			"dec": 1,
+			"is_change_get": 0
+		}
+	},
+	"commission": {
+		"award": {
+			"name": "活动奖励",
+			"inc": 1,
+			"dec": 0
+		},
+		"cash_out": {
+			"name": "账户提现",
+			"inc": 0,
+			"dec": 1,
+			"is_change_get": 0
+		}
+	}
 }

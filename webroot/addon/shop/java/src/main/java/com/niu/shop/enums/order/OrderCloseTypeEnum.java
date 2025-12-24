@@ -9,10 +9,11 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 public enum OrderCloseTypeEnum {
-    SHOP_CLOSE("shop_close","卖家关闭"),
-    BUYER_CLOSE("buyer_close","买家关闭"),
-    AUTO_CLOSE("auto_close","自动关闭"),
-    REFUND_CLOSE("refund_close","退款完成关闭");
+    SHOP_CLOSE("shop_close","后台关闭"),
+    BUYER_CLOSE("buyer_close","用户关闭"),
+    AUTO_CLOSE("auto_close","未支付自动关闭"),
+    REFUND_CLOSE("refund_close","退款完成关闭"),
+    ORDER_CLOSE_ALLOW_REFUND_ACTION("order_close_allow_refund", "订单完成关闭售后");
 
     private final String type;
 

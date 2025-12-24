@@ -14,4 +14,6 @@ public class SmsPackageParam {
     private String originalPriceEnd;
     private String timeStart;
     private String timeEnd;
+    private Integer page = 1;
+    private Integer limit = 15;
 }

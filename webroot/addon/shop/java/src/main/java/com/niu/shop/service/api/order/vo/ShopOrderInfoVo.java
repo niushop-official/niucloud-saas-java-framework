@@ -5,16 +5,21 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.utils.CommonUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.enums.common.ChannelEnum;
+import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.entity.manjian.ShopManjian;
 import com.niu.shop.entity.order.ShopOrderDiscount;
+import com.niu.shop.enums.delivery.ThirdTypeEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderStatusEnum;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +88,7 @@ public class ShopOrderInfoVo implements Serializable {
     private Integer point;  // 积分兑换
     private String activityType;  // 营销类型
     private List<OrderGoods> orderGoods;
-    private ShopOrderListVo.Pay pay;
+    private Pay pay;
     private Long nowTime = System.currentTimeMillis() / 1000;
     private Long expireTime;
     private Store store;
@@ -93,6 +98,10 @@ public class ShopOrderInfoVo implements Serializable {
     private BigDecimal manjianDiscountMoney = BigDecimal.ZERO;
     private Integer formRecordId;
     private String buyerAskDeliveryTime = "";
+    private Integer isCanInvoice = 1;
+    private ShopOrderListVo.Invoice invoice;
+    private String mchId = "";
+    private Boolean isTradeManaged = false;
 
     @Data
     public static class OrderGoods {
@@ -123,6 +132,9 @@ public class ShopOrderInfoVo implements Serializable {
         private String extend;
         private Integer isGift;
         private Integer formRecordId;
+        private String unit = "件";
+        private String impulseBuyInfo;
+        private List<ShopManjian> manjianInfo;
 
 
         public String getGoodsImageThumbSmall() {
@@ -141,6 +153,12 @@ public class ShopOrderInfoVo implements Serializable {
         private String typeName;
         @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
         private Long payTime;
+        private String payMember;
+        private String payMemberHeadimg;
+
+        public String getTypeName() {
+            return PayTypeEnum.getType().getByPath(this.type + ".name", String.class);
+        }
     }
 
     @Data
@@ -168,6 +186,14 @@ public class ShopOrderInfoVo implements Serializable {
         private String thirdDelivery; //配送方（三方配送）
         @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
         private Long createTime; // 创建时间
+        private String thirdDeliveryName;
+
+        public String getThirdDeliveryName() {
+            if (StringUtils.isEmpty(this.thirdDelivery)) {
+                return "";
+            }
+            return ThirdTypeEnum.getThirdTypeName(this.thirdDelivery);
+        }
     }
 
     public String getOrderTypeName() {

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.shop.enums.marketing.ShopManjianGoodsTypeEnum;
 import com.niu.shop.enums.marketing.ShopManjianStatusEnum;
+import com.niu.shop.service.core.marketing.model.ShopManjianRule;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 满减活动表详情
@@ -163,6 +165,8 @@ public class ShopManjianInfoVo implements Serializable {
     private Long updateTime;
 
     private Boolean isJoin;
+
+    private List<ShopManjianRule.GoodsDTO> giftGoods;
 
     /**
      * 状态名称

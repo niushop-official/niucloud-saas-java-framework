@@ -5,4 +5,6 @@ import lombok.Data;
 @Data
 public class GoodsRankComponentParam {
     private Integer rankId;
+
+    private Integer limit = 3;
 }

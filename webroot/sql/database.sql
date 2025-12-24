@@ -18,6 +18,7 @@ CREATE TABLE `nc_activity_exchange_code`
     `admin_username` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '操作人名称（添加人）',
     `admin_id`       INT(11) NOT NULL DEFAULT 0 COMMENT '操作人id',
     `create_time`    INT(11) NOT NULL DEFAULT 0 COMMENT '创建时间',
+    `type_item_id`   INT(11) NOT NULL DEFAULT 0 COMMENT '规格id',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='活动兑换码表';
 
@@ -1208,6 +1209,7 @@ CREATE TABLE `nc_sys_user` (
   `is_del` tinyint unsigned NOT NULL DEFAULT '0',
   `delete_time` int NOT NULL DEFAULT '0' COMMENT '删除时间',
   `update_time` int NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `mobile` VARCHAR(20) NOT NULL DEFAULT '' COMMENT '手机号',
   PRIMARY KEY (`uid`) USING BTREE,
   KEY `uid` (`uid`) USING BTREE,
   KEY `delete_time` (`delete_time`),
@@ -1282,10 +1284,11 @@ CREATE TABLE `nc_verify` (
   `data` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '核销参数',
   `type` varchar(30) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '核销类型',
   `create_time` int NOT NULL DEFAULT '0' COMMENT '核销时间',
-  `verifier_member_id` int NOT NULL DEFAULT '0' COMMENT '核销会员id',
-  `value` varchar(1000) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '核销内容',
+  `verifier_member_id` int NOT NULL DEFAULT '0' COMMENT '核销员的会员id',
+  `value` LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '核销内容',
   `body` varchar(500) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '描述',
   `relate_tag` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '业务标识',
+  `is_admin` tinyint NOT NULL DEFAULT 0 COMMENT '是否后台核销0-否1-是',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='核销记录';
 
@@ -1387,7 +1390,7 @@ INSERT INTO `nc_site`(site_id, site_name, group_id, keywords, app_type, logo, `d
 
 UPDATE `nc_site` SET site_id = 0 WHERE  site_id = 1;
 
-INSERT INTO `nc_sys_user` VALUES ('1', 'admin', '', '$2a$10$32zCE/6SkAUCGPhtIsKwG.2XDfsW.t4SHPmhNUjLBF6uQ54Ww6uue', '', '', '0', '0', '0', '1', '0', '0', '0');
+INSERT INTO `nc_sys_user` VALUES ('1', 'admin', '', '$2a$10$32zCE/6SkAUCGPhtIsKwG.2XDfsW.t4SHPmhNUjLBF6uQ54Ww6uue', '', '', '0', '0', '0', '1', '0', '0', '0', '');
 
 INSERT INTO `nc_sys_user_role` VALUES ('1', '1', '0', '', '0', '1', '1', '0');
 

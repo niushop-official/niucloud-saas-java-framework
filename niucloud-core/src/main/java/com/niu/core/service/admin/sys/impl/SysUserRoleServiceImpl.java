@@ -1,19 +1,25 @@
 package com.niu.core.service.admin.sys.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.google.gson.JsonArray;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.TreeUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.entity.sys.SysArea;
+import com.niu.core.entity.sys.SysRole;
 import com.niu.core.enums.member.StatusEnum;
+import com.niu.core.mapper.sys.SysRoleMapper;
 import com.niu.core.service.admin.sys.param.SysUserRoleParam;
 import com.niu.core.service.admin.sys.param.SysUserRoleSearchParam;
 import com.niu.core.service.admin.sys.ISysUserRoleService;
@@ -28,6 +34,9 @@ import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * 用户权限实现类
@@ -38,61 +47,11 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
     @Resource
     SysUserRoleMapper sysUserRoleMapper;
 
-    /**
-     * 用户权限列表
-     *
-     * @param pageParam 分页参数
-     * @param searchParam  搜索参数
-     * @return PageResult<SysUserRoleListVo>
-     */
-    @Override
-    public PageResult<SysUserRoleListVo> list(PageParam pageParam, SysUserRoleSearchParam searchParam) {
-        Integer page = pageParam.getPage();
-        Integer limit = pageParam.getLimit();
+    @Resource
+    SysRoleMapper sysRoleMapper;
 
-        MPJQueryWrapper<SysUserRole> queryWrapper = new MPJQueryWrapper<>();
-
-        //sql语句
-        queryWrapper.select("nsu.uid, nsu.username, nsu.head_img, nsu.password, nsu.real_name, nsu.last_ip, nsu.last_time, nsu.create_time, nsu.login_count, nsu.status, nsu.is_del, nsu.delete_time, nsu.update_time, nsur.id, nsur.site_id, nsur.role_ids, nsur.is_admin")
-                .setAlias("nsur")
-                .leftJoin("?_sys_user nsu ON nsur.uid = nsu.uid".replace("?_", GlobalConfig.tablePrefix));
-
-        //查询条件判断组装
-        if (ObjectUtil.isNotEmpty(searchParam.getUid())) {
-            queryWrapper.eq("nsu.uid", searchParam.getUid());
-        }
-
-        //排序
-        queryWrapper.orderByDesc("id");
-        //分页查询
-        IPage<SysUserRoleListVo> iPage = sysUserRoleMapper.selectJoinPage(
-                new Page<>(page, limit),
-                SysUserRoleListVo.class,
-                queryWrapper);
-
-
-        return PageResult.build(iPage);
-    }
-
-    /**
-     * 用户权限详情
-     *
-     * @param id 主键参数
-     * @return SysUserRole
-     */
-    @Override
-    public SysUserRoleInfoVo info(Integer id) {
-        SysUserRole model = sysUserRoleMapper.selectOne(
-                new QueryWrapper<SysUserRole>()
-                        .eq("id", id)
-                        .last("limit 1"));
-
-        Assert.notNull(model, "数据不存在");
-
-        SysUserRoleInfoVo vo = new SysUserRoleInfoVo();
-        BeanUtils.copyProperties(model, vo);
-        return vo;
-    }
+    @Resource
+    Cached cached;
 
     /**
      * 用户权限新增
@@ -107,7 +66,7 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
                         .eq("site_id", addParam.getSiteId())
                 );
         if (userRoleCount>0){
-            throw new CommonException("SITE_USER_EXIST");
+            throw new CommonException("该用户已存在");
         }
 
         SysUserRole model = new SysUserRole();
@@ -117,10 +76,13 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
         model.setCreateTime(DateUtils.currTime());
         model.setIsAdmin(addParam.getIsAdmin()==null?0:addParam.getIsAdmin());
         model.setStatus(ObjectUtil.isNull(addParam.getStatus())? StatusEnum.ON.getStatus() : addParam.getStatus());
-        if(model.getStatus()<1){
-            model.setRoleIds(addParam.getRoleIds()==null? JSONUtil.toJsonStr(new JsonArray()):addParam.getRoleIds());
+        if(model.getIsAdmin() == 0){
+            model.setRoleIds(addParam.getRoleIds() ==null ? JSONUtil.toJsonStr(new JsonArray()) : addParam.getRoleIds());
         }
         sysUserRoleMapper.insert(model);
+
+        cached.remove("user_role_" + model.getUid() + "_" + model.getSiteId());
+        cached.remove("user_role_list_" + model.getUid());
     }
 
     /**
@@ -135,15 +97,39 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
                         .eq("uid", editParam.getUid())
                         .eq("site_id", editParam.getSiteId())
                         .last("limit 1"));
-        Assert.notNull(model, "数据不存在!");
+        Assert.notNull(model, "用户不存在关联权限!");
         Integer isAdmin=model.getIsAdmin();
         if(isAdmin>0){
             //超级管理员不允许改动权限
-            throw new AdminException("ADMIN_NOT_ALLOW_EDIT_ROLE");
+            throw new AdminException("超级管理员不允许改动权限");
         }
         model.setStatus(editParam.getStatus());
         model.setRoleIds(editParam.getRoleIds());
         sysUserRoleMapper.updateById(model);
+
+        cached.remove("user_role_" + model.getUid() + "_" + model.getSiteId());
+        cached.remove("user_role_list_" + model.getUid());
+    }
+
+    @Override
+    public void editAdmin(SysUserRoleParam editParam) {
+        SysUserRole model = sysUserRoleMapper.selectOne(
+            new QueryWrapper<SysUserRole>()
+                .eq("is_admin", 1)
+                .eq("site_id", editParam.getSiteId())
+                .last("limit 1"));
+        Assert.notNull(model, "站点用户不存在!");
+
+        // 清除原管理员权限缓存
+        cached.remove("user_role_" + model.getUid() + "_" + model.getSiteId());
+        cached.remove("user_role_list_" + model.getUid());
+
+        model.setUid(editParam.getUid());
+        sysUserRoleMapper.updateById(model);
+
+        // 清除新管理员权限缓存
+        cached.remove("user_role_" + model.getUid() + "_" + model.getSiteId());
+        cached.remove("user_role_list_" + model.getUid());
     }
 
     /**
@@ -161,6 +147,9 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
         Assert.notNull(model, "数据不存在!");
 
         sysUserRoleMapper.delete(new QueryWrapper<SysUserRole>().eq("id", id));
+
+        cached.remove("user_role_" + model.getUid() + "_" + model.getSiteId());
+        cached.remove("user_role_list_" + model.getUid());
     }
 
     /**
@@ -172,14 +161,31 @@ public class SysUserRoleServiceImpl implements ISysUserRoleService {
      */
     @Override
     public SysUserRoleInfoVo getUserRole(Integer site_id, Integer uid) {
-        SysUserRole model=sysUserRoleMapper.selectOne(new QueryWrapper<SysUserRole>().eq("uid", uid).eq("site_id", site_id).last(" limit 1"));
-        SysUserRoleInfoVo vo = new SysUserRoleInfoVo();
-        if(ObjectUtil.isNotNull(model)){
-            BeanUtils.copyProperties(model, vo);
-            return vo;
-        }else{
-            return null;
-        }
+        return cached.rememberObject(Arrays.asList("user_role_" + uid + "_" + site_id), uniqueKey -> {
+            SysUserRole model=sysUserRoleMapper.selectOne(new QueryWrapper<SysUserRole>().eq("uid", uid).eq("site_id", site_id).last(" limit 1"));
+            SysUserRoleInfoVo vo = new SysUserRoleInfoVo();
+            if(ObjectUtil.isNotNull(model)){
+                BeanUtils.copyProperties(model, vo);
+                return vo;
+            }else{
+                return null;
+            }
+        });
+    }
+
+    /**
+     * 通过角色id组获取角色
+     * @param userRoleIds
+     * @param siteId
+     * @return
+     */
+    @Override
+    public List<String> getRoleByUserRoleIds(String userRoleIds, Integer siteId) {
+        return sysRoleMapper.selectList(new QueryWrapper<SysRole>()
+            .in("role_id", JSONUtil.parseArray(userRoleIds))
+            .eq("status", StatusEnum.ON.getStatus())
+            .eq("site_id", siteId)
+        ).stream().map(i -> i.getRoleId().toString()).toList();
     }
 
 }

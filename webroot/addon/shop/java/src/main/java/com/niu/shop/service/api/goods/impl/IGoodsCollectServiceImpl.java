@@ -16,6 +16,7 @@ import com.niu.shop.service.api.goods.IGoodsCollectService;
 import com.niu.shop.service.api.goods.vo.GoodsBrowseListVo;
 import com.niu.shop.service.api.goods.vo.ShopGoodsCollectVo;
 import com.niu.shop.service.core.goods.ICoreGoodsActivePriceService;
+import com.niu.shop.service.core.goods.ICoreGoodsCollectNumService;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
 import com.niu.shop.service.core.goods.param.GetShowPriceParam;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
@@ -35,6 +36,9 @@ public class IGoodsCollectServiceImpl implements IGoodsCollectService {
 
     @Resource
     ICoreGoodsActivePriceService coreGoodsActivePriceService;
+
+    @Resource
+    ICoreGoodsCollectNumService coreGoodsCollectNumService;
 
     @Override
     public PageResult<ShopGoodsCollectVo> getMemberGoodsCollectList(PageParam pageParam) {
@@ -85,6 +89,7 @@ public class IGoodsCollectServiceImpl implements IGoodsCollectService {
         param.setSiteId(model.getSiteId());
         param.setCollectNum(1);
         coreGoodsStatService.addStat(param);
+        coreGoodsCollectNumService.inc(goodsId, 1);
     }
 
     @Override
@@ -95,6 +100,7 @@ public class IGoodsCollectServiceImpl implements IGoodsCollectService {
         param.setSiteId(RequestUtils.siteId());
         param.setCollectNum(-1);
         coreGoodsStatService.addStat(param);
+        coreGoodsCollectNumService.dec(goodsId, 1);
     }
 
     @Override

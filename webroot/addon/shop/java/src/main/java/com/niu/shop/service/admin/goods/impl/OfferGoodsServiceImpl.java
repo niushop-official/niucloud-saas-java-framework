@@ -1,5 +1,6 @@
 package com.niu.shop.service.admin.goods.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -20,6 +21,7 @@ import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSpecMapper;
 import com.niu.shop.service.admin.goods.IGoodsCategoryService;
+import com.niu.shop.service.admin.goods.IOfferGoodsService;
 import com.niu.shop.service.admin.goods.IShopGoodsBrandService;
 import com.niu.shop.service.admin.goods.IShopGoodsLabelService;
 import com.niu.shop.service.admin.goods.param.*;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
  * 输出商品服务层
  */
 @Service
-public class OfferGoodsServiceImpl {
+public class OfferGoodsServiceImpl implements IOfferGoodsService {
 
     @Resource
     ShopGoodsMapper shopGoodsMapper;
@@ -56,11 +58,8 @@ public class OfferGoodsServiceImpl {
     private ShopGoodsSpecMapper shopGoodsSpecMapper;
 
 
+    @Override
     public Map<String, Object> getWhereInit() {
-        return getLists();
-    }
-
-    public Map<String, Object> getLists() {
         Map<String, Object> result = new HashMap<>();
         ShopGoodsLabelSearchParam shopGoodsLabel = new ShopGoodsLabelSearchParam();
         List<ShopGoodsLabelListVo> shopGoodsLabelListVoList = labelService.list(shopGoodsLabel);
@@ -75,40 +74,45 @@ public class OfferGoodsServiceImpl {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
-        MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
-        queryWrapper.setAlias("g")
-                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("g.site_id, g.goods_id, g.goods_name, g.sub_title, g.goods_image, g.unit, g.goods_video, g.goods_desc, g.goods_id as source_id, g.goods_cover, g.stock");
+        QueryWrapper<ShopGoods> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("site_id,goods_id,goods_name,sub_title,goods_image,unit,goods_video,goods_desc,goods_id,goods_cover,stock");
         queryWrapper.eq("delete_time", 0);
 
-        queryWrapper.eq("g.status", searchParam.getStatus() != null ? searchParam.getStatus() : 1);
+        queryWrapper.eq("status", searchParam.getStatus() != null ? searchParam.getStatus() : 1);
         if (StringUtils.isNotBlank(searchParam.getGoodsName())) {
-            queryWrapper.like("g.goods_name", searchParam.getGoodsName());
+            queryWrapper.like("goods_name", searchParam.getGoodsName());
         }
         if (searchParam.getSiteId() != null) {
-            queryWrapper.eq("g.site_id", searchParam.getSiteId());
+            queryWrapper.eq("site_id", searchParam.getSiteId());
         }
         if (StringUtils.isNotBlank(searchParam.getGoodsType())) {
-            queryWrapper.eq("g.goods_type", searchParam.getGoodsType());
+            queryWrapper.eq("goods_type", searchParam.getGoodsType());
         }
         if (searchParam.getBrandId() != null) {
-            queryWrapper.eq("g.brand_id", searchParam.getBrandId());
+            queryWrapper.eq("brand_id", searchParam.getBrandId());
         }
         if (searchParam.getGoodsCategory() != null) {
-            queryWrapper.eq("g.goods_category", searchParam.getGoodsCategory());
+            queryWrapper.eq("goods_category", searchParam.getGoodsCategory());
         }
         if (CollectionUtils.isNotEmpty(searchParam.getLabelIds())) {
-            queryWrapper.in("g.label_ids", searchParam.getLabelIds());
+            queryWrapper.in("label_ids", searchParam.getLabelIds());
+        }
+        if (searchParam.getGoodsId() != null){
+            queryWrapper.eq("goods_id", searchParam.getGoodsId());
         }
 
-        queryWrapper.orderByDesc("g.create_time");
+        queryWrapper.orderByDesc("create_time");
 
-        IPage<SelectGoodsListVo> iPage = shopGoodsMapper.selectJoinPage(new Page<>(page, limit), SelectGoodsListVo.class, queryWrapper);
+        IPage<ShopGoods> iPage = shopGoodsMapper.selectPage(new Page<>(page, limit), queryWrapper);
         if (iPage.getTotal() == 0 || iPage.getRecords().isEmpty()) {
             return PageResult.build(iPage, List.of());
         }
-
-        List<SelectGoodsListVo> goodsList = iPage.getRecords();
+        List<SelectGoodsListVo> goodsList = iPage.getRecords().stream().map(item ->{
+            SelectGoodsListVo selectGoodsListVo = new SelectGoodsListVo();
+            BeanUtils.copyProperties(item, selectGoodsListVo);
+            selectGoodsListVo.setSourceId(item.getGoodsId());
+            return selectGoodsListVo;
+        }).collect(Collectors.toList());
         List<Integer> goodsIds = goodsList.stream()
                 .map(SelectGoodsListVo::getGoodsId)
                 .collect(Collectors.toList());
@@ -163,20 +167,40 @@ public class OfferGoodsServiceImpl {
     /**
      * 商品详情
      *
-     * @param id 主键
+     * @param
      * @return ShopGoodsInfoVo
      */
-    public ShopGoodsInfoVo getOfferGoodsInfo(Integer id) {
-        ShopGoods model = shopGoodsMapper.selectOne(
-                new QueryWrapper<ShopGoods>()
-                        .eq("goods_id", id)
-                        .eq("site_id", RequestUtils.siteId())
-                        .eq("delete_time", 0));
-        if (model == null) return null;
+    @Override
+    public SelectGoodsListVo getOfferGoodsInfo(Integer goodsId) {
+        PageParam pageParam = new PageParam();
+        pageParam.setPage(1);
+        pageParam.setLimit(1);
+        GoodsOutPutParam goodsOutPutParam = new GoodsOutPutParam();
+        goodsOutPutParam.setGoodsId(goodsId);
+        PageResult<SelectGoodsListVo> offerGoodsList = getOfferGoodsList(pageParam, goodsOutPutParam);
 
-        ShopGoodsInfoVo vo = new ShopGoodsInfoVo();
-        BeanUtils.copyProperties(model, vo);
+        return offerGoodsList.getData().get(0);
+    }
 
-        return vo;
+    @Override
+    public CheckGoodsVo checkGoods(CheckGoodsParam param) {
+       ShopGoods shopGoods = shopGoodsMapper.selectById(param.getGoodsId());
+       ShopGoodsSku shopGoodsSku = shopGoodsSkuMapper.selectById(param.getSkuId());
+       CheckGoodsVo checkGoodsVo = new CheckGoodsVo();
+       if(ObjectUtil.isEmpty(shopGoods) || ObjectUtil.isEmpty(shopGoodsSku)){
+           checkGoodsVo.setCode(-1);
+           checkGoodsVo.setMessage("商品不存在或已下架");
+           return checkGoodsVo;
+       }
+       if(shopGoodsSku.getStock() < param.getNum()) {
+           checkGoodsVo.setCode(-1);
+           checkGoodsVo.setMessage("商品库存不足");
+           return checkGoodsVo;
+       }
+
+       checkGoodsVo.setCode(1);
+       checkGoodsVo.setMessage("成功");
+       return checkGoodsVo;
+
     }
 }

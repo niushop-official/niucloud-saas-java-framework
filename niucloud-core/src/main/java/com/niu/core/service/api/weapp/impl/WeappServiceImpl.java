@@ -85,16 +85,14 @@ public class WeappServiceImpl implements IWeappService {
             WxMaJscode2SessionResult wxUser = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getSessionInfo(param.getCode());
 
             Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("weapp_openid", wxUser.getOpenid()).eq("site_id", RequestUtils.siteId()));
-            if (ObjectUtil.isNotNull(member)) {
-                LoginVo vo = loginService.login(member);
-                return vo;
+            if (member == null && ObjectUtil.isNotEmpty(wxUser.getUnionid())) {
+                member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", wxUser.getUnionid()).eq("site_id", RequestUtils.siteId()));
             }
-            if (ObjectUtil.isNotEmpty(wxUser.getUnionid())) {
-                Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", wxUser.getUnionid()).eq("site_id", RequestUtils.siteId()));
-                if (ObjectUtil.isNotNull(unionidMember)) {
-                    LoginVo vo = loginService.login(unionidMember);
-                    return vo;
-                }
+            if (member != null) {
+                if (ObjectUtil.isEmpty(member.getNickname()) && ObjectUtil.isNotEmpty(param.getNickname())) member.setNickname(param.getNickname());
+                if (ObjectUtil.isEmpty(member.getHeadimg()) && ObjectUtil.isNotEmpty(param.getHeadimg())) member.setHeadimg(param.getHeadimg());
+                if (ObjectUtil.isEmpty(member.getWxUnionid()) && ObjectUtil.isNotEmpty(wxUser.getUnionid())) member.setWxUnionid(wxUser.getUnionid());
+                return loginService.login(member);
             }
 
             LoginVo loginVo = new LoginVo();
@@ -193,12 +191,12 @@ public class WeappServiceImpl implements IWeappService {
         try {
             WxMaJscode2SessionResult wxUser = WechatUtils.miniapp(RequestUtils.siteId()).getUserService().getSessionInfo(param.getCode());
 
-            Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_openid", wxUser.getOpenid()).eq("site_id", RequestUtils.siteId()));
+            Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("weapp_openid", wxUser.getOpenid()).eq("site_id", RequestUtils.siteId()));
             if (ObjectUtil.isNotNull(member)) throw new CommonException("账号已存在");
 
             Member updateMember = new Member();
             updateMember.setMemberId(RequestUtils.memberId());
-            updateMember.setWxOpenid(wxUser.getOpenid());
+            updateMember.setWeappOpenid(wxUser.getOpenid());
             this.memberMapper.updateById(updateMember);
         } catch (Exception e) {
             throw new CommonException(e.getMessage());

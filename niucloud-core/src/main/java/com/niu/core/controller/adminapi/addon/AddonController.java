@@ -56,11 +56,10 @@ public class AddonController {
      * @param addonSearchParam 搜索参数
      * @return Result<PageResult < Addon>>
      */
-    @GetMapping("/addon/list")
+    @GetMapping("/addon")
     @Description("插件列表")
     public Result<PageResult<AddonListVo>> list(@Validated PageParam pageParam, @Validated AddonSearchParam addonSearchParam) {
         PageResult<AddonListVo> list = addonService.list(pageParam, addonSearchParam);
-        System.out.println(RequestUtils.adminSiteId());
         return Result.success(list);
     }
 

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
+import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
@@ -93,6 +94,10 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
 
     @Resource
     ISiteService siteService;
+
+    @Resource
+    Cached cached;
+
     /**
      * 站点列表
      * @param pageParam 分页参数
@@ -408,14 +413,16 @@ public class AuthSiteServiceImpl implements IAuthSiteService {
      */
     @Override
     public List<Integer> getSiteIds() {
-        MPJQueryWrapper<SysUserRole> queryWrapper = new MPJQueryWrapper<SysUserRole>();
-        queryWrapper.select("site_id").eq("uid", RequestUtils.uid()).ne("site_id", RequestUtils.defaultSiteId()).eq("status", 1);
-        List<SysUserRole> sysUserRoleList=sysUserRoleMapper.selectList(queryWrapper);
-        List<Integer> siteIds=new ArrayList<>();
-        for (SysUserRole sysUserRole:sysUserRoleList) {
-            siteIds.add(sysUserRole.getSiteId());
-        }
-        return siteIds;
+        return cached.rememberObject(Arrays.asList("user_role_list_" + RequestUtils.uid()), uniqueKey -> {
+            MPJQueryWrapper<SysUserRole> queryWrapper = new MPJQueryWrapper<SysUserRole>();
+            queryWrapper.select("site_id").eq("uid", RequestUtils.uid()).ne("site_id", RequestUtils.defaultSiteId()).eq("status", 1);
+            List<SysUserRole> sysUserRoleList=sysUserRoleMapper.selectList(queryWrapper);
+            List<Integer> siteIds=new ArrayList<>();
+            for (SysUserRole sysUserRole:sysUserRoleList) {
+                siteIds.add(sysUserRole.getSiteId());
+            }
+            return siteIds;
+        });
     }
 
     /**

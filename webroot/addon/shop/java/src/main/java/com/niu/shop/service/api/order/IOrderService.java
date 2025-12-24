@@ -5,10 +5,11 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.order.param.ShopOrderParam;
 import com.niu.shop.service.api.order.param.DeliveryPackageSearchParam;
 import com.niu.shop.service.api.order.param.ShopOrderSearchParam;
-import com.niu.shop.service.api.order.vo.DeliveryPackageVo;
-import com.niu.shop.service.api.order.vo.OrderNumVo;
-import com.niu.shop.service.api.order.vo.ShopOrderInfoVo;
-import com.niu.shop.service.api.order.vo.ShopOrderListVo;
+import com.niu.shop.service.api.order.vo.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 订单服务接口
@@ -22,7 +23,7 @@ public interface IOrderService {
      * @param searchParam 搜索参数
      * @return PageResult<ShopOrderListVo>
      */
-    PageResult<ShopOrderListVo> page(PageParam pageParam, ShopOrderSearchParam searchParam);
+    ShopOrderPageVo page(PageParam pageParam, ShopOrderSearchParam searchParam);
 
     /**
      * 订单详情
@@ -58,4 +59,11 @@ public interface IOrderService {
      *
      */
     DeliveryPackageVo getPackage(DeliveryPackageSearchParam searchParam);
+
+    /**
+     * 计算发票金额
+     * @param tradeIds
+     * @return
+     */
+    Map<String, BigDecimal> calculateInvoiceMoney(List<Integer> tradeIds);
 }

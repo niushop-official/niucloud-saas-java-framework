@@ -69,7 +69,7 @@ public class VerifyListener extends VerifyEventDefiner {
         }
 
         // 验证过期时间
-        if (orderGoods.getVerifyExpireTime() != null &&
+        if (orderGoods.getVerifyExpireTime() != null && orderGoods.getVerifyExpireTime() > 0 &&
                 orderGoods.getVerifyExpireTime() < DateUtils.currTime()) {
             throw new CommonException("商品已过期");
         }

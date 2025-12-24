@@ -27,6 +27,7 @@ import com.niu.core.entity.sys.NiuSmsTemplate;
 import com.niu.core.entity.sys.SysNotice;
 import com.niu.core.enums.notice.*;
 import com.niu.core.enums.notice.vo.NoticeEnumListVo;
+import com.niu.core.enums.sys.SmsTypeEnum;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.sys.NiuSmsTemplateMapper;
 import com.niu.core.mapper.sys.SysNoticeMapper;
@@ -407,6 +408,11 @@ public class NuiSmsServiceImpl implements INuiSmsService {
     }
 
     @Override
+    public NiuSmsTemplate checkTemplateAudit(String templateKey, String templateId) {
+        return null;
+    }
+
+    @Override
     public JSONObject orderList(PageParam pageParam, String username, OrderListParam param) {
         String orderListUrl = String.format(ORDER_LIST_URL, username);
         JSONObject result = null;
@@ -583,8 +589,8 @@ public class NuiSmsServiceImpl implements INuiSmsService {
         pageListParam.put("original_price_end", param.getOriginalPriceEnd());
         pageListParam.put("time_start", param.getTimeStart());
         pageListParam.put("time_end", param.getTimeEnd());
-        pageListParam.put("page", 1);
-        pageListParam.put("limit", 15);
+        pageListParam.put("page", param.getPage());
+        pageListParam.put("limit", param.getLimit());
         try {
             JSONObject jsonObject = NiucloudUtils.Niucloud.get(PACKAGE_LIST_URL, pageListParam);
             JSONObject result = jsonObject.getJSONObject("data");

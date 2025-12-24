@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.enums.channel.WechatEncryptionTypeEnum;
 import com.niu.core.service.admin.sys.ISysConfigService;
@@ -15,7 +16,9 @@ import com.niu.core.service.admin.wechat.IWechatConfigService;
 import com.niu.core.service.admin.wechat.vo.WechatStaticInfoVo;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
+import com.niu.core.service.core.weapp.ICoreWeappDeliveryService;
 import com.niu.core.service.core.weapp.param.WeappConfigParam;
+import com.niu.core.service.core.weapp.vo.IsTradeManagedVo;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import com.niu.core.service.core.wechat.ICoreWechatConfigService;
 import com.niu.core.service.core.wechat.param.WechatConfigParam;
@@ -45,6 +48,9 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
     @Resource
     ISysConfigService sysConfigService;
 
+    @Resource
+    ICoreWeappDeliveryService coreWeappDeliveryService;
+
     /**
      * 获取公众号配置
      */
@@ -52,6 +58,9 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
     public WeappConfigVo getWeappConfig() {
         WeappConfigVo weappConfigVo = coreWeappConfigService.getWeappConfig(RequestUtils.siteId());
         weappConfigVo = staticInfo(weappConfigVo);
+
+        if (ObjectUtil.isNotEmpty(weappConfigVo.getAppSecret())) weappConfigVo.setAppSecret(StringUtils.ENCRYPTSTR);
+        if (ObjectUtil.isNotEmpty(weappConfigVo.getEncodingAesKey())) weappConfigVo.setEncodingAesKey(StringUtils.ENCRYPTSTR);
 
         if (weappConfigVo.getIsAuthorization().equals(1)) {
             try {
@@ -79,6 +88,9 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
      */
     @Override
     public void setWeappConfig(WeappConfigParam weappConfigParam) {
+        WeappConfigVo weappConfigVo = coreWeappConfigService.getWeappConfig(RequestUtils.siteId());
+        if (weappConfigParam.getAppSecret().equals(StringUtils.ENCRYPTSTR)) weappConfigParam.setAppSecret(weappConfigVo.getAppSecret());
+        if (weappConfigParam.getEncodingAesKey().equals(StringUtils.ENCRYPTSTR)) weappConfigParam.setEncodingAesKey(weappConfigVo.getEncodingAesKey());
         coreWeappConfigService.setWeappConfig(RequestUtils.siteId(), weappConfigParam);
     }
 
@@ -117,6 +129,11 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
     }
 
     @Override
+    public IsTradeManagedVo getIsTradeManaged() {
+        return coreWeappDeliveryService.getIsTradeManaged(RequestUtils.siteId());
+    }
+
+    @Override
     public void setPrivacySetting(JSONObject privacySetting) {
         try {
             WxOpenMaService wxOpenMaService = (WxOpenMaService) WechatUtils.miniapp(RequestUtils.siteId());
@@ -132,11 +149,11 @@ public class WeappConfigServiceImpl implements IWeappConfigService {
         SceneDomainVo sysUrl = sysConfigService.getUrl();
         HttpServletRequest request = RequestUtils.handler();
 
-        vo.setServeUrl(request.getScheme() + "://" + request.getServerName() + "/api/weapp/serve/" + RequestUtils.siteId());
-        vo.setRequestUrl(request.getServerName());
-        vo.setSocketUrl("wss://" + request.getHeader("host"));
-        vo.setDownloadUrl(request.getServerName());
-        vo.setUploadUrl(request.getServerName());
+        vo.setServeUrl("https://" + request.getServerName() + "/api/weapp/serve/" + RequestUtils.siteId());
+        vo.setRequestUrl("https://" + request.getServerName());
+        vo.setSocketUrl("wss://" + request.getServerName());
+        vo.setDownloadUrl("https://" +request.getServerName());
+        vo.setUploadUrl("https://" + request.getServerName());
 
         try {
             vo.setUploadIp(InetAddress.getByName("java.oss.niucloud.com").getHostAddress());

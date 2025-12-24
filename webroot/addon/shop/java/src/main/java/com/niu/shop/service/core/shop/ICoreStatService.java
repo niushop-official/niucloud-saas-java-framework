@@ -1,6 +1,7 @@
 package com.niu.shop.service.core.shop;
 
 import com.niu.shop.service.core.shop.param.AddStatParam;
+import com.niu.shop.service.core.shop.param.StatParam;
 import com.niu.shop.service.core.shop.vo.StatDataVo;
 import com.niu.shop.service.core.shop.vo.StatVo;
 
@@ -40,4 +41,6 @@ public interface ICoreStatService {
      * @return
      */
     StatDataVo getStatData(Integer siteId, Long startTime, Long endtTime);
+
+    void decStat(StatParam param);
 }

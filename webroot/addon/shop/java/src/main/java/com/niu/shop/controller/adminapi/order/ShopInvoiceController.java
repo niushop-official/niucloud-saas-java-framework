@@ -1,5 +1,7 @@
 package com.niu.shop.controller.adminapi.order;
 
+import com.niu.shop.service.admin.order.param.ShopInvoiceAddParam;
+import com.niu.shop.service.admin.order.param.ShopInvoiceAuditParam;
 import jdk.jfr.Description;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
@@ -65,5 +67,18 @@ public class ShopInvoiceController {
         return Result.success();
     }
 
+    @PostMapping("/invoice/add")
+    @Description("添加发票")
+    public Result<Object> add(@Validated @RequestBody ShopInvoiceAddParam shopInvoiceParam) {
+        shopInvoiceService.add(shopInvoiceParam);
+        return Result.success();
+    }
+
+    @PostMapping("/invoice/audit")
+    @Description("审核发票")
+    public Result<Object> audit(@Validated @RequestBody ShopInvoiceAuditParam shopInvoiceParam) {
+        shopInvoiceService.audit(shopInvoiceParam);
+        return Result.success();
+    }
 
 }

@@ -3,6 +3,7 @@ package com.niu.core.common.domain;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -17,9 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * JSON序列化
@@ -199,4 +198,106 @@ public final class BeanJsonSerializer {
         }
     }
 
+    /**
+     * 字符串转化为JSON对象/数组 并且将驼峰转下换线
+     */
+    public static class StringToJsonCamelToUnderlineSerializer extends JsonSerializer<String> {
+
+        @Override
+        public void serialize(String value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+            if (value == null || value.trim().isEmpty()) {
+                jsonGenerator.writeNull();
+                return;
+            }
+
+            // Redis序列化上下文：直接写入原始字符串（保留原逻辑）
+            if (isRedisSerializationContext()) {
+                jsonGenerator.writeString(value);
+                return;
+            }
+
+            // 普通场景：解析JSON并转换key为驼峰
+            try {
+                JSON json = JSONUtil.parse(value);
+                if (json instanceof JSONObject) {
+                    // JSON对象：递归转换所有key为驼峰
+                    Map<String, Object> camelMap = convertCamelToUnderline((JSONObject) json);
+                    jsonGenerator.writeObject(camelMap);
+                } else if (json instanceof JSONArray) {
+                    // JSON数组：递归处理数组内的每个元素
+                    List<Object> camelList = convertArrayCamelToUnderline((JSONArray) json);
+                    jsonGenerator.writeObject(camelList);
+                } else {
+                    // 非JSON对象/数组：直接输出字符串
+                    jsonGenerator.writeString(value);
+                }
+            } catch (Exception e) {
+                // 解析失败：回退为原始字符串
+                jsonGenerator.writeString(value);
+            }
+        }
+
+        /**
+         * 递归处理JSONObject：将所有驼峰key转为下划线（支持嵌套对象）
+         * 示例：userName → user_name，orderInfo → order_info
+         */
+        private Map<String, Object> convertCamelToUnderline(JSONObject jsonObject) {
+            Map<String, Object> resultMap = new HashMap<>();
+            for (String key : jsonObject.keySet()) {
+                // 驼峰key转下划线（Hutool工具类自动处理大写开头/连续大写）
+                String underlineKey = StrUtil.toUnderlineCase(key);
+                Object value = jsonObject.get(key);
+
+                // 递归处理嵌套的JSONObject
+                if (value instanceof JSONObject) {
+                    resultMap.put(underlineKey, convertCamelToUnderline((JSONObject) value));
+                }
+                // 递归处理嵌套的JSONArray
+                else if (value instanceof JSONArray) {
+                    resultMap.put(underlineKey, convertArrayCamelToUnderline((JSONArray) value));
+                }
+                // 普通值：直接放入
+                else {
+                    resultMap.put(underlineKey, value);
+                }
+            }
+            return resultMap;
+        }
+
+        /**
+         * 递归处理JSONArray：遍历数组元素，处理其中的JSONObject/JSONArray
+         */
+        private List<Object> convertArrayCamelToUnderline(JSONArray jsonArray) {
+            List<Object> resultList = new ArrayList<>();
+            for (Object element : jsonArray) {
+                // 元素是JSONObject：转换驼峰key为下划线
+                if (element instanceof JSONObject) {
+                    resultList.add(convertCamelToUnderline((JSONObject) element));
+                }
+                // 元素是JSONArray：递归处理
+                else if (element instanceof JSONArray) {
+                    resultList.add(convertArrayCamelToUnderline((JSONArray) element));
+                }
+                // 普通元素：直接放入
+                else {
+                    resultList.add(element);
+                }
+            }
+            return resultList;
+        }
+
+        /**
+         * 判断是否为Redis序列化上下文（保留原逻辑，建议后续替换为ThreadLocal优化）
+         */
+        private boolean isRedisSerializationContext() {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : stackTrace) {
+                String className = element.getClassName();
+                if (className.contains("Redis") || className.contains("Jackson2JsonRedisSerializer")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

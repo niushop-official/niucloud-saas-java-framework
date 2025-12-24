@@ -15,6 +15,8 @@ public class OrderDeliveryParam implements Serializable {
 
     private Integer siteId;
 
+    private Integer[] deliveryIds;
+
     private Integer[] orderGoodsIds;
 
     private String deliveryType;

@@ -91,28 +91,55 @@ public class SystemServiceImpl implements ISystemService {
         // 3. 目录权限检查
         List<Map<String, Object>> dirsList = new ArrayList<>();
 
+        // 检查jar目录
+        File jarDir = new File(WebAppEnvs.get().webRootDownJar);
+        boolean jardirAccess = checkDirectoryAccess(jarDir);
+        dirsList.add(Map.of(
+            "path", jarDir.getAbsolutePath(),
+            "need", "可读可写",
+            "path_name", "/webroot/jar",
+            "name", "webroot/jar",
+            "status", jardirAccess
+        ));
+
+        // 检查addon源码目录
+        File addonDir = new File(WebAppEnvs.get().webRootDownAddon);
+        boolean addondirAccess = checkDirectoryAccess(addonDir);
+        dirsList.add(Map.of(
+            "path", addonDir.getAbsolutePath(),
+            "need", "可读可写",
+            "path_name", "/webroot/addon",
+            "name", "webroot/addon",
+            "status", addondirAccess
+        ));
+
         // 检查runtime目录
-        File runtimeDir = new File(WebAppEnvs.get().webRootDownResource);
+        File runtimeDir = new File(WebAppEnvs.get().webRootDownRuntime);
         boolean runtimeAccess = checkDirectoryAccess(runtimeDir);
         dirsList.add(Map.of(
                 "path", runtimeDir.getAbsolutePath(),
                 "need", "可读可写",
-                "path_name", "/runtime",
-                "name", "runtime",
+                "path_name", "/webroot/runtime",
+                "name", "webroot/runtime",
                 "status", runtimeAccess
         ));
 
         // 检查upload目录
-        Path upload = Paths.get(WebAppEnvs.get().webRootDownPublic, "upload");
+        Path upload = Paths.get(WebAppEnvs.get().webRootDownResource, "upload");
         String uploadUrl = upload.toString();
         File uploadDir = new File(uploadUrl);
         boolean uploadAccess = checkDirectoryAccess(uploadDir);
         dirsList.add(Map.of(
-                "path", uploadDir.getAbsolutePath(),
-                "need", "可读可写",
-                "path_name", "/public/upload",
-                "name", "upload",
-                "status", uploadAccess
+            "path",
+            uploadDir.getAbsolutePath(),
+            "need",
+            "可读可写",
+            "path_name",
+            "/webroot/resource/upload",
+            "name",
+            "webroot/resource/upload",
+            "status",
+            uploadAccess
         ));
 
         systemVariables.addAll(dirsList);
@@ -142,8 +169,6 @@ public class SystemServiceImpl implements ISystemService {
                 "status", queueRunning
         ));
 
-
-
         return Map.of(
                 "server", serverInfo,
                 "dirs_list", dirsList,
@@ -165,14 +190,13 @@ public class SystemServiceImpl implements ISystemService {
         try {
             Map<String, Object> data = new HashMap<>();
             for (SpreadQrcodeParam.Param qrcodeParam : param.getParams()) {
-                JSONArray jsonArray = JSONUtil.parseArray(qrcodeParam);
-                JSONObject jsonObject = JSONUtil.parseObj(jsonArray);
-                data.put(jsonObject.getStr("name"), qrcodeParam.getColumnValue());
+                data.put(qrcodeParam.getColumnName().toString(), qrcodeParam.getColumnValue());
             }
             String dir = "upload/qrcode/" + RequestUtils.siteId() + "/" + param.getFolder();
             vo.setWeappPath(QrcodeUtils.qrcodeToFile(RequestUtils.siteId(), "weapp", "", param.getPage(), data, dir));
         } catch (Exception e) {
-
+            e.printStackTrace();
+            System.out.println("推广二维码生成失败");
         }
         return vo;
     }

@@ -157,6 +157,7 @@ public class MemberCashOutServiceImpl implements IMemberCashOutService {
         if (ObjectUtil.isEmpty(cashOut)) throw new CommonException("提现申请不存在");
         if (!cashOut.getStatus().equals(MemberCashOutStatusEnum.WAIT_TRANSFER.getStatus())) throw new CommonException("当前提现申请未处于待转账状态");
 
+        param.setChannel(RequestUtils.channel());
         return coreMemberCashOutService.transfer(cashOut, param);
     }
 

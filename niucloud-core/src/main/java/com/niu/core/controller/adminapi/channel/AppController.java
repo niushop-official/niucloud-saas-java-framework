@@ -157,7 +157,7 @@ public class AppController {
      * @param param 证书生成参数
      * @return Result<Map<String, Object>>
      */
-    @PostMapping("/generate_sign_cert")
+    @PostMapping("/generate_sing_cert")
     @Description("生成签名证书")
     public Result<String> generateSignCert(@RequestBody GenerateSignCertParam param) {
         return Result.success(HttpEnum.SUCCESS.getCode(), HttpEnum.SUCCESS.getMsg(), coreAppCloudService.generateSignCert(param));

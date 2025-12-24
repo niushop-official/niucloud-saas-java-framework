@@ -197,7 +197,7 @@ const sortInputListener = debounce((sort, row) => {
         recharge_id: row.recharge_id,
         sort
     }).then((res) => {
-        loadRechargePackageList()
+        loadRechargePackageList(getTablePageStorage(tableData.searchParam).page)
     })
 })
 
@@ -211,7 +211,7 @@ const deleteEvent = (id: number) => {
         }
     ).then(() => {
         deleteRechargePackage(id).then(() => {
-            loadRechargePackageList()
+            loadRechargePackageList(getTablePageStorage(tableData.searchParam).page)
         })
     })
 }

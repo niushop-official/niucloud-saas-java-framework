@@ -4,16 +4,17 @@
             "menu_name": "会员充值",
             "menu_short_name": "会员充值",
             "menu_key": "recharge",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "element Help",
             "api_url": "",
-            "router_path": "",
+            "router_path": "recharge/package/config",
             "view_path": "",
             "methods": "",
-            "sort": 100,
+            "sort": 49,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "充值设置",
@@ -28,7 +29,8 @@
                     "methods": "put",
                     "sort": 100,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": ""
                 },
                 {
                     "menu_name": "充值套餐",
@@ -44,6 +46,7 @@
                     "sort": 99,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "修改状态（开启、关闭）",
@@ -58,7 +61,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "套餐删除",
@@ -73,7 +77,8 @@
                             "methods": "delete",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -90,7 +95,8 @@
                     "methods": "put",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "recharge_package_list"
                 },
                 {
                     "menu_name": "添加套餐",
@@ -105,7 +111,8 @@
                     "methods": "post",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "recharge_package_list"
                 },
                 {
                     "menu_name": "订单列表",
@@ -120,7 +127,8 @@
                     "methods": "get",
                     "sort": 98,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": ""
                 },
                 {
                     "menu_name": "订单详情",
@@ -135,7 +143,8 @@
                     "methods": "get",
                     "sort": 90,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "recharge_order_list"
                 }
             ]
         }

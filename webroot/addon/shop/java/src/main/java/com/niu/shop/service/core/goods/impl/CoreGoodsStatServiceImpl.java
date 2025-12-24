@@ -2,7 +2,9 @@ package com.niu.shop.service.core.goods.impl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.entity.pay.PayRefund;
 import com.niu.shop.entity.goods.ShopGoodsStat;
@@ -11,6 +13,7 @@ import com.niu.shop.mapper.goods.ShopGoodsStatMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
+import com.niu.shop.service.core.goods.param.GoodsStatParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -90,6 +93,21 @@ public class CoreGoodsStatServiceImpl implements ICoreGoodsStatService {
                     return param;
                 })
                 .forEach(this::addStat);
+    }
+
+    @Override
+    public void decStat(GoodsStatParam param) {
+        String date = DateUtils.timestampToString(param.getTime(), "yyyy-MM-dd");
+        Long dateTime = DateUtils.StringToTimestamp(date);
+        ShopGoodsStat shopGoodsStat = shopGoodsStatMapper.selectOne(new LambdaQueryWrapper<ShopGoodsStat>()
+                .eq(ShopGoodsStat::getDate, date)
+                .eq(ShopGoodsStat::getDateTime, dateTime)
+                .eq(ShopGoodsStat::getSiteId, param.getSiteId())
+                .eq(ShopGoodsStat::getGoodsId, param.getGoodsId()));
+        if (shopGoodsStat != null){
+            shopGoodsStat.setSaleNum(Math.max(shopGoodsStat.getSaleNum() - param.getSaleNum(), 0));
+            shopGoodsStatMapper.updateById(shopGoodsStat);
+        }
     }
 
 }

@@ -21,7 +21,7 @@ public interface ILoginService {
 
     void resetPassword(ResetPasswordParam param);
 
-    LoginConfigVo getLoginConfig();
+    LoginConfigVo getLoginConfig(String url);
 
     SendMobileCodeVo sendMobileCode(SendMobileCodeParam param);
 

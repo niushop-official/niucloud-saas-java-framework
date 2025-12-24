@@ -1,6 +1,7 @@
 package com.niu.core.service.admin.sys;
 
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.service.admin.sys.param.SysRoleModifyStatusParam;
 import com.niu.core.service.admin.sys.param.SysRoleParam;
 import com.niu.core.service.admin.sys.param.SysRoleSearchParam;
 import com.niu.core.service.admin.sys.vo.SysRoleInfoVo;
@@ -66,4 +67,9 @@ public interface ISysRoleService {
      */
     List<SysRoleListVo> getAllRole();
 
+    /**
+     * 修改角色状态
+     * @param editParam
+     */
+    void modifyStatus(SysRoleModifyStatusParam editParam);
 }

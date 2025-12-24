@@ -3,6 +3,7 @@ package com.niu.core.service.admin.wxoplatform;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
+import com.niu.core.service.admin.wxoplatform.vo.OplatformConfigVo;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
 
 /**
@@ -22,7 +23,7 @@ public interface IOplatformConfigService {
      *
      * @return
      */
-    JSONObject getWxOplatformConfig();
+    OplatformConfigVo getWxOplatformConfig();
 
     /**
      * 更新微信开放平台配置

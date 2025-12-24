@@ -19,4 +19,5 @@ public class LoginConfigVo implements Serializable {
     private Integer agreementShow = 0;  // 政策协议是否展示
     private String bgUrl = "";
     private String desc = "精选好物，购物优惠的省钱平台";
+    private String wechatError;
 }

@@ -1,10 +1,7 @@
 package com.niu.core.service.api.wechat;
 
 import com.niu.core.service.api.login.vo.LoginVo;
-import com.niu.core.service.api.wechat.param.WechatAuthDataLoginParam;
-import com.niu.core.service.api.wechat.param.WechatAuthParam;
-import com.niu.core.service.api.wechat.param.AuthRegisterParam;
-import com.niu.core.service.api.wechat.param.WechatSyncParam;
+import com.niu.core.service.api.wechat.param.*;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
 import com.niu.core.service.api.wechat.vo.WechatUserInfoVo;
@@ -74,4 +71,10 @@ public interface IWechatService {
      * @param param
      */
     void updateOpenid(WechatAuthParam param);
+
+    /**
+     * 公众号更新用户openid（用于H5注册账号后，在公众号进行登录时绑定wx_openid）
+     * @param param
+     */
+    void updateOpenidByH5(UpdateOpenidByH5Param  param);
 }

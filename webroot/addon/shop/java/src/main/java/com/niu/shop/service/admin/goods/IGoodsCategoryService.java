@@ -60,6 +60,14 @@ public interface IGoodsCategoryService {
     void edit(Integer id, ShopGoodsCategoryParam editParam);
 
     /**
+     * 分类调整使用
+     * @param categoryId
+     * @param oldPid
+     * @param newPid
+     */
+    void batchUpdateCategory(Integer categoryId, Integer oldPid, Integer newPid);
+
+    /**
      * 修改分类排序
      *
      * @param editParam

@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.service.admin.niucloud.INiucloudService;
@@ -25,6 +27,9 @@ public class NiuCloudServiceImpl implements INiucloudService {
     @Resource
     ICoreNiucloudConfigService coreNiucloudConfigService;
 
+    @Resource
+    Cached cached;
+
     /**
      * 获取框架最新版本
      * @return
@@ -34,7 +39,7 @@ public class NiuCloudServiceImpl implements INiucloudService {
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> query = new HashMap<>();
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
 
         JSONObject data = NiucloudUtils.Niucloud.get("store/framework/lastversion", query).getJSONObject("data");
 
@@ -55,7 +60,7 @@ public class NiuCloudServiceImpl implements INiucloudService {
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> query = new HashMap<>();
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
 
         JSONArray data = NiucloudUtils.Niucloud.get("store/framework/version", query).getJSONArray("data");
         if (data == null) return null;
@@ -69,12 +74,15 @@ public class NiuCloudServiceImpl implements INiucloudService {
 
     @Override
     public AuthInfoVo getAuthinfo() {
+        Object cache = cached.get("auth_info");
+        if (cache != null) return (AuthInfoVo) cache;
+
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> query = new HashMap<>();
         query.put("code", instance.getCode());
         query.put("secret", instance.getSecret());
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
 
         JSONObject authInfo = NiucloudUtils.Niucloud.get("authinfo", query).getJSONObject("data");
         if (authInfo == null) return null;
@@ -82,6 +90,8 @@ public class NiuCloudServiceImpl implements INiucloudService {
         AuthInfoVo vo = new AuthInfoVo();
         AuthInfoVo.AuthInfo data = JSONUtil.toBean(authInfo, AuthInfoVo.AuthInfo.class);
         vo.setData(data);
+
+        cached.put("auth_info", vo, 7200);
         return vo;
     }
 
@@ -91,13 +101,15 @@ public class NiuCloudServiceImpl implements INiucloudService {
         Map<String, Object> query = new HashMap<>();
         query.put("code", param.getAuthCode());
         query.put("secret", param.getAuthSecret());
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
 
         JSONObject authInfo = NiucloudUtils.Niucloud.get("authinfo", query).getJSONObject("data");
         if (authInfo == null) throw new CommonException("未获取到授权信息");
 
         coreNiucloudConfigService.setNiucloudConfig(param);
         NiucloudUtils.Niucloud.clearAccessToken();
+
+        cached.remove("auth_info");
     }
 
     /**
@@ -110,7 +122,7 @@ public class NiuCloudServiceImpl implements INiucloudService {
         Map<String, Object> query = new HashMap<>();
         query.put("code", instance.getCode());
         query.put("secret", instance.getSecret());
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
 
         JSONArray addonList = NiucloudUtils.Niucloud.get("member_app_all", query).getJSONArray("data");
         if (addonList == null && addonList.size() == 0) return null;
@@ -145,7 +157,7 @@ public class NiuCloudServiceImpl implements INiucloudService {
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> query = new HashMap<>();
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
 
         return NiucloudUtils.Niucloud.get("store/app_check/" + key, query).get("data", Boolean.class);
     }
@@ -161,7 +173,7 @@ public class NiuCloudServiceImpl implements INiucloudService {
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> query = new HashMap<>();
-        query.put("product_key", instance.getProductKey());
+        query.put("product_key", GlobalConfig.productKey);
         query.put("app_key", param.getAppKey());
 
         JSONArray data = ObjectUtil.defaultIfNull(NiucloudUtils.Niucloud.get("store/app_version/list", query).get("data", JSONArray.class), new JSONArray());

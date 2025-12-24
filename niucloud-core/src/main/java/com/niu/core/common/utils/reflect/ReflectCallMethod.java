@@ -1,13 +1,16 @@
 package com.niu.core.common.utils.reflect;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
 /**
  * 反射获取方法
  */
+@Log4j2
 public class ReflectCallMethod {
 
     /**
@@ -246,6 +249,16 @@ public class ReflectCallMethod {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public static void setFieldValue(Object target, Field field, Object value) {
+        try {
+            field.setAccessible(true);
+            field.set(target, value);
+            log.debug("成功设置字段 {} 的值为: {}", field.getName(), value);
+        } catch (Exception e) {
+            log.error("设置字段失败: {}", field.getName(), e);
+        }
     }
 
     //=============================================================================================//

@@ -2,6 +2,7 @@ package com.niu.core.controller.api.sys;
 
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.Result;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.service.api.sys.ISysVerifyService;
 import com.niu.core.service.api.sys.param.*;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class SysVerifyController {
      */
     @GetMapping("/verify_records")
     public Result<?> verifyRecords(PageParam pageParam, SysVerifyRecordsParam param) {
-        return Result.success(sysVerifyService.records(pageParam, param));
+        return Result.success(sysVerifyService.getRecordsPageByVerifier(pageParam, param));
     }
 
     /**
@@ -60,7 +61,7 @@ public class SysVerifyController {
     public Result<?> verifyDetail(@PathVariable("code") String code) {
         SysVerifyDetailParam param = new SysVerifyDetailParam();
         param.setCode(code);
-        return Result.success(sysVerifyService.detail(param));
+        return Result.success(sysVerifyService.getRecordsDetailByVerifier(param));
     }
 
     /**
@@ -91,6 +92,11 @@ public class SysVerifyController {
             return Result.success();
         }
         return Result.fail();
+    }
+
+    @GetMapping("/member_verify_records")
+    public Result<?> memberVerifyRecords(PageParam pageParam, SysVerifyRecordsParam param) {
+        return Result.success(sysVerifyService.getMemberRecordsList(pageParam, param));
     }
 
 }

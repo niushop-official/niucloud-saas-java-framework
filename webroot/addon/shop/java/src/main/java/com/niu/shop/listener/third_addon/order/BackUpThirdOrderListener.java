@@ -25,9 +25,6 @@ public class BackUpThirdOrderListener extends CommonEventDefiner {
     @Resource
     private ICoreCreateOrderService coreCreateOrderService;
 
-//    @Resource
-//    private ICoreSeckillOrderCreateService coreSeckillOrderCreateService;
-
     @Override
     public CommonEventResult handleCallback(CommonEvent event) {
         if(!event.getEventName().equals("ThirdAddonOrderBackUp")){
@@ -46,37 +43,15 @@ public class BackUpThirdOrderListener extends CommonEventDefiner {
         result.setName("shop");
         Map<String, Object> resultMap = new HashMap<>();
         try {
-            List<CoreOrderCreateResultVo> returnData = new ArrayList<>();
-
-            switch (source) {
-                case "pintuan":
-                    log.info("SHOP-PINTUANBackUpThirdOrder 开始处理拼团订单");
-                    // 调用拼团订单创建服务
-
-                    returnData = coreCreateOrderService.pintuanCreateOrder(data);
-                    log.info("SHOP-PINTUANBackUpThirdOrder 拼团订单处理完成");
-                    break;
-
-                case "seckill":
-                    log.info("SHOP-PINTUANBackUpThirdOrder 开始处理秒杀订单");
-                    // 调用秒杀订单创建服务
-//                    returnData = coreSeckillOrderCreateService.create(data);
-                    log.info("SHOP-PINTUANBackUpThirdOrder 秒杀订单处理完成");
-                    break;
-
-                default:
-                    log.warn("SHOP-PINTUANBackUpThirdOrder 未知订单来源: {}", source);
-                    throw new CommonException("未知的订单来源: " + source);
-            }
-
-            log.info("SHOP-PINTUANBackUpThirdOrder 订单处理流程正常结束，来源: {}", source);
+            List<CoreOrderCreateResultVo> returnData = coreCreateOrderService.activityOrderCreate(source, data);
+            log.info("订单处理流程正常结束，来源: {}", source);
 
             resultMap.put("data", JSONUtil.toJsonStr(returnData));
             resultMap.put("status", true);
             result.setDataMap(resultMap);
             return result;
         } catch (Exception e) {
-            log.error("PINTUAN-BackUpThirdOrder 订单处理异常（来源: {}）: {}", source, e.getMessage(), e);
+            log.error("订单处理异常（来源: {}）: {}", source, e.getMessage(), e);
             resultMap.put("error_msg", e.getMessage());
             resultMap.put("status", false);
             result.setDataMap(resultMap);

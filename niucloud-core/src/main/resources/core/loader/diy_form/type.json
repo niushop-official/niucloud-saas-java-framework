@@ -10,6 +10,7 @@
     "preview": "static/resource/images/diy_form/diy_form_member_info_preview.jpg",
     "sort": 10002,
     "addon": "",
-    "app_type": ["admin"]
+    "app_type": ["admin"],
+    "show_submit": true
   }
 }

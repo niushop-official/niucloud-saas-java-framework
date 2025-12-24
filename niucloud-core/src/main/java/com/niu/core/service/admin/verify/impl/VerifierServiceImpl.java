@@ -72,6 +72,24 @@ public class VerifierServiceImpl implements IVerifierService {
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
     }
 
+    @Override
+    public VerifierListVo detail(Integer id) {
+        Verifier model = verifierMapper.selectOne(new QueryWrapper<Verifier>()
+            .eq("id", id)
+            .eq("site_id", RequestUtils.siteId()));
+        Assert.notNull(model, "核销员不存在");
+
+        VerifierListVo vo = new VerifierListVo();
+        BeanUtils.copyProperties(model, vo);
+
+        Member member = memberMapper.selectOne(new QueryWrapper<Member>().select("member_id,member_no,username,nickname,mobile,headimg").eq("member_id", model.getMemberId()).eq("site_id", RequestUtils.siteId()));
+        MemberBriefInfoVo memberInfoVo = new MemberBriefInfoVo();
+        BeanUtils.copyProperties(member, memberInfoVo);
+        vo.setMember(memberInfoVo);
+
+        return vo;
+    }
+
     /**
      * 获取核销员列表
      * @return
@@ -119,6 +137,19 @@ public class VerifierServiceImpl implements IVerifierService {
 
         verifierMapper.insert(model);
     }
+
+    @Override
+    public void edit(Integer id, VerifierParam editParam) {
+        Verifier model = verifierMapper.selectOne(new QueryWrapper<Verifier>()
+            .eq("id", id)
+            .eq("site_id", RequestUtils.siteId()));
+        Assert.notNull(model, "核销员不存在");
+
+        BeanUtils.copyProperties(editParam, model);
+        model.setVerifyType(JSONUtil.parseArray(editParam.getVerifyType()).toString());
+        verifierMapper.updateById(model);
+    }
+
 
     /**
      * 核销员删除

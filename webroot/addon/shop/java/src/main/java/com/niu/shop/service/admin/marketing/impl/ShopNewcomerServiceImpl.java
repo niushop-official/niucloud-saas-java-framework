@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.utils.CommonUtils;
@@ -116,6 +117,9 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
 
             ShopNewcomerConfigVo.Goods goodsData = new ShopNewcomerConfigVo.Goods();
             BeanUtils.copyProperties(goods, goodsData);
+            if(ObjectUtil.isEmpty(activeGoods.getSkuImage())) {
+                activeGoods.setSkuImage(goods.getGoodsImage());
+            }
             goodsData.setGoodsTypeName(GoodsTypeEnum.getNameByType(goods.getGoodsType()));
             activeGoods.setGoods(goodsData);
 
@@ -210,7 +214,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                 .orderByDesc(ShopGoods::getCreateTime);
 
         if (ObjectUtil.isNotEmpty(param.getGoodsCategory())) {
-            shopGoodsLambdaQueryWrapper.eq(ShopGoods::getGoodsCategory, param.getGoodsCategory());
+            shopGoodsLambdaQueryWrapper.apply("JSON_CONTAINS(goods_category, {0})", "\"" + param.getGoodsCategory()+ "\"");
         }
         if (ObjectUtil.isNotEmpty(param.getGoodsType())) {
             shopGoodsLambdaQueryWrapper.eq(ShopGoods::getGoodsType, param.getGoodsType());
@@ -229,7 +233,10 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                 }
                 break;
             case "selected":
-                shopGoodsLambdaQueryWrapper.in(ShopGoods::getGoodsId, ObjectUtil.isEmpty(param.getGoodsIds()) ? List.of(-1) : param.getGoodsIds());
+                if (CollectionUtils.isNotEmpty(param.getSkuIds())){
+                    List<ShopGoodsSku> shopGoodsSkuList = shopGoodsSkuMapper.selectList(new LambdaQueryWrapper<ShopGoodsSku>().in(ShopGoodsSku::getSkuId, param.getSkuIds()));
+                    shopGoodsLambdaQueryWrapper.in(ShopGoods::getGoodsId, ObjectUtil.isEmpty(shopGoodsSkuList) ? List.of(-1) : shopGoodsSkuList.stream().map(ShopGoodsSku::getGoodsId).collect(Collectors.toList()));
+                }
                 break;
         }
 
@@ -266,15 +273,15 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             List<ShopNewcomerShopGoodsVo.GoodsSku> skuList = new ArrayList<>(skus.size());
             for (ShopGoodsSku sku : skus) {
                 ShopActiveGoods activeGoods = activeGoodsMap.get(sku.getSkuId());
-                if (activeGoods == null) {
-                    continue;
-                }
 
                 ShopNewcomerShopGoodsVo.GoodsSku skuVo = new ShopNewcomerShopGoodsVo.GoodsSku();
+                skuVo.setNewcomerPrice(BigDecimal.ZERO);
                 BeanUtils.copyProperties(sku, skuVo);
-                JSONObject activeGoodsValue = JSON.parseObject(activeGoods.getActiveGoodsValue());
-                BigDecimal newcomerPrice = Optional.ofNullable(activeGoodsValue.getBigDecimal("newcomer_price")).orElse(BigDecimal.ZERO);
-                skuVo.setNewcomerPrice(newcomerPrice);
+                if (activeGoods != null){
+                    JSONObject activeGoodsValue = JSON.parseObject(activeGoods.getActiveGoodsValue());
+                    BigDecimal newcomerPrice = Optional.ofNullable(activeGoodsValue.getBigDecimal("newcomer_price")).orElse(BigDecimal.ZERO);
+                    skuVo.setNewcomerPrice(newcomerPrice);
+                }
                 skuList.add(skuVo);
 
                 if (sku.getIsDefault() == 1) {
@@ -385,6 +392,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
 
                     skuList.add(skuVo);
                 }
+                vo.setSkuList(skuList);
                 list.add(vo);
             }
         }
@@ -439,12 +447,12 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
                     skuVo.setNewcomerPrice(Optional.ofNullable(activeGoodsValue.getBigDecimal("newcomer_price")).orElse(BigDecimal.ZERO));
 
                     if (sku.getIsDefault() == 1) {
-                        skuVo.setNewcomerPrice(skuVoList.get(0).getNewcomerPrice());
+                        skuVo.setNewcomerPrice(skuVo.getNewcomerPrice());
                     }
 
                     skuVoList.add(skuVo);
                 }
-
+                vo.setSkuList(skuVoList);
                 list.add(vo);
             }
         }

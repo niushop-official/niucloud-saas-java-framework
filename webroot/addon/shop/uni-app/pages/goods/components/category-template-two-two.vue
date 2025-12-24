@@ -2,13 +2,16 @@
     <view class="min-h-screen bg-[var(--page-bg-color)] overflow-hidden">
         <view class="mescroll-box bg-[#f6f6f6]" :class="{ 'cart': config.cart.control && config.cart.event === 'cart', 'detail': !(config.cart.control && config.cart.event === 'cart') }" v-if="tabsData.length">
             <mescroll-body ref="mescrollRef" :down="{ use: false }" @init="mescrollInit" @up="getListFn">
-                <view v-if="config.search.control" class="box-border search-box z-10 bg-[#fff] fixed top-0 left-0 right-0 h-[96rpx]" :style="{'top': systemStore.topTabbarInfo.fullHeight || 0}">
-                    <view class="flex-1 search-input">
-                        <text @click.stop="searchNameFn" class="nc-iconfont nc-icon-sousuo-duanV6xx1 btn"></text>
-                        <input class="input" type="text" v-model.trim="searchName" :placeholder="config.search.title" placeholderClass="text-[var(--text-color-light9)]" @confirm="searchNameFn">
-                        <text v-if="searchName" class="nc-iconfont nc-icon-cuohaoV6xx1 clear" @click="searchName=''"></text>
+
+                <view v-if="config.search.control" class="search-box z-10 bg-[#f6f6f6] fixed top-0 left-0 right-0 box-border">
+                    <view class="h-[100rpx] flex-1 flex items-center justify-between" :style="navbarInnerStyle">
+                        <view class="flex-1 search-input bg-[#fff]">
+                            <text @click.stop="searchNameFn" class="nc-iconfont nc-icon-sousuo-duanV6xx1 btn"></text>
+                            <input class="input" type="text" v-model.trim="searchName" :placeholder="config.search.title" @confirm="searchNameFn" placeholderClass="text-[var(--text-color-light9)]">
+                            <text v-if="searchName" class="nc-iconfont nc-icon-cuohaoV6xx1 clear" @click="searchName=''"></text>
+                        </view>
                     </view>
-                </view>
+                </view>    
 
                 <!--  #ifdef  H5 -->
                 <view class="tabs-box z-2 fixed left-0 bg-[#fff] bottom-[50px] top-0" :class="{ '!top-[96rpx]': config.search.control, 'pb-[98rpx]': config.cart.control && config.cart.event === 'cart' }">
@@ -72,8 +75,7 @@
                         </view>
                     </u-popup>
                 </view>
-                <view class="flex justify-center flex-wrap pl-[168rpx] pt-[20rpx] pb-[20rpx]"
-                      :class="{ '!pt-[214rpx]': config.search.control && tabsData[tabActive]?.child_list && tabsData[tabActive]?.child_list.length, 'pt-[120rpx]': config.search.control && (!tabsData[tabActive].child_list || !tabsData[tabActive].child_list.length), 'pt-[118rpx]': tabsData[tabActive]?.child_list && tabsData[tabActive]?.child_list.length && !config.search.control }">
+                <view class="flex justify-center flex-wrap pl-[168rpx] pt-[20rpx] pb-[20rpx]"  :style="listBoxCss">
                     <template v-for="(item, index) in list" :key="item.goods_id">
                         <view class="w-[536rpx] box-border bg-white w-full flex mx-[20rpx] py-[24rpx] px-[20rpx] rounded-[var(--rounded-small)]"
                             :class="{ 'mt-[20rpx]': index }" @click.stop="toLink(item.goods_id)">
@@ -97,15 +99,15 @@
                                     </view>
                                     <template v-if="!item.isMaxBuy">
                                         <view v-if="(item.goods_type == 'real' || (item.goods_type == 'virtual' && item.virtual_receive_type != 'verify')) && item.goodsSku.sku_spec_format === '' && cartList['goods_' + item.goods_id] && cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id] && config.cart.control && config.cart.event === 'cart'" class="flex items-center">
-                                            <view class="relative w-[32rpx] h-[32rpx]">
-                                                <text class="text-[32rpx] text-color nc-iconfont nc-icon-jianshaoV6xx absolute flex items-center justify-center -left-[12rpx] -bottom-[14rpx] -right-[14rpx] -top-[14rpx]"
+                                            <view class="relative w-[44rpx] h-[44rpx]">
+                                                <text class="text-[44rpx] text-color nc-iconfont nc-icon-jianshaoV6xx absolute flex items-center justify-center -left-[12rpx] -bottom-[14rpx] -right-[14rpx] -top-[14rpx]"
                                                     @click.stop="reduceCart(item,cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id])"></text>
                                             </view>
                                             <text class="text-[#333] text-[24rpx] mx-[16rpx]">{{ cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id].num }}</text>
-                                            <view class="relative w-[32rpx] h-[32rpx]">
-                                                <text class="text-[32rpx] text-color iconfont iconjiahao2fill absolute flex items-center justify-center -left-[14rpx] -bottom-[14rpx] -right-[14rpx] -top-[14rpx]"
-                                                    :id="'itemCart' + index"
-                                                    @click.stop="addCartBtn(item,cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id], 'itemCart' + index)"></text>
+                                            <view class="w-[44rpx] h-[44rpx] bg-primary flex items-center justify-center rounded-[50%]">
+                                                <text class="iconfont iconjia font-500 text-[32rpx] text-[#fff]"
+                                                :id="'itemCart' + index"
+                                                @click.stop="addCartBtn(item,cartList['goods_' + item.goods_id]['sku_' + item.goodsSku.sku_id], 'itemCart' + index)"></text>
                                             </view>
                                         </view>
                                         <template v-else-if="(item.goods_type == 'virtual' && item.virtual_receive_type != 'verify') || item.goods_type == 'real'">
@@ -238,6 +240,19 @@ import { cloneDeep } from 'lodash-es'
 import useSystemStore from '@/stores/system';
 const systemStore = useSystemStore()
 
+const navbarInnerStyle = ref('')
+// #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
+let rightButtonWidth = systemStore.menuButtonInfo.width ? systemStore.menuButtonInfo.width * 2 + 'rpx' : '70rpx';
+navbarInnerStyle.value += 'padding-right:calc(' + rightButtonWidth + ' + 30rpx);';
+navbarInnerStyle.value += 'padding-top:' + systemStore.menuButtonInfo.top + 'px;';
+navbarInnerStyle.value += 'padding-bottom: 8px;';
+navbarInnerStyle.value+= 'height:' + systemStore.menuButtonInfo.height + 'px;';
+// #endif
+
+// #ifdef APP-PLUS
+navbarInnerStyle.value += 'padding-top:' + systemStore.systemInfo.statusBarHeight + 'px;';
+// #endif
+
 const instance = getCurrentInstance(); // 获取组件实例
 const cartStore = useCartStore();
 // 查询购物车列表
@@ -307,7 +322,13 @@ const getListFn = (mescroll: mescrollStructure) => {
 const tabsBoxCss = computed(() => {
     let style = ''
     if(config.search.control){
-        style += `top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 96rpx);`
+         // #ifdef H5
+         style += `top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 100rpx);`
+        // #endif
+        // #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
+         style += `top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 0rpx);`
+        // #endif
+       
     }else{
         style += `top: ${ systemStore.topTabbarInfo.height || 0 }px;`
     }
@@ -321,7 +342,13 @@ const tabsBoxCss = computed(() => {
 const twoTabCss = computed(() => {
     let style = ''
     if(config.search.control){
-        style += `top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 94rpx) !important;`
+        // #ifdef H5
+         style += `top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 57px) !important;`
+        // #endif
+        // #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
+         style += `top: calc(${ systemStore.topTabbarInfo.height || 0 }px) !important;`
+        // #endif
+       
     }else{
         style += `top: ${ systemStore.topTabbarInfo.height || 0 }px !important;`
     }
@@ -332,13 +359,51 @@ const twoTabCss = computed(() => {
 const labelPopupCss = computed(() => {
     let style = ''
     // #ifdef MP-WEIXIN
-    style = `padding-top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 20rpx) !important;`
+    style = `padding-top: calc(${ systemStore.topTabbarInfo.height || 0 }px) !important;`
     // #endif
     // #ifdef H5
     style = `padding-top: 20rpx !important;`
     // #endif
     return style
 })
+
+const listBoxCss = computed(() => {
+  let style = '';
+  const hasSearch = config.search.control; // 是否有搜索框
+  const hasChildList = tabsData.value[tabActive.value]?.child_list && tabsData.value[tabActive.value].child_list.length > 0; // 是否有子列表
+
+  // 处理 padding-top（核心逻辑：迁移行内 class 判断）
+  if (hasSearch) {
+    if (hasChildList) {
+      // 有搜索框 + 有子列表 → !pt-[214rpx]
+        // #ifdef H5
+        style += `padding-top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 214rpx);`
+        // #endif
+        // #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
+        style += `padding-top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 114rpx);`
+        // #endif
+      
+    } else {
+      // 有搜索框 + 无子列表 → pt-[120rpx]
+        // #ifdef H5
+         style += `padding-top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 120rpx);`
+        // #endif
+        // #ifdef MP-WEIXIN || MP-BAIDU || MP-TOUTIAO || MP-QQ
+        style += `padding-top: calc(${ systemStore.topTabbarInfo.height || 0 }px + 20rpx);`
+        // #endif
+      
+    }
+  } else {
+    if (hasChildList) {
+      // 无搜索框 + 有子列表 → pt-[118rpx]
+      style += 'padding-top: 118rpx;';
+    } else {
+      // 无搜索框 + 无子列表 → 基础 20rpx（原 else 逻辑）
+      style += 'padding-top: 20rpx;';
+    }
+  }
+  return style;
+});
 
 const goodsMaxBuy = () => {
     list.value.forEach((data, index) => {
@@ -787,7 +852,8 @@ const goodsPrice = (data: any) => {
 .tabs-box .tab-item-active {
     position: relative;
     color: var(--primary-color);
-    background-color: #f6f6f6;
+    font-weight: bold;
+    // background-color: #f6f6f6;
 
     &::before {
         display: inline-block;

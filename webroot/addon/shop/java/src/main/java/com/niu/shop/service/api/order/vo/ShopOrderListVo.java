@@ -9,6 +9,8 @@ import com.niu.core.enums.common.ChannelEnum;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
+import com.niu.shop.enums.order.OrderCloseTypeEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.enums.order.OrderStatusEnum;
 import lombok.Data;
@@ -90,8 +92,13 @@ public class ShopOrderListVo implements Serializable {
     private Integer relateOrderId;
     private Pay pay;
     private Object relateActiveInfo;
-
     private List<OrderGoods> orderGoods;
+    private Store store;
+    private String activityTypeName;
+    private String closeTypeName;
+    private String orderStatusData;
+    private Integer isCanInvoice = 1;
+    private Invoice invoice;
 
     @Data
     public static class OrderGoods {
@@ -111,6 +118,8 @@ public class ShopOrderListVo implements Serializable {
         private BigDecimal goodsMoney; // 商品总价
         private Integer isEnableRefund; // 是否允许退款
         private Integer deliveryId;
+        private String unit = "件";
+        private ShopInvoiceInfoVo.OrderDelivery orderDelivery;
 
         public String getGoodsImageThumbSmall() {
             return CommonUtils.thumbImageSmall(this.siteId, this.goodsImage);
@@ -149,5 +158,29 @@ public class ShopOrderListVo implements Serializable {
         }else{
             return res;
         }
+    }
+
+    @Data
+    public static class Store {
+        private Integer storeId;
+        private String storeName;
+        private String storeMobile;
+    }
+
+    public String getActivityTypeName(){
+        return MarketingActivityTypeEnum.getNameByTypeDefaultShop(this.activityType);
+    }
+
+    public String getCloseTypeName(){
+        return OrderCloseTypeEnum.getNameByType(this.closeType);
+    }
+
+    public String getOrderStatusData(){
+        return OrderStatusEnum.getNameByStatus(Integer.parseInt(this.status));
+    }
+
+    @Data
+    public static class Invoice {
+        private Integer id;
     }
 }

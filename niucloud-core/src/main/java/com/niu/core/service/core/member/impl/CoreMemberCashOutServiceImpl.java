@@ -14,17 +14,22 @@ import com.niu.core.enums.member.AccountTypeEnum;
 import com.niu.core.enums.member.MemberCashOutStatusEnum;
 import com.niu.core.enums.pay.PayMainType;
 import com.niu.core.enums.pay.TransferTypeEnum;
+import com.niu.core.event.member.AfterCashApplyEvent;
+import com.niu.core.event.member.AfterCashFinishEvent;
+import com.niu.core.event.member.AfterCashRefuseEvent;
 import com.niu.core.mapper.member.MemberCashOutAccountMapper;
 import com.niu.core.mapper.member.MemberCashOutMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.service.admin.member.param.CashOutTransferParam;
 import com.niu.core.service.admin.member.param.MemberCashOutAuditParam;
 import com.niu.core.service.admin.member.vo.CashOutConfigVo;
+import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.member.ICoreMemberAccountService;
 import com.niu.core.service.core.member.ICoreMemberCashOutService;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.member.param.MemberCashOutApplyParam;
 import com.niu.core.service.core.pay.ICoreTransferService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -105,6 +110,13 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         model.setTransferPayee(ObjectUtil.isNull(param.getTransferPayee()) ? "" : JSONUtil.parseObj(param.getTransferPayee()).toString());
 
         this.addCashOutRecord(model, member, config);
+
+        AfterCashApplyEvent event = new AfterCashApplyEvent();
+        event.setSiteId(param.getSiteId());
+        event.setName("AfterCashApplyEvent");
+        event.setCashOut(model);
+        EventAndSubscribeOfPublisher.publishAll(event);
+
         return model.getId();
     }
 
@@ -241,6 +253,12 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         cashOut.setStatus(MemberCashOutStatusEnum.TRANSFERED.getStatus());
         memberCashOutMapper.updateById(cashOut);
 
+        AfterCashFinishEvent event = new AfterCashFinishEvent();
+        event.setSiteId(cashOut.getSiteId());
+        event.setName("AfterCashFinishEvent");
+        event.setCashOut(cashOut);
+        EventAndSubscribeOfPublisher.publishAll(event);
+
         this.give(cashOut);
     }
 
@@ -255,6 +273,12 @@ public class CoreMemberCashOutServiceImpl implements ICoreMemberCashOutService {
         cashOut.setStatus(MemberCashOutStatusEnum.REFUSE.getStatus());
         cashOut.setRefuseReason(param.getRefuseReason() == null ? "": param.getRefuseReason());
         memberCashOutMapper.updateById(cashOut);
+
+        AfterCashRefuseEvent event = new AfterCashRefuseEvent();
+        event.setSiteId(cashOut.getSiteId());
+        event.setName("AfterCashRefuseEvent");
+        event.setCashOut(cashOut);
+        EventAndSubscribeOfPublisher.publishAll(event);
 
         this.giveback(cashOut);
     }

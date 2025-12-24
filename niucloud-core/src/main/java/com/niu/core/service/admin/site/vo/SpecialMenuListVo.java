@@ -22,8 +22,10 @@ public class SpecialMenuListVo {
         private String key;
         private String menuName;
         private String menuKey;
+        private String appType;
         private String menuShortName;
         private String parentKey;
+        private String parentSelectKey;
         private String menuType;
         private String icon;
         private String apiUrl;
@@ -32,6 +34,6 @@ public class SpecialMenuListVo {
         private String methods;
         private Integer sort;
         private String status;
-        private String isShow;
+        private Integer isShow;
         private List<MenuVo> children;}
 }

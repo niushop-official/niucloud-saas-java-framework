@@ -63,7 +63,6 @@ public class MemberSignServiceImpl implements IMemberSignService {
         queryWrapper.orderByDesc("ms.sign_id");
 
         if (ObjectUtil.isNotEmpty(searchParam.getKeywords())){
-//            queryWrapper.like("m.member_no|m.username|m.nickname|m.mobile", searchParam.getKeywords());
             QueryMapperUtils.addMultiLike(queryWrapper, searchParam.getKeywords(),
                     "m.member_no", "m.username", "m.nickname", "m.mobile");
         }

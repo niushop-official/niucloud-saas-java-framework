@@ -1,10 +1,16 @@
 package com.niu.shop.service.core.goods.param;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GoodsAddStatParam {
     private Integer siteId;
     private Integer goodsId;

@@ -4,6 +4,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.WebAppEnvs;
@@ -17,6 +19,7 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.image.ImageUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysConfig;
+import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.mapper.member.MemberLevelMapper;
 import com.niu.core.mapper.member.MemberMapper;
 import com.niu.core.mapper.sys.SysConfigMapper;
@@ -33,6 +36,7 @@ import com.niu.shop.entity.goods.*;
 import com.niu.shop.entity.order.config.ShopOrderEvaluate;
 import com.niu.shop.enums.active.ActiveClassEnum;
 import com.niu.shop.enums.active.ActiveTypeEnum;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.goods.*;
 import com.niu.shop.service.api.goods.IGoodsService;
@@ -65,8 +69,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -234,6 +240,13 @@ public class GoodsServiceImpl implements IGoodsService {
                 BeanUtils.copyProperties(vo, brand);
                 vo.setGoodsBrand(brand);
             }
+            // 限购查询当前会员已购数量
+            if (RequestUtils.memberId() != null) {
+                vo.setHasBuy(coreGoodsLimitBuyService.getGoodsHasBuyNumber(RequestUtils.siteId(), RequestUtils.memberId(), vo.getGoodsId()));
+            }else{
+                vo.setHasBuy(0);
+            }
+
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -250,75 +263,6 @@ public class GoodsServiceImpl implements IGoodsService {
      */
     public BigDecimal calculateMemberPrice(MemberLevelInfoVo memberLevel, String calculateType, JSONObject config, BigDecimal price) {
         return coreGoodsActivePriceService.calculateMemberPrice(memberLevel, calculateType, config, price);
-    }
-
-    /**
-     * 获取商品列表供组件调用
-     *
-     * @param param
-     */
-    @Override
-    public List<ShopGoodsListVo> getGoodsComponents(ShopGoodsComponentsSearchParam param) {
-        MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
-        queryWrapper.setAlias("g")
-                .leftJoin("?_shop_goods_brand sgb ON g.brand_id = sgb.brand_id".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("g.goods_id,g.site_id,goods_name,sub_title,goods_type,goods_cover,g.stock,g.sale_num + g.virtual_sale_num as sale_num,status,g.sort,g.create_time,member_discount,virtual_verify_type,unit,is_discount,label_ids,g.stock,g.brand_id,sgb.brand_name,sgb.logo");
-        queryWrapper.eq("g.site_id", RequestUtils.siteId());
-        queryWrapper.eq("g.status", 1);
-        queryWrapper.eq("g.is_gift", 0);
-        queryWrapper.eq("g.delete_time", 0);
-        if (ObjectUtil.isNotEmpty(param.getGoodsIds())) queryWrapper.in("g.goods_id", param.getGoodsIds());
-        if (ObjectUtil.isNotEmpty(param.getNum()) && param.getNum() > 0) queryWrapper.last("limit " + param.getNum());
-        if (ObjectUtil.isNotEmpty(param.getGoodsCategory()) && param.getGoodsCategory() > 0)
-            queryWrapper.like("goods_category", "\"" + param.getGoodsCategory() + "\"");
-        if (ObjectUtil.isNotEmpty(param.getOrder())) {
-            if (param.getOrder().equals("sale_num")) {
-                queryWrapper.orderByDesc("g.sale_num");
-            } else if (param.getOrder().equals("price")) {
-                queryWrapper.orderByDesc("gs.price");
-            }
-        } else {
-            queryWrapper.orderBy(true, false, "g.sort");
-            queryWrapper.orderBy(true, false, "g.create_time");
-        }
-
-        List<ShopGoodsListVo> list = shopGoodsMapper.selectJoinList(ShopGoodsListVo.class, queryWrapper);
-        for (ShopGoodsListVo vo : list) {
-            ShopGoodsSku goodsSku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>()
-                    .eq("goods_id", vo.getGoodsId()).eq("is_default", 1));
-            ShopGoodsListVo.GoodsSku goodsSkuVo = new ShopGoodsListVo.GoodsSku();
-            BeanUtils.copyProperties(goodsSku, goodsSkuVo);
-
-            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
-                .skuId(goodsSku.getSkuId())
-                .price(goodsSku.getPrice())
-                .memberDiscount(vo.getMemberDiscount())
-                .memberPrice(goodsSku.getMemberPrice())
-                .memberId(RequestUtils.memberId())
-                .build());
-            goodsSkuVo.setShowPrice(skuShowPrice.getShowPrice());
-            goodsSkuVo.setShowType(skuShowPrice.getShowType());
-
-            vo.setGoodsSku(goodsSkuVo);
-            vo.setGoodsLabelName(getGoodsLabelName(vo.getLabelIds()));
-            if (vo.getBrandId() > 0) {
-                ShopGoodsListVo.Brand brand = new ShopGoodsListVo.Brand();
-                BeanUtils.copyProperties(vo, brand);
-                vo.setGoodsBrand(brand);
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public List<GoodsLabelListVo> getGoodsLabelName(String labelIds) {
-        if (ObjectUtil.isEmpty(labelIds) || JSONUtil.parseArray(labelIds).isEmpty()) return new LinkedList<>();
-        return CollectUtils.convert(shopGoodsLabelMapper.selectList(new QueryWrapper<ShopGoodsLabel>().eq("status", 1).in("label_id", JSONUtil.parseArray(labelIds)).orderByDesc("sort")), GoodsLabelListVo.class);
-    }
-
-    @Override
-    public CoreSysConfigVo searchConfig() {
-        return coreConfigService.getConfig(RequestUtils.siteId(), "GOODS_SEARCH_CONFIG");
     }
 
     /**
@@ -356,15 +300,15 @@ public class GoodsServiceImpl implements IGoodsService {
 
         // 获取展示价格
         ShowPriceVo detailShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
-            .skuId(sku.getSkuId())
-            .price(sku.getPrice())
-            .memberDiscount(goods.getMemberDiscount())
-            .memberPrice(sku.getMemberPrice())
-            .memberId(RequestUtils.memberId())
-            .build());
+                .skuId(sku.getSkuId())
+                .price(sku.getPrice())
+                .memberDiscount(goods.getMemberDiscount())
+                .memberPrice(sku.getMemberPrice())
+                .memberId(RequestUtils.memberId())
+                .build());
         vo.setShowPrice(detailShowPrice.getShowPrice());
         vo.setShowType(detailShowPrice.getShowType());
-
+        vo.setMemberDiscount(goods.getMemberDiscount());
         goodsVo.setSaleNum(goods.getSaleNum() + goods.getVirtualSaleNum());
         //商品属性值
         goodsVo.setAttrFormat(JSONUtil.parseArray(goods.getAttrFormat()));
@@ -386,12 +330,12 @@ public class GoodsServiceImpl implements IGoodsService {
             skuVo.setType(ObjectUtil.defaultIfNull(param.getType(), ""));
 
             ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
-                .skuId(item.getSkuId())
-                .price(item.getPrice())
-                .memberDiscount(goods.getMemberDiscount())
-                .memberPrice(item.getMemberPrice())
-                .memberId(RequestUtils.memberId())
-                .build());
+                    .skuId(item.getSkuId())
+                    .price(item.getPrice())
+                    .memberDiscount(goods.getMemberDiscount())
+                    .memberPrice(item.getMemberPrice())
+                    .memberId(RequestUtils.memberId())
+                    .build());
             skuVo.setShowPrice(skuShowPrice.getShowPrice());
             skuVo.setShowType(skuShowPrice.getShowType());
             skuListVo.add(skuVo);
@@ -457,6 +401,20 @@ public class GoodsServiceImpl implements IGoodsService {
         addStatParam.setAccessNum(1);
         coreGoodsStatService.addStat(addStatParam);
 
+        CommonEventDefiner.CommonEvent event = new CommonEventDefiner.CommonEvent();
+        Map<String, Object> eventMap = new HashMap<>();
+        eventMap.put("relate_id", vo.getGoodsId());
+        eventMap.put("relate_type", MarketingActivityTypeEnum.SHOP.getType());
+        eventMap.put("limit", 3);
+        event.setEventName("SowShowData");
+        event.setData(eventMap);
+        event.setSiteId(RequestUtils.siteId());
+        List<CommonEventDefiner.CommonEventResult> sowShowDataResult = EventAndSubscribeOfPublisher.publishAndCallback(event);
+        vo.setSowShowList(List.of());
+        if (CollectionUtils.isNotEmpty(sowShowDataResult) && ObjectUtils.isNotEmpty(sowShowDataResult.get(0).getResult())){
+            vo.setSowShowList(sowShowDataResult.get(0).getResult());
+        }
+
         // 自定义详情
         DiyInfoParam diyInfoParam = new DiyInfoParam();
         diyInfoParam.setName("DIY_SHOP_GOODS_DETAIL");
@@ -467,31 +425,20 @@ public class GoodsServiceImpl implements IGoodsService {
         ImageUtils.ImageSize firstImageSize = ImageUtils.getFirstImageSize(goods.getGoodsImage());
         vo.getImageSize().setWidth(firstImageSize.getWidth().toString());
         vo.getImageSize().setHeight(firstImageSize.getHeight().toString());
-//        String[] goodsImage = goods.getGoodsImage().split(",");
-//        if (ObjectUtil.isNotEmpty(goodsImage)) {
-//            String image = goodsImage[0];
-//            try {
-//                if (CommonUtils.isUrl(image)) {
-//                    URL url = new URL(image);
-//                    BufferedImage bufferedImage = ImageIO.read(url);
-//                    if (bufferedImage != null) {
-//                        vo.getImageSize().setWidth(String.valueOf(bufferedImage.getWidth()));
-//                        vo.getImageSize().setHeight(String.valueOf(bufferedImage.getHeight()));
-//                    }
-//                } else {
-//                    File file = new File(WebAppEnvs.get().webRootDownResource, image);
-//                    BufferedImage bufferedImage = ImageIO.read(file);
-//                    if (bufferedImage != null) {
-//                        vo.getImageSize().setWidth(String.valueOf(bufferedImage.getWidth()));
-//                        vo.getImageSize().setHeight(String.valueOf(bufferedImage.getHeight()));
-//                    }
-//                }
-//            } catch (Exception e) {
-//            }
-//        }
 
         return vo;
     }
+    @Override
+    public List<GoodsLabelListVo> getGoodsLabelName(String labelIds) {
+        if (ObjectUtil.isEmpty(labelIds) || JSONUtil.parseArray(labelIds).isEmpty()) return new LinkedList<>();
+        return CollectUtils.convert(shopGoodsLabelMapper.selectList(new QueryWrapper<ShopGoodsLabel>().eq("status", 1).in("label_id", JSONUtil.parseArray(labelIds)).orderByDesc("sort")), GoodsLabelListVo.class);
+    }
+
+    @Override
+    public CoreSysConfigVo searchConfig() {
+        return coreConfigService.getConfig(RequestUtils.siteId(), "GOODS_SEARCH_CONFIG");
+    }
+
 
     /**
      * @param skuId
@@ -526,6 +473,11 @@ public class GoodsServiceImpl implements IGoodsService {
             .build());
         vo.setShowPrice(detailShowPrice.getShowPrice());
         vo.setShowType(detailShowPrice.getShowType());
+        //商品限购
+        if(ObjectUtil.isNotEmpty(RequestUtils.memberId()))
+        {
+            vo.setHasBuy(coreGoodsLimitBuyService.getGoodsHasBuyNumber(RequestUtils.siteId(),RequestUtils.memberId(), goods.getGoodsId()));
+        }
 
         // 查询商品SKU列表
         List<ShopGoodsSkuVo.Sku> skuListVo = new LinkedList<>();
@@ -552,4 +504,64 @@ public class GoodsServiceImpl implements IGoodsService {
 
         return vo;
     }
+
+    /**
+     * 获取商品列表供组件调用
+     *
+     * @param param
+     */
+    @Override
+    public List<ShopGoodsListVo> getGoodsComponents(ShopGoodsComponentsSearchParam param) {
+        MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
+        queryWrapper.setAlias("g")
+            .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix))
+            .leftJoin("?_shop_goods_brand sgb ON g.brand_id = sgb.brand_id".replace("?_", GlobalConfig.tablePrefix));
+        queryWrapper.select("g.goods_id,g.site_id,goods_name,sub_title,goods_type,goods_cover,g.stock,g.sale_num + g.virtual_sale_num as sale_num,status,g.sort,g.create_time,member_discount,virtual_verify_type,unit,is_discount,label_ids,g.stock,g.brand_id,sgb.brand_name,sgb.logo");
+        queryWrapper.eq("g.site_id", RequestUtils.siteId());
+        queryWrapper.eq("g.status", 1);
+        queryWrapper.eq("g.is_gift", 0);
+        queryWrapper.eq("g.delete_time", 0);
+        if (ObjectUtil.isNotEmpty(param.getGoodsIds())) queryWrapper.in("g.goods_id", param.getGoodsIds());
+        if (ObjectUtil.isNotEmpty(param.getNum()) && param.getNum() > 0) queryWrapper.last("limit " + param.getNum());
+        if (ObjectUtil.isNotEmpty(param.getGoodsCategory()) && param.getGoodsCategory() > 0)
+            queryWrapper.like("goods_category", "\"" + param.getGoodsCategory() + "\"");
+        if (ObjectUtil.isNotEmpty(param.getOrder())) {
+            if (param.getOrder().equals("sale_num")) {
+                queryWrapper.orderByDesc("g.sale_num");
+            } else if (param.getOrder().equals("price")) {
+                queryWrapper.orderByDesc("gs.price");
+            }
+        } else {
+            queryWrapper.orderBy(true, false, "g.sort");
+            queryWrapper.orderBy(true, false, "g.create_time");
+        }
+
+        List<ShopGoodsListVo> list = shopGoodsMapper.selectJoinList(ShopGoodsListVo.class, queryWrapper);
+        for (ShopGoodsListVo vo : list) {
+            ShopGoodsSku goodsSku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>()
+                    .eq("goods_id", vo.getGoodsId()).eq("is_default", 1));
+            ShopGoodsListVo.GoodsSku goodsSkuVo = new ShopGoodsListVo.GoodsSku();
+            BeanUtils.copyProperties(goodsSku, goodsSkuVo);
+
+            ShowPriceVo skuShowPrice = coreGoodsActivePriceService.getShowPrice(GetShowPriceParam.builder()
+                    .skuId(goodsSku.getSkuId())
+                    .price(goodsSku.getPrice())
+                    .memberDiscount(vo.getMemberDiscount())
+                    .memberPrice(goodsSku.getMemberPrice())
+                    .memberId(RequestUtils.memberId())
+                    .build());
+            goodsSkuVo.setShowPrice(skuShowPrice.getShowPrice());
+            goodsSkuVo.setShowType(skuShowPrice.getShowType());
+
+            vo.setGoodsSku(goodsSkuVo);
+            vo.setGoodsLabelName(getGoodsLabelName(vo.getLabelIds()));
+            if (vo.getBrandId() > 0) {
+                ShopGoodsListVo.Brand brand = new ShopGoodsListVo.Brand();
+                BeanUtils.copyProperties(vo, brand);
+                vo.setGoodsBrand(brand);
+            }
+        }
+        return list;
+    }
+
 }

@@ -30,6 +30,8 @@ public class SysUserDetailVo implements Serializable {
     /**实际姓名 */
     private String realName;
 
+    private String mobile;
+
     /**最后一次登录IP */
     private String lastIp;
 

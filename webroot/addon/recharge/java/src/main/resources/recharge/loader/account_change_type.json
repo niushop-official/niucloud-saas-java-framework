@@ -1,26 +1,21 @@
 {
-  "point": {
-    "recharge_give": {
-      "name": "充值赠送",
-      "inc": 1,
-      "dec": 0
-    },
-    "recharge": {
-      "name": "余额充值",
-      "inc": 1,
-      "dec": 0
-    }
-  },
-  "balance": {
-    "recharge": {
-      "name": "余额充值",
-      "inc": 1,
-      "dec": 0
-    },
-    "recharge_refund": {
-      "name": "充值订单退款",
-      "inc": 0,
-      "dec": 1
-    }
-  }
+	"point": {
+		"recharge_give": {
+			"name": "充值赠送",
+			"inc": 1,
+			"dec": 0
+		}
+	},
+	"balance": {
+		"recharge": {
+			"name": "余额充值",
+			"inc": 1,
+			"dec": 0
+		},
+		"recharge_refund": {
+			"name": "充值订单退款",
+			"inc": 0,
+			"dec": 1
+		}
+	}
 }

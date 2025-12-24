@@ -79,6 +79,14 @@ public interface INuiSmsService {
     List<TemplateListVo> getTemplateList(String smsType, String username);
 
     /**
+     *
+     * @param templateKey
+     * @param templateId
+     * @return
+     */
+    NiuSmsTemplate checkTemplateAudit(String templateKey, String templateId);
+
+    /**
      * 充值订单列表
      * @param pageParam
      * @param username

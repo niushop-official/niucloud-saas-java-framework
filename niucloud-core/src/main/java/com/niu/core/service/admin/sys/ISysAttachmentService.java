@@ -81,4 +81,10 @@ public interface ISysAttachmentService {
      * @param param
      */
     AttachmentUploadVo document(AttachmentUploadParam param);
+
+    /**
+     * 上传音频
+     * @param param
+     */
+    AttachmentUploadVo audio(AttachmentUploadParam param);
 }

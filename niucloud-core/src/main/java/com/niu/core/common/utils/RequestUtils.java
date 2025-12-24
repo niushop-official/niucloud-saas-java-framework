@@ -1,10 +1,16 @@
 package com.niu.core.common.utils;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.base.ThreadLocalHolder;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.exception.AuthException;
+import com.niu.core.entity.site.Site;
 import com.niu.core.enums.common.ChannelEnum;
+import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.service.core.member.ICoreMemberService;
 import com.niu.core.service.core.member.dto.MemberInfoDto;
+import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.core.service.core.user.ICoreUserService;
 import com.niu.core.service.core.user.dto.UserInfoDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +41,28 @@ public class RequestUtils {
 
     private static ICoreMemberService getMemberService() {
         return applicationContext.getBean(ICoreMemberService.class);
+    }
+
+    /**
+     * 系统json文件加载
+     * @return
+     */
+    public static String jsonFileContent(String pathTag) {
+        String jsonFileContent = ThreadLocalHolder.getString("jsonFile_" + pathTag);
+        if (jsonFileContent == null) {
+            return "";
+        }else{
+            return jsonFileContent;
+        }
+    }
+
+    /**
+     * 设置系统json文件
+     * @param pathTag
+     * @param content
+     */
+    public static void setJsonFileContent(String pathTag, String content) {
+        ThreadLocalHolder.putString("jsonFile_" + pathTag, content);
     }
 
     /**
@@ -127,12 +155,16 @@ public class RequestUtils {
      * @return
      */
     public static Integer apiSiteId(){
+        Integer siteId = 0;
         HttpServletRequest request = RequestUtils.handler();
         if (request != null) {
-            return Integer.parseInt(ObjectUtil.defaultIfNull(request.getHeader("site-id"), "0"));
+            siteId = Integer.valueOf(ObjectUtil.defaultIfEmpty(request.getHeader("site-id"), "0"));
+            if (siteId == 0 && ObjectUtil.isNotEmpty(RequestUtils.getRequestDomain())) {
+                ICoreSiteService coreSiteService = SpringContext.bean(ICoreSiteService.class);
+                coreSiteService.getSiteIdByDomain(RequestUtils.getRequestDomain());
+            }
         }
-        return 0;
-
+        return siteId;
     }
 
     /**

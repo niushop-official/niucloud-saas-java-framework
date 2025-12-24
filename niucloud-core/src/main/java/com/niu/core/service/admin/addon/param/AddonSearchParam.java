@@ -14,28 +14,4 @@ public class AddonSearchParam implements Serializable {
 
     private String title;
 
-    private String icon;
-
-    private String key;
-
-    private String desc;
-
-    private Integer status;
-
-    private String author;
-
-    private String version;
-
-    private Integer installTime;
-
-    private String cover;
-
-    private String type;
-
-    private String supportApp;
-
-    private Integer isStar;
-
-    private String compile;
-
 }

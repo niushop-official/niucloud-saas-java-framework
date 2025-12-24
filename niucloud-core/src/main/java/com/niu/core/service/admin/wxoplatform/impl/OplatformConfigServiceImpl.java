@@ -1,10 +1,13 @@
 package com.niu.core.service.admin.wxoplatform.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.enums.sys.ConfigKeyEnum;
 import com.niu.core.service.admin.wxoplatform.IOplatformConfigService;
 import com.niu.core.service.admin.wxoplatform.param.OplatformConfigParam;
+import com.niu.core.service.admin.wxoplatform.vo.OplatformConfigVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.wxoplatform.ICoreOplatformConfigService;
 import com.niu.core.service.core.wxoplatform.vo.CoreOplatformStaticConfigVo;
@@ -37,16 +40,11 @@ public class OplatformConfigServiceImpl implements IOplatformConfigService {
      * @return
      */
     @Override
-    public JSONObject getWxOplatformConfig() {
-        JSONObject jsonObject=coreConfigService.getConfigValue(RequestUtils.defaultSiteId(), ConfigKeyEnum.WXOPLATFORM.getName());
-        JSONObject configJsonObject=new JSONObject();
-        configJsonObject.set("app_id", jsonObject.getStr("app_id", ""));
-        configJsonObject.set("app_secret", jsonObject.getStr("app_secret", ""));
-        configJsonObject.set("token", jsonObject.getStr("token", ""));
-        configJsonObject.set("aes_key", jsonObject.getStr("aes_key", ""));
-        configJsonObject.set("develop_app_id", jsonObject.getStr("develop_app_id", ""));
-        configJsonObject.set("develop_upload_private_key", jsonObject.getStr("develop_upload_private_key", ""));
-        return configJsonObject;
+    public OplatformConfigVo getWxOplatformConfig() {
+        OplatformConfigVo configVo = coreOplatformConfigService.getWxOplatformConfig();
+        if (ObjectUtil.isNotEmpty(configVo.getAppSecret())) configVo.setAppSecret(StringUtils.ENCRYPTSTR);
+        if (ObjectUtil.isNotEmpty(configVo.getAesKey())) configVo.setAesKey(StringUtils.ENCRYPTSTR);
+        return configVo;
     }
 
     /**
@@ -56,6 +54,9 @@ public class OplatformConfigServiceImpl implements IOplatformConfigService {
      */
     @Override
     public void setWxOplatformConfig(OplatformConfigParam oplatformConfigParam) {
+        OplatformConfigVo configVo = coreOplatformConfigService.getWxOplatformConfig();
+        if (oplatformConfigParam.getAppSecret().equals(StringUtils.ENCRYPTSTR)) oplatformConfigParam.setAppSecret(configVo.getAppSecret());
+        if (oplatformConfigParam.getAesKey().equals(StringUtils.ENCRYPTSTR)) oplatformConfigParam.setAesKey(configVo.getAesKey());
         coreOplatformConfigService.setOplatformConfig(oplatformConfigParam);
     }
 }

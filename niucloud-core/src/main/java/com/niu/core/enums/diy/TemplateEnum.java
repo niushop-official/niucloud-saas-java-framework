@@ -26,9 +26,9 @@ public class TemplateEnum {
      * @param siteId
      * @return
      */
-    public static List<Map<String, Object>> getTemplateAddons(Integer siteId) {
+    public static Map<String, Map<String, Object>> getTemplateAddons(Integer siteId) {
         JsonModuleLoader jsonLoader = new JsonModuleLoader();
-        List<Map<String, Object>> templateList = new ArrayList<>();
+        Map<String, Map<String, Object>> templateList = new HashMap<>();
 
         // 加载系统核心模板
         JSONObject coreTemplates = jsonLoader.getResultElement("core", "diy/template.json");
@@ -37,7 +37,7 @@ public class TemplateEnum {
             template.put("title", "系统");
             template.put("key", "app");
             template.put("type", entry.getKey());
-            templateList.add(template);
+            templateList.put(entry.getKey(), template);
         }
 
         // 加载插件模板
@@ -50,7 +50,7 @@ public class TemplateEnum {
                     template.put("title", addon.getTitle());
                     template.put("key", addon.getKey());
                     template.put("type", entry.getKey());
-                    templateList.add(template);
+                    templateList.put(entry.getKey(), template);
                 }
             }
         }
@@ -76,7 +76,7 @@ public class TemplateEnum {
     public static JSONObject getTemplate(TemplateParam param){
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
         JSONObject diyTemplate = new JSONObject();
-        if (param.getAddon().isEmpty()) {
+        if (ObjectUtil.isEmpty(param.getAddon())) {
             diyTemplate = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/template.json");
         } else {
             diyTemplate = jsonModuleLoader.getResultElement(param.getAddon(), "diy/template.json");
@@ -84,7 +84,7 @@ public class TemplateEnum {
 
         JSONObject template = new JSONObject();
 
-        if (!param.getType().isEmpty()) {
+        if (ObjectUtil.isNotEmpty(param.getType())) {
             for (String key: diyTemplate.keySet()) {
                 if (ObjectUtil.defaultIfNull(diyTemplate.getByPath(key + ".type", String.class), "").equals(param.getType())) {
                     template.put(key, diyTemplate.getJSONObject(key));
@@ -92,7 +92,7 @@ public class TemplateEnum {
             }
             return template;
         }
-        if (!param.getAction().isEmpty()) {
+        if (ObjectUtil.isNotEmpty(param.getAction())) {
             for (String key: diyTemplate.keySet()) {
                 if (ObjectUtil.defaultIfNull(diyTemplate.getByPath(key + ".action", String.class), "").equals(param.getAction())) {
                     template.put(key, diyTemplate.getJSONObject(key));
@@ -100,7 +100,7 @@ public class TemplateEnum {
             }
             return template;
         }
-        if (param.getKey() != null && param.getKey().length > 0) {
+        if (ObjectUtil.isNotEmpty(param.getKey())) {
             for (String key: param.getKey()) {
                 if (diyTemplate.getJSONObject(key) != null) {
                     template.put(key, diyTemplate.getJSONObject(key));

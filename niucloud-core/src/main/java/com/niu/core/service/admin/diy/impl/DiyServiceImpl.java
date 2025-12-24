@@ -7,10 +7,12 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.PageUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
@@ -36,6 +38,7 @@ import com.niu.core.service.core.notice.vo.NoticeInfoVo;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
 import com.niu.core.service.core.sys.vo.SceneDomainVo;
 import org.springframework.beans.BeanUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -79,28 +82,35 @@ public class DiyServiceImpl implements IDiyService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.orderByDesc("id");
 
-        if (ObjectUtil.isNotEmpty(searchParam.getTitle())) queryWrapper.like("title", searchParam.getTitle());
+        if (ObjectUtil.isNotEmpty(searchParam.getTitle())) queryWrapper.like("page_title", searchParam.getTitle());
         if (ObjectUtil.isNotEmpty(searchParam.getMode())) queryWrapper.eq("mode", searchParam.getMode());
-        if (ObjectUtil.isNotEmpty(searchParam.getType())) queryWrapper.eq("type", searchParam.getType());
+        if (CollectionUtils.isNotEmpty(searchParam.getType())) queryWrapper.in("type", searchParam.getType());
 
-        JSONObject template = TemplateEnum.getTemplate();
-        List<Map<String, Object>> templateAddon = TemplateEnum.getTemplateAddons((RequestUtils.siteId()));
-        IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
+        JSONObject template = TemplateEnum.getTemplate(TemplateParam.builder()
+            .addon(searchParam.getAddonName())
+            .build()
+        );
+        if (ObjectUtil.isNotEmpty(template)) {
+            queryWrapper.in("type", template.keySet());
+        }
+
+        Map<String, Map<String, Object>> templateAddon = TemplateEnum.getTemplateAddons((RequestUtils.siteId()));
+        List<DiyPage> diyList = diyPageMapper.selectList(queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
-        for (DiyPage item : iPage.getRecords()) {
+        for (DiyPage item : diyList) {
             DiyPageListVo vo = new DiyPageListVo();
             BeanUtils.copyProperties(item, vo);
             vo.setTypeName(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".title", String.class), ""));
             vo.setTypePage(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".page", String.class), ""));
-            String addonName = templateAddon.stream()
-                    .filter(temp -> vo.getType() != null && vo.getType().equals(temp.get("type")))
-                    .findFirst()
-                    .map(addon -> ObjectUtil.defaultIfNull(addon.get("title"), "").toString())
-                    .orElse("");
-                vo.setAddonName(addonName);
+            Map<String, Object> type = ObjectUtil.defaultIfNull(templateAddon.get(vo.getType()), new HashMap<>());
+            vo.setAddonName((String) type.getOrDefault("title", ""));
+            vo.setAddon((String) type.getOrDefault("key", ""));
             list.add(vo);
         }
-        return PageResult.build(page, limit, iPage.getTotal()).setData(list);
+        if (StringUtils.isNotEmpty(searchParam.getAddonName())){
+            list = list.stream().filter(item -> item.getAddon().equals(searchParam.getAddonName())).toList();
+        }
+        return PageUtils.build(page,limit, list);
     }
 
     /**
@@ -116,10 +126,7 @@ public class DiyServiceImpl implements IDiyService {
 
         if (ObjectUtil.isNotEmpty(searchParam.getTitle())) queryWrapper.like("title", searchParam.getTitle());
         if (ObjectUtil.isNotEmpty(searchParam.getMode())) queryWrapper.eq("mode", searchParam.getMode());
-        if (ObjectUtil.isNotEmpty(searchParam.getType())) {
-            List<String> type = Arrays.stream(searchParam.getType()).collect(Collectors.toList());
-            queryWrapper.in("type", type);
-        }
+        if (CollectionUtils.isNotEmpty(searchParam.getType())) queryWrapper.in("type", searchParam.getType());
 
         List<DiyPage> pages = diyPageMapper.selectList(queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
@@ -411,6 +418,13 @@ public class DiyServiceImpl implements IDiyService {
         Iterator<String> categoryIterator = data.keySet().iterator();
         List<String> categoryToRemove = new ArrayList<>();
 
+        JSONObject diyTemplate = null;
+        if (ObjectUtil.isNotEmpty(name)) {
+            diyTemplate = getTemplate(TemplateParam.builder()
+                .key(new String[]{name})
+                .build()).getJSONObject(name);
+        }
+
         while (categoryIterator.hasNext()) {
             String categoryKey = categoryIterator.next();
             JSONObject category = data.getJSONObject(categoryKey);
@@ -425,8 +439,15 @@ public class DiyServiceImpl implements IDiyService {
                 JSONObject component = componentList.getJSONObject(componentKey);
                 JSONArray supportPage = component.getJSONArray("support_page");
 
+                // 过滤忽略组件名单
+                if (diyTemplate != null) {
+                    JSONArray ignoreComponents = ObjectUtil.defaultIfNull(diyTemplate.getJSONArray("ignoreComponents"), new JSONArray());
+                    if (ignoreComponents.contains(componentKey)) {
+                        keysToRemove.add(componentKey);
+                    }
+                }
+                //过滤页面不支持的组件
                 if (supportPage == null) supportPage = new JSONArray();
-
                 if (supportPage.isEmpty() || supportPage.contains(name)) {
                     sortMap.put(componentKey, component.getInt("sort", 0));
                     component.remove("sort");
@@ -516,15 +537,13 @@ public class DiyServiceImpl implements IDiyService {
      *
      * @param searchParam
      */
-    public JSONObject getDecoratePage(DiyPageSearchParam searchParam) {
-        TemplateParam templateParam = new TemplateParam();
-        String oneType = searchParam.getType()[0];
-        String[] key = searchParam.getType();
-        templateParam.setKey(key);
-        JSONObject template = this.getTemplate(templateParam).getJSONObject(oneType);
+    public JSONObject getDecoratePage(DiyDecoratePageSearchParam searchParam) {
+        JSONObject template = this.getTemplate(TemplateParam.builder()
+            .key(new String[]{searchParam.getType()})
+            .build()).getJSONObject(searchParam.getType());
         if (template == null) throw new CommonException("模板不存在");
 
-        JSONObject defaultPage = getFirstPageData(oneType, "");
+        JSONObject defaultPage = getFirstPageData(searchParam.getType(), "");
 
         JSONObject useTemplate = new JSONObject();
         useTemplate.put("type", searchParam.getType());
@@ -536,9 +555,9 @@ public class DiyServiceImpl implements IDiyService {
         useTemplate.put("url", "");
         useTemplate.put("parent", "");
 
-        DiyPageInfoVo info = infoByName(oneType);
+        DiyPageInfoVo info = infoByName(searchParam.getType());
 
-        StartUpPageConfigVo startConfig = coreDiyConfigService.getStartUpPageConfig(RequestUtils.siteId(), oneType);
+        StartUpPageConfigVo startConfig = coreDiyConfigService.getStartUpPageConfig(RequestUtils.siteId(), searchParam.getType());
         if (startConfig != null) {
             useTemplate.set("title", startConfig.getTitle());
             useTemplate.set("name", startConfig.getName());
@@ -598,11 +617,18 @@ public class DiyServiceImpl implements IDiyService {
                 .notIn("value", Arrays.asList("top_fixed", "right_fixed", "bottom_fixed", "left_fixed", "fixed"))
                 .orderByDesc("id");
 
+        JSONObject template = TemplateEnum.getTemplate();
+        Map<String, Map<String, Object>> templateAddon = TemplateEnum.getTemplateAddons((RequestUtils.siteId()));
+
         IPage<DiyPage> iPage = diyPageMapper.selectPage(new Page<DiyPage>(page, limit), queryWrapper);
         List<DiyPageListVo> list = new LinkedList<>();
         for (DiyPage item : iPage.getRecords()) {
             DiyPageListVo vo = new DiyPageListVo();
             BeanUtils.copyProperties(item, vo);
+            vo.setTypeName(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".title", String.class), ""));
+            vo.setTypePage(ObjectUtil.defaultIfNull(template.getByPath(vo.getType() + ".page", String.class), ""));
+            Map<String, Object> type = ObjectUtil.defaultIfNull(templateAddon.get(vo.getType()), new HashMap<>());
+            vo.setAddonName((String) type.getOrDefault("title", ""));
             list.add(vo);
         }
         return PageResult.build(page, limit, iPage.getTotal()).setData(list);
@@ -693,10 +719,12 @@ public class DiyServiceImpl implements IDiyService {
         page.setIsDefault(0);
         page.setShare("");
         page.setCreateTime(System.currentTimeMillis() / 1000);
+        page.setUpdateTime(System.currentTimeMillis() / 1000);
         diyPageMapper.insert(page);
     }
 
     @Override
+    @Async
     public void loadDiyData(Map<String, Object> params) {
         // 获取参数
         String mainAppStr = params.get("main_app").toString();

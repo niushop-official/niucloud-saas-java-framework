@@ -8,7 +8,10 @@ import com.niu.shop.service.api.marketing.param.ShopNewcomerSearchParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 新人专享会员参与记录表控制器
@@ -27,7 +30,8 @@ public class ShopNewcomerMemberRecordsController {
     }
 
     @GetMapping("/goods/components")
-    Result<?> componentsList(ShopNewComerComponentsListParam param) {
+    Result<?> componentsList(@RequestParam(value = "sku_ids[]", required = false) List<Integer> skuIds, ShopNewComerComponentsListParam param) {
+        param.setSkuIds(skuIds);
         return Result.success(shopNewcomerService.getComponentsList(param));
     }
 

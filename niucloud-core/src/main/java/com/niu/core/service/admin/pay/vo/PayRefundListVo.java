@@ -1,13 +1,16 @@
 package com.niu.core.service.admin.pay.vo;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.enums.common.CommonActiveEnum;
 import com.niu.core.enums.pay.PayTypeEnum;
 import com.niu.core.enums.pay.RefundStatusEnum;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * PayRefund列表视图
@@ -40,8 +43,24 @@ public class PayRefundListVo implements Serializable {
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;
     private String typeName;
+    private String tradeTypeName;
 
     public String getStatusName() {
         return RefundStatusEnum.getNameByStatus(this.status);
+    }
+
+    public String getTypeName() {
+        if (ObjectUtil.isEmpty(this.type)) {
+            return "";
+        }
+        return PayTypeEnum.getType().getByPath(this.type + ".name", String.class);
+    }
+
+    public String getTradeTypeName() {
+        if (ObjectUtil.isEmpty(this.tradeType)) {
+            return "";
+        }
+        Map<String, Object> active = CommonActiveEnum.getActiveShort(this.tradeType);
+        return active == null ? "" : active.get("active_name").toString();
     }
 }

@@ -252,16 +252,7 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
 
         this.checkGoods(vo);
 
-        // 扣除积分
-        coreMemberAccountService.addLog(
-                vo.getSiteId(),
-                vo.getMemberId(),
-                AccountTypeEnum.POINT.getType(),
-                -Double.valueOf(vo.getBasic().getPointSum()),
-                "account_point_exchange_order",
-                "积分商城消费扣款积分",
-                ""
-        );
+
 
         // 订单
         ShopOrder order = new ShopOrder();
@@ -331,7 +322,20 @@ public class CoreOrderCreateServiceImpl extends OrderCreateHelper implements ICo
             orderGoods.add(item);
         }
 
-        return this.createOrder(vo, order, orderGoods);
+        OrderCreateResultVo result = this.createOrder(vo, order, orderGoods);
+
+        // 扣除积分
+        coreMemberAccountService.addLog(
+            vo.getSiteId(),
+            vo.getMemberId(),
+            AccountTypeEnum.POINT.getType(),
+            -Double.valueOf(vo.getBasic().getPointSum()),
+            "account_point_exchange_order",
+            "积分商城消费扣款积分",
+            order.getOrderId().toString()
+        );
+
+        return result;
     }
 
     /**

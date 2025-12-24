@@ -22,7 +22,7 @@ public class DiyFormDriver {
             case "FormCheckbox" -> {
                 return JSONUtil.parseArray(fieldValue);
             }
-            case "FormDate" -> {return fieldValue;}
+            case "FormDate" -> {return JSONUtil.parseObj(fieldValue);}
             case "FormDateScope" -> {
                 return JSONUtil.parseObj(fieldValue);
 
@@ -60,7 +60,10 @@ public class DiyFormDriver {
                 }
                 result = String.join(",", resArray);
             }
-            case "FormDate" -> result = fieldValue;
+            case "FormDate" -> {
+                JSONObject formDateData = JSONUtil.parseObj(fieldValue);
+                result = formDateData.getStr("date", "");
+            }
             case "FormDateScope" -> {
                 JSONObject fieldJsonDate = JSONUtil.parseObj(fieldValue);
                 result = fieldJsonDate.getJSONObject("start").getStr("date") + "-" + fieldJsonDate.getJSONObject("end").getStr("date");

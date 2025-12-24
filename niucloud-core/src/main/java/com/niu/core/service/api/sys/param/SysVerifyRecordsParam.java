@@ -16,4 +16,6 @@ public class SysVerifyRecordsParam implements ApiBaseParam {
 
     private String[] createTime;
 
+    private Integer orderId;
+
 }

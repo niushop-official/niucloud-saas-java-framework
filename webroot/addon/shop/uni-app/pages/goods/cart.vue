@@ -65,11 +65,15 @@
                                                                 <view class="base-tag" v-else-if="tagItem.style_type == 'diy' || !tagItem.icon" :style="diyGoods.baseTagStyle(tagItem)">{{ tagItem.label_name }}</view>
                                                             </template>
                                                         </view>
-                                                        <view v-if="item.manjian_info && Object.keys(item.manjian_info).length && item.manjian_info.is_join"
+                                                        <view v-if="item.manjian_info && item.manjian_info.length>0"
                                                             class="flex items-center mt-[8rpx] mb-[auto]"
                                                             @click.stop="manjianOpenFn(item.manjian_info)">
                                                             <view class="bg-[var(--primary-color-light)] text-[var(--primary-color)] rounded-[6rpx] text-[20rpx] flex items-center justify-center w-[88rpx] h-[36rpx] mr-[6rpx]">满减送</view>
-                                                            <text class="text-[22rpx] text-[#999]">{{ item.manjian_info.manjian_name }}</text>
+                                                            <view class="text-[22rpx] truncate max-w-[300rpx] text-[#999]">
+                                                                <text v-for="(cItem,index) in item.manjian_info" :key="index"  class="whitespace-nowrap" :class="{'ml-[6rpx]':index>0}">
+                                                                    <template v-if="cItem.is_join">{{ cItem.manjian_name }}</template>    
+                                                                </text>
+                                                            </view>
                                                         </view>
                                                         <view class="flex justify-between items-end self-end mt-[10rpx] w-[100%]">
                                                             <view class="text-[var(--price-text-color)] price-font truncate max-w-[200rpx]">
@@ -409,11 +413,11 @@ const checkedNum = computed(() => {
 })
 
 const manjianOpenFn = (data: any) => {
-    let obj = {};
-    obj.condition_type = data.condition_type;
-    obj.rule_json = data.rule_json;
-    obj.name = data.manjian_name;
-    manjianShowRef.value.open(obj);
+    // let obj = {};
+    // obj.condition_type = data.condition_type;
+    // obj.rule_json = data.rule_json;
+    // obj.name = data.manjian_name;
+    manjianShowRef.value.open(data,'rule_json');
 }
 
 let isLoadCalculate = false;
@@ -441,33 +445,79 @@ const cartCalculateFn = () => {
         total.value.goods_money = data.goods_money;
         total.value.order_money = data.order_money;
         total.value.promotion_money = data.promotion_money;
-        cartList.value.forEach((item, index) => {
-            for (let subIndex = 0; subIndex < data.match_list.length; subIndex++) {
-                if (item.goods_id == data.match_list[subIndex].goods_id && item.sku_id == data.match_list[subIndex].sku_id && item.manjian_info && Object.keys(item.manjian_info).length) {
-                    item.manjian_info.is_show = true;
-                    let subTempShowNum = 0;
-                    item.manjian_info.rule_json.forEach((threeItem, threeIndex) => {
-                        if (threeIndex == data.match_list[subIndex].level) {
-                            threeItem.is_show = true;
-                            subTempShowNum++;
-                        } else {
-                            threeItem.is_show = false;
+
+        cartList.value.forEach((item) => {
+            // 找到当前商品在 match_list 中的记录
+            const matchItem = data.match_list.find(
+                m => m.goods_id == item.goods_id && m.sku_id == item.sku_id
+            );
+
+            if (Array.isArray(item.manjian_info)) {
+                item.manjian_info.forEach(manjian => {
+                    // 默认隐藏
+                    manjian.is_show = false;
+                    let showRuleCount = 0;
+
+                    if (matchItem) {
+                        // 找到该满减活动在 match_list 中的配置
+                        const matchedManjian = matchItem.manjian.find(
+                            m => m.manjian_id == manjian.manjian_id
+                        );
+
+                        if (matchedManjian) {
+                            manjian.is_show = true; // 有匹配到这个满减活动
+                            manjian.rule_json.forEach((rule, idx) => {
+                                if (idx === matchedManjian.level) {
+                                    rule.is_show = true;
+                                    showRuleCount++;
+                                } else {
+                                    rule.is_show = false;
+                                }
+                            });
                         }
-                    })
-                    if (subTempShowNum == 0) {
-                        item.manjian_info.is_show = false;
-                    } else {
-                        item.manjian_info.is_show = true;
                     }
-                    return;
-                }
+
+                    // 如果没有任何规则显示，则隐藏整个满减
+                    if (showRuleCount === 0) {
+                        manjian.is_show = false;
+                    }
+                });
             }
-            if (item.manjian_info && Object.keys(item.manjian_info).length) {
-                item.manjian_info.is_show = false;
-            }
-        })
+        });
+
         isLoadCalculate = false;
-    })
+    });
+    // getCartCalculate({ sku_ids: calculateArr }).then(({ data }) => {
+    //     total.value.goods_money = data.goods_money;
+    //     total.value.order_money = data.order_money;
+    //     total.value.promotion_money = data.promotion_money;
+    //     cartList.value.forEach((item, index) => {
+    //         for (let subIndex = 0; subIndex < data.match_list.length; subIndex++) {
+    //             if (item.goods_id == data.match_list[subIndex].goods_id && item.sku_id == data.match_list[subIndex].sku_id && item.manjian_info && Object.keys(item.manjian_info).length) {
+    //                 item.manjian_info.is_show = true;
+    //                 let subTempShowNum = 0;
+    //                 item.manjian_info.rule_json.forEach((threeItem, threeIndex) => {
+    //                     if (threeIndex == data.match_list[subIndex].level) {
+    //                         threeItem.is_show = true;
+    //                         subTempShowNum++;
+    //                     } else {
+    //                         threeItem.is_show = false;
+    //                     }
+    //                 })
+    //                 if (subTempShowNum == 0) {
+    //                     item.manjian_info.is_show = false;
+    //                 } else {
+    //                     item.manjian_info.is_show = true;
+    //                 }
+    //                 return;
+    //             }
+    //         }
+    //         if (item.manjian_info && Object.keys(item.manjian_info).length) {
+    //             item.manjian_info.is_show = false;
+    //         }
+    //     })
+    //     isLoadCalculate = false;
+    // })
 }
 
 const toLogin = () => {

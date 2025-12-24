@@ -5,6 +5,7 @@ import com.niu.core.common.annotation.EventListen;
 import com.niu.core.common.component.context.listener.AbstractListener;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.StringUtils;
+import com.niu.core.event.common.CommonEvent;
 import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.order.ShopOrder;
@@ -58,7 +59,7 @@ public class AfterShopOrderRefundCloseListener extends AbstractListener {
             coreOrderDeliveryService.checkFinish(orderDeliveryParam);
             //通知三方应用更新订单状态
             if (StringUtils.isNotEmpty(order.getRelateSource())){
-                CommonEventDefiner.CommonEvent sendEvent = new CommonEventDefiner.CommonEvent();
+                CommonEvent sendEvent = new CommonEvent();
                 Map<String, Object> data = new HashMap<>();
                 data.put("source_order_id", refundData.get("orderId"));
                 data.put("relate_source", order.getRelateSource());

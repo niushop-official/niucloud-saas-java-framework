@@ -39,6 +39,9 @@ public class MemberAccountLogListVo implements Serializable {
 
     public String getFromTypeName() {
         JSONObject changeType = MemberAccountChangeTypeEnum.getType(this.accountType);
+        if (changeType == null){
+            return "";
+        }
         return changeType.getByPath(this.fromType + ".name", String.class);
     }
 }

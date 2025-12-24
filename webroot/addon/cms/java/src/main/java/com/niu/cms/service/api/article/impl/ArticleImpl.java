@@ -2,6 +2,7 @@ package com.niu.cms.service.api.article.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
@@ -111,5 +112,21 @@ public class ArticleImpl implements IArticleService {
 
         List<ArticleListVo> list = cmsArticleMapper.selectJoinList(ArticleListVo.class, queryWrapper);
         return list;
+    }
+
+    /**
+     * 自增文章浏览量
+     * @param id 文章ID
+     */
+    @Override
+    public void incrVisit(Integer id) {
+        Integer siteId = RequestUtils.siteId();
+        
+        UpdateWrapper<CmsArticle> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("site_id", siteId)
+                     .eq("id", id)
+                     .setSql("visit = visit + 1");
+        
+        cmsArticleMapper.update(null, updateWrapper);
     }
 }

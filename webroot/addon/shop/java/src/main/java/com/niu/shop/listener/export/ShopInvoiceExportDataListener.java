@@ -85,7 +85,7 @@ public class ShopInvoiceExportDataListener extends ExportDataEventDefiner {
         }
 
         Map<Integer, ShopOrder> orderMap = Collections.emptyMap();
-        Set<Integer> orderIds = CollStreamUtil.toSet(invoices, ShopInvoice::getTradeId);
+        List<Integer> orderIds = invoices.stream().map(i -> Integer.valueOf(i.getTradeId())).toList();
         if (ObjectUtil.isNotEmpty(orderIds)) {
             orderMap = shopOrderMapper.selectBatchIds(orderIds).stream().collect(Collectors.toMap(ShopOrder::getOrderId, o -> o));
         }

@@ -196,7 +196,7 @@ public class DiyThemeServiceImpl implements IDiyThemeService {
 
                 DiyTheme diyTheme = new DiyTheme();
                 diyTheme.setSiteId(siteId);
-                diyTheme.setTheme("addon");
+                diyTheme.setType("addon");
                 diyTheme.setAddon(addon.getKey());
                 diyTheme.setTitle(data.getTitle());
                 diyTheme.setTheme(data.getTheme().toString());
@@ -210,6 +210,7 @@ public class DiyThemeServiceImpl implements IDiyThemeService {
 
         DiyTheme model = new DiyTheme();
         BeanUtils.copyProperties(data, model);
+        model.setSiteId(siteId);
         model.setType("app");
         model.setThemeType("diy");
         model.setCreateTime(System.currentTimeMillis() / 1000);
@@ -224,12 +225,13 @@ public class DiyThemeServiceImpl implements IDiyThemeService {
     @Override
     @Transactional
     public void editDiyTheme(Integer id, DiyThemeParam data) {
-
-        DiyTheme diyThemeInfo = diyThemeMapper.selectById(id);
+        DiyTheme diyThemeInfo = diyThemeMapper.selectOne(new QueryWrapper<DiyTheme>()
+            .eq("site_id", RequestUtils.siteId())
+            .eq("id", id));
         if (ObjectUtil.isEmpty(diyThemeInfo)) {
             throw new RuntimeException("主题色不存在");
         }
-        List<DiyTheme> addonData = diyThemeMapper.selectList(new QueryWrapper<DiyTheme>().eq("type", "addon").eq("title", diyThemeInfo.getTitle()));
+        List<DiyTheme> addonData = diyThemeMapper.selectList(new QueryWrapper<DiyTheme>().eq("site_id", RequestUtils.siteId()).eq("type", "addon").eq("title", diyThemeInfo.getTitle()));
         List<DiyTheme> addonSaveData = new ArrayList<>();
         if (ObjectUtil.isNotEmpty(addonData)) {
             for (DiyTheme diyTheme : addonData) {
@@ -258,12 +260,17 @@ public class DiyThemeServiceImpl implements IDiyThemeService {
 
     @Override
     public void delDiyTheme(Integer id) {
-        DiyTheme diyThemeInfo = diyThemeMapper.selectById(id);
+        DiyTheme diyThemeInfo = diyThemeMapper.selectOne(new QueryWrapper<DiyTheme>()
+            .eq("site_id", RequestUtils.siteId())
+            .eq("id", id));
         if (ObjectUtil.isEmpty(diyThemeInfo)) {
             throw new CommonException("主题色不存在");
         }
         if (diyThemeInfo.getThemeType().equals("default")) {
             throw new CommonException("默认主题色不能删除");
+        }
+        if (diyThemeInfo.getIsSelected().equals(1)) {
+            throw new CommonException("主题配色已选中不能删除");
         }
         diyThemeMapper.deleteById(diyThemeInfo);
     }
@@ -273,6 +280,7 @@ public class DiyThemeServiceImpl implements IDiyThemeService {
         QueryWrapper<DiyTheme> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("title", data.getTitle());
         queryWrapper.eq("addon", data.getAddon());
+        queryWrapper.eq("site_id", RequestUtils.siteId());
         if(ObjectUtil.isNotEmpty(data.getId()))
         {
             queryWrapper.ne("id", data.getId());

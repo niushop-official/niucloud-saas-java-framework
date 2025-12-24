@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <edit-category ref="editCategoryDialog" @complete="loadCategoryList()" />
+            <edit-category ref="editCategoryDialog" @complete="loadCategoryList(getTablePageStorage(categoryTableData.searchParam).page)" />
         </el-card>
     </div>
 </template>
@@ -57,7 +57,7 @@ import { t } from '@/lang'
 import { getArticleCategoryList, deleteArticleCategory } from '@/addon/cms/api/article'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import EditCategory from '@/addon/cms/views/article/components/edit-category.vue'
-import { debounce, setTablePageStorage,getTablePageStorage} from '@/utils/common'
+import { debounce, setTablePageStorage, getTablePageStorage } from '@/utils/common'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -134,7 +134,7 @@ const deleteEvent = (id: number) => {
         }
     ).then(() => {
         deleteArticleCategory(id).then(() => {
-            loadCategoryList()
+            loadCategoryList(getTablePageStorage(categoryTableData.searchParam).page)
         }).catch(() => {
         })
     })

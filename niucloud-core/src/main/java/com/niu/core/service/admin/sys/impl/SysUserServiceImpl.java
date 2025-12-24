@@ -18,6 +18,7 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
 import com.niu.core.common.config.GlobalConfig;
+import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysUserRole;
 import com.niu.core.entity.user.UserCreateSiteLimit;
 import com.niu.core.enums.member.StatusEnum;
@@ -96,21 +97,7 @@ public class SysUserServiceImpl implements ISysUserService {
             queryWrapper.like("username", searchParam.getUsername()).or().like("real_name", searchParam.getUsername());
         }
         if (ObjectUtil.isNotNull(searchParam.getLastTime()) && ObjectUtil.isNotEmpty(searchParam.getLastTime())) {
-            long startTime = 0;
-            long endTime = 0;
-            if (ObjectUtil.isNotNull(searchParam.getLastTime()[0])) {
-                startTime = DateUtils.StringToTimestamp(searchParam.getLastTime()[0]);
-            }
-            if (ObjectUtil.isNotNull(searchParam.getLastTime()[1])) {
-                endTime = DateUtils.StringToTimestamp(searchParam.getLastTime()[1]);
-            }
-            if (startTime > 0 && endTime > 0) {
-                queryWrapper.between("last_time", startTime, endTime);
-            } else if (startTime > 0) {
-                queryWrapper.ge("last_time", startTime);
-            } else if (endTime > 0) {
-                queryWrapper.le("last_time", endTime);
-            }
+            QueryMapperUtils.buildByTime(queryWrapper, "last_time", searchParam.getLastTime());
         }
 
         IPage<SysUser> iPage = sysUserMapper.selectPage(new Page<SysUser>(page, limit), queryWrapper);
@@ -170,6 +157,9 @@ public class SysUserServiceImpl implements ISysUserService {
         if (checkUserName(addParam.getUsername())) {
             throw new AdminException("该用户名已被占用，请更换");
         }
+        if (checkMobile(addParam.getMobile()) ) {
+            throw new AdminException("手机号重复");
+        }
         SysUser sysUser = new SysUser();
         BeanUtils.copyProperties(addParam, sysUser);
         sysUser.setCreateTime(DateUtils.currTime());
@@ -181,7 +171,7 @@ public class SysUserServiceImpl implements ISysUserService {
         //添加用户建站限制
         List<SysCreateSiteLimitParam> createSiteLimitParamList = addParam.getCreateSiteLimit();
         List<UserCreateSiteLimit> addList = new ArrayList<>();
-        if (ObjectUtil.isNotNull(createSiteLimitParamList) && createSiteLimitParamList.size() > 0) {
+        if (ObjectUtil.isNotEmpty(createSiteLimitParamList)) {
             for (SysCreateSiteLimitParam sysCreateSiteLimitParam : createSiteLimitParamList) {
                 UserCreateSiteLimit userCreateSiteLimit = new UserCreateSiteLimit();
                 userCreateSiteLimit.setUid(uid);
@@ -195,6 +185,23 @@ public class SysUserServiceImpl implements ISysUserService {
         return uid;
     }
 
+    private Boolean checkMobile(String mobile) {
+        return checkMobile(mobile, 0);
+    }
+
+    private Boolean checkMobile(String mobile, Integer uid) {
+        if (ObjectUtil.isEmpty(mobile)) return false;
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("mobile", mobile);
+        if (uid > 0) {
+            queryWrapper.ne("uid", uid);
+        }
+        long count = sysUserMapper.selectCount(queryWrapper);
+        if (count > 0) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * 后台管理员编辑
@@ -226,6 +233,13 @@ public class SysUserServiceImpl implements ISysUserService {
             model.setPassword(PasswordEncipher.encode(editParam.getPassword()));
             isChangePassword = true;
         }
+        if (ObjectUtil.isNotEmpty(editParam.getMobile())) {
+            if (checkMobile(editParam.getMobile(), uid) ) {
+                throw new AdminException("手机号重复");
+            }
+            model.setMobile(editParam.getMobile());
+        }
+
         /**
          * 更新用戶信息
          */
@@ -320,11 +334,7 @@ public class SysUserServiceImpl implements ISysUserService {
                 SysUserParam sysUserParam = new SysUserParam();
                 sysUserParam.setHeadImg(siteUserParam.getHeadImg());
                 sysUserParam.setPassword(siteUserParam.getPassword());
-                sysUserParam.setLastIp("");
-                sysUserParam.setLoginCount(0);
                 sysUserParam.setUsername(siteUserParam.getUsername());
-                sysUserParam.setIsDel(0);
-                sysUserParam.setLastTime(DateUtils.currTime());
                 sysUserParam.setStatus(siteUserParam.getStatus());
                 sysUserParam.setRealName(siteUserParam.getRealName());
                 //添加用户
@@ -356,6 +366,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean checkUserName(String userName) {
+        if (StringUtils.isBlank(userName)) throw new AdminException("用户名不能为空");
         QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", userName);
         long count = sysUserMapper.selectCount(queryWrapper);

@@ -1,295 +1,256 @@
 package com.niu.shop.service.api.marketing.vo;
 
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.domain.BeanJsonSerializer;
+import com.niu.core.common.utils.CommonUtils;
+import com.niu.core.service.core.sys.ICoreUploadService;
+import com.niu.shop.entity.goods.ShopGoodsSpec;
+import com.niu.shop.enums.active.ActiveClassEnum;
+import com.niu.shop.service.api.goods.vo.GoodsLabelListVo;
+import com.niu.shop.service.api.goods.vo.ShopGoodsDetailVo;
+import com.niu.shop.service.core.delivery.ICoreDeliveryConfigService;
+import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @Data
 public class ShopPointExchangeInfoVo {
 
-    @JsonProperty("sku_image_thumb_small")
-    private String skuImageThumbSmall;
-    @JsonProperty("sku_image_thumb_mid")
-    private String skuImageThumbMid;
-    @JsonProperty("sku_image_thumb_big")
-    private String skuImageThumbBig;
-    @JsonProperty("sku_id")
-    private Integer skuId;
-    @JsonProperty("sku_name")
-    private String skuName;
-    @JsonProperty("sku_image")
-    private String skuImage;
-    @JsonProperty("sku_no")
-    private String skuNo;
-    @JsonProperty("goods_id")
-    private Integer goodsId;
-    @JsonProperty("site_id")
-    private Integer siteId;
-    @JsonProperty("sku_spec_format")
-    private String skuSpecFormat;
-    @JsonProperty("price")
-    private String price;
-    @JsonProperty("market_price")
-    private String marketPrice;
-    @JsonProperty("sale_price")
-    private String salePrice;
-    @JsonProperty("stock")
-    private String stock;
-    @JsonProperty("weight")
-    private String weight;
-    @JsonProperty("volume")
-    private String volume;
-    @JsonProperty("sale_num")
-    private Integer saleNum;
-    @JsonProperty("is_default")
-    private Integer isDefault;
-    @JsonProperty("member_price")
-    private String memberPrice;
-    @JsonProperty("goods")
-    private GoodsDTO goods;
-    @JsonProperty("skuList")
-    private List<SkuListDTO> skuList;
-    @JsonProperty("goodsSpec")
-    private List<?> goodsSpec;
-    @JsonProperty("type")
-    private String type;
-    @JsonProperty("type_name")
-    private String typeName;
-    @JsonProperty("service")
-    private List<ServiceDTO> service;
-    @JsonProperty("label_info")
-    private List<LabelInfoDTO> labelInfo;
-    @JsonProperty("evaluate_is_show")
+    private Integer skuId; // 商品sku_id
+    private Integer siteId; // 站点id
+    private String skuName; // 商品sku名称
+    private String skuImage; // sku主图
+    private String skuNo; // 商品sku编码
+    private Integer goodsId; // 商品id
+    private String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
+    private String skuSpecFormat; // sku规格格式
+    private BigDecimal price; // sku单价
+    private BigDecimal marketPrice; // 划线价
+    private BigDecimal salePrice; // 实际卖价（有活动显示活动价，默认原价）
+    private BigDecimal costPrice; // sku成本价
+    private Integer stock; // 商品sku库存
+    private Integer point; // 商品sku库存
+    private BigDecimal weight; // 重量（单位kg）
+    private BigDecimal volume; // 体积（单位立方米）
+    private Integer saleNum; // 销量
+    private Integer isDefault; // 是否默认
+    private BigDecimal memberPrice;
     private Integer evaluateIsShow;
-    @JsonProperty("point")
-    private String point;
-    @JsonProperty("exchange_id")
     private Integer exchangeId;
+    private ShopDiscountGoodsInfoVo discountInfo;
+    private Integer isLimit = 0;
+    private Integer limitType = 1;
+    private Integer maxBuy = 0;
+    private Integer minBuy = 0;
+    private BigDecimal showPrice;
+    private String showType;
 
-    @NoArgsConstructor
+
+    @JsonProperty("skuList")
+    protected List<Sku> skuList;
+
+    private Goods goods;
+
+    @JsonProperty("goodsSpec")
+    private List<Spec> goodsSpec;
+
+    private List<Service> service = new LinkedList<>();
+
+    private List<GoodsLabelListVo> labelInfo = new LinkedList<>();
+
+    private Brand brandInfo;
+    private int isNewcomer;
+    private String type;
+    private String typeName;
+
+    private String newcomerPrice;
+
+    private String newcomerDesc;
+
+    private Object sowShowList;
+
+    private Object diyDetailInfo;
+
+
+    private ImageSize imageSize = new ImageSize();
+
     @Data
-    public static class GoodsDTO {
-        @JsonProperty("goods_type_name")
-        private String goodsTypeName;
-        @JsonProperty("goods_cover_thumb_small")
-        private String goodsCoverThumbSmall;
-        @JsonProperty("goods_cover_thumb_mid")
-        private String goodsCoverThumbMid;
-        @JsonProperty("goods_cover_thumb_big")
+    public static class Goods {
+        private Integer goodsId; // 商品id
+        private Integer siteId; // 站点id
+        private String goodsName; // 商品名称
+        private String goodsType; // 商品类型
+        private String subTitle; // 副标题
+        private String goodsCover; // 商品封面
         private String goodsCoverThumbBig;
-        @JsonProperty("delivery_type_list")
-        private DeliveryTypeListDTO deliveryTypeList;
-        @JsonProperty("goods_image_thumb_small")
-        private List<String> goodsImageThumbSmall;
-        @JsonProperty("goods_image_thumb_mid")
-        private List<String> goodsImageThumbMid;
-        @JsonProperty("goods_image_thumb_big")
+        private String goodsCoverThumbSmall;
+        private String goodsCoverThumbMid;
+        private String goodsImage; // 商品图片
         private List<String> goodsImageThumbBig;
-        @JsonProperty("goods_brand")
-        private GoodsBrandDTO goodsBrand;
-        @JsonProperty("goods_id")
-        private Integer goodsId;
-        @JsonProperty("is_discount")
-        private Integer isDiscount;
-        @JsonProperty("site_id")
-        private Integer siteId;
-        @JsonProperty("goods_name")
-        private String goodsName;
-        @JsonProperty("goods_type")
-        private String goodsType;
-        @JsonProperty("sub_title")
-        private String subTitle;
-        @JsonProperty("goods_cover")
-        private String goodsCover;
-        @JsonProperty("goods_image")
-        private String goodsImage;
-        @JsonProperty("goods_desc")
-        private String goodsDesc;
-        @JsonProperty("brand_id")
-        private Integer brandId;
-        @JsonProperty("label_ids")
-        private List<String> labelIds;
-        @JsonProperty("service_ids")
-        private List<String> serviceIds;
-        @JsonProperty("unit")
-        private String unit;
-        @JsonProperty("stock")
-        private Integer stock;
-        @JsonProperty("sale_num")
-        private Integer saleNum;
-        @JsonProperty("status")
-        private Integer status;
-        @JsonProperty("is_free_shipping")
-        private Integer isFreeShipping;
-        @JsonProperty("fee_type")
-        private String feeType;
-        @JsonProperty("delivery_type")
-        private List<String> deliveryType;
-        @JsonProperty("delivery_money")
-        private String deliveryMoney;
-        @JsonProperty("delivery_template_id")
-        private Integer deliveryTemplateId;
-        @JsonProperty("goods_category")
-        private List<Integer> goodsCategory;
-        @JsonProperty("attr_id")
-        private Integer attrId;
-        @JsonProperty("attr_format")
-        private String attrFormat;
-        @JsonProperty("member_discount")
-        private String memberDiscount;
-        @JsonProperty("goods_video")
+        private List<String> goodsImageThumbSmall;
+        private List<String> goodsImageThumbMid;
         private String goodsVideo;
-        @JsonProperty("poster_id")
-        private Integer posterId;
-        @JsonProperty("virtual_receive_type")
-        private String virtualReceiveType;
-        @JsonProperty("is_collect")
-        private Integer isCollect;
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String goodsCategory; // 商品分类
+        private String goodsDesc; // 商品介绍
+        private Integer brandId; // 商品品牌id
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String labelIds; // 标签组
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String serviceIds; // 商品服务
+        private String unit; // 单位
+        private Integer stock; // 商品库存（总和）
+        private Integer saleNum; // 销量
+        private Integer virtualSaleNum; // 虚拟销量
+        private Integer status; // 商品状态（1.正常0下架）
+        private Integer sort; // 排序
+        @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+        private String deliveryType; // 支持的配送方式
+        private Integer isFreeShipping; // 是否免邮
+        private String feeType; // 运费设置，选择模板：template，固定运费：fixed
+        private BigDecimal deliveryMoney; // 固定运费
+        private Integer deliveryTemplateId; // 运费模板
+        private Integer virtualAutoDelivery; // 虚拟商品是否自动发货
+        private String virtualReceiveType; // 虚拟商品收货方式，auto：自动收货，artificial：买家确认收货，verify：到店核销
+        private Integer virtualVerifyType; // 虚拟商品核销有效期类型，0：不限，1：购买后几日有效，2：指定过期日期
+        private Integer virtualIndate; // 虚拟到期时间
+        private Integer supplierId; // 供应商id
+        private Integer attrId; // 商品参数id
+        private JSONArray attrFormat; // 商品参数内容，json格式
+        private Integer isDiscount; // 是否参与限时折扣
+        private String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
+        private Integer posterId; // 海报id
+        private Integer isCollect = 0;
+        private Integer hasBuy = 0;
+        private Integer isLimit = 0;
+        private Integer limitType = 1;
+        private Integer maxBuy = 0;
+        private Integer minBuy = 0;
+        private Integer isGift = 0;
+        private Integer formId;
+        private Map<String, DeliveryConfigVo> deliveryTypeList;
 
-        @NoArgsConstructor
-        @Data
-        public static class DeliveryTypeListDTO {
-            @JsonProperty("express")
-            private ExpressDTO express;
-            @JsonProperty("local_delivery")
-            private LocalDeliveryDTO localDelivery;
-            @JsonProperty("store")
-            private StoreDTO store;
-
-            @NoArgsConstructor
-            @Data
-            public static class ExpressDTO {
-                @JsonProperty("name")
-                private String name;
-                @JsonProperty("status")
-                private String status;
-                @JsonProperty("key")
-                private String key;
-                @JsonProperty("desc")
-                private String desc;
-            }
-
-            @NoArgsConstructor
-            @Data
-            public static class LocalDeliveryDTO {
-                @JsonProperty("name")
-                private String name;
-                @JsonProperty("status")
-                private String status;
-                @JsonProperty("key")
-                private String key;
-                @JsonProperty("desc")
-                private String desc;
-            }
-
-            @NoArgsConstructor
-            @Data
-            public static class StoreDTO {
-                @JsonProperty("name")
-                private String name;
-                @JsonProperty("status")
-                private String status;
-                @JsonProperty("key")
-                private String key;
-                @JsonProperty("desc")
-                private String desc;
-            }
+        private ICoreUploadService coreUploadService() {
+            return SpringContext.bean(ICoreUploadService.class);
         }
 
-        @NoArgsConstructor
-        @Data
-        public static class GoodsBrandDTO {
-            @JsonProperty("brand_id")
-            private Integer brandId;
-            @JsonProperty("brand_name")
-            private String brandName;
-            @JsonProperty("logo")
-            private String logo;
+        public String getGoodsCoverThumbSmall() {
+            return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsCover());
+        }
+
+        public String getGoodsCoverThumbMid() {
+            return CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover());
+        }
+
+        public String getGoodsCoverThumbBig() {
+            return CommonUtils.thumbImageBig(this.siteId, this.getGoodsCover());
+        }
+
+        public List<String> getGoodsImageThumbSmall() {
+            List<String> list = new LinkedList<>();
+            List<String> images = Arrays.asList(this.goodsImage.split(","));
+            for (String path : images) {
+                list.add(CommonUtils.thumbImageSmall(this.siteId, this.getGoodsCover()));
+            }
+            return list;
+        }
+
+        public List<String> getGoodsImageThumbMid() {
+            List<String> list = new LinkedList<>();
+            List<String> images = Arrays.asList(this.goodsImage.split(","));
+            for (String path : images) {
+                list.add(CommonUtils.thumbImageMiddle(this.siteId, this.getGoodsCover()));
+            }
+            return list;
+        }
+
+        public List<String> getGoodsImageThumbBig() {
+            List<String> list = new LinkedList<>();
+            List<String> images = Arrays.asList(this.goodsImage.split(","));
+            for (String path : images) {
+                list.add(CommonUtils.thumbImageBig(this.siteId, this.getGoodsCover()));
+            }
+            return list;
+        }
+
+        public Map<String, DeliveryConfigVo> getDeliveryTypeList() {
+            ICoreDeliveryConfigService coreDeliveryConfigService = SpringContext.bean(ICoreDeliveryConfigService.class);
+            List<DeliveryConfigVo> deliveryList = coreDeliveryConfigService.getDeliveryList(this.siteId);
+            if (ObjectUtil.isEmpty(this.deliveryType)) {
+                return new HashMap<>();
+            }
+            JSONArray deliveryType = JSONUtil.parseArray(this.deliveryType);
+            return deliveryList.stream().filter(i -> deliveryType.contains(i.getKey()) && i.getStatus().equals(1)).collect(Collectors.toMap(DeliveryConfigVo::getKey, i -> i));
         }
     }
 
-    @NoArgsConstructor
     @Data
-    public static class SkuListDTO {
-        @JsonProperty("sku_id")
-        private Integer skuId;
-        @JsonProperty("site_id")
-        private Integer siteId;
-        @JsonProperty("sku_name")
-        private String skuName;
-        @JsonProperty("sku_image")
-        private String skuImage;
-        @JsonProperty("sku_no")
-        private String skuNo;
-        @JsonProperty("goods_id")
-        private Integer goodsId;
-        @JsonProperty("sku_spec_format")
-        private String skuSpecFormat;
-        @JsonProperty("price")
-        private String price;
-        @JsonProperty("market_price")
-        private String marketPrice;
-        @JsonProperty("sale_price")
-        private String salePrice;
-        @JsonProperty("stock")
-        private String stock;
-        @JsonProperty("weight")
-        private String weight;
-        @JsonProperty("volume")
-        private String volume;
-        @JsonProperty("is_default")
-        private Integer isDefault;
-        @JsonProperty("member_price")
-        private String memberPrice;
-        @JsonProperty("limit_num")
-        private String limitNum;
-        @JsonProperty("point")
-        private String point;
-        private Integer isJoinExchange;
+    public static class Sku {
+        private Integer skuId; // 商品sku_id
+        private Integer siteId; // 站点id
+        private String skuName; // 商品sku名称
+        private String skuImage; // sku主图
+        private String skuNo; // 商品sku编码
+        private Integer goodsId; // 商品id
+        private String skuSpecFormat; // sku规格格式
+        private BigDecimal price; // sku单价
+        private BigDecimal marketPrice; // 划线价
+        private BigDecimal salePrice; // 实际卖价（有活动显示活动价，默认原价）
+        private BigDecimal costPrice; // sku成本价
+        private Integer stock; // 商品sku库存
+        private Integer limitNum; // 商品sku库存
+        private Integer point; // 商品sku库存
+        private BigDecimal weight; // 重量（单位kg）
+        private BigDecimal volume; // 体积（单位立方米）
+        private Integer saleNum; // 销量
+        private Integer isDefault; // 是否默认
+        private BigDecimal memberPrice;
+        private BigDecimal newcomerPrice;
+        private int isNewcomer;
+        private String type;
+        private BigDecimal showPrice;
+        private String showType;
     }
 
-    @NoArgsConstructor
     @Data
-    public static class ServiceDTO {
-        @JsonProperty("service_id")
-        private Integer serviceId;
-        @JsonProperty("service_name")
-        private String serviceName;
-        @JsonProperty("image")
-        private String image;
-        @JsonProperty("desc")
-        private String desc;
+    public static class Spec extends ShopGoodsSpec {
+
     }
 
-    @NoArgsConstructor
     @Data
-    public static class LabelInfoDTO {
-        @JsonProperty("label_id")
-        private Integer labelId;
-        @JsonProperty("label_name")
-        private String labelName;
-        @JsonProperty("memo")
-        private String memo;
-        @JsonProperty("style_type")
-        private String styleType;
-        @JsonProperty("color_json")
-        private ColorJsonDTO colorJson;
-        @JsonProperty("icon")
-        private String icon;
+    public static class Service {
+        private Integer serviceId; //
+        private String serviceName; // 服务名称
+        private String image; // 图片
+        private String desc; // 描述
+    }
 
-        @NoArgsConstructor
-        @Data
-        public static class ColorJsonDTO {
-            @JsonProperty("text_color")
-            private String textColor;
-            @JsonProperty("bg_color")
-            private String bgColor;
-            @JsonProperty("border_color")
-            private String borderColor;
-        }
+    @Data
+    public static class Brand {
+        private Integer brandId; // 品牌ID
+        private String brandName; // 品牌名称
+        private String logo; // 品牌logo
+        private String desc; // 品牌介绍
+    }
+
+    public String getTypeName(){
+        return ActiveClassEnum.getNameByType(this.type);
+    }
+
+    @Data
+    public static class ImageSize {
+        private String width = "";
+        private String height = "";
     }
 }

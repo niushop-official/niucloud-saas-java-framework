@@ -1,5 +1,6 @@
 package com.niu.core.controller.api.weapp;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.api.login.vo.LoginVo;
@@ -43,6 +44,7 @@ public class WeappController {
      * 公众号更新用户openid
      * @return
      */
+    @SaCheckLogin
     @PutMapping("/update_openid")
     public Result<Object> updateOpenid(@Validated @RequestBody WechatAuthParam param) {
         weappService.updateOpenid(param);

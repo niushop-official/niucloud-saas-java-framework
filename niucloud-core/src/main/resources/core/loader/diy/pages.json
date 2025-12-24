@@ -16,7 +16,19 @@
 					"bgHeightScale": 0,
 					"imgWidth": "",
 					"imgHeight": "",
-					"bottomTabBarSwitch": true,
+					"bottomTabBar": {
+						"control": true,
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
+					},
 					"template": {
 						"textColor": "#303133",
 						"pageStartBgColor": "",
@@ -57,7 +69,7 @@
 						"imgUrl": "",
 						"imgWidth": "",
 						"imgHeight": "",
-						"count": -1,
+						"count": "once",
 						"show": 0,
 						"link": {
 							"name": ""
@@ -103,13 +115,13 @@
 							"bottom": 0,
 							"both": 0
 						}
-					}, {
+					},
+					{
 						"path": "edit-graphic-nav",
-						"uses": 0,
-						"id": "6vw3s6f5hbk0",
+						"id": "seqbcdpliy",
 						"componentName": "GraphicNav",
 						"componentTitle": "图文导航",
-						"ignore": [],
+						"uses": 0,
 						"layout": "horizontal",
 						"mode": "graphic",
 						"showStyle": "fixed",
@@ -119,105 +131,113 @@
 							"type": "circle",
 							"color": "#FFFFFF"
 						},
-						"imageSize": 40,
+						"imageSize": 30,
 						"aroundRadius": 25,
 						"font": {
 							"size": 14,
 							"weight": "normal",
 							"color": "#303133"
 						},
-						"list": [{
-							"title": "新闻资讯",
-							"link": {
-								"name": ""
-							},
-							"imageUrl": "static/resource/images/diy/article_list.png",
-							"label": {
-								"control": false,
-								"text": "热门",
-								"textColor": "#FFFFFF",
-								"bgColorStart": "#F83287",
-								"bgColorEnd": "#FE3423"
-							},
-							"id": "g8p2bs2gfug",
-							"imgWidth": 176,
-							"imgHeight": 176
-						}, {
-							"title": "积分中心",
-							"link": {
-								"name": "MEMBER_POINT",
-								"title": "我的积分",
-								"url": "/app/pages/member/point",
-								"action": ""
-							},
-							"imageUrl": "static/resource/images/diy/my_point.png",
-							"label": {
-								"control": false,
-								"text": "热门",
-								"textColor": "#FFFFFF",
-								"bgColorStart": "#F83287",
-								"bgColorEnd": "#FE3423"
-							},
-							"id": "5uqdfk1mqbc0",
-							"imgWidth": 176,
-							"imgHeight": 176
-						}, {
-							"title": "我的余额",
-							"link": {
-								"name": "MEMBER_BALANCE",
-								"title": "我的余额",
-								"url": "/app/pages/member/balance",
-								"action": ""
-							},
-							"imageUrl": "static/resource/images/diy/my_balance.png",
-							"label": {
-								"control": false,
-								"text": "热门",
-								"textColor": "#FFFFFF",
-								"bgColorStart": "#F83287",
-								"bgColorEnd": "#FE3423"
-							},
-							"id": "4w0ki31a7ok0",
-							"imgWidth": 176,
-							"imgHeight": 176
-						}, {
-							"title": "个人中心",
-							"link": {
-								"name": "MEMBER_CENTER",
-								"title": "个人中心",
-								"url": "/app/pages/member/index",
-								"action": "decorate"
-							},
-							"imageUrl": "static/resource/images/diy/my_personal.png",
-							"label": {
-								"control": false,
-								"text": "热门",
-								"textColor": "#FFFFFF",
-								"bgColorStart": "#F83287",
-								"bgColorEnd": "#FE3423"
-							},
-							"id": "2t1o5tdmhpo0",
-							"imgWidth": 176,
-							"imgHeight": 176
-						}],
-						"textColor": "#303133",
-						"pageStartBgColor": "rgba(255, 255, 255, 1)",
-						"pageEndBgColor": "rgba(255, 255, 255, 1)",
+						"pageStartBgColor": "",
+						"pageEndBgColor": "",
 						"pageGradientAngle": "to bottom",
 						"componentBgUrl": "",
 						"componentBgAlpha": 2,
-						"componentStartBgColor": "",
+						"componentStartBgColor": "rgba(255, 255, 255, 1)",
 						"componentEndBgColor": "",
 						"componentGradientAngle": "to bottom",
-						"topRounded": 0,
-						"bottomRounded": 0,
+						"topRounded": 9,
+						"bottomRounded": 9,
 						"elementBgColor": "",
 						"topElementRounded": 0,
 						"bottomElementRounded": 0,
 						"margin": {
-							"top": 0,
-							"bottom": 0,
-							"both": 0
+							"top": 10,
+							"bottom": 10,
+							"both": 10
+						},
+						"ignore": [],
+						"list": [
+							{
+								"title": "新闻资讯",
+								"link": {
+									"name": ""
+								},
+								"imageUrl": "static/resource/images/diy/article_list.png",
+								"label": {
+									"control": false,
+									"text": "热门",
+									"textColor": "#FFFFFF",
+									"bgColorStart": "#F83287",
+									"bgColorEnd": "#FE3423"
+								},
+								"id": "g8p2bs2gfug",
+								"imgWidth": 176,
+								"imgHeight": 176
+							}, {
+								"title": "积分中心",
+								"link": {
+									"name": "MEMBER_POINT",
+									"title": "我的积分",
+									"url": "/app/pages/member/point",
+									"action": ""
+								},
+								"imageUrl": "static/resource/images/diy/my_point.png",
+								"label": {
+									"control": false,
+									"text": "热门",
+									"textColor": "#FFFFFF",
+									"bgColorStart": "#F83287",
+									"bgColorEnd": "#FE3423"
+								},
+								"id": "5uqdfk1mqbc0",
+								"imgWidth": 176,
+								"imgHeight": 176
+							}, {
+								"title": "我的余额",
+								"link": {
+									"name": "MEMBER_BALANCE",
+									"title": "我的余额",
+									"url": "/app/pages/member/balance",
+									"action": ""
+								},
+								"imageUrl": "static/resource/images/diy/my_balance.png",
+								"label": {
+									"control": false,
+									"text": "热门",
+									"textColor": "#FFFFFF",
+									"bgColorStart": "#F83287",
+									"bgColorEnd": "#FE3423"
+								},
+								"id": "4w0ki31a7ok0",
+								"imgWidth": 176,
+								"imgHeight": 176
+							}, {
+								"title": "个人中心",
+								"link": {
+									"name": "MEMBER_CENTER",
+									"title": "个人中心",
+									"url": "/app/pages/member/index",
+									"action": "decorate"
+								},
+								"imageUrl": "static/resource/images/diy/my_personal.png",
+								"label": {
+									"control": false,
+									"text": "热门",
+									"textColor": "#FFFFFF",
+									"bgColorStart": "#F83287",
+									"bgColorEnd": "#FE3423"
+								},
+								"id": "2t1o5tdmhpo0",
+								"imgWidth": 176,
+								"imgHeight": 176
+							}
+						],
+						"swiper": {
+							"indicatorColor": "rgba(0, 0, 0, 0.3)",
+							"indicatorActiveColor": "#FF0E0E",
+							"indicatorStyle": "style-1",
+							"indicatorAlign": "center"
 						}
 					}
 				]
@@ -227,7 +247,7 @@
 	"DIY_MEMBER_INDEX": {
 		"default_member_index_one": {
 			"title": "默认个人中心1",
-			"cover": "static\/resource\/images\/diy\/template\/default_member_index_one_cover.png",
+			"cover": "static/resource/images/diy/template/default_member_index_one_cover.png",
 			"preview": "",
 			"desc": "官方推出默认个人中心1",
 			"mode": "diy",
@@ -241,7 +261,19 @@
 					"bgHeightScale": 0,
 					"imgWidth": "",
 					"imgHeight": "",
-					"bottomTabBarSwitch": true,
+					"bottomTabBar": {
+						"control": true,
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
+					},
 					"template": {
 						"textColor": "#303133",
 						"pageStartBgColor": "",
@@ -260,7 +292,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 0,
-							"both": 12
+							"both": 10
 						}
 					},
 					"topStatusBar": {
@@ -282,7 +314,7 @@
 						"imgUrl": "",
 						"imgWidth": "",
 						"imgHeight": "",
-						"count": -1,
+						"count": "once",
 						"show": 0,
 						"link": {
 							"name": ""
@@ -313,12 +345,12 @@
 						"margin": {
 							"top": 12,
 							"bottom": 6,
-							"both": 16
+							"both": 10
 						},
 						"style": "style-1",
 						"styleName": "风格1",
 						"textColor": "#FFFFFF",
-						"bgUrl": "static\/resource\/images\/diy\/member_style1_bg.png",
+						"bgUrl": "static/resource/images/diy/member_style1_bg.png",
 						"bgColorStart": "",
 						"bgColorEnd": ""
 					},
@@ -350,7 +382,7 @@
 						"margin": {
 							"top": 6,
 							"bottom": 0,
-							"both": 16
+							"both": 10
 						}
 					},
 					{
@@ -403,7 +435,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 0,
-							"both": 16
+							"both": 10
 						}
 					},
 					{
@@ -444,7 +476,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 6,
-							"both": 16
+							"both": 10
 						},
 						"ignore": [],
 						"list": [
@@ -454,9 +486,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_PERSONAL",
 									"title": "个人资料",
-									"url": "\/app\/pages\/member\/personal"
+									"url": "/app/pages/member/personal"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_personal.png",
+								"imageUrl": "static/resource/images/diy/horz_m_personal.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -474,9 +506,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_BALANCE",
 									"title": "我的余额",
-									"url": "\/app\/pages\/member\/balance"
+									"url": "/app/pages/member/balance"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_balance.png",
+								"imageUrl": "static/resource/images/diy/horz_m_balance.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -494,9 +526,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_POINT",
 									"title": "我的积分",
-									"url": "\/app\/pages\/member\/point"
+									"url": "/app/pages/member/point"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_point.png",
+								"imageUrl": "static/resource/images/diy/horz_m_point.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -514,10 +546,10 @@
 									"name": "MEMBER_CONTACT",
 									"parent": "MEMBER_LINK",
 									"title": "客服",
-									"url": "\/app\/pages\/member\/contact",
+									"url": "/app/pages/member/contact",
 									"action": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_service.png",
+								"imageUrl": "static/resource/images/diy/horz_m_service.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -529,7 +561,13 @@
 								"imgWidth": 100,
 								"imgHeight": 100
 							}
-						]
+						],
+						"swiper": {
+							"indicatorColor": "rgba(0, 0, 0, 0.3)",
+							"indicatorActiveColor": "#FF0E0E",
+							"indicatorStyle": "style-1",
+							"indicatorAlign": "center"
+						}
 					},
 					{
 						"path": "edit-graphic-nav",
@@ -561,9 +599,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_PERSONAL",
 									"title": "个人资料",
-									"url": "\/app\/pages\/member\/personal"
+									"url": "/app/pages/member/personal"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_personal.png",
+								"imageUrl": "static/resource/images/diy/vert_m_personal.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -581,9 +619,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_BALANCE",
 									"title": "我的余额",
-									"url": "\/app\/pages\/member\/balance"
+									"url": "/app/pages/member/balance"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_balance.png",
+								"imageUrl": "static/resource/images/diy/vert_m_balance.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -601,9 +639,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_POINT",
 									"title": "我的积分",
-									"url": "\/app\/pages\/member\/point"
+									"url": "/app/pages/member/point"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_point.png",
+								"imageUrl": "static/resource/images/diy/vert_m_point.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -621,10 +659,10 @@
 									"name": "MEMBER_CONTACT",
 									"parent": "MEMBER_LINK",
 									"title": "客服",
-									"url": "\/app\/pages\/member\/contact",
+									"url": "/app/pages/member/contact",
 									"action": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_service.png",
+								"imageUrl": "static/resource/images/diy/vert_m_service.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -639,7 +677,7 @@
 							{
 								"id": "6xhwid2el5c0",
 								"title": "开发者联盟",
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_develop.png",
+								"imageUrl": "static/resource/images/diy/vert_m_develop.png",
 								"imgWidth": 88,
 								"imgHeight": 88,
 								"link": {
@@ -654,6 +692,12 @@
 								}
 							}
 						],
+						"swiper": {
+							"indicatorColor": "rgba(0, 0, 0, 0.3)",
+							"indicatorActiveColor": "#FF0E0E",
+							"indicatorStyle": "style-1",
+							"indicatorAlign": "center"
+						},
 						"pageStartBgColor": "",
 						"pageEndBgColor": "",
 						"pageGradientAngle": "to bottom",
@@ -670,7 +714,7 @@
 						"margin": {
 							"top": 6,
 							"bottom": 12,
-							"both": 16
+							"both": 10
 						}
 					}
 				]
@@ -678,7 +722,7 @@
 		},
 		"default_member_index_two": {
 			"title": "默认个人中心2",
-			"cover": "static\/resource\/images\/diy\/template\/default_member_index_two_cover.png",
+			"cover": "static/resource/images/diy/template/default_member_index_two_cover.png",
 			"preview": "",
 			"desc": "官方推出默认个人中心2",
 			"mode": "diy",
@@ -688,11 +732,23 @@
 					"pageStartBgColor": "#F8F8F8",
 					"pageEndBgColor": "",
 					"pageGradientAngle": "to bottom",
-					"bgUrl": "static\/resource\/images\/diy\/member_style2_bg.png",
+					"bgUrl": "static/resource/images/diy/member_style2_bg.png",
 					"bgHeightScale": 0,
 					"imgWidth": 750,
 					"imgHeight": 403,
-					"bottomTabBarSwitch": true,
+					"bottomTabBar": {
+						"control": true,
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
+					},
 					"template": {
 						"textColor": "#303133",
 						"pageStartBgColor": "",
@@ -711,7 +767,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 0,
-							"both": 12
+							"both": 10
 						}
 					},
 					"topStatusBar": {
@@ -732,7 +788,7 @@
 						"imgUrl": "",
 						"imgWidth": "",
 						"imgHeight": "",
-						"count": -1,
+						"count": "once",
 						"show": 0,
 						"link": {
 							"name": ""
@@ -800,7 +856,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 0,
-							"both": 16
+							"both": 10
 						}
 					},
 					{
@@ -853,7 +909,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 0,
-							"both": 16
+							"both": 10
 						}
 					},
 					{
@@ -894,7 +950,7 @@
 						"margin": {
 							"top": 0,
 							"bottom": 6,
-							"both": 16
+							"both": 10
 						},
 						"ignore": [],
 						"list": [
@@ -904,9 +960,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_PERSONAL",
 									"title": "个人资料",
-									"url": "\/app\/pages\/member\/personal"
+									"url": "/app/pages/member/personal"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_personal.png",
+								"imageUrl": "static/resource/images/diy/horz_m_personal.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -924,9 +980,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_BALANCE",
 									"title": "我的余额",
-									"url": "\/app\/pages\/member\/balance"
+									"url": "/app/pages/member/balance"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_balance.png",
+								"imageUrl": "static/resource/images/diy/horz_m_balance.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -944,9 +1000,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_POINT",
 									"title": "我的积分",
-									"url": "\/app\/pages\/member\/point"
+									"url": "/app/pages/member/point"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_point.png",
+								"imageUrl": "static/resource/images/diy/horz_m_point.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -964,10 +1020,10 @@
 									"name": "MEMBER_CONTACT",
 									"parent": "MEMBER_LINK",
 									"title": "客服",
-									"url": "\/app\/pages\/member\/contact",
+									"url": "/app/pages/member/contact",
 									"action": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/horz_m_service.png",
+								"imageUrl": "static/resource/images/diy/horz_m_service.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -979,7 +1035,13 @@
 								"imgWidth": 100,
 								"imgHeight": 100
 							}
-						]
+						],
+						"swiper": {
+							"indicatorColor": "rgba(0, 0, 0, 0.3)",
+							"indicatorActiveColor": "#FF0E0E",
+							"indicatorStyle": "style-1",
+							"indicatorAlign": "center"
+						}
 					},
 					{
 						"path": "edit-graphic-nav",
@@ -1011,9 +1073,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_PERSONAL",
 									"title": "个人资料",
-									"url": "\/app\/pages\/member\/personal"
+									"url": "/app/pages/member/personal"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_personal.png",
+								"imageUrl": "static/resource/images/diy/vert_m_personal.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -1031,9 +1093,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_BALANCE",
 									"title": "我的余额",
-									"url": "\/app\/pages\/member\/balance"
+									"url": "/app/pages/member/balance"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_balance.png",
+								"imageUrl": "static/resource/images/diy/vert_m_balance.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -1051,9 +1113,9 @@
 									"parent": "MEMBER_LINK",
 									"name": "MEMBER_POINT",
 									"title": "我的积分",
-									"url": "\/app\/pages\/member\/point"
+									"url": "/app/pages/member/point"
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_point.png",
+								"imageUrl": "static/resource/images/diy/vert_m_point.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -1071,10 +1133,10 @@
 									"name": "MEMBER_CONTACT",
 									"parent": "MEMBER_LINK",
 									"title": "客服",
-									"url": "\/app\/pages\/member\/contact",
+									"url": "/app/pages/member/contact",
 									"action": ""
 								},
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_service.png",
+								"imageUrl": "static/resource/images/diy/vert_m_service.png",
 								"label": {
 									"control": false,
 									"text": "热门",
@@ -1089,7 +1151,7 @@
 							{
 								"id": "777g7jxbtfc0",
 								"title": "开发者联盟",
-								"imageUrl": "static\/resource\/images\/diy\/vert_m_develop.png",
+								"imageUrl": "static/resource/images/diy/vert_m_develop.png",
 								"imgWidth": 96,
 								"imgHeight": 96,
 								"link": {
@@ -1104,6 +1166,12 @@
 								}
 							}
 						],
+						"swiper": {
+							"indicatorColor": "rgba(0, 0, 0, 0.3)",
+							"indicatorActiveColor": "#FF0E0E",
+							"indicatorStyle": "style-1",
+							"indicatorAlign": "center"
+						},
 						"pageStartBgColor": "",
 						"pageEndBgColor": "",
 						"pageGradientAngle": "to bottom",
@@ -1120,7 +1188,7 @@
 						"margin": {
 							"top": 6,
 							"bottom": 12,
-							"both": 16
+							"both": 10
 						}
 					}
 				]

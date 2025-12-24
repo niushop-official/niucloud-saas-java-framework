@@ -19,9 +19,9 @@ public interface ICoreCouponMemberService  extends IService<ShopCouponMember> {
     /**
      * 恢复已使用的优惠券
      *
-     * @param id
+     * @param ids
      */
-    void recover(Integer id);
+    void recover(List<Integer> ids);
 
     /**
      * 优惠券失效
@@ -51,4 +51,11 @@ public interface ICoreCouponMemberService  extends IService<ShopCouponMember> {
      * @param memberIds
      */
     Integer sendCouponBatch(ShopCouponSendRecords shopCouponSendRecords, List<Integer> memberIds);
+
+    /**
+     * 刷新用户优惠券过期时间
+     * @param couponId
+     * @param siteId
+     */
+    void refeshMemberCouponExpireTime(Integer couponId, Integer siteId);
 }

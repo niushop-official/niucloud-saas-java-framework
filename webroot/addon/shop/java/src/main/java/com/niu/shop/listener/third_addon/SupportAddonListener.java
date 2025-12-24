@@ -12,14 +12,16 @@ import java.util.Map;
 @EventCallback("shop")
 @Component
 public class SupportAddonListener extends CommonEventDefiner {
+    private static final String PINTUAN = "pintuan";
+    private static final String SECKILL = "seckill";
     @Override
     public CommonEventResult handleCallback(CommonEvent commonEvent) {
         if(commonEvent.getEventName().equals("ThirdAddonOutputSource")){
             CommonEventDefiner.CommonEventResult commonResult = new CommonEventDefiner.CommonEventResult();
             Map<String, String> shopArr = Map.of("key", "shop", "name", "商城");
-            if (ObjectUtil.equal("pintuan", commonEvent.getSource())){
+            if (ObjectUtil.equal(PINTUAN, commonEvent.getSource())){
                 commonResult.setResult(shopArr);
-            } else if (ObjectUtil.equal("seckill", commonEvent.getSource())) {
+            } else if (ObjectUtil.equal(SECKILL, commonEvent.getSource())) {
                 commonResult.setResult(shopArr);
             }
             return commonResult;

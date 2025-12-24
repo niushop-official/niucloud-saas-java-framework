@@ -36,4 +36,6 @@ public interface IOplatformService {
     void clearAuthorization(String appid);
 
     PageResult<OplatformRecordVo> getAuthRecord(PageParam pageParam, IOplatformAuthRecordParam searchParam);
+
+    void cancelAuthorization();
 }

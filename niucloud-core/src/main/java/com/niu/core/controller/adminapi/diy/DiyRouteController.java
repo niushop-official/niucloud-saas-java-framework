@@ -2,6 +2,7 @@ package com.niu.core.controller.adminapi.diy;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.diy.IDiyRouteService;
 import com.niu.core.service.admin.diy.param.DiyRouteSearchParam;
@@ -49,17 +50,6 @@ public class DiyRouteController {
     }
 
     /**
-     * 存在的应用插件列表
-     *
-     * @return
-     */
-    @Description("存在的应用插件列表")
-    @GetMapping("/apps")
-    public Result<Map<String, InstallAddonListVo>> info() {
-        return Result.success(coreAddonService.getInstallAddonList());
-    }
-
-    /**
      * 获取自定义路由分享内容
      *
      */
@@ -80,6 +70,17 @@ public class DiyRouteController {
     public Result<Object> modifyShare(@Validated @RequestBody DiyRouteShareParam editParam) {
         diyRouteService.modifyShare(editParam);
         return Result.success();
+    }
+
+    /**
+     * 存在的应用插件列表
+     *
+     * @return
+     */
+    @GetMapping("/apps")
+    @Description("存在的应用插件列表")
+    public Result<JSONObject> info() {
+        return Result.success(diyRouteService.getApps());
     }
 
 }

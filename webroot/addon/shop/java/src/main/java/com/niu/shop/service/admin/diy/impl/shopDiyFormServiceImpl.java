@@ -24,7 +24,7 @@ public class shopDiyFormServiceImpl implements IShopDiyFormService {
     public Boolean diyFromDelBefore(Integer formId) {
         OrderConfigVo config = orderConfigService.getConfig();
         if (ObjectUtil.isNotEmpty(config)) {
-            if (config.getFormId().equals(formId)) {
+            if (config.getFormId() != null && config.getFormId().equals(formId)) {
                 return false;
             }
         }

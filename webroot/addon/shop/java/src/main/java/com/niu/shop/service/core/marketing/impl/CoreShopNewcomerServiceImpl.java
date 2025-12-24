@@ -26,6 +26,7 @@ import com.niu.shop.service.core.marketing.param.ShopNewcomerActiveJoinParam;
 import com.niu.shop.service.core.marketing.vo.CoreShopNewcomerConfigVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -201,6 +202,8 @@ public class CoreShopNewcomerServiceImpl extends ServiceImpl<ShopNewcomerMemberR
             for (ShopNewcomerMemberRecords record : records) {
                 record.setIsJoin(param.getIsJoin());
                 record.setOrderId(param.getOrderId());
+                record.setGoodsIds(CollectionUtils.isEmpty(param.getGoodsIds()) ? "" : param.getGoodsIds().toString());
+                record.setSkuIds(CollectionUtils.isEmpty(param.getSkuIds()) ? "" : param.getSkuIds().toString());
                 record.setUpdateTime(System.currentTimeMillis() / 1000);
             }
         } else {
@@ -211,13 +214,15 @@ public class CoreShopNewcomerServiceImpl extends ServiceImpl<ShopNewcomerMemberR
             for (ShopNewcomerMemberRecords record : records) {
                 record.setIsJoin(param.getIsJoin());
                 record.setOrderId(0);
+                record.setGoodsIds("");
+                record.setSkuIds("");
                 record.setUpdateTime(System.currentTimeMillis() / 1000);
             }
         }
         coreShopNewcomerMemberRecordsService.updateBatchById(records);
     }
 
-    private long getNewcomerEndTime(CoreShopNewcomerConfigVo config) {
+    private long  getNewcomerEndTime(CoreShopNewcomerConfigVo config) {
         return switch (config.getValidityType()) {
             case "day" -> System.currentTimeMillis() / 1000 + config.getValidityDay() * 86400;
             case "date" -> DateUtils.StringToTimestamp(config.getValidityTime());

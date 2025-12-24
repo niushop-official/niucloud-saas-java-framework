@@ -55,7 +55,20 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
             queryWrapper.eq("l.group_id", searchParam.getGroupId());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getLabelName())) queryWrapper.like("label_name", searchParam.getLabelName());
-        queryWrapper.orderByDesc("label_id");
+        if(ObjectUtil.isNotEmpty(searchParam.getOrder()))
+        {
+            if(searchParam.getSort().equals("asc"))
+            {
+                queryWrapper.orderByAsc(searchParam.getOrder());
+            }
+            else
+            {
+                queryWrapper.orderByDesc(searchParam.getOrder());
+            }
+        }else{
+            queryWrapper.orderByDesc("label_id");
+        }
+
 
         IPage<ShopGoodsLabelListVo> iPage = shopGoodsLabelMapper.selectJoinPage(new Page<>(page, limit), ShopGoodsLabelListVo.class, queryWrapper);
         for (ShopGoodsLabelListVo vo : iPage.getRecords()) {
@@ -75,6 +88,7 @@ public class ShopGoodsLabelServiceImpl implements IShopGoodsLabelService {
     public List<ShopGoodsLabelListVo> list(ShopGoodsLabelSearchParam searchParam) {
         QueryWrapper<ShopGoodsLabel> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
+        queryWrapper.eq("status", 1);
         if (ObjectUtil.isNotEmpty(searchParam.getLabelName())) queryWrapper.like("label_name", searchParam.getLabelName());
         queryWrapper.orderByDesc("label_id");
 

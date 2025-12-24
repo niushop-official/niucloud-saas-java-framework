@@ -6,6 +6,7 @@
   "author": "{author}",
   "type": "{type}",
   "support_app": "{supportApp}",
+  "support_version": "{support_version}",
   "jar": "{key}.jar",
   "mainClass": "com.niu.{key}.WebApplication"
 }

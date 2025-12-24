@@ -29,6 +29,7 @@ import com.niu.core.service.core.captcha.ICoreCaptchaImgService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,7 @@ public class LoginServiceImpl implements ILoginService {
     ISiteService siteService;
     @Resource
     ICoreCaptchaImgService coreCaptchaImgService;
+
     /**
      * 用户登录
      *
@@ -57,60 +59,64 @@ public class LoginServiceImpl implements ILoginService {
      */
     @Override
     public LoginResultVo login(UserLoginParam userLoginParam) {
-        String appType=userLoginParam.getAppType();
-        String userName=userLoginParam.getUsername();
-        String passWord=userLoginParam.getPassword();
+        String appType = userLoginParam.getAppType();
+        String userName = userLoginParam.getUsername();
+        String passWord = userLoginParam.getPassword();
 
-        if(!EnumUtils.isInclude(appType, AppTypeEnum.class, "getName")){
+        if (!EnumUtils.isInclude(appType, AppTypeEnum.class, "getName")) {
             throw new AuthException("APP_TYPE_NOT_EXIST");
         }
-        Integer siteId= RequestUtils.siteId();
+        Integer siteId = RequestUtils.siteId();
 
-        LoginConfigVo loginConfigVo=configService.getLoginConfig();
-        Integer isCaptcha=0;
-        if(appType.equals(AppTypeEnum.ADMIN.getName())){
-            isCaptcha=loginConfigVo.getIsCaptcha();
-        }else if(appType.equals(AppTypeEnum.SITE.getName())){
-            isCaptcha=loginConfigVo.getIsSiteCaptcha();
+        LoginConfigVo loginConfigVo = configService.getLoginConfig();
+        Integer isCaptcha = 0;
+        if (appType.equals(AppTypeEnum.ADMIN.getName())) {
+            isCaptcha = loginConfigVo.getIsCaptcha();
+        } else if (appType.equals(AppTypeEnum.SITE.getName())) {
+            isCaptcha = loginConfigVo.getIsSiteCaptcha();
         }
 
-        if(isCaptcha==1){
+        if (isCaptcha == 1) {
             //验证验证码
-            CaptchaVO captchaVO=new CaptchaVO();
+            CaptchaVO captchaVO = new CaptchaVO();
             captchaVO.setCaptchaVerification(userLoginParam.getCaptchaCode());
             coreCaptchaImgService.verification(captchaVO);
         }
-        SysUserInfoVo userInfo=sysUserService.getUserInfoByUserName(userName);
-        if(ObjectUtil.isNull(userInfo)){
+        SysUserInfoVo userInfo = sysUserService.getUserInfoByUserName(userName);
+        if (ObjectUtil.isNull(userInfo)) {
             throw new AuthException("账号密码错误");
         }
 
         //检测密码加密是否正确
-        if(!PasswordEncipher.matche(passWord, userInfo.getPassword())){
+        if (!PasswordEncipher.matche(passWord, userInfo.getPassword())) {
             throw new AuthException("账号密码错误");
         }
         //设置当前登录用户id
         RequestUtils.setUid(userInfo.getUid());
 
-        Integer defaultSiteId=0;
-        SysUserRoleInfoVo roleInfoVo=new SysUserRoleInfoVo();
-        List<Integer> siteIds=new ArrayList<>();
-        if(appType.equals(AppTypeEnum.ADMIN.getName())){
-            defaultSiteId=RequestUtils.defaultSiteId();
-            roleInfoVo=sysUserRoleService.getUserRole(defaultSiteId, userInfo.getUid());
-            if(ObjectUtil.isNotNull(roleInfoVo)){
-                if(userInfo.getStatus()<=0){
+        Integer defaultSiteId = 0;
+        SysUserRoleInfoVo roleInfoVo = new SysUserRoleInfoVo();
+        List<Integer> siteIds = new ArrayList<>();
+        if (appType.equals(AppTypeEnum.ADMIN.getName())) {
+            defaultSiteId = RequestUtils.defaultSiteId();
+            roleInfoVo = sysUserRoleService.getUserRole(defaultSiteId, userInfo.getUid());
+            if (ObjectUtil.isNotNull(roleInfoVo)) {
+                if (userInfo.getStatus() <= 0) {
                     throw new AuthException("账号被锁定");
                 }
-            }else{
-                appType=AppTypeEnum.SITE.getName();
+                if (roleInfoVo.getIsAdmin() != 1) {
+                    List<String> rules = sysUserRoleService.getRoleByUserRoleIds(roleInfoVo.getRoleIds(), defaultSiteId);
+                    if (ObjectUtil.isEmpty(rules)) throw new AuthException("账号被锁定");
+                }
+            } else {
+                appType = AppTypeEnum.SITE.getName();
             }
-        }else if(appType.equals(AppTypeEnum.SITE.getName())){
-            siteIds=authSiteService.getSiteIds();
-            if(ObjectUtil.isNotNull(siteIds) && siteIds.size()>0){
-                defaultSiteId=siteIds.indexOf(RequestUtils.siteId())>0 || authService.isSuperAdmin()?RequestUtils.siteId():siteIds.get(0);
+        } else if (appType.equals(AppTypeEnum.SITE.getName())) {
+            siteIds = authSiteService.getSiteIds();
+            if (ObjectUtil.isNotNull(siteIds) && siteIds.size() > 0) {
+                defaultSiteId = siteIds.indexOf(RequestUtils.siteId()) > 0 || authService.isSuperAdmin() ? RequestUtils.siteId() : siteIds.get(0);
             }
-        }else{
+        } else {
             throw new AuthException("APP_TYPE_NOT_EXIST");
         }
 
@@ -126,37 +132,35 @@ public class LoginServiceImpl implements ILoginService {
         StpUtil.login("user-" + userInfo.getUid(), loginModel);
         // 获取返回内容
         SaTokenInfo saTokenInfo = StpUtil.getTokenInfo();
-        LoginResultVo resultVo=new LoginResultVo();
+        LoginResultVo resultVo = new LoginResultVo();
 
-        LoginUserInfoVo userInfoVo=new LoginUserInfoVo();
+        LoginUserInfoVo userInfoVo = new LoginUserInfoVo();
         userInfoVo.setUid(userInfo.getUid());
         userInfoVo.setUsername(userInfo.getUsername());
         userInfoVo.setHeadImg(userInfo.getHeadImg());
         userInfoVo.setIsSuperAdmin(authService.isSuperAdmin());
 
-
-        if(appType.equals(AppTypeEnum.ADMIN.getName()) || (appType.equals(AppTypeEnum.SITE.getName()) && defaultSiteId>0)){
+        if (appType.equals(AppTypeEnum.ADMIN.getName()) || (appType.equals(AppTypeEnum.SITE.getName()) && defaultSiteId > 0)) {
             RequestUtils.setSiteId(defaultSiteId);
-            SiteInfoVo siteInfoVo=siteService.info(RequestUtils.siteId());
+            SiteInfoVo siteInfoVo = siteService.info(RequestUtils.siteId());
             resultVo.setSiteInfo(siteInfoVo);
         }
-        if(appType.equals(AppTypeEnum.ADMIN.getName()) && !userInfoVo.getIsSuperAdmin()){
-            siteIds=authSiteService.getSiteIds();
+        if (appType.equals(AppTypeEnum.ADMIN.getName()) && !userInfoVo.getIsSuperAdmin()) {
+            siteIds = authSiteService.getSiteIds();
         }
 
         resultVo.setToken(saTokenInfo.getTokenValue());
-        resultVo.setExpiresTime(DateUtils.currTime()+saTokenInfo.getTokenTimeout());
+        resultVo.setExpiresTime(DateUtils.currTime() + saTokenInfo.getTokenTimeout());
+        userInfoVo.setSiteIds(siteIds);
         resultVo.setUserinfo(userInfoVo);
         resultVo.setSiteId(defaultSiteId);
         resultVo.setUserrole(roleInfoVo);
-        userInfoVo.setSiteIds(siteIds);
 
         return resultVo;
     }
 
     /**
      * 用戶登出
-     *
      */
     @Override
     public void logout() {
@@ -172,11 +176,11 @@ public class LoginServiceImpl implements ILoginService {
      */
     @Override
     public void clearToken(Integer uid, String appType, String token) {
-        if(ObjectUtil.isNotNull(token) && ObjectUtil.isNotEmpty(token)){
+        if (ObjectUtil.isNotNull(token) && ObjectUtil.isNotEmpty(token)) {
             StpUtil.logoutByTokenValue(token);
-        }else if(ObjectUtil.isNotNull(appType) && ObjectUtil.isNotEmpty(appType)){
+        } else if (ObjectUtil.isNotNull(appType) && ObjectUtil.isNotEmpty(appType)) {
             StpUtil.logout(uid, appType);
-        }else{
+        } else {
             StpUtil.logout(uid);
         }
     }

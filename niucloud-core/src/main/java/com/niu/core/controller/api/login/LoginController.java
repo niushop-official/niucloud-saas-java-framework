@@ -88,8 +88,8 @@ public class LoginController {
      * @return
      */
     @GetMapping("/login/config")
-    public Result<LoginConfigVo> getLoginConfig() {
-        return Result.success(loginService.getLoginConfig());
+    public Result<LoginConfigVo> getLoginConfig(@RequestParam(name = "url", required = false, defaultValue = "") String url) {
+        return Result.success(loginService.getLoginConfig(url));
     }
 
     /**

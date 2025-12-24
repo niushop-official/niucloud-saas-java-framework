@@ -1,67 +1,165 @@
 [
-  {
-    "member": {
-      "name": "会员列表",
-      "column": [
-        {
-          "nickname":{
-            "name": "会员昵称"
-          }
-        },
-        {
-          "mobile":{
-            "name": "手机号"
-          }
-        },{
-          "member_level_name":{
-            "name": "会员等级"
-          }
-        },{
-          "sex_name":{
-            "name": "性别"
-          }
-        },{
-          "birthday":{
-            "name": "生日"
-          }
-        },{
-          "point":{
-            "name": "积分"
-          }
-        },{
-          "balance":{
-            "name": "余额"
-          }
-        },{
-          "money":{
-            "name": "可提现余额"
-          }
-        },{
-          "growth":{
-            "name": "成长值"
-          }
-        },{
-          "commission":{
-            "name": "佣金"
-          }
-        },{
-          "register_channel_name":{
-            "name": "注册来源"
-          }
-        },{
-          "status_name":{
-            "name": "用户状态"
-          }
-        },{
-          "create_time":{
-            "name": "注册时间"
-          }
-        },{
-          "last_visit_time":{
-            "name": "最后访问时间"
-          }
-        }
-      ]
-    }
-  }
+	{
+		"member": {
+			"name": "会员列表",
+			"column": [
+				{
+					"nickname": {
+						"name": "会员昵称"
+					}
+				},
+				{
+					"mobile": {
+						"name": "手机号"
+					}
+				},
+				{
+					"member_level_name": {
+						"name": "会员等级"
+					}
+				},
+				{
+					"sex_name": {
+						"name": "性别"
+					}
+				},
+				{
+					"birthday": {
+						"name": "生日"
+					}
+				},
+				{
+					"point": {
+						"name": "积分"
+					}
+				},
+				{
+					"balance": {
+						"name": "余额"
+					}
+				},
+				{
+					"money": {
+						"name": "可提现余额"
+					}
+				},
+				{
+					"growth": {
+						"name": "成长值"
+					}
+				},
+				{
+					"commission": {
+						"name": "佣金"
+					}
+				},
+				{
+					"register_channel_name": {
+						"name": "注册来源"
+					}
+				},
+				{
+					"status_name": {
+						"name": "用户状态"
+					}
+				},
+				{
+					"create_time": {
+						"name": "注册时间"
+					}
+				},
+				{
+					"last_visit_time": {
+						"name": "最后访问时间"
+					}
+				}
+			]
+		}
+	},
+	{
+		"diy_form_records": {
+			"name": "表单填写明细",
+			"column": [
+				{
+					"record_id": {
+						"name": "记录编号"
+					}
+				},
+				{
+					"create_time": {
+						"name": "填表时间"
+					}
+				},
+				{
+					"page_title": {
+						"name": "表单名称"
+					}
+				},
+				{
+					"type_name": {
+						"name": "表单类型"
+					}
+				},
+				{
+					"form_id": {
+						"name": "表单编号"
+					}
+				},
+				{
+					"nickname": {
+						"name": "填表人名称"
+					}
+				},
+				{
+					"mobile": {
+						"name": "填表人手机号"
+					}
+				}
+			]
+		}
+	},
+	{
+		"diy_form_records_member": {
+			"name": "填表人统计列表",
+			"column": [
+				{
+					"nickname": {
+						"name": "填表人名称"
+					}
+				},
+				{
+					"write_count": {
+						"name": "总计"
+					}
+				}
+			]
+		}
+	},
+	{
+		"diy_form_records_fields": {
+			"name": "表单字段统计列表",
+			"column": [
+				{
+					"field_name": {
+						"name": "字段"
+					}
+				},
+				{
+					"render_value": {
+						"name": "选项值"
+					}
+				},
+				{
+					"write_count": {
+						"name": "小计"
+					}
+				},
+				{
+					"write_percent": {
+						"name": "比例"
+					}
+				}
+			]
+		}
+	}
 ]

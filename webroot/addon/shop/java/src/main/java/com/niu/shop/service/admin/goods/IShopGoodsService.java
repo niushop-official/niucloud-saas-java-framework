@@ -1,11 +1,13 @@
 package com.niu.shop.service.admin.goods;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.vo.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商品服务接口
@@ -111,7 +113,7 @@ public interface IShopGoodsService {
      * @param goodsIds
      * @return
      */
-    Long getActiveGoodsCount(Integer[] goodsIds);
+    Long getActiveGoodsCount(Integer[] goodsIds, Integer isAll, Map<String, Object> where);
 
     /**
      * 查询商品正在交易中的数量
@@ -144,13 +146,13 @@ public interface IShopGoodsService {
      */
     ShopSelectGoodsListVo getSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam);
 
-    /**
-     * 商品选择分页列表为种草社区
-     *
-     * @param pageParam
-     * @param searchParam
-     */
-    ShopSelectGoodsListVo getZhongcaoSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam);
+//    /**
+//     * 商品选择分页列表为种草社区
+//     *
+//     * @param pageParam
+//     * @param searchParam
+//     */
+//    ShopSelectGoodsListVo getZhongcaoSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam);
 
 
     /**
@@ -200,4 +202,6 @@ public interface IShopGoodsService {
     void batchSet(ShopGoodsBatchSetParam param);
 
     Boolean verifySkuNo(ShopGoodsVerifySkuNoParam param);
+
+    QueryWrapper getBatchAllQuery(QueryWrapper queryWrapper, Map<String, Object> where);
 }

@@ -98,6 +98,17 @@ public class SysAttachmentController {
     }
 
     /**
+     * 音频上传
+     *
+     * @return
+     */
+    @PostMapping("/audio")
+    public Result<AttachmentUploadVo> audio(@RequestParam("file") MultipartFile multipartFile, AttachmentUploadParam param) {
+        param.setFile(multipartFile);
+        return Result.success(sysAttachmentService.audio(param));
+    }
+
+    /**
      * 附件分组列表
      *
      * @param searchParam
@@ -140,10 +151,6 @@ public class SysAttachmentController {
     @DeleteMapping("/attachment/category/{id}")
     public Result<Object> delCategory(@PathVariable("id") Integer id) {
         sysAttachmentService.delCategory(id);
-        return Result.success();
-    }
-
-    public Result<Object> moveCategory(Integer attrId) {
         return Result.success();
     }
 

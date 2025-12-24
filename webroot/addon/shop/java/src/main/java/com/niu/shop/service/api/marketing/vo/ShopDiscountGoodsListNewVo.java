@@ -26,7 +26,7 @@ public class ShopDiscountGoodsListNewVo implements Serializable {
     private String goodsTypeName;  // 商品类型名称
     private Integer skuId;  // SKU ID
     private String goodsCoverThumbMid;  // 商品封面图(中图)
-    private String goodsLabelName;  // 商品标签名称
+    private List<GoodsLabel> goodsLabelName;  // 商品标签名称
     private Integer siteId;  // 站点ID
     private Integer goodsId;  // 商品ID
     @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
@@ -83,6 +83,15 @@ public class ShopDiscountGoodsListNewVo implements Serializable {
         private String discountRate;  // 折扣率
         private String discountPrice;  // 折扣价
         private String reduceMoney;  // 减少的金额
+    }
+
+    @Data
+    public static class GoodsLabel {
+        private Integer labelId;  // 标签ID
+        private String labelName;  // 标签名称
+        private String styleType;
+        private String colorJson;
+        private String icon;
     }
 
     public String getGoodsTypeName() {

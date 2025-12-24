@@ -189,42 +189,40 @@ public class CoreRechargeOrderServiceImpl implements ICoreRechargeOrderService {
             QueryWrapper<RechargeOrderItem> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("order_id", pay.getTradeId());
             List<RechargeOrderItem> items = rechargeOrderItemMapper.selectList(queryWrapper);
-            if (ObjectUtil.isEmpty(items)) {
-                return;
-            }
+            if (ObjectUtil.isNotEmpty(items)) {
+                Recharge recharge = rechargeMapper.selectById(items.get(0).getItemId());
+                if (ObjectUtil.isNotEmpty(recharge)) {
+                    recharge.setSaleNum(recharge.getSaleNum() + 1);
+                    rechargeMapper.updateById(recharge);
 
-            Recharge recharge = rechargeMapper.selectById(items.get(0).getItemId());
-            if (ObjectUtil.isNotEmpty(recharge)) {
-                recharge.setSaleNum(recharge.getSaleNum() + 1);
-                rechargeMapper.updateById(recharge);
+                    // 增加会员余额
+                    if (recharge.getFaceValue().compareTo(BigDecimal.ZERO) > 0) {
+                        coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), recharge.getFaceValue().doubleValue(), "recharge", "会员充值到账", order.getOrderId().toString());
+                    }
 
-                // 增加会员余额
-                if (recharge.getFaceValue().compareTo(BigDecimal.ZERO) > 0) {
-                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), recharge.getFaceValue().doubleValue(), "recharge", "会员充值到账", order.getOrderId().toString());
-                }
+                    // 会员充值发放积分开始
+                    if (recharge.getPoint() > 0) {
+                        coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.POINT.getType(), recharge.getPoint().doubleValue(), "recharge", "会员充值赠送", order.getOrderId().toString());
+                    }
 
-                // 会员充值发放积分开始
-                if (recharge.getPoint() > 0) {
-                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.POINT.getType(), recharge.getPoint().doubleValue(), "recharge", "会员充值赠送", order.getOrderId().toString());
-                }
+                    // 会员充值发放成长值开始
+                    if (recharge.getGrowth() > 0) {
+                        coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.GROWTH.getType(), recharge.getGrowth().doubleValue(), "recharge", "会员充值赠送", order.getOrderId().toString());
+                    }
 
-                // 会员充值发放成长值开始
-                if (recharge.getGrowth() > 0) {
-                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.GROWTH.getType(), recharge.getGrowth().doubleValue(), "recharge", "会员充值赠送", order.getOrderId().toString());
-                }
-
-                if (ObjectUtil.isNotEmpty(recharge.getGiftJson())) {
-                    CommonEvent event = new CommonEvent();
-                    event.setName("CommonEvent");
-                    event.setEventName("RechargeAfterListener");
-                    event.setData(recharge);
-                    event.setMemberId(order.getMemberId());
-                    event.setSiteId(RequestUtils.siteId());
-                    EventAndSubscribeOfPublisher.publishAll(event);
-                }
-            } else {
-                if (order.getOrderItemMoney().compareTo(BigDecimal.ZERO) > 0) {
-                    coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), order.getOrderItemMoney().doubleValue(), "recharge", "会员充值到账", order.getOrderId().toString());
+                    if (ObjectUtil.isNotEmpty(recharge.getGiftJson())) {
+                        CommonEvent event = new CommonEvent();
+                        event.setName("CommonEvent");
+                        event.setEventName("RechargeAfterListener");
+                        event.setData(recharge);
+                        event.setMemberId(order.getMemberId());
+                        event.setSiteId(RequestUtils.siteId());
+                        EventAndSubscribeOfPublisher.publishAll(event);
+                    }
+                } else {
+                    if (order.getOrderItemMoney().compareTo(BigDecimal.ZERO) > 0) {
+                        coreMemberAccountService.addLog(order.getSiteId(), order.getMemberId(), AccountTypeEnum.BALANCE.getType(), order.getOrderItemMoney().doubleValue(), "recharge", "会员充值到账", order.getOrderId().toString());
+                    }
                 }
             }
 

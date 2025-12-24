@@ -1,6 +1,7 @@
 package com.niu.core.service.api.agreement.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.sys.SysAgreement;
 import com.niu.core.enums.sys.AgreementEnum;
 import com.niu.core.mapper.sys.SysAgreementMapper;
@@ -26,7 +27,7 @@ public class AgreementServiceImpl implements IAgreementService {
         QueryWrapper<SysAgreement> queryWrapper = new QueryWrapper<>();
         queryWrapper.select("site_id, agreement_key, title, content, create_time, update_time");
         queryWrapper.eq("agreement_key", param.getKey());
-        queryWrapper.eq("site_id", param.siteId());
+        queryWrapper.eq("site_id", RequestUtils.apiSiteId());
         SysAgreement sysAgreement = sysAgreementMapper.selectOne(queryWrapper);
         if (sysAgreement == null) {
             return null;

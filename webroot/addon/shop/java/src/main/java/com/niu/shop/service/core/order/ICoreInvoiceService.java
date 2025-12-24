@@ -1,5 +1,7 @@
 package com.niu.shop.service.core.order;
 
+import java.util.List;
+
 public interface ICoreInvoiceService {
 
     /**
@@ -15,4 +17,6 @@ public interface ICoreInvoiceService {
      * @param id
      */
     void close(Integer id);
+
+    void audit(List<Integer> ids);
 }

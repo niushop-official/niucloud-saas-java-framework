@@ -25,4 +25,15 @@ public class SiteEditParam implements Serializable {
     @NotNull(message = "siteDomain参数缺失")
     private String siteDomain;
 
+    @NotNull(message = "uid 参数缺失")
+    private Integer uid;
+
+    @NotNull(message = "username参数缺失")
+    private String username;
+
+    @NotNull(message = "real_name参数缺失")
+    private String realName;
+
+    @NotNull(message = "password参数缺失")
+    private String password;
 }

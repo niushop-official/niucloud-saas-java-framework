@@ -2,6 +2,7 @@ package com.niu.shop.listener.third_addon.goods;
 
 import com.niu.core.common.annotation.EventCallback;
 import com.niu.core.event.common.CommonEventDefiner;
+import com.niu.shop.service.admin.goods.IOfferGoodsService;
 import com.niu.shop.service.admin.goods.impl.OfferGoodsServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
@@ -15,7 +16,7 @@ import java.util.Map;
 public class GoodsOutPutWhereInitListener extends CommonEventDefiner {
 
     @Resource
-    OfferGoodsServiceImpl offerGoodsService;
+    private IOfferGoodsService offerGoodsService;
 
     @Override
     public CommonEventResult handleCallback(CommonEvent commonEvent) {

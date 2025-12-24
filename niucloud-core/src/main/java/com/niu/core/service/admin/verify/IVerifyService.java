@@ -7,6 +7,8 @@ import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.admin.verify.vo.VerifyInfoVo;
 import com.niu.core.service.admin.verify.vo.VerifyListVo;
 
+import java.util.Map;
+
 /**
  * 核销记录服务接口
  */
@@ -26,4 +28,17 @@ public interface IVerifyService {
      * @return VerifyInfoVo
      */
     VerifyInfoVo detail(String code);
+
+    /**
+     * 核销详情
+     * @param code
+     * @return
+     */
+    Map<String, Object> getInfoByCode(String code);
+
+    /**
+     * 核销
+     * @param code
+     */
+    void verify(String code);
 }

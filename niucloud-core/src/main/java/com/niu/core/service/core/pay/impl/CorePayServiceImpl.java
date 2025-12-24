@@ -15,6 +15,7 @@ import com.niu.core.common.loader.pay.PayLoader;
 import com.niu.core.common.loader.pay.param.PayAsyncNotifyParam;
 import com.niu.core.common.loader.pay.param.PayNotifyParam;
 import com.niu.core.common.loader.pay.param.PayParam;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.pay.Pay;
 import com.niu.core.enums.common.ChannelEnum;
@@ -31,6 +32,7 @@ import com.niu.core.service.core.pay.vo.GetInfoByTradeVo;
 import com.niu.core.service.core.pay.vo.PayTypeVo;
 import com.niu.core.service.core.sys.ICorePrinterService;
 import com.niu.core.service.core.sys.param.SysPrinterPrintTicketParam;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +64,13 @@ public class CorePayServiceImpl implements ICorePayService {
     @Resource
     Cached cached;
 
+    ICorePayService corePayService;
+
+    @Resource
+    public void setCorePayService(@Lazy ICorePayService corePayService) {
+        this.corePayService = corePayService;
+    }
+
     /**
      * 支付
      *
@@ -83,6 +92,9 @@ public class CorePayServiceImpl implements ICorePayService {
         Map<String, Object> json = new HashMap<>();
         json.put("openid", param.getOpenid());
         pay.setJson(JSONUtil.toJsonStr(json));
+        pay.setStatus(PayStatusEnum.STATUS_ING.getCode());
+        pay.setChannel(param.getChannel());
+        pay.setType(param.getType());
         this.payMapper.updateById(pay);
 
         return driver.pay(param);
@@ -100,7 +112,6 @@ public class CorePayServiceImpl implements ICorePayService {
      *
      * @param param
      */
-    @Transactional
     public void payNotify(PayNotifyParam param) {
         Pay pay = this.findPayInfoByOutTradeNo(param.getSiteId(), param.getOutTradeNo());
         if (pay == null) throw new CommonException("未获取到支付单据");
@@ -109,11 +120,11 @@ public class CorePayServiceImpl implements ICorePayService {
 
         // 支付成功
         if (param.getPayStatus().getStatus().equals(OnliepayStatusEnum.SUCCESS.getStatus())) {
-            this.paySuccess(pay, param);
+            corePayService.paySuccess(pay, param);
         }
         // 支付关闭
         if (param.getPayStatus().getStatus().equals(OnliepayStatusEnum.CLOSED.getStatus())) {
-            this.payClose(param.getSiteId(), pay);
+            corePayService.payClose(param.getSiteId(), pay);
         }
     }
 
@@ -277,24 +288,27 @@ public class CorePayServiceImpl implements ICorePayService {
         pay.setPayTime(System.currentTimeMillis() / 1000);
 
         payMapper.updateById(pay);
-
-        PaySuccessEvent event = new PaySuccessEvent();
-        event.setSiteId(param.getSiteId());
-        event.addAppSign("core");
-        event.setName("PaySuccessEvent");
-        event.setTradeType(pay.getTradeType());
-        event.setTradeId(pay.getTradeId());
-        event.setPay(pay);
-        EventAndSubscribeOfPublisher.publishAll(event);
-
-        SysPrinterPrintTicketParam printParam = new SysPrinterPrintTicketParam();
-        printParam.setSiteId(pay.getSiteId());
-        printParam.setType("shopGoodsOrder");
-        printParam.setTrigger("pay_after");
-        SysPrinterPrintTicketParam.Business business = new SysPrinterPrintTicketParam.Business();
-        business.setOrderId(pay.getTradeId());
-        printParam.setBusiness(business);
-        corePrinterService.printTicket(printParam);
+        
+        // 保存支付信息，用于事务提交后发布事件
+        final Pay finalPay = pay;
+        final Integer siteId = param.getSiteId();
+        
+        // 使用事务同步管理器，在事务提交后发布事件
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    PaySuccessEvent event = new PaySuccessEvent();
+                    event.setSiteId(siteId);
+                    event.addAppSign("core");
+                    event.setName("PaySuccessEvent");
+                    event.setTradeType(finalPay.getTradeType());
+                    event.setTradeId(finalPay.getTradeId());
+                    event.setPay(finalPay);
+                    EventAndSubscribeOfPublisher.publishAll(event);
+                }
+            }
+        );
     }
 
     /**
@@ -380,9 +394,9 @@ public class CorePayServiceImpl implements ICorePayService {
     }
 
     @Override
-    public Pay create(Integer siteId, String mainType, Integer mainId, BigDecimal money, String tradeType, Integer tradeId, String body) {
+    public String create(Integer siteId, String mainType, Integer mainId, BigDecimal money, String tradeType, Integer tradeId, String body) {
         // 生成订单号
-        String outTradeNo = com.niu.core.common.utils.CommonUtils.createNo();
+        String outTradeNo = CommonUtils.createNo();
         // 创建支付对象
         Pay pay = new Pay();
         pay.setSiteId(siteId);
@@ -398,7 +412,7 @@ public class CorePayServiceImpl implements ICorePayService {
         // 保存到数据库
         payMapper.insert(pay);
 
-        return pay;
+        return outTradeNo;
     }
 
 }

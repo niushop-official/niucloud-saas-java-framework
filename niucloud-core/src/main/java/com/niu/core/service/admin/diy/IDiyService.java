@@ -117,7 +117,7 @@ public interface IDiyService {
      * 获取装修页面列表
      * @param searchParam
      */
-    JSONObject getDecoratePage(DiyPageSearchParam searchParam);
+    JSONObject getDecoratePage(DiyDecoratePageSearchParam searchParam);
 
     /**
      * 自定义页面分页列表，轮播搜索组件用

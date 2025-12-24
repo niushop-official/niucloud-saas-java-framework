@@ -24,9 +24,11 @@ import com.niu.core.service.admin.diy.vo.DiyPageListVo;
 import com.niu.core.service.admin.weapp.IWeappVersionService;
 import com.niu.core.service.admin.weapp.param.WeappVersionAddParam;
 import com.niu.core.service.admin.weapp.vo.WeappVersionListVo;
+import com.niu.core.service.admin.weapp.vo.WeappVersionPageVo;
 import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.core.service.core.weapp.ICoreWeappCloudService;
 import com.niu.core.service.core.weapp.ICoreWeappConfigService;
+import com.niu.core.service.core.weapp.ICoreWeappService;
 import com.niu.core.service.core.weapp.param.WeappUploadParam;
 import com.niu.core.service.core.weapp.vo.WeappConfigVo;
 import me.chanjar.weixin.open.api.WxOpenMaService;
@@ -58,6 +60,9 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
     @Resource
     ICoreSiteService coreSiteService;
 
+    @Resource
+    ICoreWeappService coreWeappService;
+
     /**
      * 版本列表
      *
@@ -65,7 +70,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
      * @return
      */
     @Override
-    public PageResult<WeappVersionListVo> list(PageParam pageParam) {
+    public WeappVersionPageVo list(PageParam pageParam) {
         Integer page  = pageParam.getPage();
         Integer limit = pageParam.getLimit();
 
@@ -81,7 +86,14 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
             BeanUtils.copyProperties(item, vo);
             list.add(vo);
         }
-        return PageResult.build(page,limit, iPage.getTotal()).setData(list);
+
+        WeappVersionPageVo result = new WeappVersionPageVo();
+        result.setData(list);
+        result.setCurrentPage(page);
+        result.setPerPage(limit);
+        result.setTotal(iPage.getTotal());
+        result.setVersionInfo(coreWeappService.getWeappVersion(RequestUtils.siteId()));
+        return result;
     }
 
     /**
@@ -99,8 +111,12 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
         WeappVersion uploading = weappVersionMapper.selectOne(new QueryWrapper<WeappVersion>().select("id").eq("site_id", RequestUtils.siteId()).eq("status", WeappVersionStatusEnum.APPLET_UPLOADING));
         if (uploading != null) throw new CommonException("小程序有正在上传的版本，请等待上一版本上传完毕后再进行操作");
 
-        WeappVersion lastVersion = weappVersionMapper.selectOne(new QueryWrapper<WeappVersion>().select("version_no").eq("site_id", RequestUtils.siteId()).orderByDesc("version_no").last("limit 1"));
-        Integer versionNo = lastVersion == null ? 1 : lastVersion.getVersionNo() + 1;
+        Integer versionNo = 0;
+        if (ObjectUtil.isEmpty(param.getVersion())) {
+            WeappVersion lastVersion = weappVersionMapper.selectOne(new QueryWrapper<WeappVersion>().select("version_no").eq("site_id", RequestUtils.siteId()).orderByDesc("version_no").last("limit 1"));
+            versionNo = lastVersion == null ? 1 : lastVersion.getVersionNo() + 1;
+            param.setVersion("1.0." + versionNo);
+        }
 
         List<String> addons = coreSiteService.getAddonKeysBySiteId(RequestUtils.siteId());
 
@@ -109,7 +125,7 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
         uploadParam.setAppId(weappConfig.getAppId());
         uploadParam.setUploadPrivateKey(weappConfig.getUploadPrivateKey());
         uploadParam.setSiteId(RequestUtils.siteId());
-        uploadParam.setVersion("1.0." + versionNo);
+        uploadParam.setVersion(param.getVersion());
         uploadParam.setDesc(param.getDesc());
         uploadParam.setAddon(addons);
         String taskKey = coreWeappCloudService.uploadWeapp(uploadParam);
@@ -135,8 +151,11 @@ public class WeappVersionServiceImpl implements IWeappVersionService {
     public JSONObject getWeappCompileLog(String key) {
         JSONObject log = coreWeappCloudService.getWeappCompileLog(key);
         if (log != null) {
-            JSONArray data = ObjectUtil.defaultIfNull(log.getByPath("data.0", JSONArray.class), new JSONArray());
-            if (data.size() > 0) {
+            JSONArray resData = log.getJSONArray("data");
+            if (ObjectUtil.isEmpty(resData)) return log;
+
+            JSONArray data = resData.getJSONArray(0);
+            if (ObjectUtil.isNotEmpty(data)) {
                 JSONObject last = data.getJSONObject(data.size() - 1);
                 if (last.getInt("code", -1).equals(0)) {
                     WeappVersion model = new WeappVersion();

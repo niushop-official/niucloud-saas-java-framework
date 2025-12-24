@@ -16,6 +16,7 @@ public class ShopGoodsInitVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private Integer defaultSort;
     private GoodsInfo goodsInfo;
 
     @Data

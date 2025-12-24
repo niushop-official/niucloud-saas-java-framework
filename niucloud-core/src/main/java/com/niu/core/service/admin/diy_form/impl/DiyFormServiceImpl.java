@@ -109,9 +109,6 @@ public class DiyFormServiceImpl implements IDiyFormService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
 
         if (ObjectUtil.isNotEmpty(searchParam.getTitle())) {
-        queryWrapper.eq("title", searchParam.getTitle());
-        }
-        if (ObjectUtil.isNotEmpty(searchParam.getTitle())) {
             queryWrapper.and(i -> i.or(j -> j.like("title", searchParam.getTitle()))
                     .or(j-> j.like("page_title", searchParam.getTitle()))
             );
@@ -143,9 +140,6 @@ public class DiyFormServiceImpl implements IDiyFormService {
 
         queryWrapper.eq("site_id", RequestUtils.siteId());
 
-        if (ObjectUtil.isNotEmpty(searchParam.getTitle())) {
-            queryWrapper.eq("title", searchParam.getTitle());
-        }
         if (ObjectUtil.isNotEmpty(searchParam.getTitle())) {
             queryWrapper.and(i -> i.or(j -> j.like("title", searchParam.getTitle()))
                     .or(j-> j.like("page_title", searchParam.getTitle()))
@@ -207,6 +201,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
     @Override
     @Transactional
     public Integer add(DiyFormParam addParam) {
+        checkPageTitleUnique(addParam.getPageTitle(), 0);
 
         DiyForm model = new DiyForm();
 
@@ -293,6 +288,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
 
     @Override
     public void edit(Integer id, DiyFormParam editParam) {
+        checkPageTitleUnique(editParam.getPageTitle(), id);
 
         DiyForm model = diyFormMapper.selectOne(
                 new QueryWrapper<DiyForm>()
@@ -709,8 +705,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
     public Map<String, Object> getQrcode(int formId) {
         String page = "app/pages/index/diy_form";
         Map<String, Object> dataItem = new HashMap<>();
-        dataItem.put("key", "form_id");
-        dataItem.put("value", formId);
+        dataItem.put("form_id", formId);
 
         String dir = "upload/" + RequestUtils.siteId() + "/diy_form_qrcode";
         String path = "";
@@ -727,7 +722,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
     }
 
     @Override
-    public PageResult<DiyFormInfoVo> getSelectPage(PageParam pageParam, DiyFormSelectParam param) {
+    public DiyFormSelectPageVo getSelectPage(PageParam pageParam, DiyFormSelectParam param) {
         Integer page = pageParam.getPage();
         Integer limit = pageParam.getLimit();
         // 验证表单ID集合
@@ -766,7 +761,7 @@ public class DiyFormServiceImpl implements IDiyFormService {
         IPage<DiyForm> formPage = diyFormMapper.selectPage(new Page<>(page, limit), queryWrapper);
 
         if (formPage.getTotal() == 0){
-            return PageResult.build(page, limit, 0, new ArrayList<>());
+            return new DiyFormSelectPageVo();
         }
         List<DiyFormInfoVo> resultList = new ArrayList<>();
         formPage.getRecords().forEach(item -> {
@@ -780,8 +775,25 @@ public class DiyFormServiceImpl implements IDiyFormService {
             diyFormInfoVo.setAddonName(addonName);
             resultList.add(diyFormInfoVo);
         });
-        return PageResult.build(page, limit, formPage.getTotal(), resultList);
+
+        DiyFormSelectPageVo result = new DiyFormSelectPageVo();
+        result.setData(resultList);
+        result.setCurrentPage(page);
+        result.setPerPage(limit);
+        result.setTotal(formPage.getTotal());
+        result.setVerifyFormIds(verifyFormIds);
+        return result;
     }
 
-
+    private void checkPageTitleUnique(String title, Integer formId) {
+        QueryWrapper queryWrapper = new QueryWrapper<>()
+            .eq("site_id", RequestUtils.siteId())
+            .eq("page_title", title)
+            .last("limit 1");
+        if (formId != 0) queryWrapper.ne("form_id", formId);
+        DiyForm form = diyFormMapper.selectOne(queryWrapper);
+        if (form != null) {
+            throw new CommonException("表单名称必须是唯一的");
+        }
+    }
 }

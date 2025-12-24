@@ -231,8 +231,8 @@
 					"componentStartBgColor": "",
 					"componentEndBgColor": "",
 					"componentGradientAngle": "to bottom",
-					"topRounded": 0,
-					"bottomRounded": 0,
+					"topRounded": 12,
+					"bottomRounded": 12,
 					"elementBgColor": "",
 					"topElementRounded": 0,
 					"bottomElementRounded": 0,
@@ -676,6 +676,78 @@
 						"both": 10
 					}
 				}
+			},
+			"ShopGoodsHot": {
+				"title": "爆款商品",
+				"icon": "iconfont iconjifenshangpinpc",
+				"path": "edit-shop-goods-hot",
+				"support_page": [],
+				"uses": 0,
+				"sort": 10022,
+				"value": {
+					"titleStyle": {
+						"text": "大牌直降",
+						"textColor": "#FFFFFF",
+						"fontWeight": "bold",
+						"fontSize": 18,
+						"imgUrl": "",
+						"way": "text",
+						"link": {
+							"name": ""
+						}
+					},
+					"subTitleStyle": {
+						"text": "7月10日-29日",
+						"textColor": "#ffffff",
+						"bgColor": "#ff737a",
+						"rounded": 6,
+						"fontSize": 12
+					},
+					"btnStyle": {
+						"text": "立即抢购",
+						"textColor": "#ee695c",
+						"startBgColor": "",
+						"endBgColor": "",
+						"gradientType": "radial",
+						"fontSize": 12,
+						"link": {
+							"name": ""
+						}
+					},
+					"goodsStyle": {
+						"bgColor": "#ffffff",
+						"labelText": "大牌直降",
+						"labelSize": 10,
+						"labelColor": "#ffffff",
+						"labelBgColor": "#FF0000",
+						"rounded": 8,
+						"imgRounded": 7,
+						"source": "all",
+						"num": 10,
+						"goodsIds": []
+					}
+				},
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FF0000",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 12,
+						"bottom": 12,
+						"both": 10
+					}
+				}
 			}
 		}
 	},
@@ -720,7 +792,8 @@
 						"topRounded": 20,
 						"bottomRounded": 0,
 						"priceBgColor": "",
-						"bgColor": "#f6f6f6",
+						"startBgColor": "#ffffff",
+						"endBgColor": "#f6f6f6",
 						"priceAboutMargin": 0,
 						"priceTopMargin": -22,
 						"topMargin": -17,

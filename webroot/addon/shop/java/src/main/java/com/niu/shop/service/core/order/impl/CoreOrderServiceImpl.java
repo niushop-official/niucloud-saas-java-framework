@@ -8,6 +8,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
@@ -239,6 +240,21 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
         }
     }
 
+    @Override
+    public void setInvoiceIdByOrderId(List<String> tradeIds, Integer id) {
+        shopOrderMapper.update(new LambdaUpdateWrapper<ShopOrder>()
+                .in(ShopOrder::getOrderId, tradeIds)
+                .set(ShopOrder::getInvoiceId, id));
+
+    }
+
+    @Override
+    public void cancelInvoiceId(Integer id) {
+        shopOrderMapper.update(new LambdaUpdateWrapper<ShopOrder>()
+                .eq(ShopOrder::getInvoiceId, id)
+                .set(ShopOrder::getInvoiceId, 0));
+    }
+
     /**
      * 快递鸟查询物流信息
      * @param config
@@ -297,7 +313,7 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
      */
     public DeliveryTraceVo orderTraces100(DeliverySearchConfigVo config, DeliverySearchParam deliverySearchParam) {
 
-        if(ObjectUtil.isNotEmpty(deliverySearchParam.getCompanyId()) && ObjectUtil.isNotNull(deliverySearchParam.getExpressNo())){
+        if(ObjectUtil.isNotEmpty(deliverySearchParam.getCompanyId())){
             QueryWrapper queryWrapper = new QueryWrapper();
             queryWrapper.eq("company_id", deliverySearchParam.getCompanyId());
             queryWrapper.select("kd100_express_no");
@@ -329,7 +345,7 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
             // 发送POST请求
             String result = HttpRequest
                     .post("https://poll.kuaidi100.com/poll/query.do")
-                    .body(JSONUtil.toJsonStr(postData))
+                    .formStr(postData)
                     .execute().body();
 
             DeliveryTraceVo vo = new DeliveryTraceVo();
@@ -342,7 +358,7 @@ public class CoreOrderServiceImpl implements ICoreOrderService {
                 }
 
                 if (resultData.containsKey("status")) {
-                    int status = (Integer) resultData.get("status");
+                    int status = resultData.getInt("status");
                     if (status != 200) {
                         vo.setSuccess(false);
                         vo.setReason((String) resultData.get("message"));

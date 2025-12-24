@@ -2,6 +2,7 @@ package com.niu.shop.service.admin.marketing.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -101,6 +102,11 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
         }
         if (StringUtils.isNotEmpty(searchParam.getStatus())) {
             queryWrapper.eq(ShopDiscount::getStatus, searchParam.getStatus());
+        }
+
+        if(ObjectUtil.isNotEmpty(searchParam.getActiveId()))
+        {
+            queryWrapper.in(ShopDiscount::getDiscountId, JSONUtil.parseArray(searchParam.getActiveId()));
         }
 
         IPage<ShopDiscount> iPage = shopDiscountMapper.selectPage(new Page<>(page, limit), queryWrapper);
@@ -538,16 +544,16 @@ public class ShopDiscountServiceImpl implements IShopDiscountService {
                     if (!Arrays.asList(discountTypeArray).contains(sku.getDiscountType())) {
                         throw new AdminException("折扣类型错误");
                     }
-                    if (ObjectUtil.isEmpty(sku.getDiscountPrice())) {
+                    if (ObjectUtil.isEmpty(sku.getDiscountPrice()) && sku.getDiscountPrice().compareTo(BigDecimal.ZERO) != 0) {
                         throw new AdminException("折扣价格discount_price不能为空");
                     }
                     if (ObjectUtil.isEmpty(sku.getSpecifyPrice())) {
                         throw new AdminException("促销价不能为空");
                     }
-                    if (ObjectUtil.isEmpty(sku.getDiscountRate())) {
+                    if (ObjectUtil.isEmpty(sku.getDiscountRate()) && sku.getDiscountPrice().compareTo(BigDecimal.ZERO) != 0) {
                         throw new AdminException("打折折扣不能为空");
                     }
-                    if (ObjectUtil.isEmpty(sku.getReduceMoney())) {
+                    if (ObjectUtil.isEmpty(sku.getReduceMoney()) && sku.getDiscountPrice().compareTo(BigDecimal.ZERO) != 0) {
                         throw new AdminException("减钱金额不能为空");
                     }
                 }

@@ -7,12 +7,14 @@ import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.shop.entity.active.ShopActive;
 import com.niu.shop.entity.active.ShopActiveGoods;
 import com.niu.shop.enums.active.ActiveStatusEnum;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
 import com.niu.shop.event.marketing.ActiveEndAfterEvent;
 import com.niu.shop.event.marketing.ActiveStartAfterEvent;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
 import com.niu.shop.mapper.active.ShopActiveMapper;
 import com.niu.shop.service.core.marketing.ICoreActiveGoodsService;
 import com.niu.shop.service.core.marketing.ICoreActiveService;
+import com.niu.shop.service.core.marketing.ICoreShopNewcomerService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -29,6 +31,9 @@ public class CoreActiveServiceImpl implements ICoreActiveService {
 
     @Resource
     private ICoreActiveGoodsService coreActiveGoodsService;
+
+    @Resource
+    private ICoreShopNewcomerService coreShopNewcomerService;
 
     @Override
     public Integer add(ShopActive shopActive, List<ShopActiveGoods> shopActiveGoodsList) {
@@ -92,6 +97,10 @@ public class CoreActiveServiceImpl implements ICoreActiveService {
             //活动结束时间大于当前时间
             if (ObjectUtil.isNotEmpty(shopActive.getEndTime()) && shopActive.getEndTime() != 0 && shopActive.getEndTime() <= System.currentTimeMillis() / 1000) {
                 this.end(shopActive.getActiveId());
+            }
+            if (shopActive.getActiveClass().equals(MarketingActivityTypeEnum.NEWCOMER_DISCOUNT.getType())
+                && shopActive.getActiveStatus().equals(ActiveStatusEnum.ACTIVE.getStatus())){
+                coreShopNewcomerService.afterSave();
             }
         }
     }

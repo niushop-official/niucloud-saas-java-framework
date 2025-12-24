@@ -7,27 +7,13 @@ import com.niu.core.service.admin.sys.vo.SysUserRoleInfoVo;
 import com.niu.core.service.admin.sys.vo.SysUserRoleListVo;
 import com.niu.core.common.domain.PageParam;
 
+import java.util.List;
+
 /**
  * 用户权限服务接口类
  */
 public interface ISysUserRoleService{
 
-    /**
-     * 用户权限列表
-     *
-     * @param pageParam 分页参数
-     * @param searchParam 搜索参数
-     * @return PageResult<SysUserRoleListedVo>
-     */
-    PageResult<SysUserRoleListVo> list(PageParam pageParam, SysUserRoleSearchParam searchParam);
-
-    /**
-     * 用户权限详情
-     *
-     * @param id 主键ID
-     * @return SysUserRoleInfoVo
-     */
-    SysUserRoleInfoVo info(Integer id);
 
     /**
      * 用户权限添加
@@ -43,6 +29,8 @@ public interface ISysUserRoleService{
      */
     void edit(SysUserRoleParam editParam);
 
+    void editAdmin(SysUserRoleParam editParam);
+
     /**
      * 用户权限删除
      *
@@ -57,5 +45,13 @@ public interface ISysUserRoleService{
      * @return
      */
     SysUserRoleInfoVo getUserRole(Integer site_id, Integer uid);
+
+    /**
+     * 根据用户权限ID获取角色名称
+     * @param userRoleIds
+     * @param siteId
+     * @return
+     */
+    List<String> getRoleByUserRoleIds(String userRoleIds, Integer siteId);
 
 }

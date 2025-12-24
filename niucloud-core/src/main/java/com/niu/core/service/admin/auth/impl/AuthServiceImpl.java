@@ -27,6 +27,8 @@ import com.niu.core.mapper.sys.SysUserRoleMapper;
 import com.niu.core.service.admin.auth.IAuthService;
 import com.niu.core.service.admin.auth.param.EditAuthUserParam;
 import com.niu.core.service.admin.auth.vo.AuthUserInfoVo;
+import com.niu.core.service.admin.niucloud.INiucloudService;
+import com.niu.core.service.admin.niucloud.vo.AuthInfoVo;
 import com.niu.core.service.admin.site.ISiteService;
 import com.niu.core.service.admin.site.vo.SiteInfoVo;
 import com.niu.core.service.admin.sys.ISysMenuService;
@@ -36,6 +38,7 @@ import com.niu.core.service.admin.sys.ISysUserService;
 import com.niu.core.service.admin.sys.param.SysUserParam;
 import com.niu.core.service.admin.sys.vo.SysUserDetailVo;
 import com.niu.core.service.admin.sys.vo.SysUserRoleInfoVo;
+import com.niu.core.service.core.site.ICoreSiteService;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
 import jdk.jfr.Description;
@@ -50,6 +53,8 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 @Service
@@ -80,7 +85,13 @@ public class AuthServiceImpl implements IAuthService {
     SysUserLogMapper sysUserLogMapper;
 
     @Resource
+    INiucloudService niucloudService;
+
+    @Resource
     private ICoreConfigService coreConfigService;
+
+    @Resource
+    ICoreSiteService coreSiteService;
 
     /**
      * 校验用户和传入站点是否存在从属关系
@@ -100,13 +111,13 @@ public class AuthServiceImpl implements IAuthService {
         SiteInfoVo siteinfo = siteService.info(siteId);
         //站点不存在 抛出异常
         if (siteinfo == null) {
-            throw new AuthException("SITE_NOT_EXIST", 400);
+            throw new AuthException("站点不存在", 400);
         }
         //没有当前站点的信息
         if (!isSuperAdmin() && ObjectUtil.isNotNull(uid) && uid > 0) {
             SysUserRoleInfoVo sysUserRoleInfoVo = sysUserRoleService.getUserRole(siteId, uid);
             if (sysUserRoleInfoVo == null) {
-                throw new AuthException("NO_SITE_PERMISSION", 400);
+                throw new AuthException("您没有当前站点的访问权限", 400);
             }
         }
         RequestUtils.setAppType(siteinfo.getAppType());
@@ -180,6 +191,32 @@ public class AuthServiceImpl implements IAuthService {
         if (!method.equals("get") && GlobalConfig.isDemo) {
             throw new CommonException("演示环境不允许操作");
         }
+    }
+
+    @Override
+    public void checkAuthInfo(HttpServletRequest request) {
+        String method = RequestUtils.getRequestMethod();
+        if (method.equals("get") || request.getRequestURI().contains("/adminapi/niucloud/authinfo")) return;
+
+        if (!isCheckDomain()) return;
+
+        AuthInfoVo authInfo = niucloudService.getAuthinfo();
+        if (authInfo == null) return;
+
+        String siteAddress = authInfo.getData().getSiteAddress();
+        if (ObjectUtil.isNotEmpty(siteAddress) && RequestUtils.getRequestDomain().contains(siteAddress)) return;
+
+        throw new CommonException("授权域名校验失败！请确保当前访问域名与授权码绑定的域名一致");
+    }
+
+    public boolean isCheckDomain() {
+        String domain = RequestUtils.getRequestDomain();
+        Integer apiSiteId = RequestUtils.apiSiteId();
+        SiteInfoVo site = coreSiteService.getSiteCache(apiSiteId);
+
+        return !(domain.startsWith("localhost") ||
+            domain.startsWith("127.0.0.1") ||
+            (apiSiteId !=0 && site.getSiteDomain().equals(domain)));
     }
 
     /**
@@ -271,7 +308,7 @@ public class AuthServiceImpl implements IAuthService {
         }
 
         if (isAdmin > 0) {
-            menuList = sysMenuService.getAllMenuList(appType, addon, isTree,0);
+            menuList = sysMenuService.getAllMenuList(appType, "1", isTree,0);
         } else {
             List<String> roleIdList = JSONUtil.toList(JSONUtil.parseArray(sysUserRoleInfoVo.getRoleIds()), String.class);
             List<String> menuKeyList = sysRoleService.getMenuIdsByRoleIds(siteId, roleIdList);
@@ -297,19 +334,6 @@ public class AuthServiceImpl implements IAuthService {
         AuthUserInfoVo vo = new AuthUserInfoVo();
         BeanUtil.copyProperties(userInfo, vo);
         return vo;
-//        MPJQueryWrapper<SysUserRole> userRoleMPJQueryWrapper = new MPJQueryWrapper<>();
-//        userRoleMPJQueryWrapper.select("sur.id, su.username, su.head_img, su.real_name, su.last_ip, su.last_time, su.login_count, sur.uid, sur.site_id, sur.role_ids, sur.create_time, sur.is_admin, sur.status")
-//                .setAlias("sur")
-//                .leftJoin("?_sys_user su ON sur.uid = su.uid".replace("?_", GlobalConfig.tablePrefix));
-//        userRoleMPJQueryWrapper.eq("sur.uid", uid);
-//        userRoleMPJQueryWrapper.eq("sur.site_id", siteId);
-//        AuthUserInfoVo authUserInfoVo = sysUserRoleMapper.selectJoinOne(AuthUserInfoVo.class, userRoleMPJQueryWrapper);
-//        if(ObjectUtil.isNotNull(authUserInfoVo))
-//        {
-//            authUserInfoVo.setStatusName("");
-//        }
-//
-//        return authUserInfoVo;
     }
 
     /**

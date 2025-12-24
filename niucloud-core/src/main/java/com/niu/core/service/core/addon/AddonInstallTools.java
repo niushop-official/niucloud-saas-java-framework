@@ -48,12 +48,12 @@ public class AddonInstallTools extends CoreAddonBaseService {
      */
     public void installDir(String addon) {
         this.addon = addon;
-        if (new File(WebAppEnvs.get().projectRoot + "/admin").exists()) this.mergeAdmin(WebAppEnvs.get().projectRoot + "/admin/src/addon/");
-        if (new File(WebAppEnvs.get().webRootDownRuntime + "admin").exists()) this.mergeAdmin(WebAppEnvs.get().webRootDownRuntime + "admin/src/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/admin").exists()) this.mergeAdmin(WebAppEnvs.get().projectRoot + "/admin/src/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "admin").exists()) this.mergeAdmin(WebAppEnvs.get().webRootDownRuntime + "admin/src/");
         if (new File(WebAppEnvs.get().projectRoot + "/uni-app").exists()) this.mergeUniapp(WebAppEnvs.get().projectRoot + "/uni-app/src/addon/");
         if (new File(WebAppEnvs.get().webRootDownRuntime + "uni-app").exists()) this.mergeUniapp(WebAppEnvs.get().webRootDownRuntime + "uni-app/src/addon/");
-        if (new File(WebAppEnvs.get().projectRoot + "/web").exists()) this.mergeWeb(WebAppEnvs.get().projectRoot + "/web/addon/");
-        if (new File(WebAppEnvs.get().webRootDownRuntime + "web").exists()) this.mergeWeb(WebAppEnvs.get().webRootDownRuntime + "web/addon/");
+        if (new File(WebAppEnvs.get().projectRoot + "/web").exists()) this.mergeWeb(WebAppEnvs.get().projectRoot + "/web/");
+        if (new File(WebAppEnvs.get().webRootDownRuntime + "web").exists()) this.mergeWeb(WebAppEnvs.get().webRootDownRuntime + "web/");
         if (new File(WebAppEnvs.get().projectNiucloudAddon).exists()) this.mergeJava();
         this.mergeJar();
         this.mergeResource();
@@ -176,16 +176,38 @@ public class AddonInstallTools extends CoreAddonBaseService {
     private void mergeAdmin(String dir) {
         try {
             // 判断目的文件是否存在
-            FileTools.createDirs(dir + this.addon + "/");
+            FileTools.createDirs(dir + "addon/" + this.addon + "/");
 
             File source = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/admin/");
             if (!source.exists()) return;
 
-            FileUtils.copyDirectory(source, new File(dir + this.addon + "/"));
+            FileUtils.copyDirectory(source, new File(dir + "addon/" + this.addon + "/"));
 
+            // 判断图标目录是否存在
+            File iconDir = new File(WebAppEnvs.get().webRootDownAddon + this.addon + "/admin/icon/");
+            if (iconDir.exists()) {
+                File iconDestDir = new File(dir + "styles/icon/addon/" + this.addon);
+                FileTools.createDirs(iconDestDir.getPath());
+                FileUtils.copyDirectory(iconDir, iconDestDir);
+
+                compileAdminIcon(dir);
+            }
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }
+    }
+
+    private void compileAdminIcon(String dir) {
+        File addonIconDir = new File(dir + "styles/icon/addon/");
+        List<String> content = new LinkedList<>();
+        content.add("/* addon iconfont */");
+
+        if (!addonIconDir.exists() && addonIconDir.listFiles().length > 0) {
+            Arrays.stream(addonIconDir.listFiles()).forEach(file -> {
+                content.add("@import \"addon/"+ file.getName() +"/iconfont.css\";");
+            });
+        }
+        FileUtil.writeUtf8String(String.join("\n", content), new File(dir + "style/icon/addon-iconfont.css"));
     }
 
     private void removeAdmin(String dir) {
@@ -229,20 +251,19 @@ public class AddonInstallTools extends CoreAddonBaseService {
     private void mergeWeb(String dir) {
         try {
             // 判断目的文件是否存在
-            FileTools.createDirs(dir + this.addon + "/");
+            FileTools.createDirs(dir + "addon/" + this.addon + "/");
 
             String source = WebAppEnvs.get().webRootDownAddon + this.addon + "/web/";
             if (!new File(source).exists()) return;
 
+            FileUtils.cleanDirectory(new File(dir + "addon/" + this.addon + "/"));
+            FileUtils.copyDirectory(new File(source), new File(dir + "addon/" + this.addon + "/"));
+
             File layoutFile = new File(source + "layouts/");
             if (layoutFile.exists()) {
-                FileTools.createDirs(dir + "layouts/");
-                FileUtils.copyDirectory(layoutFile, new File(dir + "layouts/"));
+                FileTools.createDirs(dir + "layouts/" + this.addon);
+                FileUtils.copyDirectory(layoutFile, new File(dir + "layouts/" + this.addon));
             }
-
-            FileUtils.cleanDirectory(new File(dir + this.addon + "/"));
-            FileUtils.copyDirectory(new File(source), new File(dir + this.addon + "/"));
-
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }

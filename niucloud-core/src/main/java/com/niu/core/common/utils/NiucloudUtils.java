@@ -1,6 +1,8 @@
 package com.niu.core.common.utils;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.MD5;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -8,16 +10,23 @@ import cn.hutool.http.Method;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
 import com.niu.core.common.component.context.cache.CacheFactory;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.admin.sys.vo.SysDeveloperTokenVo;
 import com.niu.core.service.core.niucloud.ICoreNiucloudConfigService;
 import com.niu.core.service.core.niucloud.vo.NiucloudConfigVo;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
+import me.chanjar.weixin.common.util.crypto.SHA1;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +35,6 @@ public class NiucloudUtils {
     private static String code = "";
 
     private static String secret = "";
-
-    private String productKey = "saas_java";
 
     private static String developerToken = "";
 
@@ -50,10 +57,6 @@ public class NiucloudUtils {
         return this.secret;
     }
 
-    public String getProductKey() {
-        return this.productKey;
-    }
-
     public String getDeveloperToken() {
         return this.developerToken;
     }
@@ -69,6 +72,7 @@ public class NiucloudUtils {
         private static final String baseUrl = "https://api.niucloud.com/openapi/";
         private static final int MAX_RETRIES = 3; // 最大重试次数
         private static final long RETRY_DELAY_MS = 2000L; // 重试间隔时间 (毫秒)
+        private static final Cached cache = CacheFactory.getCacheOperator();
 
         /**
          * 发起 GET 请求
@@ -104,9 +108,7 @@ public class NiucloudUtils {
         private static HttpRequest handleRequest(HttpRequest request) {
             request.header("Referer", RequestUtils.getDomain(true));
             request.header("developer-token", NiucloudUtils.getInstance().developerToken);
-
-            Cached cache = CacheFactory.getCacheOperator();
-            request.header("access-token", (String) ObjectUtil.defaultIfNull(cache.get("niucloud_access_token"), ""));
+            request.header("access-token", getAccessToken());
             return request;
         }
 
@@ -128,6 +130,7 @@ public class NiucloudUtils {
                             if (code.equals(1)) {
                                 return data;
                             } else if (code.equals(401)) {
+                                clearAccessToken();
                                 refreshAccessToken();
                                 NiucloudUtils instance = NiucloudUtils.getInstance();
                                 if (retries < MAX_RETRIES && !instance.code.isEmpty()) {
@@ -167,14 +170,15 @@ public class NiucloudUtils {
                 Map<String, Object> query = new HashMap<>();
                 query.put("code", instance.code);
                 query.put("secret", instance.secret);
-                query.put("product_key", instance.productKey);
+                query.put("product_key", GlobalConfig.productKey);
                 query.put("redirect_uri", RequestUtils.getDomain(true));
+                query.put("token", createToken());
 
                 JSONObject response = get("auth", query);
                 if (response.getInt("code").equals(1)) {
                     String token = response.getByPath("data.token", String.class);
-                    if (!token.isEmpty()) {
-                        cache.put("niucloud_access_token", token);
+                    if (ObjectUtil.isNotEmpty(token)) {
+                        setAccessToken(token);
                     }
                 }
             } catch (Exception e) {
@@ -182,8 +186,70 @@ public class NiucloudUtils {
         }
 
         public static void clearAccessToken() {
-            Cached cache = CacheFactory.getCacheOperator();
             cache.remove("niucloud_access_token");
+            File accessTokenFile = new File(WebAppEnvs.get().webRootDownPublic, "access_token.txt");
+            try {
+                accessTokenFile.deleteOnExit();
+            } catch (Exception e) {
+            }
+        }
+
+        public static void setAccessToken(String accessToken) {
+            cache.put("niucloud_access_token", accessToken, 7200);
+        }
+
+        public static String getAccessToken() {
+            String token = (String) cache.get("niucloud_access_token");
+            if (StringUtils.isEmpty(token)) {
+                File accessTokenFile = new File(WebAppEnvs.get().webRootDownPublic, "access_token.txt");
+                if (accessTokenFile.exists()) {
+                    try {
+                        token = FileUtils.readFileToString(accessTokenFile, "UTF-8");
+                        setAccessToken(token);
+                    } catch (Exception e) {
+                    }
+                }
+            }
+            return token;
+        }
+
+        private static String createToken() {
+            NiucloudUtils instance = NiucloudUtils.getInstance();
+            Map<String, Object> data = new HashMap<>();
+            data.put("timestamp", DateUtils.currTime());
+            data.put("code", instance.code);
+            data.put("secret", instance.secret);
+            data.put("nonce", RandomUtil.randomInt(0, 100));
+            String token = MD5.create().digestHex(ObjectUtil.serialize(data));
+            cache.put("niucloud_token", token, 7200);
+            return token;
+        }
+
+        private static String getToken() {
+            Cached cache = CacheFactory.getCacheOperator();
+            return (String) cache.get("niucloud_token");
+        }
+
+        /**
+         * 验证签名
+         * @param signature
+         * @param nonce
+         * @param timestamp
+         */
+        public static void checkSignature(String signature, String timestamp, String nonce) {
+            if (!signature(new String[]{ getToken(), timestamp, nonce }).equals(signature)) {
+                throw new CommonException("Invalid request signature.");
+            }
+        }
+
+        /**
+         * 生成签名
+         * @param args
+         * @return
+         */
+        public static String signature(String[] args) {
+            Arrays.sort(args);
+            return SHA1.gen(String.join("", args));
         }
     }
 

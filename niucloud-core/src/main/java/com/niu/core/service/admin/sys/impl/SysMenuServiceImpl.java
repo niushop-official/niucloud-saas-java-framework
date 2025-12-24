@@ -311,21 +311,26 @@ public class SysMenuServiceImpl implements ISysMenuService {
             if (menuKeys.size() > 0) {
                 queryWrapper.in("menu_key", menuKeys);
             }
-            List<SysMenu> paichuList = null;
+            List<List<String>> deleteMenuAddon = new LinkedList();
             if(!addon.equals("all")){
                 queryWrapper.eq("addon",addon);
 
                 JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
                 JSONObject jsonObject = jsonModuleLoader.getResultElement(addon,  "menu/site.json");
-                JSONArray delJsonInfo = jsonObject.getJSONArray("delete");
-                paichuList = JSONUtil.toList(delJsonInfo,SysMenu.class);
+                JSONArray delJsonInfo = ObjectUtil.defaultIfNull(jsonObject.getJSONArray("delete"), new JSONArray());
+                if (ObjectUtil.isNotEmpty(delJsonInfo)) {
+                    deleteMenuAddon.add(JSONUtil.toList(delJsonInfo, String.class));
+                }
             }else{
+                addonList.add("");
                 queryWrapper.in("addon", addonList);
                 for(int i=0; i<addonList.size(); i++){
                     JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
                     JSONObject jsonObject = jsonModuleLoader.getResultElement(addonList.get(i),  "menu/site.json");
-                    JSONArray delJsonInfo = jsonObject.getJSONArray("delete");
-                    paichuList = JSONUtil.toList(delJsonInfo,SysMenu.class);
+                    JSONArray delJsonInfo = ObjectUtil.defaultIfNull(jsonObject.getJSONArray("delete"), new JSONArray());
+                    if (ObjectUtil.isNotEmpty(delJsonInfo)) {
+                        deleteMenuAddon.add(JSONUtil.toList(delJsonInfo, String.class));
+                    }
                 }
             }
             if (ObjectUtil.isNotEmpty(appType)) {
@@ -333,13 +338,13 @@ public class SysMenuServiceImpl implements ISysMenuService {
             }
 
             //排除菜单
-            if(ObjectUtil.isNotNull(paichuList) && paichuList.size()>0){
-                List<String> paichuArr = new ArrayList<>();
-                for(int i=0; i<paichuList.size(); i++){
-                    paichuArr.add(paichuList.get(i).getMenuKey());
+            if(ObjectUtil.isNotEmpty(deleteMenuAddon)){
+                List<String> deleteIntersect = intersect(deleteMenuAddon);
+                if (ObjectUtil.isNotEmpty(deleteIntersect)) {
+                    queryWrapper.notIn("menu_key", deleteIntersect);
                 }
-                queryWrapper.notIn("menu_key", paichuArr);
             }
+            queryWrapper.orderByDesc("sort");
 
             List<SysMenu> menuList = sysMenuMapper.selectList(queryWrapper);
             for (SysMenu menu : menuList) {
@@ -420,31 +425,25 @@ public class SysMenuServiceImpl implements ISysMenuService {
                 }
 
                 //站点相关插件
-                List<SysMenu> paichuList = null;
-                if (!RequestUtils.defaultSiteId().equals(siteId)) {
-                    List<String> addonList = coreSiteService.getAddonKeysBySiteId(siteId);
-
-                    if (addonList.size() > 0) {
-                        addonList.add("");
-                        queryWrapper.in("addon", addonList);
-
-                        //排除菜单
-                        for(int i=0; i<addonList.size(); i++){
-                            JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
-                            JSONObject jsonObject = jsonModuleLoader.getResultElement(addonList.get(i),  "menu/site.json");
-                            JSONArray delJsonInfo = jsonObject.getJSONArray("delete");
-                            paichuList = JSONUtil.toList(delJsonInfo,SysMenu.class);
-                        }
-                    }
-                }
+                List<String> addonList = coreSiteService.getAddonKeysBySiteId(siteId);
+                addonList.add("");
+                queryWrapper.in("addon", addonList);
 
                 //排除菜单
-                if(ObjectUtil.isNotNull(paichuList) && paichuList.size()>0){
-                    List<String> paichuArr = new ArrayList<>();
-                    for(int i=0; i<paichuList.size(); i++){
-                        paichuArr.add(paichuList.get(i).getMenuKey());
+                List<List<String>> deleteMenuAddon = new LinkedList();
+                for(int i=0; i<addonList.size(); i++){
+                    JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
+                    JSONObject jsonObject = jsonModuleLoader.getResultElement(addonList.get(i),  "menu/site.json");
+                    JSONArray delJsonInfo = ObjectUtil.defaultIfNull(jsonObject.getJSONArray("delete"), new JSONArray());
+                    if (ObjectUtil.isNotEmpty(delJsonInfo)) {
+                        deleteMenuAddon.add(JSONUtil.toList(delJsonInfo, String.class));
                     }
-                    queryWrapper.notIn("menu_key", paichuArr);
+                }
+                if(ObjectUtil.isNotEmpty(deleteMenuAddon)){
+                    List<String> deleteIntersect = intersect(deleteMenuAddon);
+                    if (ObjectUtil.isNotEmpty(deleteIntersect)) {
+                        queryWrapper.notIn("menu_key", deleteIntersect);
+                    }
                 }
 
                 if (!status.equals("all")) {
@@ -454,6 +453,8 @@ public class SysMenuServiceImpl implements ISysMenuService {
                 if (isButton == 0) {
                     queryWrapper.ne("menu_type", 2);
                 }
+
+                queryWrapper.orderByDesc("sort");
 
                 menuList = sysMenuMapper.selectList(queryWrapper);
             } catch (Exception e) {
@@ -465,6 +466,21 @@ public class SysMenuServiceImpl implements ISysMenuService {
         return outterMenuList;
     }
 
+    public static <T> List<T> intersect(List<List<T>> lists) {
+        if (lists == null || lists.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (lists.size() == 1) {
+            return new ArrayList<>(lists.get(0));
+        }
+
+        List<T> result = new ArrayList<>(lists.get(0));
+        for (int i = 1; i < lists.size(); i++) {
+            result.retainAll(lists.get(i));
+            if (result.isEmpty()) break;
+        }
+        return result;
+    }
     /**
      * 查询菜单
      *

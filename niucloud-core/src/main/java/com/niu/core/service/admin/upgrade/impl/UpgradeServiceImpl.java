@@ -35,6 +35,8 @@ import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysBackupRecordsMapper;
+import com.niu.core.mapper.sys.SysUpgradeRecordsMapper;
+import com.niu.core.service.admin.install.IInstallSystemService;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.admin.niucloud.INiucloudService;
 import com.niu.core.service.admin.sys.ISysUpgradeRecordsService;
@@ -107,6 +109,12 @@ public class UpgradeServiceImpl implements IUpgradeService {
 
     @Resource
     SiteMapper siteMapper;
+
+    @Resource
+    IInstallSystemService  installSystemService;
+
+    @Resource
+    SysUpgradeRecordsMapper sysUpgradeRecordsMapper;
 
     /**
      * 升级检测
@@ -186,20 +194,21 @@ public class UpgradeServiceImpl implements IUpgradeService {
 
         if (addon.isEmpty()) {
             Map<String, Object> query = new HashMap<>();
-            query.put("product_key", instance.getProductKey());
+            query.put("product_key", GlobalConfig.productKey);
             query.put("app_key", GlobalConfig.appKey);
             query.put("version", GlobalConfig.version);
             apps.add(query);
         } else {
             for (String key : addon.split(",")) {
-                Addon addonModel = addonMapper.selectOne(new QueryWrapper<Addon>().eq("`key`", key).select("version,type"));
                 Map<String, Object> query = new HashMap<>();
-                query.put("product_key", instance.getProductKey());
+                query.put("product_key", GlobalConfig.productKey);
                 query.put("app_key", key);
-                query.put("version", addonModel.getVersion());
-                if (addonModel.getType().equals(AddonTypeEnum.APP.getType())) {
+                if (key.equals(GlobalConfig.appKey)) {
+                    query.put("version", GlobalConfig.version);
                     apps.addFirst(query);
                 } else {
+                    Addon addonModel = addonMapper.selectOne(new QueryWrapper<Addon>().eq("`key`", key).select("version,type"));
+                    query.put("version", addonModel.getVersion());
                     apps.add(query);
                 }
             }
@@ -243,7 +252,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
 
         // 获取下载token
         Map<String, Object> actionQuery = new HashMap<>();
-        actionQuery.put("data[product_key]", instance.getProductKey());
+        actionQuery.put("data[product_key]", GlobalConfig.productKey);
         actionQuery.put("data[framework_version]", GlobalConfig.version);
         actionQuery.put("data[app_key]", upgradeContent.getContent().get(0).getApp().getAppKey());
         actionQuery.put("data[version]", upgradeContent.getContent().get(0).getVersion());
@@ -339,9 +348,14 @@ public class UpgradeServiceImpl implements IUpgradeService {
         UpgradeTaskVo vo = this.getUpgradeTask();
         if (vo == null) return;
 
-        SysUpgradeRecordsParam editParam = new SysUpgradeRecordsParam();
-        editParam.setStatus(UpgradeRecordStatusEnum.STATUS_CANCEL.getStatus());
-        sysUpgradeRecordsService.edit(vo.getKey(), editParam);
+        SysUpgradeRecords record = sysUpgradeRecordsMapper.selectOne(new QueryWrapper<SysUpgradeRecords>()
+            .eq("upgrade_key", vo.getKey())
+        );
+        if (ObjectUtil.isNotEmpty(record) && record.getStatus().equals(UpgradeRecordStatusEnum.STATUS_READY.getStatus())) {
+            SysUpgradeRecordsParam editParam = new SysUpgradeRecordsParam();
+            editParam.setStatus(UpgradeRecordStatusEnum.STATUS_CANCEL.getStatus());
+            sysUpgradeRecordsService.edit(vo.getKey(), editParam);
+        }
 
         clearUpgradeTask(0);
     }
@@ -474,7 +488,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
 
                 // 获取下载token
                 Map<String, Object> actionQuery = new HashMap<>();
-                actionQuery.put("data[product_key]", instance.getProductKey());
+                actionQuery.put("data[product_key]", GlobalConfig.productKey);
                 actionQuery.put("data[framework_version]", GlobalConfig.version);
                 actionQuery.put("data[app_key]", upgradeContent.get(currIndex).getApp().getAppKey());
                 actionQuery.put("data[version]", upgradeContent.get(currIndex).getVersion());
@@ -806,7 +820,7 @@ public class UpgradeServiceImpl implements IUpgradeService {
      */
     public Map<String, Object> refreshMenu(UpgradeTaskVo vo) {
         if (vo.getAddon().equals(GlobalConfig.appKey)) {
-            coreMenuService.refreshAddonMenu("core");
+            installSystemService.installMenu();
         } else {
             coreMenuService.refreshAddonMenu(vo.getAddon());
         }
@@ -877,7 +891,11 @@ public class UpgradeServiceImpl implements IUpgradeService {
         }
 
         File backupDir = new File(upgradeDir(vo));
-        FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, DateUtil.now() + ".log"));
+
+        try {
+            FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(JSONUtil.parseObj(vo)), new File(backupDir, "upgrade.log"));
+        } catch (Exception e) {
+        }
 
         // 变更升级记录
         SysUpgradeRecordsParam editParam = new SysUpgradeRecordsParam();

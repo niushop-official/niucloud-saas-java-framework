@@ -19,13 +19,17 @@ import com.niu.core.mapper.member.MemberAddressMapper;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.diy_form.ICoreDiyFormRecordsService;
 import com.niu.core.service.core.diy_form.param.DiyFormRecordsParam;
+import com.niu.core.service.core.member.ICoreMemberAccountService;
 import com.niu.shop.entity.coupon.ShopCouponGoods;
 import com.niu.shop.entity.coupon.ShopCouponMember;
 import com.niu.shop.entity.delivery.ShopStore;
+import com.niu.shop.entity.goods.ShopGoods;
+import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDiscount;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.enums.active.ActiveClassEnum;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
 import com.niu.shop.enums.coupon.CouponMemberStatusEnum;
 import com.niu.shop.enums.coupon.CouponTypeEnum;
 import com.niu.shop.enums.goods.GoodsPriceTypeEnum;
@@ -38,6 +42,7 @@ import com.niu.shop.event.order.ShopOrderDiscountCreateEventDefiner;
 import com.niu.shop.mapper.coupon.ShopCouponGoodsMapper;
 import com.niu.shop.mapper.coupon.ShopCouponMemberMapper;
 import com.niu.shop.mapper.delivery.ShopStoreMapper;
+import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.mapper.order.ShopOrderDiscountMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
@@ -54,6 +59,7 @@ import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.order.ICoreOrderDiscountService;
 import com.niu.shop.service.core.order.ICoreOrderEventService;
 import com.niu.shop.service.core.order.ICoreOrderService;
+import com.niu.shop.service.core.order.param.CheckStockParam;
 import com.niu.shop.service.core.order.param.OrderCalculateParam;
 import com.niu.shop.service.core.order.param.OrderPayParam;
 import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
@@ -121,6 +127,12 @@ public abstract class OrderCreateHelper {
 
     @Resource
     ShopOrderDiscountMapper shopOrderDiscountMapper;
+
+    @Resource
+    ShopGoodsSkuMapper shopGoodsSkuMapper;
+
+    @Resource
+    private ICoreMemberAccountService coreMemberAccountService;
 
     private static OrderCreateDataVo.Delivery delivery = new OrderCreateDataVo.Delivery();
     /**
@@ -608,5 +620,16 @@ public abstract class OrderCreateHelper {
         result.setTradeType(vo.getOrderType());
         result.setOrderId(order.getOrderId());
         return result;
+    }
+
+    /**
+     * 校验库存
+     * @param orderGoodsData
+     */
+    protected void checkStock(Map<Integer, CheckStockParam> orderGoodsData) {
+        for (CheckStockParam param : orderGoodsData.values()) {
+            ShopGoodsSku goodsSku = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>().select("stock").eq("sku_id", param.getSkuId()));
+            if (goodsSku.getStock().compareTo(param.getNum()) == -1) throw new CommonException("商品"+ param.getGoodsName() +"库存不足");
+        }
     }
 }

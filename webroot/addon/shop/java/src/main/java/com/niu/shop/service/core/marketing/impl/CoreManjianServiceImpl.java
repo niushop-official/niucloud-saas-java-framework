@@ -35,8 +35,8 @@ import com.niu.shop.mapper.manjian.ShopManjianGoodsMapper;
 import com.niu.shop.mapper.manjian.ShopManjianMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.service.admin.goods.vo.ShopManjianRuleContentVo;
-import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.api.cart.vo.ShopCartCalculateVo;
+import com.niu.shop.service.api.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.core.goods.ICoreGoodsService;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
@@ -50,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -341,13 +342,13 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
             }
 
             manjianInfo.setRuleJson(ruleJson.toString());
-            if(level>=0){
+            if (level >= 0) {
                 manjianInfo.setRule(ruleJson.get(level).toString());
             }
             BigDecimal manjianOneDiscountMoney = BigDecimal.ZERO;
             if (level >= 0) {
                 ShopManjianInfoVo shopManjianInfoVo = new ShopManjianInfoVo();
-                BeanUtil.copyProperties(manjianInfo,shopManjianInfoVo);
+                BeanUtil.copyProperties(manjianInfo, shopManjianInfoVo);
                 manjianOneDiscountMoney = manjianGoodsCalculate(order, shopManjianInfoVo, isFreeShipping, level, discountMoney, matchSkuIds, matchOrderGoodsMoney, manjianOneDiscountMoney);
             }
             if (manjianOneDiscountMoney.compareTo(BigDecimal.ZERO) > 0) {
@@ -480,6 +481,7 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
                 case "goods":
                     JSONArray goodsArray = JSONUtil.parseArray(value);
                     List<JSONObject> validGoods = new ArrayList<>();
+                    Map<Integer, OrderCreateDataVo.Sku> giftData = new HashMap<>();
                     for (int i = 0; i < goodsArray.size(); i++) {
                         JSONObject goods = goodsArray.getJSONObject(i);
                         ShopGoodsSku goodsSku = shopGoodsSkuMapper.selectById(goods.getLong("sku_id"));
@@ -504,15 +506,10 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
                             OrderCreateDataVo.Goods goodsVo = new OrderCreateDataVo.Goods();
                             BeanUtil.copyProperties(goodsObj, goodsVo);
                             skuVo.setGoods(goodsVo);
-                            Map<Integer, OrderCreateDataVo.Sku> giftData = new HashMap<>();
-                            if (ObjectUtil.isNotEmpty(order.getGiftGoods())) {
-                                order.setGiftGoods(giftData);
-                            }
                             giftData.put(skuVo.getSkuId(), skuVo);
-                            order.setGiftGoods(giftData);
-
                         }
                     }
+                    order.setGiftGoods(giftData);
                     if (!validGoods.isEmpty()) {
                         newGift.put(key, validGoods);
                     }
@@ -1075,7 +1072,7 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
                 .eq("member_id", memberId)
                 .eq("order_id", orderGoodsInfo.getOrderId());
         List<ShopManjianGiveRecords> manjianRecords = shopManjianGiveRecordsMapper.selectList(giveRecordsQueryWrapper);
-
+        List<ShopManjian> shopManjians = new ArrayList<>();
         if (ObjectUtil.isNotEmpty(manjianRecords)) {
             for (ShopManjianGiveRecords vv : manjianRecords) {
 
@@ -1083,91 +1080,93 @@ public class CoreManjianServiceImpl extends ServiceImpl<ShopManjianMapper, ShopM
                 manjianInfoQueryWrapper.select("manjian_id", "manjian_name", "condition_type", "goods_type", "join_member_type", "rule_type", "rule_json")
                         .eq("site_id", siteId)
                         .eq("manjian_id", vv.getManjianId());
-                ShopManjian manjianInfo = shopManjianMapper.selectOne(manjianInfoQueryWrapper);
-
-                Integer conditionMatchValue = 0;
-                if (ObjectUtil.isNotEmpty(orderGoodsList)) {
-                    for (ShopOrderInfoVo.OrderGoods v : orderGoodsList) {
-                        if (v.getIsGift() == 0) {
-                            if (vv.getSkuIds().contains(v.getSkuId().toString())) {
-                                if (ObjectUtil.isNotEmpty(manjianInfo)) {
-                                    if (manjianInfo.getConditionType().equals(ShopManjianDiscountTypeEnum.OVER_N_YUAN.getType())) {
-                                        conditionMatchValue += v.getGoodsMoney().intValue();
-                                    } else {
-                                        conditionMatchValue += v.getNum();
+                List<ShopManjian> manjianList = shopManjianMapper.selectList(manjianInfoQueryWrapper);
+                for (ShopManjian manjianInfo : manjianList) {
+                    Integer conditionMatchValue = 0;
+                    if (ObjectUtil.isNotEmpty(orderGoodsList)) {
+                        for (ShopOrderInfoVo.OrderGoods v : orderGoodsList) {
+                            if (v.getIsGift() == 0) {
+                                if (vv.getSkuIds().contains(v.getSkuId().toString())) {
+                                    if (ObjectUtil.isNotEmpty(manjianInfo)) {
+                                        if (manjianInfo.getConditionType().equals(ShopManjianDiscountTypeEnum.OVER_N_YUAN.getType())) {
+                                            conditionMatchValue += v.getGoodsMoney().intValue();
+                                        } else {
+                                            conditionMatchValue += v.getNum();
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                if (vv.getSkuIds().contains(orderGoodsInfo.getSkuId().toString())) {
-                    if (ObjectUtil.isNotEmpty(manjianInfo) && ObjectUtil.isNotEmpty(manjianInfo.getRuleJson())) {
-                        JSONArray ruleJsonArray = JSONUtil.parseArray(manjianInfo.getRuleJson());
-                        JSONObject ruleJson = ruleJsonArray.getJSONObject(vv.getLevel());
-                        int cycleNum = 0;
-                        if (manjianInfo.getRuleType().equals(ShopManjianRuleTypeEnum.CYCLE.getType())) {
-                            cycleNum = conditionMatchValue / ruleJson.getInt("limit");
-                            ruleJson.put("limit", ruleJson.getInt("limit") * cycleNum);
-                            if (ObjectUtil.isNotEmpty(ruleJson.getBigDecimal("discount_money"))) {
-                                ruleJson.put("discount_money", BigDecimal.valueOf(cycleNum).multiply(ruleJson.getBigDecimal("discount_money")));
-                            }
-                            if (ObjectUtil.isNotEmpty(ruleJson.getBigDecimal("point"))) {
-                                ruleJson.put("point", ruleJson.getBigDecimal("point").intValue() * cycleNum);
-                            }
-                            if (ObjectUtil.isNotEmpty(ruleJson.getBigDecimal("balance"))) {
-                                ruleJson.put("balance", BigDecimal.valueOf(cycleNum).multiply(ruleJson.getBigDecimal("balance")));
-                            }
-                        }
-
-                        if (ObjectUtil.isNotEmpty(ruleJson.getJSONArray("coupon"))) {
-                            JSONArray couponArray = ruleJson.getJSONArray("coupon");
-                            for (int i = 0; i < couponArray.size(); i++) {
-                                JSONObject coupon = couponArray.getJSONObject(i);
-                                if (manjianInfo.getRuleType().equals(ShopManjianRuleTypeEnum.CYCLE.getType()) && cycleNum > 0) {
-                                    coupon.put("num", coupon.getInt("num") * cycleNum);
+                    if (vv.getSkuIds().contains(orderGoodsInfo.getSkuId().toString())) {
+                        if (ObjectUtil.isNotEmpty(manjianInfo) && ObjectUtil.isNotEmpty(manjianInfo.getRuleJson())) {
+                            JSONArray ruleJsonArray = JSONUtil.parseArray(manjianInfo.getRuleJson());
+                            JSONObject ruleJson = ruleJsonArray.getJSONObject(vv.getLevel());
+                            int cycleNum = 0;
+                            if (manjianInfo.getRuleType().equals(ShopManjianRuleTypeEnum.CYCLE.getType())) {
+                                cycleNum = conditionMatchValue / ruleJson.getInt("limit");
+                                ruleJson.put("limit", ruleJson.getInt("limit") * cycleNum);
+                                if (ObjectUtil.isNotEmpty(ruleJson.getBigDecimal("discount_money"))) {
+                                    ruleJson.put("discount_money", BigDecimal.valueOf(cycleNum).multiply(ruleJson.getBigDecimal("discount_money")));
                                 }
-                                // 根据优惠券ID查询优惠券详细信息，用于获取名称等展示相关内容
-                                ShopCoupon couponInfo = shopCouponMapper.selectById(coupon.getLong("coupon_id"));
-                                if (ObjectUtil.isNotEmpty(couponInfo)) {
-                                    if (couponInfo.getMinConditionMoney().compareTo(BigDecimal.ZERO) == 0) {
-                                        coupon.put("coupon_name", couponInfo.getPrice() + "元无门槛券");
-                                    } else {
-                                        coupon.put("coupon_name", "满" + couponInfo.getMinConditionMoney() + "元减" + couponInfo.getPrice() + "元券");
+                                if (ObjectUtil.isNotEmpty(ruleJson.getBigDecimal("point"))) {
+                                    ruleJson.put("point", ruleJson.getBigDecimal("point").intValue() * cycleNum);
+                                }
+                                if (ObjectUtil.isNotEmpty(ruleJson.getBigDecimal("balance"))) {
+                                    ruleJson.put("balance", BigDecimal.valueOf(cycleNum).multiply(ruleJson.getBigDecimal("balance")));
+                                }
+                            }
+
+                            if (ObjectUtil.isNotEmpty(ruleJson.getJSONArray("coupon"))) {
+                                JSONArray couponArray = ruleJson.getJSONArray("coupon");
+                                for (int i = 0; i < couponArray.size(); i++) {
+                                    JSONObject coupon = couponArray.getJSONObject(i);
+                                    if (manjianInfo.getRuleType().equals(ShopManjianRuleTypeEnum.CYCLE.getType()) && cycleNum > 0) {
+                                        coupon.put("num", coupon.getInt("num") * cycleNum);
+                                    }
+                                    // 根据优惠券ID查询优惠券详细信息，用于获取名称等展示相关内容
+                                    ShopCoupon couponInfo = shopCouponMapper.selectById(coupon.getLong("coupon_id"));
+                                    if (ObjectUtil.isNotEmpty(couponInfo)) {
+                                        if (couponInfo.getMinConditionMoney().compareTo(BigDecimal.ZERO) == 0) {
+                                            coupon.put("coupon_name", couponInfo.getPrice() + "元无门槛券");
+                                        } else {
+                                            coupon.put("coupon_name", "满" + couponInfo.getMinConditionMoney() + "元减" + couponInfo.getPrice() + "元券");
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (ObjectUtil.isNotEmpty(ruleJson.getJSONArray("goods"))) {
-                            JSONArray goodsArray = ruleJson.getJSONArray("goods");
-                            for (int i = 0; i < goodsArray.size(); i++) {
-                                JSONObject goods = goodsArray.getJSONObject(i);
-                                if (manjianInfo.getRuleType().equals(ShopManjianRuleTypeEnum.CYCLE.getType()) && cycleNum > 0) {
-                                    goods.put("num", goods.getInt("num") * cycleNum);
-                                }
-                                // 根据商品SKU ID查询商品SKU详细信息以及关联的商品信息，用于获取商品名称、价格等展示相关内容
-                                ShopGoodsSku skuInfo = shopGoodsSkuMapper.selectById(goods.getLong("sku_id"));
+                            if (ObjectUtil.isNotEmpty(ruleJson.getJSONArray("goods"))) {
+                                JSONArray goodsArray = ruleJson.getJSONArray("goods");
+                                for (int i = 0; i < goodsArray.size(); i++) {
+                                    JSONObject goods = goodsArray.getJSONObject(i);
+                                    if (manjianInfo.getRuleType().equals(ShopManjianRuleTypeEnum.CYCLE.getType()) && cycleNum > 0) {
+                                        goods.put("num", goods.getInt("num") * cycleNum);
+                                    }
+                                    // 根据商品SKU ID查询商品SKU详细信息以及关联的商品信息，用于获取商品名称、价格等展示相关内容
+                                    ShopGoodsSku skuInfo = shopGoodsSkuMapper.selectById(goods.getLong("sku_id"));
 
-                                if (ObjectUtil.isNotEmpty(skuInfo)) {
-                                    ShopGoods goodsInfo = shopGoodsMapper.selectById(skuInfo.getGoodsId());
-                                    goods.put("goods_name", goodsInfo.getGoodsName());
-                                    goods.put("sku_name", skuInfo.getSkuName());
-                                    goods.put("sku_image", skuInfo.getSkuImage());
-                                    goods.put("price", skuInfo.getPrice());
+                                    if (ObjectUtil.isNotEmpty(skuInfo)) {
+                                        ShopGoods goodsInfo = shopGoodsMapper.selectById(skuInfo.getGoodsId());
+                                        goods.put("goods_name", goodsInfo.getGoodsName());
+                                        goods.put("sku_name", skuInfo.getSkuName());
+                                        goods.put("sku_image", skuInfo.getSkuImage());
+                                        goods.put("price", skuInfo.getPrice());
+                                    }
                                 }
                             }
-                        }
 
-                        manjianInfo.setRuleJson(ruleJson.toString());
-                        if (ruleJson.getBool("is_discount") || ruleJson.getBool("is_free_shipping") || ruleJson.getBool("is_give_point") || ruleJson.getBool("is_give_balance") || ruleJson.getBool("is_give_coupon") || ruleJson.getBool("is_give_goods")) {
-                            orderGoodsInfo.setManjianInfo(manjianInfo);
+                            manjianInfo.setRuleJson(ruleJson.toString());
+                            if (ruleJson.getBool("is_discount") || ruleJson.getBool("is_free_shipping") || ruleJson.getBool("is_give_point") || ruleJson.getBool("is_give_balance") || ruleJson.getBool("is_give_coupon") || ruleJson.getBool("is_give_goods")) {
+                                shopManjians.add(manjianInfo);
+                            }
                         }
                     }
                 }
             }
         }
+        orderGoodsInfo.setManjianInfo(shopManjians);
     }
 
     @Override

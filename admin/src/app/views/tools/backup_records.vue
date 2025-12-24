@@ -47,7 +47,7 @@
                 <el-table-column prop="version" :label="t('currentVersion')" width="120" />
                 <el-table-column prop="backup_dir" :label="t('backupDir')" width="220" />
                 <el-table-column prop="complete_time" :label="t('completeTime')" width="220" />
-                <el-table-column prop="remark" :label="t('remark')" :show-overflow-tooltip="true">
+                <el-table-column prop="remark" :label="t('remark')">
                     <template #default="{ row }">
                         <span v-if="row.remark" class="multi-hidden">{{ row.remark }}</span>
                         <span v-else>{{ t('remarkEmpty') }}</span>
@@ -599,18 +599,13 @@ const restoreUpgradeBackupFn = (id: any, task: any = '') => {
         } else {
             // 延迟2秒请求，等待恢复数据加载完成
             setTimeout(() => {
+                restoreContents = []
                 restoreUpgradeBackupFn(id, data.task)
             }, 2000)
         }
     }).catch(() => {
-        if (showDialog.value) {
-            setTimeout(() => {
-                restoreUpgradeBackupFn(id, task)
-            }, 2000)
-        } else {
-            repeat.value = false
-            tableData.loading = false
-        }
+        repeat.value = false
+        tableData.loading = false
     })
 }
 
@@ -863,7 +858,7 @@ const batchDelete = () => {
     background-color: var(--el-table-header-bg-color);
 }
 
-::v-deep .number-of-steps {
+:deep(.number-of-steps) {
     .el-step__line {
         margin: 0 25px;
         background: #dddddd;

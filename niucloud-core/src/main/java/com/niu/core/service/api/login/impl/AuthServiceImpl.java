@@ -52,12 +52,6 @@ public class AuthServiceImpl implements IAuthService {
     public void checkSite() {
         Integer siteId= RequestUtils.apiSiteId();
 
-        if (siteId == 0) {
-            Site site = siteMapper.selectOne(new QueryWrapper<Site>().select("site_id").eq("site_domain", RequestUtils.getRequestDomain()));
-            if (site == null) throw new AuthException("站点不存在", 403);
-            siteId = site.getSiteId();
-        }
-
         SiteInfoVo siteInfoVo = coreSiteService.getSiteCache(siteId);
         if(ObjectUtil.isEmpty(siteInfoVo)){
             throw new AuthException("站点不存在", 403);

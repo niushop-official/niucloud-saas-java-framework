@@ -38,6 +38,11 @@ public interface IAuthService {
     void checkIsDemo(HttpServletRequest request);
 
     /**
+     * 校验授权
+     */
+    void checkAuthInfo(HttpServletRequest request);
+
+    /**
      * 当前授权用户接口权限
      * @return
      */

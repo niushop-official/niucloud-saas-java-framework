@@ -150,6 +150,8 @@ public class OrderCreateDataVo implements Serializable {
         protected BigDecimal showPrice;
         protected String showType;
         protected Integer activeId;
+        protected Integer relateId;
+        private String memberDiscount;
     }
 
     @Data

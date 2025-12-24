@@ -63,6 +63,6 @@ export function releaseVersion(id: number) {
     return request.put(`channel/app/version/${ id }/release`, {}, { showSuccessMessage: true })
 }
 
-export function generateSignCert(params: Record<string, any>) {
-    return request.post(`channel/app/generate_sign_cert`, params, { showSuccessMessage: true });
+export function generateSingCert(params: Record<string, any>) {
+    return request.post(`channel/app/generate_sing_cert`, params, { showSuccessMessage: true });
 }

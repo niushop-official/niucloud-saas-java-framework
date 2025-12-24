@@ -46,7 +46,7 @@ public interface IMemberService {
      * @param id   主键
      * @param editParam 编辑参数
      */
-    void edit(Integer id, MemberParam editParam);
+    void edit(Integer id, MemberEditParam editParam);
 
     /**
      * 修改部分字段

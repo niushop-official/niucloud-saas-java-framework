@@ -67,4 +67,11 @@ public interface ICoreSiteService {
      * @return
      */
     Boolean siteInitBySiteId(Integer siteId, List<String> tables);
+
+    /**
+     * 通过域名获取站点ID
+     * @param siteDomain
+     * @return
+     */
+    Integer getSiteIdByDomain(String siteDomain);
 }

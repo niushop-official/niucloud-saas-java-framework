@@ -15,7 +15,7 @@
                     <el-scrollbar>
                         <div class="p-[15px]">
                             <router-view v-slot="{ Component, route }" v-if="appStore.routeRefreshTag">
-                                <keep-alive :include="tabbarStore.tabNames">
+                                <keep-alive :include="tabbarStore.tabNames" :max="15">
                                     <component :is="Component" :key="route.fullPath" />
                                 </keep-alive>
                             </router-view>
@@ -25,7 +25,7 @@
                     <!-- 主体 end -->
             </el-container>
         </el-container>
-    </div> 
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -38,4 +38,9 @@ const appStore = useAppStore()
 const tabbarStore = useTabbarStore()
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+:deep(.inter .el-breadcrumb__inner){
+    font-weight: inherit !important;
+    color: var(--el-text-color-regular) !important;
+}
+</style>

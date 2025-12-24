@@ -42,7 +42,9 @@ public class SiteInfoCacheVo implements Serializable {
     private String initalledAddon;  // 站点已执行初始化方法的插件
     private String siteDomain;  // 站点域名
     private Long createTime;  // 创建时间
-    private String staffId;
     private String memberId;
-
+    private String staffId;
+    private String metaTitle;
+    private String metaDesc;
+    private String metaKeyword;
 }

@@ -12,7 +12,7 @@
                         </div>
                         <div class="flex flex-col justify-between items-start">
                             <div class="text-[14px] text-[#1D1F3A]">系统最新版本为</div>
-                            <div class="text-[14px] text-[#1D1F3A] font-bold">v{{ newVersion.version_no }}</div>
+                            <div class="text-[14px] text-[#1D1F3A] font-bold">v{{ newVersion.version_no }}（{{ versionCode }}）</div>
                             <div class="text-[#9699B6] text-[16px]" v-if="!shouldShowUpgradeButton">
                                 <span>已是最新</span>
                             </div>

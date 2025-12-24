@@ -66,6 +66,8 @@ public class PayChannelServiceImpl implements IPayChannelService {
 
             JSONArray payType = new JSONArray();
             for (String key : payTypeEnum.keySet()) {
+                if (item.getCode().equals(ChannelEnum.PC.getCode()) && key.equals("friendspay")) continue;
+
                 JSONObject type = JSONUtil.parseObj(payTypeEnum.getJSONObject(key).toString());
                 if (payChannelList.getJSONObject(item.getCode()) == null || payChannelList.getJSONObject(item.getCode()).getJSONObject(key) == null) {
                     type.set("status", 0);
@@ -79,7 +81,7 @@ public class PayChannelServiceImpl implements IPayChannelService {
                         JSONArray encryptParams = ObjectUtil.defaultIfNull(type.getJSONArray("encrypt_params"), new JSONArray());
                         for (String payConfigkey : payConfig.keySet()) {
                             String value = payConfig.getStr(payConfigkey, "");
-                            if (encryptParams.contains(payConfigkey)) payConfig.set(payConfigkey, StringUtils.hide(value, 0, value.length()));
+                            if (encryptParams.contains(payConfigkey) && ObjectUtil.isNotEmpty(value)) payConfig.set(payConfigkey, StringUtils.ENCRYPTSTR);
                         }
                         type.set("config", payConfig);
                     } catch (Exception e) {
@@ -143,7 +145,7 @@ public class PayChannelServiceImpl implements IPayChannelService {
             JSONObject config = JSONUtil.parseObj(payChannel.getConfig());
             for (String key : data.getJSONObject("config").keySet()) {
                 String value = data.getJSONObject("config").getStr(key, "");
-                if (!value.contains("*")) config.set(key, value);
+                if (!value.equals(StringUtils.ENCRYPTSTR)) config.set(key, value);
             }
             payChannel.setConfig(config.toString());
             payChannel.setSort(data.getInt("sort"));
@@ -192,7 +194,7 @@ public class PayChannelServiceImpl implements IPayChannelService {
                     String value = config.getStr(key);
                     if (ObjectUtil.isNotEmpty(value)) {
                         try {
-                            config.set(key, StringUtils.hide(value, 0, value.length()));
+                            config.set(key, StringUtils.ENCRYPTSTR);
                         } catch (Exception e) {
                             log.error("字段:{},值:{},支付设置脱敏失败{}", key, value, e.getMessage());
                         }

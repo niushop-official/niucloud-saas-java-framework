@@ -6,6 +6,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.admin.weapp.param.WeappTemplateSyncParam;
 import com.niu.core.service.admin.weapp.param.WeappVersionAddParam;
 import com.niu.core.service.admin.weapp.vo.WeappVersionListVo;
+import com.niu.core.service.admin.weapp.vo.WeappVersionPageVo;
 import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public interface IWeappVersionService {
 
-    PageResult<WeappVersionListVo> list(PageParam pageParam);
+    WeappVersionPageVo list(PageParam pageParam);
 
     void add(WeappVersionAddParam param);
 

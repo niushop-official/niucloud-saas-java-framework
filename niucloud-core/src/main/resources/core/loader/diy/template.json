@@ -1,19 +1,19 @@
 {
   "DIY_INDEX": {
     "title": "首页",
-    "page": "\/app\/pages\/index\/index",
+    "page": "/app/pages/index/index",
     "action": "decorate",
     "type": "index"
   },
   "DIY_MEMBER_INDEX": {
     "title": "个人中心",
-    "page": "\/app\/pages\/member\/index",
+    "page": "/app/pages/member/index",
     "action": "decorate",
     "type": "member_index"
   },
   "DIY_PAGE": {
     "title": "微页面",
-    "page": "\/app\/pages\/index\/diy",
+    "page": "/app/pages/index/diy",
     "action": "",
     "type": "",
     "template": []

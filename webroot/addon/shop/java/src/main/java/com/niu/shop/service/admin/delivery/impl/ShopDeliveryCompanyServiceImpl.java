@@ -54,7 +54,7 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
         if (ObjectUtil.isNotEmpty(searchParam.getElectronicSheetSwitch()))
             queryWrapper.eq("electronic_sheet_switch", searchParam.getElectronicSheetSwitch());
         queryWrapper.eq("site_id", RequestUtils.siteId());
-        queryWrapper.orderByDesc("company_id");
+        queryWrapper.orderByDesc("create_time");
 
         IPage<ShopDeliveryCompany> iPage = shopDeliveryCompanyMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<ShopDeliveryCompanyListVo> list = new LinkedList<>();
@@ -77,13 +77,9 @@ public class ShopDeliveryCompanyServiceImpl extends ServiceImpl<ShopDeliveryComp
         LambdaQueryWrapper<ShopDeliveryCompany> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(ObjectUtil.isNotEmpty(searchParam.getCompanyName()), ShopDeliveryCompany::getCompanyName, searchParam.getCompanyName());
         queryWrapper.eq(ObjectUtil.isNotEmpty(searchParam.getElectronicSheetSwitch()), ShopDeliveryCompany::getElectronicSheetSwitch, searchParam.getElectronicSheetSwitch());
-        if(ObjectUtil.isNotEmpty(searchParam.getSiteId())){
-            queryWrapper.eq(ShopDeliveryCompany::getSiteId, searchParam.getSiteId());
-        }else {
-            queryWrapper.eq(ShopDeliveryCompany::getSiteId, RequestUtils.siteId());
-        }
+        queryWrapper.eq(ShopDeliveryCompany::getSiteId, RequestUtils.siteId());
         queryWrapper.in(CollectionUtil.isNotEmpty(searchParam.getExpressNoElectronicSheet()), ShopDeliveryCompany::getExpressNoElectronicSheet, searchParam.getExpressNoElectronicSheet());
-        queryWrapper.orderByDesc(ShopDeliveryCompany::getCompanyId);
+        queryWrapper.orderByDesc(ShopDeliveryCompany::getCreateTime);
 
         List<ShopDeliveryCompany> record = shopDeliveryCompanyMapper.selectList(queryWrapper);
         List<ShopDeliveryCompanyListVo> list = new LinkedList<>();

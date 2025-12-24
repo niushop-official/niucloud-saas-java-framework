@@ -15,6 +15,7 @@ import com.niu.core.mapper.sys.SysUserMapper;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.enums.order.*;
+import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -62,6 +63,8 @@ public class RefundDetailVo implements Serializable {
     private MemberBriefInfoVo member;
     private OrderMain orderMain;
     private PayRefund payRefund;
+    private Store store;
+    private BigDecimal giftBalance = BigDecimal.ZERO;
 
     public String getStatusName() {
         return OrderRefundStatusEnum.getNameByStatus(Integer.valueOf(this.status));
@@ -219,6 +222,7 @@ public class RefundDetailVo implements Serializable {
         }
     }
 
+    @Data
     public static class PayRefund {
 
         private String refundNo;
@@ -238,5 +242,17 @@ public class RefundDetailVo implements Serializable {
         public String getTypeName() {
             return PayTypeEnum.getType().getByPath(this.type + ".name", String.class);
         }
+    }
+
+    @Data
+    public static class Store {
+        private Integer storeId; //
+        private String storeName; // 门店名称
+        private String storeLogo; // 门店logo
+        private String storeMobile; // 手机号
+        private String fullAddress; // 完整地址
+        private String longitude; // 经度
+        private String latitude; // 纬度
+        private String tradeTime; // 营业时间
     }
 }

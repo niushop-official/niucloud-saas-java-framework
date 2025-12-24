@@ -34,7 +34,16 @@
 					},
 					"bottomTabBar": {
 						"control": true,
-						"isShow": true
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"popWindow": {
 						"imgUrl": "",
@@ -1450,7 +1459,16 @@
 					},
 					"bottomTabBar": {
 						"control": true,
-						"isShow": true
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"popWindow": {
 						"imgUrl": "",
@@ -2920,7 +2938,16 @@
 					"imgHeight": 1485,
 					"bottomTabBar": {
 						"control": true,
-						"isShow": true
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"template": {
 						"textColor": "#303133",
@@ -3502,7 +3529,16 @@
 					"imgHeight": "",
 					"bottomTabBar": {
 						"control": true,
-						"isShow": true
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"template": {
 						"textColor": "#303133",
@@ -4102,7 +4138,16 @@
 					"imgHeight": "",
 					"bottomTabBar": {
 						"control": true,
-						"isShow": true
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"template": {
 						"textColor": "#303133",
@@ -4612,6 +4657,23 @@
 								}
 							},
 							{
+								"id": "6ba0yct2b3ct",
+								"title": "我的助力",
+								"imageUrl": "addon/shop/diy/member/nav_my_help.png",
+								"imgWidth": 58,
+								"imgHeight": 58,
+								"link": {
+									"name": ""
+								},
+								"label": {
+									"control": false,
+									"text": "热门",
+									"textColor": "#FFFFFF",
+									"bgColorStart": "#F83287",
+									"bgColorEnd": "#FE3423"
+								}
+							},
+							{
 								"id": "2b0att2b3pq8",
 								"title": "我的礼物",
 								"imageUrl": "addon/shop/diy/member/nav_gift.png",
@@ -4747,7 +4809,16 @@
 					},
 					"bottomTabBar": {
 						"control": true,
-						"isShow": true
+						"isShow": true,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"popWindow": {
 						"imgUrl": "",
@@ -5135,7 +5206,16 @@
 					},
 					"bottomTabBar": {
 						"control": false,
-						"isShow": false
+						"isShow": false,
+						"designNav": {
+							"title": "",
+							"key": ""
+						}
+					},
+					"copyright": {
+						"control": true,
+						"isShow": false,
+						"textColor": "#ccc"
 					},
 					"popWindow": {
 						"imgUrl": "",

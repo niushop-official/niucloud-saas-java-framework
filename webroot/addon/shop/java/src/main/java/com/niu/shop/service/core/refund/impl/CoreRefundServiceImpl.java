@@ -9,6 +9,7 @@ import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.StringUtils;
 import com.niu.core.entity.pay.PayRefund;
 import com.niu.core.enums.pay.RefundTypeEnum;
+import com.niu.core.event.common.CommonEvent;
 import com.niu.core.event.common.CommonEventDefiner;
 import com.niu.core.service.core.app.helper.EventAndSubscribeOfPublisher;
 import com.niu.core.service.core.pay.param.PayRefundCreateParam;
@@ -133,10 +134,7 @@ public class CoreRefundServiceImpl implements ICoreRefundService {
     @Async
     @Override
     public void refundFinishAfter(ShopOrderRefund refund) {
-        ShopOrder order = shopOrderMapper.selectOne(new QueryWrapper<ShopOrder>()
-                .eq("order_id", refund.getOrderId())
-                .select("order_id,site_id,status")
-        );
+        ShopOrder order = shopOrderMapper.selectById(refund.getOrderId());
         if (order == null) return;
         //退还满减赠送
         coreManjianService.refundGift(refund);
@@ -169,7 +167,7 @@ public class CoreRefundServiceImpl implements ICoreRefundService {
 
         //通知三方应用更新订单状态
         if (StringUtils.isNotEmpty(order.getRelateSource())) {
-            CommonEventDefiner.CommonEvent sendEvent = new CommonEventDefiner.CommonEvent();
+            CommonEvent sendEvent = new CommonEvent();
             Map<String, Object> data = new HashMap<>();
             data.put("source_order_id", refund.getOrderId());
             data.put("source_order_item_id", refund.getOrderGoodsId());

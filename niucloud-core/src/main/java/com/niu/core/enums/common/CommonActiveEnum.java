@@ -7,7 +7,7 @@ import java.util.Map;
 public enum CommonActiveEnum {
 
     IMPULSE_BUY("impulse_buy", "顺手买", "顺", "#FF7700"),
-    GIFTCARD("gift_card", "礼品卡", "礼", "#F00000"),
+    GIFTCARD("giftcard", "礼品卡", "礼", "#F00000"),
     DISCOUNT("discount", "限时折扣", "折", "#FFA322"),
     EXCHANGE("exchange", "积分商城", "积", "#00C441"),
     MANJIANSONG("manjiansong", "满减送", "满减", "#249DE9"),

@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class IndexAddonListParam {
-    private String labelId;
+    private String labelId = "";
 }

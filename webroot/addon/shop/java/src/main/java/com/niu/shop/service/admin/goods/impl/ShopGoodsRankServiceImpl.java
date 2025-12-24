@@ -57,11 +57,12 @@ public class ShopGoodsRankServiceImpl implements IShopGoodsRankService {
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<ShopGoodsRank> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("site_id", RequestUtils.siteId())
-                .orderByDesc("create_time");
+        queryWrapper.eq("site_id", RequestUtils.siteId());
 
         if (ObjectUtil.isNotEmpty(searchParam.getOrder())) {
             queryWrapper.orderBy(true, "desc".equalsIgnoreCase(searchParam.getSort()), searchParam.getOrder());
+        }else{
+            queryWrapper.orderByDesc("create_time");
         }
         if (ObjectUtil.isNotEmpty(searchParam.getName())) {
             queryWrapper.like("name", searchParam.getName());

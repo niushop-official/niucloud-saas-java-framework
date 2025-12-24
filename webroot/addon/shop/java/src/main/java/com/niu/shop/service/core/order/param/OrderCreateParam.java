@@ -22,7 +22,7 @@ public class OrderCreateParam implements Serializable {
 
     private JSONObject formData;
 
-    private Delivery delivery;
+    private Delivery delivery = new Delivery();
 
     @Data
     public static class Delivery {

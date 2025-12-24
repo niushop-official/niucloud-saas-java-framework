@@ -15,4 +15,8 @@ public class ShopGoodsAttrSearchParam implements Serializable {
 
     private List<Integer> attrIdArr;
 
+    private String order;
+
+    private String sort;
+
 }

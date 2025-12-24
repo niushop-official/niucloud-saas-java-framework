@@ -56,7 +56,7 @@ public class ShopOrderDeliveryController {
         return Result.success(shopOrderDeliveryService.getDeliveryPackage(id, mobile));
     }
 
-    @GetMapping("'delivery/package/list")
+    @GetMapping("/delivery/package/list")
     @Description("获取订单包裹列表")
     public Result<List<ShopOrderDeliveryListVo>> getDeliveryPackageList(@RequestParam(name = "order_id")  Integer orderId) {
 

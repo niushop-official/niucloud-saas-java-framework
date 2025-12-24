@@ -121,6 +121,7 @@
   "fieldStatistics":"字段统计",
   "viewInformation":"查看信息",
 
-  "deleteTips":"确定删除该条数据吗"
-
+  "deleteTips":"确定删除该条数据吗",
+  "startDate": "开始日期",
+  "endDate": "结束日期"
 }

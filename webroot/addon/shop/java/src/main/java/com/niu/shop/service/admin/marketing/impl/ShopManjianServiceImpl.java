@@ -98,6 +98,9 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         if (ObjectUtil.isNotEmpty(searchParam.getStatus())) {
             queryWrapper.eq("status", searchParam.getStatus());
         }
+        if (ObjectUtil.isNotEmpty(searchParam.getActiveId())) {
+            queryWrapper.in("manjian_id", JSONUtil.parseArray(searchParam.getActiveId()));
+        }
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
             QueryMapperUtils.buildByTime(queryWrapper, "create_time", searchParam.getCreateTime());
         }
@@ -171,7 +174,7 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         shopManjianGiveRecordsWrapper.eq("site_id", RequestUtils.siteId())
                 .eq("manjian_id", manjianId);
         List<ShopManjianGiveRecords> records = shopManjianGiveRecordsMapper.selectList(shopManjianGiveRecordsWrapper);
-        if(ObjectUtil.isEmpty(records)) return PageResult.build(page, limit, 0, new ArrayList<>());
+        if (ObjectUtil.isEmpty(records)) return PageResult.build(page, limit, 0, new ArrayList<>());
         Set<Integer> orderIds = CollStreamUtil.toSet(records, ShopManjianGiveRecords::getOrderId);
         Map<Integer, ShopOrder> orderMap = shopOrderMapper.selectBatchIds(orderIds).stream().collect(Collectors.toMap(ShopOrder::getOrderId, e -> e));
         Set<Integer> memberIds = CollStreamUtil.toSet(records, ShopManjianGiveRecords::getMemberId);
@@ -221,23 +224,20 @@ public class ShopManjianServiceImpl implements IShopManjianService {
 
     @Override
     @Transactional
-    public Map<String, Object>  add(ShopManjianParam addParam) {
+    public Map<String, Object> add(ShopManjianParam addParam) {
         ShopManjian model = new ShopManjian();
         BeanUtils.copyProperties(addParam, model);
         model.setSiteId(RequestUtils.siteId());
-        if(ObjectUtil.isNotEmpty(addParam.getGoodsIds())){
-            model.setGoodsIds(addParam.getGoodsIds().toString());
-        }
 
-        if(ObjectUtil.isNotEmpty(addParam.getLevelIds())){
+        if (ObjectUtil.isNotEmpty(addParam.getLevelIds())) {
             model.setLevelIds(addParam.getLevelIds().toString());
         }
 
-        if(ObjectUtil.isNotEmpty(addParam.getLabelIds())){
+        if (ObjectUtil.isNotEmpty(addParam.getLabelIds())) {
             model.setLabelIds(addParam.getLabelIds().toString());
         }
 
-        if(ObjectUtil.isNotEmpty(addParam.getRuleJson())){
+        if (ObjectUtil.isNotEmpty(addParam.getRuleJson())) {
             model.setRuleJson(addParam.getRuleJson().toString());
         }
 
@@ -250,15 +250,43 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         }
 
         List<ShopManjianGoodsData> goodsData = JSONUtil.toList(addParam.getGoodsData(), ShopManjianGoodsData.class);
-        check(addParam, goodsData);
+//        check(addParam, goodsData, model.getStartTime(), model.getEndTime());
+        Set<Integer> goodsIds = getGoodsIds(addParam.getGoodsType(), goodsData);
+        if (!ShopManjianGoodsTypeEnum.SELECTED_GOODS.getValue().equals(addParam.getGoodsType())) {
+            boolean nonAllGoodsExists = shopManjianMapper.exists(new LambdaQueryWrapper<ShopManjian>()
+                    .eq(ShopManjian::getSiteId, RequestUtils.siteId())
+                    .ne(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.ALL_GOODS.getValue())
+                    .eq(ShopManjian::getStatus, ShopManjianStatusEnum.ACTIVE.getValue())
+                    .and(wrapper -> buildTimeConflictCondition(wrapper, model.getStartTime(), model.getEndTime())));
+
+            if (nonAllGoodsExists) {
+                throw new AdminException("已有互斥类型活动存在（仅针对指定商品参与的类型活动，同一时间段内可以同时有多个开展。）");
+            }
+        }
+        checkGoodsActivity(addParam, model.getStartTime(), model.getEndTime());
+        List<Integer> selectGoodsIds = selectOrNotGoodsIds(addParam, false, model.getStartTime(), model.getEndTime());
+        List<Integer> selectGoodsNotIds = selectOrNotGoodsIds(addParam, true, model.getStartTime(), model.getEndTime());
+        if (!ShopManjianGoodsTypeEnum.ALL_GOODS.getValue().equals(addParam.getGoodsType())){
+            List<Integer> usedGoodsIds = new ArrayList<>();
+            usedGoodsIds.addAll(selectGoodsIds);
+            usedGoodsIds.addAll(selectGoodsNotIds);
+
+            List<Integer> goodsIdIntersect = goodsIds.stream().filter(usedGoodsIds::contains).toList();
+
+            if (!goodsIdIntersect.isEmpty()) {
+                throw new AdminException("同一商品在一个时间段内只能参加一个满减送活动");
+            }
+        }
 
         model.setStatus(getStatus(model));
+        model.setGoodsIds(Arrays.asList(goodsIds).toString());
         shopManjianMapper.insert(model);
 
         if (!ObjectUtil.equal(model.getGoodsType(), ShopManjianGoodsTypeEnum.ALL_GOODS.getValue()) && ObjectUtil.isNotEmpty(goodsData)) {
             List<ShopManjianGoods> goods = goodsData2Goods(model, goodsData);
             coreShopManjianGoodsService.saveBatch(goods);
         }
+
 
         Map<String, Object> map = new HashMap<>();
         map.put("code", 1);
@@ -374,6 +402,7 @@ public class ShopManjianServiceImpl implements IShopManjianService {
                 manjianVo.setGoodsSku(sku);
                 manjianVo.setSkuImage(sku.getSkuImage());
                 manjianVo.setSkuName(sku.getSkuName());
+                manjianVo.setSkuId(sku.getSkuId());
                 String thumb = CommonUtils.thumbImageSmall(RequestUtils.siteId(), shopGoods.getGoodsCover());
                 manjianVo.setGoodsCoverThumbSmall(thumb);
                 manjianGoods.add(manjianVo);
@@ -393,19 +422,19 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         ShopManjian model = shopManjianMapper.selectById(id);
         BeanUtils.copyProperties(editParam, model);
 
-        if(ObjectUtil.isNotEmpty(editParam.getGoodsIds())){
-            model.setGoodsIds(editParam.getGoodsIds().toString());
-        }
+//        if (ObjectUtil.isNotEmpty(editParam.getGoodsIds())) {
+//            model.setGoodsIds(editParam.getGoodsIds().toString());
+//        }
 
-        if(ObjectUtil.isNotEmpty(editParam.getLevelIds())){
+        if (ObjectUtil.isNotEmpty(editParam.getLevelIds())) {
             model.setLevelIds(editParam.getLevelIds().toString());
         }
 
-        if(ObjectUtil.isNotEmpty(editParam.getLabelIds())){
+        if (ObjectUtil.isNotEmpty(editParam.getLabelIds())) {
             model.setLabelIds(editParam.getLabelIds().toString());
         }
 
-        if(ObjectUtil.isNotEmpty(editParam.getRuleJson())){
+        if (ObjectUtil.isNotEmpty(editParam.getRuleJson())) {
             model.setRuleJson(editParam.getRuleJson().toString());
         }
 
@@ -423,19 +452,33 @@ public class ShopManjianServiceImpl implements IShopManjianService {
                 ShopManjianGoodsData goodsDataItem = new ShopManjianGoodsData();
                 goodsDataItem.setGoodsId(Integer.parseInt(goodsDataItemJson.getStr("goods_id")));
                 JSONObject skuDataJson = JSONUtil.parseObj(goodsDataItemJson.getStr("goodsSku"));
-                if(ObjectUtil.isNotEmpty(skuDataJson))
-                {
+                if (ObjectUtil.isNotEmpty(skuDataJson)) {
                     goodsDataItem.setSkuId(Integer.parseInt(skuDataJson.getStr("sku_id")));
-                }else{
+                } else {
                     goodsDataItem.setSkuId(Integer.parseInt(goodsDataItemJson.getStr("sku_id")));
                 }
 
                 goodsData.add(goodsDataItem);
             }
         }
-        check(editParam, goodsData);
+        Set<Integer> goodsIds = getGoodsIds(editParam.getGoodsType(), goodsData);
+        checkGoodsActivity(editParam, model.getStartTime(), model.getEndTime());
+        List<Integer> selectGoodsIds = selectOrNotGoodsIds(editParam, false, model.getStartTime(), model.getEndTime());
+        List<Integer> selectGoodsNotIds = selectOrNotGoodsIds(editParam, true, model.getStartTime(), model.getEndTime());
+        if (!ShopManjianGoodsTypeEnum.ALL_GOODS.getValue().equals(editParam.getGoodsType())){
+            List<Integer> usedGoodsIds = new ArrayList<>();
+            usedGoodsIds.addAll(selectGoodsIds);
+            usedGoodsIds.addAll(selectGoodsNotIds);
+
+            List<Integer> goodsIdIntersect = goodsIds.stream().filter(usedGoodsIds::contains).toList();
+
+            if (!goodsIdIntersect.isEmpty()) {
+                throw new AdminException("同一商品在一个时间段内只能参加一个满减送活动");
+            }
+        }
 
         model.setStatus(getStatus(model));
+        model.setGoodsIds(Arrays.asList(goodsIds).toString());
         shopManjianMapper.updateById(model);
 
         if (!ObjectUtil.equal(model.getGoodsType(), ShopManjianGoodsTypeEnum.ALL_GOODS.getValue()) && ObjectUtil.isNotEmpty(goodsData)) {
@@ -460,17 +503,17 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         Long startTime = DateUtils.StringToTimestamp(param.getStartTime());
         Long endTime = DateUtils.StringToTimestamp(param.getEndTime());
         shopManjianGoodsQueryWrapper.and(i -> i.and(j -> j.between("nsm.start_time", startTime, endTime))
-                .or(j -> j.between("nsm.end_time",  startTime, endTime))
-                .or(j-> j.le("nsm.start_time", startTime).
+                .or(j -> j.between("nsm.end_time", startTime, endTime))
+                .or(j -> j.le("nsm.start_time", startTime).
                         ge("nsm.end_time", endTime))
-                .or(j-> j.le("nsm.start_time", startTime)).
-                        ge("nsm.end_time", endTime));
+                .or(j -> j.le("nsm.start_time", startTime)).
+                ge("nsm.end_time", endTime));
         shopManjianGoodsQueryWrapper.select("nsmg.goods_id");
 
         //不能直接Integer.class,java版本不兼容
         List<ShopManjianGoods> list = shopManjianGoodsMapper.selectJoinList(ShopManjianGoods.class, shopManjianGoodsQueryWrapper);
-        if(ObjectUtil.isEmpty(list)|| ShopManjianGoodsTypeEnum.ALL_GOODS.getValue().equals(param.getGoodsType())){
-           return;
+        if (ObjectUtil.isEmpty(list) || ShopManjianGoodsTypeEnum.ALL_GOODS.getValue().equals(param.getGoodsType())) {
+            return;
         }
         List<Integer> selectGoodsIds = list.stream().map(ShopManjianGoods::getGoodsId).collect(Collectors.toList());
 
@@ -485,8 +528,8 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         }
 
         List<Integer> intersect = new ArrayList<>();
-       if(ObjectUtil.isNotEmpty(goodsIds)) intersect.addAll(goodsIds);
-       if(ObjectUtil.isNotEmpty(selectGoodsIds))  intersect.retainAll(selectGoodsIds);
+        if (ObjectUtil.isNotEmpty(goodsIds)) intersect.addAll(goodsIds);
+        if (ObjectUtil.isNotEmpty(selectGoodsIds)) intersect.retainAll(selectGoodsIds);
 
         if (ObjectUtil.isEmpty(intersect)) {
             return;
@@ -497,11 +540,11 @@ public class ShopManjianServiceImpl implements IShopManjianService {
         shopManjianGoodsMapQueryWrapper.in("goods_id", intersect)
                 .eq("site_id", RequestUtils.siteId())
                 .in("status", Arrays.asList(ShopManjianStatusEnum.ACTIVE.getValue(), ShopManjianStatusEnum.NOT_ACTIVE.getValue()))
-                .eq("goods_type", param.getGoodsType())
+//                .eq("goods_type", param.getGoodsType())
                 .groupBy("goods_id");
         Map<Integer, ShopManjianGoods> goodsMap = shopManjianGoodsMapper.selectList(shopManjianGoodsMapQueryWrapper).stream().collect(Collectors.toMap(ShopManjianGoods::getGoodsId, e -> e));
         Set<Integer> manjianIds = goodsMap.values().stream().map(ShopManjianGoods::getManjianId).collect(Collectors.toSet());
-        if(ObjectUtil.isEmpty(manjianIds)) return;
+        if (ObjectUtil.isEmpty(manjianIds)) return;
         Map<Integer, ShopManjian> manjianMap = shopManjianMapper.selectBatchIds(manjianIds).stream().collect(Collectors.toMap(ShopManjian::getManjianId, e -> e));
 
         for (Integer goodsId : intersect) {
@@ -567,52 +610,16 @@ public class ShopManjianServiceImpl implements IShopManjianService {
                 .toList();
     }
 
-    /**
-     * 检测是否存在活动
-     * @param param
-     * @param goodsData
-     */
-    private void check(ShopManjianParam param, List<ShopManjianGoodsData> goodsData) {
-        checkGoodsActivity(param);
-        List<Integer> selectGoodsIds = selectOrNotGoodsIds(param, false);
-        List<Integer> selectGoodsNotIds = selectOrNotGoodsIds(param, true);
-        Set<Integer> goodsIds = getGoodsIds(param.getGoodsType(), goodsData);
-
-        switch (ShopManjianGoodsTypeEnum.getEnumByValue(param.getGoodsType())) {
-            case ALL_GOODS -> {
-                if (ObjectUtil.isNotEmpty(selectGoodsIds) || ObjectUtil.isNotEmpty(selectGoodsNotIds)) {
-                    throw new RuntimeException("同一商品在一个时间段内只能参加一个满减送活动");
-                }
-            }
-            case SELECTED_GOODS_NOT -> {
-                if (ObjectUtil.isNotEmpty(selectGoodsIds)) {
-                    List<Integer> copy = new ArrayList<>(selectGoodsIds);
-                    copy.removeAll(goodsIds);
-                    if (ObjectUtil.isNotEmpty(copy)) {
-                        throw new RuntimeException("同一商品在一个时间段内只能参加一个满减送活动");
-                    }
-                }
-
-                if (ObjectUtil.isNotEmpty(selectGoodsNotIds)) {
-                    throw new RuntimeException("同一商品在一个时间段内只能参加一个满减送活动");
-                }
-            }
-            case SELECTED_GOODS -> {
-                List<Integer> copy = new ArrayList<>(goodsIds);
-                if (ObjectUtil.isNotEmpty(selectGoodsIds)) {
-                    copy.retainAll(selectGoodsIds);
-                }else{
-                    copy.clear();
-                }
-                if (ObjectUtil.isNotEmpty(selectGoodsNotIds)) {
-                    copy.removeAll(selectGoodsNotIds);
-                }
-                if (ObjectUtil.isNotEmpty(copy)) {
-                    throw new RuntimeException("同一商品在一个时间段内只能参加一个满减送活动");
-                }
-            }
-        }
-    }
+//    /**
+//     * 检测是否存在活动
+//     *
+//     * @param param
+//     * @param goodsData
+//     */
+//    private void check(ShopManjianParam param, List<ShopManjianGoodsData> goodsData, Long startTime, Long endTime) {
+//
+//
+//    }
 
     private Set<Integer> getGoodsIds(String goodsType, List<ShopManjianGoodsData> goodsData) {
         if (!ShopManjianGoodsTypeEnum.ALL_GOODS.getValue().equals(goodsType) &&
@@ -625,67 +632,74 @@ public class ShopManjianServiceImpl implements IShopManjianService {
 
     /**
      * 检测商品id是否在一段时间内参与活动
+     *
      * @param param
-     * @param isNot  false:检测选中商品 true:检测不选中商品
+     * @param isNot false:检测选中商品 true:检测不选中商品
      * @return
      */
-    private List<Integer> selectOrNotGoodsIds(ShopManjianParam param, boolean isNot)  {
-        MPJQueryWrapper<ShopManjianGoods> shopManjianGoodsQueryWrapper = new MPJQueryWrapper<>();
-        shopManjianGoodsQueryWrapper.setAlias("nsmg")
-                .leftJoin("?_shop_manjian nsm ON nsmg.manjian_id = nsm.manjian_id".replace("?_", GlobalConfig.tablePrefix))
-                .eq("nsmg.site_id", RequestUtils.siteId())
-                .in("nsm.status", List.of(ShopManjianStatusEnum.ACTIVE.getValue(), ShopManjianStatusEnum.NOT_ACTIVE.getValue()));
-        if(ObjectUtil.isNotEmpty(param.getManjianId()))
-        {
-            shopManjianGoodsQueryWrapper.ne("nsm.manjian_id", param.getManjianId());
-        }
+    private List<Integer> selectOrNotGoodsIds(ShopManjianParam param, boolean isNot, Long startTime, Long endTime) {
+        MPJLambdaWrapper<ShopManjianGoods> shopManjianGoodsQueryWrapper = new MPJLambdaWrapper<ShopManjianGoods>()
+                .select(ShopManjianGoods::getGoodsId)
+                .leftJoin(ShopManjian.class, ShopManjian::getManjianId, ShopManjianGoods::getManjianId)
+                .eq(ShopManjian::getSiteId, RequestUtils.siteId())
+                .in(ShopManjian::getStatus, ShopManjianStatusEnum.ACTIVE.getValue(), ShopManjianStatusEnum.NOT_ACTIVE.getValue())
+                .ne(ObjectUtil.isNotEmpty(param.getManjianId()), ShopManjian::getManjianId, param.getManjianId())
+                .and(wrapper -> wrapper.or(j -> j
+                                .between(ShopManjian::getStartTime, startTime, endTime)
+                                .or()
+                                .between(ShopManjian::getEndTime, startTime, endTime))
+                        .or(k -> k
+                                .le(ShopManjian::getStartTime, startTime)
+                                .ge(ShopManjian::getEndTime, endTime))
+                        .or(l -> l
+                                .ge(ShopManjian::getStartTime, startTime)
+                                .le(ShopManjian::getEndTime, endTime)));
         if (isNot) {
-            shopManjianGoodsQueryWrapper .eq("nsm.goods_type", ShopManjianGoodsTypeEnum.SELECTED_GOODS_NOT.getValue());
-        }else{
-            shopManjianGoodsQueryWrapper .eq("nsm.goods_type", ShopManjianGoodsTypeEnum.SELECTED_GOODS.getValue());
+            shopManjianGoodsQueryWrapper.eq(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.SELECTED_GOODS_NOT.getValue());
+        } else {
+            shopManjianGoodsQueryWrapper.eq(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.SELECTED_GOODS.getValue());
         }
 
-        Long startTime = DateUtils.StringToTimestamp(param.getStartTime());
-        Long endTime = DateUtils.StringToTimestamp(param.getEndTime());
-        shopManjianGoodsQueryWrapper.and(i -> i.and(j -> j.between("nsm.start_time", startTime, endTime))
-                .or(j -> j.between("nsm.end_time",  startTime, endTime))
-                .or(j-> j.le("nsm.start_time", startTime).
-                        ge("nsm.end_time", endTime))
-                .or(j-> j.le("nsm.start_time", startTime).
-                        ge("nsm.end_time", endTime)));
-        shopManjianGoodsQueryWrapper.select("nsmg.goods_id, nsmg.manjian_id");
-
-        //不能直接Integer.class,java版本不兼容
         List<ShopManjianGoods> list = shopManjianGoodsMapper.selectJoinList(ShopManjianGoods.class, shopManjianGoodsQueryWrapper);
-        if(ObjectUtil.isNotEmpty(list)){
+        if (ObjectUtil.isNotEmpty(list)) {
             return list.stream().map(ShopManjianGoods::getGoodsId).collect(Collectors.toList());
-        }else{
+        } else {
             return new ArrayList<>();
         }
     }
 
-    private void checkGoodsActivity(ShopManjianParam param) {
-        QueryWrapper<ShopManjian> shopManjianQueryWrapper = new QueryWrapper<>();
-        shopManjianQueryWrapper.eq("site_id", RequestUtils.siteId())
-                .eq("goods_type", ShopManjianGoodsTypeEnum.ALL_GOODS.getValue())
-                .in("status", List.of(ShopManjianStatusEnum.NOT_ACTIVE.getValue(), ShopManjianStatusEnum.ACTIVE.getValue()));
+    private void checkGoodsActivity(ShopManjianParam param, Long startTime, Long endTime) {
+        Integer siteId = RequestUtils.siteId();
+        LambdaQueryWrapper<ShopManjian> allGoodsWrapper = new LambdaQueryWrapper<ShopManjian>()
+                .eq(ShopManjian::getSiteId, siteId)
+                .eq(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.ALL_GOODS.getValue())
+                .in(ShopManjian::getStatus,
+                        ShopManjianStatusEnum.NOT_ACTIVE.getValue(),
+                        ShopManjianStatusEnum.ACTIVE.getValue())
+                .and(wrapper -> buildTimeConflictCondition(wrapper, startTime, endTime));
 
-        if(ObjectUtil.isNotEmpty(param.getManjianId()))
-        {
-            shopManjianQueryWrapper.ne("manjian_id", param.getManjianId());
+        if (ObjectUtil.isNotEmpty(param.getManjianId())) {
+            allGoodsWrapper.ne(ShopManjian::getManjianId, param.getManjianId());
         }
-        Long startTime = DateUtils.StringToTimestamp(param.getStartTime());
-        Long endTime = DateUtils.StringToTimestamp(param.getEndTime());
-        shopManjianQueryWrapper.and(i -> i.and(j -> j.between("start_time", startTime, endTime))
-                .or(j -> j.between("end_time",  startTime, endTime))
-                .or(j-> j.le("start_time", startTime).
-                        ge("end_time", endTime))
-                .or(j-> j.le("start_time", startTime).
-                        ge("end_time", endTime)));
-        long allGoodsCount = shopManjianMapper.selectCount(shopManjianQueryWrapper);
-        if (allGoodsCount > 0) {
+
+        boolean allGoodsExists = shopManjianMapper.exists(allGoodsWrapper);
+        if (allGoodsExists) {
             throw new AdminException("当前时间段已存在类型为全部商品参与的满减送活动，不可再添加其它满减送活动");
         }
+    }
+
+    private void buildTimeConflictCondition(LambdaQueryWrapper<ShopManjian> wrapper,
+                                            Long startTime, Long endTime) {
+        wrapper.or(j -> j
+                        .between(ShopManjian::getStartTime, startTime, endTime)
+                        .or()
+                        .between(ShopManjian::getEndTime, startTime, endTime))
+                .or(k -> k
+                        .le(ShopManjian::getStartTime, startTime)
+                        .ge(ShopManjian::getEndTime, endTime))
+                .or(l -> l
+                        .ge(ShopManjian::getStartTime, startTime)
+                        .le(ShopManjian::getEndTime, endTime));
     }
 
 }

@@ -66,8 +66,17 @@ public class MemberAccountServiceImpl implements IMemberAccountService {
         queryWrapper.eq("mal.account_type", searchParam.getAccountType());
         queryWrapper.orderByDesc("mal.id");
 
-        if (ObjectUtil.isNotEmpty(searchParam.getKeywords()))
-            queryWrapper.like("m.member_no|m.username|m.nickname|m.mobile", searchParam.getKeywords());
+        if (ObjectUtil.isNotEmpty(searchParam.getKeywords())) {
+            queryWrapper.and(wrapper -> {
+                wrapper.like("m.member_no", searchParam.getKeywords())
+                    .or()
+                    .like("m.username", searchParam.getKeywords())
+                    .or()
+                    .like("m.nickname", searchParam.getKeywords())
+                    .or()
+                    .like("m.mobile", searchParam.getKeywords());
+            });
+        }
         if (ObjectUtil.defaultIfNull(searchParam.getMemberId(), 0) > 0)
             queryWrapper.eq("mal.member_id", searchParam.getMemberId());
         if (ObjectUtil.isNotEmpty(searchParam.getFromType()))

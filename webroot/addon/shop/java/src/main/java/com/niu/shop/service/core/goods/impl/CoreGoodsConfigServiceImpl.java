@@ -3,12 +3,14 @@ package com.niu.shop.service.core.goods.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.service.admin.member.param.LoginConfigParam;
-import com.niu.core.service.admin.member.vo.LoginConfigVo;
 import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.core.service.core.sys.vo.CoreSysConfigVo;
+import com.niu.shop.entity.goods.ShopGoodsSku;
+import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
+import com.niu.shop.service.admin.goods.param.ShopGoodsVerifySkuNoParam;
 import com.niu.shop.service.core.goods.param.SortConfigParam;
 import com.niu.shop.service.core.goods.vo.InitConfigVo;
 import com.niu.shop.service.core.goods.vo.ShopConfigUniqueVo;
@@ -32,6 +34,9 @@ public class CoreGoodsConfigServiceImpl implements ICoreGoodsConfigService {
 
     @Resource
     ICoreConfigService configService;
+
+    @Resource
+    ShopGoodsSkuMapper shopGoodsSkuMapper;
 
     /**
      * 获取商品搜索配置
@@ -177,6 +182,88 @@ public class CoreGoodsConfigServiceImpl implements ICoreGoodsConfigService {
         sortConfigVo.setInit(initConfigVo);
 
         configService.setConfig(siteId,"GOODS_SORT_CONFIG", JSONUtil.parseObj(sortConfigVo));
+    }
+
+    @Override
+    public Boolean verifySkuNo(ShopGoodsVerifySkuNoParam param) {
+        // 获取商品编码唯一配置
+        JSONObject sysConfigInfo = getUniqueConfig();
+        
+        // 如果未开启商品编码唯一验证，则直接返回通过
+        if (ObjectUtil.isNotNull(sysConfigInfo) && sysConfigInfo.getInt("is_enable") == 0) {
+            return true;
+        }
+        
+        // 验证sku_no参数是否存在
+        if (ObjectUtil.isEmpty(param.getSkuNo())) {
+            throw new AdminException("缺少参数sku_no");
+        }
+        
+        // 处理sku_no参数，支持多个编码（逗号分隔）
+        String[] skuNoArr = param.getSkuNo().split(",");
+        List<String> validSkuNoList = new ArrayList<>();
+        
+        // 过滤空值
+        for (String skuNo : skuNoArr) {
+            if (ObjectUtil.isNotEmpty(skuNo.trim())) {
+                validSkuNoList.add(skuNo.trim());
+            }
+        }
+        
+        // 如果过滤后没有有效的商品编码，则直接返回通过
+        if (validSkuNoList.isEmpty()) {
+            return true;
+        }
+        
+        // 检查参数中是否存在重复的商品编码
+        if (validSkuNoList.size() > 1) {
+            Map<String, Integer> countMap = new HashMap<>();
+            for (String skuNo : validSkuNoList) {
+                countMap.put(skuNo, countMap.getOrDefault(skuNo, 0) + 1);
+            }
+            
+            // 查找重复的编码
+            for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
+                if (entry.getValue() > 1) {
+                    throw new AdminException("商品编码[" + entry.getKey() + "]已存在");
+                }
+            }
+        }
+        
+        // 构建数据库查询条件，使用FIND_IN_SET函数
+        QueryWrapper<ShopGoodsSku> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", RequestUtils.siteId());
+        
+        // 构建OR条件，使用FIND_IN_SET查询
+        StringBuilder findInSetCondition = new StringBuilder();
+        for (int i = 0; i < validSkuNoList.size(); i++) {
+            if (i > 0) {
+                findInSetCondition.append(" OR ");
+            }
+            findInSetCondition.append("FIND_IN_SET('").append(validSkuNoList.get(i)).append("', sku_no)");
+        }
+        queryWrapper.apply(findInSetCondition.toString());
+        
+        // 排除当前商品ID（如果存在）
+        if (ObjectUtil.isNotNull(param.getGoodsId()) && ObjectUtil.isNotEmpty(param.getGoodsId())) {
+            queryWrapper.ne("goods_id", param.getGoodsId());
+        }
+        
+        // 查询数据库中是否存在相同的商品编码
+        ShopGoodsSku existingSku = shopGoodsSkuMapper.selectOne(queryWrapper);
+        if (ObjectUtil.isNotNull(existingSku) && ObjectUtil.isNotEmpty(existingSku.getSkuNo())) {
+            // 找出冲突的商品编码
+            String[] existingSkuNoArr = existingSku.getSkuNo().split(",");
+            for (String skuNo : validSkuNoList) {
+                for (String existingSkuNo : existingSkuNoArr) {
+                    if (skuNo.equals(existingSkuNo.trim())) {
+                        throw new AdminException("商品编码[" + skuNo + "]已存在");
+                    }
+                }
+            }
+        }
+        
+        return true;
     }
 
 }

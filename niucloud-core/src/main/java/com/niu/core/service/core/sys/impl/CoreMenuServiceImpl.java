@@ -107,7 +107,7 @@ public class CoreMenuServiceImpl extends ServiceImpl<SysMenuMapper,SysMenu> impl
      */
     public void deleteMenu(String addon, Boolean isAll) {
         QueryWrapper<SysMenu> queryWrapper = new QueryWrapper<SysMenu>()
-                .eq("addon", addon);
+                .eq("addon", addon.equals("core") ? "" : addon);
         if (!isAll) queryWrapper.eq("source", "system");
 
         sysMenuMapper.delete(queryWrapper);

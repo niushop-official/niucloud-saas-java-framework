@@ -1,5 +1,7 @@
 package com.niu.shop.controller.adminapi.marketing;
 
+import com.niu.shop.service.admin.marketing.param.PointExchangeBatchParam;
+import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeSelectListVo;
 import jdk.jfr.Description;
 import com.niu.core.common.domain.Result;
 import com.niu.core.common.domain.PageResult;
@@ -116,4 +118,30 @@ public class ShopPointExchangeController {
         return Result.success();
     }
 
+    @PostMapping("/batchDelete")
+    @Description("批量删除积分兑换")
+    public Result<?> batchDelete(@Validated @RequestBody PointExchangeBatchParam param) {
+        iShopPointExchangeService.batchDelete(param);
+        return Result.success();
+    }
+
+    @PostMapping("/batchUp")
+    @Description("积分兑换批量上架")
+    public Result<?> batchUp(@Validated @RequestBody PointExchangeBatchParam param) {
+        iShopPointExchangeService.batchUp(param);
+        return Result.success();
+    }
+
+    @PostMapping("/batchDown")
+    @Description("积分兑换批量下架")
+    public Result<?> batchDown(@Validated @RequestBody PointExchangeBatchParam param) {
+        iShopPointExchangeService.batchDown(param);
+        return Result.success();
+    }
+
+    @GetMapping("/select")
+    @Description("积分商城分页列表（用于弹框选择）")
+    public Result<ShopPointExchangeSelectListVo> select(@Validated PageParam pageParam, @Validated ShopPointExchangeSearchParam searchParam) {
+        return Result.success(iShopPointExchangeService.getSelectPage(pageParam, searchParam));
+    }
 }

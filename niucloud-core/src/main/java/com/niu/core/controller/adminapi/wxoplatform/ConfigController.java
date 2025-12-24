@@ -43,7 +43,7 @@ public class ConfigController {
      */
     @GetMapping("/config")
     @Description("获取微信开放平台配置信息")
-    public Result<JSONObject> getConfig(){
+    public Result getConfig(){
         return Result.success(oplatformConfigService.getWxOplatformConfig());
     }
 

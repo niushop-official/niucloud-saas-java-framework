@@ -47,7 +47,7 @@ public class ShopAddressServiceImpl implements IShopAddressService {
 
         QueryWrapper<ShopAddress> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
-        if (ObjectUtil.isNotEmpty(searchParam.getMobile())) queryWrapper.eq("mobile", searchParam.getMobile());
+        if (ObjectUtil.isNotEmpty(searchParam.getMobile())) queryWrapper.like("mobile", searchParam.getMobile());
         if (ObjectUtil.isNotEmpty(searchParam.getFullAddress())) queryWrapper.like("full_address", searchParam.getFullAddress());
         queryWrapper.orderByDesc("id");
 

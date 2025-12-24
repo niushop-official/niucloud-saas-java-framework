@@ -1,9 +1,11 @@
 package com.niu.shop.service.core.marketing.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.niu.core.common.exception.CommonException;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.shop.entity.coupon.ShopCoupon;
 import com.niu.shop.entity.coupon.ShopCouponMember;
 import com.niu.shop.entity.coupon.ShopCouponSendRecords;
@@ -17,6 +19,8 @@ import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.CollectionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,19 +50,29 @@ public class CoreCouponMemberServiceImpl  extends ServiceImpl<ShopCouponMemberMa
     /**
      * 恢复已使用的优惠券
      *
-     * @param id
+     * @param ids
      */
     @Override
-    public void recover(Integer id) {
-        ShopCouponMember memberCoupon = shopCouponMemberMapper.selectOne(new QueryWrapper<ShopCouponMember>()
-                .eq("status", CouponMemberStatusEnum.USED.getStatus())
-                .eq("id", id));
-        if (memberCoupon != null) {
-            memberCoupon.setTradeId(0);
-            memberCoupon.setStatus(memberCoupon.getExpireTime().compareTo(System.currentTimeMillis() / 1000) == 1 ? CouponMemberStatusEnum.WAIT_USE.getStatus() : CouponMemberStatusEnum.EXPIRE.getStatus());
-            memberCoupon.setUseTime(Long.valueOf(0));
-            shopCouponMemberMapper.updateById(memberCoupon);
+    public void recover(List<Integer> ids) {
+        List<ShopCouponMember> memberCoupons = shopCouponMemberMapper.selectList(new LambdaQueryWrapper<ShopCouponMember>()
+                .eq(ShopCouponMember::getStatus, CouponMemberStatusEnum.USED.getStatus())
+                .in(ShopCouponMember::getId, ids));
+        if (CollectionUtils.isEmpty(memberCoupons)) {
+            return;
         }
+        long currTime = DateUtils.currTime();
+        List<ShopCouponMember> updateCoupons = memberCoupons.stream().map(memberCoupon -> {
+            if (currTime >= memberCoupon.getExpireTime()) {
+                memberCoupon.setStatus(CouponMemberStatusEnum.EXPIRE.getStatus());
+            } else {
+                memberCoupon.setStatus(CouponMemberStatusEnum.WAIT_USE.getStatus());
+            }
+            memberCoupon.setTradeId(0);
+            memberCoupon.setUseTime(0L);
+            return memberCoupon;
+        }).toList();
+
+        shopCouponMemberMapper.updateById(updateCoupons);
     }
 
     @Override
@@ -170,6 +184,37 @@ public class CoreCouponMemberServiceImpl  extends ServiceImpl<ShopCouponMemberMa
         coupon.setReceiveCount(coupon.getReceiveCount() + memberCouponData.size());
         shopCouponMapper.updateById(coupon);
         return memberCouponData.size();
+    }
+
+    @Override
+    public void refeshMemberCouponExpireTime(Integer couponId, Integer siteId) {
+        // 根据优惠券ID和站点ID查询优惠券信息
+        QueryWrapper<ShopCoupon> couponQueryWrapper = new QueryWrapper<>();
+        couponQueryWrapper.eq("id", couponId).eq("site_id", siteId);
+        ShopCoupon couponInfo = shopCouponMapper.selectOne(couponQueryWrapper);
+        
+        if (couponInfo == null) {
+            return; // 优惠券不存在，直接返回
+        }
+        
+        // 构建更新条件
+        QueryWrapper<ShopCouponMember> updateWrapper = new QueryWrapper<>();
+        updateWrapper.eq("coupon_id", couponId).eq("site_id", siteId);
+        
+        ShopCouponMember updateMember = new ShopCouponMember();
+        
+        // 根据有效期类型进行不同的过期时间更新
+        if (couponInfo.getValidType() == 1) {
+            // 基于领取时间 + 天数的有效期
+            long time = 86400L * couponInfo.getLength(); // 计算总秒数
+            // 使用SQL函数更新过期时间
+            updateWrapper.apply("expire_time = create_time + " + time);
+            shopCouponMemberMapper.update(null, updateWrapper);
+        } else {
+            // 基于固定结束时间的有效期
+            updateMember.setExpireTime(couponInfo.getValidEndTime());
+            shopCouponMemberMapper.update(updateMember, updateWrapper);
+        }
     }
 
     public ShopCouponMember createShopCouponMember(Integer siteId, Integer couponId, Integer memberId, Long currentTime, Long expireTime, ShopCoupon coupon) {

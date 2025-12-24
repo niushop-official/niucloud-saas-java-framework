@@ -73,15 +73,8 @@ public class ShopManjianSearchParam implements Serializable {
      */
     private String ruleJson;
 
-    /**
-     * 优惠规格 ladder:阶梯优惠  cycle:循环优惠
-     */
-    private String ruleType;
+    private String activeId;
 
-    /**
-     * 站点id
-     */
-    private Integer siteId;
 
     /**
      * 开始时间
@@ -93,45 +86,6 @@ public class ShopManjianSearchParam implements Serializable {
      */
     private Integer status;
 
-    /**
-     * 活动累计赠送余额
-     */
-    private BigDecimal totalBalance;
-
-    /**
-     * 活动累计赠送优惠券数
-     */
-    private Integer totalCouponNum;
-
-    /**
-     * 活动累计赠送商品数
-     */
-    private Integer totalGoodsNum;
-
-    /**
-     * 活动参与会员数
-     */
-    private Integer totalMemberNum;
-
-    /**
-     * 活动累计金额
-     */
-    private BigDecimal totalOrderMoney;
-
-    /**
-     * 活动累计订单数
-     */
-    private Integer totalOrderNum;
-
-    /**
-     * 活动累计赠送积分
-     */
-    private Integer totalPoint;
-
-    /**
-     * 修改时间
-     */
-    private Long updateTime;
 
 
 }

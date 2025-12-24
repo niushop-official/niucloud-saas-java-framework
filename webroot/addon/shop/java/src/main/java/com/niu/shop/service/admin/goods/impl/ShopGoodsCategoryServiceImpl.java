@@ -14,6 +14,8 @@ import com.niu.shop.entity.goods.ShopGoodsCategory;
 import com.niu.shop.mapper.goods.ShopGoodsCategoryMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.service.admin.goods.IGoodsCategoryService;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONUtil;
 import com.niu.shop.service.admin.goods.param.EditGoodsCategorySortParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsCategoryParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsCategorySearchParam;
@@ -55,7 +57,7 @@ public class ShopGoodsCategoryServiceImpl implements IGoodsCategoryService {
         queryWrapper.eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getCategoryName())) queryWrapper.like("category_name", searchParam.getCategoryName());
         if (ObjectUtil.isNotEmpty(searchParam.getLevel())) queryWrapper.eq("level", searchParam.getLevel());
-        queryWrapper.orderByDesc(Arrays.asList("sort", "category_id"));
+        queryWrapper.orderByDesc("create_time");
 
         List<ShopGoodsCategory> records = shopGoodsCategoryMapper.selectList(queryWrapper);
         List<ShopGoodsCategoryListVo> list = new LinkedList<>();
@@ -73,7 +75,11 @@ public class ShopGoodsCategoryServiceImpl implements IGoodsCategoryService {
      * @return
      */
     public JSONArray tree() {
-        List<ShopGoodsCategory> list = shopGoodsCategoryMapper.selectList(new QueryWrapper<ShopGoodsCategory>().eq("site_id", RequestUtils.siteId()));
+        List<ShopGoodsCategory> list = shopGoodsCategoryMapper.selectList(
+            new QueryWrapper<ShopGoodsCategory>()
+                .eq("site_id", RequestUtils.siteId())
+                .orderByDesc(Arrays.asList("sort", "create_time")
+        ));
         if (list == null) return null;
 
         JSONArray jsonArray = JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(list));
@@ -88,6 +94,7 @@ public class ShopGoodsCategoryServiceImpl implements IGoodsCategoryService {
     public JSONArray tree(ShopGoodsCategorySearchParam searchParam) {
         QueryWrapper queryWrapper = new QueryWrapper<ShopGoodsCategory>().eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotNull(searchParam.getIsShow())) queryWrapper.eq("is_show", searchParam.getIsShow());
+        queryWrapper.orderByDesc(Arrays.asList("sort", "create_time"));
         List<ShopGoodsCategory> list = shopGoodsCategoryMapper.selectList(queryWrapper);
         if (list == null) return null;
 
@@ -112,11 +119,13 @@ public class ShopGoodsCategoryServiceImpl implements IGoodsCategoryService {
 
         ShopGoodsCategoryInfoVo vo = new ShopGoodsCategoryInfoVo();
         BeanUtils.copyProperties(model, vo);
-
-        Long childCount = shopGoodsCategoryMapper.selectCount(new QueryWrapper<ShopGoodsCategory>()
-                .eq("pid", id));
-        vo.setChildCount(childCount == null ? 0 : childCount.intValue());
-
+        vo.setChildCount(0);
+        if(vo.getLevel().equals(1))
+        {
+            Long childCount = shopGoodsCategoryMapper.selectCount(new QueryWrapper<ShopGoodsCategory>()
+                    .eq("pid", id));
+            vo.setChildCount(childCount == null ? 0 : childCount.intValue());
+        }
         return vo;
     }
 
@@ -201,6 +210,47 @@ public class ShopGoodsCategoryServiceImpl implements IGoodsCategoryService {
         }
 
         shopGoodsCategoryMapper.updateById(model);
+        batchUpdateCategory(id, model.getPid(), editParam.getPid());
+
+    }
+
+    @Override
+    public void batchUpdateCategory(Integer categoryId, Integer oldPid, Integer newPid) {
+        // 查询包含该分类的所有商品
+        QueryWrapper<ShopGoods> goodsQueryWrapper = new QueryWrapper<>();
+        goodsQueryWrapper.eq("site_id", RequestUtils.siteId());
+        goodsQueryWrapper.like("goods_category", "\"" + categoryId + "\"");
+        List<ShopGoods> categoryGoodsList = shopGoodsMapper.selectList(goodsQueryWrapper);
+
+        for (ShopGoods item : categoryGoodsList) {
+            // 解析商品分类JSON字符串
+            JSONArray goodsCategoryArray = JSONUtil.parseArray(item.getGoodsCategory());
+            List<String> itemCategory = new LinkedList<>();
+            
+            // 将JSONArray转换为List<String>
+            for (int i = 0; i < goodsCategoryArray.size(); i++) {
+                itemCategory.add(goodsCategoryArray.get(i).toString());
+            }
+
+            if (oldPid == 0 && newPid != 0) {
+                // 将无二级分类的顶级分类调整为二级分类，添加新的父分类ID
+                itemCategory.add(String.valueOf(newPid));
+            } else if (oldPid != 0 && newPid == 0) {
+                // 将二级分类调整为顶级分类，移除旧的父分类ID
+                itemCategory.remove(String.valueOf(oldPid));
+            }
+
+            // 更新商品分类信息
+            JSONArray updatedCategoryArray = JSONUtil.parseArray(itemCategory);
+            ShopGoods updateGoods = new ShopGoods();
+            updateGoods.setGoodsCategory(updatedCategoryArray.toString());
+            
+            QueryWrapper<ShopGoods> updateWrapper = new QueryWrapper<>();
+            updateWrapper.eq("site_id", RequestUtils.siteId());
+            updateWrapper.eq("goods_id", item.getGoodsId());
+            
+            shopGoodsMapper.update(updateGoods, updateWrapper);
+        }
     }
 
     /**

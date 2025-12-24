@@ -1,14 +1,12 @@
 package com.niu.core.controller.api.wechat;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.wechat.IWechatService;
-import com.niu.core.service.api.wechat.param.WechatAuthDataLoginParam;
-import com.niu.core.service.api.wechat.param.WechatAuthParam;
-import com.niu.core.service.api.wechat.param.AuthRegisterParam;
-import com.niu.core.service.api.wechat.param.WechatSyncParam;
+import com.niu.core.service.api.wechat.param.*;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
 import com.niu.core.service.api.wechat.vo.WechatUserInfoVo;
@@ -113,9 +111,22 @@ public class WechatController {
      * 公众号更新用户openid
      * @return
      */
+    @SaCheckLogin
     @PutMapping("/update_openid")
     public Result updateOpenid(@Validated @RequestBody WechatAuthParam param) {
         wechatService.updateOpenid(param);
+        return Result.success();
+    }
+
+    /**
+     * 公众号更新用户openid
+     * @param param
+     * @return
+     */
+    @SaCheckLogin
+    @PutMapping("/update_openid_h5")
+    public Result updateOpenidH5(@RequestBody UpdateOpenidByH5Param param) {
+        wechatService.updateOpenidByH5(param);
         return Result.success();
     }
 }

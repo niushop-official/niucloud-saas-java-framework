@@ -62,6 +62,11 @@ public class AddonInstallJavaTools {
                 // 3、niucloud-addon模块下添加模块依赖
                 String addonProject = webAppEnvs.projectNiucloudAddon;
                 LocalMavenTools.addPomModuleNode(addonProject, addonName);
+
+                // 4、niucloud-web-app 模块下添加依赖
+                Map<String, String> coordinateMap = LocalMavenTools.readPomXmlCoordinate(addonPomPath);
+                LocalMavenTools.addPomDependencyNode(webAppEnvs.projectRoot + "/niucloud-web-app", coordinateMap);
+
                 log.info("已添加maven依赖.");
                 tips.add("已添加maven依赖.");
             } else {
@@ -178,8 +183,10 @@ public class AddonInstallJavaTools {
                 // 源码安装进行卸载
                 // ==========================================================================================//
                 // 1、、Maven卸载依赖
-                String addonProject = webAppEnvs.projectNiucloudAddon + "/" + addonName;
+                String addonProject = webAppEnvs.projectNiucloudAddon;
                 LocalMavenTools.removePomModuleNode(addonProject, addonName);
+                // 移除niucloud-web-app模块的依赖
+                LocalMavenTools.removePomDependencyNode(webAppEnvs.projectRoot + "/niucloud-web-app", LocalMavenTools.readPomXmlCoordinate(projectAddonPomXmlPath));
                 // 3、删除模块的所有项目文件（如果存在）
                 String addonProjectPath = webAppEnvs.projectNiucloudAddon + "/" + addonName + "/";
                 try {

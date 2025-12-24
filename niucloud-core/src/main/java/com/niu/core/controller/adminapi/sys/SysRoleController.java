@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
 import com.niu.core.service.admin.sys.ISysRoleService;
+import com.niu.core.service.admin.sys.param.SysRoleModifyStatusParam;
 import com.niu.core.service.admin.sys.param.SysRoleParam;
 import com.niu.core.service.admin.sys.param.SysRoleSearchParam;
 import com.niu.core.service.admin.sys.vo.SysRoleListVo;
@@ -92,4 +93,9 @@ public class SysRoleController {
         return Result.success();
     }
 
+    @PutMapping("/role/status")
+    public Result modifyStatus(@Validated @RequestBody SysRoleModifyStatusParam editParam) {
+        sysRoleService.modifyStatus(editParam);
+        return Result.success();
+    }
 }

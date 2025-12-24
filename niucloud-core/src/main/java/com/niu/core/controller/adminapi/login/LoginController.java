@@ -52,12 +52,6 @@ public class LoginController {
         return Result.success(configService.getLoginConfig());
     }
 
-    @Description("获取token信息")
-    @RequestMapping("/tokenInfo")
-    public SaResult tokenInfo() {
-        return SaResult.data(StpUtil.getTokenInfo());
-    }
-
     // 测试注销
     @Description("注销")
     @RequestMapping("/logout")

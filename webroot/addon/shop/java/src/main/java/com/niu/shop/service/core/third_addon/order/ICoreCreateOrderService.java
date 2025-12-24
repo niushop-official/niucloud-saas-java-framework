@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface ICoreCreateOrderService {
-    List<CoreOrderCreateResultVo> pintuanCreateOrder(Map<String, Object> data);
+    List<CoreOrderCreateResultVo> activityOrderCreate(String source, Map<String, Object> data);
 }

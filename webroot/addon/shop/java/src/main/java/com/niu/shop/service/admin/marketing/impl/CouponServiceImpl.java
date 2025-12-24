@@ -48,6 +48,7 @@ import com.niu.shop.service.admin.marketing.ICouponService;
 import com.niu.shop.service.admin.marketing.IShopCouponGoodsService;
 import com.niu.shop.service.admin.marketing.param.*;
 import com.niu.shop.service.admin.marketing.vo.*;
+import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,6 +98,9 @@ CouponServiceImpl implements ICouponService {
     @Resource
     private SysConfigMapper sysConfigMapper;
 
+    @Resource
+    private ICoreCouponMemberService coreCouponMemberService;
+
     @Override
     public JSONObject getInit() {
         JSONArray tree = goodsCategoryService.tree();
@@ -105,25 +109,25 @@ CouponServiceImpl implements ICouponService {
                     JSONObject vo = new JSONObject();
                     JSONObject jsonObj = (JSONObject) json;
 
-                    vo.put("value", jsonObj.getInt("category_id"));
-                    vo.put("label", jsonObj.getStr("category_name"));
+                    vo.set("value", jsonObj.getInt("category_id"));
+                    vo.set("label", jsonObj.getStr("category_name"));
                     if (jsonObj.getJSONArray("children") != null) {
                         JSONArray children = new JSONArray();
                         jsonObj.getJSONArray("children").forEach(child -> {
 
                             JSONObject childJsonObj = (JSONObject) child;
                             JSONObject childVo = new JSONObject();
-                            childVo.put("value", childJsonObj.getInt("category_id"));
-                            childVo.put("label", childJsonObj.getStr("category_name"));
+                            childVo.set("value", childJsonObj.getInt("category_id"));
+                            childVo.set("label", childJsonObj.getStr("category_name"));
                             children.add(childVo);
                         });
-                        vo.put("children", children);
+                        vo.set("children", children);
                     }
                     categoryList.add(vo);
                 }
         );
         JSONObject result = new JSONObject();
-        result.put("goods_category_tree", categoryList);
+        result.set("goods_category_tree", categoryList);
         return result;
 
     }
@@ -458,6 +462,7 @@ CouponServiceImpl implements ICouponService {
                 shopCouponGoodsService.insertAll(list);
             }
         }
+        coreCouponMemberService.refeshMemberCouponExpireTime(couponId, siteId);
     }
 
     /**
@@ -637,6 +642,7 @@ CouponServiceImpl implements ICouponService {
             qw.between(ShopCouponSendRecords::getCreateTime, param.getCreateTime()[0], param.getCreateTime()[1]);
             QueryMapperUtils.buildByTime(qw, ShopCouponSendRecords::getCreateTime, param.getCreateTime());
         }
+        qw.orderByDesc(ShopCouponSendRecords::getCreateTime);
         Page<ShopCouponSendRecords> shopCouponSendRecordsPage = shopCouponSendRecordsMapper.selectPage(new Page<>(page, limit), qw);
         List<ShopCouponSendRecordsVo> list = new ArrayList<>();
         for (ShopCouponSendRecords item : shopCouponSendRecordsPage.getRecords()) {

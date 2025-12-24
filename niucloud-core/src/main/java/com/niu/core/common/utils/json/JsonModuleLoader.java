@@ -7,6 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.config.dataization.AddonModuleContext;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.site.ICoreSiteService;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,13 @@ public class JsonModuleLoader {
      * @return
      */
     public JSONArray mergeContentToArray(String jsonFile) {
+
+        String jsonStringContent = RequestUtils.jsonFileContent( "mergeContentToArray" + jsonFile);
+        if(!jsonStringContent.equals(""))
+        {
+            return JSONUtil.parseArray(jsonStringContent);
+        }
+
         JSONArray jsonArrayResult = new JSONArray();
         Set<String> addonModules = AddonModuleContext.getAddonModules();
         for (String addonModule : addonModules) {
@@ -74,6 +82,7 @@ public class JsonModuleLoader {
                 }
             }
         }
+        RequestUtils.setJsonFileContent( "mergeContentToArray" + jsonFile, jsonArrayResult.toString());
         return jsonArrayResult;
     }
 
@@ -137,6 +146,13 @@ public class JsonModuleLoader {
      * @return
      */
     public JSONArray mergeResultSet(String jsonFile) {
+
+        String jsonStringContent = RequestUtils.jsonFileContent( "mergeResultSet" + jsonFile);
+        if(!jsonStringContent.equals(""))
+        {
+            return JSONUtil.parseArray(jsonStringContent);
+        }
+
         final JSONArray jsonArrayResult = new JSONArray();
         Set<String> addonModules = AddonModuleContext.getAddonModules();
         Set<String> newAddonModules = new HashSet<>();
@@ -160,6 +176,8 @@ public class JsonModuleLoader {
                 }
             }
         }
+
+        RequestUtils.setJsonFileContent( "mergeResultSet" + jsonFile, jsonArrayResult.toString());
         return jsonArrayResult;
     }
 
@@ -171,6 +189,13 @@ public class JsonModuleLoader {
      * @return
      */
     public JSONArray mergeResultSet(Integer siteId, String jsonFile) {
+
+        String jsonStringContent = RequestUtils.jsonFileContent( "mergeResultSet_" + siteId+ jsonFile);
+        if(!jsonStringContent.equals(""))
+        {
+            return JSONUtil.parseArray(jsonStringContent);
+        }
+
         final JSONArray jsonArrayResult = new JSONArray();
         List<String> addonModules = getSiteAddonModules(siteId);
         for (String addonModule : addonModules) {
@@ -189,6 +214,7 @@ public class JsonModuleLoader {
                 }
             }
         }
+        RequestUtils.setJsonFileContent( "mergeResultSet_" + siteId + jsonFile, jsonArrayResult.toString());
         return jsonArrayResult;
     }
 
@@ -200,6 +226,13 @@ public class JsonModuleLoader {
      * @return
      */
     public JSONObject mergeResultElement(String jsonFile) {
+
+        String jsonStringContent = RequestUtils.jsonFileContent( "mergeResultElement" + jsonFile);
+        if(!jsonStringContent.equals(""))
+        {
+            return JSONUtil.parseObj(jsonStringContent);
+        }
+
         Set<JSONObject> jsonContentSet = new HashSet<>();
         Set<String> addonModules = AddonModuleContext.getAddonModules();
         log.info("JSON addonModules -> " + addonModules);
@@ -224,6 +257,7 @@ public class JsonModuleLoader {
             log.error("JSON合并异常:" + e.getMessage());
             e.printStackTrace();
         }
+        RequestUtils.setJsonFileContent( "mergeResultElement" + jsonFile, jsonObjectResult.toString());
         return jsonObjectResult;
     }
 
@@ -235,6 +269,13 @@ public class JsonModuleLoader {
      * @return
      */
     public JSONObject mergeResultElement(Integer siteId, String jsonFile) {
+
+        String jsonStringContent = RequestUtils.jsonFileContent( "mergeResultElement_" + siteId+ jsonFile);
+        if(!jsonStringContent.equals(""))
+        {
+            return JSONUtil.parseObj(jsonStringContent);
+        }
+
         Set<JSONObject> jsonContentSet = new HashSet<>();
         List<String> addonModules = getSiteAddonModules(siteId);
         log.info("JSON addonModules -> " + addonModules);
@@ -259,6 +300,7 @@ public class JsonModuleLoader {
             log.error("JSON合并异常:" + e.getMessage());
             e.printStackTrace();
         }
+        RequestUtils.setJsonFileContent( "mergeResultElement_" + siteId + jsonFile, jsonObjectResult.toString());
         return jsonObjectResult;
     }
 

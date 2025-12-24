@@ -3,6 +3,8 @@ package com.niu.shop.service.core.marketing.vo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class ProductDetail {
 
@@ -11,13 +13,13 @@ public class ProductDetail {
     @JsonProperty("sku_id")
     private Integer skuId;
     @JsonProperty("point")
-    private String point;
+    private Integer point;
     @JsonProperty("price")
-    private String price;
+    private BigDecimal price;
     @JsonProperty("limit_num")
-    private String limitNum;
+    private Integer limitNum;
     @JsonProperty("stock")
-    private String stock;
+    private Integer stock;
     @JsonProperty("is_enabled")
     private Integer isEnabled;
 }

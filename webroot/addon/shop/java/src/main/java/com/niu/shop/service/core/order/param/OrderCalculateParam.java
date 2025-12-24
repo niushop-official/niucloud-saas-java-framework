@@ -25,6 +25,7 @@ public class OrderCalculateParam implements Serializable {
     public static class SkuItem {
         private Integer skuId;
         private Integer num;
+        private Integer impulseBuyGoodsId;
     }
 
     @Data

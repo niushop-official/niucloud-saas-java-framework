@@ -89,7 +89,7 @@
 import { reactive, ref } from 'vue'
 import { t } from '@/lang'
 import { getArticleList, deleteArticle, getArticleCategoryAll } from '@/addon/cms/api/article'
-import { img ,setTablePageStorage, getTablePageStorage } from '@/utils/common'
+import { img, setTablePageStorage, getTablePageStorage } from '@/utils/common'
 import { ElMessageBox, FormInstance } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -167,7 +167,7 @@ const deleteEvent = (id: number) => {
         }
     ).then(() => {
         deleteArticle(id).then(() => {
-            loadArticleList()
+            loadArticleList(getTablePageStorage(articleTableData.searchParam).page)
         }).catch(() => {
         })
     })

@@ -38,6 +38,7 @@ public class DiyPageListVo implements Serializable {
     private String addonName;
     private String typePage;
     private String url;
+    private String addon;
 
     public String getUrl() {
         return "/app/pages/index/diy?id=" + id;

@@ -4,16 +4,22 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.niu.core.common.component.context.task.ThreadPoolManager;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.shop.entity.ShopStat;
 import com.niu.shop.mapper.ShopStatMapper;
 import com.niu.shop.service.core.shop.ICoreStatService;
 import com.niu.shop.service.core.shop.param.AddStatParam;
+import com.niu.shop.service.core.shop.param.StatParam;
 import com.niu.shop.service.core.shop.vo.StatDataVo;
 import com.niu.shop.service.core.shop.vo.StatVo;
 import jodd.util.MathUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.stereotype.Service;
@@ -24,14 +30,16 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CoreStatServiceImpl implements ICoreStatService {
 
     @Resource
     ShopStatMapper shopStatMapper;
-
+    private static final ReentrantLock lock = new ReentrantLock();
     /**
      * 添加统计数据
      *
@@ -40,21 +48,36 @@ public class CoreStatServiceImpl implements ICoreStatService {
      */
     @Override
     public void addStat(Integer siteId, AddStatParam data) {
-        ShopStat model = shopStatMapper.selectOne(new QueryWrapper<ShopStat>().eq("date", DateUtil.today()).eq("site_id", siteId));
-        if (model == null) {
-            ShopStat stat = new ShopStat();
-            BeanUtil.copyProperties(data, stat);
-            stat.setSiteId(siteId);
-            stat.setDate(DateUtil.today());
-            stat.setDateTime(new DateTime(stat.getDate()).getTime() / 1000);
-            shopStatMapper.insert(stat);
-        } else {
-            if (ObjectUtil.isNotEmpty(data.getOrderNum())) model.setOrderNum(model.getOrderNum() + data.getOrderNum());
-            if (ObjectUtil.isNotEmpty(data.getSaleMoney())) model.setSaleMoney(model.getSaleMoney().add(data.getSaleMoney()));
-            if (ObjectUtil.isNotEmpty(data.getRefundMoney())) model.setRefundMoney(model.getRefundMoney().add(data.getRefundMoney()));
-            if (ObjectUtil.isNotEmpty(data.getAccessSum())) model.setAccessSum(model.getAccessSum() + data.getAccessSum());
-            shopStatMapper.updateById(model);
-        }
+
+        ThreadPoolManager.runTask(() -> {
+            lock.lock();
+            try{
+                ShopStat model = shopStatMapper.selectOne(new QueryWrapper<ShopStat>().eq("date", DateUtil.today()).eq("site_id", siteId));
+                if (model == null) {
+                    ShopStat stat = new ShopStat();
+                    BeanUtil.copyProperties(data, stat);
+                    stat.setSiteId(siteId);
+                    stat.setDate(DateUtil.today());
+                    stat.setDateTime(new DateTime(stat.getDate()).getTime() / 1000);
+                    shopStatMapper.insert(stat);
+                } else {
+                    if (ObjectUtil.isNotEmpty(data.getOrderNum()))
+                        model.setOrderNum(model.getOrderNum() + data.getOrderNum());
+                    if (ObjectUtil.isNotEmpty(data.getSaleMoney()))
+                        model.setSaleMoney(model.getSaleMoney().add(data.getSaleMoney()));
+                    if (ObjectUtil.isNotEmpty(data.getRefundMoney()))
+                        model.setRefundMoney(model.getRefundMoney().add(data.getRefundMoney()));
+                    if (ObjectUtil.isNotEmpty(data.getAccessSum()))
+                        model.setAccessSum(model.getAccessSum() + data.getAccessSum());
+                    shopStatMapper.updateById(model);
+                }
+            }catch (Exception e){
+                log.error("添加统计数据异常:com.niu.shop.service.core.shop", e);
+            }finally {
+                lock.unlock();
+            }
+
+        });
     }
 
     /**
@@ -137,5 +160,19 @@ public class CoreStatServiceImpl implements ICoreStatService {
         }
 
         return vo;
+    }
+
+    @Override
+    public void decStat(StatParam param) {
+        String date = DateUtils.timestampToString(param.getTime(), "yyyy-MM-dd");
+        Long dateTime = DateUtils.StringToTimestamp(date);
+        ShopStat shopStat = shopStatMapper.selectOne(new LambdaQueryWrapper<ShopStat>()
+                .eq(ShopStat::getSiteId, param.getSiteId())
+                .eq(ShopStat::getDate, date)
+                .eq(ShopStat::getDateTime, dateTime));
+        if (shopStat != null){
+            shopStat.setOrderNum(Math.max(shopStat.getOrderNum() - param.getOrderNum(), 0));
+            shopStatMapper.updateById(shopStat);
+        }
     }
 }

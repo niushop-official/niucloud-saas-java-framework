@@ -43,6 +43,7 @@ public class ShopGoodsSkuVo implements Serializable {
     private BigDecimal memberPrice;
     private BigDecimal showPrice;
     private String showType;
+    private Integer hasBuy = 0;
 
     @JsonProperty("skuList")
     private List<Sku> skuList;

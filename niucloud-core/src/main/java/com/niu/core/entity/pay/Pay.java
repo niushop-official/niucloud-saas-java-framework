@@ -75,6 +75,6 @@ public class Pay implements Serializable {
 
     /** 失败原因 */
     private String failReason;
-    private int fromMainId;
+    private Integer fromMainId;
 
 }

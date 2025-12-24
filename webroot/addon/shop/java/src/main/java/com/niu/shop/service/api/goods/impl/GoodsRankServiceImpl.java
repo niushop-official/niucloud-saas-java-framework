@@ -114,7 +114,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
         GoodsRankComponentVo vo = new GoodsRankComponentVo();
         vo.setRankId(ranks.get(0).getRankId());
         vo.setName(ranks.get(0).getName());
-        vo.setGoodsList(getGoodsList(pageParam, ranks, 3).getData());
+        vo.setGoodsList(getGoodsList(pageParam, ranks, param.getLimit()).getData());
         return vo;
     }
 
@@ -236,6 +236,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
 
             info.setGoodsSku(skuVo);
             info.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), info.getGoodsCover()));
+            info.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), info.getGoodsCover()));
         }
 
         return list;
@@ -305,6 +306,7 @@ public class GoodsRankServiceImpl implements IGoodsRankService {
                 info.setSort(sort);
                 info.setCreateTime(DateUtils.timestampToString(o.getLong("create_time")));
                 info.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), info.getGoodsCover()));
+                info.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), info.getGoodsCover()));
                 return info;
             })
             .peek(o -> {

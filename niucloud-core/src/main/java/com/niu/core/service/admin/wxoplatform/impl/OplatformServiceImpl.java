@@ -31,6 +31,7 @@ import com.niu.core.service.core.weapp.param.WeappConfigParam;
 import com.niu.core.service.core.wechat.ICoreWechatConfigService;
 import com.niu.core.service.core.wechat.param.WechatConfigParam;
 import lombok.RequiredArgsConstructor;
+import me.chanjar.weixin.open.api.WxOpenComponentService;
 import me.chanjar.weixin.open.bean.auth.WxOpenAuthorizationInfo;
 import me.chanjar.weixin.open.bean.auth.WxOpenAuthorizerInfo;
 import me.chanjar.weixin.open.bean.result.WxOpenAuthorizerInfoResult;
@@ -101,7 +102,7 @@ public class OplatformServiceImpl implements IOplatformService {
                 wechatConfig.setWechatName(authorizerInfo.getNickName());
                 wechatConfig.setWechatOriginal(authorizerInfo.getUserName());
                 wechatConfig.setIsAuthorization(1);
-                wechatConfig.setQrcode(coreFetchService.image(authorizerInfo.getQrcodeUrl(), RequestUtils.siteId()));
+                wechatConfig.setQrCode(coreFetchService.image(authorizerInfo.getQrcodeUrl(), RequestUtils.siteId()));
                 coreWechatConfigService.setWechatConfig(RequestUtils.siteId(), wechatConfig);
 
                 coreWechatConfigService.setWechatAuthorizationInfo(RequestUtils.siteId(), result);
@@ -213,7 +214,6 @@ public class OplatformServiceImpl implements IOplatformService {
         wrapper.select(SysConfig::getCreateTime,SysConfig::getAddon,SysConfig::getStatus,SysConfig::getConfigKey, SysConfig::getValue, SysConfig::getSiteId, SysConfig::getUpdateTime);
         wrapper.leftJoin(Site.class, "siteinfo",Site::getSiteId, SysConfig::getSiteId).select("site_name");
         wrapper.in(SysConfig::getConfigKey, ConfigKeyEnum.WECHAT_AUTHORIZATION_INFO.getName(), ConfigKeyEnum.WEAPP_AUTHORIZATION_INFO.getName());
-        wrapper.eq(SysConfig::getSiteId, RequestUtils.siteId());
         wrapper.orderByDesc(SysConfig::getUpdateTime);
         Page<SysConfig> pageObj = new Page<>(page, limit);
         IPage<SysConfig> iPage = sysConfigMapper.selectPage(pageObj, wrapper);
@@ -221,12 +221,28 @@ public class OplatformServiceImpl implements IOplatformService {
         for (SysConfig item : iPage.getRecords()) {
             OplatformRecordVo vo = new OplatformRecordVo();
             BeanUtils.copyProperties(item, vo);
-            vo.setValue(JSONUtil.parseObj(item.getValue()));
             Site siteInfo = new Site();
             siteInfo.setSiteName(item.getSiteName());
             vo.setSite(siteInfo);
             listInfo.add(vo);
         }
         return  PageResult.build(page, limit, iPage.getTotal()).setData(listInfo);
+    }
+
+    @Override
+    public void cancelAuthorization() {
+        try {
+            WxOpenAuthorizerInfoResult info = coreWeappConfigService.getWeappAuthorizationInfo(RequestUtils.siteId());
+            Boolean result = WechatUtils.WxOpen().getWxOpenComponentService().unbindOpenAccount(
+                info.getAuthorizationInfo().getAuthorizerAppid(),
+                "mini",
+                WechatUtils.WxOpen().getWxOpenConfigStorage().getComponentAppId()
+            );
+            if (!result) {
+                throw new CommonException("授权取消失败, 如果该开放平台账号并非通过api创建，请登录微信公众平台手动解除授权");
+            }
+        } catch (Exception e) {
+            throw new CommonException("授权取消失败");
+        }
     }
 }

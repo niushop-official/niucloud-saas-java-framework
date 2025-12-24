@@ -96,7 +96,6 @@ const refreshMenu = () => {
     ).then(() => {
         refreshLoading.value = true
         menuRefresh({}).then(res => {
-            location.reload()
             refreshLoading.value = false
         }).catch(() => {
             refreshLoading.value = false

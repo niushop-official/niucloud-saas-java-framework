@@ -47,7 +47,7 @@ public class SysConfigServiceImpl implements ISysConfigService {
      */
     @Override
     public SysServiceVo getService() {
-        return coreSysConfigService.getService(RequestUtils.siteId());
+        return coreSysConfigService.getService();
     }
 
     @Override

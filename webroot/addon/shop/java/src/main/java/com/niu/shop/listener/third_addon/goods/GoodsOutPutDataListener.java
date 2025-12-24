@@ -7,6 +7,7 @@ import com.niu.core.common.annotation.EventCallback;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.event.common.CommonEventDefiner;
+import com.niu.shop.service.admin.goods.IOfferGoodsService;
 import com.niu.shop.service.admin.goods.impl.OfferGoodsServiceImpl;
 import com.niu.shop.service.admin.goods.param.GoodsOutPutParam;
 import com.niu.shop.service.admin.goods.vo.SelectGoodsListVo;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class GoodsOutPutDataListener extends CommonEventDefiner {
 
     @Resource
-    OfferGoodsServiceImpl offerGoodsService;
+    private IOfferGoodsService offerGoodsService;
 
     @Override
     public CommonEventResult handleCallback(CommonEvent commonEvent) {

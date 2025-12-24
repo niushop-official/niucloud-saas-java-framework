@@ -11,8 +11,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum UploadThumbTypeEnum {
 
-    BIG("big", 800, 800),
-    MID("mid", 400, 400),
+    BIG("big", 1200, 1200),
+    MID("mid", 800, 800),
     SMALL("small", 200, 200),
     ;
 

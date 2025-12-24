@@ -140,23 +140,28 @@ public class ShowMarketingEnum {
             }
             addonVo.getList().addAll(remainingAddons);
 
-            // 特殊处理pintuan_diy
+            // 特殊处理
             if (CollectionUtils.isNotEmpty(addonVo.getList())) {
                 for (ShowMarketingVo.MarketingTool tool : addonVo.getList()) {
                     if ("pintuan_diy".equals(tool.getKey())) {
-                        DiyPage diyPage = diyPageMapper.selectOne(new LambdaQueryWrapper<DiyPage>()
-                                .eq(DiyPage::getType, "DIY_PINTUAN_ACTIVITY_GOODS_DETAIL")
-                                .eq(DiyPage::getIsDefault, 1)
-                                .eq(DiyPage::getMode, "diy")
-                                .eq(DiyPage::getSiteId, siteId)
-                                .last("limit 1"));
-                        if (diyPage != null && diyPage.getId() != null) {
-                            tool.setUrl("/site/decorate/edit?id=" + diyPage.getId() + "&back=/site/app/marketing&is_target=true");
-                        }
-                        break;
+                        setUrl(tool, "DIY_PINTUAN_ACTIVITY_GOODS_DETAIL", siteId);
+                    } else if ("seckill_diy".equals(tool.getKey())) {
+                        setUrl(tool, "DIY_SECKILL_ACTIVITY_GOODS_DETAIL", siteId);
                     }
                 }
             }
+        }
+    }
+
+    private void setUrl(ShowMarketingVo.MarketingTool tool, String type, Integer siteId) {
+        DiyPage diyPage = diyPageMapper.selectOne(new LambdaQueryWrapper<DiyPage>()
+                .eq(DiyPage::getType, type)
+                .eq(DiyPage::getIsDefault, 1)
+                .eq(DiyPage::getMode, "diy")
+                .eq(DiyPage::getSiteId, siteId)
+                .last("limit 1"));
+        if (diyPage != null && diyPage.getId() != null) {
+            tool.setUrl("/site/decorate/edit?id=" + diyPage.getId() + "&back=/site/app/marketing&is_target=true");
         }
     }
 

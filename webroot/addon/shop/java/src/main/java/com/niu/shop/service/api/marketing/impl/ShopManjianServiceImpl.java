@@ -1,17 +1,19 @@
 package com.niu.shop.service.api.marketing.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.shop.entity.coupon.ShopCoupon;
-import com.niu.shop.entity.coupon.ShopCouponMember;
 import com.niu.shop.entity.goods.ShopGoods;
 import com.niu.shop.entity.goods.ShopGoodsSku;
 import com.niu.shop.entity.manjian.ShopManjian;
 import com.niu.shop.entity.manjian.ShopManjianGoods;
-import com.niu.shop.enums.coupon.CouponMemberStatusEnum;
 import com.niu.shop.enums.coupon.CouponStatusEnum;
 import com.niu.shop.enums.marketing.ShopManjianGoodsTypeEnum;
 import com.niu.shop.enums.marketing.ShopManjianStatusEnum;
@@ -23,19 +25,18 @@ import com.niu.shop.mapper.manjian.ShopManjianGoodsMapper;
 import com.niu.shop.mapper.manjian.ShopManjianMapper;
 import com.niu.shop.service.api.marketing.IShopManjianService;
 import com.niu.shop.service.api.marketing.param.ShopManjianInfoParam;
-import com.niu.shop.service.api.marketing.vo.ShopManjianContentVo;
 import com.niu.shop.service.api.marketing.vo.ShopManjianInfoVo;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.marketing.model.ShopManjianCoupon;
 import com.niu.shop.service.core.marketing.model.ShopManjianRule;
+import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 public class ShopManjianServiceImpl implements IShopManjianService {
@@ -62,173 +63,174 @@ public class ShopManjianServiceImpl implements IShopManjianService {
     ShopGoodsMapper shopGoodsMapper;
 
     @Override
-    public ShopManjianInfoVo getManjianInfo(ShopManjianInfoParam param) {
-
+    public List<ShopManjianInfoVo> getManjianInfo(ShopManjianInfoParam param) {
         Integer goodsId = param.getGoodsId();
         Integer skuId = param.getSkuId();
+        List<ShopManjianRule.GoodsDTO> giftGoods = param.getGiftGoods();
+        Integer memberId = RequestUtils.memberId();
+        Integer siteId = RequestUtils.siteId();
+        long currTime = DateUtils.currTime();
+
+        if (ObjectUtil.isEmpty(skuId) && ObjectUtil.isEmpty(goodsId)) {
+            return List.of();
+        }
+
         if (ObjectUtil.isEmpty(skuId) && ObjectUtil.isNotEmpty(goodsId)) {
+            ShopGoodsSku defaultSkuInfo = shopGoodsSkuMapper.selectOne(new LambdaQueryWrapper<ShopGoodsSku>()
+                    .eq(ShopGoodsSku::getGoodsId, goodsId).eq(ShopGoodsSku::getSiteId, siteId)
+                    .eq(ShopGoodsSku::getIsDefault, 1).last("limit 1"));
+            skuId = ObjectUtil.isNotEmpty(defaultSkuInfo) ? defaultSkuInfo.getSkuId() : null;
+        }
 
-            ShopGoodsSku defaultSkuInfo = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>()
-                    .eq("goods_id", goodsId).eq("site_id", RequestUtils.siteId()).eq("is_default", 1).last("limit 1"));
-            if(ObjectUtil.isNotEmpty(defaultSkuInfo))
-            {
-                skuId = defaultSkuInfo.getSkuId();
+        List<ShopManjianInfoVo> allManjianInfo = new ArrayList<>();
+
+        LambdaQueryWrapper<ShopManjian> baseQuery = new LambdaQueryWrapper<ShopManjian>()
+                .eq(ShopManjian::getSiteId, siteId)
+                .eq(ShopManjian::getStatus, ShopManjianStatusEnum.ACTIVE.getValue())
+                .le(ShopManjian::getStartTime, currTime)
+                .gt(ShopManjian::getEndTime, currTime);
+
+        ShopManjian allGoodsManjian = shopManjianMapper.selectOne(
+                baseQuery.eq(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.ALL_GOODS.getValue())
+                        .last("limit 1"));
+        if (ObjectUtil.isNotEmpty(allGoodsManjian)) {
+            addManjianInfo(allManjianInfo, allGoodsManjian, siteId, memberId, giftGoods);
+        }
+
+        List<ShopManjian> selectedGoodsNotList = shopManjianMapper.selectList(baseQuery
+                .eq(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.SELECTED_GOODS_NOT.getValue()));
+        if (CollectionUtils.isNotEmpty(selectedGoodsNotList)) {
+            selectedGoodsNotList.forEach(manjian -> addManjianInfo(allManjianInfo, manjian, siteId, memberId, giftGoods));
+        }
+
+        List<ShopManjian> selectedGoodsList = shopManjianMapper.selectList(
+                baseQuery.eq(ShopManjian::getGoodsType, ShopManjianGoodsTypeEnum.SELECTED_GOODS.getValue()));
+        if (CollectionUtils.isNotEmpty(selectedGoodsList)) {
+            ShopManjianGoods manjianGoodsInfo = shopManjianGoodsMapper.selectOne(
+                    new LambdaQueryWrapper<ShopManjianGoods>().select(ShopManjianGoods::getManjianId)
+                            .eq(ShopManjianGoods::getSiteId, siteId).eq(ShopManjianGoods::getGoodsId, goodsId)
+                            .eq(ShopManjianGoods::getSkuId, skuId).eq(ShopManjianGoods::getStatus, ShopManjianStatusEnum.ACTIVE.getValue())
+                            .last("limit 1"));
+
+            if (ObjectUtil.isNotEmpty(manjianGoodsInfo)) {
+                selectedGoodsList.stream()
+                        .filter(manjian -> manjian.getManjianId().equals(manjianGoodsInfo.getManjianId()))
+                        .findFirst()
+                        .ifPresent(manjian ->
+                                addManjianInfo(allManjianInfo, manjian, siteId, memberId, giftGoods));
             }
         }
-        if(ObjectUtil.isNotEmpty(skuId) && ObjectUtil.isEmpty(goodsId))
-        {
-            ShopGoodsSku defaultSkuInfo = shopGoodsSkuMapper.selectById(skuId);
-            if(ObjectUtil.isNotEmpty(defaultSkuInfo))
-            {
-                goodsId = defaultSkuInfo.getGoodsId();
+
+        return allManjianInfo;
+    }
+
+    /**
+     * 添加满减活动信息到结果列表
+     */
+    private void addManjianInfo(List<ShopManjianInfoVo> resultList, ShopManjian manjian, Integer siteId, Integer memberId, List<ShopManjianRule.GoodsDTO> giftGoods) {
+        ShopManjianInfoVo manjianInfoVo = new ShopManjianInfoVo();
+        BeanUtils.copyProperties(manjian, manjianInfoVo);
+
+        boolean canJoin = coreManjianService.canJoinManjian(manjian, siteId, memberId);
+        if (canJoin) {
+            ShopManjianInfoVo ruleContent = getRuleContent(manjianInfoVo, giftGoods);
+            if (ruleContent.getIsJoin()) {
+                manjianInfoVo = ruleContent;
             }
         }
-        ShopManjianInfoVo manjianInfo = new ShopManjianInfoVo();
-
-        ShopManjian manjianInfoAllGoods = shopManjianMapper.selectOne(new QueryWrapper<ShopManjian>()
-                    .eq("site_id", RequestUtils.siteId()).eq("status", ShopManjianStatusEnum.ACTIVE.getValue()).eq("goods_type", ShopManjianGoodsTypeEnum.ALL_GOODS.getValue()));
-
-
-        if (ObjectUtil.isNotEmpty(manjianInfoAllGoods)) {
-            // 全部商品参与
-            BeanUtils.copyProperties(manjianInfoAllGoods, manjianInfo);
-            if(ObjectUtil.isNotEmpty(RequestUtils.memberId()))
-            {
-                boolean canJoin = coreManjianService.canJoinManjian(manjianInfoAllGoods, RequestUtils.siteId(), RequestUtils.memberId());
-                if (canJoin) {
-                    manjianInfo = getRuleContent(manjianInfo);
-                }
-            }
-
-        } else {
-            ShopManjian manjianInfoSelectedGoodsNot = shopManjianMapper.selectOne(new QueryWrapper<ShopManjian>()
-                    .eq("site_id", RequestUtils.siteId()).eq("status", ShopManjianStatusEnum.ACTIVE.getValue()).eq("goods_type", ShopManjianGoodsTypeEnum.SELECTED_GOODS_NOT.getValue()).last("limit 1"));
-
-            ShopManjianGoods manjianGoodsInfo = shopManjianGoodsMapper.selectOne(new QueryWrapper<ShopManjianGoods>()
-                    .eq("site_id", RequestUtils.siteId()).eq("goods_id", goodsId).eq("sku_id", skuId).eq("status", ShopManjianStatusEnum.ACTIVE.getValue()).last("limit 1"));
-
-            if (ObjectUtil.isNotEmpty(manjianInfoSelectedGoodsNot) && ObjectUtil.isEmpty(manjianGoodsInfo)) {
-                // 指定商品不参与
-                BeanUtils.copyProperties(manjianInfoSelectedGoodsNot, manjianInfo);
-                if(ObjectUtil.isNotEmpty(RequestUtils.memberId()))
-                {
-                    boolean canJoin = coreManjianService.canJoinManjian(manjianInfoSelectedGoodsNot, RequestUtils.siteId(), RequestUtils.memberId());
-                    if (canJoin) {
-                        manjianInfo = getRuleContent(manjianInfo);
-                    }
-                }
-
-            } else {
-                // 指定商品参与
-                List<ShopManjian> manjianInfoSelectedGoods = shopManjianMapper.selectList(new QueryWrapper<ShopManjian>()
-                        .eq("site_id", RequestUtils.siteId()).eq("status", ShopManjianStatusEnum.ACTIVE.getValue()).eq("goods_type", ShopManjianGoodsTypeEnum.SELECTED_GOODS.getValue()));
-
-                if (ObjectUtil.isNotEmpty(manjianInfoSelectedGoods) && ObjectUtil.isNotEmpty(manjianGoodsInfo) &&manjianGoodsInfo.getGoodsType().equals(ShopManjianGoodsTypeEnum.SELECTED_GOODS.getValue())) {
-                    ShopManjian selectedManjianInfo = manjianInfoSelectedGoods.stream().filter(m -> m.getManjianId().equals(manjianGoodsInfo.getManjianId())).findFirst().orElse(null);
-                    if (ObjectUtil.isNotEmpty(selectedManjianInfo))  {
-                        BeanUtils.copyProperties(selectedManjianInfo, manjianInfo);
-                        if (ObjectUtil.isNotEmpty(RequestUtils.memberId())) {
-                            boolean canJoin = coreManjianService.canJoinManjian(selectedManjianInfo, RequestUtils.siteId(), RequestUtils.memberId());
-                            if (canJoin) {
-                                manjianInfo = getRuleContent(manjianInfo);
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-        if(ObjectUtil.isEmpty(manjianInfo.getRuleJson())) return null;
-        return manjianInfo;
+        resultList.add(manjianInfoVo);
     }
 
     @Override
-    public ShopManjianInfoVo getRuleContent(ShopManjianInfoVo vo) {
-        if (vo!= null && vo.getRuleJson()!= null &&!vo.getRuleJson().isEmpty()) {
+    public ShopManjianInfoVo getRuleContent(ShopManjianInfoVo vo, List<ShopManjianRule.GoodsDTO> giftGoods) {
+        if (vo != null && vo.getRuleJson() != null && !vo.getRuleJson().isEmpty()) {
             boolean isJoin = false;
+            vo.setGiftGoods(giftGoods);
             List<ShopManjianRule> ruleJsonList = JSONUtil.toList(vo.getRuleJson(), ShopManjianRule.class);
             for (int i = 0; i < ruleJsonList.size(); i++) {
                 ShopManjianRule item = ruleJsonList.get(i);
-                if (item.getIsDiscount()) {
+                if (item.getIsDiscount() || item.getIsFreeShipping() ||
+                        item.getIsGivePoint() || item.getIsGiveBalance()) {
                     isJoin = true;
                 }
-                if (item.getIsFreeShipping()) {
-                    isJoin = true;
-                }
-                if (item.getIsGivePoint()) {
-                    isJoin = true;
-                }
-                if (item.getIsGiveBalance()) {
-                    isJoin = true;
-                }
-                if (item.getIsGiveCoupon()) {
+                if (item.getIsGiveCoupon() && !CollectionUtils.isEmpty(item.getCoupon())) {
                     List<ShopManjianCoupon> couponList = item.getCoupon();
-                    if (couponList!= null &&!couponList.isEmpty()) {
-                        for (int j = 0; j < couponList.size(); j++) {
-                            ShopManjianCoupon coupon = couponList.get(j);
+                    List<ShopManjianCoupon> validCoupons = new ArrayList<>();
+                    for (ShopManjianCoupon coupon : couponList) {
+                        ShopCoupon couponEntity = shopCouponMapper.selectOne(new LambdaQueryWrapper<ShopCoupon>()
+                                .select(ShopCoupon::getPrice, ShopCoupon::getMinConditionMoney)
+                                .eq(ShopCoupon::getId, coupon.getCouponId())
+                                .eq(ShopCoupon::getStatus, CouponStatusEnum.NORMAL.getStatus()));
 
-                            ShopCoupon couponEntity = shopCouponMapper.selectOne(new QueryWrapper<ShopCoupon>()
-                                    .eq("id", coupon.getCouponId())
-                                    .eq("status", CouponStatusEnum.NORMAL.getStatus()));
-                            Long memberCouponCount = shopCouponMemberMapper.selectCount(new QueryWrapper<ShopCouponMember>()
-                                    .eq("coupon_id", coupon.getCouponId())
-                                    .eq("site_id", RequestUtils.siteId())
-                                    .eq("member_id", RequestUtils.memberId())
-                                    .ne("status", CouponMemberStatusEnum.INVALID.getStatus()));
-                            if (ObjectUtil.isNotEmpty(couponEntity)) {
-                                String couponName;
-                                if (couponEntity.getMinConditionMoney().compareTo(BigDecimal.ZERO) == 0) {
-                                    couponName = couponEntity.getPrice() + "元无门槛券";
-                                } else {
-                                    couponName = "满" + couponEntity.getMinConditionMoney() + "元减" + couponEntity.getPrice() + "元券";
-                                }
-                                coupon.setCouponName(couponName);
-                                if (couponEntity.getRemainCount() == 0 || memberCouponCount >= couponEntity.getLimitCount()) {
-                                    couponList.remove(j);
-                                    j--;
-                                }
+                        if (ObjectUtil.isNotEmpty(couponEntity)) {
+                            String couponName;
+                            if (couponEntity.getMinConditionMoney().compareTo(BigDecimal.ZERO) == 0) {
+                                couponName = couponEntity.getPrice() + "元无门槛券";
                             } else {
-                                couponList.remove(j);
-                                j--;
+                                couponName = "满" + couponEntity.getMinConditionMoney() + "元减" + couponEntity.getPrice() + "元券";
                             }
-                        }
-                        item.setCoupon(couponList);
-                        if (!couponList.isEmpty()) {
-                            isJoin = true;
+                            coupon.setCouponName(couponName);
+                            validCoupons.add(coupon);
                         }
                     }
-                }
-                if (item.getIsGiveGoods()) {
-                    List<ShopManjianRule.GoodsDTO> goodsList = item.getGoods();
-                    if (ObjectUtil.isNotEmpty(goodsList)) {
-                        for (int k = 0; k < goodsList.size(); k++) {
-                            ShopManjianRule.GoodsDTO goods = goodsList.get(k);
 
-                            ShopGoodsSku skuInfo = shopGoodsSkuMapper.selectOne(new QueryWrapper<ShopGoodsSku>()
-                                    .eq("goods_id", goods.getGoodsId())
-                                    .eq("sku_id", goods.getSkuId())
-                                    .ge("stock", goods.getNum()));
+                    item.setCoupon(validCoupons);
+                    if (!validCoupons.isEmpty()) {
+                        isJoin = true;
+                    }
+                }
+                if (item.getIsGiveGoods() && !CollectionUtils.isEmpty(item.getGoods())) {
+                    List<ShopManjianRule.GoodsDTO> goodsList = item.getGoods();
+                    List<ShopManjianRule.GoodsDTO> validGoods = new ArrayList<>();
+                    if (ObjectUtil.isNotEmpty(goodsList)) {
+                        for (ShopManjianRule.GoodsDTO goods : goodsList) {
+                            ShopGoodsSku skuInfo = shopGoodsSkuMapper.selectOne(new LambdaQueryWrapper<ShopGoodsSku>()
+                                    .select(ShopGoodsSku::getGoodsId, ShopGoodsSku::getSkuName, ShopGoodsSku::getSkuImage, ShopGoodsSku::getPrice, ShopGoodsSku::getStock)
+                                    .eq(ShopGoodsSku::getGoodsId, goods.getGoodsId()).eq(ShopGoodsSku::getSkuId, goods.getSkuId()).gt(ShopGoodsSku::getStock, 0));
                             ShopGoods goodsInfo = shopGoodsMapper.selectById(goods.getGoodsId());
-                            if (ObjectUtil.isNotEmpty(skuInfo)) {
-                                goods.setGoodsName(goodsInfo.getGoodsName());
-                                goods.setSkuName(skuInfo.getSkuName());
-                                goods.setSkuImage(skuInfo.getSkuImage());
-                                goods.setPrice(skuInfo.getPrice());
-                            } else {
-                                goodsList.remove(k);
-                                k--;
+                            if (ObjectUtil.isNotEmpty(skuInfo) && ObjectUtil.isNotEmpty(goodsInfo) && goodsInfo.getStatus() == 1) {
+                                int availableNum = calculateAvailableNum(goods, skuInfo, giftGoods);
+                                if (availableNum > 0){
+                                    goods.setGoodsName(goodsInfo.getGoodsName());
+                                    goods.setSkuName(skuInfo.getSkuName());
+                                    goods.setSkuImage(skuInfo.getSkuImage());
+                                    goods.setPrice(skuInfo.getPrice());
+                                    if (StringUtils.isEmpty(goods.getSkuImage())) {
+                                        goods.setSkuImage(CommonUtils.thumbImageMiddle(goodsInfo.getSiteId(), goodsInfo.getGoodsCover()));
+                                    }
+                                    validGoods.add(goods);
+                                }
                             }
                         }
-                        item.setGoods(goodsList);
-                        if (!goodsList.isEmpty()) {
+                        item.setGoods(validGoods);
+                        if (!validGoods.isEmpty()) {
                             isJoin = true;
                         }
                     }
                 }
                 ruleJsonList.set(i, item);
             }
+            vo.setRuleJson(JSONUtil.toJsonStr(ruleJsonList));
             vo.setIsJoin(isJoin);
         }
         return vo;
+    }
+
+    private int calculateAvailableNum(ShopManjianRule.GoodsDTO goods, ShopGoodsSku skuInfo,
+                                      List<ShopManjianRule.GoodsDTO> giftGoods) {
+        int stock = skuInfo.getStock();
+
+        if (CollectionUtils.isEmpty(giftGoods)) {
+            return Math.min(goods.getNum(), stock);
+        }
+
+        int usedStock = giftGoods.stream()
+                .filter(gift -> Objects.equals(gift.getGoodsId(), goods.getGoodsId()) &&
+                        Objects.equals(gift.getSkuId(), goods.getSkuId()))
+                .mapToInt(ShopManjianRule.GoodsDTO::getNum)
+                .sum();
+
+        int availableStock = Math.max(0, stock - usedStock);
+        return Math.min(goods.getNum(), availableStock);
     }
 }

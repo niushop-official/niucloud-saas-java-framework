@@ -11,6 +11,10 @@
                         <upload-image v-model="formData.head_img" />
                     </el-form-item>
 
+                    <el-form-item :label="t('手机号')" prop="mobile">
+                        <el-input v-model.trim="formData.mobile" :placeholder="t('请输入手机号')"  clearable class="input-width" maxlength="11" show-word-limit />
+                    </el-form-item>
+
                     <el-form-item :label="t('userRealName')" prop="real_name">
                         <el-input v-model.trim="formData.real_name" :placeholder="t('userRealNamePlaceholder')" :readonly="realnameInput" @click="realnameInput = false" @blur="realnameInput = true" clearable class="input-width" maxlength="10" show-word-limit />
                     </el-form-item>
@@ -97,6 +101,7 @@ const formData = ref({
     username: '',
     password: '',
     head_img: '',
+    mobile: '',
     real_name: '',
     confirm_password: '',
     create_site_limit: [],
@@ -111,6 +116,19 @@ const formRules = computed(() => {
         ],
         password: [
             { required: userStore.userInfo && userStore.userInfo.is_super_admin == true, message: t('passwordPlaceholder'), trigger: 'blur' }
+        ],
+        mobile: [
+            { required: true, message: t('请输入手机号'), trigger: 'blur' },
+            {
+                validator: (rule: any, value: string, callback: any) => {
+                    if (!Test.mobile(value)) {
+                        callback(new Error(t('手机号格式错误')))
+                    } else {
+                        callback()
+                    }
+                },
+                trigger: 'blur'
+            }
         ],
         real_name: [
             { required: true, message: t('userRealNamePlaceholder'), trigger: 'blur' }
@@ -173,6 +191,7 @@ const setFormData = (uid: number = 0) => {
         getUserInfo(uid).then(({ data }) => {
             formData.value.uid = data.uid
             formData.value.username = data.username
+            formData.value.mobile = data.mobile
             formData.value.real_name = data.real_name
             formData.value.head_img = data.head_img
             loading.value = false
@@ -184,6 +203,7 @@ const setFormData = (uid: number = 0) => {
             username: '',
             password: '',
             head_img: '',
+            mobile: '',
             real_name: '',
             confirm_password: '',
             create_site_limit: [],
@@ -254,7 +274,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .displayPass {
-  ::v-deep .el-input__inner{
+    :deep(.el-input__inner){
     -webkit-text-security: disc !important;
   }
 }

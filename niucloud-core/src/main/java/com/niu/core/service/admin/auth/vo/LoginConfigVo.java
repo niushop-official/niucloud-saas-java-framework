@@ -14,5 +14,6 @@ public class LoginConfigVo implements Serializable {
     private Integer isSiteCaptcha = 0; // 是否启用站点验证码
     private String bg = ""; // 平台端登录背景
     private String siteBg = ""; // 站点登录端背景
-
+    private String siteLoginLogo = "";
+    private String siteLoginBgImg = "";
 }

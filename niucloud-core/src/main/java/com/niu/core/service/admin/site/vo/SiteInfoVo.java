@@ -51,6 +51,9 @@ public class SiteInfoVo implements Serializable {
     private List<String> addonKeys;
     private String initalledAddon;  // 站点已执行初始化方法的插件
     private String siteDomain;  // 站点域名
+    private String metaTitle;
+    private String metaDesc;
+    private String metaKeyword;
     private String statusName;
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
     private Long createTime;

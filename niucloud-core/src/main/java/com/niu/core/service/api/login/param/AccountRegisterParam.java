@@ -18,11 +18,17 @@ public class AccountRegisterParam implements Serializable {
     @NotBlank(message = "密码不能为空")
     private String password;
 
+    private String wxOpenid;
+
     private String mobile = "";
 
     private String mobileKey = "";
 
     private String mobileCode = "";
+
+    private String captchaKey = "";
+
+    private String captchaCode = "";
 
     private Integer pid;
 }

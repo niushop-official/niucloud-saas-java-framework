@@ -2,6 +2,7 @@ package com.niu.shop.service.admin.refund.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -21,21 +22,22 @@ import com.niu.core.mapper.pay.PayRefundMapper;
 import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import com.niu.core.service.core.pay.param.PayRefundCreateParam;
 import com.niu.core.service.core.pay.param.PayRefundTransferParam;
+import com.niu.shop.entity.delivery.ShopStore;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.ShopOrderRefund;
 import com.niu.shop.entity.order.ShopOrderRefundLog;
 import com.niu.shop.entity.shop_address.ShopAddress;
-import com.niu.shop.enums.order.OrderLogMainTypeEnum;
-import com.niu.shop.enums.order.OrderRefundActionTypeEnum;
-import com.niu.shop.enums.order.OrderRefundStatusEnum;
-import com.niu.shop.enums.order.OrderRefundTypeEnum;
+import com.niu.shop.enums.order.*;
+import com.niu.shop.mapper.delivery.ShopStoreMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.mapper.order.ShopOrderRefundLogMapper;
 import com.niu.shop.mapper.order.ShopOrderRefundMapper;
 import com.niu.shop.mapper.shop_address.ShopAddressMapper;
+import com.niu.shop.service.admin.order.vo.ShopOrderInfoVo;
 import com.niu.shop.service.admin.refund.IRefundActionService;
+import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.refund.ICoreRefundActionService;
 import com.niu.shop.service.core.refund.param.ActiveRefundCloseParam;
 import com.niu.shop.service.core.refund.param.ActiveRefundParam;
@@ -91,6 +93,11 @@ public class RefundActionServiceImpl implements IRefundActionService {
     @Resource
     ICoreRefundActionService coreRefundActionService;
 
+    @Resource
+    ShopStoreMapper shopStoreMapper;
+
+    @Resource
+    ICoreManjianService coreManjianService;
 
     /**
      * 订单退款列表
@@ -170,6 +177,15 @@ public class RefundActionServiceImpl implements IRefundActionService {
         BeanUtil.copyProperties(order, orderVo);
         vo.setOrderMain(orderVo);
 
+        if (order.getDeliveryType().equals(OrderDeliveryTypeEnum.STORE.getType())) {
+            ShopStore store = shopStoreMapper.selectOne(new QueryWrapper<ShopStore>().eq("store_id", order.getTakeStoreId()));
+            if (store != null) {
+                RefundDetailVo.Store storeVo = new RefundDetailVo.Store();
+                BeanUtil.copyProperties(store, storeVo);
+                vo.setStore(storeVo);
+            }
+        }
+
         if (ObjectUtil.isNotEmpty(vo.getRefundNo())) {
             RefundDetailVo.PayRefund payRefundVo = new RefundDetailVo.PayRefund();
             PayRefund payRefund = payRefundMapper.selectOne(new QueryWrapper<PayRefund>().eq("refund_no", vo.getRefundNo()));
@@ -180,6 +196,13 @@ public class RefundActionServiceImpl implements IRefundActionService {
         if (!refund.getDelivery().isEmpty()) {
             RefundDetailVo.Delivery delivery = JSONUtil.toBean(JSONUtil.parseObj(refund.getDelivery()), RefundDetailVo.Delivery.class);
             vo.setDelivery(delivery);
+        }
+
+        Map<Integer, JSONObject> refundGiftList = coreManjianService.refundCheck(refund);
+        if (ObjectUtil.isNotEmpty(refundGiftList)) {
+            refundGiftList.values().stream().forEach(v -> {
+                vo.setGiftBalance(vo.getGiftBalance().add(v.getBigDecimal("balance", BigDecimal.ZERO)));
+            });
         }
 
         return vo;

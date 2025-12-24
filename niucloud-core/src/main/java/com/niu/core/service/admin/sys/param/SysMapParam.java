@@ -17,4 +17,6 @@ public class SysMapParam {
 
     @NotNull(message = "valid_time参数缺失")
     private Integer validTime;
+
+    private String amapKey;
 }

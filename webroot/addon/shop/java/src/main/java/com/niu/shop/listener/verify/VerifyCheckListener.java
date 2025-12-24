@@ -92,7 +92,8 @@ public class VerifyCheckListener extends VerifyCheckEventDefiner {
         Map<String, Object> firstItem = (Map<String, Object>) listObj.get(0);
         firstItem.put("un_use_msg", unUseMsg);
         listObj.set(0, firstItem);
-        data.put("list", listObj);
+        valueObj.set("list", listObj);
+        data.put("value", valueObj);
         data.put("un_use_msg", unUseMsgList);
         result.setData(data);
         return result;
@@ -138,7 +139,8 @@ public class VerifyCheckListener extends VerifyCheckEventDefiner {
                 }
             }
         }
-        data.put("list", verifyList);
+        valueObj.set("list", verifyList);
+        data.put("value", valueObj);
         data.put("un_use_msg", unUseMsgList);
         result.setData(data);
         return result;

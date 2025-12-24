@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * ShopInvoice视图
@@ -36,10 +37,17 @@ public class ShopInvoiceInfoVo implements Serializable {
     private Integer isInvoice;  // 是否开票
     private String invoiceNumber;  // 发票代码
     private String invoiceVoucher;  // 发票凭证
+    private String payVoucher;  // 支付凭证
     private String remark;  // 备注
     @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
-    private Integer invoiceTime;  // 开票时间
+    private Long createTime;  // 创建时间
+    @JsonSerialize(using = BeanJsonSerializer.LongDateToStringSerializer.class)
+    private Long invoiceTime;  // 开票时间
     private Integer status;  // 是否生效
+    
+    private List<String> payVoucherThumbSmall;  // 支付凭证缩略图（小）
+    private List<String> payVoucherThumbMid;  // 支付凭证缩略图（中）
+    private List<String> payVoucherThumbBig;  // 支付凭证缩略图（大）
 
     /**
      * 获取头名称

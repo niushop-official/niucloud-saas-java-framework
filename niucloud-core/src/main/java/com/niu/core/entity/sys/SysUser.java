@@ -54,4 +54,6 @@ public class SysUser implements Serializable {
     /** 更新时间 */
     private Long updateTime; 
 
+    /** 手机号 */
+    private String mobile;
 }

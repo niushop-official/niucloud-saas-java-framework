@@ -124,4 +124,9 @@ public class ShopOrderBatchDeliveryServiceImpl implements IShopOrderBatchDeliver
         coreOrderBatchDeliveryService.add(param);
     }
 
+    @Override
+    public void execute(Integer id) {
+        coreOrderBatchDeliveryService.execute(id, RequestUtils.siteId());
+    }
+
 }

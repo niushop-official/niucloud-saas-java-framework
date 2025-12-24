@@ -91,7 +91,7 @@ public class MemberController {
      */
     @Description("会员编辑")
     @PutMapping("/member/{member_id}")
-    public Result<Object> edit(@PathVariable("member_id") Integer memberId, @Validated @RequestBody MemberParam editParam) {
+    public Result<Object> edit(@PathVariable("member_id") Integer memberId, @Validated @RequestBody MemberEditParam editParam) {
         memberService.edit(memberId, editParam);
         return Result.success();
     }

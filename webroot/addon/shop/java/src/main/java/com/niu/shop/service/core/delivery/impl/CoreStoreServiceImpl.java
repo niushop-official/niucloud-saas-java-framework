@@ -67,7 +67,7 @@ public class CoreStoreServiceImpl implements ICoreStoreService {
                         latlng.getLng().doubleValue(),
                         Double.valueOf(item.getLatitude()),
                         Double.valueOf(item.getLongitude())
-                ));
+                ).intValue());
             }
             storeList.sort(Comparator.comparing(StoreListVo::getDistance));
         }

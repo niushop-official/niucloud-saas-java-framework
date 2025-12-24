@@ -2,6 +2,7 @@ package com.niu.core.service.admin.pay.vo;
 
 import cn.hutool.json.JSONObject;
 import com.niu.core.entity.member.Member;
+import com.niu.core.service.admin.member.vo.MemberBriefInfoVo;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -29,7 +30,7 @@ public class FriendsPayInfoByTradeVo {
     private String channel;
     private String failReason;
     private Integer posterId;
-    private Member member;
+    private MemberBriefInfoVo member;
     private String link;
     private String qrcode;
     private JSONObject config;

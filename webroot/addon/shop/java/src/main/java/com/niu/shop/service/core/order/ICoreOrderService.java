@@ -7,6 +7,8 @@ import com.niu.shop.service.core.order.param.OrderCloseParam;
 import com.niu.shop.service.core.order.param.OrderPayParam;
 import com.niu.shop.service.core.order.vo.DeliveryTraceVo;
 
+import java.util.List;
+
 public interface ICoreOrderService {
 
     /**
@@ -46,4 +48,17 @@ public interface ICoreOrderService {
      * @param param
      */
     DeliveryTraceVo deliverySearch(Integer siteId, DeliverySearchParam param);
+
+    /**
+     * 设置发票ID
+     * @param tradeIds
+     * @param id
+     */
+    void setInvoiceIdByOrderId(List<String> tradeIds, Integer id);
+
+    /**
+     * 清除发票ID
+     * @param id
+     */
+    void cancelInvoiceId(Integer id);
 }

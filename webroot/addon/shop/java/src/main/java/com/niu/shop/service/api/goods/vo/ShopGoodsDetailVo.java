@@ -9,12 +9,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.niu.core.common.component.context.SpringContext;
 import com.niu.core.common.domain.BeanJsonSerializer;
 import com.niu.core.common.utils.CommonUtils;
-import com.niu.core.common.utils.RequestUtils;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.goods.ShopGoodsSpec;
 import com.niu.shop.enums.active.ActiveClassEnum;
-import com.niu.shop.listener.treasure.SnowShowDataResult;
 import com.niu.shop.service.api.marketing.vo.ShopDiscountGoodsInfoVo;
 import com.niu.shop.service.core.delivery.ICoreDeliveryConfigService;
 import com.niu.shop.service.core.delivery.vo.DeliveryConfigVo;
@@ -39,6 +36,7 @@ public class ShopGoodsDetailVo implements Serializable {
     private String skuImage; // sku主图
     private String skuNo; // 商品sku编码
     private Integer goodsId; // 商品id
+    private String memberDiscount; // 会员等级折扣，不参与：空，会员折扣：discount，指定会员价：fixed_price
     private String skuSpecFormat; // sku规格格式
     private BigDecimal price; // sku单价
     private BigDecimal marketPrice; // 划线价
@@ -83,9 +81,10 @@ public class ShopGoodsDetailVo implements Serializable {
 
     private String newcomerDesc;
 
-    private SnowShowDataResult sowShowList;
+    private Object sowShowList;
 
     private Object diyDetailInfo;
+
 
     private ImageSize imageSize = new ImageSize();
 
@@ -220,7 +219,7 @@ public class ShopGoodsDetailVo implements Serializable {
         private Integer saleNum; // 销量
         private Integer isDefault; // 是否默认
         private BigDecimal memberPrice;
-        private BigDecimal newcomerPrice;
+        private String newcomerPrice;
         private int isNewcomer;
         private String type;
         private BigDecimal showPrice;

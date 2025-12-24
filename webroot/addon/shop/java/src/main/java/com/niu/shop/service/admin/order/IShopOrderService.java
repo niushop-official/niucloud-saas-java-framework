@@ -63,4 +63,11 @@ public interface IShopOrderService {
      * @param param
      */
     void editDelivery(EditDeliveryParam param);
+
+     /**
+      * 删除订单
+      *
+      * @param param
+      */
+    void delete(DeleteOrderParam param);
 }

@@ -19,6 +19,8 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
     /** 星号 */
     private static final char ASTERISK = '*';
 
+    public static final String ENCRYPTSTR = "******************************";
+
     /**
      * 获取参数不为空值
      * 

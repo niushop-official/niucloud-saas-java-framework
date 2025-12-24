@@ -64,28 +64,31 @@
                             </view>
                         </view>
                     </view>
-                    <view v-if="createData.delivery.delivery_type == 'store'">
+                    <view v-if="createData.delivery.delivery_type == 'store'" class="pb-[10rpx]">
                         <!-- 姓名 -->
                         <view class="px-[20rpx] py-[14rpx]">
-                            <view class="flex justify-between items-center">
+                            <view class="flex justify-between items-center h-[30rpx]">
                                 <view class="text-color text-[26rpx]" @click="handleTime">姓名</view>
                                 <input class="text-right" maxlength="20" placeholder-style="color:#B1B3B5;font-size:26rpx" placeholder="请输入" v-model="createData.delivery.taker_name" />
                             </view>
                         </view>
                         <!-- 预留手机 -->
                         <view class="px-[20rpx] py-[14rpx]">
-                            <view class="flex justify-between items-center">
+                            <view class="flex justify-between items-center h-[30rpx]">
                                 <view class="text-color text-[26rpx]">预留手机</view>
                                 <input class="text-right" maxlength="11" placeholder-style="color:#B1B3B5;font-size:26rpx" placeholder="请输入" v-model="createData.delivery.taker_mobile" />
                             </view>
                         </view>
                         <!-- 提货时间 -->
-                        <view class="flex justify-between items-center px-[20rpx] pt-[14rpx] pb-[24rpx]">
-                            <view class="text-color text-[26rpx]">提货时间</view>
-                            <view class="flex" @click="handleTime">
-                                <view class="text-[26rpx] ml-2 text-right" :class="{'text-[#63676D]': !createData.delivery.buyer_ask_delivery_time }">{{ createData.delivery.buyer_ask_delivery_time ? showGetDate : '选择提货时间' }}</view>
-                                <text class="text-[26rpx] text-[var(--text-color-light6)] nc-iconfont nc-icon-youV6xx"></text>
+                        <view class="px-[20rpx] py-[14rpx]">
+                            <view class="flex justify-between items-center h-[30rpx]">
+                                <view class="text-color text-[26rpx]">提货时间</view>
+                                <view class="flex" @click="handleTime">
+                                    <view class="text-[26rpx] ml-2 text-right" :class="{'text-[#63676D]': !createData.delivery.buyer_ask_delivery_time }">{{ createData.delivery.buyer_ask_delivery_time ? showGetDate : '选择提货时间' }}</view>
+                                    <text class="text-[26rpx] text-[var(--text-color-light6)] nc-iconfont nc-icon-youV6xx"></text>
+                                </view>
                             </view>
+                            
                         </view>
                     </view>
 					<view v-if="createData.delivery.delivery_type == 'local_delivery' && localConfig.time_is_open" >
@@ -121,9 +124,11 @@
                                                 <text class="truncate text-[24rpx] text-[var(--text-color-light9)] leading-[28rpx]">{{ item.sku_name }}</text>
                                             </view>
                                         </view>
-                                        <view v-if="item.manjian_info && Object.keys(item.manjian_info).length" class="flex items-center mt-[10rpx] mb-[auto]" @click.stop="manjianOpenFn(item.manjian_info)">
+                                        <view v-if="item.manjian_info && item.manjian_info.length >0" class="flex items-center mt-[10rpx] mb-[auto] flex-nowrap overflow-hidden" @click.stop="manjianOpenFn(item.manjian_info)">
                                             <view class="bg-[var(--primary-color-light)] text-[var(--primary-color)] rounded-[6rpx] text-[20rpx] flex items-center justify-center w-[88rpx] h-[36rpx] mr-[6rpx]">满减送</view>
-                                            <text class="text-[22rpx] text-[#999]">{{ item.manjian_info.manjian_name }}</text>
+                                            <view class="text-[22rpx] text-[#999] truncate max-w-[400rpx]">
+                                                <text v-for="(cItem, index) in item.manjian_info" :key="index" class="whitespace-nowrap" :class="{'ml-[6rpx]': index>0}">{{ cItem.manjian_name }}</text>
+                                            </view>
                                         </view>
                                         <view class="mb-auto" :class="{'mt-[6rpx]': !item.sku_name}" v-if="item.not_support_delivery">
                                             <u-alert type="error" description="该商品不支持当前所选配送方式" class="leading-[30rpx] !inline-block" fontSize="11"></u-alert>
@@ -376,6 +381,7 @@ onShow(async () => {
 	localConfig.value = res.data;
     // 解决在创建订单时，使用优惠券并在切换页面后，提示优惠券已失效的问题
     if(!payRef.value?.payInfo){
+        createData.value.order_key = ''
         calculate(); // 确保在 localConfig 赋值后执行
     }
 })
@@ -437,11 +443,11 @@ const switchDeliveryType = async (type: string, index: number) => {
 
 // 满减
 const manjianOpenFn = (data: any) => {
-    let obj = {};
-    obj.condition_type = cloneDeep(data).condition_type;
-    obj.rule_json = [cloneDeep(data).rule];
-    obj.name = cloneDeep(data).manjian_name;
-    manjianShowRef.value.open(obj);
+    // let obj = {};
+    // obj.condition_type = cloneDeep(data).condition_type;
+    // obj.rule_json = [cloneDeep(data).rule];
+    // obj.name = cloneDeep(data).manjian_name;
+    manjianShowRef.value.open(data,'rule');
 }
 
 const formatTimeWeek = (timeType: number, weekStr: string): string[] => {
@@ -706,6 +712,7 @@ const couponList = computed(() => {
  * 选择优惠券
  */
 const confirmSelectCoupon = (coupon: any) => {
+    createData.value.order_key = ''
     createData.value.discount.coupon_id = coupon ? coupon.id : 0
     calculate()
 }
@@ -714,6 +721,7 @@ const confirmSelectCoupon = (coupon: any) => {
  * 选择自提点
  */
 const confirmSelectStore = (store: any) => {
+    createData.value.order_key = ''
     createData.value.delivery.take_store_id = ((store && store.store_id) ? store.store_id : 0)
     if (store) {
         service_time.value = {
@@ -744,7 +752,6 @@ const toLeaveMessage = () => {
   messageOpenRef.value.open();
 }
 const confirmMessage = (message: string) => {
-    console.log(message)
   createData.value.member_remark = message
 }
 </script>

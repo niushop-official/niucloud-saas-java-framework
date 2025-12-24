@@ -58,12 +58,11 @@ public class SysConfigController {
     /**
      * 版权信息
      *
-     * @param param
      * @return
      */
     @GetMapping("/copyright")
-    public Result<?> copyright(SysConfigCopyrightParam param) {
-        return Result.success(sysConfigService.copyright(param));
+    public Result<?> copyright() {
+        return Result.success(sysConfigService.copyright());
     }
 
     /**
@@ -110,7 +109,7 @@ public class SysConfigController {
 
         vo.setTabbarList(diyService.tabbarList(new DiyTabbarListParam()));
         vo.setMapConfig(sysConfigService.map(new SysConfigMapParam()));
-        vo.setLoginConfig(loginService.getLoginConfig());
+        vo.setLoginConfig(loginService.getLoginConfig(url));
 
         SysInitVo.SiteInfoVo siteInfoVo = new SysInitVo.SiteInfoVo();
         BeanUtil.copyProperties(coreSiteService.getSiteCache(RequestUtils.siteId()), siteInfoVo);
@@ -120,6 +119,7 @@ public class SysConfigController {
         vo.setMemberLevel(memberLevelService.list(new MemberLevelParam()));
         vo.setThemeList(diyThemeService.getDiyTheme());
         vo.setAppConfig(appService.getAppConfig());
+        vo.setCopyright(sysConfigService.copyright());
 
         if (ObjectUtil.isEmpty(vo.getSiteInfo().getSiteId())) {
             InitWapEvent event = new InitWapEvent();
@@ -141,49 +141,5 @@ public class SysConfigController {
     public Result<?> getMemberMobileExist(@RequestParam(value = "openid", defaultValue = "") String openid, @RequestHeader(value = "Channel", defaultValue = "h5") String channel) {
         return Result.success(sysConfigService.getMemberMobileExist(openid, channel));
     }
-
-//    /*
-//     * 获取用户是否绑定手机号
-//     *
-//     * @param sysMemberMobileParam
-//     * @return
-//     */
-//    @GetMapping("/member_mobile_exist")
-//    public Result getMemberMobileExist(SysMemberMobileParam sysMemberMobileParam) {
-//        // 根据渠道确定openid字段
-//        String openidField;
-//        String channel = RequestUtils.channel();
-//        switch (channel) {
-//            case "wechat":
-//                openidField = "wx_openid";
-//                break;
-//            case "weapp":
-//                openidField = "weapp_openid";
-//                break;
-//            default:
-//                openidField = "";
-//                break;
-//        }
-//
-//        // 初始化返回结果
-//        Map<String, Object> res = new HashMap<>();
-//        res.put("member_mobile_exist", 0);
-//
-//        // 检查用户是否绑定手机号
-//        if (sysMemberMobileParam.getOpenid() != null && !sysMemberMobileParam.getOpenid().isEmpty()) {
-//            if (openidField != null && !openidField.isEmpty()) {
-//                // 构造查询条件
-//                QueryWrapper queryWrapper = new QueryWrapper();
-//                queryWrapper.eq(openidField, sysMemberMobileParam.getOpenid());
-//                queryWrapper.ne("mobile", "");
-//
-//                // 查询用户数量
-//                Long count = memberMapper.selectCount(queryWrapper);
-//                res.put("member_mobile_exist", count > 0 ? 1 : 0);
-//            }
-//        }
-//
-//        return Result.success(res);
-//    }
 
 }

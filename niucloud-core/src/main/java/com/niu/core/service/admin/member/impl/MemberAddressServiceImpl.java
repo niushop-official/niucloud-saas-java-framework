@@ -1,7 +1,9 @@
 package com.niu.core.service.admin.member.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageResult;
@@ -14,6 +16,7 @@ import com.niu.core.service.admin.member.param.MemberAddressSearchParam;
 import com.niu.core.service.admin.member.IMemberAddressService;
 import com.niu.core.service.admin.member.vo.MemberAddressInfoVo;
 import com.niu.core.service.admin.member.vo.MemberAddressListVo;
+import com.niu.core.service.admin.sys.ISysAreaService;
 import org.bouncycastle.cert.ocsp.Req;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,9 @@ public class MemberAddressServiceImpl implements IMemberAddressService {
         
     @Resource
     MemberAddressMapper memberAddressMapper;
+
+    @Resource
+    ISysAreaService sysAreaService;
 
     /**
      * 会员收货地址列表
@@ -82,6 +88,18 @@ public class MemberAddressServiceImpl implements IMemberAddressService {
         MemberAddress model = new MemberAddress();
         BeanUtils.copyProperties(addParam, model);
         model.setSiteId(RequestUtils.siteId());
+        JSONObject addressInfo = sysAreaService.getAddress(addParam.getFullAddress());
+        if (addressInfo != null && addressInfo.getInt("status") == 0 && addressInfo.getStr("message", "").equals("Success")) {
+            model.setLng(ObjectUtil.defaultIfNull(addressInfo.getByPath("result.location.lng"), "").toString());
+            model.setLat(ObjectUtil.defaultIfNull(addressInfo.getByPath("result.location.lat"), "").toString());
+        }
+        if (addParam.getIsDefault() == 1) {
+            memberAddressMapper.update(null,
+                new UpdateWrapper<MemberAddress>()
+                    .set("is_default", 0)
+                    .eq("member_id", model.getMemberId())
+                    .eq("site_id", model.getSiteId()));
+        }
         memberAddressMapper.insert(model);
     }
 
@@ -100,6 +118,18 @@ public class MemberAddressServiceImpl implements IMemberAddressService {
 
         Assert.notNull(model, "数据不存在!");
         BeanUtils.copyProperties(editParam, model);
+        JSONObject addressInfo = sysAreaService.getAddress(editParam.getFullAddress());
+        if (addressInfo != null && addressInfo.getInt("status") == 0 && addressInfo.getStr("message", "").equals("Success")) {
+            model.setLng(ObjectUtil.defaultIfNull(addressInfo.getByPath("result.location.lng"), "").toString());
+            model.setLat(ObjectUtil.defaultIfNull(addressInfo.getByPath("result.location.lat"), "").toString());
+        }
+        if (editParam.getIsDefault() == 1) {
+            memberAddressMapper.update(null,
+                new UpdateWrapper<MemberAddress>()
+                    .set("is_default", 0)
+                    .eq("member_id", model.getMemberId())
+                    .eq("site_id", model.getSiteId()));
+        }
         memberAddressMapper.updateById(model);
     }
 
@@ -120,3 +150,4 @@ public class MemberAddressServiceImpl implements IMemberAddressService {
     }
 
 }
+

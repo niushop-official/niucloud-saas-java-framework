@@ -19,7 +19,7 @@ public class WechatConfigVo implements Serializable {
     private String wechatOriginal = ""; // 原始ID
     private String appId = ""; // APPID
     private String appSecret = ""; // APPSECRET
-    private String qrcode = ""; // 公众号二维码
+    private String qrCode = ""; // 公众号二维码
     private String token = ""; // 公众号token
     private String encodingAesKey = ""; // 加密密钥
     private String encryptionType = "not_encrypt"; // 加密方式

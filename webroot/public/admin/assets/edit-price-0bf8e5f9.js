@@ -1,0 +1,1 @@
+import{u as t}from"./poster-f00fe99b.js";import{d as r,h as n,c as s,b as _}from"./index-a2dd70e3.js";const c={class:"content-wrap"},a=r({__name:"edit-price",setup(l,{expose:e}){return t(),e({}),(o,p)=>(n(),s("div",c,[_(o.$slots,"common")]))}}),d=Object.freeze(Object.defineProperty({__proto__:null,default:a},Symbol.toStringTag,{value:"Module"}));export{d as _};

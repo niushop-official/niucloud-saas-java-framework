@@ -24,27 +24,35 @@
                 </el-col>
             </el-row>
             <el-row :gutter="20" class="mb-[20px]">
-                <el-col :span="6">
+                <el-col :span="6" >
                     <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('realname') }}</span>
                     <span class="text-[14px] text-[#666666]">
                         {{ detail.real_name || '--' }}
                     </span>
                 </el-col>
                 <el-col :span="6" :offset="6">
-                    <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('addTime') }}</span>
+                    <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('手机号') }}</span>
                     <span class="text-[14px] text-[#666666]">
-                        {{ detail.create_time }}
+                        {{ detail.mobile || '--' }}
                     </span>
                 </el-col>
             </el-row>
             <el-row :gutter="20" class="mb-[20px]">
                 <el-col :span="6">
+                    <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('addTime') }}</span>
+                    <span class="text-[14px] text-[#666666]">
+                        {{ detail.create_time }}
+                    </span>
+                </el-col>
+                <el-col :span="6" :offset="6">
                     <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('lastLoginTime') }}</span>
                     <span class="text-[14px] text-[#666666]">
                         {{ detail.last_time || '' }}
                     </span>
                 </el-col>
-                <el-col :span="6" :offset="6">
+            </el-row>
+            <el-row :gutter="20" class="mb-[20px]">
+                <el-col :span="6">
                     <span class="text-[14px] w-[130px] text-right mr-[20px]">{{ t('lastLoginIP') }}</span>
                     <span class="text-[14px] text-[#666666]">
                         {{ detail.last_ip || '' }}

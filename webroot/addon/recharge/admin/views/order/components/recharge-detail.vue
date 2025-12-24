@@ -1,5 +1,5 @@
 <template>
-    <el-drawer v-model="showDialog" :title="popTitle" direction="rtl" :before-close="handleClose" class="member-detail-drawer">
+    <el-drawer v-model="showDialog" :title="popTitle" direction="rtl" :before-close="handleClose" size="1000px">
         <div class="main-container" v-loading="loading">
             <el-form :model="formData" label-width="100px" ref="formRef" class="page-form" v-if="!loading" label-position="left">
                 <el-row class="row-bg px-[30px]" :gutter="20">
@@ -104,8 +104,4 @@ defineExpose({
 })
 </script>
 
-<style lang="scss">
-.member-detail-drawer{
-    width: 1000px !important;
-}
-</style>
+<style lang="scss" scoped></style>

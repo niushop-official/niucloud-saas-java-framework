@@ -74,6 +74,7 @@ public class GoodsBrowseServiceImpl implements IGoodsBrowseService {
         queryWrapper.select("b.*,gs.price,gs.market_price,gs.member_price,g.member_discount");
         queryWrapper.eq("b.site_id", RequestUtils.siteId());
         queryWrapper.eq("b.member_id", RequestUtils.memberId());
+        queryWrapper.eq("g.delete_time", 0);
         if (ObjectUtil.isNotEmpty(searchParam.getDate()))
             QueryMapperUtils.buildByTime(queryWrapper, "b.browse_time", searchParam.getDate());
         queryWrapper.orderByDesc("b.browse_time");

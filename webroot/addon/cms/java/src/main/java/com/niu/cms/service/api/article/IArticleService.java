@@ -38,4 +38,10 @@ public interface IArticleService {
      * @return
      */
     List<ArticleListVo> all(AllArticleSearchParam searchParam);
+
+    /**
+     * 自增文章浏览量
+     * @param id 文章ID
+     */
+    void incrVisit(Integer id);
 }

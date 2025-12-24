@@ -36,6 +36,11 @@ public class ThirdTypeEnum {
         return result;
     }
 
+    public static String getThirdTypeName(String type) {
+        Map<String, ThirdTypeValue> thirdType = getThirdType(type);
+        return thirdType.get(type).getName();
+    }
+
     @Data
     public static class ThirdTypeValue {
         private String name;

@@ -1,12 +1,8 @@
 package com.niu.shop.service.api.marketing;
 
-import cn.hutool.json.JSONArray;
-import com.niu.core.common.domain.PageParam;
-import com.niu.core.common.domain.PageResult;
-import com.niu.shop.service.api.marketing.param.DiscountGoodsSearchParam;
-import com.niu.shop.service.api.marketing.param.ShopDiscountListParam;
 import com.niu.shop.service.api.marketing.param.ShopManjianInfoParam;
-import com.niu.shop.service.api.marketing.vo.*;
+import com.niu.shop.service.api.marketing.vo.ShopManjianInfoVo;
+import com.niu.shop.service.core.marketing.model.ShopManjianRule;
 
 import java.util.List;
 
@@ -15,7 +11,7 @@ import java.util.List;
  */
 public interface IShopManjianService {
 
-    ShopManjianInfoVo getManjianInfo(ShopManjianInfoParam param);
+    List<ShopManjianInfoVo> getManjianInfo(ShopManjianInfoParam param);
 
-    ShopManjianInfoVo getRuleContent(ShopManjianInfoVo vo);
+    ShopManjianInfoVo getRuleContent(ShopManjianInfoVo vo, List<ShopManjianRule.GoodsDTO> giftGoods);
 }

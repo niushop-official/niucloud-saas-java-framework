@@ -1,5 +1,5 @@
 <template>
-    <el-drawer v-model="showDialog" :title="t('detailTitle')" direction="rtl" :before-close="handleClose" class="member-detail-drawer">
+    <el-drawer v-model="showDialog" :title="t('detailTitle')" direction="rtl" :before-close="handleClose" class="recharge-detail-drawer">
         <div class="main-container" v-loading="loading">
             <el-tabs v-model="activeName" class="pb-[10px]" @tab-change="handleClick">
                 <el-tab-pane :label="t('basicInfo')" name="basicInfo" />
@@ -112,7 +112,7 @@ defineExpose({
 })
 </script>
 <style lang="scss">
-.member-detail-drawer {
+.recharge-detail-drawer {
     width: 1000px !important;
 }
-</style>
+</style> 

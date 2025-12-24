@@ -79,7 +79,7 @@ public class StorageConfigServiceImpl implements IStorageConfigService {
                 itemParam.set("name", paramsValues);
                 String value = configParams.getStr(paramsKey);
                 if (encryptParams.contains(paramsKey) && ObjectUtil.isNotEmpty(value)) {
-                    value = StringUtils.hide(value, 0, value.length());
+                    value = StringUtils.ENCRYPTSTR;
                 }
                 itemParam.set("value", value);
                 params.set(paramsKey, itemParam);
@@ -130,7 +130,7 @@ public class StorageConfigServiceImpl implements IStorageConfigService {
             JSONObject valuesParams = JSONUtil.parseObj(storageValues.get("params"));
             for (String paramsKey : valuesParams.keySet()) {
                 String value = storageData.getStr(paramsKey);
-                if (!value.contains("*")) {
+                if (!value.equals(StringUtils.ENCRYPTSTR)) {
                     configParams.set(paramsKey, value);
                 }
             }

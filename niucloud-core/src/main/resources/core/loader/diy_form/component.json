@@ -1,817 +1,803 @@
 {
-  "DIY_FORM_COMPONENT": {
-    "title": "表单组件",
-    "support": [],
-    "list": {
-      "FormSubmit": {
-        "title": "表单提交",
-        "icon": "iconfont icona-biaodantijiaopc30",
-        "path": "edit-form-submit",
-        "uses": 1,
-        "support": [],
-        "sort": 10001,
-        "position": "bottom_fixed",
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 50,
-          "bottomElementRounded": 50,
-          "margin": {
-            "top": 8,
-            "bottom": 0,
-            "both": 10
-          }
-        },
-        "value": {
-          "btnPosition": "follow_content",
-          "submitBtn": {
-            "text": "提交",
-            "color": "#ffffff",
-            "bgColor": "#409EFF"
-          },
-          "resetBtn": {
-            "control": true,
-            "text": "重置",
-            "color": "",
-            "bgColor": ""
-          }
-        },
-        "componentType": "diy_form"
-      },
-      "FormInput": {
-        "title": "单行文本",
-        "icon": "iconfont icona-danhangwenben-1pc30",
-        "path": "edit-form-input",
-        "uses": 0,
-        "support": [],
-        "sort": 10002,
-        "position": "",
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "单行文本",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal"
-        },
-        "componentType": "diy_form"
-      },
-      "FormTextarea": {
-        "title": "多行文本",
-        "icon": "iconfont icona-duohangwenben-1pc30",
-        "path": "edit-form-textarea",
-        "uses": 0,
-        "support": [],
-        "sort": 10003,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "多行文本",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "rowCount": 4
-        },
-        "componentType": "diy_form"
-      },
-      "FormNumber": {
-        "title": "数字",
-        "icon": "iconfont icona-shuzipc30-1",
-        "path": "edit-form-number",
-        "uses": 0,
-        "support": [],
-        "sort": 10004,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "数字",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "unit": "",
-          "formatLimit": [],
-          "numberScope": {
-            "min": 0,
-            "max": 0
-          }
-        },
-        "componentType": "diy_form"
-      },
-      "FormRadio": {
-        "title": "单选项",
-        "icon": "iconfont icona-duihaopc30",
-        "path": "edit-form-radio",
-        "uses": 0,
-        "support": [],
-        "sort": 10005,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "单选项",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": [],
-            "value": []
-          },
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "style": "style-1",
-          "options": [
-            {
-              "id": "lpuardiqgmef",
-              "text": "选项1"
-            },
-            {
-              "id": "bzugsfdwhxde",
-              "text": "选项2"
-            }
-          ],
-          "logicalRule": [
-            {
-              "triggerOptionId": "",
-              "execEvent": [
-                {
-                  "id": "",
-                  "componentName": "",
-                  "componentTitle": ""
-                }
-              ]
-            }
-          ]
-        },
-        "render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "componentType": "diy_form"
-      },
-      "FormCheckbox": {
-        "title": "多选项",
-        "icon": "iconfont icona-duoxuanxiangpc301",
-        "path": "edit-form-checkbox",
-        "uses": 0,
-        "support": [],
-        "sort": 10006,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "多选项",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": [],
-            "value": []
-          },
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "style": "style-1",
-          "options": [
-            {
-              "id": "rucgdfdonlxm",
-              "text": "选项1"
-            },
-            {
-              "id": "qtseoavcurjx",
-              "text": "选项2"
-            }
-          ],
-          "selectableNum": {
-            "min": 0,
-            "max": 0
-          }
-        },
-        "render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "componentType": "diy_form"
-      },
-      "FormMobile": {
-        "title": "手机号",
-        "icon": "iconfont icona-shoujipc30",
-        "path": "edit-form-mobile",
-        "uses": 1,
-        "support": [],
-        "sort": 10008,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "手机号",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal"
-        },
-        "componentType": "diy_form"
-      },
-      "FormEmail": {
-        "title": "邮箱",
-        "icon": "iconfont icona-youxiangpc30",
-        "path": "edit-form-email",
-        "uses": 0,
-        "support": [],
-        "sort": 10009,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "邮箱",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal"
-        },
-        "componentType": "diy_form"
-      },
-      "FormIdentity": {
-        "title": "身份证号",
-        "icon": "iconfont icona-shenfenzhengpc30",
-        "path": "edit-form-identity",
-        "uses": 1,
-        "support": [],
-        "sort": 10010,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "身份证号",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal"
-        },
-        "componentType": "diy_form"
-      },
-      "FormDate": {
-        "title": "日期",
-        "icon": "iconfont icona-riqipc30",
-        "path": "edit-form-date",
-        "uses": 0,
-        "support": [],
-        "sort": 10012,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "日期",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": {
-              "date": "",
-              "timestamp": 0
-            },
-            "value": {
-              "date": "",
-              "timestamp": 0
-            }
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "dateFormat": "YYYY年M月D日",
-          "dateWay": "current",
-          "defaultControl": true
-        },
-        "render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "componentType": "diy_form"
-      },
-      "FormDateScope": {
-        "title": "日期范围",
-        "icon": "iconfont icona-riqifanweipc30",
-        "path": "edit-form-date-scope",
-        "uses": 0,
-        "support": [],
-        "sort": 10013,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "日期范围",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": {
-              "start": {
-                "date": "",
-                "timestamp": 0
-              },
-              "end": {
-                "date": "",
-                "timestamp": 0
-              }
-            },
-            "value": {
-              "start": {
-                "date": "",
-                "timestamp": 0
-              },
-              "end": {
-                "date": "",
-                "timestamp": 0
-              }
-            }
-          },
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "dateFormat": "YYYY年M月D日",
-          "start": {
-            "placeholder": "请选择起始日期",
-            "dateWay": "current",
-            "defaultControl": true
-          },
-          "end": {
-            "placeholder": "请选择结束日期",
-            "dateWay": "current",
-            "defaultControl": true
-          }
-        },
-        "render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "componentType": "diy_form"
-      },
-      "FormTime": {
-        "title": "时间",
-        "icon": "iconfont icona-shijianpc30-1",
-        "path": "edit-form-time",
-        "uses": 0,
-        "support": [],
-        "sort": 10014,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "时间",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": "",
-            "value": ""
-          },
-          "placeholder": "请输入",
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "timeWay": "current",
-          "defaultControl": true
-        },
-        "componentType": "diy_form"
-      },
-      "FormTimeScope": {
-        "title": "时间范围",
-        "icon": "iconfont icona-shijianfanweipc30",
-        "path": "edit-form-time-scope",
-        "uses": 0,
-        "support": [],
-        "sort": 10015,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "时间范围",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "default": {
-              "start": {
-                "date": "",
-                "timestamp": 0
-              },
-              "end": {
-                "date": "",
-                "timestamp": 0
-              }
-            },
-            "value": {
-              "start": {
-                "date": "",
-                "timestamp": 0
-              },
-              "end": {
-                "date": "",
-                "timestamp": 0
-              }
-            }
-          },
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "start": {
-            "placeholder": "请选择起始时间",
-            "timeWay": "current",
-            "defaultControl": true
-          },
-          "end": {
-            "placeholder": "请选择结束时间",
-            "timeWay": "current",
-            "defaultControl": true
-          }
-        },
-        "render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "componentType": "diy_form"
-      },
-      "FormImage": {
-        "title": "图片",
-        "icon": "iconfont icona-tupianpc30",
-        "path": "edit-form-image",
-        "uses": 0,
-        "support": [],
-        "sort": 10018,
-        "template": {
-          "textColor": "#303133",
-          "pageStartBgColor": "#FFFFFF",
-          "pageEndBgColor": "",
-          "pageGradientAngle": "to bottom",
-          "componentBgUrl": "",
-          "componentBgAlpha": 2,
-          "componentStartBgColor": "",
-          "componentEndBgColor": "",
-          "componentGradientAngle": "to bottom",
-          "topRounded": 0,
-          "bottomRounded": 0,
-          "elementBgColor": "",
-          "topElementRounded": 0,
-          "bottomElementRounded": 0,
-          "margin": {
-            "top": 8,
-            "bottom": 8,
-            "both": 10
-          }
-        },
-        "value": {
-          "field": {
-            "name": "图片",
-            "remark": {
-              "text": "",
-              "color": "#999999",
-              "fontSize": 14
-            },
-            "required": false,
-            "unique": false,
-            "autofill": false,
-            "privacyProtection": false,
-            "detailComponent": "/src/app/views/diy_form/components/detail-form-image.vue",
-            "default": "",
-            "value": []
-          },
-          "fontSize": 14,
-          "fontWeight": "normal",
-          "uploadMode": [
-            "take_pictures",
-            "select_from_album"
-          ],
-          "limit": 9
-        },
-        "render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
-        "componentType": "diy_form"
-      }
-    }
-  }
+	"DIY_FORM_COMPONENT": {
+		"title": "表单组件",
+		"support": [],
+		"list": {
+			"FormSubmit": {
+				"title": "表单提交",
+				"icon": "iconfont icona-biaodantijiaopc30",
+				"path": "edit-form-submit",
+				"uses": 1,
+				"support": [],
+				"sort": 10001,
+				"position": "bottom_fixed",
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 50,
+					"bottomElementRounded": 50,
+					"margin": {
+						"top": 8,
+						"bottom": 0,
+						"both": 10
+					}
+				},
+				"value": {
+					"btnPosition": "follow_content",
+					"submitBtn": {
+						"text": "提交",
+						"color": "#ffffff",
+						"bgColor": "#409EFF"
+					},
+					"resetBtn": {
+						"control": true,
+						"text": "重置",
+						"color": "",
+						"bgColor": ""
+					}
+				}
+			},
+			"FormInput": {
+				"title": "单行文本",
+				"icon": "iconfont icona-danhangwenben-1pc30",
+				"path": "edit-form-input",
+				"uses": 0,
+				"sort": 10002,
+				"position": "",
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "单行文本",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal"
+				}
+			},
+			"FormTextarea": {
+				"title": "多行文本",
+				"icon": "iconfont icona-duohangwenben-1pc30",
+				"path": "edit-form-textarea",
+				"uses": 0,
+				"sort": 10003,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "多行文本",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"rowCount": 4
+				}
+			},
+			"FormNumber": {
+				"title": "数字",
+				"icon": "iconfont icona-shuzipc30-1",
+				"path": "edit-form-number",
+				"uses": 0,
+				"sort": 10004,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "数字",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"unit": "",
+					"formatLimit": [],
+					"numberScope": {
+						"min": 0,
+						"max": 0
+					}
+				}
+			},
+			"FormRadio": {
+				"title": "单选项",
+				"icon": "iconfont icona-duihaopc30",
+				"path": "edit-form-radio",
+				"uses": 0,
+				"sort": 10005,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "单选项",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": [],
+						"value": []
+					},
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"style": "style-1",
+					"options": [
+						{
+							"id": "jpzmnkvhhfxr",
+							"text": "选项1"
+						},
+						{
+							"id": "fwpqogasimln",
+							"text": "选项2"
+						}
+					],
+					"logicalRule": [
+						{
+							"triggerOptionId": "",
+							"execEvent": [
+								{
+									"id": "",
+									"componentName": "",
+									"componentTitle": ""
+								}
+							]
+						}
+					]
+				},
+				"render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
+				"convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver"
+			},
+			"FormCheckbox": {
+				"title": "多选项",
+				"icon": "iconfont icona-duoxuanxiangpc301",
+				"path": "edit-form-checkbox",
+				"uses": 0,
+				"sort": 10006,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "多选项",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": [],
+						"value": []
+					},
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"style": "style-1",
+					"options": [
+						{
+							"id": "tawmvsfioayh",
+							"text": "选项1"
+						},
+						{
+							"id": "gtvzidqhbmus",
+							"text": "选项2"
+						}
+					],
+					"selectableNum": {
+						"min": 0,
+						"max": 0
+					}
+				},
+				"render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
+				"convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver"
+			},
+			"FormMobile": {
+				"title": "手机号",
+				"icon": "iconfont icona-shoujipc30",
+				"path": "edit-form-mobile",
+				"uses": 1,
+				"sort": 10008,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "手机号",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal"
+				}
+			},
+			"FormEmail": {
+				"title": "邮箱",
+				"icon": "iconfont icona-youxiangpc30",
+				"path": "edit-form-email",
+				"uses": 0,
+				"sort": 10009,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "邮箱",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal"
+				}
+			},
+			"FormIdentity": {
+				"title": "身份证号",
+				"icon": "iconfont icona-shenfenzhengpc30",
+				"path": "edit-form-identity",
+				"uses": 1,
+				"sort": 10010,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "身份证号",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal"
+				}
+			},
+			"FormDate": {
+				"title": "日期",
+				"icon": "iconfont icona-riqipc30",
+				"path": "edit-form-date",
+				"uses": 0,
+				"sort": 10012,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "日期",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": {
+							"date": "",
+							"timestamp": 0
+						},
+						"value": {
+							"date": "",
+							"timestamp": 0
+						}
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"dateFormat": "YYYY年M月D日",
+					"dateWay": "current",
+					"defaultControl": true
+				},
+				"render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
+				"convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver"
+			},
+			"FormDateScope": {
+				"title": "日期范围",
+				"icon": "iconfont icona-riqifanweipc30",
+				"path": "edit-form-date-scope",
+				"uses": 0,
+				"sort": 10013,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "日期范围",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": {
+							"start": {
+								"date": "",
+								"timestamp": 0
+							},
+							"end": {
+								"date": "",
+								"timestamp": 0
+							}
+						},
+						"value": {
+							"start": {
+								"date": "",
+								"timestamp": 0
+							},
+							"end": {
+								"date": "",
+								"timestamp": 0
+							}
+						}
+					},
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"dateFormat": "YYYY年M月D日",
+					"start": {
+						"placeholder": "请选择起始日期",
+						"dateWay": "current",
+						"defaultControl": true
+					},
+					"end": {
+						"placeholder": "请选择结束日期",
+						"dateWay": "current",
+						"defaultControl": true
+					}
+				},
+				"render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
+				"convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver"
+			},
+			"FormTime": {
+				"title": "时间",
+				"icon": "iconfont icona-shijianpc30-1",
+				"path": "edit-form-time",
+				"uses": 0,
+				"sort": 10014,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "时间",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": "",
+						"value": ""
+					},
+					"placeholder": "请输入",
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"timeWay": "current",
+					"defaultControl": true
+				}
+			},
+			"FormTimeScope": {
+				"title": "时间范围",
+				"icon": "iconfont icona-shijianfanweipc30",
+				"path": "edit-form-time-scope",
+				"uses": 0,
+				"sort": 10015,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "时间范围",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"default": {
+							"start": {
+								"date": "",
+								"timestamp": 0
+							},
+							"end": {
+								"date": "",
+								"timestamp": 0
+							}
+						},
+						"value": {
+							"start": {
+								"date": "",
+								"timestamp": 0
+							},
+							"end": {
+								"date": "",
+								"timestamp": 0
+							}
+						}
+					},
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"start": {
+						"placeholder": "请选择起始时间",
+						"timeWay": "current",
+						"defaultControl": true
+					},
+					"end": {
+						"placeholder": "请选择结束时间",
+						"timeWay": "current",
+						"defaultControl": true
+					}
+				},
+				"render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
+				"convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver"
+			},
+			"FormImage": {
+				"title": "图片",
+				"icon": "iconfont icona-tupianpc30",
+				"path": "edit-form-image",
+				"uses": 0,
+				"sort": 10018,
+				"template": {
+					"textColor": "#303133",
+					"pageStartBgColor": "#FFFFFF",
+					"pageEndBgColor": "",
+					"pageGradientAngle": "to bottom",
+					"componentBgUrl": "",
+					"componentBgAlpha": 2,
+					"componentStartBgColor": "",
+					"componentEndBgColor": "",
+					"componentGradientAngle": "to bottom",
+					"topRounded": 0,
+					"bottomRounded": 0,
+					"elementBgColor": "",
+					"topElementRounded": 0,
+					"bottomElementRounded": 0,
+					"margin": {
+						"top": 8,
+						"bottom": 8,
+						"both": 10
+					}
+				},
+				"value": {
+					"field": {
+						"name": "图片",
+						"remark": {
+							"text": "",
+							"color": "#999999",
+							"fontSize": 14
+						},
+						"required": false,
+						"unique": false,
+						"autofill": false,
+						"privacyProtection": false,
+						"cache": true,
+						"detailComponent": "/src/app/views/diy_form/components/detail-form-image.vue",
+						"default": "",
+						"value": []
+					},
+					"fontSize": 14,
+					"fontWeight": "normal",
+					"uploadMode": [
+						"take_pictures",
+						"select_from_album"
+					],
+					"limit": 9
+				},
+				"render": "com.niu.core.service.core.diy_form.driver.DiyFormDriver",
+				"convert": "com.niu.core.service.core.diy_form.driver.DiyFormDriver"
+			}
+		}
+	}
 }

@@ -72,8 +72,9 @@ public class CoreDiyFormRecordsServiceImpl implements ICoreDiyFormRecordsService
         MPJQueryWrapper<DiyFormRecords> queryWrapper = new MPJQueryWrapper<>();
 
         //sql语句
-        queryWrapper.select("ndfr.record_id, ndfr.site_id, ndfr.form_id, ndfr.value, ndfr.member_id, ndfr.relate_id, ndfr.create_time, nm.username, nm.member_no, nm.mobile, nm.nickname, nm.headimg")
+        queryWrapper.select("ndfr.record_id, ndfr.site_id, ndfr.form_id, ndfr.value, ndfr.member_id, ndfr.relate_id, ndfr.create_time, nm.username, nm.member_no, nm.mobile, nm.nickname, nm.headimg, df.page_title, df.title, df.type")
                 .setAlias("ndfr")
+                .leftJoin("?_diy_form df ON ndfr.form_id = df.form_id".replace("?_", GlobalConfig.tablePrefix))
                 .leftJoin("?_member nm ON ndfr.member_id = nm.member_id".replace("?_", GlobalConfig.tablePrefix));
 
         queryWrapper.eq("ndfr.site_id", searchParam.getSiteId());

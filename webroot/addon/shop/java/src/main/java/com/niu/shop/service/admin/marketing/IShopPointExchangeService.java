@@ -1,14 +1,15 @@
 package com.niu.shop.service.admin.marketing;
 
 import com.niu.core.common.domain.PageResult;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeEditStatusParam;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeModifySortParam;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeParam;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeSearchParam;
+import com.niu.shop.entity.exchange.ShopPointExchange;
+import com.niu.shop.entity.goods.ShopGoodsSku;
+import com.niu.shop.service.admin.marketing.param.*;
 import com.niu.core.common.domain.PageParam;
 import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeInfoVo;
 import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeListVo;
+import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeSelectListVo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,4 +72,36 @@ public interface IShopPointExchangeService {
      */
     void modifySort(ShopPointExchangeModifySortParam modifySortParam);
 
+    /**
+     * 商品编辑业务
+     * @param shopPointExchangeInfo
+     * @param status
+     * @param skuMap
+     */
+    void afterGoodsEdit(ShopPointExchange shopPointExchangeInfo, Integer status, Map<Integer, ShopGoodsSku> skuMap);
+
+    /**
+     * 批量删除积分兑换
+     */
+    void batchDelete(PointExchangeBatchParam param);
+
+    /**
+     * 批量下架
+     * @param param
+     */
+    void batchDown(PointExchangeBatchParam param);
+
+    /**
+     * 批量上架
+     * @param param
+     */
+    void batchUp(PointExchangeBatchParam param);
+
+    /**
+     * 积分商城分页列表（用于弹框选择）
+     * @param pageParam
+     * @param searchParam
+     * @return
+     */
+    ShopPointExchangeSelectListVo getSelectPage(PageParam pageParam, ShopPointExchangeSearchParam searchParam);
 }

@@ -2,6 +2,8 @@ package com.niu.shop.service.admin.order;
 
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.shop.service.admin.order.param.ShopInvoiceAddParam;
+import com.niu.shop.service.admin.order.param.ShopInvoiceAuditParam;
 import com.niu.shop.service.admin.order.param.ShopInvoiceParam;
 import com.niu.shop.service.admin.order.param.ShopInvoiceSearchParam;
 import com.niu.shop.service.admin.order.vo.ShopInvoiceInfoVo;
@@ -34,5 +36,17 @@ public interface IShopInvoiceService {
      * @param shopInvoiceParam
      */
     void invoicing(Integer id, ShopInvoiceParam shopInvoiceParam);
+
+    /**
+     * 审核
+     * @param param
+     */
+    void audit(ShopInvoiceAuditParam param);
+
+    /**
+     * 开票
+     * @param param
+     */
+    void add(ShopInvoiceAddParam param);
 
 }

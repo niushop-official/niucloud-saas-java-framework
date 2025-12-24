@@ -142,7 +142,10 @@ public class ShopOrderInfoVo implements Serializable {
         private ShopManjian manjianInfo;
         private Integer formRecordId;
         private Boolean formRecordShow;
-
+        private String expressCompanyName;
+        private String expressNumber;
+        private DeliveryInfo deliveryInfo;
+        private Map<String, String> impulseBuyInfo;
 
         public String getGoodsImageThumbSmall() {
             return CommonUtils.thumbImageSmall(this.siteId, this.getGoodsImage());
@@ -169,6 +172,13 @@ public class ShopOrderInfoVo implements Serializable {
                 return false;
             }
         }
+    }
+
+    @Data
+    public static class DeliveryInfo {
+        private Integer deliveryId;
+        private String expressCompanyName;
+        private String expressNumber;
     }
 
     @Data

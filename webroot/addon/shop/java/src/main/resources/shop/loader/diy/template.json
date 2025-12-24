@@ -31,7 +31,16 @@
 			},
 			"bottomTabBar": {
 				"control": false,
-				"isShow": false
+				"isShow": false,
+				"designNav": {
+					"title": "",
+					"key": ""
+				}
+			},
+			"copyright": {
+				"control": true,
+				"isShow": false,
+				"textColor": "#ccc"
 			}
 		}
 	}

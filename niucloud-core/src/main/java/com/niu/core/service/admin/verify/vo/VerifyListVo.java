@@ -29,6 +29,7 @@ public class VerifyListVo implements Serializable {
     private String relateTag;  // 业务标识
     private MemberBriefInfoVo member; // 会员信息
     private String typeName;
+    private Integer isAdmin;
 
     public String getTypeName() {
         return VerifyTypeEnum.getTypeByName(this.type);

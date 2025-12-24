@@ -43,4 +43,7 @@ public class Verify implements Serializable {
     
     /** 业务标识 */
     private String relateTag;
+
+    /** 是否后台核销 */
+    private Integer isAdmin;
 }

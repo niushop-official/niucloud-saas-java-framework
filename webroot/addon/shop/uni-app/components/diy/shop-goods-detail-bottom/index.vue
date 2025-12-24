@@ -7,10 +7,29 @@
                     <view class="nc-iconfont nc-icon-shouyeV6xx11 text-[36rpx]"></view>
                     <text class="text-[20rpx] mt-[10rpx]">首页</text>
                 </view>
-                <view v-if="menuContent.includes('service')" class="flex flex-col justify-center items-center mr-[38rpx]" @click="redirect({ url: '/app/pages/member/contact' })">
-                    <text class="nc-iconfont text-[36rpx] nc-icon-kefuV6xx-1 text-[#303133]"></text>
-                    <text class="text-[20rpx] mt-[10rpx]">客服</text>
-                </view>
+                <template v-if="menuContent.includes('service')">
+                    <!--  #ifdef H5 -->
+                    <view class="flex flex-col justify-center items-center mr-[38rpx]"
+                        @click="redirect({ url: '/app/pages/member/contact', param: {send_title: sendMessageTitle, send_path: encodeURIComponent(sendMessagePath), send_img: encodeURIComponent(sendMessageImg)} })">
+                        <text class="nc-iconfont text-[36rpx] nc-icon-kefuV6xx-1 text-[#303133]"></text>
+                        <text class="text-[20rpx] mt-[10rpx]">客服</text>
+                    </view>
+                    <!-- #endif -->
+                    <!-- #ifdef MP-WEIXIN -->
+                    <view>
+                        <nc-contact
+                            :send-message-title="sendMessageTitle"
+                            :send-message-path="sendMessagePath"
+                            :send-message-img="sendMessageImg">
+                            <view class="flex flex-col justify-center items-center mr-[38rpx]">
+                                <text class="nc-iconfont nc-icon-kefuV6xx-1 text-[36rpx]"></text>
+                                <text class="text-[20rpx] mt-[10rpx]">客服</text>
+                            </view>
+                        </nc-contact>
+                    </view> 
+                    <!-- #endif -->
+                </template>
+               
                 <view v-if="menuContent.includes('cart')" class="flex flex-col justify-center items-center mr-[38rpx]" @click="redirect({ url: '/addon/shop/pages/goods/cart'})">
                     <view class="iconfont icongouwuche2 text-[38rpx]"></view>
                     <text class="text-[20rpx] mt-[10rpx]">购物车</text>
@@ -23,19 +42,7 @@
                     <text class="nc-iconfont text-[36rpx] nc-icon-fenxiangV6xx text-[#303133]"></text>
                     <text class="text-[20rpx] mt-[10rpx]">分享</text>
                 </view>
-                <!-- #ifdef MP-WEIXIN -->
-                <!-- <view>
-                    <nc-contact
-                        :send-message-title="sendMessageTitle"
-                        :send-message-path="sendMessagePath"
-                        :send-message-img="sendMessageImg">
-                        <view class="flex flex-col justify-center items-center mr-[38rpx]">
-                            <text class="nc-iconfont nc-icon-kefuV6xx-1 text-[36rpx]"></text>
-                            <text class="text-[20rpx] mt-[10rpx]">客服</text>
-                        </view>
-                    </nc-contact>
-                </view> -->
-                <!-- #endif -->
+                
             </view>
             <view class="flex flex-1" v-if="diyComponent.goods.status == 1">
                 <button v-if="diyComponent.goods.is_gift"
@@ -254,7 +261,7 @@ onMounted(() => {
         watch(
             () => diyComponent.value,
             (newValue, oldValue) => {
-                
+
             }
         )
         watch(
@@ -281,7 +288,7 @@ const initFn = () => {
     if (diyComponent.value.type) {
         sendMessagePath.value += '&type=' + diyComponent.value.type;
     }
-    sendMessageImg.value = img(diyComponent.value.goods.goods_cover_thumb_mid) 
+    sendMessageImg.value = img(diyComponent.value.goods.goods_cover_thumb_mid)
     menuContent.value = (typeof diyComponent.value?.menuContent == 'object') ? diyComponent.value?.menuContent : diyComponent.value?.menuContent.split(',');
 }
 

@@ -13,6 +13,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.json.JsonModuleLoader;
+import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.sys.SysExport;
 import com.niu.core.enums.sys.ExportEnum;
 import com.niu.core.mapper.sys.SysExportMapper;
@@ -53,24 +54,15 @@ public class SysExportServiceImpl implements ISysExportService {
         Integer limit = pageParam.getLimit();
 
         QueryWrapper<SysExport> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("site_id", RequestUtils.siteId());
         queryWrapper.orderByDesc("id");
         queryWrapper.like("export_key", searchParam.getExportKey());
 
         if (ObjectUtil.isNotEmpty(searchParam.getExportKey())) {
             queryWrapper.eq("export_status", searchParam.getExportStatus());
         }
-
         if (ObjectUtil.isNotEmpty(searchParam.getCreateTime())) {
-            String[] createTime = searchParam.getCreateTime();
-            long startTime = (createTime[0] == null) ? 0 : DateUtils.StringToTimestamp(createTime[0]);
-            long endTime = (createTime[1] == null) ? 0 : DateUtils.StringToTimestamp(createTime[1]);
-            if (startTime > 0 && endTime > 0) {
-                queryWrapper.between("create_time", startTime, endTime);
-            } else if (startTime > 0 && endTime == 0) {
-                queryWrapper.ge("create_time", startTime);
-            } else if (startTime == 0 && endTime > 0) {
-                queryWrapper.le("create_time", startTime);
-            }
+            QueryMapperUtils.buildByTime(queryWrapper, "create_time", searchParam.getCreateTime());
         }
 
         JSONArray results = JsonModuleLoader.build().mergeResultSet("export/ExportType.json");
@@ -103,12 +95,14 @@ public class SysExportServiceImpl implements ISysExportService {
     public void del(Integer id) {
         SysExport model = sysExportMapper.selectOne(
                 new QueryWrapper<SysExport>()
+                        .eq("site_id", RequestUtils.siteId())
                         .eq("id", id)
                         .last("limit 1"));
-
         Assert.notNull(model, "数据不存在!");
 
         sysExportMapper.delete(new QueryWrapper<SysExport>().eq("id", id));
+
+        coreExportService.deleteExportFile(model.getFilePath());
     }
 
     /**

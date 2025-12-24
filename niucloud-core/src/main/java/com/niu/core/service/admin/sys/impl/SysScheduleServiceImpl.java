@@ -203,6 +203,7 @@ public class SysScheduleServiceImpl implements ISysScheduleService {
         newSysSchedule.setUpdateTime(DateUtils.currTime());
         newSysSchedule.setSiteId(RequestUtils.adminSiteId());
         newSysSchedule.setAddon(jobInfo.getSource());
+        newSysSchedule.setName(jobInfo.getName());
         int result = sysScheduleMapper.insert(newSysSchedule);
         if (result > 0) {
             if (newSysSchedule.getStatus() == 1) {

@@ -2,26 +2,22 @@
     <view :style="warpCss">
         <view :style="maskLayer"></view>
         <view class="diy-active relative">
-            <view v-for="(item,index) in articleList" :key="item.id"
-                class="item flex align-center px-[var(--pad-sidebar-m)] py-[var(--pad-top-m)]" @click="toLink(item.id)"
-                :style="itemCss">
+            <view v-for="item in articleList" :key="item.id" class="item flex align-center px-[var(--pad-sidebar-m)] py-[var(--pad-top-m)]" @click="toLink(item.id)" :style="itemCss">
+<!--                v-if="item.image_thumb_small"-->
                 <view class="w-[260rpx] h-[210rpx] rounded-[var(--goods-rounded-big)] overflow-hidden">
-                    <u--image width="260rpx" height="210rpx" :radius="'var(--goods-rounded-big)'" :src="img(item.image)"
-                        v-if="item.image" model="aspectFill">
+                    <up-image width="260rpx" height="210rpx" :radius="'var(--goods-rounded-big)'" :src="img(item.image)"
+                              v-if="item.image" model="aspectFill">
                         <template #error>
                             <u-icon name="photo" color="var(--text-color-light9)" size="50"></u-icon>
                         </template>
-                    </u--image>
+                    </up-image>
+<!--                     <easy-image class="w-[260rpx] h-[210rpx]" :image-src="item.image_thumb_small" image-class="rounded-[var(&#45;&#45;goods-rounded-big)]" />-->
                 </view>
                 <view class="flex-1 flex flex-col justify-between ml-[20rpx] py-[4rpx]">
-                    <view class="text-[28rpx] leading-[36rpx] text-[#333] multi-hidden"
-                        :style="{ color: diyComponent.textColor }">{{ item.title }}</view>
-                    <view class="text-[24rpx] truncate mb-[auto] mt-[14rpx] text-[#999]"
-                        style="width: calc(750rpx - 260rpx - var(--pad-sidebar-m) - var(--pad-sidebar-m));">{{
-                        item.summary }}</view>
+                    <view class="text-[28rpx] leading-[36rpx] text-[#333] multi-hidden" :style="{ color: diyComponent.textColor }">{{ item.title }}</view>
+                    <view class="text-[24rpx] truncate mb-[auto] mt-[14rpx] text-[#999]" style="width: calc(750rpx - 260rpx - var(--pad-sidebar-m) - var(--pad-sidebar-m));">{{ item.summary }}</view>
                     <view class="text-[22rpx] text-[#999] flex items-center mt-[10rpx]">
-                        <text
-                            class="nc-iconfont nc-icon-a-shijianV6xx-36 mr-[6rpx] font-500 -mb-[4rpx] !text-[20rpx]"></text>
+                        <text class="nc-iconfont nc-icon-a-shijianV6xx-36 mr-[6rpx] font-500 -mb-[4rpx] !text-[20rpx]"></text>
                         <text>{{ item.create_time }}</text>
                     </view>
                 </view>
@@ -33,7 +29,7 @@
 <script setup lang="ts">
 // 文章
 import { ref, computed, watch, onMounted, nextTick, getCurrentInstance } from 'vue';
-import { redirect, img } from '@/utils/common';
+import { redirect, img, timeStampTurnTime } from '@/utils/common';
 import useDiyStore from '@/app/stores/diy';
 import { getArticleAll } from '@/addon/cms/api/article';
 
@@ -50,7 +46,7 @@ const diyComponent = computed(() => {
 })
 
 const warpCss = computed(() => {
-    var style = '';
+    let style = '';
     style += 'position:relative;';
     if (diyComponent.value.componentStartBgColor) {
         if (diyComponent.value.componentStartBgColor && diyComponent.value.componentEndBgColor) style += `background:linear-gradient(${ diyComponent.value.componentGradientAngle },${ diyComponent.value.componentStartBgColor },${ diyComponent.value.componentEndBgColor });`;
@@ -71,7 +67,7 @@ const warpCss = computed(() => {
 
 // 背景图加遮罩层
 const maskLayer = computed(() => {
-    var style = '';
+    let style = '';
     if (diyComponent.value.componentBgUrl) {
         style += 'position:absolute;top:0;width:100%;';
         style += `background: rgba(0,0,0,${ diyComponent.value.componentBgAlpha / 10 });`;
@@ -87,7 +83,7 @@ const maskLayer = computed(() => {
 });
 
 const itemCss = computed(() => {
-    var style = '';
+    let style = '';
     if (diyComponent.value.elementBgColor) style += 'background-color:' + diyComponent.value.elementBgColor + ';';
     if (diyComponent.value.topElementRounded) style += 'border-top-left-radius:' + diyComponent.value.topElementRounded * 2 + 'rpx;';
     if (diyComponent.value.topElementRounded) style += 'border-top-right-radius:' + diyComponent.value.topElementRounded * 2 + 'rpx;';
@@ -129,11 +125,12 @@ onMounted(() => {
     refresh();
     // 装修模式下刷新
     if (diyStore.mode == 'decorate') {
+        const date = new Date();
         let obj = {
             image: "",
             summary: "文章摘要",
             title: "文章标题",
-            create_time: "2023-03-28 09:00:00"
+            create_time: timeStampTurnTime(date.getTime()/1000)
         };
         articleList.value.push(obj);
         articleList.value.push(obj);

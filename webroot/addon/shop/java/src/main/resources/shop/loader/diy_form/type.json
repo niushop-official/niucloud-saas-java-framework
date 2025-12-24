@@ -1,14 +1,14 @@
 {
-  "DIY_FORM_GOODS_DETAIL": {
-    "title": "商品详情",
-    "preview": "addon/shop/diy_form/goods_detail_preview.png",
-    "sort": 10005,
-    "addon": "shop"
-  },
-  "DIY_FROM_ORDER_PAYMENT": {
-    "title": "订单付款",
-    "preview": "addon/shop/diy_form/order_payment_preview.png",
-    "sort": 10006,
-    "addon": "shop"
-  }
+	"DIY_FORM_GOODS_DETAIL": {
+		"title": "商品表单",
+		"preview": "addon/shop/diy_form/goods_detail_preview.jpg",
+		"sort": 10005,
+		"addon": "shop"
+	},
+	"DIY_FROM_ORDER_PAYMENT": {
+		"title": "待付款表单",
+		"preview": "addon/shop/diy_form/order_payment_preview.jpg",
+		"sort": 10006,
+		"addon": "shop"
+	}
 }

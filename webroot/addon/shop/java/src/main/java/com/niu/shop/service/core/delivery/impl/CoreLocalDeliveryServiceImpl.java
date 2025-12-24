@@ -6,8 +6,11 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.entity.member.MemberAddress;
+import com.niu.core.service.core.sys.ICoreConfigService;
 import com.niu.shop.entity.delivery.ShopDeliveryLocalDelivery;
+import com.niu.shop.enums.delivery.ThirdTypeEnum;
 import com.niu.shop.enums.order.OrderDeliveryTypeEnum;
 import com.niu.shop.mapper.delivery.ShopDeliveryLocalDeliveryMapper;
 import com.niu.shop.service.core.delivery.ICoreLocalDeliveryService;
@@ -21,14 +24,19 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CoreLocalDeliveryServiceImpl implements ICoreLocalDeliveryService {
 
     @Resource
     ShopDeliveryLocalDeliveryMapper shopDeliveryLocalDeliveryMapper;
+
+    @Resource
+    private ICoreConfigService coreConfigService;
 
     @Override
     public void calculate(OrderCreateDataVo vo) {
@@ -61,6 +69,28 @@ public class CoreLocalDeliveryServiceImpl implements ICoreLocalDeliveryService {
         }
 
         feeCalculate(vo, goodsMoney, goodsWeight);
+    }
+
+    @Override
+    public JSONObject getConfig(Integer siteId) {
+        JSONObject data = coreConfigService.getConfigValue(siteId, "SHOP_THREE_PARTY_DELIVERY_CONFIG");
+        for (Map.Entry<String, ThirdTypeEnum.ThirdTypeValue> entry : ThirdTypeEnum.getThirdType("").entrySet()) {
+            String type = entry.getKey();
+            ThirdTypeEnum.ThirdTypeValue item = entry.getValue();
+            if (JSONUtil.isNull(data) || !JSONUtil.toJsonStr(data).contains(type)) {
+                Map<String, String> temp = new HashMap<>();
+                for (String column : item.getColumn()) {
+                    temp.put(column, "");
+                }
+                data.put(type, temp);
+            }
+        }
+        return data;
+    }
+
+    @Override
+    public void setConfig(JSONObject config, Integer siteId) {
+        coreConfigService.setConfig(siteId, "SHOP_THREE_PARTY_DELIVERY_CONFIG", config);
     }
 
     private void feeCalculate(OrderCreateDataVo vo, BigDecimal goodsMoney, BigDecimal goodsWeight) {

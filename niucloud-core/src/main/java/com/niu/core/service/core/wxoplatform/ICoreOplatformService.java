@@ -1,5 +1,7 @@
 package com.niu.core.service.core.wxoplatform;
 
+import me.chanjar.weixin.open.bean.result.WxOpenVersioninfoResult;
+
 public interface ICoreOplatformService {
 
     /**
@@ -8,4 +10,6 @@ public interface ICoreOplatformService {
      * @return
      */
     Integer getSiteIdByAuthorizerAppid(String appid);
+
+    WxOpenVersioninfoResult weappVersion(Integer siteId);
 }

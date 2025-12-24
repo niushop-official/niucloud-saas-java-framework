@@ -2,30 +2,47 @@ package com.niu.shop.service.core.order.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.utils.NoticeUtils;
+import com.niu.core.common.utils.StringUtils;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.service.core.member.ICoreMemberService;
+import com.niu.core.service.core.notice.ICoreNoticeService;
+import com.niu.core.service.core.sys.ICorePrinterService;
+import com.niu.core.service.core.sys.param.SysPrinterPrintTicketParam;
 import com.niu.shop.entity.cart.ShopCart;
 import com.niu.shop.entity.order.ShopInvoice;
 import com.niu.shop.entity.order.ShopOrder;
 import com.niu.shop.entity.order.ShopOrderDiscount;
 import com.niu.shop.entity.order.ShopOrderGoods;
 import com.niu.shop.entity.order.config.ShopOrderInvoice;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.enums.order.*;
 import com.niu.shop.mapper.cart.ShopCartMapper;
+import com.niu.shop.mapper.goods.ShopGoodsMapper;
+import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.mapper.order.ShopInvoiceMapper;
 import com.niu.shop.mapper.order.ShopOrderDiscountMapper;
 import com.niu.shop.mapper.order.ShopOrderGoodsMapper;
 import com.niu.shop.mapper.order.ShopOrderMapper;
 import com.niu.shop.service.admin.marketing.IShopDiscountService;
+import com.niu.shop.service.core.goods.ICoreGoodsSaleNumService;
 import com.niu.shop.service.core.goods.ICoreGoodsService;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
+import com.niu.shop.service.core.goods.ICoreGoodsStockService;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
+import com.niu.shop.service.core.goods.param.GoodsStatParam;
 import com.niu.shop.service.core.marketing.ICoreCouponMemberService;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
+import com.niu.shop.service.core.marketing.ICoreShopNewcomerService;
+import com.niu.shop.service.core.marketing.param.ShopNewcomerActiveJoinParam;
 import com.niu.shop.service.core.order.*;
 import com.niu.shop.service.core.order.param.*;
 import com.niu.shop.service.core.order.vo.OrderConfigVo;
@@ -33,14 +50,12 @@ import com.niu.shop.service.core.order.vo.OrderCreateDataVo;
 import com.niu.shop.service.core.order.vo.OrderGoodsVo;
 import com.niu.shop.service.core.shop.ICoreStatService;
 import com.niu.shop.service.core.shop.param.AddStatParam;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -94,6 +109,21 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
     @Resource
     ICoreGoodsStatService coreGoodsStatService;
 
+    @Resource
+    private ICoreGoodsStockService coreGoodsStockService;
+
+    @Resource
+    private ICoreGoodsSaleNumService coreGoodsSaleNumService;
+
+    @Resource
+    private ICoreShopNewcomerService coreShopNewcomerService;
+
+    @Resource
+    private ICoreNoticeService coreNoticeService;
+
+    @Resource
+    private ICorePrinterService corePrinterService;
+
     /**
      * 订单关闭之后
      *
@@ -106,13 +136,35 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         // 发票失效
         if (order.getInvoiceId() > 0) coreInvoiceService.close(order.getInvoiceId());
 
-        List<ShopOrderGoods> orderGoods = shopOrderGoodsMapper.selectList(new QueryWrapper<ShopOrderGoods>().eq("order_id", order.getOrderId()));
-
+        List<ShopOrderGoods> orderGoods = shopOrderGoodsMapper.selectList(new LambdaQueryWrapper<ShopOrderGoods>()
+                .eq(ShopOrderGoods::getOrderId, order.getOrderId())
+        );
+        //返还商品库存
+        Map<Integer, Integer> goodsStoreMap = new HashMap<>();
+        Map<Integer, Integer> skuStoreMap = new HashMap<>();
+        //累减销量
+        Map<Integer, Integer> goodsSaleMap = new HashMap<>();
+        Map<Integer, Integer> skuSaleMap = new HashMap<>();
+        boolean shouldReduceSales = order.getPayTime() == null || order.getPayTime() <= 0;
         for (ShopOrderGoods item : orderGoods) {
-            // 扣除销量
-            coreGoodsService.decSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
-            // 返还库存
-            coreGoodsService.incStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+            int goodsId = item.getGoodsId();
+            int skuId = item.getSkuId();
+            int num = item.getNum();
+            if (item.getIsGift().equals(0)) {
+                goodsStoreMap.merge(goodsId, num, Integer::sum);
+                skuStoreMap.merge(skuId, num, Integer::sum);
+            }
+            if (shouldReduceSales) {
+                goodsSaleMap.merge(goodsId, num, Integer::sum);
+                skuSaleMap.merge(skuId, num, Integer::sum);
+                GoodsStatParam goodsStatParam = GoodsStatParam.builder()
+                        .goodsId(goodsId)
+                        .saleNum(num)
+                        .siteId(item.getSiteId())
+                        .time(order.getCreateTime())
+                        .build();
+                coreGoodsStatService.decStat(goodsStatParam);
+            }
         }
 
         // 添加订单日志
@@ -125,15 +177,41 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         coreOrderLogService.add(logParam);
 
         // 返还使用的优惠
-        List<ShopOrderDiscount> orderDiscount = shopOrderDiscountMapper.selectList(new QueryWrapper<ShopOrderDiscount>().eq("order_id", order.getOrderId()));
+        List<ShopOrderDiscount> orderDiscount = shopOrderDiscountMapper.selectList(new LambdaQueryWrapper<ShopOrderDiscount>()
+            .eq(ShopOrderDiscount::getOrderId, order.getOrderId()));
+
         if (ObjectUtil.isNotEmpty(orderDiscount)) {
-            for (ShopOrderDiscount item : orderDiscount) {
-                switch (item.getDiscountType()) {
-                    case "coupon":
-                        coreCouponMemberService.recover(item.getDiscountTypeId());
-                        break;
+            Map<String, List<Integer>> discountMap = new HashMap<>();
+
+            for (ShopOrderDiscount shopOrderDiscount : orderDiscount) {
+                String type = shopOrderDiscount.getDiscountType();
+                Integer id = shopOrderDiscount.getDiscountTypeId();
+                discountMap.computeIfAbsent(type, k -> new ArrayList<>()).add(id);
+            }
+
+            for (String type : discountMap.keySet()) {
+                List<Integer> ids = discountMap.get(type);
+                if (CollectionUtils.isNotEmpty(ids)) {
+                    switch (type) {
+                        case "coupon":
+                            coreCouponMemberService.recover(ids);
+                            break;
+                    }
                 }
             }
+        }
+
+        coreGoodsStockService.batchUpdateStock(true, goodsStoreMap, skuStoreMap);
+        coreGoodsSaleNumService.batchUpdateSaleNum(false, goodsSaleMap, skuSaleMap);
+
+        if (Objects.equals(order.getActivityType(), MarketingActivityTypeEnum.NEWCOMER_DISCOUNT.getType())) {
+            ShopNewcomerActiveJoinParam joinParam = ShopNewcomerActiveJoinParam.builder()
+                    .siteId(order.getSiteId())
+                    .memberId(order.getMemberId())
+                    .isJoin(0)
+                    .orderId(order.getOrderId())
+                    .build();
+            coreShopNewcomerService.activeJoin(joinParam);
         }
     }
 
@@ -149,52 +227,60 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
         try {
             // 创建发票
             this.createInvoice(vo);
-
+            Map<Integer, Integer> goodsMap = new HashMap<>();
+            Map<Integer, Integer> skuMap = new HashMap<>();
+            List<Integer> newcomerGoodsIds = new ArrayList<>();
+            List<Integer> newcomerSkuIds = new ArrayList<>();
             for (OrderCreateDataVo.Sku item : vo.getGoodsData().values()) {
-                // 增加销量
-                coreGoodsService.incSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
-                // 减少库存
-                coreGoodsService.decStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
-
-                GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
-                goodsAddStatParam.setSiteId(item.getSiteId());
-                goodsAddStatParam.setGoodsId(item.getGoodsId());
-                goodsAddStatParam.setSaleNum(item.getNum());
-                coreGoodsStatService.addStat(goodsAddStatParam);
+                goodsMap.merge(item.getGoodsId(), item.getNum(), Integer::sum);
+                skuMap.merge(item.getSkuId(), item.getNum(), Integer::sum);
+                GoodsAddStatParam goodsStatParam = GoodsAddStatParam.builder()
+                        .goodsId(item.getGoodsId())
+                        .saleNum(item.getNum())
+                        .siteId(item.getSiteId())
+                        .build();
+                coreGoodsStatService.addStat(goodsStatParam);
+                if (StringUtils.isNotEmpty(item.getExtend())){
+                    JSONObject extend = JSONUtil.parseObj(item.getExtend());
+                    if ((extend.containsKey("is_newcomer") || extend.containsKey("isNewcomer"))
+                            && (ObjectUtil.isNotEmpty(extend.get("is_newcomer")) || ObjectUtil.isNotEmpty(extend.get("isNewcomer")))){
+                        newcomerGoodsIds.add(item.getGoodsId());
+                        newcomerSkuIds.add(item.getSkuId());
+                    }
+                }
             }
 
-            if(ObjectUtil.isNotEmpty(vo.getImpulseBuyList()))
-            {
-                for (OrderCreateDataVo.Sku item : vo.getImpulseBuyList().values()) {
-                    // 增加销量
-                    coreGoodsService.incSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
-                    // 减少库存
-                    coreGoodsService.decStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
 
-                    GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
-                    goodsAddStatParam.setSiteId(item.getSiteId());
-                    goodsAddStatParam.setGoodsId(item.getGoodsId());
-                    goodsAddStatParam.setSaleNum(item.getNum());
+            if (ObjectUtil.isNotEmpty(vo.getImpulseBuyList())) {
+                for (OrderCreateDataVo.Sku item : vo.getImpulseBuyList().values()) {
+                    goodsMap.merge(item.getGoodsId(), item.getNum(), Integer::sum);
+                    skuMap.merge(item.getSkuId(), item.getNum(), Integer::sum);
+
+                    GoodsAddStatParam goodsAddStatParam = GoodsAddStatParam.builder()
+                            .goodsId(item.getGoodsId())
+                            .saleNum(item.getNum())
+                            .siteId(item.getSiteId())
+                            .build();
                     coreGoodsStatService.addStat(goodsAddStatParam);
                 }
             }
 
             //赠品同步增加销量减少库存
-            if(ObjectUtil.isNotEmpty(vo.getGiftGoods()))
-            {
+            if (ObjectUtil.isNotEmpty(vo.getGiftGoods())) {
                 for (OrderCreateDataVo.Sku item : vo.getGiftGoods().values()) {
-                    // 增加销量
-                    coreGoodsService.incSaleNum(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
-                    // 减少库存
-                    coreGoodsService.decStock(item.getSiteId(), item.getGoodsId(), item.getSkuId(), item.getNum());
+                    goodsMap.merge(item.getGoodsId(), item.getNum(), Integer::sum);
+                    skuMap.merge(item.getSkuId(), item.getNum(), Integer::sum);
 
-                    GoodsAddStatParam goodsAddStatParam = new GoodsAddStatParam();
-                    goodsAddStatParam.setSiteId(item.getSiteId());
-                    goodsAddStatParam.setGoodsId(item.getGoodsId());
-                    goodsAddStatParam.setSaleNum(item.getNum());
+                    GoodsAddStatParam goodsAddStatParam = GoodsAddStatParam.builder()
+                            .goodsId(item.getGoodsId())
+                            .saleNum(item.getNum())
+                            .siteId(item.getSiteId())
+                            .build();
                     coreGoodsStatService.addStat(goodsAddStatParam);
                 }
             }
+            coreGoodsStockService.batchUpdateStock(false, goodsMap, skuMap);
+            coreGoodsSaleNumService.batchUpdateSaleNum(true, goodsMap, skuMap);
 
             // 清除购物车
             if (ObjectUtil.isNotEmpty(vo.getCartIds())) {
@@ -227,10 +313,24 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
             AddStatParam statParam = new AddStatParam();
             statParam.setOrderNum(1);
             coreStatService.addStat(vo.getSiteId(), statParam);
+
+            if (shopOrderMapper.selectById(vo.getOrderId()).getActivityType().equals(MarketingActivityTypeEnum.NEWCOMER_DISCOUNT.getType())){
+                ShopNewcomerActiveJoinParam joinParam = ShopNewcomerActiveJoinParam.builder()
+                        .siteId(vo.getSiteId())
+                        .memberId(vo.getMemberId())
+                        .isJoin(1)
+                        .orderId(vo.getOrderId())
+                        .goodsIds(newcomerGoodsIds)
+                        .skuIds(newcomerSkuIds)
+                        .build();
+                coreShopNewcomerService.activeJoin(joinParam);
+            }
+
         } catch (Exception e) {
             log.error("订单AfterShopOrderCreate失败");
             e.printStackTrace();
         }
+        //coreNoticeService.send(vo.getSiteId(), "shop_order_pay_remind", Map.of("order_id", vo.getOrderId()));
     }
 
     /**
@@ -240,12 +340,12 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
      */
     private void createInvoice(OrderCreateDataVo vo) {
         ShopOrderInvoice config = coreOrderConfigService.invoice(vo.getSiteId());
-        if (config.getIsInvoice().equals("1") && ObjectUtil.isNotEmpty(vo.getInvoice().getHeaderName())) {
+        if (config.getIsInvoice().equals("1") && vo.getInvoice() != null && ObjectUtil.isNotEmpty(vo.getInvoice().getHeaderName())) {
             ShopInvoice model = new ShopInvoice();
             BeanUtil.copyProperties(vo.getInvoice(), model);
             model.setSiteId(vo.getSiteId());
             model.setMemberId(vo.getMemberId());
-            model.setTradeId(vo.getOrderId());
+            model.setTradeId(vo.getOrderId().toString());
             model.setTradeType(vo.getOrderType());
             model.setMoney(vo.getBasic().getOrderMoney());
             model.setStatus(InvoiceStatusEnum.WAIT_OPEN.getStatus());
@@ -314,6 +414,21 @@ public class CoreOrderEventServiceImpl implements ICoreOrderEventService {
 
         //满减赠送赠品
         manjianService.giftGrant(order);
+
+        // 小票打印
+        try {
+            SysPrinterPrintTicketParam printParam = new SysPrinterPrintTicketParam();
+            printParam.setSiteId(order.getSiteId());
+            printParam.setType("shopGoodsOrder");
+            printParam.setTrigger("pay_after");
+            SysPrinterPrintTicketParam.Business business = new SysPrinterPrintTicketParam.Business();
+            business.setOrderId(order.getOrderId());
+            printParam.setBusiness(business);
+            corePrinterService.printTicket(printParam);
+        } catch (Exception e) {
+            log.error("小票打印失败");
+            e.printStackTrace();
+        }
     }
 
     /**

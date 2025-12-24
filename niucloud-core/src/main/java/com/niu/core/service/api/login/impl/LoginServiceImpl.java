@@ -24,6 +24,7 @@ import com.niu.core.service.api.login.param.*;
 import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.login.vo.MobileCodeCacheVo;
 import com.niu.core.service.api.login.vo.SendMobileCodeVo;
+import com.niu.core.service.api.wechat.IWechatService;
 import com.niu.core.service.core.member.ICoreMemberConfigService;
 import com.niu.core.service.core.notice.ICoreNoticeService;
 import org.springframework.beans.BeanUtils;
@@ -53,6 +54,13 @@ public class LoginServiceImpl implements ILoginService {
     private Cached cached;
 
     IRegisterService registerService;
+
+    IWechatService wechatService;
+
+    @Resource
+    public void setWechatService(@Lazy IWechatService wechatService) {
+        this.wechatService = wechatService;
+    }
 
     @Resource
     public void setRegisterService(@Lazy IRegisterService registerService) {
@@ -156,8 +164,16 @@ public class LoginServiceImpl implements ILoginService {
      * 获取登录注册配置
      * @return
      */
-    public LoginConfigVo getLoginConfig() {
-        return coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
+    public LoginConfigVo getLoginConfig(String url) {
+        LoginConfigVo config = coreMemberConfigService.getLoginConfig(RequestUtils.siteId());
+        if (ObjectUtil.isNotEmpty(url)) {
+            try {
+                wechatService.getJssdkConfig(url);
+            } catch (Exception e) {
+                config.setWechatError(e.getMessage());
+            }
+        }
+        return config;
     }
 
     /**

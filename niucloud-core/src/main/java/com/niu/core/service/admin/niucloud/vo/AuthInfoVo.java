@@ -10,7 +10,7 @@ public class AuthInfoVo {
     private static final long serialVersionUID = 1L;
 
     @Data
-    public class AuthInfo {
+    public static class AuthInfo {
         private Boolean addressType;
         private String authCode;
         private String companyName;

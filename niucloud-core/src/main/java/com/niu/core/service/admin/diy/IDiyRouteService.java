@@ -1,5 +1,6 @@
 package com.niu.core.service.admin.diy;
 
+import cn.hutool.json.JSONObject;
 import com.niu.core.service.admin.diy.param.DiyRouteSearchParam;
 import com.niu.core.service.admin.diy.param.DiyRouteShareParam;
 import com.niu.core.service.admin.diy.vo.DiyRouteInfoVo;
@@ -33,4 +34,5 @@ public interface IDiyRouteService {
      */
     void modifyShare(DiyRouteShareParam editParam);
 
+    JSONObject getApps();
 }

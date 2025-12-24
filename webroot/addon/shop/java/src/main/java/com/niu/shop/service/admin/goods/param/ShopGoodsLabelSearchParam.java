@@ -14,4 +14,8 @@ public class ShopGoodsLabelSearchParam implements Serializable {
 
     private Integer groupId;
 
+    private String order;
+
+    private String sort = "asc";
+
 }

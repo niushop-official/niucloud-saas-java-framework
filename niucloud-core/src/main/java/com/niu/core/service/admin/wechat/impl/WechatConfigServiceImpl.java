@@ -1,11 +1,13 @@
 package com.niu.core.service.admin.wechat.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.entity.wechat.WechatReply;
 import com.niu.core.enums.channel.WechatEncryptionTypeEnum;
 import com.niu.core.mapper.wechat.WechatReplyMapper;
@@ -49,7 +51,10 @@ public class WechatConfigServiceImpl implements IWechatConfigService {
      */
     @Override
     public WechatConfigVo getWechatConfig() {
-        return coreWechatConfigService.getWechatConfig(RequestUtils.siteId());
+        WechatConfigVo wechatConfigVo = coreWechatConfigService.getWechatConfig(RequestUtils.siteId());
+        if (ObjectUtil.isNotEmpty(wechatConfigVo.getAppSecret())) wechatConfigVo.setAppSecret(StringUtils.ENCRYPTSTR);
+        if (ObjectUtil.isNotEmpty(wechatConfigVo.getEncodingAesKey())) wechatConfigVo.setEncodingAesKey(StringUtils.ENCRYPTSTR);
+        return wechatConfigVo;
     }
 
     /**
@@ -59,6 +64,9 @@ public class WechatConfigServiceImpl implements IWechatConfigService {
      */
     @Override
     public void setWechatConfig(WechatConfigParam wechatConfigParam) {
+        WechatConfigVo wechatConfigVo = coreWechatConfigService.getWechatConfig(RequestUtils.siteId());
+        if (wechatConfigParam.getAppSecret().equals(StringUtils.ENCRYPTSTR)) wechatConfigParam.setAppSecret(wechatConfigVo.getAppSecret());
+        if (wechatConfigParam.getEncodingAesKey().equals(StringUtils.ENCRYPTSTR)) wechatConfigParam.setEncodingAesKey(wechatConfigVo.getEncodingAesKey());
         coreWechatConfigService.setWechatConfig(RequestUtils.siteId(), wechatConfigParam);
     }
 

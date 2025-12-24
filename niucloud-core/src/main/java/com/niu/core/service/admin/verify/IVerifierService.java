@@ -23,6 +23,8 @@ public interface IVerifierService {
      */
     PageResult<VerifierListVo> list(PageParam pageParam, VerifierSearchParam searchParam);
 
+    VerifierListVo detail(Integer id);
+
     /**
      * 全部核销员
      * @return
@@ -34,6 +36,12 @@ public interface IVerifierService {
      * @param addParam 添加参数
      */
     void add(VerifierParam addParam);
+
+    /**
+     * 核销员修改
+     * @param editParam
+     */
+    void edit(Integer id, VerifierParam editParam);
 
     /**
      * 核销员删除

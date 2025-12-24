@@ -21,7 +21,7 @@ public class StoreListVo implements Serializable {
     private String longitude; // 经度
     private String latitude; // 纬度
     private String tradeTime; // 营业时间
-    private double distance;
+    private Integer distance;
     private List<String> timeWeek; //自定义的营业时间["0","1","2","3","4","5","6"]周日-周六
     private List<TradeTimeItemParam> tradeTimeJson; //营业时间JSON
     private Integer timeInterval; //时段设置（分钟）

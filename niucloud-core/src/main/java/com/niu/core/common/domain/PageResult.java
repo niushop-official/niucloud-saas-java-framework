@@ -84,7 +84,7 @@ public class PageResult<E> {
      * @param limit 数量
      */
     public static <E> PageResult<E> build(long page, long limit) {
-        return new PageResult<>(page, limit);
+        return new PageResult<>(page, limit, 0, List.of());
     }
 
     /**

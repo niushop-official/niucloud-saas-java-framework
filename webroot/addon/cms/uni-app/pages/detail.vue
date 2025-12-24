@@ -53,7 +53,6 @@ import { getArticleDetail, visit } from '@/addon/cms/api/article';
 import { useShare } from '@/hooks/useShare'
 
 const { setShare } = useShare()
-
 const articleDetail: any = ref<Array<any>>([]);
 const loading = ref<boolean>(true);
 let style = {
@@ -95,7 +94,6 @@ onLoad((option: any) => {
 })
 const  visitFn = (id: number)=>{
     visit(id).then((res) =>{
-
     })
 }
 </script>

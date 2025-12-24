@@ -15,4 +15,6 @@ public class WeappVersionAddParam implements Serializable {
 
     private String desc = "";
 
+    private String version = "";
+
 }

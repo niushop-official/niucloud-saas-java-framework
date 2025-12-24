@@ -1,7 +1,7 @@
 <template>
     <view :style="themeColor()">
         <!-- #ifdef MP-WEIXIN || APP-PLUS -->
-        <top-tabbar :data="topTabbarData" scrollBool="1" :isBack="false" />
+        <top-tabbar :data="topTabbarData" scrollBool="1" :isBack="false" v-if="!config.search?.control" />
         <!-- #endif -->
         <view class="relative">
             <category-template-one-one class="category" v-if="config.level===1 && config.template === 'style-1'" :categoryId="categoryId" :config="config" />

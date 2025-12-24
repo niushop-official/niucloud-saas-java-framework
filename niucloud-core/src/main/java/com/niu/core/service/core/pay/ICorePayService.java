@@ -41,4 +41,10 @@ public interface ICorePayService {
     void closeByTrade(Integer siteId, String tradeType, Integer tradeId);
 
     List<PayTypeVo> getPayTypeByTrade(Integer siteId, String tradeType, ChannelEnum channel);
-    Pay create (Integer siteId, String mainType, Integer mainId, BigDecimal money, String tradeType, Integer tradeId, String body);}
+
+    String create (Integer siteId, String mainType, Integer mainId, BigDecimal money, String tradeType, Integer tradeId, String body);
+
+    void paySuccess(Pay pay, PayNotifyParam param);
+
+    void payClose(Integer siteId, Pay pay);
+}

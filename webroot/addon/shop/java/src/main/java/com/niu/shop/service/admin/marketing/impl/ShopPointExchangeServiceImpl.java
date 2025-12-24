@@ -4,8 +4,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
@@ -15,7 +19,6 @@ import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
-import com.niu.core.enums.upload.UploadThumbTypeEnum;
 import com.niu.core.service.core.sys.ICoreUploadService;
 import com.niu.shop.entity.active.ShopActive;
 import com.niu.shop.entity.active.ShopActiveGoods;
@@ -29,16 +32,15 @@ import com.niu.shop.enums.active.ActiveTypeEnum;
 import com.niu.shop.enums.marketing.ShopPointExchangeStatusEnum;
 import com.niu.shop.enums.marketing.ShopPointExchangeTypeEnum;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
+import com.niu.shop.mapper.active.ShopActiveMapper;
 import com.niu.shop.mapper.exchange.ShopPointExchangeMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
 import com.niu.shop.service.admin.marketing.IShopPointExchangeService;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeEditStatusParam;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeModifySortParam;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeParam;
-import com.niu.shop.service.admin.marketing.param.ShopPointExchangeSearchParam;
+import com.niu.shop.service.admin.marketing.param.*;
 import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeInfoVo;
 import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeListVo;
+import com.niu.shop.service.admin.marketing.vo.ShopPointExchangeSelectListVo;
 import com.niu.shop.service.core.marketing.ICoreActiveService;
 import com.niu.shop.service.core.marketing.vo.ProductDetail;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +49,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.Resource;
+
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,6 +83,9 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
     @Resource
     ICoreUploadService coreUploadService;
+
+    @Resource
+    ShopActiveMapper shopActiveMapper;
 
     @Lazy
     @Resource
@@ -157,6 +165,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
         if (ShopPointExchangeTypeEnum.GOODS.getType().equals(vo.getType())) {
             List<ProductDetail> productDetails = JSONArray.parseArray(vo.getProductDetail(), ProductDetail.class);
+            Map<Integer, ProductDetail> productDetailsMap = productDetails.stream().collect(Collectors.toMap(ProductDetail::getSkuId, item -> item));
             ProductDetail productDetail = Optional.ofNullable(CollectionUtil.get(productDetails, 0)).orElse(new ProductDetail());
 
             // --- goods list ---
@@ -169,6 +178,12 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
                     .map(goodsSku -> {
                         ShopPointExchangeInfoVo.GoodsSku goodsSkuVo = new ShopPointExchangeInfoVo.GoodsSku();
                         BeanUtils.copyProperties(goodsSku, goodsSkuVo);
+                        if (productDetailsMap.get(goodsSku.getSkuId()) != null) {
+                            BeanUtils.copyProperties(productDetailsMap.get(goodsSku.getSkuId()), goodsSkuVo);
+                            goodsSkuVo.setIsEnabled(1);
+                        } else {
+                            goodsSkuVo.setIsEnabled(0);
+                        }
                         goodsSkuVo.setGoodsPrice(goodsSku.getPrice());
                         goodsSkuVo.setGoodsStock(goodsSku.getStock());
                         return goodsSkuVo;
@@ -195,19 +210,6 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
             // --- goods price ---
             goodsSkuOptional.ifPresent(goodsSku -> vo.getGoodsInfo().setGoodsPrice(goodsSkuOptional.get().getGoodsPrice()));
-
-            // --- is enable ---
-            for (ShopPointExchangeInfoVo.GoodsSku goodsSku : vo.getGoodsList()) {
-                Optional<ProductDetail> first = productDetails.stream().filter(detail -> Objects.equals(detail.getSkuId(), goodsSku.getSkuId())).findFirst();
-
-                if (first.isPresent()) {
-                    goodsSku.setIsEnabled(1);
-                    BeanUtils.copyProperties(first.get(), goodsSku);
-                    continue;
-                }
-
-                goodsSku.setIsEnabled(0);
-            }
         }
 
         return vo;
@@ -379,6 +381,104 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
         shopPointExchangeMapper.updateById(info);
     }
 
+    @Override
+    public void afterGoodsEdit(ShopPointExchange shopPointExchangeInfo, Integer status, Map<Integer, ShopGoodsSku> skuMap) {
+        ShopPointExchangeParam shopPointExchangeParam = new ShopPointExchangeParam();
+        LambdaUpdateWrapper<ShopPointExchange> updateWrapper = new LambdaUpdateWrapper<ShopPointExchange>();
+        if (Objects.equals(status, 0)){
+            shopPointExchangeParam.setStatus(status);
+            updateWrapper.set(ShopPointExchange::getStatus, status);
+        }
+        if (!skuMap.isEmpty()){
+            String productDetail = shopPointExchangeInfo.getProductDetail();
+            cn.hutool.json.JSONArray jsonArray = JSONUtil.parseArray(productDetail);
+
+            for (int i = 0; i < jsonArray.size(); i++) {
+                JSONObject detail = jsonArray.getJSONObject(i);
+                Integer stock = detail.getInt("stock", 0);
+                Integer skuId = detail.getInt("sku_id", 0);
+                if (skuId == 0) {
+                    continue;
+                }
+                Integer skuStock = skuMap.get(skuId).getStock();
+                detail.set("stock", stock > skuStock ? skuStock : stock);
+            }
+            shopPointExchangeParam.setType(shopPointExchangeInfo.getType());
+            shopPointExchangeParam.setProductDetail(jsonArray.toString());
+            updateWrapper.set(ShopPointExchange::getType, shopPointExchangeParam.getType());
+            updateWrapper.set(ShopPointExchange::getProductDetail, shopPointExchangeParam.getProductDetail());
+            verifyData(shopPointExchangeParam);
+        }
+        updateWrapper.eq(ShopPointExchange::getId, shopPointExchangeInfo.getId());
+        shopPointExchangeMapper.update(updateWrapper);
+    }
+
+    @Override
+    public void batchDelete(PointExchangeBatchParam param) {
+        List<ShopPointExchange> pointExchangeList = shopPointExchangeMapper.selectList(new QueryWrapper<ShopPointExchange>().eq("site_id", RequestUtils.siteId()).in("id", param.getIds()));
+
+        List<Integer> goodsIds = new ArrayList<>();
+
+        pointExchangeList.stream().forEach(pointExchange -> {
+            if (pointExchange.getStatus() == ShopPointExchangeStatusEnum.UP.getStatus()) {
+                throw new RuntimeException("存在未下架活动");
+            }
+            List<ProductDetail> productDetails = JSONArray.parseArray(pointExchange.getProductDetail(), ProductDetail.class);
+            goodsIds.add(productDetails.get(0).getGoodsId());
+        });
+
+        List<ShopActive> activeList = shopActiveMapper.selectList(
+            new QueryWrapper<ShopActive>()
+                .eq("site_id", RequestUtils.siteId())
+                .in("goods_id", goodsIds)
+                .eq("active_class", ActiveClassEnum.EXCHANGE.toString())
+        );
+        if (ObjectUtil.isEmpty(activeList)) return;
+
+        List<Integer> activeIds = activeList.stream().map(active -> active.getActiveId()).toList();
+
+        shopPointExchangeMapper.delete(new QueryWrapper<ShopPointExchange>().in("id", param.getIds()).eq("site_id", RequestUtils.siteId()));
+        shopActiveMapper.delete(new QueryWrapper<ShopActive>().in("active_id", activeIds));
+        shopActiveGoodsMapper.delete(new QueryWrapper<ShopActiveGoods>().in("active_id", activeIds));
+    }
+
+    @Override
+    public void batchDown(PointExchangeBatchParam param) {
+        shopPointExchangeMapper.update(null, new UpdateWrapper<ShopPointExchange>()
+            .in("id", param.getIds())
+            .eq("site_id", RequestUtils.siteId())
+            .set("status", ShopPointExchangeStatusEnum.DOWN.getStatus())
+        );
+    }
+
+    @Override
+    public void batchUp(PointExchangeBatchParam param) {
+        shopPointExchangeMapper.update(null, new UpdateWrapper<ShopPointExchange>()
+            .in("id", param.getIds())
+            .eq("site_id", RequestUtils.siteId())
+            .set("status", ShopPointExchangeStatusEnum.UP.getStatus())
+        );
+    }
+
+    @Override
+    public ShopPointExchangeSelectListVo getSelectPage(PageParam pageParam, ShopPointExchangeSearchParam searchParam) {
+        List<Integer> verifyIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(searchParam.getVerifyIds())){
+            List<ShopPointExchange> shopPointExchanges = shopPointExchangeMapper.selectByIds(searchParam.getVerifyIds());
+            if (!CollectionUtils.isEmpty(shopPointExchanges)){
+                verifyIds = shopPointExchanges.stream().map(ShopPointExchange::getId).toList();
+            }
+        }
+        ShopPointExchangeSelectListVo result = new ShopPointExchangeSelectListVo();
+        PageResult<ShopPointExchangeListVo> list = list(pageParam, searchParam);
+        result.setData(list.getData());
+        result.setTotal(list.getTotal());
+        result.setVerifyIds(verifyIds);
+        result.setCurrentPage(pageParam.getPage());
+        result.setPerPage(pageParam.getLimit());
+        return result;
+    }
+
     @Transactional
     public void joinShopActive(ShopPointExchangeParam addParam, List<ProductDetail> productDetails) {
         ShopActive shopActive = new ShopActive();
@@ -421,19 +521,19 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             int sumStock = 0;
             param.setStock("0");
             for (ProductDetail productDetail : productDetails) {
-                if (Integer.parseInt(productDetail.getPoint()) <= 0) {
+                if (productDetail.getPoint() <= 0) {
                     throw new RuntimeException("商品兑换积分要大于零");
                 }
 
-                int stock = Integer.parseInt(productDetail.getStock());
+                int stock = productDetail.getStock();
                 if (stock < 0) {
                     throw new RuntimeException("商品兑换库存要大于零");
                 }
 
                 sumStock += stock;
 
-                if (CharSequenceUtil.isBlank(productDetail.getPrice())) {
-                    productDetail.setPrice("0");
+                if (ObjectUtil.isEmpty(productDetail.getPrice())) {
+                    productDetail.setPrice(BigDecimal.ZERO);
                 }
             }
 
@@ -441,9 +541,9 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
             productDetails.sort(Comparator.comparing(ProductDetail::getPoint));
             ProductDetail productDetail = CollectionUtil.get(productDetails, 0);
-            param.setPoint(Integer.parseInt(productDetail.getPoint()));
+            param.setPoint(productDetail.getPoint());
             param.setPrice(NumberUtil.toBigDecimal(productDetail.getPrice()));
-            param.setLimitNum(Integer.parseInt(productDetail.getLimitNum()));
+            param.setLimitNum(productDetail.getLimitNum());
             param.setProductDetail(JSONArray.toJSONString(productDetails));
         }
         return param;

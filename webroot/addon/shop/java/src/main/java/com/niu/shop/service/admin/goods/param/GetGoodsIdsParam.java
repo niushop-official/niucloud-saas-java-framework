@@ -4,6 +4,7 @@ import lombok.Data;
 
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 商品参数
@@ -15,5 +16,9 @@ public class GetGoodsIdsParam implements Serializable {
 
     @NotNull(message = "goods_ids参数缺失")
     private Object goodsIds;
+
+    private Integer isAll = 0;
+
+    private Map<String, Object> where;
 
 }

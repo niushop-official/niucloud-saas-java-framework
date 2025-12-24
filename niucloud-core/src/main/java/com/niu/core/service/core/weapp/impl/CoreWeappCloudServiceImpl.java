@@ -7,6 +7,7 @@ import cn.hutool.http.Method;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.common.utils.file.FileTools;
@@ -65,7 +66,7 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         try {
             FileUtils.copyFile(new File(WebAppEnvs.get().webRootDownResource + param.getUploadPrivateKey()), new File(packageDir + "private.key"));
         } catch (Exception e) {
-            throw new CommonException(e.getMessage());
+            throw new CommonException("开发小程序上传秘钥不存在");
         }
 
         File zipFile = ZipUtil.zip(packageDir, tempDir + "build.zip");
@@ -73,7 +74,7 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         NiucloudUtils instance = NiucloudUtils.getInstance();
 
         Map<String, Object> actionQuery = new HashMap<>();
-        actionQuery.put("data[product_key]", instance.getProductKey());
+        actionQuery.put("data[product_key]", GlobalConfig.productKey);
         JSONObject actionToken = niucloudService.getActionToken("weappbuild", actionQuery);
 
         Map<String, Object> query = new HashMap<>();
@@ -89,6 +90,7 @@ public class CoreWeappCloudServiceImpl implements ICoreWeappCloudService {
         HttpResponse response = new NiucloudUtils.Cloud().useThirdBuild().build("cloud/weapp").query(query)
             .func(i -> {
                 i.form("file", zipFile, "build.zip");
+                i.timeout(300000);
             })
             .method(Method.POST).execute();
 

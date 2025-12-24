@@ -12,6 +12,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.component.context.WebAppEnvs;
 import com.niu.core.common.component.context.cache.Cached;
+import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.NiucloudUtils;
 import com.niu.core.common.utils.RequestUtils;
@@ -92,7 +93,7 @@ public class CoreAppCloudServiceImpl implements ICoreAppCloudService {
         build.set("privacy_agreement", wapUrl + "/app/pages/auth/agreement?key=privacy&=");
         build.set("service_agreement", wapUrl + "/app/pages/auth/agreement?key=service&=");
         build.set("qq_map_key", mapConfig.getKey());
-        build.set("amap_key", "");
+        build.set("amap_key", mapConfig.getAmapKey());
         build.set("version_name", param.getVersionName());
         build.set("version_code", param.getVersionCode());
         build.putByPath("cert.type", param.getCert().getType());
@@ -124,7 +125,7 @@ public class CoreAppCloudServiceImpl implements ICoreAppCloudService {
             NiucloudUtils instance = NiucloudUtils.getInstance();
 
             Map<String, Object> actionQuery = new HashMap<>();
-            actionQuery.put("data[product_key]", instance.getProductKey());
+            actionQuery.put("data[product_key]", GlobalConfig.productKey);
             JSONObject actionToken = niucloudService.getActionToken("appbuild", actionQuery);
 
             Map<String, Object> query = new HashMap<>();

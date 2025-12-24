@@ -11,8 +11,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -87,7 +89,27 @@ public class ControllerRequestAspect {
         preprocessingMap.forEach((k, v) -> {
             if (filedName.equals(k)) {
                 if (field.getType().equals(String[].class)) {
-                    ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) v);
+                    ReflectCallMethod.setFieldValue(target, field, v);
+//                    ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) v);
+                } else if (field.getType().equals(List.class)) {
+                    // 获取泛型类型
+                    ParameterizedType listType = (ParameterizedType) field.getGenericType();
+                    Class<?> listGenericType = (Class<?>) listType.getActualTypeArguments()[0];
+
+                    if (listGenericType.equals(Integer.class)) {
+                        List<Integer> intList = Arrays.stream(v)
+                                .filter(str -> str != null && !str.trim().isEmpty())
+                                .map(Integer::parseInt)
+                                .collect(Collectors.toList());
+                        ReflectCallMethod.setFieldValue(target, field, intList);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, intList);
+                    } else if (listGenericType.equals(String.class)) {
+                        List<String> stringList = Arrays.stream(v)
+                                .filter(str -> str != null && !str.trim().isEmpty())
+                                .collect(Collectors.toList());
+                        ReflectCallMethod.setFieldValue(target, field, stringList);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, stringList);
+                    }
                 }
             }
         });
@@ -99,41 +121,67 @@ public class ControllerRequestAspect {
                 return;
             } else {
                 if (field.getType().equals(String.class)) {
-                    ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) valueObjects[0]);
+                    ReflectCallMethod.setFieldValue(target, field, (Object) valueObjects[0]);
+//                    ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) valueObjects[0]);
                 } else if (field.getType().equals(Integer.class)) {
                     try {
                         Integer value = Integer.parseInt(valueObjects[0]);
-                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
+                        ReflectCallMethod.setFieldValue(target, field, value);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
                     } catch (Exception e) {
                         // ignore
                     }
                 } else if (field.getType().equals(Long.class)) {
                     try {
                         Long value = Long.parseLong(valueObjects[0]);
-                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
+                        ReflectCallMethod.setFieldValue(target, field, value);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
                     } catch (Exception e) {
                         // ignore
                     }
                 } else if (field.getType().equals(Double.class)) {
                     try {
                         Double value = Double.parseDouble(valueObjects[0]);
-                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
+                        ReflectCallMethod.setFieldValue(target, field, value);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
                     } catch (Exception e) {
                         // ignore
                     }
                 } else if (field.getType().equals(Float.class)) {
                     try {
                         Float value = Float.parseFloat(valueObjects[0]);
-                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
+                        ReflectCallMethod.setFieldValue(target, field, value);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) value);
                     } catch (Exception e) {
                         // ignore
                     }
                 } else if (field.getType().equals(String[].class)) {
-                    ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) valueObjects);
+                    ReflectCallMethod.setFieldValue(target, field, valueObjects);
+//                    ReflectCallMethod.setInvokeByFieldName(target, filedName, (Object) valueObjects);
                 } else if (field.getType().equals(Date.class)) {
                     // 时间暂时不处理
                 } else if (field.getType().equals(LocalDateTime.class)) {
                     // 时间暂时不处理（JDK.18以上）
+                } else if (field.getType().equals(List.class)) {
+                    // 处理 List 类型
+                    ParameterizedType listType = (ParameterizedType) field.getGenericType();
+                    Class<?> listGenericType = (Class<?>) listType.getActualTypeArguments()[0];
+
+                    if (listGenericType.equals(Integer.class)) {
+                        List<Integer> intList = Arrays.stream(valueObjects)
+                                .filter(str -> str != null && !str.trim().isEmpty())
+                                .map(Integer::parseInt)
+                                .collect(Collectors.toList());
+                        ReflectCallMethod.setFieldValue(target, field, intList);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, intList);
+                    }
+                    else if (listGenericType.equals(String.class)) {
+                        List<String> stringList = Arrays.stream(valueObjects)
+                                .filter(str -> str != null && !str.trim().isEmpty())
+                                .collect(Collectors.toList());
+                        ReflectCallMethod.setFieldValue(target, field, stringList);
+//                        ReflectCallMethod.setInvokeByFieldName(target, filedName, stringList);
+                    }
                 }
             }
         }

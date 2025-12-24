@@ -527,6 +527,22 @@ const activeclick = (data: any) => {
             }
         })
         window.open(routeUrl.href, '_blank')
+    } else if (data.list[0].join_type == 'seckill') {
+        const routeUrl = router.resolve({
+            path: '/seckill/active/list',
+            // query: {
+            //     active_id: data.list[0].join_id
+            // }
+        })
+        window.open(routeUrl.href, '_blank')
+    }else if (data.list[0].join_type == 'pintuan') {
+        const routeUrl = router.resolve({
+            path: '/pintuan/active/list',
+            // query: {
+            //     active_id: data.list[0].join_id
+            // }
+        })
+        window.open(routeUrl.href, '_blank')
     }
 }
 
@@ -849,6 +865,10 @@ const copyEvent = (data: any) => {
                 loadGoodsList(getTablePageStorage(goodsTable.searchParam).page)
             }
             repeat.value = false
+            ElMessage({
+                type: 'success',
+                message: '商品复制成功，可以在仓库中商品查询'
+            })
         }).catch(() => {
             repeat.value = false
         })

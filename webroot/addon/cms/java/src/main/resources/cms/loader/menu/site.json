@@ -6,7 +6,7 @@
             "menu_key": "cms",
             "parent_key": "",
             "menu_type": 0,
-            "icon": "element Tickets",
+            "icon": "iconfont iconweiguanwang",
             "api_url": "",
             "router_path": "",
             "view_path": "",
@@ -14,6 +14,7 @@
             "sort": 100,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "文章管理",
@@ -23,12 +24,13 @@
                     "menu_type": 0,
                     "icon": "iconfont iconwenzhangguanli1",
                     "api_url": "",
-                    "router_path": "",
+                    "router_path": "cms/article/list",
                     "view_path": "",
                     "methods": "",
                     "sort": 98,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "文章列表",
@@ -43,7 +45,8 @@
                             "methods": "get",
                             "sort": 100,
                             "status": 1,
-                            "is_show": 1
+                            "is_show": 1,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "文章添加/编辑",
@@ -58,7 +61,8 @@
                             "methods": "post",
                             "sort": 90,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "文章栏目",
@@ -73,7 +77,8 @@
                             "methods": "get",
                             "sort": 80,
                             "status": 1,
-                            "is_show": 1
+                            "is_show": 1,
+                            "parent_select_key": ""
                         }
                     ]
                 }

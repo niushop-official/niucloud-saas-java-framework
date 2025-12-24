@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
+import com.niu.core.common.utils.CollectUtils;
 import com.niu.core.common.utils.CommonUtils;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
@@ -122,6 +123,8 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
         ShopGoodsDetailParam param = new ShopGoodsDetailParam();
         List<ProductDetail> productDetails = JSONArray.parseArray(shopPointExchange.getProductDetail(), ProductDetail.class);
+        Map<Integer, ProductDetail> productDetailsMap = productDetails.stream().collect(Collectors.toMap(ProductDetail::getSkuId, item -> item));
+        List<Integer> skuIds = productDetails.stream().map(ProductDetail::getSkuId).collect(Collectors.toList());
 
         ProductDetail productDetail = productDetails.get(0);
         param.setGoodsId(productDetail.getGoodsId());
@@ -129,154 +132,45 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
 
         ShopGoodsDetailVo shopGoodsDetailVo = goodsService.detail(param);
 
-        // 最简单的详情信息
         ShopPointExchangeInfoVo shopPointExchangeInfoVo = new ShopPointExchangeInfoVo();
-        String small = CommonUtils.thumbImageSmall(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage());
-        String mid = CommonUtils.thumbImageMiddle(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage());
-        String big = CommonUtils.thumbImageBig(RequestUtils.siteId(), shopGoodsDetailVo.getSkuImage());
-        shopPointExchangeInfoVo.setSkuImageThumbSmall(small);
-        shopPointExchangeInfoVo.setSkuImageThumbMid(mid);
-        shopPointExchangeInfoVo.setSkuImageThumbBig(big);
-        shopPointExchangeInfoVo.setSkuId(shopGoodsDetailVo.getSkuId());
-        shopPointExchangeInfoVo.setSkuName(shopGoodsDetailVo.getSkuName());
-        shopPointExchangeInfoVo.setSkuImage(shopGoodsDetailVo.getSkuImage());
-        shopPointExchangeInfoVo.setSkuNo(shopGoodsDetailVo.getSkuNo());
-        shopPointExchangeInfoVo.setGoodsId(shopGoodsDetailVo.getGoodsId());
-        shopPointExchangeInfoVo.setSiteId(shopGoodsDetailVo.getSiteId());
-        shopPointExchangeInfoVo.setSkuSpecFormat(shopGoodsDetailVo.getSkuSpecFormat());
-        shopPointExchangeInfoVo.setPrice(productDetail.getPrice());
-        shopPointExchangeInfoVo.setMarketPrice(shopGoodsDetailVo.getMarketPrice().toString());
-        shopPointExchangeInfoVo.setSalePrice(productDetail.getPrice());
-        shopPointExchangeInfoVo.setStock(shopGoodsDetailVo.getStock().toString());
-        shopPointExchangeInfoVo.setWeight(shopGoodsDetailVo.getWeight().toString());
-        shopPointExchangeInfoVo.setVolume(shopGoodsDetailVo.getVolume().toString());
-        shopPointExchangeInfoVo.setSaleNum(shopGoodsDetailVo.getSaleNum());
-        shopPointExchangeInfoVo.setIsDefault(shopGoodsDetailVo.getIsDefault());
-        shopPointExchangeInfoVo.setType(shopPointExchange.getType());
-        shopPointExchangeInfoVo.setTypeName(ShopPointExchangeTypeEnum.getNameByType(shopPointExchange.getType()));
-        shopPointExchangeInfoVo.setEvaluateIsShow(shopGoodsDetailVo.getEvaluateIsShow());
-        shopPointExchangeInfoVo.setPoint(shopPointExchange.getPoint().toString());
-        shopPointExchangeInfoVo.setExchangeId(id);
-        shopPointExchangeInfoVo.setGoodsSpec(shopGoodsDetailVo.getGoodsSpec());
+        BeanUtils.copyProperties(shopGoodsDetailVo, shopPointExchangeInfoVo);
 
-        // goods
-        ShopPointExchangeInfoVo.GoodsDTO goodsDTO = new ShopPointExchangeInfoVo.GoodsDTO();
-        goodsDTO.setGoodsTypeName(GoodsTypeEnum.getNameByType(shopGoodsDetailVo.getGoods().getGoodsType()));
-        goodsDTO.setGoodsCoverThumbBig(shopGoodsDetailVo.getGoods().getGoodsCoverThumbBig());
-        goodsDTO.setGoodsCoverThumbSmall(shopGoodsDetailVo.getGoods().getGoodsCoverThumbSmall());
-        goodsDTO.setGoodsCoverThumbMid(shopGoodsDetailVo.getGoods().getGoodsCoverThumbMid());
-        goodsDTO.setGoodsImage(shopGoodsDetailVo.getGoods().getGoodsImage());
-        goodsDTO.setGoodsImageThumbSmall(shopGoodsDetailVo.getGoods().getGoodsImageThumbSmall());
-        goodsDTO.setGoodsImageThumbMid(shopGoodsDetailVo.getGoods().getGoodsImageThumbMid());
-        goodsDTO.setGoodsImageThumbBig(shopGoodsDetailVo.getGoods().getGoodsImageThumbBig());
-        goodsDTO.setGoodsDesc(shopPointExchange.getContent());
-        goodsDTO.setBrandId(shopGoodsDetailVo.getGoods().getBrandId());
-        goodsDTO.setUnit(shopGoodsDetailVo.getGoods().getUnit());
-        goodsDTO.setStock(shopGoodsDetailVo.getGoods().getStock());
-        goodsDTO.setSaleNum(shopGoodsDetailVo.getGoods().getSaleNum());
-        goodsDTO.setStatus(shopGoodsDetailVo.getGoods().getStatus());
-        goodsDTO.setIsFreeShipping(shopGoodsDetailVo.getGoods().getIsFreeShipping());
-        goodsDTO.setFeeType(shopGoodsDetailVo.getGoods().getFeeType());
-        goodsDTO.setDeliveryMoney(shopGoodsDetailVo.getGoods().getDeliveryMoney().toString());
-        goodsDTO.setDeliveryTemplateId(shopGoodsDetailVo.getGoods().getDeliveryTemplateId());
-        goodsDTO.setAttrId(shopGoodsDetailVo.getGoods().getAttrId());
-        goodsDTO.setAttrFormat(JSONUtil.toJsonStr(shopGoodsDetailVo.getGoods().getAttrFormat()));
-        goodsDTO.setMemberDiscount(shopGoodsDetailVo.getGoods().getMemberDiscount());
-        goodsDTO.setPosterId(shopGoodsDetailVo.getGoods().getPosterId());
-        goodsDTO.setVirtualReceiveType(shopGoodsDetailVo.getGoods().getVirtualReceiveType());
-        goodsDTO.setIsCollect(shopGoodsDetailVo.getGoods().getIsCollect());
-        goodsDTO.setGoodsId(shopGoodsDetailVo.getGoodsId());
-        goodsDTO.setIsDiscount(shopGoodsDetailVo.getGoods().getIsDiscount());
-        goodsDTO.setSiteId(shopGoodsDetailVo.getGoods().getSiteId());
-        goodsDTO.setGoodsName(shopGoodsDetailVo.getGoods().getGoodsName());
-        goodsDTO.setGoodsType(shopGoodsDetailVo.getGoods().getGoodsType());
-        goodsDTO.setSubTitle(shopGoodsDetailVo.getGoods().getSubTitle());
-        goodsDTO.setGoodsCover(shopGoodsDetailVo.getGoods().getGoodsCover());
+        ShopPointExchangeInfoVo.Goods goods = new ShopPointExchangeInfoVo.Goods();
+        BeanUtils.copyProperties(shopGoodsDetailVo.getGoods(), goods);
+        shopPointExchangeInfoVo.setGoods(goods);
 
-        List<String> labelIds = JSON.parseObject(shopGoodsDetailVo.getGoods().getLabelIds(), new TypeReference<List<String>>() {
-        });
-        goodsDTO.setLabelIds(labelIds);
+        List<ShopPointExchangeInfoVo.Spec> spec = CollectUtils.convert(shopGoodsDetailVo.getGoodsSpec(), ShopPointExchangeInfoVo.Spec.class);
+        shopPointExchangeInfoVo.setGoodsSpec(spec);
 
-        List<String> serviceIds = JSON.parseObject(shopGoodsDetailVo.getGoods().getServiceIds(), new TypeReference<List<String>>() {
-        });
-        goodsDTO.setServiceIds(serviceIds);
+        List<ShopPointExchangeInfoVo.Service> service = CollectUtils.convert(shopGoodsDetailVo.getService(), ShopPointExchangeInfoVo.Service.class);
+        shopPointExchangeInfoVo.setService(service);
 
-        List<String> deliveryTypes = JSON.parseObject(shopGoodsDetailVo.getGoods().getDeliveryType(), new TypeReference<List<String>>() {
-        });
-        goodsDTO.setDeliveryType(deliveryTypes);
-
-        List<Integer> goodsCategories = JSON.parseObject(shopGoodsDetailVo.getGoods().getGoodsCategory(), new TypeReference<List<Integer>>() {
-        });
-        goodsDTO.setGoodsCategory(goodsCategories);
-
-        // goods brand
-        if (shopGoodsDetailVo.getBrandInfo() != null) {
-            ShopPointExchangeInfoVo.GoodsDTO.GoodsBrandDTO goodsBrandDTO = new ShopPointExchangeInfoVo.GoodsDTO.GoodsBrandDTO();
-            goodsBrandDTO.setBrandId(shopGoodsDetailVo.getBrandInfo().getBrandId());
-            goodsBrandDTO.setBrandName(shopGoodsDetailVo.getBrandInfo().getBrandName());
-            goodsBrandDTO.setLogo(shopGoodsDetailVo.getBrandInfo().getLogo());
-            goodsDTO.setGoodsBrand(goodsBrandDTO);
+        if (ObjectUtil.isNotEmpty(shopGoodsDetailVo.getBrandInfo())) {
+            ShopPointExchangeInfoVo.Brand brandInfo = new ShopPointExchangeInfoVo.Brand();
+            BeanUtils.copyProperties(shopGoodsDetailVo.getBrandInfo(), brandInfo);
+            shopPointExchangeInfoVo.setBrandInfo(brandInfo);
         }
 
-        shopPointExchangeInfoVo.setGoods(goodsDTO);
+        shopPointExchangeInfoVo.setSaleNum(shopPointExchange.getTotalExchangeNum());
+        shopPointExchangeInfoVo.setPoint(productDetails.get(0).getPoint());
+        shopPointExchangeInfoVo.setPrice(productDetails.get(0).getPrice());
+        shopPointExchangeInfoVo.setStock(productDetails.get(0).getStock());
+        shopPointExchangeInfoVo.setExchangeId(shopPointExchange.getId());
 
-        // sku数据
-        List<ShopPointExchangeInfoVo.SkuListDTO> skuData = shopGoodsDetailVo.getSkuList().stream().map(sku -> {
-            ShopPointExchangeInfoVo.SkuListDTO skuListDTO = new ShopPointExchangeInfoVo.SkuListDTO();
-            skuListDTO.setSkuId(sku.getSkuId());
-            skuListDTO.setSiteId(sku.getSiteId());
-            skuListDTO.setSkuName(sku.getSkuName());
-            skuListDTO.setSkuImage(sku.getSkuImage());
-            skuListDTO.setSkuNo(sku.getSkuNo());
-            skuListDTO.setGoodsId(sku.getGoodsId());
-            skuListDTO.setSkuSpecFormat(sku.getSkuSpecFormat());
-            skuListDTO.setPrice(sku.getPrice().toString());
-            skuListDTO.setMarketPrice(sku.getMarketPrice().toString());
-            skuListDTO.setStock(sku.getStock().toString());
-            skuListDTO.setWeight(sku.getWeight().toString());
-            skuListDTO.setVolume(sku.getVolume().toString());
-            skuListDTO.setIsDefault(sku.getIsDefault());
-            skuListDTO.setLimitNum(ObjectUtil.isEmpty(sku.getLimitNum()) ? "0" : sku.getLimitNum().toString());
-            skuListDTO.setPoint(sku.getPoint() == null ? "0" : sku.getPoint().toString());
-
-            Optional<ProductDetail> productDetailOptional = productDetails.stream()
-                    .filter(detail -> detail.getSkuId().equals(sku.getSkuId()))
-                    .findFirst();
-            productDetailOptional.ifPresent(detail -> {
-                BeanUtils.copyProperties(detail, skuListDTO);
-                skuListDTO.setSalePrice(detail.getPrice());
-                skuListDTO.setIsJoinExchange(1);
-            });
-
-            return skuListDTO;
-        }).collect(Collectors.toList());
-        shopPointExchangeInfoVo.setSkuList(skuData);
-
-        // service
-        List<ShopPointExchangeInfoVo.ServiceDTO> services = shopGoodsDetailVo.getService().stream().map(service -> {
-            ShopPointExchangeInfoVo.ServiceDTO serviceDTO = new ShopPointExchangeInfoVo.ServiceDTO();
-            serviceDTO.setServiceId(service.getServiceId());
-            serviceDTO.setServiceName(service.getServiceName());
-            serviceDTO.setImage(service.getImage());
-            serviceDTO.setDesc(service.getDesc());
-            return serviceDTO;
-        }).collect(Collectors.toList());
-        shopPointExchangeInfoVo.setService(services);
-
-        // label
-        List<ShopPointExchangeInfoVo.LabelInfoDTO> labels = shopGoodsDetailVo.getLabelInfo().stream().map(label -> {
-            ShopPointExchangeInfoVo.LabelInfoDTO labelInfoDTO = new ShopPointExchangeInfoVo.LabelInfoDTO();
-            labelInfoDTO.setLabelId(label.getLabelId());
-            labelInfoDTO.setLabelName(label.getLabelName());
-            labelInfoDTO.setMemo(label.getMemo());
-            labelInfoDTO.setStyleType(label.getStyleType());
-            labelInfoDTO.setIcon(label.getIcon());
-            if (ObjectUtil.isNotEmpty(label.getColorJson())) {
-                labelInfoDTO.setColorJson(JSONUtil.toBean(JSONUtil.parseObj(label.getColorJson()), ShopPointExchangeInfoVo.LabelInfoDTO.ColorJsonDTO.class));
+        List<ShopPointExchangeInfoVo.Sku> skuList = new LinkedList<>();
+        shopGoodsDetailVo.getSkuList().forEach(item -> {
+            if (skuIds.contains(item.getSkuId())) {
+                ShopPointExchangeInfoVo.Sku sku = new ShopPointExchangeInfoVo.Sku();
+                BeanUtils.copyProperties(item, sku);
+                sku.setPoint(productDetailsMap.get(item.getSkuId()).getPoint());
+                sku.setPrice(productDetailsMap.get(item.getSkuId()).getPrice());
+                sku.setStock(productDetailsMap.get(item.getSkuId()).getStock());
+                sku.setIsDefault(item.getSkuId() == productDetails.get(0).getSkuId() ? 1 : 0);
+                sku.setLimitNum(productDetailsMap.get(item.getSkuId()).getLimitNum());
+                skuList.add(sku);
             }
-            return labelInfoDTO;
-        }).collect(Collectors.toList());
-        shopPointExchangeInfoVo.setLabelInfo(labels);
+        });
+        shopPointExchangeInfoVo.setSkuList(skuList);
 
         return shopPointExchangeInfoVo;
     }
@@ -294,7 +188,7 @@ public class ShopPointExchangeServiceImpl implements IShopPointExchangeService {
             queryWrapper.like("names", searchParam.getNames());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getIds())) {
-            queryWrapper.in("id", searchParam.getIds());
+            queryWrapper.in("id", searchParam.getIds().split(","));
         }
         if (ObjectUtil.isNotEmpty(searchParam.getNum())) {
             queryWrapper.last("limit " + searchParam.getNum());

@@ -23,6 +23,7 @@ import com.niu.core.common.exception.AdminException;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.crypto.PasswordEncipher;
+import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.common.utils.mapper.QueryMapperUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.entity.member.MemberLabel;
@@ -210,7 +211,6 @@ public class MemberServiceImpl implements IMemberService {
     @Override
     public void add(MemberAddParam addParam) {
         Integer siteId = RequestUtils.siteId();
-
         addParam.setUsername(addParam.getMobile());
 
         Member mobileIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
@@ -220,33 +220,38 @@ public class MemberServiceImpl implements IMemberService {
                 .last("limit 1"));
         Assert.isNull(mobileIsExist, "手机号已存在");
 
-        if (addParam.getNickname().length() == 0 & addParam.getMobile().length() > 0) {
+        if (!addParam.getInitMemberNo().equals(addParam.getMemberNo())) {
+            Member memberNoIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
+                .select("member_id")
+                .eq("site_id", siteId)
+                .eq("member_no", addParam.getMemberNo())
+                .last("limit 1"));
+            Assert.isNull(memberNoIsExist, "会员编号已存在");
+        } else {
+            Member memberNoIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
+                .select("member_id")
+                .eq("site_id", siteId)
+                .eq("member_no", addParam.getMemberNo())
+                .last("limit 1"));
+            if (memberNoIsExist != null) {
+                addParam.setMemberNo(iCoreMemberService.createMemberNo(siteId));
+            }
+        }
+
+        if (ObjectUtil.isEmpty(addParam.getNickname()) && ObjectUtil.isNotEmpty(addParam.getMobile())) {
             addParam.setNickname(addParam.getMobile().replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2"));
         }
 
-        if (addParam.getMemberNo().isEmpty()) {
-            addParam.setMemberNo(iCoreMemberService.createMemberNo(siteId));
-        } else {
-            Member memberNoIsExist = memberMapper.selectOne(new QueryWrapper<Member>()
-                    .select("member_id")
-                    .eq("site_id", siteId)
-                    .eq("member_no", addParam.getMemberNo())
-                    .last("limit 1"));
-            Assert.isNull(memberNoIsExist, "会员编码已存在");
-        }
-
         Member model = new Member();
+        BeanUtils.copyProperties(addParam,  model);
         model.setSiteId(siteId);
-        model.setMobile(addParam.getMobile());
-        model.setMemberNo(addParam.getMemberNo());
-        model.setUsername(addParam.getUsername());
-        model.setNickname(addParam.getNickname());
-        model.setHeadimg(addParam.getHeadimg());
         model.setPassword(PasswordEncipher.encode(addParam.getPassword()));
         model.setRegisterType(MemberRegisterTypeEnum.MANUAL.getType());
         model.setRegisterChannel(MemberRegisterChannelEnum.MANUAL.getType());
         model.setCreateTime(System.currentTimeMillis() / 1000);
-        model.setMemberLabel("[]");
+        if (ObjectUtil.isNotEmpty(addParam.getMemberLabel())) {
+            model.setMemberLabel(JSONUtil.toJsonStr(addParam.getMemberLabel().stream().map(i -> i.toString()).toList()));
+        }
         memberMapper.insert(model);
         // 会员注册事件
         MemberRegisterEvent registerEvent = new MemberRegisterEvent();
@@ -263,7 +268,7 @@ public class MemberServiceImpl implements IMemberService {
      * @param editParam 参数
      */
     @Override
-    public void edit(Integer id, MemberParam editParam) {
+    public void edit(Integer id, MemberEditParam editParam) {
         Integer siteId = RequestUtils.siteId();
 
         UpdateWrapper<Member> updateWrapper = new UpdateWrapper<>();
@@ -271,11 +276,15 @@ public class MemberServiceImpl implements IMemberService {
                 .eq("member_id", id);
 
         Member model = new Member();
-        model.setNickname(editParam.getNickname());
-        model.setHeadimg(editParam.getHeadimg());
-        model.setPassword(editParam.getPassword());
-        model.setSex(editParam.getSex());
-        model.setBirthday(editParam.getBirthday());
+        BeanUtils.copyProperties(editParam, model);
+        if (ObjectUtil.isNotEmpty(editParam.getPassword())) {
+            model.setPassword(PasswordEncipher.encode(editParam.getPassword()));
+        }
+        if (ObjectUtil.isNotEmpty(editParam.getMemberLabel())) {
+            model.setMemberLabel(JSONUtil.toJsonStr(editParam.getMemberLabel().stream().map(i -> i.toString()).toList()));
+        } else {
+            model.setMemberLabel("[]");
+        }
 
         memberMapper.update(model, updateWrapper);
     }
@@ -307,7 +316,12 @@ public class MemberServiceImpl implements IMemberService {
                 updateWrapper.set(Member::getHeadimg, value.equals("") || value.equals("null") ? "" : value);
                 break;
             case "member_label":
-                updateWrapper.set(Member::getMemberLabel, value.isEmpty() ? "[]" : value);
+                if (editParam.getValue() instanceof List){
+                    List<String> memberLabel = (List<String>) editParam.getValue();
+                    updateWrapper.set(Member::getMemberLabel, value.isEmpty() ? "[]" : JSONUtil.toJsonStr(memberLabel));
+                }else {
+                    updateWrapper.set(Member::getMemberLabel, value.isEmpty() ? "[]" : value);
+                }
                 break;
             case "member_level":
                 updateWrapper.set(Member::getMemberLevel, value.equals("") || value.equals("null") ? 0 : Integer.parseInt(value));
@@ -319,9 +333,6 @@ public class MemberServiceImpl implements IMemberService {
                 updateWrapper.set(Member::getSex, value.equals("") || value.equals("null") ? 0 : Integer.parseInt(value));
                 break;
             case "id_card":
-//                if (!IdcardUtil.isValidCard(value) && !value.isEmpty()){
-//                    throw new AdminException("请输入正确的身份证号");
-//                }
                 updateWrapper.set(Member::getIdCard, value.equals("") || value.equals("null") ? "" : value);
                 break;
             case "remark":
@@ -367,9 +378,14 @@ public class MemberServiceImpl implements IMemberService {
 
         MPJQueryWrapper<Member> queryWrapper = new MPJQueryWrapper<Member>();
         queryWrapper.select("member_id,headimg,nickname").eq("site_id", siteId);
-        if (ObjectUtil.isNotEmpty(searchParam.getKeyword()))
-            queryWrapper.like("member_no|username|nickname|mobile", searchParam.getKeyword());
-
+        if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
+            queryWrapper.and(
+                wrapper -> wrapper.like("member_no", searchParam.getKeyword())
+                .or().like("username", searchParam.getKeyword())
+                .or().like("nickname", searchParam.getKeyword())
+                .or().like("mobile", searchParam.getKeyword())
+            );
+        }
         List<Member> members = memberMapper.selectList(queryWrapper); // 调用 selectList 方法
 
         List<MemberAllListVo> list = new LinkedList<>();
@@ -459,6 +475,36 @@ public class MemberServiceImpl implements IMemberService {
             uw.set("member_label", JSONUtil.toJsonStr(value));
         }else if ("member_level".equals(field)){
             uw.set("member_level", Integer.parseInt(param.getValue().toString()));
+        }
+        if (ObjectUtil.isNotEmpty(param.getWhere().getKeyword())) {
+            uw.and(i -> i.like("member_no", param.getWhere().getKeyword()).or()
+                .like("username", param.getWhere().getKeyword()).or()
+                .like("nickname", param.getWhere().getKeyword()).or()
+                .like("mobile", param.getWhere().getKeyword()));
+        }
+        if (ObjectUtil.isNotEmpty(param.getWhere().getMemberLevel()) && param.getWhere().getMemberLevel() != 0) {
+            uw.eq("member_level", param.getWhere().getMemberLevel());
+        }
+        if (ObjectUtil.isNotEmpty(param.getWhere().getRegisterChannel())) {
+            uw.eq("register_channel", param.getWhere().getRegisterChannel());
+        }
+        if (ObjectUtil.isNotEmpty(param.getWhere().getMemberLabel()) && param.getWhere().getMemberLabel() != 0) {
+            uw.like("member_label", param.getWhere().getMemberLabel());
+        }
+        if (ObjectUtil.isNotEmpty(param.getWhere().getRegisterType())) {
+            uw.eq("register_type", param.getWhere().getRegisterType());
+        }
+        if (ObjectUtil.isNotEmpty(param.getWhere().getCreateTime())) {
+            String[] stringTimes = param.getWhere().getCreateTime();
+            Long startTime = (stringTimes[0] == null) ? 0 : DateUtils.StringToTimestamp(stringTimes[0]);
+            Long endTime = (stringTimes.length == 1) ? 0 : DateUtils.StringToTimestamp(stringTimes[1]);
+            if (startTime > 0 && endTime > 0) {
+                uw.between("create_time", startTime, endTime);
+            } else if (startTime > 0 && endTime == 0) {
+                uw.ge("create_time", startTime);
+            } else if (startTime == 0 && endTime > 0) {
+                uw.le("create_time", startTime);
+            }
         }
         memberMapper.update(uw);
     }

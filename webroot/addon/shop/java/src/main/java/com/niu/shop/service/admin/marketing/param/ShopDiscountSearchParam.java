@@ -1,4 +1,5 @@
 package com.niu.shop.service.admin.marketing.param;
+import cn.hutool.json.JSONArray;
 import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -14,5 +15,7 @@ public class ShopDiscountSearchParam implements Serializable {
     private String name;
 
     private String status;
+
+    private String activeId;
 
 }

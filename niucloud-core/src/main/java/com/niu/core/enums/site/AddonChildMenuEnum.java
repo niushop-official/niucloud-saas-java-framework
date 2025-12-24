@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,9 +27,11 @@ public enum AddonChildMenuEnum {
      * 获取所有菜单配置
      */
     public static List<MenuConfig> getAll() {
-        return Arrays.stream(values())
+        List<MenuConfig> list = Arrays.stream(values())
                 .map(item -> new MenuConfig(item.key, item.name, item.shortName, item.sort))
                 .collect(Collectors.toList());
+        list.sort(Comparator.comparing(i -> i.sort));
+        return list;
     }
 
     @Data

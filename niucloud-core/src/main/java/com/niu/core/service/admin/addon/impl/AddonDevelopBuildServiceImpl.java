@@ -92,8 +92,13 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
             } else {
                 FileTools.createDirs(destPath.getPath());
             }
-
             FileUtils.copyDirectory(sourcePath, destPath);
+
+            // 打包admin icon文件
+            File iconDir = new File(WebAppEnvs.get().projectRoot + "/admin/src/styles/icon/addon/" + this.addon + "/");
+            if (iconDir.exists()) {
+                FileUtils.copyDirectory(iconDir, new File(destPath, "icon"));
+            }
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }
@@ -128,8 +133,19 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
             } else {
                 FileTools.createDirs(destPath.getPath());
             }
-
             FileUtils.copyDirectory(sourcePath, destPath);
+
+            // 拷贝layouts
+            File layoutDir = new File(WebAppEnvs.get().projectRoot + "/web/layouts/" + this.addon + "/");
+            if (layoutDir.exists()) {
+                File layoutDirDestPath = new File(destPath, "layouts/" + this.addon);
+                if (layoutDirDestPath.exists()) {
+                    FileUtils.cleanDirectory(layoutDirDestPath);
+                } else {
+                    FileTools.createDirs(layoutDirDestPath.getPath());
+                }
+                FileUtils.copyDirectory(layoutDir, layoutDirDestPath);
+            }
         } catch (IOException e) {
             throw new CommonException(e.getMessage());
         }
@@ -156,7 +172,7 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
 
     private void jar() {
         File sourcePath = new File(WebAppEnvs.get().projectNiucloudAddon + this.addon + "/target/" + this.addon + ".jar");
-        if (!sourcePath.exists()) throw new CommonException("请先通过maven打包好jar包");
+        if (!sourcePath.exists()) return;
 
         try {
             File destPath = new File(this.addonPath + "jar/");
@@ -251,7 +267,7 @@ public class AddonDevelopBuildServiceImpl implements IAddonDevelopBuildService {
         model.setSource("system");
         sysMenuMapper.update(model, new QueryWrapper<SysMenu>().ne("source", "system").eq("app_type", appType).eq("addon", this.addon));
 
-        List<SysMenu> menuList = sysMenuMapper.selectList(new QueryWrapper<SysMenu>().select("menu_name,menu_key,menu_short_name,parent_key,menu_type,icon,api_url,router_path,view_path,methods,sort,status,is_show").eq("app_type", appType).eq("addon", this.addon));
+        List<SysMenu> menuList = sysMenuMapper.selectList(new QueryWrapper<SysMenu>().select("menu_name,menu_key,menu_short_name,parent_select_key,parent_key,menu_type,icon,api_url,router_path,view_path,methods,sort,status,is_show").eq("app_type", appType).eq("addon", this.addon));
         JSONArray menuTree = TreeUtils.listToTree(JSONUtil.parseArray(JacksonUtils.toSnakeCaseJSONString(menuList)), "menu_key", "parent_key", "children");
         menuJson.put("menu", menuTree);
 

@@ -40,6 +40,7 @@ import com.niu.shop.enums.active.ActiveGoodsTypeEnum;
 import com.niu.shop.enums.goods.GoodsBatchSetEnum;
 import com.niu.shop.enums.goods.GoodsTypeEnum;
 import com.niu.shop.event.goods.AfterGoodsEditEvent;
+import com.niu.shop.event.marketing.GoodsIsConnectedCardEventDefiner;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsMapper;
 import com.niu.shop.mapper.goods.ShopGoodsSkuMapper;
@@ -51,6 +52,7 @@ import com.niu.shop.service.admin.goods.IShopGoodsSpecService;
 import com.niu.shop.service.admin.goods.param.*;
 import com.niu.shop.service.admin.goods.vo.*;
 import com.niu.shop.service.api.goods.IGoodsService;
+import com.niu.shop.service.core.goods.ICoreGoodsConfigService;
 import com.niu.shop.service.core.goods.ICoreGoodsLimitBuyService;
 import com.niu.shop.service.core.marketing.ICoreManjianService;
 import com.niu.shop.service.core.marketing.param.GetManjianInfoParam;
@@ -115,6 +117,58 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
     @Resource
     SysConfigMapper sysConfigMapper;
 
+    @Resource
+    ICoreGoodsConfigService coreGoodsConfigService;
+
+    /**
+     * 获取商品添加/编辑数据
+     *
+     * @param goodsId
+     * @return
+     */
+    @Override
+    public ShopGoodsInitVo getInit(Integer goodsId) {
+        ShopGoodsInitVo vo = new ShopGoodsInitVo();
+        if (goodsId > 0) {
+            ShopGoods model = shopGoodsMapper.selectOne(
+                    new QueryWrapper<ShopGoods>()
+                            .eq("goods_id", goodsId)
+                            .eq("site_id", RequestUtils.siteId())
+                            .eq("delete_time", 0));
+            if (model == null) return null;
+
+            ShopGoodsInitVo.GoodsInfo goodsInfo = new ShopGoodsInitVo.GoodsInfo();
+            BeanUtils.copyProperties(model, goodsInfo);
+            goodsInfo.setGoodsCategory(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getGoodsCategory()))));
+            goodsInfo.setLabelIds(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getLabelIds()))));
+            goodsInfo.setServiceIds(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getServiceIds()))));
+            goodsInfo.setAttrIds(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getAttrIds()))));
+            goodsInfo.setStatus(String.valueOf(model.getStatus()));
+
+            List<ShopGoodsInitVo.SkuInfo> skuList = CollectUtils.convert(shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", model.getGoodsId())), ShopGoodsInitVo.SkuInfo.class);
+            goodsInfo.setSkuList(skuList);
+
+            List<ShopGoodsInitVo.SkuInfo> tempSkuList = skuList.stream().filter(i -> i.getSkuSpecFormat() != null && !i.getSkuSpecFormat().isEmpty()).collect(Collectors.toList());
+            if (tempSkuList.size() > 0) {
+                goodsInfo.setSpecType("multi");
+
+                List<ShopGoodsInitVo.SpecInfo> specList = CollectUtils.convert(shopGoodsSpecMapper.selectList(new QueryWrapper<ShopGoodsSpec>().eq("goods_id", model.getGoodsId())), ShopGoodsInitVo.SpecInfo.class);
+                goodsInfo.setSpecList(specList);
+            }
+
+            if (model.getBrandId().equals(0)) goodsInfo.setBrandId("");
+            if (model.getSupplierId().equals(0)) goodsInfo.setSupplierId("");
+            if (model.getPosterId().equals(0)) goodsInfo.setPosterId("");
+            if (model.getDiyDetailId().equals(0)) goodsInfo.setDiyDetailId("");
+            if (model.getFormId().equals(0)) goodsInfo.setFormId("");
+
+            goodsInfo.setActiveGoodsCount(getActiveGoodsCount(goodsId));
+
+            vo.setGoodsInfo(goodsInfo);
+        }
+        vo.setDefaultSort(coreGoodsConfigService.getSortConfig().getDefaultSort());
+        return vo;
+    }
     /**
      * 商品列表
      *
@@ -130,7 +184,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
         queryWrapper.setAlias("g")
                 .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("g.goods_id,g.site_id,goods_name,sub_title,goods_type,goods_cover,g.stock,g.sale_num,status,sort,create_time,member_discount");
+        queryWrapper.select("g.goods_id,g.site_id,goods_name,sub_title,goods_type,goods_cover,g.stock,g.sale_num,status,sort,create_time,member_discount,is_gift");
         queryWrapper.eq("g.site_id", RequestUtils.siteId());
         queryWrapper.eq("delete_time", 0);
         if (ObjectUtil.isNotEmpty(searchParam.getGoodsName()))
@@ -300,27 +354,6 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
     public void add(ShopGoodsParam addParam) {
         Integer siteId = RequestUtils.siteId();
 
-        //查询配置数据
-        QueryWrapper<SysConfig> sysConfigQueryWrapper = new QueryWrapper<>();
-        sysConfigQueryWrapper.eq("site_id", RequestUtils.siteId());
-        sysConfigQueryWrapper.eq("config_key","GOODS_UNIQUE_CONFIG");
-        SysConfig sysConfigInfo =  sysConfigMapper.selectOne(sysConfigQueryWrapper);
-
-        //如果配置了商品编码唯一，则校验
-        if(ObjectUtil.isNotNull(sysConfigInfo)){
-            JSONObject configInfo = JSONUtil.parseObj(sysConfigInfo.getValue());
-            if(configInfo.getInt("is_enable")==1) {
-                QueryWrapper<ShopGoodsSku> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("site_id", RequestUtils.siteId());
-                queryWrapper.eq("sku_no", addParam.getSkuNo());
-                if(!addParam.getSkuNo().isEmpty()){
-                    if (shopGoodsSkuMapper.selectCount(queryWrapper) > 0) {
-                        throw new AdminException("商品编码重复");
-                    }
-                }
-            }
-        }
-
         // 添加goods表
         ShopGoods model = new ShopGoods();
         BeanUtils.copyProperties(addParam, model);
@@ -340,8 +373,15 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         shopGoodsMapper.insert(model);
 
         // 规格数据
+        ShopGoodsVerifySkuNoParam verifySkuNoParam = new ShopGoodsVerifySkuNoParam();
         List<ShopGoodsSku> skuData = new LinkedList<>();
         if (addParam.getSpecType().equals("single")) {
+            if(ObjectUtil.isNotEmpty(addParam.getSkuNo()))
+            {
+                verifySkuNoParam.setSkuNo(addParam.getSkuNo());
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                verifySkuNo(verifySkuNoParam);
+            }
             ShopGoodsSku sku = new ShopGoodsSku();
             BeanUtils.copyProperties(addParam, sku);
             sku.setSiteId(siteId);
@@ -355,9 +395,10 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             if (addParam.getGoodsSkuData().keySet().size() == 0) throw new CommonException("请添加商品规格");
 
             Integer defaultCount = 0;
+            List<String> skuNoArr = new ArrayList<>();
             for (String key : addParam.getGoodsSkuData().keySet()) {
                 ShopGoodsParam.SkuData skuParam = addParam.getGoodsSkuData().get(key);
-
+                if(!skuParam.getSkuNo().isEmpty()) skuNoArr.add(skuParam.getSkuNo());
                 List<String> skuSpecFormat = new LinkedList<>();
                 for (int i = 0; i < skuParam.getSkuSpec().size(); i++) {
                     JSONObject spec = skuParam.getSkuSpec().getJSONObject(i);
@@ -377,6 +418,14 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
                     if (defaultCount > 1) throw new CommonException("商品不能有多个默认规格");
                 }
                 skuData.add(sku);
+            }
+
+            //验证sku编码
+            if(ObjectUtil.isNotEmpty(skuNoArr))
+            {
+                verifySkuNoParam.setSkuNo(String.join(",", skuNoArr));
+                 verifySkuNoParam.setGoodsId(model.getGoodsId());
+                 verifySkuNo(verifySkuNoParam);
             }
             if (defaultCount.equals(0)) throw new CommonException("商品缺少默认规格");
 
@@ -457,29 +506,6 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         ShopGoods model = shopGoodsMapper.selectOne(new QueryWrapper<ShopGoods>().eq("goods_id", id).eq("site_id", siteId).eq("delete_time", 0));
         Assert.notNull(model, "商品不存在");
 
-
-        //查询配置数据
-        QueryWrapper<SysConfig> sysConfigQueryWrapper = new QueryWrapper<>();
-        sysConfigQueryWrapper.eq("site_id", RequestUtils.siteId());
-        sysConfigQueryWrapper.eq("config_key","GOODS_UNIQUE_CONFIG");
-        SysConfig sysConfigInfo =  sysConfigMapper.selectOne(sysConfigQueryWrapper);
-
-        //如果配置了商品编码唯一，则校验
-        if(ObjectUtil.isNotNull(sysConfigInfo)){
-            JSONObject configInfo = JSONUtil.parseObj(sysConfigInfo.getValue());
-            if(configInfo.getInt("is_enable")==1) {
-                QueryWrapper<ShopGoodsSku> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("site_id", RequestUtils.siteId());
-                queryWrapper.eq("sku_no", editParam.getSkuNo());
-                queryWrapper.ne("goods_id", model.getGoodsId());
-                if(!editParam.getSkuNo().isEmpty()){
-                    if (shopGoodsSkuMapper.selectCount(queryWrapper) > 0) {
-                        throw new AdminException("商品编码重复");
-                    }
-                }
-            }
-        }
-
         Long activeGoodsCount = getActiveGoodsCount(id);
         // 如果有正在进行的活动不允许下架
         if (editParam.getStatus().equals(0) && activeGoodsCount > 0)
@@ -497,8 +523,15 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         shopGoodsMapper.updateById(model);
 
         // 规格数据
+        ShopGoodsVerifySkuNoParam verifySkuNoParam = new ShopGoodsVerifySkuNoParam();
         List<ShopGoodsSku> skuData = new LinkedList<>();
         if (editParam.getSpecType().equals("single")) {
+            if(ObjectUtil.isNotEmpty(editParam.getSkuNo()))
+            {
+                verifySkuNoParam.setSkuNo(editParam.getSkuNo());
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                verifySkuNo(verifySkuNoParam);
+            }
             List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", id));
             if (skuList.size() > 1) {
                 // 删除原来的多规格
@@ -540,7 +573,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             if (activeGoodsCount > 0 && firstSkuData.getSkuId() == null) {
                 throw new CommonException("商品正在参与营销活动，禁止修改");
             }
-
+            List<String> skuNoArr = new ArrayList<>();
             // 检测规格项是否发生变化
             if (firstSkuData.getSkuId() != null) {
                 List<Integer> skuIdArr = new LinkedList<>();
@@ -548,7 +581,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
                 Integer defaultCount = 0;
                 for (String key : editParam.getGoodsSkuData().keySet()) {
                     ShopGoodsParam.SkuData skuParam = editParam.getGoodsSkuData().get(key);
-
+                    if(!skuParam.getSkuNo().isEmpty()) skuNoArr.add(skuParam.getSkuNo());
                     List<String> skuSpecFormat = new LinkedList<>();
                     for (int i = 0; i < skuParam.getSkuSpec().size(); i++) {
                         JSONObject spec = skuParam.getSkuSpec().getJSONObject(i);
@@ -636,7 +669,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
                 Integer defaultCount = 0;
                 for (String key : editParam.getGoodsSkuData().keySet()) {
                     ShopGoodsParam.SkuData skuParam = editParam.getGoodsSkuData().get(key);
-
+                    if(!skuParam.getSkuNo().isEmpty()) skuNoArr.add(skuParam.getSkuNo());
                     List<String> skuSpecFormat = new LinkedList<>();
                     for (int i = 0; i < skuParam.getSkuSpec().size(); i++) {
                         JSONObject spec = skuParam.getSkuSpec().getJSONObject(i);
@@ -679,6 +712,13 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
                 }
                 shopGoodsSpecService.insertAll(specData);
             }
+            //验证sku编码
+            if(ObjectUtil.isNotEmpty(skuNoArr))
+            {
+                verifySkuNoParam.setSkuNo(String.join(",", skuNoArr));
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                verifySkuNo(verifySkuNoParam);
+            }
         }
 
         if (skuData.size() > 0) shopGoodsSkuService.insertAll(skuData);
@@ -707,12 +747,34 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         } else if (param.getGoodsIds() instanceof ArrayList) {
             goodsIds = ((ArrayList<?>) param.getGoodsIds()).toArray(new Integer[0]);
         }
-        if (getActiveGoodsCount(goodsIds) > 0) throw new CommonException("商品正在参与营销活动，禁止删除");
+
+        Long activeCount = getActiveGoodsCount(goodsIds, param.getIsAll(), param.getWhere());
+        if (activeCount > 0) throw new CommonException("商品正在参与营销活动，禁止删除");
+
+        GoodsIsConnectedCardEventDefiner.GoodsIsConnectedCardEvent event = new GoodsIsConnectedCardEventDefiner.GoodsIsConnectedCardEvent();
+        event.setSiteId(RequestUtils.siteId());
+        event.setGoodsIds(goodsIds);
+        event.setIsAll(param.getIsAll());
+        event.setWhere(param.getWhere());
+        List<GoodsIsConnectedCardEventDefiner.GoodsIsConnectedCardEventResult> list = EventAndSubscribeOfPublisher.publishAndCallback(event);
+        if (!CollectionUtils.isEmpty(list)){
+            if (list.get(0).getIsConnected()){
+                throw new CommonException("商品正在参与礼品卡活动，禁止删除");
+            }
+        }
 
         ShopGoods model = new ShopGoods();
         model.setStatus(0);
         model.setDeleteTime(System.currentTimeMillis() / 1000);
-        shopGoodsMapper.update(model, new QueryWrapper<ShopGoods>().eq("site_id", RequestUtils.siteId()).in("goods_id", goodsIds));
+
+        QueryWrapper queryWrapper = new QueryWrapper<ShopGoods>().eq("site_id", RequestUtils.siteId());
+        if (param.getIsAll() == 1) {
+            queryWrapper = getBatchAllQuery(queryWrapper, param.getWhere());
+        } else {
+            queryWrapper.in("goods_id", goodsIds);
+        }
+
+        shopGoodsMapper.update(model, queryWrapper);
     }
 
     /**
@@ -792,14 +854,84 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             goodsIds = ((ArrayList<?>) param.getGoodsIds()).toArray(new Integer[0]);
         }
 
-        if (param.getStatus().equals(0) && getActiveGoodsCount(goodsIds) > 0) {
-            throw new CommonException("商品正在参与营销活动，禁止下架");
+        List<Integer> explodeGoodsIds = new LinkedList<>();
+        if (param.getStatus().equals(0)) {
+            explodeGoodsIds = getActiveGoodsIds(goodsIds, param.getIsAll(), param.getWhere());
         }
+
         ShopGoods model = new ShopGoods();
         model.setStatus(param.getStatus());
-        shopGoodsMapper.update(model, new QueryWrapper<ShopGoods>().eq("site_id", RequestUtils.siteId()).in("goods_id", goodsIds));
+
+        QueryWrapper queryWrapper = new QueryWrapper<ShopGoods>().eq("site_id", RequestUtils.siteId());
+        if (param.getIsAll() == 1) {
+            queryWrapper = getBatchAllQuery(queryWrapper, param.getWhere());
+        } else {
+            queryWrapper.in("goods_id", goodsIds);
+        }
+        if (ObjectUtil.isNotEmpty(explodeGoodsIds)) queryWrapper.notIn("goods_id", explodeGoodsIds);
+
+        shopGoodsMapper.update(model, queryWrapper);
     }
 
+    public QueryWrapper getBatchAllQuery(QueryWrapper queryWrapper, Map<String, Object> where) {
+        JSONObject whereJson = JSONUtil.parseObj(where);
+
+        String goodsName = whereJson.getStr("goods_name", "");
+        Integer brandId = whereJson.getInt("brand_id", 0);
+        String goodsType = whereJson.getStr("goods_type", "");
+        Integer goodsCategory = whereJson.getInt("goods_category", 0);
+        Integer labelIds = whereJson.getInt("label_ids", 0);
+        Integer startSaleNum = whereJson.getInt("start_sale_num", 0);
+        Integer endSaleNum = whereJson.getInt("end_sale_num", 0);
+        BigDecimal startPrice = whereJson.getBigDecimal("start_price", BigDecimal.ZERO);
+        BigDecimal endPrice = whereJson.getBigDecimal("end_price", BigDecimal.ZERO);
+
+        if (ObjectUtil.isNotEmpty(goodsName)) queryWrapper.like("goods_name", goodsName);
+        if (brandId != 0) queryWrapper.eq("brand_id", brandId);
+        if (ObjectUtil.isNotEmpty(goodsType)) queryWrapper.eq("goods_type", goodsType);
+        if (goodsCategory != 0) queryWrapper.like("goods_category", "\"" + goodsCategory + "\"");
+        if (labelIds != 0) queryWrapper.like("label_ids", "\"" + labelIds + "\"");
+        QueryMapperUtils.buildByBetween(queryWrapper, "sale_num", new Integer[]{startSaleNum, endSaleNum});
+        QueryMapperUtils.buildByBetween(queryWrapper, "price", new BigDecimal[]{startPrice, endPrice});
+
+        return queryWrapper;
+    }
+
+    /**
+     * 查询参与营销活动的商品
+     * @param goodsIds
+     * @param isAll
+     * @param where
+     * @return
+     */
+    private List<Integer> getActiveGoodsIds(Integer[] goodsIds, Integer isAll, Map<String, Object> where) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("goods_ids", Arrays.asList(goodsIds));
+        data.put("site_id", RequestUtils.siteId());
+        data.put("is_all", isAll);
+        data.put("where", where);
+
+        CommonEventDefiner.CommonEvent event = new CommonEventDefiner.CommonEvent();
+        event.setEventName("GetGoodsJoinInfo");
+        event.setSiteId(RequestUtils.siteId());
+        event.setData(data);
+        List<CommonEventDefiner.CommonEventResult> dataList = EventAndSubscribeOfPublisher.publishAndCallback(event);
+
+        List<Integer> activeGoodsIds = new ArrayList<>();
+
+        for (CommonEventDefiner.CommonEventResult item: dataList) {
+            if (item == null || item.getResult() == null || ObjectUtil.isEmpty(item.getResult())) {
+                continue;
+            }
+            Map<Integer, Map<String, Map<String, Object>>> result =
+                (Map<Integer, Map<String, Map<String, Object>>>) item.getResult();
+            List<Integer> ids = new ArrayList<>(Arrays.asList(result.keySet().toArray(Integer[]::new)));
+            if (ObjectUtil.isNotEmpty(ids)) {
+                activeGoodsIds.addAll(ids);
+            }
+        }
+        return activeGoodsIds;
+    }
 
     /**
      * 修改商品上下架状态（单商品）
@@ -826,55 +958,6 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         ShopGoods model = new ShopGoods();
         model.setSort(param.getSort());
         shopGoodsMapper.update(model, new QueryWrapper<ShopGoods>().eq("site_id", RequestUtils.siteId()).eq("goods_id", param.getGoodsId()));
-    }
-
-    /**
-     * 获取商品添加/编辑数据
-     *
-     * @param goodsId
-     * @return
-     */
-    @Override
-    public ShopGoodsInitVo getInit(Integer goodsId) {
-        ShopGoodsInitVo vo = new ShopGoodsInitVo();
-        if (goodsId > 0) {
-            ShopGoods model = shopGoodsMapper.selectOne(
-                    new QueryWrapper<ShopGoods>()
-                            .eq("goods_id", goodsId)
-                            .eq("site_id", RequestUtils.siteId())
-                            .eq("delete_time", 0));
-            if (model == null) return null;
-
-            ShopGoodsInitVo.GoodsInfo goodsInfo = new ShopGoodsInitVo.GoodsInfo();
-            BeanUtils.copyProperties(model, goodsInfo);
-            goodsInfo.setGoodsCategory(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getGoodsCategory()))));
-            goodsInfo.setLabelIds(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getLabelIds()))));
-            goodsInfo.setServiceIds(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getServiceIds()))));
-            goodsInfo.setAttrIds(strArrToIntArr(Convert.toStrArray(JSONUtil.parseArray(model.getAttrIds()))));
-            goodsInfo.setStatus(String.valueOf(model.getStatus()));
-
-            List<ShopGoodsInitVo.SkuInfo> skuList = CollectUtils.convert(shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", model.getGoodsId())), ShopGoodsInitVo.SkuInfo.class);
-            goodsInfo.setSkuList(skuList);
-
-            List<ShopGoodsInitVo.SkuInfo> tempSkuList = skuList.stream().filter(i -> i.getSkuSpecFormat() != null && !i.getSkuSpecFormat().isEmpty()).collect(Collectors.toList());
-            if (tempSkuList.size() > 0) {
-                goodsInfo.setSpecType("multi");
-
-                List<ShopGoodsInitVo.SpecInfo> specList = CollectUtils.convert(shopGoodsSpecMapper.selectList(new QueryWrapper<ShopGoodsSpec>().eq("goods_id", model.getGoodsId())), ShopGoodsInitVo.SpecInfo.class);
-                goodsInfo.setSpecList(specList);
-            }
-
-            if (model.getBrandId().equals(0)) goodsInfo.setBrandId("");
-            if (model.getSupplierId().equals(0)) goodsInfo.setSupplierId("");
-            if (model.getPosterId().equals(0)) goodsInfo.setPosterId("");
-            if (model.getDiyDetailId().equals(0)) goodsInfo.setDiyDetailId("");
-            if (model.getFormId().equals(0)) goodsInfo.setFormId("");
-
-            goodsInfo.setActiveGoodsCount(getActiveGoodsCount(goodsId));
-
-            vo.setGoodsInfo(goodsInfo);
-        }
-        return vo;
     }
 
     /**
@@ -913,13 +996,7 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
      * @return
      */
     public Long getActiveGoodsCount(Integer goodsId) {
-        String[] activeType = {ActiveGoodsTypeEnum.GOODS_SINGLE.getType(), ActiveGoodsTypeEnum.GOODS_INDEPENDENT.getType()};
-        return shopActiveGoodsMapper.selectCount(new QueryWrapper<ShopActiveGoods>()
-                .eq("site_id", RequestUtils.siteId())
-                .eq("active_goods_status", "active")
-                .in("active_goods_type", Arrays.asList(activeType))
-                .eq("goods_id", goodsId)
-        );
+        return getActiveGoodsCount(new Integer[]{goodsId}, 0, new HashMap<>());
     }
 
     /**
@@ -927,14 +1004,30 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
      *
      * @return
      */
-    public Long getActiveGoodsCount(Integer[] goodsIds) {
-        String[] activeType = {ActiveGoodsTypeEnum.GOODS_SINGLE.getType(), ActiveGoodsTypeEnum.GOODS_INDEPENDENT.getType()};
-        return shopActiveGoodsMapper.selectCount(new QueryWrapper<ShopActiveGoods>()
-                .eq("site_id", RequestUtils.siteId())
-                .eq("active_goods_status", "active")
-                .in("active_goods_type", Arrays.asList(activeType))
-                .in("goods_id", Arrays.asList(goodsIds))
-        );
+    public Long getActiveGoodsCount(Integer[] goodsIds, Integer isAll, Map<String, Object> where) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("goods_ids", Arrays.asList(goodsIds));
+        data.put("site_id", RequestUtils.siteId());
+        data.put("is_get_count", 1);
+        data.put("is_all", isAll);
+        data.put("where", where);
+
+        CommonEventDefiner.CommonEvent event = new CommonEventDefiner.CommonEvent();
+        event.setEventName("GetGoodsJoinInfo");
+        event.setSiteId(RequestUtils.siteId());
+        event.setData(data);
+        List<CommonEventDefiner.CommonEventResult> dataList = EventAndSubscribeOfPublisher.publishAndCallback(event);
+
+        Long count = 0L;
+
+        for (CommonEventDefiner.CommonEventResult item: dataList) {
+            if (item == null || item.getResult() == null) {
+                continue;
+            }
+            count+= Long.valueOf(item.getResult().toString());
+        }
+        return count;
+
     }
 
     /**
@@ -1077,104 +1170,104 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         return vo;
     }
 
-    @Override
-    public ShopSelectGoodsListVo getZhongcaoSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam) {
-        Integer page = pageParam.getPage();
-        Integer limit = pageParam.getLimit();
-
-        MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
-        queryWrapper.setAlias("g")
-                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
-        queryWrapper.select("g.goods_id,g.site_id,g.goods_image,goods_name,goods_type,goods_cover,g.stock,g.sale_num,status,sort,create_time,member_discount");
-        queryWrapper.eq("g.site_id", RequestUtils.siteId());
-        queryWrapper.eq("delete_time", 0);
-
-        if (ObjectUtil.isNotEmpty(searchParam.getIsGift()) && searchParam.getIsGift() == 1) {
-            queryWrapper.ge("g.is_gift", 0);
-        } else {
-            queryWrapper.eq("g.is_gift", 0);
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
-            queryWrapper.and(i -> i.like("goods_name", searchParam.getKeyword()).or().like("sub_title", searchParam.getKeyword()));
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getSkuIds())) {
-            List<ShopGoodsSku> selectGoodsList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().select("goods_id").in("sku_id", searchParam.getSkuIds()).groupBy("goods_id"));
-            if (ObjectUtil.isNotEmpty(selectGoodsList)) {
-                List<Integer> goodsIds = selectGoodsList.stream().map(i -> i.getGoodsId()).toList();
-                if (ObjectUtil.isEmpty(searchParam.getGoodsIds())) searchParam.setGoodsIds(goodsIds);
-            }
-        }
-
-        if (searchParam.getSelectType().equals("all")) {
-            queryWrapper.gt("g.stock", 0);
-            queryWrapper.eq("g.status", 1);
-        }
-
-        if (searchParam.getSelectType().equals("all")) {
-            if(ObjectUtil.isNotEmpty(searchParam.getGoodsIds()) && searchParam.getGoodsIds().size() > 0){
-                queryWrapper.notIn("g.goods_id", searchParam.getGoodsIds());
-            }
-        }else if(searchParam.getSelectType().equals("selected")){
-            queryWrapper.in("g.goods_id", searchParam.getGoodsIds());
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getGoodsType()))
-            queryWrapper.eq("goods_type", searchParam.getGoodsType());
-
-        if (ObjectUtil.isNotEmpty(searchParam.getGoodsCategory()))
-            queryWrapper.like("goods_category", "\"" + searchParam.getGoodsCategory() + "\"");
-
-        List<Integer> verifyGoodsIds = new LinkedList<>();
-        List<Integer> verifySkuIds = new LinkedList<>();
-
-        // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
-        if (ObjectUtil.isNotEmpty(searchParam.getVerifyGoodsIds())) {
-            List<ShopGoods> verifyGoodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().select("goods_id").in("goods_id", searchParam.getVerifyGoodsIds()).eq("site_id", RequestUtils.siteId()).eq("delete_time", 0).eq("status", 1));
-            if (ObjectUtil.isNotEmpty(verifyGoodsList)) {
-                verifyGoodsIds = verifyGoodsList.stream().map(i -> i.getGoodsId()).collect(Collectors.toList());
-            }
-        }
-
-        if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds())) {
-            List<ShopGoodsSku> verifySkuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().in("sku_id", searchParam.getVerifySkuIds()).select("sku_id"));
-            if (ObjectUtil.isNotEmpty(verifySkuList)) {
-                verifySkuIds = verifySkuList.stream().map(i -> i.getSkuId()).collect(Collectors.toList());
-            }
-        }
-
-        queryWrapper.orderByDesc("g.goods_id");
-
-        IPage<ShopSelectGoodsListVo.ListVo> iPage = shopGoodsMapper.selectJoinPage(new Page<>(page, limit), ShopSelectGoodsListVo.ListVo.class, queryWrapper);
-        List<ShopSelectGoodsListVo.ListVo> list = new LinkedList<>();
-        for (ShopSelectGoodsListVo.ListVo vo : iPage.getRecords()) {
-            vo.setGoodsImage(vo.getGoodsImage());
-
-            List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", vo.getGoodsId()));
-            vo.setSkuList(skuList);
-
-            for (ShopGoodsSku item : skuList) {
-                if (item.getIsDefault().equals(1)) {
-                    ShopSelectGoodsListVo.GoodsSku goodsSkuVo = new ShopSelectGoodsListVo.GoodsSku();
-                    BeanUtils.copyProperties(item, goodsSkuVo);
-                    vo.setGoodsSku(goodsSkuVo);
-                }
-            }
-            vo.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), vo.getGoodsCover()));
-            vo.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), vo.getGoodsCover()));
-            list.add(vo);
-        }
-        PageResult pageResutl = PageResult.build(page, limit, iPage.getTotal()).setData(list);
-
-        ShopSelectGoodsListVo vo = new ShopSelectGoodsListVo();
-        BeanUtils.copyProperties(pageResutl, vo);
-
-        vo.setVerifyGoodsIds(verifyGoodsIds);
-        vo.setVerifySkuIds(verifySkuIds);
-
-        return vo;
-    }
+//    @Override
+//    public ShopSelectGoodsListVo getZhongcaoSelectPage(PageParam pageParam, ShopGoodsSelectSearchParam searchParam) {
+//        Integer page = pageParam.getPage();
+//        Integer limit = pageParam.getLimit();
+//
+//        MPJQueryWrapper<ShopGoods> queryWrapper = new MPJQueryWrapper<>();
+//        queryWrapper.setAlias("g")
+//                .innerJoin("?_shop_goods_sku gs ON g.goods_id = gs.goods_id AND gs.is_default = 1".replace("?_", GlobalConfig.tablePrefix));
+//        queryWrapper.select("g.goods_id,g.site_id,g.goods_image,goods_name,goods_type,goods_cover,g.stock,g.sale_num,status,sort,create_time,member_discount");
+//        queryWrapper.eq("g.site_id", RequestUtils.siteId());
+//        queryWrapper.eq("delete_time", 0);
+//
+//        if (ObjectUtil.isNotEmpty(searchParam.getIsGift()) && searchParam.getIsGift() == 1) {
+//            queryWrapper.ge("g.is_gift", 0);
+//        } else {
+//            queryWrapper.eq("g.is_gift", 0);
+//        }
+//
+//        if (ObjectUtil.isNotEmpty(searchParam.getKeyword())) {
+//            queryWrapper.and(i -> i.like("goods_name", searchParam.getKeyword()).or().like("sub_title", searchParam.getKeyword()));
+//        }
+//
+//        if (ObjectUtil.isNotEmpty(searchParam.getSkuIds())) {
+//            List<ShopGoodsSku> selectGoodsList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().select("goods_id").in("sku_id", searchParam.getSkuIds()).groupBy("goods_id"));
+//            if (ObjectUtil.isNotEmpty(selectGoodsList)) {
+//                List<Integer> goodsIds = selectGoodsList.stream().map(i -> i.getGoodsId()).toList();
+//                if (ObjectUtil.isEmpty(searchParam.getGoodsIds())) searchParam.setGoodsIds(goodsIds);
+//            }
+//        }
+//
+//        if (searchParam.getSelectType().equals("all")) {
+//            queryWrapper.gt("g.stock", 0);
+//            queryWrapper.eq("g.status", 1);
+//        }
+//
+//        if (searchParam.getSelectType().equals("all")) {
+//            if(ObjectUtil.isNotEmpty(searchParam.getGoodsIds()) && searchParam.getGoodsIds().size() > 0){
+//                queryWrapper.notIn("g.goods_id", searchParam.getGoodsIds());
+//            }
+//        }else if(searchParam.getSelectType().equals("selected")){
+//            queryWrapper.in("g.goods_id", searchParam.getGoodsIds());
+//        }
+//
+//        if (ObjectUtil.isNotEmpty(searchParam.getGoodsType()))
+//            queryWrapper.eq("goods_type", searchParam.getGoodsType());
+//
+//        if (ObjectUtil.isNotEmpty(searchParam.getGoodsCategory()))
+//            queryWrapper.like("goods_category", "\"" + searchParam.getGoodsCategory() + "\"");
+//
+//        List<Integer> verifyGoodsIds = new LinkedList<>();
+//        List<Integer> verifySkuIds = new LinkedList<>();
+//
+//        // 检测商品id集合是否存在，移除不存在的商品id，纠正数据准确性
+//        if (ObjectUtil.isNotEmpty(searchParam.getVerifyGoodsIds())) {
+//            List<ShopGoods> verifyGoodsList = shopGoodsMapper.selectList(new QueryWrapper<ShopGoods>().select("goods_id").in("goods_id", searchParam.getVerifyGoodsIds()).eq("site_id", RequestUtils.siteId()).eq("delete_time", 0).eq("status", 1));
+//            if (ObjectUtil.isNotEmpty(verifyGoodsList)) {
+//                verifyGoodsIds = verifyGoodsList.stream().map(i -> i.getGoodsId()).collect(Collectors.toList());
+//            }
+//        }
+//
+//        if (ObjectUtil.isNotEmpty(searchParam.getVerifySkuIds())) {
+//            List<ShopGoodsSku> verifySkuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().in("sku_id", searchParam.getVerifySkuIds()).select("sku_id"));
+//            if (ObjectUtil.isNotEmpty(verifySkuList)) {
+//                verifySkuIds = verifySkuList.stream().map(i -> i.getSkuId()).collect(Collectors.toList());
+//            }
+//        }
+//
+//        queryWrapper.orderByDesc("g.goods_id");
+//
+//        IPage<ShopSelectGoodsListVo.ListVo> iPage = shopGoodsMapper.selectJoinPage(new Page<>(page, limit), ShopSelectGoodsListVo.ListVo.class, queryWrapper);
+//        List<ShopSelectGoodsListVo.ListVo> list = new LinkedList<>();
+//        for (ShopSelectGoodsListVo.ListVo vo : iPage.getRecords()) {
+//            vo.setGoodsImage(vo.getGoodsImage());
+//
+//            List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", vo.getGoodsId()));
+//            vo.setSkuList(skuList);
+//
+//            for (ShopGoodsSku item : skuList) {
+//                if (item.getIsDefault().equals(1)) {
+//                    ShopSelectGoodsListVo.GoodsSku goodsSkuVo = new ShopSelectGoodsListVo.GoodsSku();
+//                    BeanUtils.copyProperties(item, goodsSkuVo);
+//                    vo.setGoodsSku(goodsSkuVo);
+//                }
+//            }
+//            vo.setGoodsCoverThumbSmall(CommonUtils.thumbImageSmall(RequestUtils.siteId(), vo.getGoodsCover()));
+//            vo.setGoodsCoverThumbMid(CommonUtils.thumbImageMiddle(RequestUtils.siteId(), vo.getGoodsCover()));
+//            list.add(vo);
+//        }
+//        PageResult pageResutl = PageResult.build(page, limit, iPage.getTotal()).setData(list);
+//
+//        ShopSelectGoodsListVo vo = new ShopSelectGoodsListVo();
+//        BeanUtils.copyProperties(pageResutl, vo);
+//
+//        vo.setVerifyGoodsIds(verifyGoodsIds);
+//        vo.setVerifySkuIds(verifySkuIds);
+//
+//        return vo;
+//    }
 
 
     /**
@@ -1536,13 +1629,13 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
         LambdaUpdateWrapper<ShopGoods> uw = new LambdaUpdateWrapper<>();
         if (type.equals(GoodsBatchSetEnum.LABEL.getKey())) {
             if (value.containsKey("label_ids") && ObjectUtil.isNotEmpty(value.get("label_ids"))) {
-                String labelIds = value.get("label_ids").toString();
-                uw.set(ShopGoods::getLabelIds, labelIds);
+                List<String> labelIds = value.getJSONArray("label_ids").stream().map(Object::toString).toList();
+                uw.set(ShopGoods::getLabelIds, JSONUtil.parseArray(labelIds).toString());
             }
         } else if (type.equals(GoodsBatchSetEnum.SERVICE.getKey())) {
             if (value.containsKey("service_ids") && ObjectUtil.isNotEmpty(value.get("service_ids"))) {
-                String serviceIds = value.get("service_ids").toString();
-                uw.set(ShopGoods::getServiceIds, serviceIds);
+                List<String> serviceIds = value.getJSONArray("service_ids").stream().map(Object::toString).toList();
+                uw.set(ShopGoods::getServiceIds, JSONUtil.parseArray(serviceIds).toString());
             }
         } else if (type.equals(GoodsBatchSetEnum.VIRTUAL_SALE_NUM.getKey())) {
             if (value.containsKey("virtual_sale_num") && ObjectUtil.isNotEmpty(value.get("virtual_sale_num"))) {
@@ -1551,8 +1644,8 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             }
         } else if (type.equals(GoodsBatchSetEnum.CATEGORY.getKey())) {
             if (value.containsKey("goods_category") && ObjectUtil.isNotEmpty(value.get("goods_category"))) {
-                String categoryIds = value.get("goods_category").toString();
-                uw.set(ShopGoods::getGoodsCategory, categoryIds);
+                List<String> categoryIds = value.getJSONArray("goods_category").stream().map(Object::toString).toList();
+                uw.set(ShopGoods::getGoodsCategory, JSONUtil.parseArray(categoryIds).toString());
             }
         } else if (type.equals(GoodsBatchSetEnum.BRAND.getKey())) {
             if (value.containsKey("brand_id") && ObjectUtil.isNotEmpty(value.get("brand_id"))) {
@@ -1633,9 +1726,9 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             return;
         }
         boolean hasUpdateField = uw.getSqlSet() != null && !uw.getSqlSet().isEmpty();
-        if (hasUpdateField && !goodsIds.isEmpty()) {
-            uw.in(ShopGoods::getGoodsId, goodsIds);
-            shopGoodsMapper.update(null, uw);
+        if (hasUpdateField && !shopGoodsIds.isEmpty()) {
+            uw.in(ShopGoods::getGoodsId, shopGoodsIds);
+            shopGoodsMapper.update(uw);
         }
     }
 
@@ -1653,7 +1746,9 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
             } else if (ObjectUtil.isNotEmpty(where.get("end_price"))) {
                 mpjqw.le("sgk.price", where.get("end_price"));
             }
-            mpjqw.notIn("sg.goods_id", goodsIds);
+            if(ObjectUtil.isNotEmpty(goodsIds)){
+                mpjqw.notIn("sg.goods_id", goodsIds);
+            }
         } else {
             mpjqw.in("sg.goods_id", goodsIds);
         }
@@ -1705,33 +1800,8 @@ public class ShopGoodsServiceImpl implements IShopGoodsService {
 
     @Override
     public Boolean verifySkuNo(ShopGoodsVerifySkuNoParam param) {
-        //查询配置数据
-        QueryWrapper<SysConfig> sysConfigQueryWrapper = new QueryWrapper<>();
-        sysConfigQueryWrapper.eq("site_id", RequestUtils.siteId());
-        sysConfigQueryWrapper.eq("config_key","GOODS_UNIQUE_CONFIG");
-        SysConfig sysConfigInfo =  sysConfigMapper.selectOne(sysConfigQueryWrapper);
-
-        //如果配置了商品编码唯一，则校验
-        if(ObjectUtil.isNotNull(sysConfigInfo)){
-            JSONObject configInfo = JSONUtil.parseObj(sysConfigInfo.getValue());
-            if(configInfo.getInt("is_enable")==1){
-                QueryWrapper<ShopGoodsSku> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq("site_id", RequestUtils.siteId());
-                queryWrapper.eq("sku_no", param.getSkuNo());
-                if(ObjectUtil.isNotNull(param.getGoodsId()) && ObjectUtil.isNotEmpty(param.getGoodsId())){
-                    queryWrapper.ne("goods_id", param.getGoodsId());
-                }
-                if (shopGoodsSkuMapper.selectCount(queryWrapper) > 0) {
-                    throw new AdminException("商品编码重复");
-                }else {
-                    return true;
-                }
-            } else {
-                return true;
-            }
-        }else{
-            return true;
-        }
+        return coreGoodsConfigService.verifySkuNo(param);
     }
+
 
 }

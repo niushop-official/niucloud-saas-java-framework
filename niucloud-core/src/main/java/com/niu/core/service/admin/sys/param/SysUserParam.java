@@ -28,20 +28,10 @@ public class SysUserParam implements Serializable {
     @NotNull(message = "realName参数缺失")
     private String realName;
 
-    @NotNull(message = "lastIp参数缺失")
-    private String lastIp;
-
-    @NotNull(message = "lastTime参数缺失")
-    private Long lastTime;
-
-    @NotNull(message = "loginCount参数缺失")
-    private Integer loginCount;
-
     @NotNull(message = "status参数缺失")
     private Integer status;
 
-    @NotNull(message = "isDel参数缺失")
-    private Integer isDel;
+    private String mobile;
 
     private List<SysCreateSiteLimitParam> createSiteLimit;
 

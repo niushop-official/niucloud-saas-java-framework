@@ -37,6 +37,7 @@ public class RegisterController {
     @PostMapping("/register")
     public Result<LoginVo> account(@Validated @RequestBody AccountRegisterParam param) {
         registerService.checkLoginConfig(MemberLoginTypeEnum.USERNAME.getType());
+        CaptchaUtils.check(param.getCaptchaKey(), param.getCaptchaCode());
         return Result.success(registerService.account(param));
     }
 
@@ -61,6 +62,7 @@ public class RegisterController {
     public Result bind(AuthRegisterParam param) {
         switch (RequestUtils.channel()) {
             case "wechat":
+            case "pc":
                 return Result.success(wechatService.register(param));
             case "weapp":
                 return Result.success(weappService.register(param));

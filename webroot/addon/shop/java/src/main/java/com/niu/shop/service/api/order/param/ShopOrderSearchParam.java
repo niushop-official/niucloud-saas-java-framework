@@ -19,4 +19,5 @@ public class ShopOrderSearchParam implements Serializable {
 
     private String activityType;
 
+    private String body;
 }

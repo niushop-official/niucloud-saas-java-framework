@@ -1,6 +1,8 @@
 package com.niu.core.service.core.sys.impl;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.hutool.json.JSONObject;
 import com.github.pagehelper.util.StringUtil;
 import com.niu.core.common.component.upload.model.*;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 @Service
@@ -116,7 +119,7 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
      */
     private void generateNewName(AttachmentUploadParam attachmentUploadParam) {
         String ext = FilenameUtils.getExtension(attachmentUploadParam.getFile().getOriginalFilename());
-        String name = (System.currentTimeMillis()) + "_" + attachmentUploadParam.getStorageType() + "." + ext;
+        String name = IdUtil.simpleUUID() + "_" + attachmentUploadParam.getStorageType() + "." + ext;
         attachmentUploadParam.setNewFilename(name);
     }
 
@@ -181,6 +184,11 @@ public class CoreUploadServiceImpl implements ICoreUploadService {
         JSONObject configObject = rootJSONObject.getJSONObject(defaultValue);
         // 根据配置初始化
         IUploadProvider uploadProvider = UploadProviderFactory.createAndInit(defaultValue, configObject);
+        
+        if (uploadProvider == null) {
+            ThumbModelResult thumbModelResult = new ThumbModelResult();
+            return thumbModelResult;
+        }
 
         ThumbModel model = new ThumbModel();
         model.setType(type);

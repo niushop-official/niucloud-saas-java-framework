@@ -5,17 +5,16 @@ import cn.hutool.json.JSONObject;
 import com.niu.core.common.domain.PageResult;
 import com.niu.core.common.domain.Result;
 import com.niu.core.enums.diy.PagesEnum;
+import com.niu.core.service.admin.diy.IDiyRouteService;
 import com.niu.core.service.admin.diy.IDiyService;
-import com.niu.core.service.admin.diy.param.DiyPageInitParam;
-import com.niu.core.service.admin.diy.param.DiyPageParam;
-import com.niu.core.service.admin.diy.param.DiyPageSearchParam;
-import com.niu.core.service.admin.diy.param.TemplateParam;
+import com.niu.core.service.admin.diy.param.*;
 import com.niu.core.service.admin.diy.vo.DiyPageInfoVo;
 import com.niu.core.service.admin.diy.vo.DiyPageListVo;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.service.core.addon.ICoreAddonService;
 import com.niu.core.service.core.addon.vo.InstallAddonListVo;
 import com.niu.core.service.core.diy.param.StartUpPageConfigParam;
+import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +38,9 @@ public class DiyController {
 
     @Resource
     ICoreAddonService coreAddonService;
+
+    @Resource
+    IDiyRouteService diyRouteService;
 
     /**
      * 自定义页面分页列表
@@ -136,7 +138,11 @@ public class DiyController {
     @GetMapping("/apps")
     @Description("存在的应用插件列表")
     public Result<Map<String, InstallAddonListVo>> info() {
-        return Result.success(coreAddonService.getInstallAddonList());
+        Map<String, InstallAddonListVo> installAddonList = coreAddonService.getInstallAddonList();
+        InstallAddonListVo installAddonListVo = new InstallAddonListVo();
+        installAddonListVo.setTitle("系统");
+        installAddonList.put("app", installAddonListVo);
+        return Result.success(installAddonList);
     }
 
     /**
@@ -207,7 +213,7 @@ public class DiyController {
      */
     @GetMapping("/decorate")
     @Description("获取页面装修列表")
-    public Result<JSONObject> getDecoratePage(DiyPageSearchParam searchParam) {
+    public Result<JSONObject> getDecoratePage(@Valid DiyDecoratePageSearchParam searchParam) {
         return Result.success(diyPageService.getDecoratePage(searchParam));
     }
 

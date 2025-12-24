@@ -1,6 +1,7 @@
 package com.niu.shop.service.admin.goods.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -19,14 +20,18 @@ import com.niu.shop.service.admin.goods.IShopGoodsService;
 import com.niu.shop.service.admin.goods.IShopGoodsSkuService;
 import com.niu.shop.service.admin.goods.IShopGoodsSpecService;
 import com.niu.shop.service.admin.goods.IShopVirtualGoodsService;
+import com.niu.shop.service.admin.goods.param.ShopGoodsVerifySkuNoParam;
 import com.niu.shop.service.admin.goods.param.ShopVirtualGoodsParam;
 import com.niu.shop.service.admin.goods.vo.ShopVirtualGoodsInitVo;
+import com.niu.shop.service.core.goods.ICoreGoodsConfigService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import jakarta.annotation.Resource;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +58,9 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
     @Resource
     IShopGoodsService shopGoodsService;
 
+    @Resource
+    ICoreGoodsConfigService coreGoodsConfigService;
+
     /**
      * 商品添加
      * @param addParam 参数
@@ -76,8 +84,15 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
         shopGoodsMapper.insert(model);
 
         // 规格数据
+        ShopGoodsVerifySkuNoParam verifySkuNoParam = new ShopGoodsVerifySkuNoParam();
         List<ShopGoodsSku> skuData = new LinkedList<>();
         if (addParam.getSpecType().equals("single")) {
+            if(ObjectUtil.isNotEmpty(addParam.getSkuNo()))
+            {
+                verifySkuNoParam.setSkuNo(addParam.getSkuNo());
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                shopGoodsService.verifySkuNo(verifySkuNoParam);
+            }
             ShopGoodsSku sku = new ShopGoodsSku();
             BeanUtils.copyProperties(addParam, sku);
             sku.setSiteId(siteId);
@@ -89,11 +104,12 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
             skuData.add(sku);
         } else {
             if (addParam.getGoodsSkuData().keySet().size() == 0) throw new CommonException("请添加商品规格");
-
+            //组装商品编码，防止重复
+            List<String> skuNoArr = new ArrayList<>();
             Integer defaultCount = 0;
             for (String key: addParam.getGoodsSkuData().keySet()) {
                 ShopVirtualGoodsParam.SkuData skuParam = addParam.getGoodsSkuData().get(key);
-
+                if(!skuParam.getSkuNo().isEmpty()) skuNoArr.add(skuParam.getSkuNo());
                 List<String> skuSpecFormat = new LinkedList<>();
                 for (int i = 0; i < skuParam.getSkuSpec().size(); i++) {
                     JSONObject spec = skuParam.getSkuSpec().getJSONObject(i);
@@ -134,6 +150,14 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
 
                 spec.setSpecValues(String.join(",", specValues));
                 specData.add(spec);
+            }
+
+            //验证sku编码
+            if(ObjectUtil.isNotEmpty(skuNoArr))
+            {
+                verifySkuNoParam.setSkuNo(String.join(",", skuNoArr));
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                shopGoodsService.verifySkuNo(verifySkuNoParam);
             }
             shopGoodsSpecService.insertAll(specData);
         }
@@ -206,8 +230,15 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
         shopGoodsMapper.updateById(model);
 
         // 规格数据
+        ShopGoodsVerifySkuNoParam verifySkuNoParam = new ShopGoodsVerifySkuNoParam();
         List<ShopGoodsSku> skuData = new LinkedList<>();
         if (editParam.getSpecType().equals("single")) {
+            if(ObjectUtil.isNotEmpty(editParam.getSkuNo()))
+            {
+                verifySkuNoParam.setSkuNo(editParam.getSkuNo());
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                shopGoodsService.verifySkuNo(verifySkuNoParam);
+            }
             List<ShopGoodsSku> skuList = shopGoodsSkuMapper.selectList(new QueryWrapper<ShopGoodsSku>().eq("goods_id", id));
             if (skuList.size() > 1) {
                 // 删除原来的多规格
@@ -249,13 +280,14 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
             }
 
             // 检测规格项是否发生变化
+            List<String> skuNoArr = new ArrayList<>();
             if (firstSkuData.getSkuId() != null) {
                 List<Integer> skuIdArr = new LinkedList<>();
 
                 Integer defaultCount = 0;
                 for (String key: editParam.getGoodsSkuData().keySet()) {
                     ShopVirtualGoodsParam.SkuData skuParam = editParam.getGoodsSkuData().get(key);
-
+                    if(!skuParam.getSkuNo().isEmpty()) skuNoArr.add(skuParam.getSkuNo());
                     List<String> skuSpecFormat = new LinkedList<>();
                     for (int i = 0; i < skuParam.getSkuSpec().size(); i++) {
                         JSONObject spec = skuParam.getSkuSpec().getJSONObject(i);
@@ -339,7 +371,7 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
                 Integer defaultCount = 0;
                 for (String key: editParam.getGoodsSkuData().keySet()) {
                     ShopVirtualGoodsParam.SkuData skuParam = editParam.getGoodsSkuData().get(key);
-
+                    if(!skuParam.getSkuNo().isEmpty()) skuNoArr.add(skuParam.getSkuNo());
                     List<String> skuSpecFormat = new LinkedList<>();
                     for (int i = 0; i < skuParam.getSkuSpec().size(); i++) {
                         JSONObject spec = skuParam.getSkuSpec().getJSONObject(i);
@@ -381,6 +413,13 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
                     specData.add(spec);
                 }
                 shopGoodsSpecService.insertAll(specData);
+            }
+            //验证sku编码
+            if(ObjectUtil.isNotEmpty(skuNoArr))
+            {
+                verifySkuNoParam.setSkuNo(String.join(",", skuNoArr));
+                verifySkuNoParam.setGoodsId(model.getGoodsId());
+                shopGoodsService.verifySkuNo(verifySkuNoParam);
             }
         }
 
@@ -446,6 +485,7 @@ public class ShopVirtualGoodsServiceImpl implements IShopVirtualGoodsService {
 
             vo.setGoodsInfo(goodsInfo);
         }
+        vo.setDefaultSort(coreGoodsConfigService.getSortConfig().getDefaultSort());
         return vo;
     }
 }

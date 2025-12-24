@@ -50,7 +50,20 @@ public class ShopGoodsBrandServiceImpl implements IShopGoodsBrandService {
         QueryWrapper<ShopGoodsBrand> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getBrandName())) queryWrapper.like("brand_name", searchParam.getBrandName());
-        queryWrapper.orderByDesc("brand_id");
+        if(ObjectUtil.isNotEmpty(searchParam.getOrder()))
+        {
+            if(searchParam.getSort().equals("asc"))
+            {
+                queryWrapper.orderByAsc(searchParam.getOrder());
+            }
+            else
+            {
+                queryWrapper.orderByDesc(searchParam.getOrder());
+            }
+        }else{
+            queryWrapper.orderByDesc("brand_id");
+        }
+
 
         IPage<ShopGoodsBrand> iPage = shopGoodsBrandMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<ShopGoodsBrandListVo> list = new LinkedList<>();
@@ -73,7 +86,7 @@ public class ShopGoodsBrandServiceImpl implements IShopGoodsBrandService {
         QueryWrapper<ShopGoodsBrand> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getBrandName())) queryWrapper.like("brand_name", searchParam.getBrandName());
-        queryWrapper.orderByDesc("brand_id");
+        queryWrapper.orderByDesc("create_time");
 
         List<ShopGoodsBrand> record = shopGoodsBrandMapper.selectList(queryWrapper);
         List<ShopGoodsBrandListVo> list = new LinkedList<>();

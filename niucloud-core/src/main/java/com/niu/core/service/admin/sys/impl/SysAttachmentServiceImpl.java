@@ -117,6 +117,14 @@ public class SysAttachmentServiceImpl implements ISysAttachmentService {
         return coreUploadService.upload(param);
     }
 
+    @Override
+    public AttachmentUploadVo audio(AttachmentUploadParam param) {
+        param.setSiteId(RequestUtils.siteId());
+        param.setAttType("audio");
+        param.setDir("attachment/audio/" + param.getSiteId() + "/" + DateFormatUtils.getUploadFormat() + "/");
+        return coreUploadService.upload(param);
+    }
+
     /**
      * 移动图片分组
      */
@@ -212,6 +220,9 @@ public class SysAttachmentServiceImpl implements ISysAttachmentService {
      */
     public void delCategory(Integer id) {
         Integer siteId = RequestUtils.siteId();
+
+        Long num = sysAttachmentMapper.selectCount(new QueryWrapper<SysAttachment>().eq("cate_id", id));
+        if (num > 0) throw new CommonException("附件组中存在图片不允许删除");
 
         QueryWrapper<SysAttachmentCategory> queryWrapper = new QueryWrapper<SysAttachmentCategory>()
                 .eq("site_id", siteId)

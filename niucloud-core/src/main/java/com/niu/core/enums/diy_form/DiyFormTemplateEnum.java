@@ -23,12 +23,17 @@ public class DiyFormTemplateEnum {
     public JSONObject getTemplate(String type, String templateKey){
         JSONObject all = getTemplate();
 
-        if (StringUtils.isNotEmpty(type) && all.containsKey(type)){
-            JSONObject temp = all.getJSONObject(type);
-            if (StringUtils.isNotEmpty(templateKey) && temp.containsKey(templateKey)){
-                return temp.getJSONObject(templateKey);
+        if (ObjectUtil.isNotEmpty(type)) {
+            for (String key : all.keySet()) {
+                JSONObject temp = all.getJSONObject(key);
+                if (key.equals(type)) {
+                    if(ObjectUtil.isNotEmpty(templateKey) && temp.containsKey(templateKey))
+                    {
+                        return temp.getJSONObject(templateKey);
+                    }
+                    return temp;
+                }
             }
-            return temp;
         }
         return all;
     }

@@ -1,5 +1,6 @@
 package com.niu.core.enums.diy;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.niu.core.common.utils.RequestUtils;
 import com.niu.core.common.utils.json.JacksonUtils;
@@ -27,10 +28,10 @@ public class PagesEnum {
         JsonModuleLoader jsonModuleLoader = new JsonModuleLoader();
         JSONObject pages = jsonModuleLoader.mergeResultElement(RequestUtils.siteId(), "diy/pages.json");
 
-        if (!type.isEmpty() && pages != null) {
+        if (ObjectUtil.isNotEmpty(type) && ObjectUtil.isNotEmpty(pages)) {
             pages = pages.getJSONObject(type);
         }
-        if (!mode.isEmpty() && pages != null) {
+        if (ObjectUtil.isNotEmpty(mode) && ObjectUtil.isNotEmpty(pages)) {
             JSONObject modePages = new JSONObject();
             for (String key : pages.keySet()) {
                 if (!pages.getStr(key + ".mode", "").equals(mode)) {

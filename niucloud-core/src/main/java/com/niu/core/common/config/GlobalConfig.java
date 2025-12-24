@@ -49,13 +49,18 @@ public class GlobalConfig {
     /**
      * 版本
      */
-    public static String version = "1.0.1";
+    public static String version = "1.1.0";
 
     /**
      * 应用key
      *
      */
     public static String appKey = "niucloud-admin";
+
+    /**
+     * 产品key
+     */
+    public static String productKey = "saas_java";
 
     /**
      * 默认访问路径

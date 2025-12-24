@@ -2,10 +2,6 @@
 	"SHOP_BASE_LINK": {
 		"title": "商城系统",
 		"type": "folder",
-		"addon_info": {
-			"title": "商城",
-			"key": "shop"
-		},
 		"child_list": [
 			{
 				"name": "SHOP_LINK",
@@ -134,6 +130,13 @@
 						"name": "SHOP_NEWCOMER_LIST",
 						"title": "新人专享",
 						"url": "/addon/shop/pages/newcomer/list",
+						"is_share": 1,
+						"action": ""
+					},
+					{
+						"name": "SHOP_INVOICE_LIST",
+						"title": "发票列表",
+						"url": "/addon/shop/pages/invoice/list",
 						"is_share": 1,
 						"action": ""
 					}

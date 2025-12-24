@@ -88,14 +88,15 @@ public class AppServiceImpl implements IAppService {
         if (openid.isEmpty()) throw new CommonException("openid不能为空");
 
         Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wxapp_openid", openid).eq("site_id", RequestUtils.siteId()));
-        if (ObjectUtil.isNotNull(member)) {
-            return loginService.login(member);
+        if (member == null && ObjectUtil.isNotEmpty(unionid)) {
+            member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", openid).eq("site_id", RequestUtils.siteId()));
         }
-        if (ObjectUtil.isNotEmpty(unionid)) {
-            Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", openid).eq("site_id", RequestUtils.siteId()));
-            if (ObjectUtil.isNotNull(unionidMember)) {
-                return loginService.login(unionidMember);
-            }
+
+        if (member != null) {
+            if (ObjectUtil.isEmpty(member.getNickname()) && ObjectUtil.isNotEmpty(nickname)) member.setNickname(nickname);
+            if (ObjectUtil.isEmpty(member.getHeadimg()) && ObjectUtil.isNotEmpty(avatar)) member.setHeadimg(avatar);
+            if (ObjectUtil.isEmpty(member.getWxUnionid()) && ObjectUtil.isNotEmpty(unionid)) member.setWxUnionid(unionid);
+            return loginService.login(member);
         }
 
         LoginVo loginVo = new LoginVo();

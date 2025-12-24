@@ -52,6 +52,7 @@ public class ShopNewcomerConfigVo {
     @Data
     public static class Goods {
 
+        private Integer siteId;
         @JsonProperty("goods_type_name")
         private String goodsTypeName;
         @JsonProperty("goods_id")
@@ -60,6 +61,8 @@ public class ShopNewcomerConfigVo {
         private String goodsName;
         @JsonProperty("goods_type")
         private String goodsType;
+
+        private String goodsCover;
     }
 
     @NoArgsConstructor

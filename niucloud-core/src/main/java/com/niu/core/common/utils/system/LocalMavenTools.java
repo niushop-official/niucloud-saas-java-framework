@@ -8,6 +8,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -98,6 +99,43 @@ public class LocalMavenTools {
             }
         }
         return coordinateMap;
+    }
+
+    public static Map<String, String> readPomXmlCoordinate(String pomXmlPath) {
+        File pomFile = new File(pomXmlPath);
+        if (!pomFile.exists() || !pomFile.isFile()) {
+            throw new IllegalArgumentException("pom.xml 文件不存在: " + pomXmlPath);
+        }
+
+        try (FileInputStream fis = new FileInputStream(pomFile);
+             InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
+
+            MavenXpp3Reader mavenReader = new MavenXpp3Reader();
+            Model model = mavenReader.read(reader);
+
+            String groupId = model.getGroupId();
+            String artifactId = model.getArtifactId();
+            String version = model.getVersion();
+
+            // 如果 groupId 为空，尝试从 parent 获取
+            if (groupId == null && model.getParent() != null) {
+                groupId = model.getParent().getGroupId();
+            }
+
+            // 如果 version 为空，尝试从 parent 获取
+            if (version == null && model.getParent() != null) {
+                version = model.getParent().getVersion();
+            }
+
+            Map<String, String> coordinate = new HashMap<>();
+            coordinate.put("groupId", groupId);
+            coordinate.put("artifactId", artifactId);
+            coordinate.put("version", version);
+            return coordinate;
+
+        } catch (Exception e) {
+            throw new RuntimeException("解析 pom.xml 失败: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -210,7 +248,6 @@ public class LocalMavenTools {
             newDependency.setGroupId(addGroupId);
             newDependency.setArtifactId(addArtifactId);
             newDependency.setVersion(addVersion);
-            newDependency.setScope("provided");
             dependencyList.add(newDependency);
             model.setDependencies(dependencyList);
             MavenXpp3Writer writer = new MavenXpp3Writer();

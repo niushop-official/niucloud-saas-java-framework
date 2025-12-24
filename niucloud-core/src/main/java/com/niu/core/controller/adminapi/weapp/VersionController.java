@@ -9,6 +9,7 @@ import com.niu.core.service.admin.weapp.IWeappVersionService;
 import com.niu.core.service.admin.weapp.param.WeappTemplateSyncParam;
 import com.niu.core.service.admin.weapp.param.WeappVersionAddParam;
 import com.niu.core.service.admin.weapp.vo.WeappVersionListVo;
+import com.niu.core.service.admin.weapp.vo.WeappVersionPageVo;
 import com.niu.core.service.core.notice.vo.AddonNoticeListVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +49,7 @@ public class VersionController {
      */
     @GetMapping("/version")
     @Description("版本列表")
-    public Result<PageResult<WeappVersionListVo>> list(@Validated PageParam pageParam) {
+    public Result<WeappVersionPageVo> list(@Validated PageParam pageParam) {
         return Result.success(weappVersionService.list(pageParam));
     }
 

@@ -261,7 +261,7 @@
 						"methods": "get",
 						"sort": "70",
 						"status": "1",
-						"is_show": "0",
+						"is_show": "1",
 						"children": [
 							{
 								"menu_name": "新增",
@@ -526,9 +526,9 @@
 						"is_show": "1"
 					},
 					{
-						"menu_name": "编辑分组",
-						"menu_key": "edit_attachment_category",
-						"menu_short_name": "编辑分组",
+						"menu_name": "删除分组",
+						"menu_key": "del_attachment_category",
+						"menu_short_name": "删除分组",
 						"menu_type": "2",
 						"icon": "",
 						"api_url": "sys/attachment/category/",
@@ -992,7 +992,7 @@
 			{
 				"menu_name": "云编译",
 				"menu_key": "cloud_build",
-				"menu_short_name": "云编译按钮",
+				"menu_short_name": "云编译",
 				"menu_type": "2",
 				"icon": "",
 				"api_url": "niucloud/build",
@@ -1698,7 +1698,7 @@
 				"methods": "",
 				"sort": "97",
 				"status": "1",
-				"is_show": "1"
+				"is_show": "0"
 			}
 		]
 	}

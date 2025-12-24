@@ -5,6 +5,7 @@ import com.niu.core.common.domain.PageResult;
 import com.niu.core.service.api.sys.param.*;
 import com.niu.core.service.api.sys.vo.SysVerifyDetailVo;
 import com.niu.core.service.api.sys.vo.SysVerifyGetCodeVo;
+import com.niu.core.service.api.sys.vo.SysVerifyRecordsVo;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,15 +35,7 @@ public interface ISysVerifyService {
      * @param param
      * @return
      */
-    PageResult records(PageParam pageParam, SysVerifyRecordsParam param);
-
-    /**
-     * 核销记录
-     *
-     * @param param
-     * @return
-     */
-    PageResult records2(PageParam pageParam, SysVerifyRecordsParam param);
+    PageResult getRecordsPageByVerifier(PageParam pageParam, SysVerifyRecordsParam param);
 
 
     /**
@@ -51,7 +44,7 @@ public interface ISysVerifyService {
      * @param param
      * @return
      */
-    SysVerifyDetailVo detail(SysVerifyDetailParam param);
+    SysVerifyDetailVo getRecordsDetailByVerifier(SysVerifyDetailParam param);
 
     /**
      * 通过code码获取核销信息
@@ -69,4 +62,5 @@ public interface ISysVerifyService {
      */
     Boolean verifyCode(SysVerifyCodeParam param);
 
+    PageResult<SysVerifyRecordsVo> getMemberRecordsList(PageParam pageParam, SysVerifyRecordsParam param);
 }

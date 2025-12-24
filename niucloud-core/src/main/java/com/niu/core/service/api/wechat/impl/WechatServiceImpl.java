@@ -1,11 +1,13 @@
 package com.niu.core.service.api.wechat.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.RequestUtils;
+import com.niu.core.common.utils.StringUtils;
 import com.niu.core.common.utils.WechatUtils;
 import com.niu.core.entity.member.Member;
 import com.niu.core.mapper.member.MemberMapper;
@@ -14,10 +16,7 @@ import com.niu.core.service.api.login.ILoginService;
 import com.niu.core.service.api.login.IRegisterService;
 import com.niu.core.service.api.login.vo.LoginVo;
 import com.niu.core.service.api.wechat.IWechatService;
-import com.niu.core.service.api.wechat.param.WechatAuthDataLoginParam;
-import com.niu.core.service.api.wechat.param.WechatAuthParam;
-import com.niu.core.service.api.wechat.param.AuthRegisterParam;
-import com.niu.core.service.api.wechat.param.WechatSyncParam;
+import com.niu.core.service.api.wechat.param.*;
 import com.niu.core.service.api.wechat.vo.WechatCodeUrlVo;
 import com.niu.core.service.api.wechat.vo.WechatScanLoginVo;
 import com.niu.core.service.api.wechat.vo.WechatUserInfoVo;
@@ -117,14 +116,15 @@ public class WechatServiceImpl implements IWechatService {
         if (openid.isEmpty()) throw new CommonException("openid不能为空");
 
         Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_openid", openid).eq("site_id", RequestUtils.siteId()));
-        if (ObjectUtil.isNotNull(member)) {
-            return loginService.login(member);
+        if (member == null && ObjectUtil.isNotEmpty(unionid)) {
+            member = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", openid).eq("site_id", RequestUtils.siteId()));
         }
-        if (ObjectUtil.isNotEmpty(unionid)) {
-            Member unionidMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_unionid", openid).eq("site_id", RequestUtils.siteId()));
-            if (ObjectUtil.isNotNull(unionidMember)) {
-                return loginService.login(unionidMember);
-            }
+
+        if (member != null) {
+            if (ObjectUtil.isEmpty(member.getNickname()) && ObjectUtil.isNotEmpty(nickname)) member.setNickname(nickname);
+            if (ObjectUtil.isEmpty(member.getHeadimg()) && ObjectUtil.isNotEmpty(avatar)) member.setHeadimg(avatar);
+            if (ObjectUtil.isEmpty(member.getWxUnionid()) && ObjectUtil.isNotEmpty(unionid)) member.setWxUnionid(unionid);
+            return loginService.login(member);
         }
 
         LoginVo loginVo = new LoginVo();
@@ -149,11 +149,10 @@ public class WechatServiceImpl implements IWechatService {
                 return loginVo;
             } else if (config.getIsForceAccessUserInfo() == 1) {
                 // 开启强制获取会员信息时，必须获取到昵称和头像才能进行注册
-                if (ObjectUtil.isNotEmpty(nickname) && ObjectUtil.isNotEmpty(avatar)) {
-                    return registerService.register(registerMember);
-                } else {
-                    return loginVo;
+                if (ObjectUtil.isEmpty(nickname)) {
+                    registerMember.setNickname(RandomUtil.randomString(10));
                 }
+                return registerService.register(registerMember);
             } else if (config.getIsBindMobile() == 1) {
                 // 开启强制绑定手机号，必须获取手机号才能进行注册，由于公众号无法主动获取，所以不能注册
                 return loginVo;
@@ -301,5 +300,21 @@ public class WechatServiceImpl implements IWechatService {
         } catch (Exception e) {
             throw new CommonException(e.getMessage());
         }
+    }
+
+    @Override
+    public void updateOpenidByH5(UpdateOpenidByH5Param param) {
+        if (ObjectUtil.isEmpty(param.getWxOpenid())) return;
+
+        Member wxMember = memberMapper.selectOne(new QueryWrapper<Member>().eq("wx_openid", param.getWxOpenid()).eq("site_id", RequestUtils.siteId()));
+        if (ObjectUtil.isNotNull(wxMember)) throw new CommonException("openid已存在");
+
+        Member member = memberMapper.selectOne(new QueryWrapper<Member>().eq("member_id", RequestUtils.memberId()).eq("site_id", RequestUtils.siteId()));
+        if (ObjectUtil.isNull(member)) throw new CommonException("账号不存在");
+
+        Member model = new Member();
+        model.setMemberId(member.getMemberId());
+        model.setWxOpenid(param.getWxOpenid());
+        memberMapper.updateById(model);
     }
 }

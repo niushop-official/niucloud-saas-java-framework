@@ -87,6 +87,12 @@ public class RegisterServiceImpl implements IRegisterService {
         member.setRegisterType(MemberRegisterTypeEnum.USERNAME.getType());
         member.setLoginType(MemberLoginTypeEnum.USERNAME.getType());
         member.setPid(param.getPid());
+        if (ObjectUtil.isNotEmpty(param.getWxOpenid())) {
+            Member wxMemberExist = memberMapper.selectOne(new QueryWrapper<Member>().select("member_id").eq("wx_openid", param.getWxOpenid()).eq("site_id", RequestUtils.siteId()));
+            if (ObjectUtil.isNull(wxMemberExist)) {
+                member.setWxOpenid(param.getWxOpenid());
+            }
+        }
 
         return this.register(member);
     }

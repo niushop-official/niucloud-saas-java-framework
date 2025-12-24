@@ -13,7 +13,6 @@ public class BatchModifyParam {
 
     private Integer isAll = 0;
 
-    @NotEmpty(message = "memberIds不能为空")
     private List<Integer> memberIds;
 
     private Object value;
@@ -21,11 +20,21 @@ public class BatchModifyParam {
     private Where where;
     @Data
     public static class Where {
-        private List<String> createTime;
+        /** 关键字 */
         private String keyword;
-        private String memberLabel;
-        private String memberLevel;
-        private String registerChannel;
+
+        /** 注册类型 */
         private String registerType;
+
+        /** 注册途径 */
+        private String registerChannel;
+
+        /** 创建时间筛选 */
+        private String[] createTime;
+
+        private Integer memberLabel;
+
+        /** 会员等级 */
+        private Integer memberLevel;
     }
 }

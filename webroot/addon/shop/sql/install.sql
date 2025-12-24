@@ -646,7 +646,7 @@ CREATE TABLE `{{prefix}}shop_invoice` (
   `site_id` int NOT NULL DEFAULT '0' COMMENT '站点id',
   `member_id` int NOT NULL DEFAULT '0' COMMENT '会员id',
   `trade_type` varchar(10) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'order' COMMENT '开票分类 order:订单',
-  `trade_id` int NOT NULL DEFAULT '0' COMMENT '业务id',
+  `trade_id` VARCHAR(1000) NOT NULL DEFAULT '' COMMENT '业务id集',
   `header_type` tinyint NOT NULL DEFAULT '1' COMMENT '抬头类型',
   `header_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '名称（发票抬头）',
   `type` tinyint NOT NULL DEFAULT '1' COMMENT '发票类型',
@@ -666,6 +666,7 @@ CREATE TABLE `{{prefix}}shop_invoice` (
   `create_time` int NOT NULL DEFAULT '0' COMMENT '申请时间',
   `invoice_time` int NOT NULL DEFAULT '0' COMMENT '开票时间',
   `status` int NOT NULL DEFAULT '0' COMMENT '是否生效',
+  `pay_voucher` TEXT DEFAULT NULL COMMENT '支付凭证',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='发票表';
 

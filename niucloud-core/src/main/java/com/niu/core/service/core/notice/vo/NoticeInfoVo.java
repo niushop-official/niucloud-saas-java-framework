@@ -34,5 +34,7 @@ public class NoticeInfoVo implements Serializable {
     private JSONObject sms;
     private JSONObject wechat;
     private JSONObject weapp;
+    private String auditStatus = "wait";
+    private String sign = "";
 
 }

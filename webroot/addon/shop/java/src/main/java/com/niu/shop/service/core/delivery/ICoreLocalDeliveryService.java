@@ -21,4 +21,7 @@ public interface ICoreLocalDeliveryService {
     void calculate(OrderCreateDataVo vo);
 
 
+    JSONObject getConfig(Integer siteId);
+
+    void setConfig(JSONObject config, Integer siteId);
 }

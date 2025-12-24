@@ -62,5 +62,10 @@ public class OplatformController {
         return Result.success(list);
     }
 
-
+    @PostMapping("/authorization/cancel")
+    @Description("取消授权")
+    public Result cancelAuthorization(){
+        oplatformService.cancelAuthorization();
+        return Result.success();
+    }
 }

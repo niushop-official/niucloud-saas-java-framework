@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.yulichang.query.MPJQueryWrapper;
 import com.niu.core.common.component.context.SpringContext;
+import com.niu.core.common.component.context.task.ThreadPoolManager;
 import com.niu.core.common.config.GlobalConfig;
 import com.niu.core.common.domain.PageParam;
 import com.niu.core.common.domain.PageResult;
@@ -30,6 +31,7 @@ import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateParam;
 import com.niu.shop.service.admin.goods.param.ShopGoodsEvaluateSearchParam;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsEvaluateInfoVo;
 import com.niu.shop.service.admin.goods.vo.ShopGoodsEvaluateListVo;
+import com.niu.shop.service.core.goods.ICoreGoodsEvaluateService;
 import com.niu.shop.service.core.goods.ICoreGoodsStatService;
 import com.niu.shop.service.core.goods.param.GoodsAddStatParam;
 import org.springframework.beans.BeanUtils;
@@ -57,10 +59,8 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
     @Resource
     ShopGoodsMapper shopGoodsMapper;
 
-    private ICoreUploadService coreUploadService() {
-        return SpringContext.bean(ICoreUploadService.class);
-    }
-
+    @Resource
+    ICoreGoodsEvaluateService coreGoodsEvaluateService;
     /**
      * 商品评价列表
      *
@@ -152,8 +152,8 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
         model.setMemberHead(addParam.getMemberHead());
         model.setMemberName(addParam.getMemberName());
         model.setContent(addParam.getContent());
-        Object ceshi = addParam.getImages();
-        if(ceshi instanceof String){
+        Object images = addParam.getImages();
+        if(images instanceof String){
             model.setImages(JSONUtil.parseArray(new ArrayList<>()).toString());
         }else{
             model.setImages(JSONUtil.parseArray(addParam.getImages()).toString());
@@ -162,7 +162,7 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
         model.setScores(addParam.getScores());
         model.setIsAudit(GoodsEvaluateEnum.AUDIT_NO.getStatus());
         model.setCreateTime(DateUtils.StringToTimestamp(addParam.getCreateTime()));
-        shopGoodsEvaluateMapper.insert(model);
+        coreGoodsEvaluateService.addEvaluate(model);
     }
 
     /**
@@ -269,6 +269,78 @@ public class ShopGoodsEvaluateServiceImpl implements IShopGoodsEvaluateService {
                 new QueryWrapper<ShopGoodsEvaluate>()
                         .eq("evaluate_id", id)
                         .eq("site_id", RequestUtils.siteId()));
+    }
+
+    @Override
+    public void auditEditBatch() {
+        // 查询待审核的评价ID列表
+        QueryWrapper<ShopGoodsEvaluate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("is_audit", GoodsEvaluateEnum.AUDIT.getStatus())
+                .eq("site_id", RequestUtils.siteId())
+                .select("evaluate_id");
+        List<ShopGoodsEvaluate> evaluateList = shopGoodsEvaluateMapper.selectList(queryWrapper);
+        
+        // 提取评价ID列表
+        List<Integer> evaluateIds = new ArrayList<>();
+        for (ShopGoodsEvaluate evaluate : evaluateList) {
+            evaluateIds.add(evaluate.getEvaluateId());
+        }
+        
+        // 如果有待审核的评价，调用updateGoodsEvaluateNumBach方法更新统计数据
+        if (!evaluateIds.isEmpty()) {
+            //异步处理
+            ThreadPoolManager.runTask(() -> {
+                updateGoodsEvaluateNumBach(evaluateIds);
+            });
+        }
+        
+        // 更新所有待审核评价的状态为未审核
+        UpdateWrapper<ShopGoodsEvaluate> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("is_audit", GoodsEvaluateEnum.AUDIT.getStatus())
+                .eq("site_id", RequestUtils.siteId())
+                .set("is_audit", GoodsEvaluateEnum.AUDIT_NO.getStatus());
+        shopGoodsEvaluateMapper.update(null, updateWrapper);
+    }
+
+    @Override
+    public void updateGoodsEvaluateNumBach(List<Integer> ids) {
+        // 查询指定ID的评价数据，分批处理
+        QueryWrapper<ShopGoodsEvaluate> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("evaluate_id", ids)
+                .eq("site_id", RequestUtils.siteId())
+                .select("goods_id");
+        
+        // 批量查询
+        List<ShopGoodsEvaluate> evaluateList = shopGoodsEvaluateMapper.selectList(queryWrapper);
+        
+        // 分组处理，每50条处理一次
+        for (int i = 0; i < evaluateList.size(); i += 50) {
+            int endIndex = Math.min(i + 50, evaluateList.size());
+            List<ShopGoodsEvaluate> batchList = evaluateList.subList(i, endIndex);
+            
+            for (ShopGoodsEvaluate item : batchList) {
+                // 验证商品ID是否存在
+                QueryWrapper<ShopGoods> goodsQueryWrapper = new QueryWrapper<>();
+                goodsQueryWrapper.eq("goods_id", item.getGoodsId())
+                        .select("goods_id");
+                ShopGoods goods = shopGoodsMapper.selectOne(goodsQueryWrapper);
+                
+                if (goods != null) {
+                    // 更新商品评价统计数据
+                    GoodsAddStatParam param = new GoodsAddStatParam();
+                    param.setSiteId(RequestUtils.siteId());
+                    param.setGoodsId(item.getGoodsId());
+                    param.setEvaluateNum(1);
+                    coreGoodsStatService.addStat(param);
+                    
+                    // 更新商品表中的评价数量
+                    UpdateWrapper<ShopGoods> updateWrapper = new UpdateWrapper<>();
+                    updateWrapper.eq("goods_id", item.getGoodsId())
+                            .setSql("evaluate_num = evaluate_num + 1");
+                    shopGoodsMapper.update(null, updateWrapper);
+                }
+            }
+        }
     }
 
     /**

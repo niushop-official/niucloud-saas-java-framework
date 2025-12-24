@@ -94,6 +94,7 @@ declare module '@vue/runtime-core' {
     SelectIcon: typeof import('./src/components/select-icon/index.vue')['default']
     SpreadPopup: typeof import('./src/components/spread-popup/index.vue')['default']
     UploadAttachment: typeof import('./src/components/upload-attachment/index.vue')['default']
+    UploadAudio: typeof import('./src/components/upload-audio/index.vue')['default']
     UploadFile: typeof import('./src/components/upload-file/index.vue')['default']
     UploadImage: typeof import('./src/components/upload-image/index.vue')['default']
     UploadVideo: typeof import('./src/components/upload-video/index.vue')['default']

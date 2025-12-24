@@ -10,6 +10,7 @@ import com.niu.shop.entity.active.ShopActive;
 import com.niu.shop.entity.active.ShopActiveGoods;
 import com.niu.shop.enums.active.ActiveClassEnum;
 import com.niu.shop.enums.active.ActiveStatusEnum;
+import com.niu.shop.enums.active.MarketingActivityTypeEnum;
 import com.niu.shop.event.marketing.GoodsMarketCalculateEventDefiner;
 import com.niu.shop.mapper.active.ShopActiveGoodsMapper;
 import com.niu.shop.mapper.active.ShopActiveMapper;
@@ -81,6 +82,8 @@ public class ShopNewcomerCalculateListener extends GoodsMarketCalculateEventDefi
 
         GoodsMarketCalculateResult result = new GoodsMarketCalculateResult();
         result.setSkuInfo(skuInfo);
+        result.setRelateId(activeGoods.getActiveId());
+        result.setActiveType(MarketingActivityTypeEnum.NEWCOMER_DISCOUNT.getType());
         return result;
     }
 

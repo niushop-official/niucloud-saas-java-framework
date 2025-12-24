@@ -25,6 +25,7 @@ import com.niu.core.mapper.addon.AddonMapper;
 import com.niu.core.mapper.site.SiteGroupMapper;
 import com.niu.core.mapper.site.SiteMapper;
 import com.niu.core.mapper.sys.SysUserRoleMapper;
+import com.niu.core.service.admin.diy.IDiyService;
 import com.niu.core.service.admin.site.ISiteService;
 import com.niu.core.service.admin.site.param.SiteGroupAddParam;
 import com.niu.core.service.admin.site.param.SiteGroupParam;
@@ -84,6 +85,9 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
 
     @Resource
     ICoreSiteService coreSiteService;
+
+    @Resource
+    IDiyService diyService;
 
     @Resource
     private void setSiteService(@Lazy ISiteService siteService) {
@@ -249,6 +253,14 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
             if (ObjectUtil.isNotEmpty(siteList)) {
                 for (Site site : siteList) {
                     siteService.siteAddonChange(site, model);
+
+                    // 更新微页面数据
+                    Map<String, Object> diyParam = new HashMap<>();
+                    diyParam.put("site_id", site.getSiteId());
+                    diyParam.put("tag", "update");
+                    diyParam.put("main_app", group.getApp());
+                    diyService.loadDiyData(diyParam);
+
                     coreSiteService.clearSiteCache(site.getSiteId());
                 }
 
@@ -287,7 +299,7 @@ public class SiteGroupServiceImpl implements ISiteGroupService {
         List<String> addonString=JSONUtil.toList(jsonArray, String.class);
         keys.retainAll(addonString);
         if(keys.size()!=addonString.size()){
-            throw new AdminException("SITE_GROUP_APP_NOT_EXIST");
+            throw new AdminException("存在无效的应用");
         }
     }
 

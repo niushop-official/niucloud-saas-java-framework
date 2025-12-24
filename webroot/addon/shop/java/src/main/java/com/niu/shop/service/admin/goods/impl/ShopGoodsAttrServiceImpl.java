@@ -46,7 +46,19 @@ public class ShopGoodsAttrServiceImpl implements IShopGoodsAttrService {
         QueryWrapper<ShopGoodsAttr> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("site_id", RequestUtils.siteId());
         if (ObjectUtil.isNotEmpty(searchParam.getAttrName())) queryWrapper.like("attr_name", searchParam.getAttrName());
-        queryWrapper.orderByDesc(Arrays.asList("sort", "attr_id"));
+        if(ObjectUtil.isNotEmpty(searchParam.getOrder()))
+        {
+            if(searchParam.getSort().equals("asc"))
+            {
+                queryWrapper.orderByAsc(searchParam.getOrder());
+            }
+            else
+            {
+                queryWrapper.orderByDesc(searchParam.getOrder());
+            }
+        }else{
+            queryWrapper.orderByDesc("attr_id");
+        }
 
         IPage<ShopGoodsAttr> iPage = shopGoodsAttrMapper.selectPage(new Page<>(page, limit), queryWrapper);
         List<ShopGoodsAttrListVo> list = new LinkedList<>();
@@ -71,7 +83,19 @@ public class ShopGoodsAttrServiceImpl implements IShopGoodsAttrService {
             queryWrapper.in("attr_id", searchParam.getAttrIdArr());
         }
         if (ObjectUtil.isNotEmpty(searchParam.getAttrName())) queryWrapper.like("attr_name", searchParam.getAttrName());
-        queryWrapper.orderByDesc(Arrays.asList("sort", "attr_id"));
+        if(ObjectUtil.isNotEmpty(searchParam.getOrder()))
+        {
+            if(searchParam.getSort().equals("asc"))
+            {
+                queryWrapper.orderByAsc(searchParam.getOrder());
+            }
+            else
+            {
+                queryWrapper.orderByDesc(searchParam.getOrder());
+            }
+        }else{
+            queryWrapper.orderByDesc("attr_id");
+        }
 
         List<ShopGoodsAttr> record = shopGoodsAttrMapper.selectList(queryWrapper);
         List<ShopGoodsAttrListVo> list = new LinkedList<>();

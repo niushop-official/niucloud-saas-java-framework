@@ -14,6 +14,7 @@
             "sort": 110,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "概况",
@@ -28,7 +29,8 @@
                     "methods": "get",
                     "sort": 100,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": ""
                 },
                 {
                     "menu_name": "商品管理",
@@ -44,6 +46,7 @@
                     "sort": 95,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "商品列表",
@@ -58,7 +61,8 @@
                             "methods": "get",
                             "sort": 100,
                             "status": 1,
-                            "is_show": 1
+                            "is_show": 1,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "商品分类",
@@ -74,6 +78,7 @@
                             "sort": 99,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品分类添加",
@@ -88,7 +93,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品分类编辑",
@@ -103,7 +109,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品分类删除",
@@ -118,7 +125,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品分类拖拽排序",
@@ -133,7 +141,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -151,6 +160,7 @@
                             "sort": 88,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "分类设置编辑",
@@ -165,7 +175,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -183,6 +194,7 @@
                             "sort": 88,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品标签分组添加",
@@ -197,7 +209,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品标签分组编辑",
@@ -212,7 +225,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品标签分组删除",
@@ -227,7 +241,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -245,6 +260,7 @@
                             "sort": 98,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品标签添加",
@@ -259,7 +275,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品标签编辑",
@@ -274,7 +291,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品标签删除",
@@ -289,7 +307,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品标签复制",
@@ -304,7 +323,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -322,6 +342,7 @@
                             "sort": 97,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品品牌添加",
@@ -336,7 +357,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品品牌编辑",
@@ -351,7 +373,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品品牌删除",
@@ -366,7 +389,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -384,6 +408,7 @@
                             "sort": 96,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品服务添加",
@@ -398,7 +423,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品服务编辑",
@@ -413,7 +439,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品服务删除",
@@ -428,7 +455,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -446,6 +474,7 @@
                             "sort": 95,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "修改参数模板排序号",
@@ -460,7 +489,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "修改参数模板名称",
@@ -475,7 +505,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "修改参数模板值",
@@ -490,7 +521,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -507,7 +539,8 @@
                             "methods": "get",
                             "sort": 94,
                             "status": 1,
-                            "is_show": 1
+                            "is_show": 1,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "商品设置",
@@ -522,7 +555,8 @@
                             "methods": "post",
                             "sort": 93,
                             "status": 1,
-                            "is_show": 1
+                            "is_show": 1,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "编码唯一性设置",
@@ -537,7 +571,8 @@
                             "methods": "post",
                             "sort": 93,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "商品排序设置",
@@ -552,7 +587,8 @@
                             "methods": "post",
                             "sort": 93,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "回收站",
@@ -568,6 +604,7 @@
                             "sort": 92,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品恢复",
@@ -582,7 +619,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -599,7 +637,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品编辑",
@@ -614,7 +653,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品删除",
@@ -629,7 +669,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品排序号修改",
@@ -644,7 +685,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品上下架状态修改",
@@ -659,7 +701,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品复制",
@@ -674,7 +717,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品规格列表库存编辑",
@@ -689,7 +733,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品规格列表价格编辑",
@@ -704,7 +749,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品规格列表会员价格编辑",
@@ -719,7 +765,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "删除参数模板",
@@ -734,7 +781,8 @@
                             "methods": "delete",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_attr_list"
                         },
                         {
                             "menu_name": "编辑参数模板",
@@ -749,7 +797,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_attr_list"
                         },
                         {
                             "menu_name": "添加参数模板",
@@ -764,7 +813,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_attr_list"
                         },
                         {
                             "menu_name": "商品添加",
@@ -779,7 +829,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         },
                         {
                             "menu_name": "商品编辑",
@@ -794,7 +845,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_list"
                         }
                     ]
                 },
@@ -812,6 +864,7 @@
                     "sort": 90,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "商城订单",
@@ -827,6 +880,7 @@
                             "sort": 100,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "订单关闭",
@@ -841,7 +895,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "订单改价",
@@ -856,7 +911,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "订单配送修改",
@@ -871,7 +927,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "订单发货",
@@ -886,7 +943,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "订单项发货",
@@ -901,7 +959,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商家留言",
@@ -916,7 +975,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "订单完成",
@@ -931,7 +991,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -949,6 +1010,7 @@
                             "sort": 99,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "退款审核",
@@ -963,7 +1025,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "退款收货审核",
@@ -978,7 +1041,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -995,7 +1059,8 @@
                             "methods": "get",
                             "sort": 98,
                             "status": 1,
-                            "is_show": 1
+                            "is_show": 1,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "发票管理",
@@ -1011,6 +1076,7 @@
                             "sort": 97,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "开票",
@@ -1025,7 +1091,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1043,6 +1110,7 @@
                             "sort": 96,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "商品评价删除",
@@ -1057,7 +1125,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品评价回复",
@@ -1072,7 +1141,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品评价通过",
@@ -1087,7 +1157,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品评价拒绝",
@@ -1102,7 +1173,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品评价置顶",
@@ -1117,7 +1189,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "商品评价取消置顶",
@@ -1132,7 +1205,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1150,6 +1224,7 @@
                             "sort": 95,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "订单设置编辑",
@@ -1164,7 +1239,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1182,6 +1258,7 @@
                             "sort": 94,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "删除商家地址库",
@@ -1196,7 +1273,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1214,6 +1292,7 @@
                             "sort": 93,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "配送设置编辑",
@@ -1228,7 +1307,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1246,6 +1326,7 @@
                             "sort": 92,
                             "status": 1,
                             "is_show": 1,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "删除电子面单模板",
@@ -1260,7 +1341,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1277,7 +1359,8 @@
                             "methods": "get",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_goods_evaluate"
                         },
                         {
                             "menu_name": "添加/编辑地址库",
@@ -1293,6 +1376,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "shop_address",
                             "children": [
                                 {
                                     "menu_name": "地址库添加",
@@ -1307,7 +1391,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": "shop_address"
                                 },
                                 {
                                     "menu_name": "地址库编辑",
@@ -1322,7 +1407,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": "shop_address"
                                 }
                             ]
                         },
@@ -1340,6 +1426,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "物流公司删除",
@@ -1354,7 +1441,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1371,7 +1459,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_config_delivery_company"
                         },
                         {
                             "menu_name": "编辑物流公司",
@@ -1386,7 +1475,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_config_delivery_company"
                         },
                         {
                             "menu_name": "同城配送",
@@ -1402,6 +1492,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "同城配送设置",
@@ -1416,7 +1507,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1434,6 +1526,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "运费模版删除",
@@ -1448,7 +1541,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1466,6 +1560,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "shop_config_delivery_shipping_template",
                             "children": [
                                 {
                                     "menu_name": "运费模版添加",
@@ -1480,7 +1575,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "运费模版编辑",
@@ -1495,7 +1591,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1513,6 +1610,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "shop_config_delivery",
                             "children": [
                                 {
                                     "menu_name": "配送员添加",
@@ -1527,7 +1625,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "配送员编辑",
@@ -1542,7 +1641,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "配送员删除",
@@ -1557,7 +1657,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1574,7 +1675,8 @@
                             "methods": "get",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_order_list"
                         },
                         {
                             "menu_name": "物流跟踪",
@@ -1590,6 +1692,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "shop_config_delivery",
                             "children": [
                                 {
                                     "menu_name": "物流跟踪设置",
@@ -1604,7 +1707,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1622,6 +1726,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "",
                             "children": [
                                 {
                                     "menu_name": "自提点删除",
@@ -1636,7 +1741,8 @@
                                     "methods": "delete",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1654,6 +1760,7 @@
                             "sort": 0,
                             "status": 1,
                             "is_show": 0,
+                            "parent_select_key": "shop_config_shop_delivery_store",
                             "children": [
                                 {
                                     "menu_name": "自提点添加",
@@ -1668,7 +1775,8 @@
                                     "methods": "post",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 },
                                 {
                                     "menu_name": "自提点编辑",
@@ -1683,7 +1791,8 @@
                                     "methods": "put",
                                     "sort": 0,
                                     "status": 1,
-                                    "is_show": 0
+                                    "is_show": 0,
+                                    "parent_select_key": ""
                                 }
                             ]
                         },
@@ -1700,7 +1809,8 @@
                             "methods": "get",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_order_refund"
                         },
                         {
                             "menu_name": "电子面单设置",
@@ -1715,7 +1825,8 @@
                             "methods": "get",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_delivery_electronic_sheet"
                         },
                         {
                             "menu_name": "添加模板",
@@ -1730,7 +1841,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_delivery_electronic_sheet"
                         },
                         {
                             "menu_name": "编辑模板",
@@ -1745,7 +1857,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": "shop_delivery_electronic_sheet"
                         }
                     ]
                 },
@@ -1763,6 +1876,7 @@
                     "sort": 85,
                     "status": 1,
                     "is_show": 0,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "数据概况",
@@ -1777,7 +1891,8 @@
                             "methods": "get",
                             "sort": 90,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "会员数据",
@@ -1792,7 +1907,8 @@
                             "methods": "get",
                             "sort": 89,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "交易数据",
@@ -1807,7 +1923,8 @@
                             "methods": "get",
                             "sort": 88,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "流量数据",
@@ -1822,7 +1939,8 @@
                             "methods": "get",
                             "sort": 87,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 }
@@ -1832,16 +1950,17 @@
             "menu_name": "优惠券",
             "menu_short_name": "优惠券",
             "menu_key": "shop_goods_coupon",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "element Help",
             "api_url": "",
             "router_path": "shop/marketing/coupon/list",
             "view_path": "",
             "methods": "",
-            "sort": 150,
+            "sort": 100,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "优惠券列表",
@@ -1857,6 +1976,7 @@
                     "sort": 90,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "优惠券删除",
@@ -1871,7 +1991,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "优惠券设置状态",
@@ -1886,7 +2007,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "发券记录",
@@ -1901,7 +2023,8 @@
                             "methods": "get",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "发券",
@@ -1916,7 +2039,8 @@
                             "methods": "post",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -1933,7 +2057,8 @@
                     "methods": "post",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_coupon_list"
                 },
                 {
                     "menu_name": "优惠券编辑",
@@ -1948,7 +2073,8 @@
                     "methods": "put",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_coupon_list"
                 },
                 {
                     "menu_name": "优惠券领取记录",
@@ -1963,7 +2089,8 @@
                     "methods": "get",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_coupon_list"
                 }
             ]
         },
@@ -1971,16 +2098,17 @@
             "menu_name": "满减送",
             "menu_short_name": "满减送",
             "menu_key": "shop_goods_manjian",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "element Help",
             "api_url": "",
             "router_path": "shop/marketing/manjian/list",
             "view_path": "",
             "methods": "",
-            "sort": 151,
+            "sort": 99,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "满减送",
@@ -1996,6 +2124,7 @@
                     "sort": 89,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "活动关闭",
@@ -2010,7 +2139,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "活动删除",
@@ -2025,7 +2155,8 @@
                             "methods": "delete",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -2042,7 +2173,8 @@
                     "methods": "get",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_manjian_list"
                 },
                 {
                     "menu_name": "编辑满减送活动",
@@ -2057,7 +2189,8 @@
                     "methods": "put",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_manjian_list"
                 },
                 {
                     "menu_name": "添加满减送活动",
@@ -2072,7 +2205,8 @@
                     "methods": "post",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_manjian_list"
                 }
             ]
         },
@@ -2080,16 +2214,17 @@
             "menu_name": "限时折扣",
             "menu_short_name": "限时折扣",
             "menu_key": "shop_goods_discount",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "iconfont icondiscount",
             "api_url": "",
             "router_path": "shop/marketing/discount/list",
             "view_path": "marketing/discount/list",
             "methods": "get",
-            "sort": 152,
+            "sort": 98,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "活动列表",
@@ -2105,6 +2240,7 @@
                     "sort": 90,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "活动关闭",
@@ -2119,7 +2255,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "活动删除",
@@ -2134,7 +2271,8 @@
                             "methods": "delete",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -2152,6 +2290,7 @@
                     "sort": 80,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "活动设置编辑",
@@ -2166,7 +2305,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -2183,7 +2323,8 @@
                     "methods": "get",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_discount_list"
                 },
                 {
                     "menu_name": "编辑限时折扣",
@@ -2198,7 +2339,8 @@
                     "methods": "put",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_discount_list"
                 },
                 {
                     "menu_name": "添加限时折扣",
@@ -2213,7 +2355,8 @@
                     "methods": "post",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_discount_list"
                 }
             ]
         },
@@ -2221,16 +2364,17 @@
             "menu_name": "积分商城",
             "menu_short_name": "积分商城",
             "menu_key": "shop_point_goods",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "iconfont iconpointshop",
             "api_url": "",
             "router_path": "shop/marketing/exchange/goods_list",
             "view_path": "",
             "methods": "get",
-            "sort": 153,
+            "sort": 97,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "积分商品",
@@ -2246,6 +2390,7 @@
                     "sort": 90,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "修改上下架状态",
@@ -2260,7 +2405,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "删除积分商品",
@@ -2275,7 +2421,8 @@
                             "methods": "delete",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "修改排序号",
@@ -2290,7 +2437,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -2307,7 +2455,8 @@
                     "methods": "get",
                     "sort": 89,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": "shop_point_goods_list"
                 },
                 {
                     "menu_name": "添加商品",
@@ -2322,7 +2471,8 @@
                     "methods": "post",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_point_goods_list"
                 },
                 {
                     "menu_name": "编辑商品",
@@ -2337,7 +2487,8 @@
                     "methods": "put",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_point_goods_list"
                 }
             ]
         },
@@ -2345,16 +2496,17 @@
             "menu_name": "新人专享",
             "menu_short_name": "新人专享",
             "menu_key": "shop_goods_newcomer_discount",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "iconfont icondiscount",
             "api_url": "",
             "router_path": "shop/marketing/newcomer/config",
             "view_path": "",
             "methods": "get",
-            "sort": 154,
+            "sort": 96,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "新人设置",
@@ -2369,7 +2521,8 @@
                     "methods": "put",
                     "sort": 90,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": ""
                 },
                 {
                     "menu_name": "购买记录",
@@ -2384,7 +2537,8 @@
                     "methods": "get",
                     "sort": 80,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": ""
                 }
             ]
         },
@@ -2392,16 +2546,17 @@
             "menu_name": "商品榜单",
             "menu_short_name": "商品榜单",
             "menu_key": "shop_goods_rank",
-            "parent_key": "active",
+            "parent_key": "addon",
             "menu_type": 0,
             "icon": "iconfont icondiscount",
             "api_url": "",
             "router_path": "shop/marketing/goods_rank/config",
             "view_path": "",
             "methods": "get",
-            "sort": 155,
+            "sort": 50,
             "status": 1,
             "is_show": 1,
+            "parent_select_key": "",
             "children": [
                 {
                     "menu_name": "榜单设置",
@@ -2416,7 +2571,8 @@
                     "methods": "get",
                     "sort": 90,
                     "status": 1,
-                    "is_show": 1
+                    "is_show": 1,
+                    "parent_select_key": ""
                 },
                 {
                     "menu_name": "榜单管理",
@@ -2432,6 +2588,7 @@
                     "sort": 80,
                     "status": 1,
                     "is_show": 1,
+                    "parent_select_key": "",
                     "children": [
                         {
                             "menu_name": "删除榜单",
@@ -2446,7 +2603,8 @@
                             "methods": "delete",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "批量删除榜单",
@@ -2461,7 +2619,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         },
                         {
                             "menu_name": "榜单排序号修改",
@@ -2476,7 +2635,8 @@
                             "methods": "put",
                             "sort": 0,
                             "status": 1,
-                            "is_show": 0
+                            "is_show": 0,
+                            "parent_select_key": ""
                         }
                     ]
                 },
@@ -2493,7 +2653,8 @@
                     "methods": "post",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_rank_list"
                 },
                 {
                     "menu_name": "榜单编辑",
@@ -2508,7 +2669,8 @@
                     "methods": "put",
                     "sort": 0,
                     "status": 1,
-                    "is_show": 0
+                    "is_show": 0,
+                    "parent_select_key": "shop_goods_rank_list"
                 }
             ]
         }

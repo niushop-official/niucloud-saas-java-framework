@@ -174,7 +174,7 @@ public class SiteUserServiceImpl implements ISiteUserService {
         SysUser sysUser=sysUserMapper.selectById(uid);
         sysUser.setStatus(StatusEnum.OFF.getStatus());
         sysUserMapper.updateById(sysUser);
-
+        cached.remove("user_role_list_" + uid);
     }
 
     /**
@@ -187,6 +187,7 @@ public class SiteUserServiceImpl implements ISiteUserService {
         SysUser sysUser=sysUserMapper.selectById(uid);
         sysUser.setStatus(StatusEnum.ON.getStatus());
         sysUserMapper.updateById(sysUser);
+        cached.remove("user_role_list_" + uid);
     }
 
     @Override

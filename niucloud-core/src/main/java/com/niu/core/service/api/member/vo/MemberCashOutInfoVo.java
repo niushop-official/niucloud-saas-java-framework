@@ -87,6 +87,9 @@ public class MemberCashOutInfoVo {
 
     private String transferRemark;
 
+    @JsonSerialize(using = BeanJsonSerializer.StringToJsonSerializer.class)
+    private String transferPayee;
+
     private String extra;
 
     private Transfer transfer;

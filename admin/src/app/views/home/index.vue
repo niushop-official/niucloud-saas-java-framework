@@ -3,11 +3,16 @@
         <!-- <div class="flex justify-between items-center">
             <layoutHeader></layoutHeader>
         </div> -->
-        <div class="flex justify-between items-center py-[24px] pl-[62px] pr-[64px] home-head">
-            <div class="flex items-center" v-if="webConfig">
-                <img class="w-[32x] h-[32px] rounded-full" v-if="webConfig.icon" :src="img(webConfig.icon)" alt="">
-                <img class="w-[32x] h-[32px] rounded-full" v-else src="@/app/assets/images/icon-addon.png" alt="">
-                <span class="ml-[10px] text-[16px] font-bold">{{webConfig.site_name}}</span>
+        <div class="flex justify-between items-center py-[24px] pr-[64px] home-head">
+            <div class="flex items-center w-[219px] justify-center" v-if="webConfig">
+                <div class="max-w-[82px] h-[40px] overflow-hidden">
+                    <el-image class="h-[40px]" :src="img(webConfig.icon)" fit="contain">
+                        <template #error>
+                            <div class="flex justify-center items-center w-full h-full"><img class="max-w-[70px]" src="@/app/assets/images/logo.default.png" alt=""  object-fit="contain"></div>
+                        </template>
+                    </el-image>
+                </div>
+                <span class="ml-[10px] max-w-[120px] text-[16px] font-bold truncate">{{webConfig.site_name}}</span>
             </div>
             <div class="flex items-center">
                 <div v-if="userStore.userInfo.is_super_admin" class="border-primary border-[1px] h-[30px] px-[15px] flex items-center rounded-[6px] mr-[10px] cursor-pointer" @click="toHome">
@@ -198,11 +203,11 @@
                                 {{ item.site_group.group_name }}
                             </div>
                             <el-scrollbar class="flex pb-[20px] pt-[4px] box-border !h-[260px] w-[100%] scrollbarBox">
-                                <div class="flex mx-[30px] mt-[14px] leading-[1] items-center w-full" v-for="app in item.site_group.app_name">
+                                <div class="flex mx-[30px] mt-[14px] leading-[1] items-center" v-for="app in item.site_group.app_name">
                                     <div class="nc-iconfont nc-icon-duiV6mm text-[#466CEA]"></div>
                                     <div class="text-[14px] text-[#666666] ml-[3px] truncate">{{ app }}</div>
                                 </div>
-                                <div class="flex mx-[30px] mt-[14px] leading-[1] text-center w-full" v-for="addon in item.site_group.addon_name">
+                                <div class="flex mx-[30px] mt-[14px] leading-[1] text-center" v-for="addon in item.site_group.addon_name">
                                     <div class="nc-iconfont nc-icon-duiV6mm text-[#466CEA]"></div>
                                     <div class="text-[14px] text-[#666666] ml-[3px] truncate">{{ addon }}</div>
                                 </div>
@@ -358,6 +363,7 @@ const selectSite = (site: any) => {
 }
 
 const toHome = () => {
+    window.localStorage.setItem('admin.siteId', 0)
     if (!window.localStorage.getItem('admin.token')) {
         window.localStorage.setItem('admin.token', getToken())
         window.localStorage.setItem('admin.comparisonTokenStorage', getToken())

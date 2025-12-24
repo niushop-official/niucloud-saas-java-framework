@@ -179,7 +179,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
         var goodsSkuQueryWrapper = new MPJQueryWrapper<ShopGoodsSku>()
             .setAlias("gs")
             .leftJoin("?_shop_goods g ON gs.goods_id = g.goods_id".replace("?_", GlobalConfig.tablePrefix))
-            .select("gs.*,g.goods_name")
+            .select("gs.*,g.goods_name,g.goods_cover")
             .eq("gs.site_id", RequestUtils.siteId())
             .in("gs.sku_id", skuIds)
             .orderByDesc("gs.sale_num")
@@ -197,6 +197,7 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
             goodsSku.setNewcomerPrice(Optional.ofNullable(value.getBigDecimal("newcomer_price")).orElse(BigDecimal.ZERO));
             ShopNewComerComponentsListVo.Goods goods = new ShopNewComerComponentsListVo.Goods();
             goods.setGoodsName(goodsSku.getGoodsName());
+            goods.setGoodsCover(goodsSku.getGoodsCover());
             goodsSku.setGoods(goods);
         }
 
@@ -262,12 +263,12 @@ public class ShopNewcomerServiceImpl implements IShopNewcomerService {
 
             var activeGoods = shopActiveGoodsMapper.selectList(shopActiveGoodsLambdaQueryWrapper);
             if (ObjectUtil.isEmpty(activeGoods)) {
-                vo.setNewcomerPrice(vo.getPrice());
+                vo.setNewcomerPrice(vo.getPrice().toString());
                 vo.setIsNewcomer(0);
             } else {
                 var goods = activeGoods.get(0);
                 var value = JSON.parseObject(goods.getActiveGoodsValue());
-                vo.setNewcomerPrice(value.getBigDecimal("newcomer_price"));
+                vo.setNewcomerPrice(value.getBigDecimal("newcomer_price").toString());
                 vo.setIsNewcomer(1);
             }
 

@@ -161,7 +161,7 @@ public class RequestUtils {
             siteId = Integer.valueOf(ObjectUtil.defaultIfEmpty(request.getHeader("site-id"), "0"));
             if (siteId == 0 && ObjectUtil.isNotEmpty(RequestUtils.getRequestDomain())) {
                 ICoreSiteService coreSiteService = SpringContext.bean(ICoreSiteService.class);
-                coreSiteService.getSiteIdByDomain(RequestUtils.getRequestDomain());
+                siteId = coreSiteService.getSiteIdByDomain(RequestUtils.getRequestDomain());
             }
         }
         return siteId;

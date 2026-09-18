@@ -1,4 +1,4 @@
-NIUCLOUD SAAS JAVA框架 v1.0.5 更新内容
+NIUCLOUD JAVA 商城 v1.0.5 更新内容
 
 新增：
   * 用户端添加订单开具发票功能

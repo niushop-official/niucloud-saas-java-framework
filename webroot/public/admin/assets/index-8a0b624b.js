@@ -1,1 +1,0 @@
-import{P as t,d as o,r as l,h as a,c as n,t as s}from"./index-a2dd70e3.js";function r(){return t.get("seckill/hello_world")}const c={class:"text-[20px]"},f=o({__name:"index",setup(_){const e=l("");return(async()=>{e.value=await(await r()).data})(),(i,p)=>(a(),n("span",c,s(e.value),1))}});export{f as default};

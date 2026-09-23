@@ -2,6 +2,7 @@ package com.niu.core.service.admin.auth.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -166,6 +167,9 @@ public class AuthServiceImpl implements IAuthService {
 
         Map<String, List<String>> allMenuList = sysMenuService.getAllApiList(RequestUtils.appType(), 100);
         List<String> menulist = allMenuList.get(method);
+        if (CollUtil.isEmpty(menulist)) {
+            return;
+        }
         int is_exists = menulist.indexOf(rule);
 
         //判断当前访问的接口是否收到权限的限制

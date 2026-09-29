@@ -26,14 +26,14 @@
                                 </div>
                             <!-- </router-link> -->
                         </el-dropdown-item>
-                        <el-dropdown-item class="rounded-[4px]">
-                            <router-link to="/tools/authorize">
-                                <div class="flex items-center leading-[1] py-[5px]">
-                                    <span class="iconfont iconshouquanxinxi2 ml-[4px] !text-[14px] mr-[10px]"></span>
-                                    <span class="text-[14px]">授权信息</span>
-                                </div>
-                            </router-link>
-                        </el-dropdown-item>
+<!--                        <el-dropdown-item class="rounded-[4px]">-->
+<!--                            <router-link to="/tools/authorize">-->
+<!--                                <div class="flex items-center leading-[1] py-[5px]">-->
+<!--                                    <span class="iconfont iconshouquanxinxi2 ml-[4px] !text-[14px] mr-[10px]"></span>-->
+<!--                                    <span class="text-[14px]">授权信息</span>-->
+<!--                                </div>-->
+<!--                            </router-link>-->
+<!--                        </el-dropdown-item>-->
                         <el-dropdown-item @click="changePasswordDialog=true" class="rounded-[4px]">
                             <div class="flex items-center leading-[1] py-[5px]">
                                 <span class="iconfont iconxiugai ml-[4px] !text-[14px] mr-[10px]"></span>

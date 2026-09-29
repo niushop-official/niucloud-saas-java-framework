@@ -18,11 +18,11 @@ import com.niu.core.common.exception.CommonException;
 import com.niu.core.common.utils.date.DateUtils;
 import com.niu.core.service.admin.niucloud.ICloudBuildService;
 import com.niu.core.service.admin.sys.vo.SysDeveloperTokenVo;
-import com.niu.core.service.core.niucloud.ICoreNiucloudConfigService;
-import com.niu.core.service.core.niucloud.vo.NiucloudConfigVo;
 import com.niu.core.service.core.sys.ICoreSysConfigService;
 import me.chanjar.weixin.common.util.crypto.SHA1;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class NiucloudUtils {
 
     private static String code = "";
@@ -38,15 +39,14 @@ public class NiucloudUtils {
 
     private static String developerToken = "";
 
-    public NiucloudUtils() {
-        ICoreNiucloudConfigService niucloudConfigService = (ICoreNiucloudConfigService) SpringContext.getBean(ICoreNiucloudConfigService.class);
-        NiucloudConfigVo config = niucloudConfigService.getNiucloudConfig();
-        code = config.getAuthCode();
-        secret = config.getAuthSecret();
+    @Value("${niu-cloud.auth-code:}")
+    public void setCode(String code) {
+        NiucloudUtils.code = code;
+    }
 
-        ICoreSysConfigService sysConfigService = (ICoreSysConfigService) SpringContext.getBean(ICoreSysConfigService.class);
-        SysDeveloperTokenVo developerTokenVo = sysConfigService.getDeveloperToken();
-        developerToken = developerTokenVo.getToken();
+    @Value("${niu-cloud.auth-secret:}")
+    public void setSecret(String secret) {
+        NiucloudUtils.secret = secret;
     }
 
     public String getCode() {
@@ -58,7 +58,9 @@ public class NiucloudUtils {
     }
 
     public String getDeveloperToken() {
-        return this.developerToken;
+        ICoreSysConfigService sysConfigService = (ICoreSysConfigService) SpringContext.getBean(ICoreSysConfigService.class);
+        SysDeveloperTokenVo developerTokenVo = sysConfigService.getDeveloperToken();
+        return developerTokenVo.getToken();
     }
 
     public static NiucloudUtils getInstance() {
@@ -107,7 +109,7 @@ public class NiucloudUtils {
 
         private static HttpRequest handleRequest(HttpRequest request) {
             request.header("Referer", RequestUtils.getDomain(true));
-            request.header("developer-token", NiucloudUtils.getInstance().developerToken);
+            request.header("developer-token", NiucloudUtils.getInstance().getDeveloperToken());
             request.header("access-token", getAccessToken());
             return request;
         }

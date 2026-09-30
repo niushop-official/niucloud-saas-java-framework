@@ -131,3 +131,8 @@ sa-token:
     password:
     # 连接超时时间
     timeout: 10s
+
+# 牛之云默认授权
+niu-cloud:
+  auth-code: *
+  auth-secret: *

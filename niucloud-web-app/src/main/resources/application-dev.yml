@@ -126,3 +126,8 @@ sa-token:
   is-log: true
   # 登录是否往前端注入Cookie
   is-read-cookie: false
+
+# 牛之云默认授权
+niu-cloud:
+  auth-code: 20260928505805470996892
+  auth-secret: 664avc4248ef5

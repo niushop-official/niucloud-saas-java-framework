@@ -1,0 +1,1 @@
+import{_ as o}from"./form-detail.vue_vue_type_script_setup_true_lang-bd4b3705.js";import"./index-0b5cbc07.js";/* empty css                   *//* empty css                  *//* empty css                   *//* empty css                  *//* empty css                */import"./el-form-item-4ed993c7.js";import"./diy_form-31db9a41.js";export{o as default};

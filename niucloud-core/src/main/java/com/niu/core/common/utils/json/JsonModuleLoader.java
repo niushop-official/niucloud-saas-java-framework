@@ -359,21 +359,51 @@ public class JsonModuleLoader {
     private JSONObject mergeJsonForAttribute(Collection<JSONObject> jsonObjectList) {
         JSONObject targetMap = new JSONObject();
         for (JSONObject jsonObject : jsonObjectList) {
-            jsonObject.keySet().stream().forEach(key -> {
-                Object value = targetMap.get(key);
-                if (value == null) {
-                    targetMap.put(key, jsonObject.get(key));
+            for (String key : jsonObject.keySet()) {
+                Object value = jsonObject.get(key);
+                if (targetMap.containsKey(key)) {
+                    // 如果targetMap中已经有该key，且value是JSONObject，则递归合并
+                    Object existingValue = targetMap.get(key);
+                    if (existingValue instanceof JSONObject && value instanceof JSONObject) {
+                        JSONObject merged = mergeJsonObjects((JSONObject) existingValue, (JSONObject) value);
+                        targetMap.put(key, merged);
+                    } else {
+                        // 否则，用新的value覆盖（或者根据需求处理，这里直接覆盖）
+                        targetMap.put(key, value);
+                    }
                 } else {
-                    JSONObject jsonValue1 = (JSONObject) value;
-                    JSONObject jsonValue2 = (JSONObject) jsonObject.get(key);
-                    jsonValue2.keySet().stream().forEach(k -> {
-                        jsonValue1.put(k, jsonValue2.get(k));
-                    });
-                    targetMap.put(key, jsonValue1);
+                    targetMap.put(key, value);
                 }
-            });
+            }
         }
         return targetMap;
+    }
+
+    // 递归合并两个JSONObject
+    private JSONObject mergeJsonObjects(JSONObject obj1, JSONObject obj2) {
+        JSONObject result = new JSONObject();
+        // 先添加obj1的所有键值对
+        for (String key : obj1.keySet()) {
+            result.put(key, obj1.get(key));
+        }
+        // 合并obj2的键值对
+        for (String key : obj2.keySet()) {
+            Object value2 = obj2.get(key);
+            if (result.containsKey(key)) {
+                Object value1 = result.get(key);
+                // 如果两个值都是JSONObject，则递归合并
+                if (value1 instanceof JSONObject && value2 instanceof JSONObject) {
+                    JSONObject merged = mergeJsonObjects((JSONObject) value1, (JSONObject) value2);
+                    result.put(key, merged);
+                } else {
+                    // 否则，用obj2的值覆盖
+                    result.put(key, value2);
+                }
+            } else {
+                result.put(key, value2);
+            }
+        }
+        return result;
     }
 
     /**

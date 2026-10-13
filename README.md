@@ -162,8 +162,8 @@ niucloud-admin-java
     <tr>
         <td><img src="webroot/resource/static/resource/images/shop5.jpg"></td>
         <td><img src="webroot/resource/static/resource/images/shop6.jpg"></td>
-        <td><img src="webroot/resource/static/resource/images/shop7.jpg"></td>
         <td><img src="webroot/resource/static/resource/images/shop8.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop7.jpg"></td>
     </tr>	 
     </tbody>
 </table>

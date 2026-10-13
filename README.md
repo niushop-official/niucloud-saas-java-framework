@@ -1,4 +1,4 @@
-###  ![输入图片说明](https://www.niucloud.com/_nuxt/login_logo.650a27e2.png)   
+###  ![输入图片说明](webroot/resource/static/resource/images/logo2.png)   
 一款支持插件化+云安装+云编译 快速开发SAAS多用户系统后台管理框架! 
 
 
@@ -148,29 +148,25 @@ niucloud-admin-java
 | MySQL | 8.0 / 5.7 | 数据库    |
 
 
-### 界面截图
-![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj2.png)
-![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj3.png)
-![](https://niucloud-bucket.oss-cn-beijing.aliyuncs.com/gitee_saas/saas/saas_kj4.png)
-
-
 ### 商城插件  :point_right:   SHOP
-### 商城插件SHOP
+
 
 <table>
     <tbody>
     <tr>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A27.Bll5k5Oi.jpg"></td>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A28.CWYJfJc4.jpg"></td>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A24.BL9nyNIW.jpg"></td>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A26.D_LsTXAd.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop1.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop2.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop3.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop4.jpg"></td>
     </tr>
     <tr>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A21.DG4KeG7m.jpg"></td>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A22.DUOosIBy.jpg"></td>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A23.DqUGqBi6.jpg"></td>
-        <td><img src="https://doc.press.niucloud.com/assets/%E5%95%86%E5%9F%8E%E7%95%8C%E9%9D%A25.kD9xOpcL.jpg"></td>
-    </tr>
+        <td><img src="webroot/resource/static/resource/images/shop5.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop6.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop7.jpg"></td>
+        <td><img src="webroot/resource/static/resource/images/shop8.jpg"></td>
+    </tr>	 
+    </tbody>
+</table>
 
 </tbody></table>
 
@@ -180,7 +176,7 @@ niucloud-Admin-Java 程序员二开神器！
 https://www.niucloud.com
 
 ### 技术交流群(加客服拉您入群)
-![输入图片说明](qun1.jpg)
+![输入图片说明](webroot/resource/static/resource/images/weixin1.png)
 
 ### 开源使用须知
 
